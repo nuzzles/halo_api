@@ -31,17 +31,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .find(|node| node.has_tag_name("Endpoints"))
         .ok_or("manifest has no Endpoints section")?;
 
-    println!("NAME\tAUTHORITY\tCLEARANCE\tPATH\tQUERY");
+    let authorities = document
+        .descendants()
+        .find(|node| node.has_tag_name("Authorities"))
+        .ok_or("manifest has no Authorities section")?;
+    let authority_hosts = authorities
+        .children()
+        .filter(|node| node.is_element())
+        .filter_map(|entry| {
+            let key = child_text(entry, "Key");
+            let value = entry
+                .children()
+                .find(|child| child.is_element() && child.tag_name().name() == "Value")?;
+            Some((key, descendant_text(value, "Hostname")))
+        })
+        .collect::<std::collections::HashMap<_, _>>();
+
+    println!("NAME\tAUTHORITY\tHOST\tCLEARANCE\tPATH\tQUERY");
     for entry in endpoints.children().filter(|node| node.is_element()) {
         let key = child_text(entry, "Key");
         let value = entry
             .children()
             .find(|child| child.is_element() && child.tag_name().name() == "Value")
             .ok_or("endpoint entry has no Value")?;
+        let authority = descendant_text(value, "AuthorityId");
         println!(
-            "{}\t{}\t{}\t{}\t{}",
+            "{}\t{}\t{}\t{}\t{}\t{}",
             key,
-            descendant_text(value, "AuthorityId"),
+            authority,
+            authority_hosts.get(authority).copied().unwrap_or(""),
             descendant_text(value, "ClearanceAware"),
             descendant_text(value, "Path"),
             descendant_text(value, "QueryString"),
