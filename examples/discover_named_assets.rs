@@ -1,10 +1,10 @@
-//! Emits named constants for every 343-tagged map, mode, and playlist in the live catalog.
+//! Emits named IDs for current playlists and every map/mode in their rotations.
 
 mod common;
 
 use std::collections::{BTreeMap, HashSet};
 
-use halo_api::clients::hi::models::{UgcAssetKind, UgcSearchResult};
+use halo_api::clients::hi::models::{AssetLink, PlaylistId};
 
 fn constant_name(name: &str) -> String {
     let mut output = String::new();
@@ -28,41 +28,21 @@ fn constant_name(name: &str) -> String {
     output
 }
 
-async fn official_assets(
-    halo: &halo_api::HaloInfiniteClient,
-    kind: UgcAssetKind,
-) -> Result<Vec<UgcSearchResult>, common::ExampleError> {
-    const PAGE_SIZE: u32 = 20;
-    let mut start = 0;
-    let mut assets = Vec::new();
-    loop {
-        let page = halo.search_assets(kind, start, PAGE_SIZE).await?;
-        assets.extend(page.results.into_iter().filter(|asset| {
-            asset.asset_home == Some(2)
-                || asset
-                    .tags
-                    .iter()
-                    .any(|tag| tag.eq_ignore_ascii_case("343i"))
-        }));
-        start += page.result_count;
-        if page.result_count == 0 || start >= page.estimated_total {
-            break;
-        }
-    }
-    Ok(assets)
-}
-
-fn print_constants(type_name: &str, assets: Vec<UgcSearchResult>, versioned: bool) {
-    let mut named = BTreeMap::<String, Vec<UgcSearchResult>>::new();
+fn print_constants(type_name: &str, assets: Vec<AssetLink>, versioned: bool) {
     let mut seen = HashSet::new();
+    let mut named = BTreeMap::<String, Vec<AssetLink>>::new();
     for asset in assets {
-        if !seen.insert((asset.asset_id.clone(), asset.version_id.clone())) {
-            continue;
+        let key = if versioned {
+            (asset.asset_id.clone(), asset.version_id.clone())
+        } else {
+            (asset.asset_id.clone(), String::new())
+        };
+        if seen.insert(key) {
+            named
+                .entry(constant_name(&asset.public_name))
+                .or_default()
+                .push(asset);
         }
-        named
-            .entry(constant_name(&asset.name))
-            .or_default()
-            .push(asset);
     }
 
     println!("// {type_name}");
@@ -77,12 +57,12 @@ fn print_constants(type_name: &str, assets: Vec<UgcSearchResult>, versioned: boo
             if versioned {
                 println!(
                     "pub const {name}: Self = Self::from_static(\"{}\", \"{}\"); // {}",
-                    asset.asset_id, asset.version_id, asset.name
+                    asset.asset_id, asset.version_id, asset.public_name
                 );
             } else {
                 println!(
                     "pub const {name}: Self = Self(Cow::Borrowed(\"{}\")); // {}",
-                    asset.asset_id, asset.name
+                    asset.asset_id, asset.public_name
                 );
             }
         }
@@ -92,20 +72,44 @@ fn print_constants(type_name: &str, assets: Vec<UgcSearchResult>, versioned: boo
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
-    print_constants(
-        "MapId",
-        official_assets(&halo, UgcAssetKind::Map).await?,
-        true,
-    );
-    print_constants(
-        "GameModeId",
-        official_assets(&halo, UgcAssetKind::GameMode).await?,
-        true,
-    );
-    print_constants(
-        "PlaylistId",
-        official_assets(&halo, UgcAssetKind::Playlist).await?,
-        false,
-    );
+    let playlist_ids = if std::env::var_os("HALO_PLAYLIST_IDS").is_some() {
+        common::comma_separated(
+            "HALO_PLAYLIST_IDS",
+            "Current playlist IDs (comma-separated)",
+        )?
+    } else {
+        [
+            PlaylistId::BIG_TEAM_BATTLE,
+            PlaylistId::SQUAD_BATTLE,
+            PlaylistId::TEAM_DOUBLES,
+        ]
+        .into_iter()
+        .map(|id| id.as_str().to_owned())
+        .collect()
+    };
+
+    let mut playlists = Vec::new();
+    let mut maps = Vec::new();
+    let mut modes = Vec::new();
+    for playlist_id in playlist_ids {
+        let playlist_id = PlaylistId::new(playlist_id);
+        let metadata = halo.playlist_metadata(playlist_id.as_str()).await?;
+        let playlist = halo
+            .playlist(playlist_id.as_str(), &metadata.ugc_playlist_version)
+            .await?;
+        playlists.push(playlist.asset);
+
+        for rotation in playlist.rotation_entries {
+            let pair = halo
+                .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
+                .await?;
+            maps.push(pair.map);
+            modes.push(pair.mode);
+        }
+    }
+
+    print_constants("PlaylistId", playlists, false);
+    print_constants("MapId", maps, true);
+    print_constants("GameModeId", modes, true);
     Ok(())
 }
