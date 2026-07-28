@@ -11,9 +11,10 @@ use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
     CustomizationItemMetadata, EmblemMapping, EmblemMetadata, GameModeId, GameVariantAsset,
-    MapAsset, MapId, MapModePairAsset, MatchStats, MatchesPrivacy, PlayerCustomizationCollection,
-    PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
-    RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind, UgcSearchResults, UserInfo,
+    MapAsset, MapId, MapModePairAsset, MatchStats, MatchType, MatchesPrivacy,
+    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
+    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind,
+    UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -273,6 +274,26 @@ impl HaloInfiniteClient {
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches", wrap_xuid(xuid.as_str())),
             &[("start", start.to_string()), ("count", count.to_string())],
+        )
+        .await
+    }
+
+    pub async fn player_matches_by_type(
+        &self,
+        xuid: &Xuid,
+        match_type: MatchType,
+        start: u32,
+        count: u32,
+    ) -> Result<PlayerMatchHistory, InfiniteClientError> {
+        self.get(
+            &self.endpoints.halostats_base_url,
+            &format!("/hi/players/{}/matches", wrap_xuid(xuid.as_str())),
+            &[
+                ("type", match_type.as_str().to_string()),
+                ("participation", "All".to_string()),
+                ("start", start.to_string()),
+                ("count", count.to_string()),
+            ],
         )
         .await
     }

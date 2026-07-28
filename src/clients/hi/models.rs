@@ -877,6 +877,81 @@ pub struct PlayerMatchHistory {
     pub result_count: i32,
 }
 
+/// Selects which kind of games appear in a player's match history.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MatchType {
+    All,
+    Matchmade,
+    Custom,
+}
+
+impl MatchType {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::All => "All",
+            Self::Matchmade => "Matchmade",
+            Self::Custom => "Custom",
+        }
+    }
+}
+
+/// A player's or team's result in a completed match.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MatchOutcome {
+    Tie,
+    Win,
+    Loss,
+    DidNotFinish,
+    Unknown(i32),
+}
+
+impl MatchOutcome {
+    pub const fn from_code(code: i32) -> Self {
+        match code {
+            1 => Self::Tie,
+            2 => Self::Win,
+            3 => Self::Loss,
+            4 => Self::DidNotFinish,
+            other => Self::Unknown(other),
+        }
+    }
+
+    pub const fn code(self) -> i32 {
+        match self {
+            Self::Tie => 1,
+            Self::Win => 2,
+            Self::Loss => 3,
+            Self::DidNotFinish => 4,
+            Self::Unknown(code) => code,
+        }
+    }
+
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Tie => "Tie",
+            Self::Win => "Victory",
+            Self::Loss => "Defeat",
+            Self::DidNotFinish => "Did not finish",
+            Self::Unknown(_) => "Unknown",
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for MatchOutcome {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Self::from_code(i32::deserialize(deserializer)?))
+    }
+}
+
+impl std::fmt::Display for MatchOutcome {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.as_str())
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct MatchHistoryEntry {
     #[serde(rename = "MatchId")]
@@ -884,7 +959,7 @@ pub struct MatchHistoryEntry {
     #[serde(rename = "LastTeamId")]
     pub last_team_id: i32,
     #[serde(rename = "Outcome")]
-    pub outcome: i32,
+    pub outcome: MatchOutcome,
     #[serde(rename = "Rank")]
     pub rank: i32,
     #[serde(rename = "PresentAtEndOfMatch")]
@@ -949,7 +1024,7 @@ pub struct MatchPlayer {
     #[serde(rename = "LastTeamId")]
     pub last_team_id: i32,
     #[serde(rename = "Outcome")]
-    pub outcome: i32,
+    pub outcome: MatchOutcome,
     #[serde(rename = "Rank")]
     pub rank: i32,
     #[serde(rename = "PlayerTeamStats")]
@@ -969,7 +1044,7 @@ pub struct MatchTeam {
     #[serde(rename = "TeamId")]
     pub team_id: i32,
     #[serde(rename = "Outcome")]
-    pub outcome: i32,
+    pub outcome: MatchOutcome,
     #[serde(rename = "Rank")]
     pub rank: i32,
     #[serde(rename = "Stats")]
@@ -2290,6 +2365,7 @@ mod tests {
             }]
         }))
         .unwrap();
+        assert_eq!(scoreboard.players[0].outcome, MatchOutcome::Win);
         assert_eq!(scoreboard.players[0].team_stats[0].stats.core.kills, 20);
     }
 }
