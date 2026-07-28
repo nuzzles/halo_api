@@ -54,10 +54,6 @@ impl GameModeId {
         "aca7bbf8-7a18-4aae-8785-1bd3f58275fd",
         "3685f6b2-2860-4e98-9d13-513087edb465",
     );
-    pub const RANKED_CTF: Self = Self::from_static(
-        "507191c6-a492-4331-b2ae-a172101eb23e",
-        "ffd0ef4e-da75-42b0-93bb-ab44d4e6905b",
-    );
     pub const RANKED_ONE_FLAG_CTF: Self = Self::from_static(
         "18ac247d-7f86-4a59-9b47-9e74a6384ac2",
         "6dbe8411-cc9b-44ca-b680-32847677536a",
@@ -82,7 +78,10 @@ impl GameModeId {
         "4cb279b7-a064-4df6-9058-02cdc6825d93",
         "1392d27e-e7e3-41d9-93f9-420c66cff577",
     );
-    pub const RANKED_CTF_5_CAPTURES: Self = Self::RANKED_CTF;
+    pub const RANKED_CTF_5_CAPTURES: Self = Self::from_static(
+        "507191c6-a492-4331-b2ae-a172101eb23e",
+        "ffd0ef4e-da75-42b0-93bb-ab44d4e6905b",
+    );
     pub const RANKED_ATTRITION: Self = Self::from_static(
         "0bc630bf-2ee3-4eae-b272-b68d4ab80be7",
         "b6b22432-f3d9-468c-9359-b82a72791030",
