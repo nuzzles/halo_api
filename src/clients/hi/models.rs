@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 /// Response body from the playlist CSR endpoint.
@@ -30,18 +31,81 @@ pub struct CsrRecordRanking {
     pub value: i32,
     #[serde(rename = "Tier")]
     pub tier: String,
-    /// 0-indexed sub-tier within `tier` (e.g. "Platinum 1" is `sub_tier == 0`). Not meaningful
-    /// for the Onyx tier, which reports `value` directly instead.
+    /// 0-indexed sub-tier within `tier`. Not meaningful for Onyx, which reports `value`.
     #[serde(rename = "SubTier")]
     pub sub_tier: i32,
 }
 
 impl CsrRecordRanking {
-    /// Whether this ranking represents "unranked" (the API's `-1` sentinel), as opposed to a
-    /// real CSR value.
     pub fn is_unranked(&self) -> bool {
         self.value == -1
     }
+}
+
+/// A page of a player's match history.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerMatchHistory {
+    #[serde(rename = "Results")]
+    pub results: Vec<MatchHistoryEntry>,
+    #[serde(rename = "ResultCount")]
+    pub result_count: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchHistoryEntry {
+    #[serde(rename = "MatchId")]
+    pub match_id: String,
+    #[serde(rename = "MatchInfo")]
+    pub info: MatchInfo,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchInfo {
+    #[serde(rename = "StartTime")]
+    pub start_time: DateTime<Utc>,
+    #[serde(rename = "EndTime")]
+    pub end_time: DateTime<Utc>,
+    #[serde(rename = "Playlist")]
+    pub playlist: Option<MatchPlaylist>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchPlaylist {
+    #[serde(rename = "AssetId")]
+    pub asset_id: String,
+}
+
+/// Response body from the matchmade service record endpoint.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ServiceRecord {
+    #[serde(rename = "MatchesCompleted")]
+    pub matches_completed: i32,
+    #[serde(rename = "Wins")]
+    pub wins: i32,
+    #[serde(rename = "Losses")]
+    pub losses: i32,
+    #[serde(rename = "Ties")]
+    pub ties: i32,
+    #[serde(rename = "CoreStats")]
+    pub core_stats: CoreStats,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CoreStats {
+    #[serde(rename = "Kills")]
+    pub kills: i32,
+    #[serde(rename = "Deaths")]
+    pub deaths: i32,
+    #[serde(rename = "Assists")]
+    pub assists: i32,
+    #[serde(rename = "AverageKDA")]
+    pub kda: f32,
+    #[serde(rename = "Accuracy")]
+    pub accuracy: f32,
+    #[serde(rename = "DamageDealt")]
+    pub damage_dealt: i32,
+    #[serde(rename = "DamageTaken")]
+    pub damage_taken: i32,
 }
 
 #[cfg(test)]
@@ -67,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn deserializes_full_response_shape() {
+    fn deserializes_full_csr_response_shape() {
         let json = serde_json::json!({
             "Value": [{
                 "Id": "xuid(123)",

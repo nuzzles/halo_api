@@ -9,8 +9,9 @@
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! use std::sync::Arc;
 //!
-//! use halo_api::constants::PlaylistId;
-//! use halo_api::HaloClient;
+//! use halo_api::clients::hi::constants::PlaylistId;
+//! use halo_api::auth::AuthClient;
+//! use halo_api::clients::hi::HaloInfiniteClient;
 //! use xbox::auth::LegacyPasswordProvider;
 //! use xbox::XboxClient;
 //!
@@ -18,7 +19,8 @@
 //!     "my-username",
 //!     "my-password",
 //! )));
-//! let halo = HaloClient::from_xbox_client(xbox_client.clone());
+//! let auth = AuthClient::from_xbox_client(xbox_client.clone());
+//! let halo = HaloInfiniteClient::new(auth);
 //!
 //! let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
 //! let csr = halo.playlist_csr(PlaylistId::Arena, &xuid).await?;
@@ -29,13 +31,9 @@
 //! ```
 
 pub mod auth;
-pub mod client;
-pub mod constants;
-pub mod error;
-pub mod models;
+pub mod clients;
 
-mod endpoints;
+pub use clients::hi::{HaloInfiniteClient, InfiniteClientError};
 
-pub use client::HaloClient;
-pub use endpoints::HaloEndpoints;
-pub use error::HaloApiError;
+#[cfg(test)]
+mod tests;

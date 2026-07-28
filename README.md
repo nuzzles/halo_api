@@ -12,10 +12,9 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 ## What this crate does
 
-- Acquires and caches a Halo "spartan token" (the bearer credential every Halo Waypoint API call requires) from
-  an Xbox Live XSTS ticket, via the [`SpartanTokenSource`](src/auth/spartan.rs) trait.
-- Wraps Halo Infinite's stats endpoints — Competitive Skill Rank (CSR) by playlist, service records, and match
-  history — behind a single typed `HaloClient`.
+- Separates authentication (`AuthClient`) from Halo API operations (`HaloInfiniteClient`).
+- Acquires and caches both the Spartan token and Waypoint flight clearance.
+- Covers stats, skill, profile, UGC, progression, ban, and privacy endpoints.
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 
@@ -28,8 +27,9 @@ supply a spartan token from elsewhere.
 ```rust,no_run
 use std::sync::Arc;
 
-use halo_api::constants::PlaylistId;
-use halo_api::HaloClient;
+use halo_api::clients::hi::constants::PlaylistId;
+use halo_api::auth::AuthClient;
+use halo_api::clients::hi::HaloInfiniteClient;
 use xbox::auth::LegacyPasswordProvider;
 use xbox::XboxClient;
 
@@ -39,7 +39,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "my-username",
         "my-password",
     )));
-    let halo = HaloClient::from_xbox_client(xbox_client.clone());
+    let auth = AuthClient::from_xbox_client(xbox_client.clone());
+    let halo = HaloInfiniteClient::new(auth);
 
     let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
     let csr = halo.playlist_csr(PlaylistId::Arena, &xuid).await?;
@@ -51,20 +52,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Architecture
 
-- `auth` — `SpartanTokenSource` trait plus the built-in `XboxSpartanTokenProvider` (backed by any
-  `xbox::auth::XblAuthProvider`).
-- `client` — `HaloClient`, the top-level entry point: spartan-token caching, request execution, and
-  401-invalidate-and-retry-once behavior.
-- `endpoints` — one module per Halo Waypoint API surface (`csr`, `service_record`, `match_history`, ...).
-- `models` — request/response types for each endpoint.
-- `constants` — playlist IDs and Halo Waypoint origin/domain constants.
+- `auth` — Spartan-token and clearance providers, caching, endpoint configuration, and `AuthError`.
+- `clients::hi` — `HaloInfiniteClient`, Infinite endpoint configuration, and
+  `InfiniteClientError`. Authentication failures are preserved in its `Auth` error variant.
+- `clients::hi::models` — Halo Infinite request/response types.
+- `clients::hi::constants` — Halo Infinite constants such as playlist IDs.
 
 ## Endpoint coverage
 
-Covered today: CSR by playlist, service record, player match history.
-
-Planned: user/profile lookup, per-match stats and skill, UGC assets, playlist metadata, progression files
-(season calendars, medals), ban info, and matches-privacy settings.
+Covered today: CSR, service records, match history/count/stats/skill, user lookup, UGC assets and versions,
+playlist metadata, season calendars, medals, ban summaries, settings, and match privacy. There is one
+compile-checked program per endpoint under [`examples`](examples), plus a [`whoami`](examples/whoami.rs)
+smoke test. Examples read `XBOX_USERNAME` and `XBOX_PASSWORD` when set and otherwise prompt
+interactively; endpoint inputs follow the same environment-variable-or-prompt convention.
 
 ## MSRV
 

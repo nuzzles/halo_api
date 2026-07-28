@@ -1,10 +1,13 @@
 use std::sync::Arc;
 
+use crate::auth::endpoints::AuthEndpoints;
+use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
+use crate::clients::hi::constants::PlaylistId;
+use crate::clients::hi::endpoints::HaloEndpoints;
+use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
-use halo_api::constants::PlaylistId;
-use halo_api::{HaloClient, HaloEndpoints};
-use wiremock::matchers::{header, method, path};
+use wiremock::matchers::{header, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 use xbox::auth::XblAuthProvider;
 use xbox::cache::CachedToken;
@@ -12,6 +15,19 @@ use xbox::{XboxClient, XboxEndpoints, XboxError};
 
 /// Hands out a fixed, never-expiring user token without touching the network.
 struct FakeAuthProvider;
+
+struct FailingHaloAuth;
+
+#[async_trait]
+impl HaloAuth for FailingHaloAuth {
+    async fn credentials(&self, _require_clearance: bool) -> Result<HaloCredentials, AuthError> {
+        Err(AuthError::SpartanTokenProvider(
+            "Xbox login failed".to_string(),
+        ))
+    }
+
+    async fn invalidate(&self) {}
+}
 
 #[async_trait]
 impl XblAuthProvider for FakeAuthProvider {
@@ -51,12 +67,33 @@ fn csr_body(value: i32) -> serde_json::Value {
     })
 }
 
-/// Sets up a mock server with XSTS + spartan-token mocks, and returns a `HaloClient` wired to
+/// Sets up a mock server with XSTS + spartan-token mocks, and returns a `HaloInfiniteClient` wired to
 /// it plus the shared `XboxClient` (for XUID resolution) — everything an end-to-end test needs.
-async fn test_client(server: &MockServer) -> (HaloClient, Arc<XboxClient<FakeAuthProvider>>) {
+async fn test_client(
+    server: &MockServer,
+) -> (HaloInfiniteClient, Arc<XboxClient<FakeAuthProvider>>) {
     Mock::given(method("POST"))
         .and(path("/xsts/authorize"))
         .respond_with(ResponseTemplate::new(200).set_body_json(xsts_body()))
+        .mount(server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/oban/flight-configurations/titles/hi/audiences/retail/players/xuid(123456789)/active",
+        ))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "FlightConfigurationId": "fake-clearance"
+        })))
+        .mount(server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/users/me"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "xuid": "123456789",
+            "notificationsReadDate": "2026-01-01T00:00:00Z"
+        })))
         .mount(server)
         .await;
 
@@ -78,16 +115,28 @@ async fn test_client(server: &MockServer) -> (HaloClient, Arc<XboxClient<FakeAut
         },
     ));
 
-    let halo_client = HaloClient::from_xbox_client_with_endpoints(
-        xbox_client.clone(),
-        HaloEndpoints {
-            skill_base_url: server.uri(),
-            halostats_base_url: server.uri(),
-            spartan_token_url: format!("{}/spartan-token", server.uri()),
-        },
-    );
+    let auth_endpoints = AuthEndpoints {
+        spartan_token_url: format!("{}/spartan-token", server.uri()),
+        clearance_url: format!(
+            "{}/oban/flight-configurations/titles/hi/audiences/retail/players",
+            server.uri()
+        ),
+        current_user_url: format!("{}/users/me", server.uri()),
+    };
+    let endpoints = HaloEndpoints {
+        skill_base_url: server.uri(),
+        halostats_base_url: server.uri(),
+        current_user_url: format!("{}/users/me", server.uri()),
+        profile_base_url: server.uri(),
+        game_cms_base_url: server.uri(),
+        ugc_base_url: server.uri(),
+        settings_base_url: server.uri(),
+        ban_base_url: server.uri(),
+    };
+    let auth = AuthClient::from_xbox_client_with_endpoints(xbox_client.clone(), &auth_endpoints);
+    let halo_infinite_client = HaloInfiniteClient::with_endpoints(auth, endpoints);
 
-    (halo_client, xbox_client)
+    (halo_infinite_client, xbox_client)
 }
 
 #[tokio::test]
@@ -137,11 +186,19 @@ async fn spartan_token_is_cached_across_calls() {
         .iter()
         .filter(|r| r.url.path() == "/spartan-token")
         .count();
+    let clearance_hits = received
+        .iter()
+        .filter(|r| {
+            r.url.path()
+                == "/oban/flight-configurations/titles/hi/audiences/retail/players/xuid(123456789)/active"
+        })
+        .count();
 
     assert_eq!(
         spartan_hits, 1,
         "spartan token should only be fetched once across two CSR lookups"
     );
+    assert_eq!(clearance_hits, 0, "CSR should not request clearance");
 }
 
 #[tokio::test]
@@ -156,5 +213,43 @@ async fn gamertag_not_found_maps_to_typed_error() {
         .await;
 
     let err = halo.service_record("NoSuchGamer").await.unwrap_err();
-    assert!(matches!(err, halo_api::HaloApiError::GamertagNotFound(gt) if gt == "NoSuchGamer"));
+    assert!(matches!(err, InfiniteClientError::GamertagNotFound(gt) if gt == "NoSuchGamer"));
+}
+
+#[tokio::test]
+async fn infinite_client_preserves_auth_errors() {
+    let halo = HaloInfiniteClient::new(FailingHaloAuth);
+    let error = halo.match_stats("unused").await.unwrap_err();
+
+    assert!(matches!(
+        error,
+        InfiniteClientError::Auth(AuthError::SpartanTokenProvider(message))
+            if message == "Xbox login failed"
+    ));
+}
+
+#[tokio::test]
+async fn ban_summary_uses_spartan_auth_without_clearance() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/bansummary"))
+        .and(query_param("auth", "st"))
+        .and(query_param("targets", "xuid(123456789)"))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    halo.ban_summary(&xuid).await.unwrap();
+
+    let requests = server.received_requests().await.unwrap();
+    let request = requests
+        .iter()
+        .find(|request| request.url.path() == "/hi/bansummary")
+        .unwrap();
+    assert!(request.headers.get("343-clearance").is_none());
 }

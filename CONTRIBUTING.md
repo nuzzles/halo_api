@@ -11,9 +11,6 @@ cargo build
 cargo test --all-features
 ```
 
-This crate depends on [`xbox`](https://github.com/nuzzles/xbox) via a path dependency during co-development.
-If you're working on both crates together, clone them as siblings (`../xbox` relative to this repo).
-
 ## Before opening a PR
 
 Run the same checks CI runs:
@@ -30,13 +27,12 @@ All of these must pass. If `cargo fmt` reports diffs, run `cargo fmt` (without `
 
 ## Coding conventions
 
-- No `unwrap()`/`expect()` in library code outside of tests — return a typed error instead (see `src/error.rs`).
+- No `unwrap()`/`expect()` in library code outside of tests — return the owning client's typed error.
 - New public types/functions should have doc comments; non-obvious behavior (auth quirks, API response shapes,
   retry semantics) should explain *why*, not just restate the signature.
-- New endpoints go in their own module under `src/endpoints/`, with response models under the matching module
-  in `src/models/`. Don't inline response structs at call sites — this crate exists specifically to stop that
-  pattern from spreading.
-- New authenticated HTTP call sites should go through `HaloClient`'s existing spartan-token cache and
+- New Infinite endpoints, response models, and constants belong under `src/clients/hi`.
+  Don't inline response structs at call sites — this crate exists specifically to stop that pattern from spreading.
+- New authenticated HTTP call sites should go through `HaloInfiniteClient`'s existing credential handling and
   401-retry wrapper rather than hand-rolling their own `reqwest` call.
 
 ## Filing issues

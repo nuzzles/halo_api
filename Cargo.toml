@@ -13,8 +13,8 @@ categories = ["api-bindings"]
 all-features = true
 
 [dependencies]
-xbox = { version = "0.1", path = "../xbox" }
-reqwest = { version = "0.13.4", features = ["json"] }
+xbox = "0.2"
+reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 thiserror = "2.0.19"
@@ -26,3 +26,4 @@ tracing = "0.1.44"
 [dev-dependencies]
 tokio = { version = "1.53.1", features = ["full"] }
 wiremock = "0.6.5"
+rpassword = "7.5.4"

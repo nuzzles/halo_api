@@ -1,8 +1,4 @@
 /// A known Halo Infinite matchmaking playlist, identified by its asset GUID.
-///
-/// Only playlists with a confirmed asset GUID are included. `Squad` battle was referenced in
-/// the codebase this crate was extracted from, but its GUID was never located — add it once
-/// confirmed rather than guessing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PlaylistId {
     Arena,
