@@ -56,27 +56,44 @@ impl GameModeId {
     );
     pub const RANKED_CTF: Self = Self::from_static(
         "507191c6-a492-4331-b2ae-a172101eb23e",
-        "ee8c890b-a95f-4154-bac6-0009992d74f6",
+        "ffd0ef4e-da75-42b0-93bb-ab44d4e6905b",
     );
     pub const RANKED_ONE_FLAG_CTF: Self = Self::from_static(
         "18ac247d-7f86-4a59-9b47-9e74a6384ac2",
-        "13729f6d-3f7b-4ad2-982e-f25b38b57c16",
+        "6dbe8411-cc9b-44ca-b680-32847677536a",
     );
     pub const RANKED_STRONGHOLDS: Self = Self::from_static(
         "22b8a0eb-0d02-4eb3-8f56-5f63fc254f83",
-        "2cdb80b0-2a02-4934-a649-2911368d49e1",
+        "7a6d2582-284c-4728-bec9-118e32cd0cc0",
     );
     pub const RANKED_ODDBALL: Self = Self::from_static(
         "751bcc9d-aace-45a1-8d71-358f0bc89f7e",
-        "29f36248-0181-44ba-96a0-3c3b9b924085",
+        "227d4ffc-d67f-449a-8315-a1f82854d2ed",
     );
     pub const RANKED_SLAYER: Self = Self::from_static(
         "c2d20d44-8606-4669-b894-afae15b3524f",
-        "9eee25fe-39db-493f-ab0d-d95403df66b8",
+        "0091d411-f90d-44a7-aac3-ccc7ff2b131f",
     );
     pub const RANKED_KING_OF_THE_HILL: Self = Self::from_static(
         "88c22b1f-2d64-48b9-bab1-26fe4721fb23",
-        "3f49d4f7-f411-48bf-82ee-7fd329c19d53",
+        "43e75f3a-eee5-4147-b9d3-19782fac58f8",
+    );
+    pub const RANKED_CTF_3_CAPTURES: Self = Self::from_static(
+        "4cb279b7-a064-4df6-9058-02cdc6825d93",
+        "1392d27e-e7e3-41d9-93f9-420c66cff577",
+    );
+    pub const RANKED_CTF_5_CAPTURES: Self = Self::RANKED_CTF;
+    pub const RANKED_ATTRITION: Self = Self::from_static(
+        "0bc630bf-2ee3-4eae-b272-b68d4ab80be7",
+        "b6b22432-f3d9-468c-9359-b82a72791030",
+    );
+    pub const RANKED_DOUBLES_ODDBALL: Self = Self::from_static(
+        "9beb95dc-9fa2-4c6e-889f-d717f2adfe49",
+        "75c45183-df50-405c-8fbc-bccc0f7eb375",
+    );
+    pub const RANKED_DOUBLES_SLAYER: Self = Self::from_static(
+        "b0c65df9-0b2c-4040-b018-ad3e1baab832",
+        "9e8f9dae-007d-4eb4-a131-4e5d526d9130",
     );
 
     /// Creates a game-mode ID from an asset GUID and immutable version GUID.
@@ -117,51 +134,87 @@ impl MapId {
     );
     pub const FRAGMENTATION: Self = Self::from_static(
         "4f196016-0101-4844-8358-2504f7c44656",
-        "fa161336-7088-4a1a-9a02-05703e7d97b9",
+        "645e4e35-a573-4362-a59c-1c7867622891",
     );
     pub const STREETS: Self = Self::from_static(
         "f0a1760f-0d4a-4bcc-ac7a-e8f9aee331dc",
-        "4e3e0256-20ff-4807-9ca5-f0abde3b47db",
+        "7cfb2ea5-2f69-4ed5-9d54-73988bebe8d7",
     );
     pub const DEADLOCK: Self = Self::from_static(
         "08607bf4-6abe-4a5b-9547-290a6cc1433e",
-        "f45958fd-2f68-432a-8d36-6834f2807540",
+        "866fbb48-fc87-459e-a3fe-a69d764c0256",
     );
     pub const HIGHPOWER: Self = Self::from_static(
         "c494ef7c-d203-42a9-9c0f-b3f576334501",
-        "72bc0109-3748-4b5a-8d9e-18399dfb7ba0",
+        "aeedf79f-ae5a-4de6-bb29-b14f66baf64b",
     );
     pub const LAUNCH_SITE: Self = Self::from_static(
         "56a11b8c-64d1-4537-8893-a9241e4d5b93",
-        "faaf9d32-8a9f-4fb7-9552-6e3f27c70923",
+        "1cd21d5a-a57e-4d42-997d-ff95ca0e32fc",
     );
     pub const LIVE_FIRE: Self = Self::from_static(
         "b6aca0c7-8ba7-4066-bf91-693571374c3c",
-        "3840a563-f689-4a60-882c-65c93cf0fc72",
+        "67bf316f-e891-4e85-8f3d-b129ef5fcb2e",
     );
     pub const BEHEMOTH: Self = Self::from_static(
         "53136ad9-0fd6-4271-8752-31d114b9561e",
-        "9eff68dc-2089-4e89-a1ba-9541ff136be8",
+        "d79b7333-90bf-4cbf-8e44-3b39da651202",
     );
     pub const BAZAAR: Self = Self::from_static(
         "298d5036-cd43-47b3-a4bd-31e127566593",
-        "23e96d69-63df-41af-9f6e-1d0079f7f3b7",
+        "5546a6ec-841d-4955-be7a-5f32c3ac0428",
     );
     pub const AQUARIUS: Self = Self::from_static(
         "33c0766c-ef15-48f8-b298-34aba5bff3b4",
-        "52b8e5d1-56ca-4d15-ac5a-29ce52485dca",
+        "711c83cf-c952-46cf-80fa-57e62af2bd38",
     );
     pub const RECHARGE: Self = Self::from_static(
         "8420410b-044d-44d7-80b6-98a766c8c39f",
-        "30239a47-2353-4b4c-bf68-10d39b906232",
+        "3195263c-ef0f-49da-99a1-54839a1a64a0",
     );
     pub const BREAKER: Self = Self::from_static(
         "e6cbfe01-665b-4a8c-bf3a-d63a65a7c890",
-        "1bc4349f-951e-45ec-81c8-56799226a589",
+        "635c65fe-d207-47e5-b30d-dce1ec680c51",
     );
     pub const CATALYST: Self = Self::from_static(
         "e859cf75-9b8a-429a-91be-2376681c8537",
-        "bb22b05d-0423-46a5-b383-e64ebf116337",
+        "463a6db1-b0a7-4477-b20b-0c51a7916d4f",
+    );
+    pub const CHASM: Self = Self::from_static(
+        "fc1ced39-128b-439d-9b44-4710225090f3",
+        "e03dfd3a-804f-48d0-a1f2-e5963f036dbe",
+    );
+    pub const CLIFFHANGER: Self = Self::from_static(
+        "81274d6f-6a94-425a-a16e-3bdb1e2eea9d",
+        "2cbfa179-2bd2-499d-a5bd-74bf2d14d05b",
+    );
+    pub const FORBIDDEN: Self = Self::from_static(
+        "ea51a3dd-2125-4e5b-872d-25f1835edd29",
+        "dd6b48a2-cdb7-4197-af60-706f4ca10f69",
+    );
+    pub const FOREST: Self = Self::from_static(
+        "619bea21-f1e6-461f-8a7d-2bb4f905d0ca",
+        "ed9e777f-4c8a-441c-b970-e66cc5c2dd9a",
+    );
+    pub const HOUSE_OF_RECKONING: Self = Self::from_static(
+        "eaf608f0-6ec3-444f-a51a-9c1de5d0bf5c",
+        "681d9ead-df2c-45d6-a828-a7d9e2e582cd",
+    );
+    pub const ILLUSION: Self = Self::from_static(
+        "86ef3b1c-2f39-4c29-8c19-65ab84a704c2",
+        "db6a631d-1465-4b86-b970-78d800e5cfd3",
+    );
+    pub const OASIS: Self = Self::from_static(
+        "6aa0a116-66a6-4242-a1b3-41aa417d6dc6",
+        "32465034-7f98-4dea-b178-8058d3d39c8e",
+    );
+    pub const PRISM: Self = Self::from_static(
+        "92d23264-d3b9-462e-adbc-8ddb44e81966",
+        "c9a6a0ef-03b6-46d7-b0c0-6e18d105f0de",
+    );
+    pub const SCARR: Self = Self::from_static(
+        "247637f8-1ed2-47de-8ff0-fd4b68f50888",
+        "b1bbed19-ba61-4cfd-8b1e-14a986cf75c1",
     );
 
     /// Creates a map ID from an asset GUID and immutable version GUID.
@@ -186,6 +239,52 @@ impl MapId {
     pub fn version_id(&self) -> &str {
         &self.version_id
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum UgcAssetKind {
+    Map,
+    Playlist,
+    GameMode,
+}
+
+impl UgcAssetKind {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Map => "Map",
+            Self::Playlist => "Playlist",
+            Self::GameMode => "UgcGameVariant",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct UgcSearchResults {
+    #[serde(rename = "EstimatedTotal")]
+    pub estimated_total: u32,
+    #[serde(rename = "Start")]
+    pub start: u32,
+    #[serde(rename = "ResultCount")]
+    pub result_count: u32,
+    #[serde(rename = "Results")]
+    pub results: Vec<UgcSearchResult>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct UgcSearchResult {
+    #[serde(rename = "AssetId")]
+    pub asset_id: String,
+    #[serde(rename = "AssetVersionId")]
+    pub version_id: String,
+    #[serde(rename = "Name")]
+    pub name: String,
+    #[serde(rename = "AssetKind")]
+    pub asset_kind: i32,
+    #[serde(rename = "Tags")]
+    pub tags: Vec<String>,
+    /// The catalog that owns the asset. Halo-owned assets use home `2`.
+    #[serde(default, rename = "AssetHome")]
+    pub asset_home: Option<i32>,
 }
 
 /// Response body from the playlist CSR endpoint.

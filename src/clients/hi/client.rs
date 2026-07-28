@@ -12,7 +12,8 @@ use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
     GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats, MatchesPrivacy,
     PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
-    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UserInfo,
+    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind,
+    UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -374,6 +375,30 @@ impl HaloInfiniteClient {
             &self.endpoints.ugc_base_url,
             &format!("/hi/{kind}/{asset_id}"),
             &[],
+        )
+        .await
+    }
+
+    /// Searches Halo Infinite's live UGC catalog.
+    pub async fn search_assets(
+        &self,
+        kind: UgcAssetKind,
+        start: u32,
+        count: u32,
+    ) -> Result<UgcSearchResults, InfiniteClientError> {
+        self.get_authenticated_with_user_agent(
+            &self.endpoints.ugc_base_url,
+            "/hi/search",
+            &[
+                ("start", start.to_string()),
+                ("count", count.to_string()),
+                ("include-times", "false".to_string()),
+                ("sort", "PlaysRecent".to_string()),
+                ("order", "Desc".to_string()),
+                ("assetKind", kind.as_str().to_string()),
+            ],
+            true,
+            HALO_WAYPOINT_USER_AGENT,
         )
         .await
     }
