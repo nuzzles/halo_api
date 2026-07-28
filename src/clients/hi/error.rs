@@ -10,10 +10,11 @@ pub enum InfiniteClientError {
     #[error("authentication failed: {0}")]
     Auth(#[from] AuthError),
 
-    #[error("Halo Infinite request to {url} failed with status {status}")]
+    #[error("Halo Infinite request to {url} failed with status {status}: {body}")]
     HttpStatus {
         url: String,
         status: reqwest::StatusCode,
+        body: String,
     },
 
     #[error("Halo Infinite network error: {0}")]

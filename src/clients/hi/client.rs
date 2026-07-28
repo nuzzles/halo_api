@@ -9,10 +9,15 @@ use xbox::util::wrap_xuid;
 use super::InfiniteClientError;
 use super::constants::PlaylistId;
 use super::endpoints::HaloEndpoints;
-use super::models::{CsrRecords, PlayerMatchHistory, ServiceRecord};
+use super::models::{
+    CsrRecords, CsrSeason, CsrSeasonCalendar, GameVariantAsset, MapAsset, MapModePairAsset,
+    PlayerMatchHistory, PlaylistAsset, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
+    SeasonCalendar, ServiceRecord, UserInfo,
+};
 use crate::auth::{HaloAuth, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
+const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
 
 /// Halo Infinite API client. Authentication is supplied by a separate [`HaloAuth`] client.
 pub struct HaloInfiniteClient {
@@ -56,6 +61,46 @@ impl HaloInfiniteClient {
         self.get_authenticated(base, path, query, true).await
     }
 
+    async fn get_with_clearance_query<T: DeserializeOwned>(
+        &self,
+        base: &str,
+        path: &str,
+        query: &[(&str, String)],
+    ) -> Result<T, InfiniteClientError> {
+        self.get_with_clearance_named_query(base, path, query, "clearanceId")
+            .await
+    }
+
+    async fn get_with_clearance_named_query<T: DeserializeOwned>(
+        &self,
+        base: &str,
+        path: &str,
+        query: &[(&str, String)],
+        clearance_query_name: &'static str,
+    ) -> Result<T, InfiniteClientError> {
+        let credentials = self.auth.credentials(true).await?;
+        let mut query = query.to_vec();
+        if let Some(clearance) = &credentials.clearance {
+            query.push((clearance_query_name, clearance.clone()));
+        }
+        let url = format!("{base}{path}");
+        match self.get_once(&url, &query, &credentials).await {
+            Err(error) if error.is_unauthorized() => {
+                self.auth.invalidate().await;
+                let credentials = self.auth.credentials(true).await?;
+                let mut query = query
+                    .into_iter()
+                    .filter(|(name, _)| *name != clearance_query_name)
+                    .collect::<Vec<_>>();
+                if let Some(clearance) = &credentials.clearance {
+                    query.push((clearance_query_name, clearance.clone()));
+                }
+                self.get_once(&url, &query, &credentials).await
+            }
+            result => result,
+        }
+    }
+
     async fn get_authenticated<T: DeserializeOwned>(
         &self,
         base: &str,
@@ -87,16 +132,17 @@ impl HaloInfiniteClient {
             .query(query)
             .header("X-343-Authorization-Spartan", &credentials.spartan_token)
             .header("Accept", "application/json")
+            .header("User-Agent", HALO_PC_USER_AGENT)
             .timeout(DEFAULT_TIMEOUT);
         if let Some(clearance) = &credentials.clearance {
             request = request.header("343-Clearance", clearance);
         }
         let response = request.send().await?;
         if !response.status().is_success() {
-            return Err(InfiniteClientError::HttpStatus {
-                url: response.url().to_string(),
-                status: response.status(),
-            });
+            let url = response.url().to_string();
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(InfiniteClientError::HttpStatus { url, status, body });
         }
         Ok(response.json().await?)
     }
@@ -129,7 +175,7 @@ impl HaloInfiniteClient {
             .map(|x| wrap_xuid(x.as_str()))
             .collect::<Vec<_>>()
             .join(",");
-        self.get(
+        self.get_with_clearance(
             &self.endpoints.skill_base_url,
             &format!("/hi/playlist/{playlist_id}/csrs"),
             &[("players", players)],
@@ -196,7 +242,7 @@ impl HaloInfiniteClient {
     }
 
     /// Looks up profile information by gamertag.
-    pub async fn user(&self, gamertag: &str) -> Result<Value, InfiniteClientError> {
+    pub async fn user(&self, gamertag: &str) -> Result<UserInfo, InfiniteClientError> {
         self.get(
             &self.endpoints.profile_base_url,
             &format!("/users/gt({gamertag})"),
@@ -206,7 +252,7 @@ impl HaloInfiniteClient {
     }
 
     /// Looks up profile information for multiple XUIDs.
-    pub async fn users(&self, xuids: &[Xuid]) -> Result<Value, InfiniteClientError> {
+    pub async fn users(&self, xuids: &[Xuid]) -> Result<Vec<UserInfo>, InfiniteClientError> {
         self.get(
             &self.endpoints.profile_base_url,
             "/users",
@@ -226,34 +272,36 @@ impl HaloInfiniteClient {
         &self,
         asset_id: &str,
         version_id: &str,
-    ) -> Result<Value, InfiniteClientError> {
-        self.ugc_version("Maps", asset_id, version_id).await
+    ) -> Result<MapAsset, InfiniteClientError> {
+        self.ugc_version("maps", asset_id, version_id, false).await
     }
     pub async fn mode(
         &self,
         asset_id: &str,
         version_id: &str,
-    ) -> Result<Value, InfiniteClientError> {
-        self.ugc_version("UgcGameVariants", asset_id, version_id)
+    ) -> Result<GameVariantAsset, InfiniteClientError> {
+        self.ugc_version("ugcGameVariants", asset_id, version_id, false)
             .await
     }
     pub async fn playlist(
         &self,
         asset_id: &str,
         version_id: &str,
-    ) -> Result<Value, InfiniteClientError> {
-        self.ugc_version("Playlists", asset_id, version_id).await
+    ) -> Result<PlaylistAsset, InfiniteClientError> {
+        self.ugc_version("playlists", asset_id, version_id, true)
+            .await
     }
     pub async fn map_mode_pair(
         &self,
         asset_id: &str,
         version_id: &str,
-    ) -> Result<Value, InfiniteClientError> {
-        self.ugc_version("MapModePairs", asset_id, version_id).await
+    ) -> Result<MapModePairAsset, InfiniteClientError> {
+        self.ugc_version("mapModePairs", asset_id, version_id, true)
+            .await
     }
 
     pub async fn asset(&self, kind: &str, asset_id: &str) -> Result<Value, InfiniteClientError> {
-        self.get(
+        self.get_with_clearance(
             &self.endpoints.ugc_base_url,
             &format!("/hi/{kind}/{asset_id}"),
             &[],
@@ -261,21 +309,27 @@ impl HaloInfiniteClient {
         .await
     }
 
-    async fn ugc_version(
+    async fn ugc_version<T: DeserializeOwned>(
         &self,
         kind: &str,
         asset_id: &str,
         version_id: &str,
-    ) -> Result<Value, InfiniteClientError> {
-        self.get(
-            &self.endpoints.ugc_base_url,
-            &format!("/hi/{kind}/{asset_id}/versions/{version_id}"),
-            &[],
-        )
-        .await
+        clearance_query: bool,
+    ) -> Result<T, InfiniteClientError> {
+        let path = format!("/hi/{kind}/{asset_id}/versions/{version_id}");
+        if clearance_query {
+            self.get_with_clearance_query(&self.endpoints.ugc_base_url, &path, &[])
+                .await
+        } else {
+            self.get_with_clearance(&self.endpoints.ugc_base_url, &path, &[])
+                .await
+        }
     }
 
-    pub async fn playlist_metadata(&self, playlist_id: &str) -> Result<Value, InfiniteClientError> {
+    pub async fn playlist_metadata(
+        &self,
+        playlist_id: &str,
+    ) -> Result<PlaylistMetadata, InfiniteClientError> {
         self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             &format!("/hi/multiplayer/file/playlists/assets/{playlist_id}.json"),
@@ -284,8 +338,8 @@ impl HaloInfiniteClient {
         .await
     }
 
-    pub async fn season_calendar(&self) -> Result<Value, InfiniteClientError> {
-        self.get(
+    pub async fn season_calendar(&self) -> Result<SeasonCalendar, InfiniteClientError> {
+        self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             "/hi/progression/file/calendars/seasons/seasoncalendar.json",
             &[],
@@ -293,7 +347,7 @@ impl HaloInfiniteClient {
         .await
     }
     pub async fn medals(&self) -> Result<Value, InfiniteClientError> {
-        self.get(
+        self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             "/hi/Waypoint/file/medals/metadata.json",
             &[],
@@ -333,13 +387,59 @@ impl HaloInfiniteClient {
         .await
     }
 
-    pub async fn csr_season_calendar(&self) -> Result<Value, InfiniteClientError> {
-        self.get(
+    pub async fn csr_season_calendar(&self) -> Result<CsrSeasonCalendar, InfiniteClientError> {
+        self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             "/hi/Progression/file/Csr/Calendars/CsrSeasonCalendar.json",
             &[],
         )
         .await
+    }
+
+    /// Fetches the progression document referenced by a CSR calendar entry.
+    ///
+    /// The response remains JSON while the season-file schema is being explored.
+    pub async fn csr_season_file(&self, file_path: &str) -> Result<Value, InfiniteClientError> {
+        let path = format!("/hi/Progression/file/{}", file_path.trim_start_matches('/'));
+        self.get(&self.endpoints.game_cms_base_url, &path, &[])
+            .await
+    }
+
+    /// Returns the CSR season whose date range contains the current time.
+    pub async fn current_csr_season(&self) -> Result<Option<CsrSeason>, InfiniteClientError> {
+        let calendar = self.csr_season_calendar().await?;
+        Ok(calendar.current(chrono::Utc::now()).cloned())
+    }
+
+    /// Resolves the current Ranked Arena playlist into its concrete maps and game variants.
+    pub async fn current_ranked_arena(
+        &self,
+    ) -> Result<Option<RankedArenaSeason>, InfiniteClientError> {
+        let Some(season) = self.current_csr_season().await? else {
+            return Ok(None);
+        };
+        let playlist_id = PlaylistId::Arena.as_str();
+        let metadata = self.playlist_metadata(playlist_id).await?;
+        let playlist = self
+            .playlist(playlist_id, &metadata.ugc_playlist_version)
+            .await?;
+        let mut map_modes = Vec::with_capacity(playlist.rotation_entries.len());
+        for rotation in playlist.rotation_entries {
+            let pair = self
+                .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
+                .await?;
+            let map = self.map(&pair.map.asset_id, &pair.map.version_id).await?;
+            let mode = self
+                .mode(&pair.mode.asset_id, &pair.mode.version_id)
+                .await?;
+            map_modes.push(RankedArenaMapMode {
+                weight: rotation.metadata.weight,
+                pair,
+                map,
+                mode,
+            });
+        }
+        Ok(Some(RankedArenaSeason { season, map_modes }))
     }
 
     pub async fn settings(&self) -> Result<Value, InfiniteClientError> {

@@ -149,6 +149,7 @@ async fn gets_playlist_csr_end_to_end() {
             "/hi/playlist/edfef3ac-9cbe-4fa2-b949-8f29deafd483/csrs",
         ))
         .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
         .respond_with(ResponseTemplate::new(200).set_body_json(csr_body(1500)))
         .expect(1)
         .mount(&server)
@@ -198,7 +199,10 @@ async fn spartan_token_is_cached_across_calls() {
         spartan_hits, 1,
         "spartan token should only be fetched once across two CSR lookups"
     );
-    assert_eq!(clearance_hits, 0, "CSR should not request clearance");
+    assert_eq!(
+        clearance_hits, 1,
+        "clearance should be fetched once and cached across CSR lookups"
+    );
 }
 
 #[tokio::test]
@@ -252,4 +256,76 @@ async fn ban_summary_uses_spartan_auth_without_clearance() {
         .find(|request| request.url.path() == "/hi/bansummary")
         .unwrap();
     assert!(request.headers.get("343-clearance").is_none());
+}
+
+#[tokio::test]
+async fn ugc_playlist_and_map_mode_pair_send_clearance_header_and_query() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+    let asset = serde_json::json!({
+        "AssetId": "asset",
+        "VersionId": "version",
+        "PublicName": "Ranked Arena",
+        "Description": ""
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/hi/playlists/asset/versions/version"))
+        .and(query_param("clearanceId", "fake-clearance"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json({
+            let mut body = asset.clone();
+            body["RotationEntries"] = serde_json::json!([]);
+            body
+        }))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/mapModePairs/asset/versions/version"))
+        .and(query_param("clearanceId", "fake-clearance"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json({
+            let mut body = asset.clone();
+            body["MapLink"] = asset.clone();
+            body["UgcGameVariantLink"] = asset;
+            body
+        }))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    halo.playlist("asset", "version").await.unwrap();
+    halo.map_mode_pair("asset", "version").await.unwrap();
+}
+
+#[tokio::test]
+async fn csr_season_file_uses_pc_user_agent_and_spartan_auth() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/Progression/file/Csr/Seasons/CsrSeason13-3.json"))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header(
+            "User-Agent",
+            "SHIVA-2043073184/6.10021.18539.0 (release; PC)",
+        ))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    halo.csr_season_file("Csr/Seasons/CsrSeason13-3.json")
+        .await
+        .unwrap();
+
+    let requests = server.received_requests().await.unwrap();
+    let request = requests
+        .iter()
+        .find(|request| request.url.path().ends_with("CsrSeason13-3.json"))
+        .unwrap();
+    assert!(request.headers.get("343-clearance").is_none());
+    assert!(request.url.query().is_none());
 }
