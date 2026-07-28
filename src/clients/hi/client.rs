@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{io::Read, sync::Arc, time::Duration};
 
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
@@ -10,11 +10,11 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmManifest, GameModeId,
-    GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats, MatchType, MatchesPrivacy,
-    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
-    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind,
-    UgcSearchResults, UserInfo,
+    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk, FilmChunkData,
+    FilmManifest, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats,
+    MatchType, MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset,
+    PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar,
+    ServiceRecord, UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -315,6 +315,38 @@ impl HaloInfiniteClient {
             &[],
         )
         .await
+    }
+
+    /// Downloads and zlib-decompresses one Theater film chunk.
+    pub async fn film_chunk(
+        &self,
+        film: &FilmManifest,
+        chunk: &FilmChunk,
+    ) -> Result<FilmChunkData, InfiniteClientError> {
+        let base = film.blob_storage_path_prefix.trim_end_matches('/');
+        let path = format!("/{}", chunk.file_relative_path.trim_start_matches('/'));
+        let compressed = self.get_bytes_with_clearance(base, &path).await?;
+        let mut decoder = flate2::read::ZlibDecoder::new(compressed.as_slice());
+        let mut data = Vec::new();
+        decoder
+            .read_to_end(&mut data)
+            .map_err(|error| InfiniteClientError::FilmDecompression(Arc::new(error)))?;
+        Ok(FilmChunkData {
+            metadata: chunk.clone(),
+            data,
+        })
+    }
+
+    /// Downloads and decompresses every retained chunk in a Theater film.
+    pub async fn film_chunks(
+        &self,
+        film: &FilmManifest,
+    ) -> Result<Vec<FilmChunkData>, InfiniteClientError> {
+        let mut chunks = Vec::with_capacity(film.custom_data.chunks.len());
+        for chunk in &film.custom_data.chunks {
+            chunks.push(self.film_chunk(film, chunk).await?);
+        }
+        Ok(chunks)
     }
 
     pub async fn match_skill(

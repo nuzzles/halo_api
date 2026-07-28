@@ -1137,6 +1137,13 @@ pub struct FilmChunk {
     pub chunk_type: i32,
 }
 
+#[derive(Debug, Clone)]
+pub struct FilmChunkData {
+    pub metadata: FilmChunk,
+    /// Decompressed film data.
+    pub data: Vec<u8>,
+}
+
 /// Response body from the matchmade service record endpoint.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
