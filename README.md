@@ -52,24 +52,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## Architecture
-
-- `auth` — Spartan-token and clearance providers, caching, endpoint configuration, and `AuthError`.
-- `clients::hi` — `HaloInfiniteClient`, Infinite endpoint configuration, and
-  `InfiniteClientError`. Authentication failures are preserved in its `Auth` error variant.
-- `clients::hi::models` — Halo Infinite request/response types and named asset IDs.
-
-## Endpoint coverage
-
-Covered today: CSR, service records, match history/count/stats/skill, user lookup, UGC assets and versions,
-playlist metadata, season calendars, medals, ban summaries, settings, and match privacy. There is one
-compile-checked program per endpoint under [`examples`](examples), plus a [`whoami`](examples/whoami.rs)
-smoke test. Examples read `XBOX_USERNAME` and `XBOX_PASSWORD` when set and otherwise prompt
-interactively; endpoint inputs follow the same environment-variable-or-prompt convention.
-
 ## MSRV
 
-This crate targets the latest stable Rust toolchain. No specific MSRV is guaranteed yet.
+This crate has a [Minimum Supported Rust Version (MSRV)][MSRV] of 1.96.
+
+[MSRV]: CHANGELOG.md
 
 ## License
 

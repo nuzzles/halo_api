@@ -2,6 +2,7 @@
 name = "halo_api"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.96"
 license = "MIT OR Apache-2.0"
 description = "Unofficial Halo Infinite REST API client for Rust (CSR, service record, match history, and more)."
 repository = "https://github.com/nuzzles/halo_api"
