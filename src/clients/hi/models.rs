@@ -3,6 +3,8 @@ use std::{borrow::Cow, collections::BTreeMap};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer};
 
+const WAYPOINT_FILE_BASE_URL: &str = "https://gamecms-hacs.svc.halowaypoint.com/hi/Waypoint/file";
+
 fn deserialize_null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
@@ -16,9 +18,12 @@ where
 pub struct PlaylistId(Cow<'static, str>);
 
 impl PlaylistId {
+    pub const BIG_TEAM_BATTLE: Self = Self(Cow::Borrowed("2825d417-93e6-4366-98f9-839a2dc41fe4"));
     pub const RANKED_ARENA: Self = Self(Cow::Borrowed("edfef3ac-9cbe-4fa2-b949-8f29deafd483"));
     pub const RANKED_DOUBLES: Self = Self(Cow::Borrowed("fa5aa2a3-2428-4912-a023-e1eeea7b877c"));
     pub const RANKED_SLAYER: Self = Self(Cow::Borrowed("dcb2e24e-05fb-4390-8076-32a0cdb4326e"));
+    pub const SQUAD_BATTLE: Self = Self(Cow::Borrowed("f5580605-660c-43f9-ac69-4075c4a05c5d"));
+    pub const TEAM_DOUBLES: Self = Self(Cow::Borrowed("7323be09-2523-47c0-9e0d-64af9534ee22"));
 
     /// Creates an ID for a playlist that is not included among the named constants.
     pub fn new(value: impl Into<String>) -> Self {
@@ -50,29 +55,69 @@ pub struct GameModeId {
 }
 
 impl GameModeId {
+    pub const ASSAULT_MULTI_BOMB_BTB: Self = Self::from_static(
+        "f7704cb1-476a-447d-ac53-847874a9dae0",
+        "94d1b9c3-b7fa-48a2-ac9a-64bed263922a",
+    );
+    pub const ASSAULT_NEUTRAL_BOMB_SQUAD: Self = Self::from_static(
+        "ce9c98fa-e376-4958-a470-111e0d070f70",
+        "88f0d4bd-08ad-4475-b0bf-5e222f8a4f30",
+    );
+    pub const ASSAULT_ONE_BOMB_BTB: Self = Self::from_static(
+        "50d8dad3-f49c-4c69-9ced-be4de6b2e844",
+        "47a5c157-01d6-4818-a5ed-39b94135edf7",
+    );
+    pub const ASSAULT_ONE_BOMB_SQUAD: Self = Self::from_static(
+        "a34be7a1-0c04-4a5a-8cd4-bb65e76e2b4b",
+        "0cd1c5c2-5fee-408b-bfd0-963a5c0496d5",
+    );
+    pub const BTB_ONE_FLAG_CTF: Self = Self::from_static(
+        "b5b791c6-46b9-4b0d-8590-da0d22287e01",
+        "4fcc56ac-91c7-458d-8372-44c6159e563e",
+    );
+    pub const BTB_SENTRY_DEFENSE: Self = Self::from_static(
+        "b41b6dab-18b6-4784-a079-dee748fe473b",
+        "5e5783a1-a005-4937-a5e8-57cee603cb8d",
+    );
+    pub const CASTLE_WARS: Self = Self::from_static(
+        "823cc0c6-a368-467a-9481-d9de35e7e666",
+        "b83ef4ce-eb6d-4d04-af32-69b6acd4c60f",
+    );
+    pub const CTF_BTB: Self = Self::from_static(
+        "1519c0cb-759d-424e-a68e-b9cb870b1e14",
+        "030a4f4a-0493-42ae-a831-352172fed8ee",
+    );
+    pub const CTF_BTB_FIESTA: Self = Self::from_static(
+        "72578bb7-547a-4627-b21f-c93cc3213dca",
+        "ff344ee6-82e9-4df1-8cfa-0f486d3bce26",
+    );
+    pub const CTF_BTB_HEAVIES: Self = Self::from_static(
+        "3c038d8d-b4b4-4c97-ab53-1e9d3b43d502",
+        "f7fb19e5-c283-44d1-b6fe-9fa5accb35ce",
+    );
+    pub const CTF_DOUBLES: Self = Self::from_static(
+        "7be47523-cadc-4fba-8ba9-155ba45e1f59",
+        "93156ae1-306d-4d09-9969-eaee46475f57",
+    );
+    pub const EXTRACTION_BTB: Self = Self::from_static(
+        "51502806-5e18-442b-bd85-ea8cb3b6e726",
+        "2f83581c-c50d-46b1-920e-c967de2355f7",
+    );
     pub const FIESTA_SLAYER: Self = Self::from_static(
         "aca7bbf8-7a18-4aae-8785-1bd3f58275fd",
         "3685f6b2-2860-4e98-9d13-513087edb465",
     );
-    pub const RANKED_ONE_FLAG_CTF: Self = Self::from_static(
-        "18ac247d-7f86-4a59-9b47-9e74a6384ac2",
-        "6dbe8411-cc9b-44ca-b680-32847677536a",
+    pub const INVASION: Self = Self::from_static(
+        "0d192b69-6899-4c3c-b63d-4de7beb07f76",
+        "ec59fb10-30ee-47e7-a27b-02caf21ac2d9",
     );
-    pub const RANKED_STRONGHOLDS: Self = Self::from_static(
-        "22b8a0eb-0d02-4eb3-8f56-5f63fc254f83",
-        "7a6d2582-284c-4728-bec9-118e32cd0cc0",
+    pub const KOTH_DOUBLES: Self = Self::from_static(
+        "cbfaa7fe-5963-4762-b655-a99824ba6fdf",
+        "408da051-5d42-49fa-8417-5f9a78cf8467",
     );
-    pub const RANKED_ODDBALL: Self = Self::from_static(
-        "751bcc9d-aace-45a1-8d71-358f0bc89f7e",
-        "227d4ffc-d67f-449a-8315-a1f82854d2ed",
-    );
-    pub const RANKED_SLAYER: Self = Self::from_static(
-        "c2d20d44-8606-4669-b894-afae15b3524f",
-        "0091d411-f90d-44a7-aac3-ccc7ff2b131f",
-    );
-    pub const RANKED_KING_OF_THE_HILL: Self = Self::from_static(
-        "88c22b1f-2d64-48b9-bab1-26fe4721fb23",
-        "43e75f3a-eee5-4147-b9d3-19782fac58f8",
+    pub const RANKED_ATTRITION: Self = Self::from_static(
+        "0bc630bf-2ee3-4eae-b272-b68d4ab80be7",
+        "b6b22432-f3d9-468c-9359-b82a72791030",
     );
     pub const RANKED_CTF_3_CAPTURES: Self = Self::from_static(
         "4cb279b7-a064-4df6-9058-02cdc6825d93",
@@ -80,11 +125,7 @@ impl GameModeId {
     );
     pub const RANKED_CTF_5_CAPTURES: Self = Self::from_static(
         "507191c6-a492-4331-b2ae-a172101eb23e",
-        "ffd0ef4e-da75-42b0-93bb-ab44d4e6905b",
-    );
-    pub const RANKED_ATTRITION: Self = Self::from_static(
-        "0bc630bf-2ee3-4eae-b272-b68d4ab80be7",
-        "b6b22432-f3d9-468c-9359-b82a72791030",
+        "58052d54-b2d6-4006-baba-243a9d58c13d",
     );
     pub const RANKED_DOUBLES_ODDBALL: Self = Self::from_static(
         "9beb95dc-9fa2-4c6e-889f-d717f2adfe49",
@@ -93,6 +134,66 @@ impl GameModeId {
     pub const RANKED_DOUBLES_SLAYER: Self = Self::from_static(
         "b0c65df9-0b2c-4040-b018-ad3e1baab832",
         "9e8f9dae-007d-4eb4-a131-4e5d526d9130",
+    );
+    pub const RANKED_KING_OF_THE_HILL: Self = Self::from_static(
+        "88c22b1f-2d64-48b9-bab1-26fe4721fb23",
+        "43e75f3a-eee5-4147-b9d3-19782fac58f8",
+    );
+    pub const RANKED_ODDBALL: Self = Self::from_static(
+        "751bcc9d-aace-45a1-8d71-358f0bc89f7e",
+        "227d4ffc-d67f-449a-8315-a1f82854d2ed",
+    );
+    pub const RANKED_ONE_FLAG_CTF: Self = Self::from_static(
+        "18ac247d-7f86-4a59-9b47-9e74a6384ac2",
+        "6dbe8411-cc9b-44ca-b680-32847677536a",
+    );
+    pub const RANKED_SLAYER: Self = Self::from_static(
+        "c2d20d44-8606-4669-b894-afae15b3524f",
+        "0091d411-f90d-44a7-aac3-ccc7ff2b131f",
+    );
+    pub const RANKED_STRONGHOLDS: Self = Self::from_static(
+        "22b8a0eb-0d02-4eb3-8f56-5f63fc254f83",
+        "7a6d2582-284c-4728-bec9-118e32cd0cc0",
+    );
+    pub const SLAYER_BTB: Self = Self::from_static(
+        "920d628c-9eae-47a6-b96c-d141cf36ade2",
+        "2a228d8e-cb58-4804-8e4c-926aae27c61d",
+    );
+    pub const SLAYER_BTB_FIESTA: Self = Self::from_static(
+        "ab3c7acc-2af8-4a5e-b510-ddea47054c4a",
+        "be364419-a424-48d0-a943-812ed6e184cc",
+    );
+    pub const SLAYER_BTB_HEAVIES: Self = Self::from_static(
+        "64edc877-e2aa-4b83-b507-5d64ee4fefe9",
+        "1627eba7-1d88-4d53-8b98-860812da5b0d",
+    );
+    pub const SLAYER_DOUBLES: Self = Self::from_static(
+        "10a89f4f-9d37-4833-8db2-b95931f5eecd",
+        "ba5aa4d4-f6c0-433e-b094-ae5f2703e241",
+    );
+    pub const SQUAD_CTF: Self = Self::from_static(
+        "16188841-9cb2-4cf3-bb59-5139f9a737ab",
+        "871ccd7c-8bf3-4513-a722-24f972f34d22",
+    );
+    pub const SQUAD_KING_OF_THE_HILL: Self = Self::from_static(
+        "3899e110-91cd-4479-a8ad-5f8f8b91248d",
+        "8f137484-6970-46c9-a4a9-c26ff0c232d4",
+    );
+    pub const SQUAD_ONE_FLAG_CTF: Self = Self::from_static(
+        "4640310c-8a5c-4afa-bc39-98835e49d9f2",
+        "046685be-2189-4ba2-8874-b5c7f2ee1615",
+    );
+    pub const SQUAD_SLAYER: Self = Self::from_static(
+        "d73d459a-d63d-4a21-97f0-b1b156101d3c",
+        "a2402448-53d3-42d0-8c53-393bf5ac055b",
+    );
+    pub const TOTAL_CONTROL_BTB: Self = Self::from_static(
+        "34bac2c7-b6d7-4202-b634-1d770e5247a4",
+        "341262d6-39c9-4aed-832d-86dbc94e0eca",
+    );
+    pub const TOTAL_CONTROL_BTB_FIESTA: Self = Self::from_static(
+        "ac993227-14be-4aea-a055-8782665c4251",
+        "cb71fdfe-faa4-4c06-8a43-d8aa023fcc22",
     );
 
     /// Creates a game-mode ID from an asset GUID and immutable version GUID.
@@ -127,93 +228,477 @@ pub struct MapId {
 }
 
 impl MapId {
-    pub const FORGE_SPACE: Self = Self::from_static(
-        "76669255-697d-48c9-a802-7ff2ec8257f1",
-        "b8abf687-4e95-4846-83c7-33e779eed33e",
-    );
-    pub const FRAGMENTATION: Self = Self::from_static(
-        "4f196016-0101-4844-8358-2504f7c44656",
-        "645e4e35-a573-4362-a59c-1c7867622891",
-    );
-    pub const STREETS: Self = Self::from_static(
-        "f0a1760f-0d4a-4bcc-ac7a-e8f9aee331dc",
-        "7cfb2ea5-2f69-4ed5-9d54-73988bebe8d7",
-    );
-    pub const DEADLOCK: Self = Self::from_static(
-        "08607bf4-6abe-4a5b-9547-290a6cc1433e",
-        "866fbb48-fc87-459e-a3fe-a69d764c0256",
-    );
-    pub const HIGHPOWER: Self = Self::from_static(
-        "c494ef7c-d203-42a9-9c0f-b3f576334501",
-        "aeedf79f-ae5a-4de6-bb29-b14f66baf64b",
-    );
-    pub const LAUNCH_SITE: Self = Self::from_static(
-        "56a11b8c-64d1-4537-8893-a9241e4d5b93",
-        "1cd21d5a-a57e-4d42-997d-ff95ca0e32fc",
-    );
-    pub const LIVE_FIRE: Self = Self::from_static(
-        "b6aca0c7-8ba7-4066-bf91-693571374c3c",
-        "67bf316f-e891-4e85-8f3d-b129ef5fcb2e",
-    );
-    pub const BEHEMOTH: Self = Self::from_static(
-        "53136ad9-0fd6-4271-8752-31d114b9561e",
-        "d79b7333-90bf-4cbf-8e44-3b39da651202",
-    );
-    pub const BAZAAR: Self = Self::from_static(
-        "298d5036-cd43-47b3-a4bd-31e127566593",
-        "5546a6ec-841d-4955-be7a-5f32c3ac0428",
+    pub const APOSTLE: Self = Self::from_static(
+        "023507d1-7566-458d-b3d7-31627c40c01d",
+        "ac0cd6db-2ce4-43df-91ef-7e5a90550a08",
     );
     pub const AQUARIUS: Self = Self::from_static(
-        "33c0766c-ef15-48f8-b298-34aba5bff3b4",
-        "711c83cf-c952-46cf-80fa-57e62af2bd38",
+        "c395f3ac-4614-45f9-a83a-56f69e8ae962",
+        "dda9eaa7-441d-45ef-983b-bf9e89298be5",
     );
-    pub const RECHARGE: Self = Self::from_static(
-        "8420410b-044d-44d7-80b6-98a766c8c39f",
-        "3195263c-ef0f-49da-99a1-54839a1a64a0",
+    pub const AQUARIUS_RANKED: Self = Self::from_static(
+        "667072ae-ba00-4414-adda-8203e8c49295",
+        "9cce4f7e-cd2e-470f-93eb-a2725958f8bd",
+    );
+    pub const ARGYLE: Self = Self::from_static(
+        "2e35d8c0-8292-465c-8d69-35b5ff8b70db",
+        "c4dffc26-537d-4162-a9d1-703798784c49",
+    );
+    pub const ARGYLE_RANKED: Self = Self::from_static(
+        "78677080-db7a-429e-84fe-f041d8342c37",
+        "042ca666-15c8-4b68-b7bc-7a1d2fbdf113",
+    );
+    pub const ARRIVAL: Self = Self::from_static(
+        "beaf8ac9-fa85-4562-8def-28d9428dbddb",
+        "e92c6ffa-741c-4c82-a253-657acd92c694",
+    );
+    pub const BAZAAR: Self = Self::from_static(
+        "3e1e4cec-4f2c-44c6-b8d2-96b85c66c702",
+        "f463f61f-719f-4e1d-9a55-8492cce69b0b",
+    );
+    pub const BEHEMOTH: Self = Self::from_static(
+        "c3eabce0-2b2b-413c-96de-365a78846993",
+        "95ea4511-8d7e-48d0-b18d-5c7fde89ed94",
     );
     pub const BREAKER: Self = Self::from_static(
-        "e6cbfe01-665b-4a8c-bf3a-d63a65a7c890",
-        "635c65fe-d207-47e5-b30d-dce1ec680c51",
+        "6a147baf-b9c0-489e-8f04-8c6676c948d2",
+        "735d5165-dc3c-46c5-9dfc-30ee9f6b8bb7",
+    );
+    pub const BREAKER_HEAVIES: Self = Self::from_static(
+        "953dc3e2-943f-4ae3-abdd-b4be2a6a7a3a",
+        "4c7e77db-39f3-4219-8389-a0b3eaaecdeb",
+    );
+    pub const BREAKER_ONE_FLAG_CTF: Self = Self::from_static(
+        "66508493-003c-4f3d-9a2b-91f37eabcfa6",
+        "70269654-ecb5-44de-a3bc-6b8b21e65787",
+    );
+    pub const BREAKPOINT: Self = Self::from_static(
+        "fe7d8044-bc7f-4a05-a266-061382dfd8fa",
+        "2599dda4-1ad7-4ecf-afe8-c601dbe789b2",
     );
     pub const CATALYST: Self = Self::from_static(
-        "e859cf75-9b8a-429a-91be-2376681c8537",
-        "463a6db1-b0a7-4477-b20b-0c51a7916d4f",
+        "f7e8cde9-0c0a-487c-94a3-61bfa0f20465",
+        "55753d9f-3cab-4421-8280-c3a877319d68",
+    );
+    pub const CATALYST_RANKED: Self = Self::from_static(
+        "74b8c681-a3b0-422b-9fea-c111d3c979da",
+        "523d7c04-367b-4160-8f03-59792c18a184",
     );
     pub const CHASM: Self = Self::from_static(
-        "fc1ced39-128b-439d-9b44-4710225090f3",
-        "e03dfd3a-804f-48d0-a1f2-e5963f036dbe",
+        "a455572d-3141-48bc-ac55-dac78d9b52c9",
+        "d03834f3-acad-4217-8ecb-244839366f2e",
     );
     pub const CLIFFHANGER: Self = Self::from_static(
         "81274d6f-6a94-425a-a16e-3bdb1e2eea9d",
         "2cbfa179-2bd2-499d-a5bd-74bf2d14d05b",
     );
+    pub const CLIFFSIDE: Self = Self::from_static(
+        "4bffd021-92c0-422b-8b6e-8f595511458c",
+        "9e4296fd-b785-4bea-a880-8a5f8b268d56",
+    );
+    pub const COMMAND: Self = Self::from_static(
+        "2c9f3490-6be2-4d90-9015-02095651e91e",
+        "a9f63a1c-3f6a-4125-a2a1-f4bbbb864e97",
+    );
+    pub const COMMAND_ASSAULT: Self = Self::from_static(
+        "66b15c7c-d439-41b4-a965-575bd5c86c04",
+        "93e2b110-16a4-44cc-a7b3-06991f285a4e",
+    );
+    pub const COMMAND_SENTRY_DEFENSE: Self = Self::from_static(
+        "215eb485-d3b9-43d3-9390-42a9cc2b7db9",
+        "304c033f-3b0e-4d03-8c03-927da02edeb2",
+    );
+    pub const CRASHOUT: Self = Self::from_static(
+        "178ee422-43c1-4df8-be86-84f8bb0cc4d2",
+        "c72d84c8-9077-48a2-a78c-38d6df82a5c2",
+    );
+    pub const CREDENCE: Self = Self::from_static(
+        "0cc728d2-9b4d-4b80-95c9-18c77c095575",
+        "a73940e7-210d-4aba-b039-ec51c006d146",
+    );
+    pub const CRITICAL_DEWPOINT: Self = Self::from_static(
+        "bae4df14-4f4a-424c-aac1-2f795c807146",
+        "35fdc4d3-7864-4600-adc9-847de372166a",
+    );
+    pub const CURFEW: Self = Self::from_static(
+        "63d634be-0319-489d-8c21-9c4e012f664f",
+        "397afd65-341c-46f0-9a32-caa46d995f0a",
+    );
+    pub const DAIMYO: Self = Self::from_static(
+        "0590f221-1e5b-45ca-919c-df1b113eab3f",
+        "60769158-fbd9-41be-84af-6d43be9b4363",
+    );
+    pub const DAWNBREAKER: Self = Self::from_static(
+        "89dd4003-455c-4a1c-bcea-43acd514b20d",
+        "93d0fd61-f115-449f-af8a-6de2b340b764",
+    );
+    pub const DEAD_WATER: Self = Self::from_static(
+        "321271c8-529a-4a97-b303-093d839a6068",
+        "4596b8d4-d97c-4ee9-a5f4-1b06464d56ce",
+    );
+    pub const DEADLOCK: Self = Self::from_static(
+        "6f82df05-3b24-4746-8579-e0c5ef9e9d64",
+        "f1f191c2-d388-4cf4-a177-b28f8229d80b",
+    );
+    pub const DEADLOCK_HEAVIES: Self = Self::from_static(
+        "4fd75c74-5098-47ce-b6d3-4540df3f9b8e",
+        "12d90f79-fe4e-4f21-adc8-a7bbd8d71dd6",
+    );
+    pub const DEADLOCK_SENTRY_DEFENSE: Self = Self::from_static(
+        "34b81859-5cbc-4276-965e-8da33ebc824f",
+        "f8741b7d-c01a-43df-a008-f4139259733b",
+    );
+    pub const DOMICILE: Self = Self::from_static(
+        "921aebb1-783d-45e4-bacd-7ad869fa8dae",
+        "6a2f9336-a5cd-41c5-ab0d-0da39ef351c1",
+    );
+    pub const DREDGE: Self = Self::from_static(
+        "e4bb06db-065f-4902-b93b-d8dac315eac4",
+        "55402a49-0dba-495a-9a21-7346a1b79e81",
+    );
+    pub const ELEVATION: Self = Self::from_static(
+        "76043dc6-2724-45e2-9b5a-6fe2e75da588",
+        "c131c7eb-c2da-407d-b1d4-b4eb9e65037d",
+    );
+    pub const EMPYREAN: Self = Self::from_static(
+        "d035fc3e-f298-4c14-9487-465be2e1dc1f",
+        "8d5eb886-a41d-4093-827e-2cbdc75c651e",
+    );
+    pub const EMPYREAN_RANKED: Self = Self::from_static(
+        "70dd38c5-2eb7-4db3-8901-0dfca292ff18",
+        "8c4ab697-8630-47bf-b8a8-7d49a5e91b3c",
+    );
+    pub const EXHUMED: Self = Self::from_static(
+        "354b1633-1b47-4e0f-9a43-15ebf0acef0c",
+        "65679de1-145f-494b-89b2-8338e6ee019f",
+    );
+    pub const EXILED: Self = Self::from_static(
+        "9bb8d9df-ff6c-4a6e-b151-436bbb2c0907",
+        "c9bb9a73-c790-436d-8f95-5409ac5a183a",
+    );
+    pub const FIRST_LIGHT: Self = Self::from_static(
+        "c85ccdc7-8368-482f-8ca5-8b8d5d9a096d",
+        "cc1cefc8-d73f-478a-b7c9-0227e1ebee91",
+    );
+    pub const FLOOD_GULCH: Self = Self::from_static(
+        "7097bc4f-efcf-4c5a-a96e-4ddb03e84d2a",
+        "ea3b126b-a2cf-4cdd-9d02-de154417b286",
+    );
     pub const FORBIDDEN: Self = Self::from_static(
-        "ea51a3dd-2125-4e5b-872d-25f1835edd29",
-        "dd6b48a2-cdb7-4197-af60-706f4ca10f69",
+        "87c03bfd-2db3-4a5b-bbf9-d5369c5894d1",
+        "500d0305-72eb-47a4-aba5-f599e221cf00",
     );
     pub const FOREST: Self = Self::from_static(
-        "619bea21-f1e6-461f-8a7d-2bb4f905d0ca",
-        "ed9e777f-4c8a-441c-b970-e66cc5c2dd9a",
+        "e8d56863-9ad4-4efe-9059-81270884589c",
+        "740b1651-e6cd-4172-a2a9-1c1710fa022f",
+    );
+    pub const FORGE_SPACE: Self = Self::from_static(
+        "76669255-697d-48c9-a802-7ff2ec8257f1",
+        "b8abf687-4e95-4846-83c7-33e779eed33e",
+    );
+    pub const FORTITUDE: Self = Self::from_static(
+        "1ede38fa-4d30-4dfa-a8b7-5d08bf4e46e3",
+        "ad5eb2a0-1909-425e-a7de-5faa34a9d1e7",
+    );
+    pub const FORTITUDE_ASSAULT: Self = Self::from_static(
+        "ecce7405-53c2-4fb1-a57f-33af084f37d7",
+        "8cae5866-e28f-48b4-ac13-e7312212f80c",
+    );
+    pub const FORTITUDE_HEAVIES: Self = Self::from_static(
+        "305b1bdd-9a7b-4975-bacf-8bd63c8c13d2",
+        "615d7c10-8473-45ca-9c87-88c5d4f7acff",
+    );
+    pub const FORTRESS_RANKED: Self = Self::from_static(
+        "a54808fb-9bf5-432a-a3c3-f76cbea944c1",
+        "f8fe5de8-694e-4787-9ece-dea86b37e6be",
+    );
+    pub const FRAGMENTATION: Self = Self::from_static(
+        "068f41f4-e3dd-4bec-b297-d2ded85ab54b",
+        "2f0b4c72-51e5-4115-b302-0bae4b4df7dd",
+    );
+    pub const FRAGMENTATION_HEAVIES: Self = Self::from_static(
+        "0d849a52-fedb-4aea-b5a3-caee268f1f49",
+        "f0dcbaf5-b10f-4f13-bb76-2e789ed4c18a",
+    );
+    pub const FRAGMENTATION_SENTRY_DEFENSE: Self = Self::from_static(
+        "10d59d28-e00a-4bf1-9890-3a3e6cbbc64c",
+        "8cc62b67-a062-490b-8b74-af91ebff4607",
+    );
+    pub const GONDOLAS: Self = Self::from_static(
+        "c4cd9e46-3666-4d89-98ec-3b7b2c7005fb",
+        "59b54acf-d016-41e6-a941-732416a39f25",
+    );
+    pub const GOTHIC: Self = Self::from_static(
+        "0d5cb522-ab18-4348-8a04-36948ca1f2e1",
+        "26b1ccd4-504f-4c81-99bb-66b3d7d72192",
+    );
+    pub const GYRE: Self = Self::from_static(
+        "2aba3426-083c-42a9-b469-02898d4d0c62",
+        "81957761-5b8b-4053-a84a-2203486133cf",
+    );
+    pub const HARVEST: Self = Self::from_static(
+        "ff6b8a12-6b95-4eac-8ee1-9ba4c985c2e0",
+        "e7d01a4c-f5dc-4286-85d8-de37ab2d8841",
+    );
+    pub const HARVESTERS: Self = Self::from_static(
+        "8168a385-24f7-4d2b-8b1d-bfa3c741401f",
+        "9042df75-fcda-497b-9d95-93ad33b5188a",
+    );
+    pub const HIGHPOWER: Self = Self::from_static(
+        "33c6505d-1cfa-43c6-9fa9-311eb0502ad9",
+        "d550b178-a436-4821-ba21-f11a57f35b63",
+    );
+    pub const HIGHPOWER_HEAVIES: Self = Self::from_static(
+        "ecbb3aa1-6227-43c7-8cf8-ce62d1a988f0",
+        "8b13a317-c677-4f72-b5de-ce6c816ef20b",
+    );
+    pub const HIGHPOWER_SENTRY_DEFENSE: Self = Self::from_static(
+        "142a5e23-46de-4429-a232-aac4e6459a11",
+        "9fc3a03e-b97b-4c7c-b6aa-e7d8608c10c7",
     );
     pub const HOUSE_OF_RECKONING: Self = Self::from_static(
         "eaf608f0-6ec3-444f-a51a-9c1de5d0bf5c",
         "681d9ead-df2c-45d6-a828-a7d9e2e582cd",
     );
     pub const ILLUSION: Self = Self::from_static(
-        "86ef3b1c-2f39-4c29-8c19-65ab84a704c2",
-        "db6a631d-1465-4b86-b970-78d800e5cfd3",
+        "9e821f5e-042f-407c-97f3-de165b1cdb26",
+        "b1f66098-0095-472e-947f-de171998fc10",
+    );
+    pub const IMMOLATE: Self = Self::from_static(
+        "47823612-9de0-4ca9-8a95-b3a6ebd7ca91",
+        "ef53d2cc-fd2f-45a2-9a0a-a77082e4911f",
+    );
+    pub const INSOLENCE: Self = Self::from_static(
+        "d5c5eb4f-0dcb-4677-a866-eae0dcbfde9b",
+        "b574a3ab-0329-4e00-8e84-0db796c2d5df",
+    );
+    pub const INSOLENCE_ASSAULT: Self = Self::from_static(
+        "32fcf611-9e8f-4475-894c-acd65fbf39b1",
+        "d7db089e-03b3-4a84-9c45-5965017a7fb9",
+    );
+    pub const INSOLENCE_HEAVIES: Self = Self::from_static(
+        "2a339c65-5128-4457-88d4-0906e265034e",
+        "32583c91-936f-4ecc-931c-a7df4626783f",
+    );
+    pub const INTERFERENCE: Self = Self::from_static(
+        "654dff62-d618-496a-8914-06ab73d991e3",
+        "87e7bd29-9914-48f3-81e0-38ad200e1e4e",
+    );
+    pub const JAROK_BRIDGE: Self = Self::from_static(
+        "7fbce06f-0d2b-498a-bf7d-f86e6e224820",
+        "f1eb96a2-27d7-43b8-b4d4-1f43a3b21c45",
+    );
+    pub const KUSINI_BAY: Self = Self::from_static(
+        "89f3b8ad-6bbf-4652-8d67-8e5330294de4",
+        "ee7540aa-e504-4372-8e04-3e583a3359aa",
+    );
+    pub const LAST_BROADCAST: Self = Self::from_static(
+        "67c349f5-d7cc-49a0-9cf0-6afba73b18be",
+        "f2f13ee6-cf73-4246-b011-e432f2997de4",
+    );
+    pub const LAST_ROAD: Self = Self::from_static(
+        "24d6a48b-d78b-49c7-8b24-338fa3508a32",
+        "b73af8d8-37e4-485a-ba46-052867138300",
+    );
+    pub const LATTICE_RANKED: Self = Self::from_static(
+        "1a6cfc2e-ec86-48e1-9464-1ce1bff6ed48",
+        "3a382104-9b89-4e6e-aa18-0affaa98f478",
+    );
+    pub const LAUNCH_SITE: Self = Self::from_static(
+        "56a11b8c-64d1-4537-8893-a9241e4d5b93",
+        "1cd21d5a-a57e-4d42-997d-ff95ca0e32fc",
+    );
+    pub const LIVE_FIRE: Self = Self::from_static(
+        "6c01f693-c968-4a71-b157-efc35ffcf71f",
+        "ce0d50f3-e756-4aa0-a81c-85e47c83aa8b",
+    );
+    pub const LIVE_FIRE_RANKED: Self = Self::from_static(
+        "309253f8-7a75-48ff-83e1-e7fb3db2ac47",
+        "86a644f0-5063-40b8-b601-ce361439da72",
+    );
+    pub const LONGSHORE: Self = Self::from_static(
+        "a6fb1ff7-3130-454c-b484-270c4ce07bf3",
+        "b6217ea0-cf2e-47e7-8e5a-823ea2d05441",
+    );
+    pub const NADAIR: Self = Self::from_static(
+        "6dbd1c0d-a6c2-4697-8453-f0799d941741",
+        "b7fe7b46-9a4a-44b7-9dde-17515aeb4d7a",
     );
     pub const OASIS: Self = Self::from_static(
-        "6aa0a116-66a6-4242-a1b3-41aa417d6dc6",
-        "32465034-7f98-4dea-b178-8058d3d39c8e",
+        "7aa6fed5-4c21-43dd-b740-2fae8c971517",
+        "97da30e7-14d5-48db-b15b-91b453286ffd",
+    );
+    pub const OASIS_HEAVIES: Self = Self::from_static(
+        "7f56a242-c93a-4a19-b084-a9bf9cdd0246",
+        "5dcd3924-2e17-4369-81e1-ca0801ed89bb",
+    );
+    pub const OASIS_SENTRY_DEFENSE: Self = Self::from_static(
+        "052956b4-06d1-4f78-9938-6b43c66bb223",
+        "806de5c2-1a74-44dc-9179-50bb390df384",
+    );
+    pub const OBITUARY: Self = Self::from_static(
+        "a289bafe-102e-4363-98f7-80b596007338",
+        "93845a4c-0ace-4161-86cb-9d0c190d07da",
+    );
+    pub const OBITUARY_ASSAULT: Self = Self::from_static(
+        "f2daaa7f-5bd0-46fc-b00c-feb970675125",
+        "586e6852-0e69-40cd-8a85-1364b6111ab5",
+    );
+    pub const OBITUARY_HEAVIES: Self = Self::from_static(
+        "e3681516-2930-491c-b94f-7dbfa161e000",
+        "4ee8fc3e-cdca-44d7-8e59-d677d7afaa60",
+    );
+    pub const OPULENCE: Self = Self::from_static(
+        "255bbe78-b191-476e-b0ae-0763c3bc2f44",
+        "b29f6e87-b4ce-4423-8277-e749bedbb813",
+    );
+    pub const ORIGIN_RANKED: Self = Self::from_static(
+        "46a8319c-2c63-46ee-9382-788906dcb049",
+        "82e20c0a-ca3d-450a-a797-f5ed277a7dc2",
+    );
+    pub const PERDITION: Self = Self::from_static(
+        "be8131fc-8839-4448-b65c-1fb46dd077ef",
+        "a63fe01d-a1c2-4955-8ec3-d8666fb31496",
+    );
+    pub const PERILOUS: Self = Self::from_static(
+        "c5ac9f12-660e-4f1a-83e7-2e7536bbcb04",
+        "7c5df4a3-5c39-4984-a483-84f2c78190f3",
     );
     pub const PRISM: Self = Self::from_static(
-        "92d23264-d3b9-462e-adbc-8ddb44e81966",
-        "c9a6a0ef-03b6-46d7-b0c0-6e18d105f0de",
+        "2fdb8370-e5ac-4a1a-bdce-a08bc738b9ad",
+        "867d213f-2e3a-436b-8dfd-6f0347decbb7",
+    );
+    pub const PROMENADE: Self = Self::from_static(
+        "6edb3f62-aed7-49a5-b4c0-b44e9d010854",
+        "4e1f18d0-e085-46f9-9cd2-c302e74ddb50",
+    );
+    pub const RAT_S_NEST: Self = Self::from_static(
+        "133c0185-24ed-4bc2-b834-62db5c936257",
+        "cfc6d71c-306b-4088-abc0-cadd8754a8a1",
+    );
+    pub const RECHARGE: Self = Self::from_static(
+        "2b6d2baf-7645-4e16-8a80-c7006f595812",
+        "03134a7d-1dd1-499a-a7e1-3d1319eca633",
+    );
+    pub const RECHARGE_RANKED: Self = Self::from_static(
+        "336b5174-3579-4fd8-b2f0-922e4a5f7628",
+        "c0c6705e-167b-4335-afe0-2bafc7290f40",
+    );
+    pub const RECOVERY: Self = Self::from_static(
+        "1bc0e2a7-9d6d-4771-9574-9978e7c9292c",
+        "bc4a3d27-ec96-49af-8ae0-98015f548397",
+    );
+    pub const REFUGE: Self = Self::from_static(
+        "41217472-3020-4bd8-bce9-b2a2b0d50896",
+        "99c96da2-961a-4436-8d29-9e2a17a16c7f",
+    );
+    pub const REFUGE_HEAVIES: Self = Self::from_static(
+        "8aa45646-d527-47cc-affe-deac726a4af5",
+        "4fde7a23-b792-4d81-a495-7c0b03c47834",
+    );
+    pub const RENDEZVOUS: Self = Self::from_static(
+        "a778ae21-a8ae-4569-acb5-898efbd4b3f3",
+        "4ebe71cd-9001-4fcf-bb71-d29bded96b7b",
+    );
+    pub const SALVATION: Self = Self::from_static(
+        "cd08bc7a-7ba5-4502-be87-c58b641fc94d",
+        "ef803442-9dbe-4ac3-b848-8eba21d4845b",
     );
     pub const SCARR: Self = Self::from_static(
-        "247637f8-1ed2-47de-8ff0-fd4b68f50888",
-        "b1bbed19-ba61-4cfd-8b1e-14a986cf75c1",
+        "ccb81e1f-ce22-4017-97bb-f46b181eb8f7",
+        "e6e10a2f-c35f-49ed-954b-24e6c5fdfb38",
+    );
+    pub const SCARR_HEAVIES: Self = Self::from_static(
+        "c5d5e3f4-6021-4590-aacc-a78333be6ea0",
+        "4bd03ddc-597b-43aa-9449-9484c4b6cde4",
+    );
+    pub const SCARR_SENTRY_DEFENSE: Self = Self::from_static(
+        "64511055-6442-4797-8ec4-028c33996fe6",
+        "7eab053a-bcf2-4afa-8cad-9ceed63f4d2f",
+    );
+    pub const SERENITY_RANKED: Self = Self::from_static(
+        "1de0bf60-e446-4fb9-970f-d0e54fc6c74a",
+        "10f3c5bd-8eb7-4bad-8360-a66a581715ce",
+    );
+    pub const SHIRO: Self = Self::from_static(
+        "2890782c-0a33-4f2c-a468-e3a7d6cd6db4",
+        "eeec3be0-1bdf-4703-96dd-2633280c96c8",
+    );
+    pub const SNOWBOUND: Self = Self::from_static(
+        "410f1c01-aca6-4567-9df5-9b16bd550cb2",
+        "e7aa799d-7007-4ab8-a5b6-08926f768c2c",
+    );
+    pub const SOLITUDE: Self = Self::from_static(
+        "f1cc3b4e-471c-4ec5-b855-1db7d9e6ce42",
+        "cc6dfb16-7782-4995-a74a-98e86051fcdf",
+    );
+    pub const SOLITUDE_RANKED: Self = Self::from_static(
+        "4a5e5612-2b2e-4375-a0b3-9335a68815f3",
+        "77710e1b-d9bc-42fd-a74b-918c27387783",
+    );
+    pub const STARBOARD: Self = Self::from_static(
+        "7a9265af-a880-487b-8829-68d88fcfb145",
+        "6147aa00-84e8-44ac-93c0-8638506349f1",
+    );
+    pub const STREETS: Self = Self::from_static(
+        "9c7b0b0f-e933-4c2d-9d4a-3e4500d0de99",
+        "f39c10d7-e191-42be-b9c5-1502ccd2eb7a",
+    );
+    pub const STREETS_RANKED: Self = Self::from_static(
+        "e23ea388-9bcb-4180-a0dc-fbe987751b9e",
+        "bc130bc8-6610-458d-b04a-ead6392824c4",
+    );
+    pub const SUNKEN: Self = Self::from_static(
+        "b66992eb-0bc9-4ec5-8e43-f850cb7317f3",
+        "469500ac-d9e9-44de-9cff-b3b2758e5c1e",
+    );
+    pub const SYLVANUS: Self = Self::from_static(
+        "95b69e4b-485f-4c6c-9b00-4bd68c94c1e9",
+        "d6a434d9-0860-451f-a971-e9cfead782ae",
+    );
+    pub const THRESHOLD: Self = Self::from_static(
+        "ddbb3a00-b109-4703-af07-00433512af38",
+        "1e198b75-0371-4904-b44e-59af97c17d7d",
+    );
+    pub const THUNDERHEAD: Self = Self::from_static(
+        "28a3ac28-f69d-4fa9-9ebf-a0449c89c8da",
+        "5f93b32d-cdae-4742-b4ad-09bc3e0720f0",
+    );
+    pub const THUNDERHEAD_ASSAULT: Self = Self::from_static(
+        "97361eb7-cf18-468a-8152-5b8fafcb27e4",
+        "2264b3a7-5969-43f3-892d-225299d48159",
+    );
+    pub const THUNDERHEAD_HEAVIES: Self = Self::from_static(
+        "37bc3df6-93e8-4d74-b16e-5ceaa30ebc23",
+        "7deeaaa6-5487-4bc4-bc6e-c9e94041968f",
+    );
+    pub const TIMBERLAND_EVOLVED: Self = Self::from_static(
+        "1231d3f0-2363-4d28-8047-717a069fb0e4",
+        "c6fd3ecd-e503-42b9-9437-389e72db33d8",
+    );
+    pub const VACANCY_RANKED: Self = Self::from_static(
+        "6a1e8432-88ae-4430-8f7d-9ffefc97cc8d",
+        "97a448f9-0734-426b-ab10-b67fbd75f85f",
+    );
+    pub const VALLAHEIM: Self = Self::from_static(
+        "688c2033-35de-461e-9394-a32c665c964c",
+        "353a79a0-831d-4c27-9496-799d111b5b89",
+    );
+    pub const WATERWORKS: Self = Self::from_static(
+        "0661af5e-8b6d-44c0-bb7c-9c76cdcc624d",
+        "1b61d905-687d-4041-86a1-beb5259c6cff",
+    );
+    pub const WATERWORKS_ASSAULT: Self = Self::from_static(
+        "68df8895-7f8c-4668-8624-92f35f9559f6",
+        "07fc5222-2af1-4373-933a-2ed679f21501",
+    );
+    pub const WAVELENGTH: Self = Self::from_static(
+        "72339fd1-c61a-4cbb-a876-0ffdb877a899",
+        "cd8bf101-9e9c-40d7-a048-e6647e94a12f",
+    );
+    pub const YOSAI: Self = Self::from_static(
+        "b902c6a0-6140-40bd-afc3-74b9e0a5916c",
+        "fbd54b72-4d1e-4605-b8ee-1c7c9b2e982b",
     );
 
     /// Creates a map ID from an asset GUID and immutable version GUID.
@@ -735,6 +1220,16 @@ pub struct EmblemConfiguration {
     pub configuration_id: i64,
 }
 
+impl EmblemConfiguration {
+    /// Returns the emblem identifier used by [`EmblemMapping`].
+    pub fn emblem_id(&self) -> Option<&str> {
+        self.emblem_path
+            .rsplit('/')
+            .next()
+            .and_then(|file_name| file_name.strip_suffix(".json"))
+    }
+}
+
 /// Waypoint image assets indexed by emblem identifier and configuration ID.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(transparent)]
@@ -746,6 +1241,11 @@ impl EmblemMapping {
     pub fn get(&self, emblem_id: &str, configuration_id: i64) -> Option<&EmblemImageAssets> {
         self.emblems.get(emblem_id)?.get(&configuration_id)
     }
+
+    /// Resolves an equipped emblem configuration to its display assets.
+    pub fn resolve(&self, configuration: &EmblemConfiguration) -> Option<&EmblemImageAssets> {
+        self.get(configuration.emblem_id()?, configuration.configuration_id)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -754,6 +1254,43 @@ pub struct EmblemImageAssets {
     pub emblem_cms_path: String,
     pub nameplate_cms_path: String,
     pub text_color: String,
+}
+
+/// Display metadata for an emblem inventory item.
+#[derive(Debug, Clone, Deserialize)]
+pub struct EmblemMetadata {
+    #[serde(rename = "CommonData")]
+    pub common_data: EmblemCommonData,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct EmblemCommonData {
+    #[serde(rename = "Title")]
+    pub title: LocalizedText,
+}
+
+impl EmblemImageAssets {
+    /// Returns the authenticated Waypoint endpoint for the emblem image.
+    ///
+    /// Opening this URL without Halo authorization and clearance headers returns HTTP 401.
+    pub fn emblem_url(&self) -> String {
+        waypoint_file_url(&self.emblem_cms_path)
+    }
+
+    /// Returns the authenticated Waypoint endpoint for the nameplate image.
+    ///
+    /// Opening this URL without Halo authorization and clearance headers returns HTTP 401.
+    pub fn nameplate_url(&self) -> String {
+        waypoint_file_url(&self.nameplate_cms_path)
+    }
+}
+
+fn waypoint_file_url(path: &str) -> String {
+    format!(
+        "{}/{}",
+        WAYPOINT_FILE_BASE_URL.trim_end_matches('/'),
+        path.trim_start_matches('/')
+    )
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1366,6 +1903,36 @@ mod tests {
             .unwrap();
         assert_eq!(emblem.emblem_cms_path, "images/emblems/wrath.png");
         assert_eq!(emblem.text_color, "#000000");
+        assert_eq!(
+            emblem.emblem_url(),
+            "https://gamecms-hacs.svc.halowaypoint.com/hi/Waypoint/file/images/emblems/wrath.png"
+        );
+        assert_eq!(
+            emblem.nameplate_url(),
+            "https://gamecms-hacs.svc.halowaypoint.com/hi/Waypoint/file/images/nameplates/wrath.png"
+        );
+
+        let equipped = EmblemConfiguration {
+            emblem_path: "Inventory/Spartan/Emblems/104-001-reach-wrath-e-37d15c60.json"
+                .to_string(),
+            configuration_id: -1_490_538_315,
+        };
+        assert_eq!(
+            emblem_mapping.resolve(&equipped).unwrap().emblem_cms_path,
+            "images/emblems/wrath.png"
+        );
+
+        let metadata: EmblemMetadata = serde_json::from_value(serde_json::json!({
+            "CommonData": {
+                "Title": {
+                    "status": "Ready",
+                    "value": "The Gate",
+                    "translations": { "de-DE": "Das Tor" }
+                }
+            }
+        }))
+        .unwrap();
+        assert_eq!(metadata.common_data.title.value, "The Gate");
 
         let public: PlayerCustomizationCollection = serde_json::from_value(serde_json::json!({
             "PlayerCustomizations": [{
