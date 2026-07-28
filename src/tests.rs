@@ -167,6 +167,31 @@ async fn gets_playlist_csr_end_to_end() {
 }
 
 #[tokio::test]
+async fn player_matches_uses_supported_query_parameters() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches"))
+        .and(query_param("start", "0"))
+        .and(query_param("count", "1"))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({ "Results": [], "ResultCount": 0 })),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    let history = halo.player_matches(&xuid, 0, 1).await.unwrap();
+
+    assert!(history.results.is_empty());
+    assert_eq!(history.result_count, 0);
+}
+
+#[tokio::test]
 async fn spartan_token_is_cached_across_calls() {
     let server = MockServer::start().await;
     let (halo, _xbox) = test_client(&server).await;

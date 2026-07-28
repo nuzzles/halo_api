@@ -877,24 +877,6 @@ pub struct PlayerMatchHistory {
     pub result_count: i32,
 }
 
-/// Selects which kind of games appear in a player's match history.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MatchType {
-    All,
-    Matchmade,
-    Custom,
-}
-
-impl MatchType {
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::All => "All",
-            Self::Matchmade => "Matchmade",
-            Self::Custom => "Custom",
-        }
-    }
-}
-
 /// A player's or team's result in a completed match.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MatchOutcome {
@@ -1399,7 +1381,7 @@ impl ArmorCore {
 #[serde(rename_all = "PascalCase")]
 pub struct ArmorTheme {
     pub armor_fx_path: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_null_default")]
     pub armor_fx_paths: Vec<String>,
     pub chest_attachment_path: String,
     pub coating_path: String,
@@ -2373,6 +2355,31 @@ mod tests {
                 .body_type,
             "Large"
         );
+
+        let armor_theme: ArmorTheme = serde_json::from_value(serde_json::json!({
+            "ArmorFxPath": "",
+            "ArmorFxPaths": null,
+            "ChestAttachmentPath": "",
+            "CoatingPath": "coating.json",
+            "Emblems": [],
+            "GlovePath": "",
+            "HelmetAttachmentPath": "",
+            "HelmetPath": "helmet.json",
+            "HipAttachmentPath": "",
+            "KneePadPath": "",
+            "LeftShoulderPadPath": "",
+            "MythicFxPath": "",
+            "RightShoulderPadPath": "",
+            "ThemePath": "theme.json",
+            "VisorPath": "",
+            "WristAttachmentPath": "",
+            "FirstModifiedDateUtc": { "ISO8601Date": "2026-01-01T00:00:00Z" },
+            "LastModifiedDateUtc": { "ISO8601Date": "2026-01-01T00:00:00Z" },
+            "IsDefault": true,
+            "IsEquipped": true
+        }))
+        .unwrap();
+        assert!(armor_theme.armor_fx_paths.is_empty());
 
         let bans: BanSummary = serde_json::from_value(serde_json::json!({
             "Results": [{

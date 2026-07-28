@@ -40,7 +40,10 @@ async fn main() -> Result<(), common::ExampleError> {
                     event.metadata
                 );
             }
-            FilmEventKind::Other(_) => {}
+            FilmEventKind::Other(code) => println!(
+                "  {seconds:>8.3}s  {:<16} unclassified event code {code} (metadata {})",
+                event.gamertag, event.metadata
+            ),
         }
         match event.kind {
             FilmEventKind::Kill => *kills.entry(event.gamertag).or_default() += 1,

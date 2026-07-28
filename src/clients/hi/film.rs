@@ -26,19 +26,6 @@ impl FilmRegistry {
     pub fn archetype(&self, index: usize) -> Option<&FilmArchetype> {
         self.archetypes.get(index)
     }
-
-    pub fn biped_archetypes(&self) -> impl Iterator<Item = &FilmArchetype> {
-        self.archetypes.iter().filter(|archetype| {
-            archetype
-                .components
-                .iter()
-                .any(|name| name == "object-position-dynamic-precision-component")
-                && archetype
-                    .components
-                    .iter()
-                    .any(|name| name == "object-dead-state-component")
-        })
-    }
 }
 
 /// Parses the fixed-width ECS component registry from the film bootstrap chunk.
@@ -171,144 +158,6 @@ pub struct FilmDeltaHeader {
     pub data_bit_offset: usize,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum FilmPositionEncoding {
-    Raw,
-    Absolute,
-    AbsoluteFallback,
-    Delta8,
-    DeltaAxis,
-    Unchanged,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct FilmPositionUpdate {
-    pub slot: u32,
-    pub encoding: FilmPositionEncoding,
-    pub vector: Option<[f32; 3]>,
-}
-
-/// Decodes position component 0 from the first DELTA record in a FRAME.
-///
-/// Delta vectors are relative and must be accumulated against the entity's
-/// latest absolute position. Multiplayer films observed so far use 14-bit axes.
-pub fn decode_first_position_update(
-    payload: &[u8],
-    axis_width: usize,
-) -> Option<FilmPositionUpdate> {
-    let delta = decode_first_delta_header(payload)?;
-    if delta.component_mask & 1 == 0 || !(1..=24).contains(&axis_width) {
-        return None;
-    }
-    let slot = delta.record.slot?;
-    let mut reader = FilmBitReader::new(payload);
-    reader.read(delta.data_bit_offset)?;
-    let use_prediction = reader.read(1)? != 0;
-    let is_delta = reader.read(1)? != 0;
-
-    if use_prediction {
-        reader.read(1)?; // handle-present; tail follows the vector
-        let mut vector = [0.0; 3];
-        for value in &mut vector {
-            *value = f32::from_bits(reader.read(32)? as u32);
-        }
-        return Some(FilmPositionUpdate {
-            slot,
-            encoding: FilmPositionEncoding::Raw,
-            vector: Some(vector),
-        });
-    }
-    if !is_delta {
-        return decode_absolute_position(&mut reader, slot, axis_width, false);
-    }
-
-    let special = reader.read(1)? != 0;
-    if special {
-        if reader.read(1)? != 0 {
-            return Some(FilmPositionUpdate {
-                slot,
-                encoding: FilmPositionEncoding::Unchanged,
-                vector: None,
-            });
-        }
-        return decode_absolute_body(&mut reader, slot, axis_width, false);
-    }
-    if reader.read(1)? != 0 {
-        return decode_absolute_position(&mut reader, slot, axis_width, true);
-    }
-    if reader.read(1)? != 0 {
-        let step = position_step(axis_width);
-        let mut vector = [0.0; 3];
-        for value in &mut vector {
-            *value = f32::from(reader.read(8)? as u8 as i8) * step;
-        }
-        return Some(FilmPositionUpdate {
-            slot,
-            encoding: FilmPositionEncoding::Delta8,
-            vector: Some(vector),
-        });
-    }
-
-    let mut vector = [0.0; 3];
-    for value in &mut vector {
-        *value = reader.read(axis_width)? as f32 * position_step(axis_width);
-    }
-    Some(FilmPositionUpdate {
-        slot,
-        encoding: FilmPositionEncoding::DeltaAxis,
-        vector: Some(vector),
-    })
-}
-
-fn decode_absolute_position(
-    reader: &mut FilmBitReader<'_>,
-    slot: u32,
-    axis_width: usize,
-    fallback: bool,
-) -> Option<FilmPositionUpdate> {
-    if reader.read(1)? != 0 {
-        return Some(FilmPositionUpdate {
-            slot,
-            encoding: FilmPositionEncoding::Unchanged,
-            vector: None,
-        });
-    }
-    decode_absolute_body(reader, slot, axis_width, fallback)
-}
-
-fn decode_absolute_body(
-    reader: &mut FilmBitReader<'_>,
-    slot: u32,
-    axis_width: usize,
-    fallback: bool,
-) -> Option<FilmPositionUpdate> {
-    if reader.read(1)? == 0 {
-        reader.read(1)?; // precision index
-    }
-    let mut vector = [0.0; 3];
-    for value in &mut vector {
-        *value = dequant_position_axis(reader.read(axis_width)?, axis_width);
-    }
-    Some(FilmPositionUpdate {
-        slot,
-        encoding: if fallback {
-            FilmPositionEncoding::AbsoluteFallback
-        } else {
-            FilmPositionEncoding::Absolute
-        },
-        vector: Some(vector),
-    })
-}
-
-fn position_step(axis_width: usize) -> f32 {
-    200.0 / (1u64 << axis_width) as f32
-}
-
-fn dequant_position_axis(value: u64, axis_width: usize) -> f32 {
-    let step = position_step(axis_width);
-    value as f32 * step - 100.0 + step * 0.5
-}
-
 /// Decodes the first DELTA record through its component-presence mask.
 pub fn decode_first_delta_header(payload: &[u8]) -> Option<FilmDeltaHeader> {
     let record = decode_frame_record_header(payload)?;
@@ -318,7 +167,10 @@ pub fn decode_first_delta_header(payload: &[u8]) -> Option<FilmDeltaHeader> {
     let mut reader = FilmBitReader::new(payload);
     reader.read(record.header_bits)?;
     let component_mask = if reader.read(1)? != 0 {
-        reader.read(64)?
+        // Component bitsets are serialized component-0 first. `FilmBitReader`
+        // returns that first bit as the high bit of a u64, whereas the sparse
+        // representation below uses component indexes as normal bit positions.
+        reader.read(64)?.reverse_bits()
     } else {
         let count = reader.read(3)? as usize;
         let mut mask = 0u64;
@@ -421,89 +273,6 @@ pub fn index_packets(chunks: &[FilmChunkData]) -> Vec<FilmPacket> {
     packets
 }
 
-/// An absolute position found in a Theater keyframe.
-///
-/// Keyframes currently do not expose a reliable entity-to-player binding, so
-/// these samples intentionally remain unattributed.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct FilmPosition {
-    pub chunk_index: i32,
-    pub timestamp_ms: i64,
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
-
-/// Decodes absolute XYZ samples from the full-state keyframes in replication chunks.
-///
-/// This is useful for map-level spatial analysis. It does not decode the denser
-/// per-frame position deltas or associate a sample with a player yet.
-pub fn decode_keyframe_positions(chunks: &[FilmChunkData]) -> Vec<FilmPosition> {
-    const COMB_OFFSET_BITS: usize = 273;
-    let mut positions = Vec::new();
-    for chunk in chunks.iter().filter(|chunk| chunk.metadata.chunk_type == 2) {
-        for packet in index_packets(std::slice::from_ref(chunk))
-            .into_iter()
-            .filter(|packet| packet.packet_type == 2)
-        {
-            let payload =
-                &chunk.data[packet.payload_offset..packet.payload_offset + packet.payload_size];
-            let end = payload.len().saturating_mul(8).saturating_sub(96);
-            let mut bit = COMB_OFFSET_BITS;
-            while bit <= end {
-                if position_comb_matches(payload, bit) {
-                    let start = bit - COMB_OFFSET_BITS;
-                    let x = read_f32_le_bits(payload, start);
-                    let y = read_f32_le_bits(payload, start + 32);
-                    let z = read_f32_le_bits(payload, start + 64);
-                    if plausible_position(x, y, z) {
-                        positions.push(FilmPosition {
-                            chunk_index: chunk.metadata.index,
-                            timestamp_ms: chunk.metadata.start_time_offset_ms,
-                            x,
-                            y,
-                            z,
-                        });
-                    }
-                    bit += 96;
-                } else {
-                    bit += 1;
-                }
-            }
-        }
-    }
-    positions
-}
-
-fn position_comb_matches(data: &[u8], start: usize) -> bool {
-    (0..4).all(|repeat| {
-        let base = start + repeat * 24;
-        (0..8).all(|offset| bit_at(data, base + offset))
-            && (8..24).all(|offset| !bit_at(data, base + offset))
-    })
-}
-
-fn read_f32_le_bits(data: &[u8], start: usize) -> f32 {
-    let mut bytes = [0u8; 4];
-    for (byte_index, byte) in bytes.iter_mut().enumerate() {
-        for bit_index in 0..8 {
-            *byte |= u8::from(bit_at(data, start + byte_index * 8 + bit_index)) << (7 - bit_index);
-        }
-    }
-    f32::from_bits(u32::from_be_bytes(bytes).swap_bytes())
-}
-
-fn plausible_position(x: f32, y: f32, z: f32) -> bool {
-    let magnitude = x.abs() + y.abs() + z.abs();
-    let artifact = (x.abs() <= 0.1 && (y - 2.0).abs() <= 0.1 && z.abs() <= 0.1)
-        || ((x + 2.1).abs() <= 0.1 && y.abs() <= 0.1 && z.abs() <= 0.1);
-    [x, y, z]
-        .iter()
-        .all(|value| value.is_finite() && value.abs() < 200.0)
-        && magnitude >= 1.0
-        && !artifact
-}
-
 fn bit_at(data: &[u8], position: usize) -> bool {
     data.get(position / 8)
         .is_some_and(|byte| byte & (1 << (7 - position % 8)) != 0)
@@ -552,60 +321,136 @@ pub enum FilmEventKind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FilmMedal {
-    DoubleKill,
-    TripleKill,
-    Overkill,
-    Killtacular,
-    KillingSpree,
-    Killjoy,
-    Wingman,
-    Rifleman,
-    Boxer,
-    BackSmack,
-    Snipe,
-    Perfect,
-    NoScope,
-    CounterSnipe,
+    Known { id: u8, name: &'static str },
     Unknown(u8),
 }
 
+/// Known film-medal IDs, including the SPNKr mappings catalogued in
+/// <https://den.dev/blog/extracting-stats-film-files-halo-infinite/>.
+pub const KNOWN_FILM_MEDALS: &[(u8, &str)] = &[
+    (0, "Double Kill"),
+    (1, "Triple Kill"),
+    (2, "Overkill"),
+    (3, "Killtacular"),
+    (4, "Killtrocity"),
+    (5, "Killamanjaro"),
+    (6, "Killtastrophe"),
+    (7, "Killpocalypse"),
+    (8, "Killionaire"),
+    (9, "Killing Spree"),
+    (10, "Killing Frenzy"),
+    (11, "Running Riot"),
+    (12, "Rampage"),
+    (13, "Perfection"),
+    (26, "Killjoy"),
+    (27, "Nightmare"),
+    (28, "Boogeyman"),
+    (29, "Grim Reaper"),
+    (30, "Demon"),
+    (31, "Flawless Victory"),
+    (32, "Steaktacular"),
+    (36, "Stopped Short"),
+    (37, "Flag Joust"),
+    (38, "Goal Line Stand"),
+    (39, "Necromancer"),
+    (43, "Ace"),
+    (44, "Extermination"),
+    (45, "Sole Survivor"),
+    (46, "Untainted"),
+    (47, "Blight"),
+    (48, "Disease"),
+    (49, "Plague"),
+    (51, "Pestilence"),
+    (53, "Culling"),
+    (54, "Cleansing"),
+    (55, "Purge"),
+    (56, "Purification"),
+    (57, "Divine Intervention"),
+    (58, "Zombie Slayer"),
+    (59, "Undead Hunter"),
+    (60, "Hell's Janitor"),
+    (61, "The Sickness"),
+    (62, "Spotter"),
+    (63, "Treasure Hunter"),
+    (64, "Saboteur"),
+    (65, "Wingman"),
+    (66, "Wheelman"),
+    (67, "Gunner"),
+    (68, "Driver"),
+    (69, "Pilot"),
+    (70, "Tanker"),
+    (71, "Rifleman"),
+    (72, "Bomber"),
+    (73, "Grenadier"),
+    (74, "Boxer"),
+    (75, "Warrior"),
+    (76, "Gunslinger"),
+    (77, "Scattergunner"),
+    (78, "Sharpshooter"),
+    (79, "Marksman"),
+    (80, "Heavy"),
+    (81, "Bodyguard"),
+    (82, "Back Smack"),
+    (83, "Nuclear Football"),
+    (84, "Boom Block"),
+    (85, "Bulltrue"),
+    (86, "Cluster Luck"),
+    (87, "Dogfight"),
+    (88, "Harpoon"),
+    (89, "Mind the Gap"),
+    (90, "Ninja"),
+    (91, "Odin's Raven"),
+    (92, "Pancake"),
+    (93, "Quigley"),
+    (94, "Remote Detonation"),
+    (95, "Return to Sender"),
+    (96, "Rideshare"),
+    (97, "Skyjack"),
+    (98, "Stick"),
+    (99, "Tag & Bag"),
+    (108, "Snipe"),
+    (109, "Perfect"),
+    (114, "No Scope"),
+    (127, "From the Grave"),
+    (128, "From the Void"),
+    (129, "Grapple-jack"),
+    (130, "Hold This"),
+    (131, "Last Shot"),
+    (132, "Lawnmower"),
+    (133, "Mount Up"),
+    (134, "Off the Rack"),
+    (135, "Quick Draw"),
+    (137, "Pineapple Express"),
+    (138, "Ramming Speed"),
+    (139, "Reclaimer"),
+    (140, "Shot Caller"),
+    (141, "Yard Sale"),
+    (142, "Special Delivery"),
+    (146, "Fumble"),
+    (148, "Straight Balling"),
+    (151, "Always Rotating"),
+    (152, "Hill Guardian"),
+    (153, "Clock Stop"),
+    (154, "Secure Line"),
+    (156, "Splatter"),
+    (162, "All That Juice"),
+    (163, "Great Journey"),
+    (165, "Breacher"),
+    (166, "Mounted"),
+    (168, "Counter-snipe"),
+];
+
 impl FilmMedal {
-    pub const fn from_id(id: u8) -> Self {
-        match id {
-            0 => Self::DoubleKill,
-            1 => Self::TripleKill,
-            2 => Self::Overkill,
-            3 => Self::Killtacular,
-            9 => Self::KillingSpree,
-            26 => Self::Killjoy,
-            65 => Self::Wingman,
-            71 => Self::Rifleman,
-            74 => Self::Boxer,
-            82 => Self::BackSmack,
-            108 => Self::Snipe,
-            109 => Self::Perfect,
-            114 => Self::NoScope,
-            168 => Self::CounterSnipe,
-            other => Self::Unknown(other),
-        }
+    pub fn from_id(id: u8) -> Self {
+        KNOWN_FILM_MEDALS
+            .iter()
+            .find(|(known_id, _)| *known_id == id)
+            .map_or(Self::Unknown(id), |(_, name)| Self::Known { id, name })
     }
 
     pub const fn name(self) -> &'static str {
         match self {
-            Self::DoubleKill => "Double Kill",
-            Self::TripleKill => "Triple Kill",
-            Self::Overkill => "Overkill",
-            Self::Killtacular => "Killtacular",
-            Self::KillingSpree => "Killing Spree",
-            Self::Killjoy => "Killjoy",
-            Self::Wingman => "Wingman",
-            Self::Rifleman => "Rifleman",
-            Self::Boxer => "Boxer",
-            Self::BackSmack => "Back Smack",
-            Self::Snipe => "Snipe",
-            Self::Perfect => "Perfect",
-            Self::NoScope => "No Scope",
-            Self::CounterSnipe => "Counter-snipe",
+            Self::Known { name, .. } => name,
             Self::Unknown(_) => "Unknown medal",
         }
     }
@@ -636,7 +481,7 @@ pub struct FilmEvent {
 }
 
 impl FilmEvent {
-    pub const fn medal(&self) -> Option<FilmMedal> {
+    pub fn medal(&self) -> Option<FilmMedal> {
         if matches!(self.kind, FilmEventKind::Medal) {
             Some(FilmMedal::from_id(self.metadata))
         } else {
@@ -718,18 +563,36 @@ pub fn decode_players(chunks: &[FilmChunkData]) -> Vec<FilmPlayer> {
 }
 
 pub fn decode_events(chunks: &[FilmChunkData], players: &[FilmPlayer]) -> Vec<FilmEvent> {
+    const EVENT_HEADER_BYTES: usize = 12;
+    const EVENT_GAMERTAG_BYTES: usize = 32;
+    const EVENT_TAIL_BYTES: usize = 60;
+    const PREFIX_PADDING_BYTES: usize = 3;
+
     let mut events = Vec::new();
     for chunk in chunks.iter().filter(|chunk| chunk.metadata.chunk_type == 3) {
         for player in players {
-            let pattern = player
-                .gamertag
-                .encode_utf16()
-                .flat_map(u16::to_le_bytes)
-                .collect::<Vec<_>>();
-            for position in find_bit_pattern(&chunk.data, &pattern) {
-                let Some(data) = extract_bits(&chunk.data, position, 60 * 8) else {
+            let Some(gamertag_field) = padded_gamertag_field(&player.gamertag) else {
+                continue;
+            };
+            for gamertag_position in find_bit_pattern(&chunk.data, &gamertag_field) {
+                let Some(event_position) = gamertag_position.checked_sub(EVENT_HEADER_BYTES * 8)
+                else {
                     continue;
                 };
+                let Some(prefix_position) = event_position.checked_sub(PREFIX_PADDING_BYTES * 8)
+                else {
+                    continue;
+                };
+                if !bits_are_zero(&chunk.data, prefix_position, PREFIX_PADDING_BYTES * 8) {
+                    continue;
+                }
+                let Some(data) = extract_bits(&chunk.data, gamertag_position, EVENT_TAIL_BYTES * 8)
+                else {
+                    continue;
+                };
+                if data[..EVENT_GAMERTAG_BYTES] != gamertag_field {
+                    continue;
+                }
                 events.push(FilmEvent {
                     xuid: player.xuid,
                     gamertag: player.gamertag.clone(),
@@ -744,6 +607,16 @@ pub fn decode_events(chunks: &[FilmChunkData], players: &[FilmPlayer]) -> Vec<Fi
     events.sort_by_key(|event| event.timestamp_ms);
     events.dedup();
     events
+}
+
+fn padded_gamertag_field(gamertag: &str) -> Option<[u8; 32]> {
+    let encoded = gamertag
+        .encode_utf16()
+        .flat_map(u16::to_le_bytes)
+        .collect::<Vec<_>>();
+    let mut field = [0; 32];
+    field.get_mut(..encoded.len())?.copy_from_slice(&encoded);
+    Some(field)
 }
 
 fn decode_utf16(bytes: &[u8]) -> String {
@@ -813,35 +686,6 @@ mod tests {
     }
 
     #[test]
-    fn reads_unaligned_little_endian_float() {
-        let value = 12.5f32;
-        let mut data = vec![0u8; 5];
-        for (index, bit) in value
-            .to_le_bytes()
-            .iter()
-            .flat_map(|byte| (0..8).map(move |shift| byte & (1 << (7 - shift)) != 0))
-            .enumerate()
-        {
-            if bit {
-                let position = index + 3;
-                data[position / 8] |= 1 << (7 - position % 8);
-            }
-        }
-        assert_eq!(read_f32_le_bits(&data, 3), value);
-    }
-
-    #[test]
-    fn recognizes_position_comb() {
-        let mut data = [0u8; 12];
-        for repeat in 0..4 {
-            data[repeat * 3] = 0xff;
-        }
-        assert!(position_comb_matches(&data, 0));
-        data[4] = 1;
-        assert!(!position_comb_matches(&data, 0));
-    }
-
-    #[test]
     fn reads_msb_first_bits() {
         let mut reader = FilmBitReader::new(&[0b1011_0010, 0b0110_0000]);
         assert_eq!(reader.read(3), Some(0b101));
@@ -852,7 +696,7 @@ mod tests {
     #[test]
     fn parses_registry_slots() {
         let mut data = vec![0; REGISTRY_BLOCK_SIZE];
-        let name = b"object-position-dynamic-precision-component";
+        let name = b"example-component";
         data[8..8 + name.len()].copy_from_slice(name);
         let chunks = [FilmChunkData {
             metadata: FilmChunk {
@@ -870,6 +714,63 @@ mod tests {
             registry.archetypes[0].components,
             [String::from_utf8_lossy(name)]
         );
+    }
+
+    #[test]
+    fn decodes_only_complete_summary_event_envelopes() {
+        let mut data = vec![0; 3];
+        let mut event = [0u8; 72];
+        event[..12].fill(0xa5);
+        event[12..44].copy_from_slice(&padded_gamertag_field("MsNuzzles").unwrap());
+        event[59] = 50;
+        event[60..64].copy_from_slice(&12_345u32.to_be_bytes());
+        event[71] = 42;
+        data.extend_from_slice(&event);
+        let chunks = [FilmChunkData {
+            metadata: FilmChunk {
+                index: 0,
+                start_time_offset_ms: 0,
+                duration_ms: 0,
+                size: data.len() as i64,
+                file_relative_path: String::new(),
+                chunk_type: 3,
+            },
+            data,
+        }];
+        let players = [
+            FilmPlayer {
+                xuid: 1,
+                gamertag: "Nuzzles".into(),
+            },
+            FilmPlayer {
+                xuid: 2,
+                gamertag: "MsNuzzles".into(),
+            },
+        ];
+
+        assert_eq!(
+            decode_events(&chunks, &players),
+            [FilmEvent {
+                xuid: 2,
+                gamertag: "MsNuzzles".into(),
+                timestamp_ms: 12_345,
+                kind: FilmEventKind::Kill,
+                medal_flag: 0,
+                metadata: 42,
+            }]
+        );
+    }
+
+    #[test]
+    fn maps_article_medal_ids() {
+        assert_eq!(
+            FilmMedal::from_id(166),
+            FilmMedal::Known {
+                id: 166,
+                name: "Mounted"
+            }
+        );
+        assert_eq!(FilmMedal::from_id(255), FilmMedal::Unknown(255));
     }
 
     #[test]
@@ -907,5 +808,21 @@ mod tests {
         assert_eq!(delta.record.slot, Some(0));
         assert_eq!(delta.component_mask, 1 | (1 << 11));
         assert_eq!(delta.data_bit_offset, bits.len());
+    }
+
+    #[test]
+    fn decodes_dense_component_mask_component_zero_first() {
+        // DELTA, slot 0, tag 0, dense mask with components 0 and 63 set.
+        let bits = format!("1{:011b}00{}{}", 0, 1, format!("1{}1", "0".repeat(62)))
+            .chars()
+            .collect::<Vec<_>>();
+        let mut data = vec![0u8; bits.len().div_ceil(8)];
+        for (index, bit) in bits.into_iter().enumerate() {
+            if bit == '1' {
+                data[index / 8] |= 1 << (7 - index % 8);
+            }
+        }
+        let delta = decode_first_delta_header(&data).unwrap();
+        assert_eq!(delta.component_mask, 1 | (1 << 63));
     }
 }

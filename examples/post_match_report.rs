@@ -4,7 +4,7 @@ mod common;
 
 use std::collections::HashMap;
 
-use halo_api::clients::hi::models::{GameModeId, MapId, MatchType};
+use halo_api::clients::hi::models::{GameModeId, MapId};
 use xbox::models::Xuid;
 
 fn bare_xuid(player_id: &str) -> &str {
@@ -21,13 +21,8 @@ async fn main() -> Result<(), common::ExampleError> {
     let user = halo.user(&gamertag).await?;
     let xuid = Xuid::from(user.xuid.clone());
 
-    let history = halo
-        .player_matches_by_type(&xuid, MatchType::Custom, 0, 1)
-        .await?;
-    let latest = history
-        .results
-        .first()
-        .ok_or("No recent custom matches found")?;
+    let history = halo.player_matches(&xuid, 0, 1).await?;
+    let latest = history.results.first().ok_or("No recent matches found")?;
     let stats = halo.match_stats(&latest.match_id).await?;
 
     let player = stats
