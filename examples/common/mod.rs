@@ -39,8 +39,10 @@ pub fn comma_separated(name: &str, label: &str) -> Result<Vec<String>, ExampleEr
     Ok(values)
 }
 
-pub fn xuid() -> Result<Xuid, ExampleError> {
-    Ok(Xuid::from(value("HALO_XUID", "Player XUID")?))
+pub async fn player_xuid(halo: &HaloInfiniteClient) -> Result<(String, Xuid), ExampleError> {
+    let gamertag = value("HALO_GAMERTAG", "Gamertag")?;
+    let user = halo.user(&gamertag).await?;
+    Ok((user.gamertag, Xuid::from(user.xuid)))
 }
 
 pub fn xbox_client() -> Result<Arc<ExampleXboxClient>, ExampleError> {

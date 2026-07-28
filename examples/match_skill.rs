@@ -3,7 +3,7 @@ mod common;
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let id = common::value("HALO_MATCH_ID", "Match ID")?;
-    let xuid = common::xuid()?;
+    let (_, xuid) = common::player_xuid(&halo).await?;
     println!("{:#?}", halo.match_skill(&id, &[xuid]).await?);
     Ok(())
 }
