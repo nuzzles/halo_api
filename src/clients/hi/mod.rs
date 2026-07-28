@@ -1,5 +1,4 @@
 mod client;
-pub mod constants;
 pub(crate) mod endpoints;
 mod error;
 pub mod models;

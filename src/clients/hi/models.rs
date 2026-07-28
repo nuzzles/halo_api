@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer};
 
@@ -7,6 +9,183 @@ where
     T: Deserialize<'de> + Default,
 {
     Option::<T>::deserialize(deserializer).map(Option::unwrap_or_default)
+}
+
+/// A Halo Infinite matchmaking playlist asset ID.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PlaylistId(Cow<'static, str>);
+
+impl PlaylistId {
+    pub const RANKED_ARENA: Self = Self(Cow::Borrowed("edfef3ac-9cbe-4fa2-b949-8f29deafd483"));
+    pub const RANKED_DOUBLES: Self = Self(Cow::Borrowed("fa5aa2a3-2428-4912-a023-e1eeea7b877c"));
+    pub const RANKED_SLAYER: Self = Self(Cow::Borrowed("dcb2e24e-05fb-4390-8076-32a0cdb4326e"));
+
+    /// Creates an ID for a playlist that is not included among the named constants.
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(Cow::Owned(value.into()))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl AsRef<str> for PlaylistId {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl std::fmt::Display for PlaylistId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+/// A Halo Infinite UGC game-mode asset ID paired with an immutable version ID.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct GameModeId {
+    asset_id: Cow<'static, str>,
+    version_id: Cow<'static, str>,
+}
+
+impl GameModeId {
+    pub const FIESTA_SLAYER: Self = Self::from_static(
+        "aca7bbf8-7a18-4aae-8785-1bd3f58275fd",
+        "3685f6b2-2860-4e98-9d13-513087edb465",
+    );
+    pub const RANKED_CTF: Self = Self::from_static(
+        "507191c6-a492-4331-b2ae-a172101eb23e",
+        "ee8c890b-a95f-4154-bac6-0009992d74f6",
+    );
+    pub const RANKED_ONE_FLAG_CTF: Self = Self::from_static(
+        "18ac247d-7f86-4a59-9b47-9e74a6384ac2",
+        "13729f6d-3f7b-4ad2-982e-f25b38b57c16",
+    );
+    pub const RANKED_STRONGHOLDS: Self = Self::from_static(
+        "22b8a0eb-0d02-4eb3-8f56-5f63fc254f83",
+        "2cdb80b0-2a02-4934-a649-2911368d49e1",
+    );
+    pub const RANKED_ODDBALL: Self = Self::from_static(
+        "751bcc9d-aace-45a1-8d71-358f0bc89f7e",
+        "29f36248-0181-44ba-96a0-3c3b9b924085",
+    );
+    pub const RANKED_SLAYER: Self = Self::from_static(
+        "c2d20d44-8606-4669-b894-afae15b3524f",
+        "9eee25fe-39db-493f-ab0d-d95403df66b8",
+    );
+    pub const RANKED_KING_OF_THE_HILL: Self = Self::from_static(
+        "88c22b1f-2d64-48b9-bab1-26fe4721fb23",
+        "3f49d4f7-f411-48bf-82ee-7fd329c19d53",
+    );
+
+    /// Creates a game-mode ID from an asset GUID and immutable version GUID.
+    pub fn new(asset_id: impl Into<String>, version_id: impl Into<String>) -> Self {
+        Self {
+            asset_id: Cow::Owned(asset_id.into()),
+            version_id: Cow::Owned(version_id.into()),
+        }
+    }
+
+    const fn from_static(asset_id: &'static str, version_id: &'static str) -> Self {
+        Self {
+            asset_id: Cow::Borrowed(asset_id),
+            version_id: Cow::Borrowed(version_id),
+        }
+    }
+
+    pub fn asset_id(&self) -> &str {
+        &self.asset_id
+    }
+
+    pub fn version_id(&self) -> &str {
+        &self.version_id
+    }
+}
+
+/// A Halo Infinite map asset ID paired with an immutable version ID.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MapId {
+    asset_id: Cow<'static, str>,
+    version_id: Cow<'static, str>,
+}
+
+impl MapId {
+    pub const FORGE_SPACE: Self = Self::from_static(
+        "76669255-697d-48c9-a802-7ff2ec8257f1",
+        "b8abf687-4e95-4846-83c7-33e779eed33e",
+    );
+    pub const FRAGMENTATION: Self = Self::from_static(
+        "4f196016-0101-4844-8358-2504f7c44656",
+        "fa161336-7088-4a1a-9a02-05703e7d97b9",
+    );
+    pub const STREETS: Self = Self::from_static(
+        "f0a1760f-0d4a-4bcc-ac7a-e8f9aee331dc",
+        "4e3e0256-20ff-4807-9ca5-f0abde3b47db",
+    );
+    pub const DEADLOCK: Self = Self::from_static(
+        "08607bf4-6abe-4a5b-9547-290a6cc1433e",
+        "f45958fd-2f68-432a-8d36-6834f2807540",
+    );
+    pub const HIGHPOWER: Self = Self::from_static(
+        "c494ef7c-d203-42a9-9c0f-b3f576334501",
+        "72bc0109-3748-4b5a-8d9e-18399dfb7ba0",
+    );
+    pub const LAUNCH_SITE: Self = Self::from_static(
+        "56a11b8c-64d1-4537-8893-a9241e4d5b93",
+        "faaf9d32-8a9f-4fb7-9552-6e3f27c70923",
+    );
+    pub const LIVE_FIRE: Self = Self::from_static(
+        "b6aca0c7-8ba7-4066-bf91-693571374c3c",
+        "3840a563-f689-4a60-882c-65c93cf0fc72",
+    );
+    pub const BEHEMOTH: Self = Self::from_static(
+        "53136ad9-0fd6-4271-8752-31d114b9561e",
+        "9eff68dc-2089-4e89-a1ba-9541ff136be8",
+    );
+    pub const BAZAAR: Self = Self::from_static(
+        "298d5036-cd43-47b3-a4bd-31e127566593",
+        "23e96d69-63df-41af-9f6e-1d0079f7f3b7",
+    );
+    pub const AQUARIUS: Self = Self::from_static(
+        "33c0766c-ef15-48f8-b298-34aba5bff3b4",
+        "52b8e5d1-56ca-4d15-ac5a-29ce52485dca",
+    );
+    pub const RECHARGE: Self = Self::from_static(
+        "8420410b-044d-44d7-80b6-98a766c8c39f",
+        "30239a47-2353-4b4c-bf68-10d39b906232",
+    );
+    pub const BREAKER: Self = Self::from_static(
+        "e6cbfe01-665b-4a8c-bf3a-d63a65a7c890",
+        "1bc4349f-951e-45ec-81c8-56799226a589",
+    );
+    pub const CATALYST: Self = Self::from_static(
+        "e859cf75-9b8a-429a-91be-2376681c8537",
+        "bb22b05d-0423-46a5-b383-e64ebf116337",
+    );
+
+    /// Creates a map ID from an asset GUID and immutable version GUID.
+    pub fn new(asset_id: impl Into<String>, version_id: impl Into<String>) -> Self {
+        Self {
+            asset_id: Cow::Owned(asset_id.into()),
+            version_id: Cow::Owned(version_id.into()),
+        }
+    }
+
+    const fn from_static(asset_id: &'static str, version_id: &'static str) -> Self {
+        Self {
+            asset_id: Cow::Borrowed(asset_id),
+            version_id: Cow::Borrowed(version_id),
+        }
+    }
+
+    pub fn asset_id(&self) -> &str {
+        &self.asset_id
+    }
+
+    pub fn version_id(&self) -> &str {
+        &self.version_id
+    }
 }
 
 /// Response body from the playlist CSR endpoint.
@@ -600,6 +779,61 @@ pub struct AssetLink {
     pub public_name: String,
     #[serde(rename = "Description")]
     pub description: String,
+    #[serde(rename = "Files")]
+    pub files: Option<AssetFiles>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AssetFiles {
+    #[serde(rename = "Prefix")]
+    pub prefix: String,
+    #[serde(rename = "FileRelativePaths")]
+    pub relative_paths: Vec<String>,
+}
+
+impl AssetFiles {
+    pub fn url(&self, relative_path: &str) -> String {
+        format!(
+            "{}/{}",
+            self.prefix.trim_end_matches('/'),
+            relative_path.trim_start_matches('/')
+        )
+    }
+
+    pub fn image_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.relative_paths
+            .iter()
+            .filter(|path| {
+                let path = path.to_ascii_lowercase();
+                path.ends_with(".png") || path.ends_with(".jpg") || path.ends_with(".jpeg")
+            })
+            .map(|path| self.url(path))
+    }
+
+    fn named_image_url(&self, file_name: &str) -> Option<String> {
+        self.relative_paths
+            .iter()
+            .find(|path| {
+                path.rsplit('/')
+                    .next()
+                    .is_some_and(|name| name.eq_ignore_ascii_case(file_name))
+            })
+            .map(|path| self.url(path))
+    }
+
+    fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.relative_paths
+            .iter()
+            .filter(|path| {
+                let Some(name) = path.rsplit('/').next() else {
+                    return false;
+                };
+                let name = name.to_ascii_lowercase();
+                name.starts_with("screenshot")
+                    && (name.ends_with(".png") || name.ends_with(".jpg") || name.ends_with(".jpeg"))
+            })
+            .map(|path| self.url(path))
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -608,6 +842,33 @@ pub struct PlaylistAsset {
     pub asset: AssetLink,
     #[serde(rename = "RotationEntries")]
     pub rotation_entries: Vec<RotationEntry>,
+}
+
+impl PlaylistAsset {
+    pub fn hero_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("hero.png"))
+    }
+
+    pub fn thumbnail_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("thumbnail.png"))
+    }
+
+    pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset
+            .files
+            .iter()
+            .flat_map(AssetFiles::screenshot_urls)
+    }
+
+    pub fn image_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset.files.iter().flat_map(AssetFiles::image_urls)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -642,6 +903,33 @@ pub struct MapAsset {
     pub custom_data: MapCustomData,
 }
 
+impl MapAsset {
+    pub fn hero_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("hero.png"))
+    }
+
+    pub fn thumbnail_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("thumbnail.png"))
+    }
+
+    pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset
+            .files
+            .iter()
+            .flat_map(AssetFiles::screenshot_urls)
+    }
+
+    pub fn image_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset.files.iter().flat_map(AssetFiles::image_urls)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct MapCustomData {
     #[serde(rename = "NumOfObjectsOnMap")]
@@ -660,6 +948,33 @@ pub struct GameVariantAsset {
     pub asset: AssetLink,
     #[serde(rename = "CustomData")]
     pub custom_data: GameVariantCustomData,
+}
+
+impl GameVariantAsset {
+    pub fn hero_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("hero.png"))
+    }
+
+    pub fn thumbnail_url(&self) -> Option<String> {
+        self.asset
+            .files
+            .as_ref()
+            .and_then(|files| files.named_image_url("thumbnail.png"))
+    }
+
+    pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset
+            .files
+            .iter()
+            .flat_map(AssetFiles::screenshot_urls)
+    }
+
+    pub fn image_urls(&self) -> impl Iterator<Item = String> + '_ {
+        self.asset.files.iter().flat_map(AssetFiles::image_urls)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -687,6 +1002,94 @@ pub struct RankedArenaSeason {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn asset_ids_support_named_and_custom_values() {
+        assert_eq!(PlaylistId::RANKED_ARENA.as_str().len(), 36);
+        assert_eq!(PlaylistId::new("custom").as_str(), "custom");
+        assert_eq!(GameModeId::RANKED_SLAYER.asset_id().len(), 36);
+        assert_eq!(GameModeId::new("asset", "version").version_id(), "version");
+        assert_eq!(MapId::LIVE_FIRE.asset_id().len(), 36);
+        assert_eq!(MapId::new("asset", "version").version_id(), "version");
+    }
+
+    #[test]
+    fn map_exposes_ugc_image_urls() {
+        let map: MapAsset = serde_json::from_value(serde_json::json!({
+            "AssetId": "asset",
+            "VersionId": "version",
+            "PublicName": "Live Fire",
+            "Description": "",
+            "Files": {
+                "Prefix": "https://cdn.example/map/",
+                "FileRelativePaths": [
+                    "map.mvar",
+                    "images/hero.png",
+                    "images/screenshot.jpg"
+                ]
+            },
+            "CustomData": {
+                "NumOfObjectsOnMap": 0,
+                "TagLevelId": 0,
+                "IsBaked": true,
+                "HasNodeGraph": false
+            }
+        }))
+        .unwrap();
+
+        assert_eq!(
+            map.image_urls().collect::<Vec<_>>(),
+            [
+                "https://cdn.example/map/images/hero.png",
+                "https://cdn.example/map/images/screenshot.jpg"
+            ]
+        );
+        assert_eq!(
+            map.hero_url().as_deref(),
+            Some("https://cdn.example/map/images/hero.png")
+        );
+        assert!(map.thumbnail_url().is_none());
+        assert_eq!(
+            map.screenshot_urls().collect::<Vec<_>>(),
+            ["https://cdn.example/map/images/screenshot.jpg"]
+        );
+    }
+
+    #[test]
+    fn game_mode_exposes_ugc_image_urls() {
+        let mode: GameVariantAsset = serde_json::from_value(serde_json::json!({
+            "AssetId": "asset",
+            "VersionId": "version",
+            "PublicName": "Ranked:Slayer",
+            "Description": "",
+            "Files": {
+                "Prefix": "https://cdn.example/mode/",
+                "FileRelativePaths": [
+                    "images/hero.png",
+                    "images/thumbnail.png",
+                    "images/screenshot1.Png"
+                ]
+            },
+            "CustomData": {
+                "KeyValues": {},
+                "HasNodeGraph": false
+            }
+        }))
+        .unwrap();
+
+        assert_eq!(
+            mode.hero_url().as_deref(),
+            Some("https://cdn.example/mode/images/hero.png")
+        );
+        assert_eq!(
+            mode.thumbnail_url().as_deref(),
+            Some("https://cdn.example/mode/images/thumbnail.png")
+        );
+        assert_eq!(
+            mode.screenshot_urls().collect::<Vec<_>>(),
+            ["https://cdn.example/mode/images/screenshot1.Png"]
+        );
+    }
 
     fn ranking(value: i32) -> CsrRecordRanking {
         CsrRecordRanking {

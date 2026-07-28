@@ -7,12 +7,11 @@ use xbox::models::Xuid;
 use xbox::util::wrap_xuid;
 
 use super::InfiniteClientError;
-use super::constants::PlaylistId;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    GameVariantAsset, MapAsset, MapModePairAsset, MatchStats, MatchesPrivacy,
-    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistMetadata,
+    GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats, MatchesPrivacy,
+    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
     RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
@@ -183,22 +182,13 @@ impl HaloInfiniteClient {
         playlist: PlaylistId,
         xuid: &Xuid,
     ) -> Result<CsrRecords, InfiniteClientError> {
-        self.playlist_csr_by_id(playlist.as_str(), std::slice::from_ref(xuid))
+        self.playlist_csr_batch(playlist, std::slice::from_ref(xuid))
             .await
     }
 
     pub async fn playlist_csr_batch(
         &self,
         playlist: PlaylistId,
-        xuids: &[Xuid],
-    ) -> Result<CsrRecords, InfiniteClientError> {
-        self.playlist_csr_by_id(playlist.as_str(), xuids).await
-    }
-
-    /// Gets CSR using any playlist asset ID, including playlists unknown to [`PlaylistId`].
-    pub async fn playlist_csr_by_id(
-        &self,
-        playlist_id: &str,
         xuids: &[Xuid],
     ) -> Result<CsrRecords, InfiniteClientError> {
         let players = xuids
@@ -208,7 +198,7 @@ impl HaloInfiniteClient {
             .join(",");
         self.get_with_clearance(
             &self.endpoints.skill_base_url,
-            &format!("/hi/playlist/{playlist_id}/csrs"),
+            &format!("/hi/playlist/{playlist}/csrs"),
             &[("players", players)],
         )
         .await
@@ -354,19 +344,12 @@ impl HaloInfiniteClient {
         })
     }
 
-    pub async fn map(
-        &self,
-        asset_id: &str,
-        version_id: &str,
-    ) -> Result<MapAsset, InfiniteClientError> {
-        self.ugc_version("maps", asset_id, version_id, false).await
+    pub async fn map(&self, map: MapId) -> Result<MapAsset, InfiniteClientError> {
+        self.ugc_version("maps", map.asset_id(), map.version_id(), false)
+            .await
     }
-    pub async fn mode(
-        &self,
-        asset_id: &str,
-        version_id: &str,
-    ) -> Result<GameVariantAsset, InfiniteClientError> {
-        self.ugc_version("ugcGameVariants", asset_id, version_id, false)
+    pub async fn mode(&self, mode: GameModeId) -> Result<GameVariantAsset, InfiniteClientError> {
+        self.ugc_version("ugcGameVariants", mode.asset_id(), mode.version_id(), false)
             .await
     }
     pub async fn playlist(
@@ -547,7 +530,7 @@ impl HaloInfiniteClient {
         let Some(season) = self.current_csr_season().await? else {
             return Ok(None);
         };
-        let playlist_id = PlaylistId::Arena.as_str();
+        let playlist_id = PlaylistId::RANKED_ARENA.as_str();
         let metadata = self.playlist_metadata(playlist_id).await?;
         let playlist = self
             .playlist(playlist_id, &metadata.ugc_playlist_version)
@@ -557,9 +540,17 @@ impl HaloInfiniteClient {
             let pair = self
                 .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
                 .await?;
-            let map = self.map(&pair.map.asset_id, &pair.map.version_id).await?;
+            let map = self
+                .map(MapId::new(
+                    pair.map.asset_id.clone(),
+                    pair.map.version_id.clone(),
+                ))
+                .await?;
             let mode = self
-                .mode(&pair.mode.asset_id, &pair.mode.version_id)
+                .mode(GameModeId::new(
+                    pair.mode.asset_id.clone(),
+                    pair.mode.version_id.clone(),
+                ))
                 .await?;
             map_modes.push(RankedArenaMapMode {
                 weight: rotation.metadata.weight,

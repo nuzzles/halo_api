@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use crate::auth::endpoints::AuthEndpoints;
 use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
-use crate::clients::hi::constants::PlaylistId;
 use crate::clients::hi::endpoints::HaloEndpoints;
+use crate::clients::hi::models::PlaylistId;
 use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
@@ -157,7 +157,10 @@ async fn gets_playlist_csr_end_to_end() {
         .await;
 
     let xuid = "123456789".into();
-    let csr = halo.playlist_csr(PlaylistId::Arena, &xuid).await.unwrap();
+    let csr = halo
+        .playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .await
+        .unwrap();
 
     assert_eq!(csr.records.len(), 1);
     assert_eq!(csr.records[0].result.current.value, 1500);
@@ -177,8 +180,12 @@ async fn spartan_token_is_cached_across_calls() {
         .await;
 
     let xuid = "123456789".into();
-    halo.playlist_csr(PlaylistId::Arena, &xuid).await.unwrap();
-    halo.playlist_csr(PlaylistId::Arena, &xuid).await.unwrap();
+    halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .await
+        .unwrap();
+    halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .await
+        .unwrap();
 
     // The mock server tracks received requests; assert /spartan-token was hit exactly once
     // across both CSR lookups above, proving the spartan token was cached rather than

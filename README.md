@@ -27,7 +27,7 @@ supply a spartan token from elsewhere.
 ```rust,no_run
 use std::sync::Arc;
 
-use halo_api::clients::hi::constants::PlaylistId;
+use halo_api::clients::hi::models::PlaylistId;
 use halo_api::auth::AuthClient;
 use halo_api::clients::hi::HaloInfiniteClient;
 use xbox::auth::LegacyPasswordProvider;
@@ -43,7 +43,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let halo = HaloInfiniteClient::new(auth);
 
     let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
-    let csr = halo.playlist_csr(PlaylistId::Arena, &xuid).await?;
+    let csr = halo
+        .playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .await?;
 
     println!("{csr:?}");
     Ok(())
@@ -55,8 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `auth` — Spartan-token and clearance providers, caching, endpoint configuration, and `AuthError`.
 - `clients::hi` — `HaloInfiniteClient`, Infinite endpoint configuration, and
   `InfiniteClientError`. Authentication failures are preserved in its `Auth` error variant.
-- `clients::hi::models` — Halo Infinite request/response types.
-- `clients::hi::constants` — Halo Infinite constants such as playlist IDs.
+- `clients::hi::models` — Halo Infinite request/response types and named asset IDs.
 
 ## Endpoint coverage
 

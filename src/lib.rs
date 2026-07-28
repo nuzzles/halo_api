@@ -9,7 +9,7 @@
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! use std::sync::Arc;
 //!
-//! use halo_api::clients::hi::constants::PlaylistId;
+//! use halo_api::clients::hi::models::PlaylistId;
 //! use halo_api::auth::AuthClient;
 //! use halo_api::clients::hi::HaloInfiniteClient;
 //! use xbox::auth::LegacyPasswordProvider;
@@ -23,7 +23,7 @@
 //! let halo = HaloInfiniteClient::new(auth);
 //!
 //! let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
-//! let csr = halo.playlist_csr(PlaylistId::Arena, &xuid).await?;
+//! let csr = halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid).await?;
 //!
 //! println!("{csr:?}");
 //! # Ok(())
