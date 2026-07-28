@@ -1,5 +1,13 @@
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
+
+fn deserialize_null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de> + Default,
+{
+    Option::<T>::deserialize(deserializer).map(Option::unwrap_or_default)
+}
 
 /// Response body from the playlist CSR endpoint.
 #[derive(Debug, Clone, Deserialize)]
@@ -63,6 +71,41 @@ impl CsrRecordRanking {
     }
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchesPrivacy {
+    #[serde(rename = "MatchmadeGames")]
+    pub matchmade_games: i32,
+    #[serde(rename = "OtherGames")]
+    pub other_games: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PrivacySetting {
+    Show,
+    Hide,
+    Unknown(i32),
+}
+
+impl PrivacySetting {
+    pub fn from_code(code: i32) -> Self {
+        match code {
+            1 => Self::Show,
+            2 => Self::Hide,
+            other => Self::Unknown(other),
+        }
+    }
+}
+
+impl MatchesPrivacy {
+    pub fn matchmade_setting(&self) -> PrivacySetting {
+        PrivacySetting::from_code(self.matchmade_games)
+    }
+
+    pub fn other_setting(&self) -> PrivacySetting {
+        PrivacySetting::from_code(self.other_games)
+    }
+}
+
 /// A page of a player's match history.
 #[derive(Debug, Clone, Deserialize)]
 pub struct PlayerMatchHistory {
@@ -76,6 +119,14 @@ pub struct PlayerMatchHistory {
 pub struct MatchHistoryEntry {
     #[serde(rename = "MatchId")]
     pub match_id: String,
+    #[serde(rename = "LastTeamId")]
+    pub last_team_id: i32,
+    #[serde(rename = "Outcome")]
+    pub outcome: i32,
+    #[serde(rename = "Rank")]
+    pub rank: i32,
+    #[serde(rename = "PresentAtEndOfMatch")]
+    pub present_at_end: bool,
     #[serde(rename = "MatchInfo")]
     pub info: MatchInfo,
 }
@@ -86,6 +137,14 @@ pub struct MatchInfo {
     pub start_time: DateTime<Utc>,
     #[serde(rename = "EndTime")]
     pub end_time: DateTime<Utc>,
+    #[serde(rename = "Duration")]
+    pub duration: String,
+    #[serde(rename = "GameVariantCategory")]
+    pub game_variant_category: i32,
+    #[serde(rename = "MapVariant")]
+    pub map_variant: Option<MatchAssetLink>,
+    #[serde(rename = "UgcGameVariant")]
+    pub ugc_game_variant: Option<MatchAssetLink>,
     #[serde(rename = "Playlist")]
     pub playlist: Option<MatchPlaylist>,
 }
@@ -94,6 +153,96 @@ pub struct MatchInfo {
 pub struct MatchPlaylist {
     #[serde(rename = "AssetId")]
     pub asset_id: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchAssetLink {
+    #[serde(rename = "AssetId")]
+    pub asset_id: String,
+    #[serde(rename = "VersionId")]
+    pub version_id: String,
+    #[serde(rename = "AssetKind")]
+    pub asset_kind: i32,
+}
+
+/// Detailed scoreboard returned for one match.
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchStats {
+    #[serde(rename = "MatchId")]
+    pub match_id: String,
+    #[serde(rename = "MatchInfo")]
+    pub info: MatchInfo,
+    #[serde(rename = "Players")]
+    pub players: Vec<MatchPlayer>,
+    #[serde(rename = "Teams")]
+    pub teams: Vec<MatchTeam>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchPlayer {
+    #[serde(rename = "PlayerId")]
+    pub player_id: String,
+    #[serde(rename = "PlayerType")]
+    pub player_type: i32,
+    #[serde(rename = "LastTeamId")]
+    pub last_team_id: i32,
+    #[serde(rename = "Outcome")]
+    pub outcome: i32,
+    #[serde(rename = "Rank")]
+    pub rank: i32,
+    #[serde(rename = "PlayerTeamStats")]
+    pub team_stats: Vec<PlayerTeamStats>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerTeamStats {
+    #[serde(rename = "TeamId")]
+    pub team_id: i32,
+    #[serde(rename = "Stats")]
+    pub stats: MatchStatsBlock,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchTeam {
+    #[serde(rename = "TeamId")]
+    pub team_id: i32,
+    #[serde(rename = "Outcome")]
+    pub outcome: i32,
+    #[serde(rename = "Rank")]
+    pub rank: i32,
+    #[serde(rename = "Stats")]
+    pub stats: MatchStatsBlock,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchStatsBlock {
+    #[serde(rename = "CoreStats")]
+    pub core: MatchCoreStats,
+    #[serde(flatten)]
+    pub mode_stats: std::collections::BTreeMap<String, serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MatchCoreStats {
+    #[serde(rename = "Score")]
+    pub score: i32,
+    #[serde(rename = "PersonalScore")]
+    pub personal_score: i32,
+    #[serde(rename = "Kills")]
+    pub kills: i32,
+    #[serde(rename = "Deaths")]
+    pub deaths: i32,
+    #[serde(rename = "Assists")]
+    pub assists: i32,
+    #[serde(rename = "KDA")]
+    pub kda: f64,
+    #[serde(rename = "Accuracy")]
+    pub accuracy: f64,
+    #[serde(rename = "DamageDealt")]
+    pub damage_dealt: i64,
+    #[serde(rename = "DamageTaken")]
+    pub damage_taken: i64,
 }
 
 /// Response body from the matchmade service record endpoint.
@@ -105,13 +254,13 @@ pub struct ServiceRecord {
     #[serde(rename = "TimePlayed")]
     pub time_played: String,
     #[serde(rename = "MatchesCompleted")]
-    pub matches_completed: i32,
+    pub matches_completed: i64,
     #[serde(rename = "Wins")]
-    pub wins: i32,
+    pub wins: i64,
     #[serde(rename = "Losses")]
-    pub losses: i32,
+    pub losses: i64,
     #[serde(rename = "Ties")]
-    pub ties: i32,
+    pub ties: i64,
     #[serde(rename = "CoreStats")]
     pub core_stats: CoreStats,
     #[serde(rename = "BombStats")]
@@ -135,77 +284,95 @@ pub struct ServiceRecord {
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
 pub struct ServiceRecordSubqueries {
-    #[serde(rename = "SeasonIds")]
+    #[serde(
+        default,
+        rename = "SeasonIds",
+        deserialize_with = "deserialize_null_default"
+    )]
     pub season_ids: Vec<String>,
-    #[serde(rename = "GameVariantCategories")]
+    #[serde(
+        default,
+        rename = "GameVariantCategories",
+        deserialize_with = "deserialize_null_default"
+    )]
     pub game_variant_categories: Vec<i32>,
-    #[serde(rename = "IsRanked")]
+    #[serde(
+        default,
+        rename = "IsRanked",
+        deserialize_with = "deserialize_null_default"
+    )]
     pub is_ranked: Vec<bool>,
-    #[serde(rename = "PlaylistAssetIds")]
+    #[serde(
+        default,
+        rename = "PlaylistAssetIds",
+        deserialize_with = "deserialize_null_default"
+    )]
     pub playlist_asset_ids: Vec<String>,
+    #[serde(rename = "GameplayInteractions")]
+    pub gameplay_interactions: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
 pub struct CoreStats {
     #[serde(rename = "Score")]
-    pub score: i32,
+    pub score: i64,
     #[serde(rename = "PersonalScore")]
-    pub personal_score: i32,
+    pub personal_score: i64,
     #[serde(rename = "RoundsWon")]
-    pub rounds_won: i32,
+    pub rounds_won: i64,
     #[serde(rename = "RoundsLost")]
-    pub rounds_lost: i32,
+    pub rounds_lost: i64,
     #[serde(rename = "RoundsTied")]
-    pub rounds_tied: i32,
+    pub rounds_tied: i64,
     #[serde(rename = "Kills")]
-    pub kills: i32,
+    pub kills: i64,
     #[serde(rename = "Deaths")]
-    pub deaths: i32,
+    pub deaths: i64,
     #[serde(rename = "Assists")]
-    pub assists: i32,
+    pub assists: i64,
     #[serde(rename = "AverageKDA")]
-    pub kda: f32,
+    pub kda: f64,
     #[serde(rename = "Suicides")]
-    pub suicides: i32,
+    pub suicides: i64,
     #[serde(rename = "Betrayals")]
-    pub betrayals: i32,
+    pub betrayals: i64,
     #[serde(rename = "GrenadeKills")]
-    pub grenade_kills: i32,
+    pub grenade_kills: i64,
     #[serde(rename = "HeadshotKills")]
-    pub headshot_kills: i32,
+    pub headshot_kills: i64,
     #[serde(rename = "MeleeKills")]
-    pub melee_kills: i32,
+    pub melee_kills: i64,
     #[serde(rename = "PowerWeaponKills")]
-    pub power_weapon_kills: i32,
+    pub power_weapon_kills: i64,
     #[serde(rename = "ShotsFired")]
-    pub shots_fired: i32,
+    pub shots_fired: i64,
     #[serde(rename = "ShotsHit")]
-    pub shots_hit: i32,
+    pub shots_hit: i64,
     #[serde(rename = "Accuracy")]
-    pub accuracy: f32,
+    pub accuracy: f64,
     #[serde(rename = "DamageDealt")]
-    pub damage_dealt: i32,
+    pub damage_dealt: i64,
     #[serde(rename = "DamageTaken")]
-    pub damage_taken: i32,
+    pub damage_taken: i64,
     #[serde(rename = "CalloutAssists")]
-    pub callout_assists: i32,
+    pub callout_assists: i64,
     #[serde(rename = "VehicleDestroys")]
-    pub vehicle_destroys: i32,
+    pub vehicle_destroys: i64,
     #[serde(rename = "DriverAssists")]
-    pub driver_assists: i32,
+    pub driver_assists: i64,
     #[serde(rename = "Hijacks")]
-    pub hijacks: i32,
+    pub hijacks: i64,
     #[serde(rename = "EmpAssists")]
-    pub emp_assists: i32,
+    pub emp_assists: i64,
     #[serde(rename = "MaxKillingSpree")]
-    pub max_killing_spree: i32,
+    pub max_killing_spree: i64,
     #[serde(rename = "Medals")]
     pub medals: Vec<StatAward>,
     #[serde(rename = "PersonalScores")]
     pub personal_scores: Vec<StatAward>,
     #[serde(rename = "Spawns")]
-    pub spawns: i32,
+    pub spawns: i64,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -213,9 +380,9 @@ pub struct StatAward {
     #[serde(rename = "NameId")]
     pub name_id: i64,
     #[serde(rename = "Count")]
-    pub count: i32,
+    pub count: i64,
     #[serde(rename = "TotalPersonalScoreAwarded")]
-    pub total_personal_score_awarded: i32,
+    pub total_personal_score_awarded: i64,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -231,6 +398,113 @@ pub struct Gamerpic {
     pub medium: String,
     pub large: String,
     pub xlarge: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AppearanceCustomization {
+    #[serde(rename = "Status")]
+    pub status: String,
+    #[serde(rename = "Appearance")]
+    pub appearance: PlayerAppearance,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerCustomizationCollection {
+    #[serde(rename = "PlayerCustomizations")]
+    pub player_customizations: Vec<PlayerCustomization>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerCustomization {
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "ResultCode")]
+    pub result_code: String,
+    #[serde(rename = "Result")]
+    pub result: PlayerCustomizationData,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerCustomizationData {
+    #[serde(rename = "Appearance")]
+    pub appearance: PlayerAppearance,
+    #[serde(flatten)]
+    pub other_customization: std::collections::BTreeMap<String, serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerAppearance {
+    #[serde(rename = "LastModifiedDateUtc")]
+    pub last_modified: Option<ApiDate>,
+    #[serde(rename = "ActionPosePath")]
+    pub action_pose_path: Option<String>,
+    #[serde(rename = "StancePath")]
+    pub stance_path: Option<String>,
+    #[serde(rename = "BackdropImagePath")]
+    pub backdrop_image_path: Option<String>,
+    #[serde(rename = "Emblem")]
+    pub emblem: Option<EmblemConfiguration>,
+    #[serde(rename = "ServiceTag")]
+    pub service_tag: String,
+    #[serde(rename = "IntroEmotePath")]
+    pub intro_emote_path: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct EmblemConfiguration {
+    #[serde(rename = "EmblemPath")]
+    pub emblem_path: String,
+    #[serde(rename = "ConfigurationId")]
+    pub configuration_id: i64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BanSummary {
+    #[serde(rename = "Results")]
+    pub results: Vec<BanSummaryResult>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BanSummaryResult {
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "ResultCode")]
+    pub result_code: i32,
+    #[serde(rename = "Result")]
+    pub result: BanResult,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BanResult {
+    #[serde(rename = "BansInEffect")]
+    pub bans_in_effect: Vec<BanInEffect>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BanInEffect {
+    #[serde(rename = "Type")]
+    pub ban_type: i32,
+    #[serde(rename = "Scope")]
+    pub scope: i32,
+    #[serde(rename = "EnforceUntilUtc")]
+    pub enforce_until: ApiDate,
+    #[serde(rename = "BanMessagePath")]
+    pub message_path: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BanMessage {
+    #[serde(rename = "Title")]
+    pub title: String,
+    #[serde(rename = "DisplayMessage")]
+    pub display_message: LocalizedText,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LocalizedText {
+    pub status: String,
+    pub value: String,
+    pub translations: std::collections::BTreeMap<String, String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -503,5 +777,132 @@ mod tests {
         );
         assert!(calendar.current(gap).is_none());
         assert!(calendar.current(at_end).is_none());
+    }
+
+    #[test]
+    fn deserializes_discord_bot_response_contracts() {
+        let privacy: MatchesPrivacy = serde_json::from_value(serde_json::json!({
+            "MatchmadeGames": 1,
+            "OtherGames": 2
+        }))
+        .unwrap();
+        assert_eq!(privacy.matchmade_setting(), PrivacySetting::Show);
+        assert_eq!(privacy.other_setting(), PrivacySetting::Hide);
+
+        let service_record: ServiceRecord = serde_json::from_value(serde_json::json!({
+            "MatchesCompleted": 3_000_000_000_i64,
+            "CoreStats": {
+                "Score": 4_000_000_000_i64,
+                "DamageDealt": 5_000_000_000_i64
+            }
+        }))
+        .unwrap();
+        assert_eq!(service_record.matches_completed, 3_000_000_000);
+        assert_eq!(service_record.core_stats.damage_dealt, 5_000_000_000);
+
+        let empty_record: ServiceRecord = serde_json::from_value(serde_json::json!({
+            "Subqueries": {
+                "SeasonIds": null,
+                "GameVariantCategories": null,
+                "IsRanked": null,
+                "PlaylistAssetIds": null,
+                "GameplayInteractions": null
+            },
+            "CoreStats": { "Medals": [], "PersonalScores": [] }
+        }))
+        .unwrap();
+        assert!(empty_record.subqueries.season_ids.is_empty());
+        assert!(empty_record.subqueries.playlist_asset_ids.is_empty());
+
+        let appearance: AppearanceCustomization = serde_json::from_value(serde_json::json!({
+            "Status": "Success",
+            "Appearance": {
+                "LastModifiedDateUtc": { "ISO8601Date": "2026-01-01T00:00:00Z" },
+                "ActionPosePath": "pose.json",
+                "StancePath": null,
+                "BackdropImagePath": "backdrop.json",
+                "Emblem": { "EmblemPath": "emblem.json", "ConfigurationId": 42 },
+                "ServiceTag": "117",
+                "IntroEmotePath": null
+            }
+        }))
+        .unwrap();
+        assert_eq!(appearance.appearance.service_tag, "117");
+
+        let public: PlayerCustomizationCollection = serde_json::from_value(serde_json::json!({
+            "PlayerCustomizations": [{
+                "Id": "xuid(123)",
+                "ResultCode": "Success",
+                "Result": {
+                    "Appearance": {
+                        "LastModifiedDateUtc": null,
+                        "ActionPosePath": "pose.json",
+                        "StancePath": null,
+                        "BackdropImagePath": "backdrop.json",
+                        "Emblem": null,
+                        "ServiceTag": "117",
+                        "IntroEmotePath": null
+                    },
+                    "ArmorCores": {}
+                }
+            }]
+        }))
+        .unwrap();
+        assert_eq!(public.player_customizations[0].result_code, "Success");
+
+        let bans: BanSummary = serde_json::from_value(serde_json::json!({
+            "Results": [{
+                "Id": "xuid(123)",
+                "ResultCode": 0,
+                "Result": { "BansInEffect": [{
+                    "Type": 1,
+                    "Scope": 1,
+                    "EnforceUntilUtc": { "ISO8601Date": "2026-08-01T00:00:00Z" },
+                    "BanMessagePath": "Banning/example.json"
+                }] }
+            }]
+        }))
+        .unwrap();
+        assert_eq!(bans.results[0].result.bans_in_effect.len(), 1);
+
+        let message: BanMessage = serde_json::from_value(serde_json::json!({
+            "Title": "HI: Admin Matchmaking Ban Cheating",
+            "DisplayMessage": {
+                "status": "Ready",
+                "value": "Suspended until {0}",
+                "translations": { "de-DE": "Gesperrt bis {0}" }
+            }
+        }))
+        .unwrap();
+        assert_eq!(message.display_message.translations.len(), 1);
+
+        let scoreboard: MatchStats = serde_json::from_value(serde_json::json!({
+            "MatchId": "match",
+            "MatchInfo": {
+                "StartTime": "2026-01-01T00:00:00Z",
+                "EndTime": "2026-01-01T00:10:00Z",
+                "Duration": "PT10M",
+                "GameVariantCategory": 6,
+                "MapVariant": { "AssetKind": 2, "AssetId": "map", "VersionId": "v1" },
+                "UgcGameVariant": { "AssetKind": 6, "AssetId": "mode", "VersionId": "v2" },
+                "Playlist": { "AssetId": "playlist" }
+            },
+            "Teams": [],
+            "Players": [{
+                "PlayerId": "xuid(123)",
+                "PlayerType": 1,
+                "LastTeamId": 0,
+                "Outcome": 2,
+                "Rank": 1,
+                "PlayerTeamStats": [{
+                    "TeamId": 0,
+                    "Stats": { "CoreStats": {
+                        "PersonalScore": 2500, "Kills": 20, "Deaths": 10, "Assists": 5
+                    }}
+                }]
+            }]
+        }))
+        .unwrap();
+        assert_eq!(scoreboard.players[0].team_stats[0].stats.core.kills, 20);
     }
 }

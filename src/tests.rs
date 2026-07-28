@@ -132,6 +132,7 @@ async fn test_client(
         ugc_base_url: server.uri(),
         settings_base_url: server.uri(),
         ban_base_url: server.uri(),
+        economy_base_url: server.uri(),
     };
     let auth = AuthClient::from_xbox_client_with_endpoints(xbox_client.clone(), &auth_endpoints);
     let halo_infinite_client = HaloInfiniteClient::with_endpoints(auth, endpoints);
@@ -240,15 +241,17 @@ async fn ban_summary_uses_spartan_auth_without_clearance() {
     Mock::given(method("GET"))
         .and(path("/hi/bansummary"))
         .and(query_param("auth", "st"))
-        .and(query_param("targets", "xuid(123456789)"))
+        .and(query_param("targets", "xuid(123456789),xuid(987654321)"))
         .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({ "Results": [] })),
+        )
         .expect(1)
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    halo.ban_summary(&xuid).await.unwrap();
+    let xuids = ["123456789".into(), "987654321".into()];
+    halo.ban_summary(&xuids).await.unwrap();
 
     let requests = server.received_requests().await.unwrap();
     let request = requests

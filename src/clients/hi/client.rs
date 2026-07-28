@@ -10,14 +10,17 @@ use super::InfiniteClientError;
 use super::constants::PlaylistId;
 use super::endpoints::HaloEndpoints;
 use super::models::{
-    CsrRecords, CsrSeason, CsrSeasonCalendar, GameVariantAsset, MapAsset, MapModePairAsset,
-    PlayerMatchHistory, PlaylistAsset, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
-    SeasonCalendar, ServiceRecord, UserInfo,
+    AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
+    GameVariantAsset, MapAsset, MapModePairAsset, MatchStats, MatchesPrivacy,
+    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistMetadata,
+    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
+const HALO_WAYPOINT_USER_AGENT: &str =
+    "HaloWaypoint/2021112313511900 CFNetwork/1327.0.4 Darwin/21.2.0";
 
 /// Halo Infinite API client. Authentication is supplied by a separate [`HaloAuth`] client.
 pub struct HaloInfiniteClient {
@@ -84,7 +87,10 @@ impl HaloInfiniteClient {
             query.push((clearance_query_name, clearance.clone()));
         }
         let url = format!("{base}{path}");
-        match self.get_once(&url, &query, &credentials).await {
+        match self
+            .get_once(&url, &query, &credentials, HALO_PC_USER_AGENT)
+            .await
+        {
             Err(error) if error.is_unauthorized() => {
                 self.auth.invalidate().await;
                 let credentials = self.auth.credentials(true).await?;
@@ -95,7 +101,8 @@ impl HaloInfiniteClient {
                 if let Some(clearance) = &credentials.clearance {
                     query.push((clearance_query_name, clearance.clone()));
                 }
-                self.get_once(&url, &query, &credentials).await
+                self.get_once(&url, &query, &credentials, HALO_PC_USER_AGENT)
+                    .await
             }
             result => result,
         }
@@ -108,13 +115,31 @@ impl HaloInfiniteClient {
         query: &[(&str, String)],
         require_clearance: bool,
     ) -> Result<T, InfiniteClientError> {
+        self.get_authenticated_with_user_agent(
+            base,
+            path,
+            query,
+            require_clearance,
+            HALO_PC_USER_AGENT,
+        )
+        .await
+    }
+
+    async fn get_authenticated_with_user_agent<T: DeserializeOwned>(
+        &self,
+        base: &str,
+        path: &str,
+        query: &[(&str, String)],
+        require_clearance: bool,
+        user_agent: &'static str,
+    ) -> Result<T, InfiniteClientError> {
         let url = format!("{base}{path}");
         let first = self.auth.credentials(require_clearance).await?;
-        match self.get_once(&url, query, &first).await {
+        match self.get_once(&url, query, &first, user_agent).await {
             Err(error) if error.is_unauthorized() => {
                 self.auth.invalidate().await;
                 let second = self.auth.credentials(require_clearance).await?;
-                self.get_once(&url, query, &second).await
+                self.get_once(&url, query, &second, user_agent).await
             }
             result => result,
         }
@@ -125,6 +150,7 @@ impl HaloInfiniteClient {
         url: &str,
         query: &[(&str, String)],
         credentials: &HaloCredentials,
+        user_agent: &'static str,
     ) -> Result<T, InfiniteClientError> {
         let mut request = self
             .http
@@ -132,19 +158,24 @@ impl HaloInfiniteClient {
             .query(query)
             .header("X-343-Authorization-Spartan", &credentials.spartan_token)
             .header("Accept", "application/json")
-            .header("User-Agent", HALO_PC_USER_AGENT)
+            .header("User-Agent", user_agent)
             .timeout(DEFAULT_TIMEOUT);
         if let Some(clearance) = &credentials.clearance {
             request = request.header("343-Clearance", clearance);
         }
         let response = request.send().await?;
+        let url = response.url().to_string();
         if !response.status().is_success() {
-            let url = response.url().to_string();
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
             return Err(InfiniteClientError::HttpStatus { url, status, body });
         }
-        Ok(response.json().await?)
+        let body = response.text().await?;
+        serde_json::from_str(&body).map_err(|source| InfiniteClientError::Decode {
+            url,
+            source: Arc::new(source),
+            body,
+        })
     }
 
     pub async fn playlist_csr(
@@ -214,7 +245,7 @@ impl HaloInfiniteClient {
         .await
     }
 
-    pub async fn match_stats(&self, match_id: &str) -> Result<Value, InfiniteClientError> {
+    pub async fn match_stats(&self, match_id: &str) -> Result<MatchStats, InfiniteClientError> {
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/matches/{match_id}/stats"),
@@ -266,6 +297,61 @@ impl HaloInfiniteClient {
             )],
         )
         .await
+    }
+
+    /// Gets a player's equipped service tag, emblem, backdrop, pose, and intro emote.
+    pub async fn appearance(
+        &self,
+        xuid: &Xuid,
+    ) -> Result<AppearanceCustomization, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.economy_base_url,
+            &format!(
+                "/hi/players/{}/customization/appearance",
+                wrap_xuid(xuid.as_str())
+            ),
+            &[],
+        )
+        .await
+    }
+
+    /// Gets public customization data for multiple players.
+    pub async fn player_customizations(
+        &self,
+        xuids: &[Xuid],
+    ) -> Result<PlayerCustomizationCollection, InfiniteClientError> {
+        let players = xuids
+            .iter()
+            .map(|xuid| wrap_xuid(xuid.as_str()))
+            .collect::<Vec<_>>()
+            .join(",");
+        self.get_authenticated_with_user_agent(
+            &self.endpoints.economy_base_url,
+            "/hi/customization",
+            &[("players", players)],
+            true,
+            HALO_WAYPOINT_USER_AGENT,
+        )
+        .await
+    }
+
+    /// Resolves a gamertag and gets that player's equipped appearance.
+    pub async fn appearance_by_gamertag(
+        &self,
+        gamertag: &str,
+    ) -> Result<AppearanceCustomization, InfiniteClientError> {
+        let user = self.user(gamertag).await?;
+        let customization = self
+            .player_customizations(&[Xuid::from(user.xuid)])
+            .await?
+            .player_customizations
+            .into_iter()
+            .next()
+            .ok_or_else(|| InfiniteClientError::CustomizationNotFound(gamertag.to_string()))?;
+        Ok(AppearanceCustomization {
+            status: customization.result_code,
+            appearance: customization.result.appearance,
+        })
     }
 
     pub async fn map(
@@ -354,18 +440,61 @@ impl HaloInfiniteClient {
         )
         .await
     }
-    pub async fn ban_summary(&self, xuid: &Xuid) -> Result<Value, InfiniteClientError> {
-        self.get(
-            &self.endpoints.ban_base_url,
-            "/hi/bansummary",
-            &[
-                ("auth", "st".to_string()),
-                ("targets", wrap_xuid(xuid.as_str())),
-            ],
+
+    /// Gets the Waypoint mapping from emblem configurations to image assets.
+    ///
+    /// This remains JSON until the live response contract has been captured and tested.
+    pub async fn emblem_mapping(&self) -> Result<Value, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            "/hi/Waypoint/file/images/emblems/mapping.json",
+            &[],
         )
         .await
     }
-    pub async fn matches_privacy(&self, xuid: &Xuid) -> Result<Value, InfiniteClientError> {
+    /// Returns bans that Halo currently reports as being in effect for the targets.
+    ///
+    /// An empty result does not indicate whether the player was historically banned or whether a
+    /// third-party service independently classifies the account as banned.
+    pub async fn ban_summary(&self, xuids: &[Xuid]) -> Result<BanSummary, InfiniteClientError> {
+        let targets = xuids
+            .iter()
+            .map(|xuid| wrap_xuid(xuid.as_str()))
+            .collect::<Vec<_>>()
+            .join(",");
+        self.get(
+            &self.endpoints.ban_base_url,
+            "/hi/bansummary",
+            &[("auth", "st".to_string()), ("targets", targets)],
+        )
+        .await
+    }
+
+    pub async fn ban_summary_by_gamertag(
+        &self,
+        gamertag: &str,
+    ) -> Result<BanSummary, InfiniteClientError> {
+        let user = self.user(gamertag).await?;
+        self.ban_summary(&[Xuid::from(user.xuid)]).await
+    }
+
+    /// Resolves the localized title and body referenced by a ban summary entry.
+    pub async fn ban_message(&self, message_path: &str) -> Result<BanMessage, InfiniteClientError> {
+        self.get_with_clearance_named_query(
+            &self.endpoints.game_cms_base_url,
+            &format!("/hi/Banning/file/{}", message_path.trim_start_matches('/')),
+            &[],
+            "flight",
+        )
+        .await
+    }
+    /// Gets the authenticated player's match-history privacy settings.
+    ///
+    /// Halo rejects attempts to read this setting for a different player.
+    pub async fn matches_privacy(
+        &self,
+        xuid: &Xuid,
+    ) -> Result<MatchesPrivacy, InfiniteClientError> {
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches-privacy", wrap_xuid(xuid.as_str())),

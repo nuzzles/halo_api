@@ -20,8 +20,20 @@ pub enum InfiniteClientError {
     #[error("Halo Infinite network error: {0}")]
     Network(Arc<reqwest::Error>),
 
+    #[error(
+        "Halo Infinite response from {url} did not match the expected schema: {source}; body: {body}"
+    )]
+    Decode {
+        url: String,
+        source: Arc<serde_json::Error>,
+        body: String,
+    },
+
     #[error("no Halo Infinite record found for gamertag \"{0}\"")]
     GamertagNotFound(String),
+
+    #[error("Halo Infinite returned no customization for player \"{0}\"")]
+    CustomizationNotFound(String),
 }
 
 impl From<reqwest::Error> for InfiniteClientError {

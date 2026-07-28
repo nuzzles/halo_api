@@ -10,6 +10,7 @@ const PROFILE_ORIGIN: &str = "profile";
 const GAME_CMS_ORIGIN: &str = "gamecms-hacs";
 const UGC_ORIGIN: &str = "discovery-infiniteugc";
 const BAN_ORIGIN: &str = "banprocessor";
+const ECONOMY_ORIGIN: &str = "economy";
 
 /// Builds a full `https://<origin>.svc.halowaypoint.com` base URL for the given origin.
 fn base_url(origin: &str) -> String {
@@ -30,6 +31,7 @@ pub(crate) struct HaloEndpoints {
     pub ugc_base_url: String,
     pub settings_base_url: String,
     pub ban_base_url: String,
+    pub economy_base_url: String,
 }
 
 impl Default for HaloEndpoints {
@@ -43,6 +45,7 @@ impl Default for HaloEndpoints {
             ugc_base_url: base_url(UGC_ORIGIN),
             settings_base_url: "https://settings.svc.halowaypoint.com".to_string(),
             ban_base_url: base_url(BAN_ORIGIN),
+            economy_base_url: base_url(ECONOMY_ORIGIN),
         }
     }
 }
