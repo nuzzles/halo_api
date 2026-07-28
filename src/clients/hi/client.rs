@@ -10,8 +10,8 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, GameModeId, GameVariantAsset,
-    MapAsset, MapId, MapModePairAsset, MatchStats, MatchType, MatchesPrivacy,
+    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmManifest, GameModeId,
+    GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats, MatchType, MatchesPrivacy,
     PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
     RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind,
     UgcSearchResults, UserInfo,
@@ -302,6 +302,16 @@ impl HaloInfiniteClient {
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/matches/{match_id}/stats"),
+            &[],
+        )
+        .await
+    }
+
+    /// Returns the Theater film manifest and chunk inventory for a match.
+    pub async fn match_film(&self, match_id: &str) -> Result<FilmManifest, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.ugc_base_url,
+            &format!("/hi/films/matches/{match_id}/spectate"),
             &[],
         )
         .await

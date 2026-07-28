@@ -1082,6 +1082,61 @@ pub struct MatchCoreStats {
     pub damage_taken: i64,
 }
 
+/// Theater-film metadata and downloadable chunk inventory for a match.
+#[derive(Debug, Clone, Deserialize)]
+pub struct FilmManifest {
+    #[serde(rename = "FilmStatusBond")]
+    pub status: i32,
+    #[serde(rename = "CustomData")]
+    pub custom_data: FilmCustomData,
+    #[serde(rename = "BlobStoragePathPrefix")]
+    pub blob_storage_path_prefix: String,
+    #[serde(rename = "AssetId")]
+    pub asset_id: String,
+}
+
+impl FilmManifest {
+    pub fn chunk_url(&self, chunk: &FilmChunk) -> String {
+        format!(
+            "{}/{}",
+            self.blob_storage_path_prefix.trim_end_matches('/'),
+            chunk.file_relative_path.trim_start_matches('/')
+        )
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct FilmCustomData {
+    #[serde(rename = "FilmLength")]
+    pub film_length: i64,
+    #[serde(rename = "Chunks")]
+    pub chunks: Vec<FilmChunk>,
+    #[serde(rename = "HasGameEnded")]
+    pub has_game_ended: bool,
+    #[serde(rename = "ManifestRefreshSeconds")]
+    pub manifest_refresh_seconds: i64,
+    #[serde(rename = "MatchId")]
+    pub match_id: String,
+    #[serde(rename = "FilmMajorVersion")]
+    pub film_major_version: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct FilmChunk {
+    #[serde(rename = "Index")]
+    pub index: i32,
+    #[serde(rename = "ChunkStartTimeOffsetMilliseconds")]
+    pub start_time_offset_ms: i64,
+    #[serde(rename = "DurationMilliseconds")]
+    pub duration_ms: i64,
+    #[serde(rename = "ChunkSize")]
+    pub size: i64,
+    #[serde(rename = "FileRelativePath")]
+    pub file_relative_path: String,
+    #[serde(rename = "ChunkType")]
+    pub chunk_type: i32,
+}
+
 /// Response body from the matchmade service record endpoint.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
