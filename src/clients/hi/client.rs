@@ -10,10 +10,10 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    EmblemMapping, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats,
-    MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId,
-    PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord,
-    UgcAssetKind, UgcSearchResults, UserInfo,
+    EmblemMapping, EmblemMetadata, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset,
+    MatchStats, MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset,
+    PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar,
+    ServiceRecord, UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -176,6 +176,47 @@ impl HaloInfiniteClient {
             source: Arc::new(source),
             body,
         })
+    }
+
+    async fn get_bytes_with_clearance(
+        &self,
+        base: &str,
+        path: &str,
+    ) -> Result<Vec<u8>, InfiniteClientError> {
+        let url = format!("{base}{path}");
+        let first = self.auth.credentials(true).await?;
+        match self.get_bytes_once(&url, &first).await {
+            Err(error) if error.is_unauthorized() => {
+                self.auth.invalidate().await;
+                let second = self.auth.credentials(true).await?;
+                self.get_bytes_once(&url, &second).await
+            }
+            result => result,
+        }
+    }
+
+    async fn get_bytes_once(
+        &self,
+        url: &str,
+        credentials: &HaloCredentials,
+    ) -> Result<Vec<u8>, InfiniteClientError> {
+        let mut request = self
+            .http
+            .get(url)
+            .header("X-343-Authorization-Spartan", &credentials.spartan_token)
+            .header("User-Agent", HALO_PC_USER_AGENT)
+            .timeout(DEFAULT_TIMEOUT);
+        if let Some(clearance) = &credentials.clearance {
+            request = request.header("343-Clearance", clearance);
+        }
+        let response = request.send().await?;
+        if !response.status().is_success() {
+            let url = response.url().to_string();
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(InfiniteClientError::HttpStatus { url, status, body });
+        }
+        Ok(response.bytes().await?.to_vec())
     }
 
     pub async fn playlist_csr(
@@ -455,6 +496,46 @@ impl HaloInfiniteClient {
             &self.endpoints.game_cms_base_url,
             "/hi/Waypoint/file/images/emblems/mapping.json",
             &[],
+        )
+        .await
+    }
+
+    /// Gets the localized display metadata for an emblem inventory item.
+    pub async fn emblem_metadata(
+        &self,
+        emblem_path: &str,
+    ) -> Result<EmblemMetadata, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            &format!(
+                "/hi/progression/file/{}",
+                emblem_path.trim_start_matches('/')
+            ),
+            &[],
+        )
+        .await
+    }
+
+    /// Downloads an emblem PNG with the required Halo authentication headers.
+    pub async fn emblem_image(
+        &self,
+        assets: &super::models::EmblemImageAssets,
+    ) -> Result<Vec<u8>, InfiniteClientError> {
+        self.waypoint_image(&assets.emblem_cms_path).await
+    }
+
+    /// Downloads a nameplate PNG with the required Halo authentication headers.
+    pub async fn emblem_nameplate(
+        &self,
+        assets: &super::models::EmblemImageAssets,
+    ) -> Result<Vec<u8>, InfiniteClientError> {
+        self.waypoint_image(&assets.nameplate_cms_path).await
+    }
+
+    async fn waypoint_image(&self, cms_path: &str) -> Result<Vec<u8>, InfiniteClientError> {
+        self.get_bytes_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            &format!("/hi/Waypoint/file/{}", cms_path.trim_start_matches('/')),
         )
         .await
     }

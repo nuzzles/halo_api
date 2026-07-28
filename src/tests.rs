@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::auth::endpoints::AuthEndpoints;
 use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
 use crate::clients::hi::endpoints::HaloEndpoints;
-use crate::clients::hi::models::PlaylistId;
+use crate::clients::hi::models::{EmblemImageAssets, PlaylistId};
 use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
@@ -338,4 +338,29 @@ async fn csr_season_file_uses_pc_user_agent_and_spartan_auth() {
         .unwrap();
     assert!(request.headers.get("343-clearance").is_none());
     assert!(request.url.query().is_none());
+}
+
+#[tokio::test]
+async fn emblem_image_download_uses_spartan_auth_and_clearance() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/Waypoint/file/images/emblems/example.png"))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes([1, 2, 3]))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let assets = EmblemImageAssets {
+        emblem_cms_path: "images/emblems/example.png".to_string(),
+        nameplate_cms_path: "images/nameplates/example.png".to_string(),
+        text_color: "#FFFFFF".to_string(),
+    };
+    assert_eq!(
+        halo.emblem_image(&assets).await.unwrap().as_ref(),
+        [1, 2, 3]
+    );
 }
