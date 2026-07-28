@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::BTreeMap};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer};
@@ -735,6 +735,27 @@ pub struct EmblemConfiguration {
     pub configuration_id: i64,
 }
 
+/// Waypoint image assets indexed by emblem identifier and configuration ID.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(transparent)]
+pub struct EmblemMapping {
+    pub emblems: BTreeMap<String, BTreeMap<i64, EmblemImageAssets>>,
+}
+
+impl EmblemMapping {
+    pub fn get(&self, emblem_id: &str, configuration_id: i64) -> Option<&EmblemImageAssets> {
+        self.emblems.get(emblem_id)?.get(&configuration_id)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EmblemImageAssets {
+    pub emblem_cms_path: String,
+    pub nameplate_cms_path: String,
+    pub text_color: String,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct BanSummary {
     #[serde(rename = "Results")]
@@ -1329,6 +1350,22 @@ mod tests {
         }))
         .unwrap();
         assert_eq!(appearance.appearance.service_tag, "117");
+
+        let emblem_mapping: EmblemMapping = serde_json::from_value(serde_json::json!({
+            "104-001-reach-wrath-e-37d15c60": {
+                "-1490538315": {
+                    "emblemCmsPath": "images/emblems/wrath.png",
+                    "nameplateCmsPath": "images/nameplates/wrath.png",
+                    "textColor": "#000000"
+                }
+            }
+        }))
+        .unwrap();
+        let emblem = emblem_mapping
+            .get("104-001-reach-wrath-e-37d15c60", -1_490_538_315)
+            .unwrap();
+        assert_eq!(emblem.emblem_cms_path, "images/emblems/wrath.png");
+        assert_eq!(emblem.text_color, "#000000");
 
         let public: PlayerCustomizationCollection = serde_json::from_value(serde_json::json!({
             "PlayerCustomizations": [{

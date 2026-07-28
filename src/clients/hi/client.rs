@@ -10,10 +10,10 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats, MatchesPrivacy,
-    PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata,
-    RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind,
-    UgcSearchResults, UserInfo,
+    EmblemMapping, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats,
+    MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId,
+    PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord,
+    UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -450,9 +450,7 @@ impl HaloInfiniteClient {
     }
 
     /// Gets the Waypoint mapping from emblem configurations to image assets.
-    ///
-    /// This remains JSON until the live response contract has been captured and tested.
-    pub async fn emblem_mapping(&self) -> Result<Value, InfiniteClientError> {
+    pub async fn emblem_mapping(&self) -> Result<EmblemMapping, InfiniteClientError> {
         self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             "/hi/Waypoint/file/images/emblems/mapping.json",
