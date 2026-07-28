@@ -10,10 +10,10 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    EmblemMapping, EmblemMetadata, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset,
-    MatchStats, MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset,
-    PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar,
-    ServiceRecord, UgcAssetKind, UgcSearchResults, UserInfo,
+    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, GameModeId, GameVariantAsset,
+    MapAsset, MapId, MapModePairAsset, MatchStats, MatchesPrivacy, PlayerCustomizationCollection,
+    PlayerMatchHistory, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
+    RankedArenaSeason, SeasonCalendar, ServiceRecord, UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use crate::auth::{HaloAuth, HaloCredentials};
 
@@ -505,15 +505,36 @@ impl HaloInfiniteClient {
         &self,
         emblem_path: &str,
     ) -> Result<EmblemMetadata, InfiniteClientError> {
+        self.customization_metadata(emblem_path).await
+    }
+
+    /// Gets localized display metadata for a customization inventory item or core.
+    pub async fn customization_metadata(
+        &self,
+        item_path: &str,
+    ) -> Result<CustomizationItemMetadata, InfiniteClientError> {
         self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
-            &format!(
-                "/hi/progression/file/{}",
-                emblem_path.trim_start_matches('/')
-            ),
+            &format!("/hi/progression/file/{}", item_path.trim_start_matches('/')),
             &[],
         )
         .await
+    }
+
+    /// Downloads the display image referenced by customization metadata.
+    pub async fn customization_image(
+        &self,
+        metadata: &CustomizationItemMetadata,
+    ) -> Result<Option<Vec<u8>>, InfiniteClientError> {
+        let Some(path) = metadata.image_cms_path() else {
+            return Ok(None);
+        };
+        self.get_bytes_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            &format!("/hi/images/file/{}", path.trim_start_matches('/')),
+        )
+        .await
+        .map(Some)
     }
 
     /// Downloads an emblem PNG with the required Halo authentication headers.

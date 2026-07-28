@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::auth::endpoints::AuthEndpoints;
 use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
 use crate::clients::hi::endpoints::HaloEndpoints;
-use crate::clients::hi::models::{EmblemImageAssets, PlaylistId};
+use crate::clients::hi::models::{CustomizationItemMetadata, EmblemImageAssets, PlaylistId};
 use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
@@ -362,5 +362,28 @@ async fn emblem_image_download_uses_spartan_auth_and_clearance() {
     assert_eq!(
         halo.emblem_image(&assets).await.unwrap().as_ref(),
         [1, 2, 3]
+    );
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/images/file/Progression/Inventory/Armor/Helmets/example.png",
+        ))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes([4, 5, 6]))
+        .expect(1)
+        .mount(&server)
+        .await;
+    let metadata: CustomizationItemMetadata =
+        serde_json::from_value(serde_json::json!({ "CommonData": {
+            "Title": { "status": "Ready", "value": "Helmet", "translations": {} },
+            "DisplayPath": { "Media": { "MediaUrl": {
+                "Path": "Progression/Inventory/Armor/Helmets/example.png"
+            }}}
+        }}))
+        .unwrap();
+    assert_eq!(
+        halo.customization_image(&metadata).await.unwrap().unwrap(),
+        [4, 5, 6]
     );
 }

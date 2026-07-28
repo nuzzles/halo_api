@@ -1190,8 +1190,176 @@ pub struct PlayerCustomization {
 pub struct PlayerCustomizationData {
     #[serde(rename = "Appearance")]
     pub appearance: PlayerAppearance,
-    #[serde(flatten)]
-    pub other_customization: std::collections::BTreeMap<String, serde_json::Value>,
+    #[serde(default, rename = "AiCores")]
+    pub ai_cores: AiCoreCollection,
+    #[serde(default, rename = "ArmorCores")]
+    pub armor_cores: ArmorCoreCollection,
+    #[serde(default, rename = "VehicleCores")]
+    pub vehicle_cores: VehicleCoreCollection,
+    #[serde(default, rename = "WeaponCores")]
+    pub weapon_cores: WeaponCoreCollection,
+    #[serde(default, rename = "SpartanBody")]
+    pub spartan_body: Option<SpartanBody>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct AiCoreCollection {
+    #[serde(default, rename = "AiCores")]
+    pub cores: Vec<AiCore>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct AiCore {
+    pub core_id: String,
+    pub core_path: String,
+    pub core_type: String,
+    pub is_equipped: bool,
+    pub themes: Vec<AiTheme>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct AiTheme {
+    pub color_path: String,
+    pub model_path: String,
+    pub theme_path: String,
+    pub first_modified_date_utc: ApiDate,
+    pub last_modified_date_utc: ApiDate,
+    pub is_default: bool,
+    pub is_equipped: bool,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct ArmorCoreCollection {
+    #[serde(default, rename = "ArmorCores")]
+    pub cores: Vec<ArmorCore>,
+}
+
+impl ArmorCoreCollection {
+    pub fn equipped(&self) -> Option<&ArmorCore> {
+        self.cores.iter().find(|core| core.is_equipped)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ArmorCore {
+    pub core_id: String,
+    pub core_path: String,
+    pub core_type: String,
+    pub is_equipped: bool,
+    pub themes: Vec<ArmorTheme>,
+}
+
+impl ArmorCore {
+    pub fn equipped_theme(&self) -> Option<&ArmorTheme> {
+        self.themes.iter().find(|theme| theme.is_equipped)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ArmorTheme {
+    pub armor_fx_path: String,
+    #[serde(default)]
+    pub armor_fx_paths: Vec<String>,
+    pub chest_attachment_path: String,
+    pub coating_path: String,
+    #[serde(default)]
+    pub emblems: Vec<CustomizationEmblem>,
+    pub glove_path: String,
+    pub helmet_attachment_path: String,
+    pub helmet_path: String,
+    pub hip_attachment_path: String,
+    pub knee_pad_path: String,
+    pub left_shoulder_pad_path: String,
+    pub mythic_fx_path: String,
+    pub right_shoulder_pad_path: String,
+    pub theme_path: String,
+    pub visor_path: String,
+    pub wrist_attachment_path: String,
+    pub first_modified_date_utc: ApiDate,
+    pub last_modified_date_utc: ApiDate,
+    pub is_default: bool,
+    pub is_equipped: bool,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct VehicleCoreCollection {
+    #[serde(default, rename = "VehicleCores")]
+    pub cores: Vec<VehicleCore>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct VehicleCore {
+    pub core_id: String,
+    pub core_path: String,
+    pub core_type: String,
+    pub themes: Vec<VehicleTheme>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct VehicleTheme {
+    pub alternate_geometry_region_path: String,
+    pub coating_path: String,
+    #[serde(default)]
+    pub emblems: Vec<CustomizationEmblem>,
+    pub horn_path: String,
+    pub theme_path: String,
+    pub vehicle_charm_path: String,
+    pub vehicle_fx_path: String,
+    pub first_modified_date_utc: ApiDate,
+    pub last_modified_date_utc: ApiDate,
+    pub is_default: bool,
+    pub is_equipped: bool,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct WeaponCoreCollection {
+    #[serde(default, rename = "WeaponCores")]
+    pub cores: Vec<WeaponCore>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct WeaponCore {
+    pub core_id: String,
+    pub core_path: String,
+    pub core_type: String,
+    pub themes: Vec<WeaponTheme>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct WeaponTheme {
+    pub alternate_geometry_region_path: String,
+    pub ammo_counter_color_path: String,
+    pub coating_path: String,
+    pub death_fx_path: String,
+    #[serde(default)]
+    pub emblems: Vec<CustomizationEmblem>,
+    pub stat_tracker_path: String,
+    pub theme_path: String,
+    pub weapon_charm_path: String,
+    pub first_modified_date_utc: ApiDate,
+    pub last_modified_date_utc: ApiDate,
+    pub is_default: bool,
+    pub is_equipped: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct SpartanBody {
+    pub body_type: String,
+    pub voice_path: String,
+    pub left_arm: String,
+    pub right_arm: String,
+    pub left_leg: String,
+    pub right_leg: String,
+    pub last_modified_date_utc: ApiDate,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1220,6 +1388,24 @@ pub struct EmblemConfiguration {
     pub configuration_id: i64,
 }
 
+/// An emblem applied to an armor, weapon, or vehicle location.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct CustomizationEmblem {
+    pub path: String,
+    pub location_id: i64,
+    pub configuration_id: i64,
+}
+
+impl CustomizationEmblem {
+    pub fn emblem_id(&self) -> Option<&str> {
+        self.path
+            .rsplit('/')
+            .next()
+            .and_then(|file_name| file_name.strip_suffix(".json"))
+    }
+}
+
 impl EmblemConfiguration {
     /// Returns the emblem identifier used by [`EmblemMapping`].
     pub fn emblem_id(&self) -> Option<&str> {
@@ -1246,6 +1432,22 @@ impl EmblemMapping {
     pub fn resolve(&self, configuration: &EmblemConfiguration) -> Option<&EmblemImageAssets> {
         self.get(configuration.emblem_id()?, configuration.configuration_id)
     }
+
+    /// Resolves legacy emblem paths through their inventory display metadata.
+    pub fn resolve_metadata(
+        &self,
+        metadata: &CustomizationItemMetadata,
+        configuration_id: i64,
+    ) -> Option<&EmblemImageAssets> {
+        self.get(metadata.image_id()?, configuration_id)
+    }
+
+    pub fn resolve_customization_emblem(
+        &self,
+        emblem: &CustomizationEmblem,
+    ) -> Option<&EmblemImageAssets> {
+        self.get(emblem.emblem_id()?, emblem.configuration_id)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1256,18 +1458,60 @@ pub struct EmblemImageAssets {
     pub text_color: String,
 }
 
-/// Display metadata for an emblem inventory item.
+/// Display metadata for a customization inventory item or core.
 #[derive(Debug, Clone, Deserialize)]
-pub struct EmblemMetadata {
+pub struct CustomizationItemMetadata {
     #[serde(rename = "CommonData")]
-    pub common_data: EmblemCommonData,
+    pub common_data: CustomizationItemCommonData,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct EmblemCommonData {
+pub struct CustomizationItemCommonData {
     #[serde(rename = "Title")]
     pub title: LocalizedText,
+    #[serde(rename = "DisplayPath")]
+    pub display_path: Option<CustomizationDisplayPath>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CustomizationDisplayPath {
+    #[serde(rename = "Media")]
+    pub media: CustomizationMedia,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CustomizationMedia {
+    #[serde(rename = "MediaUrl")]
+    pub media_url: CustomizationMediaUrl,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CustomizationMediaUrl {
+    #[serde(rename = "Path")]
+    pub path: String,
+}
+
+impl CustomizationItemMetadata {
+    /// Returns the Game CMS path for this item's display image, when one is defined.
+    pub fn image_cms_path(&self) -> Option<&str> {
+        self.common_data
+            .display_path
+            .as_ref()
+            .map(|display| display.media.media_url.path.as_str())
+            .filter(|path| !path.is_empty())
+    }
+
+    /// Returns the display image's file stem, which is also the emblem mapping identifier.
+    pub fn image_id(&self) -> Option<&str> {
+        self.image_cms_path()?
+            .rsplit('/')
+            .next()?
+            .rsplit_once('.')
+            .map(|(stem, _)| stem)
+    }
+}
+
+pub type EmblemMetadata = CustomizationItemMetadata;
 
 impl EmblemImageAssets {
     /// Returns the authenticated Waypoint endpoint for the emblem image.
@@ -1928,11 +2172,31 @@ mod tests {
                     "status": "Ready",
                     "value": "The Gate",
                     "translations": { "de-DE": "Das Tor" }
+                },
+                "DisplayPath": {
+                    "Media": {
+                        "MediaUrl": {
+                            "Path": "Progression/Inventory/Armor/Helmets/example.png"
+                        }
+                    }
                 }
             }
         }))
         .unwrap();
         assert_eq!(metadata.common_data.title.value, "The Gate");
+        assert_eq!(
+            metadata.image_cms_path(),
+            Some("Progression/Inventory/Armor/Helmets/example.png")
+        );
+        assert_eq!(metadata.image_id(), Some("example"));
+
+        let applied_emblem: CustomizationEmblem = serde_json::from_value(serde_json::json!({
+            "Path": "Inventory/Armor/Emblems/013-001-0fe4e1a4.json",
+            "LocationId": -142056143,
+            "ConfigurationId": 802727239
+        }))
+        .unwrap();
+        assert_eq!(applied_emblem.emblem_id(), Some("013-001-0fe4e1a4"));
 
         let public: PlayerCustomizationCollection = serde_json::from_value(serde_json::json!({
             "PlayerCustomizations": [{
@@ -1948,12 +2212,30 @@ mod tests {
                         "ServiceTag": "117",
                         "IntroEmotePath": null
                     },
-                    "ArmorCores": {}
+                    "ArmorCores": {},
+                    "SpartanBody": {
+                        "BodyType": "Large",
+                        "VoicePath": "Inventory/Spartan/Voices/voice.json",
+                        "LeftArm": "None",
+                        "RightArm": "None",
+                        "LeftLeg": "None",
+                        "RightLeg": "None",
+                        "LastModifiedDateUtc": { "ISO8601Date": "2026-01-01T00:00:00Z" }
+                    }
                 }
             }]
         }))
         .unwrap();
         assert_eq!(public.player_customizations[0].result_code, "Success");
+        assert_eq!(
+            public.player_customizations[0]
+                .result
+                .spartan_body
+                .as_ref()
+                .unwrap()
+                .body_type,
+            "Large"
+        );
 
         let bans: BanSummary = serde_json::from_value(serde_json::json!({
             "Results": [{
