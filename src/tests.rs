@@ -2,7 +2,7 @@ use std::io::Write;
 use std::sync::Arc;
 
 use crate::auth::endpoints::AuthEndpoints;
-use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
+use crate::auth::{AuthError, ClearanceTokenSource, HaloAuthClient, SpartanTokenSource};
 use crate::clients::hi::endpoints::HaloEndpoints;
 use crate::clients::hi::models::{
     CustomizationItemMetadata, EmblemImageAssets, MatchHistoryType, MatchType, PlaylistId,
@@ -20,17 +20,26 @@ use xbox::{XboxClient, XboxEndpoints, XboxError};
 /// Hands out a fixed, never-expiring user token without touching the network.
 struct FakeAuthProvider;
 
-struct FailingHaloAuth;
+struct FailingSpartanTokenSource;
+struct UnusedClearanceTokenSource;
 
 #[async_trait]
-impl HaloAuth for FailingHaloAuth {
-    async fn credentials(&self, _require_clearance: bool) -> Result<HaloCredentials, AuthError> {
+impl SpartanTokenSource for FailingSpartanTokenSource {
+    async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError> {
         Err(AuthError::SpartanTokenProvider(
             "Xbox login failed".to_string(),
         ))
     }
+}
 
-    async fn invalidate(&self) {}
+#[async_trait]
+impl ClearanceTokenSource for UnusedClearanceTokenSource {
+    async fn clearance_token(
+        &self,
+        _spartan_token: &str,
+    ) -> Result<CachedToken<String>, AuthError> {
+        unreachable!("clearance is not requested when Spartan-token acquisition fails")
+    }
 }
 
 #[async_trait]
@@ -138,7 +147,8 @@ async fn test_client(
         ban_base_url: server.uri(),
         economy_base_url: server.uri(),
     };
-    let auth = AuthClient::from_xbox_client_with_endpoints(xbox_client.clone(), &auth_endpoints);
+    let auth =
+        HaloAuthClient::from_xbox_client_with_endpoints(xbox_client.clone(), &auth_endpoints);
     let halo_infinite_client = HaloInfiniteClient::with_endpoints(auth, endpoints);
 
     (halo_infinite_client, xbox_client)
@@ -521,7 +531,10 @@ async fn gamertag_not_found_maps_to_typed_error() {
 
 #[tokio::test]
 async fn infinite_client_preserves_auth_errors() {
-    let halo = HaloInfiniteClient::new(FailingHaloAuth);
+    let halo = HaloInfiniteClient::new(HaloAuthClient::with_sources(
+        Arc::new(FailingSpartanTokenSource),
+        Arc::new(UnusedClearanceTokenSource),
+    ));
     let error = halo.match_stats("unused").await.unwrap_err();
 
     assert!(matches!(

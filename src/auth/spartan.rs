@@ -16,15 +16,8 @@ use super::endpoints::AuthEndpoints;
 const SPARTAN_TOKEN_TIMEOUT: Duration = Duration::from_secs(10);
 const HALO_RELYING_PARTY: RelyingParty = RelyingParty::new("https://prod.xsts.halowaypoint.com/");
 
-/// Something that can produce a fresh Halo "spartan token" on demand — the bearer credential
-/// every Halo Waypoint API call requires.
-///
-/// This is deliberately its own trait, separate from anything in the `xbox` crate: a spartan
-/// token can be sourced from anywhere (an `xbox` client, a shared cache elsewhere, a value read
-/// from a secrets manager), so [`crate::HaloInfiniteClient`] only depends on this trait, not on `xbox`'s
-/// concrete types.
 #[async_trait]
-pub trait SpartanTokenSource: Send + Sync {
+pub(crate) trait SpartanTokenSource: Send + Sync {
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError>;
 }
 
@@ -42,24 +35,13 @@ struct ExpiresUtc {
     iso8601_date: DateTime<Utc>,
 }
 
-/// The default [`SpartanTokenSource`]: mints a spartan token from an Xbox Live XSTS ticket
-/// (scoped to Halo Waypoint's relying-party URI) obtained via a shared `xbox::XboxClient`.
-///
-/// Takes the `xbox::XboxClient` as an `Arc` so callers can keep their own handle to it (e.g.
-/// for gamertag/XUID resolution) alongside the one wired into a [`crate::HaloInfiniteClient`].
-pub struct XboxSpartanTokenProvider<P: XblAuthProvider> {
+pub(crate) struct XboxSpartanTokenProvider<P: XblAuthProvider> {
     xbox: Arc<XboxClient<P>>,
     http: Client,
     spartan_token_url: String,
 }
 
 impl<P: XblAuthProvider> XboxSpartanTokenProvider<P> {
-    pub fn new(xbox: Arc<XboxClient<P>>) -> Self {
-        Self::with_endpoints(xbox, &AuthEndpoints::default())
-    }
-
-    /// Constructs a provider pointed at overridden endpoint URLs, e.g. to point at a mock
-    /// server in tests.
     pub(crate) fn with_endpoints(xbox: Arc<XboxClient<P>>, endpoints: &AuthEndpoints) -> Self {
         Self {
             xbox,

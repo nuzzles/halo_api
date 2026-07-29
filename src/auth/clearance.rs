@@ -10,21 +10,22 @@ use crate::auth::AuthError;
 
 const TIMEOUT: Duration = Duration::from_secs(10);
 
-/// Produces the Waypoint flight clearance required alongside a Spartan token.
 #[async_trait]
-pub trait ClearanceTokenSource: Send + Sync {
+pub(crate) trait ClearanceTokenSource: Send + Sync {
     async fn clearance_token(&self, spartan_token: &str) -> Result<CachedToken<String>, AuthError>;
 }
 
-/// Fetches clearance from Halo Waypoint's OBAN flight-configuration endpoint.
-pub struct WaypointClearanceProvider {
+pub(crate) struct WaypointClearanceProvider {
     http: Client,
     current_user_url: String,
     clearance_base_url: String,
 }
 
 impl WaypointClearanceProvider {
-    pub fn new(current_user_url: impl Into<String>, clearance_base_url: impl Into<String>) -> Self {
+    pub(crate) fn new(
+        current_user_url: impl Into<String>,
+        clearance_base_url: impl Into<String>,
+    ) -> Self {
         Self {
             http: Client::new(),
             current_user_url: current_user_url.into(),

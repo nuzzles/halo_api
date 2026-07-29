@@ -4,7 +4,7 @@ use std::env;
 use std::io::{self, Write};
 use std::sync::Arc;
 
-use halo_api::auth::AuthClient;
+use halo_api::auth::HaloAuthClient;
 use halo_api::clients::hi::HaloInfiniteClient;
 use xbox::{RelyingParty, XboxClient, auth::LegacyPasswordProvider, models::Xuid};
 
@@ -59,7 +59,7 @@ pub fn xbox_client() -> Result<Arc<ExampleXboxClient>, ExampleError> {
 pub fn halo_infinite_client() -> Result<(Arc<ExampleXboxClient>, HaloInfiniteClient), ExampleError>
 {
     let xbox = xbox_client()?;
-    let auth = AuthClient::from_xbox_client(xbox.clone());
+    let auth = HaloAuthClient::from_xbox_client(xbox.clone());
     Ok((xbox, HaloInfiniteClient::new(auth)))
 }
 

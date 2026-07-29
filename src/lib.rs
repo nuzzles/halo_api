@@ -10,7 +10,7 @@
 //! use std::sync::Arc;
 //!
 //! use halo_api::clients::hi::models::PlaylistId;
-//! use halo_api::auth::AuthClient;
+//! use halo_api::auth::HaloAuthClient;
 //! use halo_api::clients::hi::HaloInfiniteClient;
 //! use xbox::auth::LegacyPasswordProvider;
 //! use xbox::XboxClient;
@@ -19,7 +19,7 @@
 //!     "my-username",
 //!     "my-password",
 //! )));
-//! let auth = AuthClient::from_xbox_client(xbox_client.clone());
+//! let auth = HaloAuthClient::from_xbox_client(xbox_client.clone());
 //! let halo = HaloInfiniteClient::new(auth);
 //!
 //! let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;

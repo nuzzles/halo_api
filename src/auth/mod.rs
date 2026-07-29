@@ -1,11 +1,12 @@
-pub mod clearance;
-pub mod client;
-pub mod error;
-pub mod spartan;
+mod clearance;
+mod client;
+mod error;
+mod spartan;
 
 pub(crate) mod endpoints;
 
-pub use clearance::{ClearanceTokenSource, WaypointClearanceProvider};
-pub use client::{AuthClient, HaloAuth, HaloCredentials};
+pub(crate) use clearance::{ClearanceTokenSource, WaypointClearanceProvider};
+pub use client::HaloAuthClient;
+pub(crate) use client::HaloCredentials;
 pub use error::AuthError;
-pub use spartan::{SpartanTokenSource, XboxSpartanTokenProvider};
+pub(crate) use spartan::{SpartanTokenSource, XboxSpartanTokenProvider};

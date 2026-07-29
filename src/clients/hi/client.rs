@@ -20,7 +20,7 @@ use super::models::{
     UgcSearchResults, UserInfo,
 };
 use super::rate_limit::RateLimiter;
-use crate::auth::{HaloAuth, HaloCredentials};
+use crate::auth::{HaloAuthClient, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 /// Default per-origin request rate. Matches SPNKr's conservative default for this API.
@@ -43,12 +43,12 @@ fn origin_of(url: &str) -> &str {
     }
 }
 
-/// Halo Infinite API client. Authentication is supplied by a separate [`HaloAuth`] client.
+/// Halo Infinite API client. Authentication is supplied by a [`HaloAuthClient`].
 ///
 /// Construct one with [`HaloInfiniteClient::new`] for the defaults, or
 /// [`HaloInfiniteClient::builder`] to configure the request timeout and per-origin rate limit.
 pub struct HaloInfiniteClient {
-    auth: Arc<dyn HaloAuth>,
+    auth: HaloAuthClient,
     http: Client,
     endpoints: HaloEndpoints,
     limiter: RateLimiter,
@@ -56,7 +56,7 @@ pub struct HaloInfiniteClient {
 }
 
 impl HaloInfiniteClient {
-    pub fn new<A: HaloAuth + 'static>(auth: impl Into<Arc<A>>) -> Self {
+    pub fn new(auth: HaloAuthClient) -> Self {
         Self::builder().build(auth)
     }
 
@@ -66,10 +66,7 @@ impl HaloInfiniteClient {
     }
 
     #[cfg(test)]
-    pub(crate) fn with_endpoints<A: HaloAuth + 'static>(
-        auth: impl Into<Arc<A>>,
-        endpoints: HaloEndpoints,
-    ) -> Self {
+    pub(crate) fn with_endpoints(auth: HaloAuthClient, endpoints: HaloEndpoints) -> Self {
         Self::builder().build_with_endpoints(auth, endpoints)
     }
 
@@ -923,9 +920,8 @@ impl HaloInfiniteClient {
 /// Configures a [`HaloInfiniteClient`].
 ///
 /// ```no_run
-/// # use std::sync::Arc;
 /// # use std::time::Duration;
-/// # fn example(auth: halo_api::auth::AuthClient) {
+/// # fn example(auth: halo_api::auth::HaloAuthClient) {
 /// use halo_api::clients::hi::HaloInfiniteClient;
 ///
 /// let halo = HaloInfiniteClient::builder()
@@ -978,16 +974,15 @@ impl HaloInfiniteClientBuilder {
     }
 
     /// Builds the client against the real Halo Waypoint endpoints.
-    pub fn build<A: HaloAuth + 'static>(self, auth: impl Into<Arc<A>>) -> HaloInfiniteClient {
+    pub fn build(self, auth: HaloAuthClient) -> HaloInfiniteClient {
         self.build_with_endpoints(auth, HaloEndpoints::default())
     }
 
-    pub(crate) fn build_with_endpoints<A: HaloAuth + 'static>(
+    pub(crate) fn build_with_endpoints(
         self,
-        auth: impl Into<Arc<A>>,
+        auth: HaloAuthClient,
         endpoints: HaloEndpoints,
     ) -> HaloInfiniteClient {
-        let auth: Arc<A> = auth.into();
         HaloInfiniteClient {
             auth,
             http: self.http.unwrap_or_default(),

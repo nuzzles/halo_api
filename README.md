@@ -12,7 +12,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 ## What this crate does
 
-- Separates authentication (`AuthClient`) from Halo API operations (`HaloInfiniteClient`).
+- Separates authentication (`HaloAuthClient`) from Halo API operations (`HaloInfiniteClient`).
 - Acquires and caches both the Spartan token and Waypoint flight clearance.
 - Covers stats, skill, profile, UGC, progression, career rank, reward tracks, ban, and privacy endpoints.
 - Filters service records by season, playlist, mode, and ranked/social via `ServiceRecordFilter`.
@@ -22,8 +22,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
   hard failure the caller has to handle manually.
 
 This crate depends on the [`xbox`](https://crates.io/crates/xbox) crate for Xbox Live authentication (XSTS
-tickets, XUID resolution) but does not require it directly — anything implementing `SpartanTokenSource` can
-supply a spartan token from elsewhere.
+tickets and XUID resolution). [`HaloAuthClient`] acquires and refreshes all Halo Waypoint credentials.
 
 ## Quick start
 
@@ -31,7 +30,7 @@ supply a spartan token from elsewhere.
 use std::sync::Arc;
 
 use halo_api::clients::hi::models::PlaylistId;
-use halo_api::auth::AuthClient;
+use halo_api::auth::HaloAuthClient;
 use halo_api::clients::hi::HaloInfiniteClient;
 use xbox::auth::LegacyPasswordProvider;
 use xbox::XboxClient;
@@ -42,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "my-username",
         "my-password",
     )));
-    let auth = AuthClient::from_xbox_client(xbox_client.clone());
+    let auth = HaloAuthClient::from_xbox_client(xbox_client.clone());
     let halo = HaloInfiniteClient::new(auth);
 
     let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
