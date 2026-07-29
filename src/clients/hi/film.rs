@@ -813,7 +813,7 @@ mod tests {
     #[test]
     fn decodes_dense_component_mask_component_zero_first() {
         // DELTA, slot 0, tag 0, dense mask with components 0 and 63 set.
-        let bits = format!("1{:011b}00{}{}", 0, 1, format!("1{}1", "0".repeat(62)))
+        let bits = format!("1{:011b}0011{}1", 0, "0".repeat(62))
             .chars()
             .collect::<Vec<_>>();
         let mut data = vec![0u8; bits.len().div_ceil(8)];
