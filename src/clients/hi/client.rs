@@ -8,6 +8,7 @@ use xbox::util::wrap_xuid;
 
 use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
+use super::film::{FilmEvent, decode_events, decode_players};
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
     CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk, FilmChunkData,
@@ -327,6 +328,22 @@ impl HaloInfiniteClient {
             chunks.push(self.film_chunk(film, chunk).await?);
         }
         Ok(chunks)
+    }
+
+    /// Downloads a match's Theater film and returns its human-player highlight events.
+    ///
+    /// Events include kills, deaths, mode-related events, and medals. Theater films do not
+    /// contain highlight events for bots or AI opponents, and some events may be absent from a
+    /// film. Join these results with [`Self::match_stats`] when team or mode-specific details are
+    /// needed.
+    pub async fn match_highlight_events(
+        &self,
+        match_id: &str,
+    ) -> Result<Vec<FilmEvent>, InfiniteClientError> {
+        let film = self.match_film(match_id).await?;
+        let chunks = self.film_chunks(&film).await?;
+        let players = decode_players(&chunks);
+        Ok(decode_events(&chunks, &players))
     }
 
     pub async fn match_skill(

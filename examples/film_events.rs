@@ -2,25 +2,14 @@
 
 mod common;
 
-use halo_api::clients::hi::film::{
-    FilmEventKind, decode_diagnostics, decode_events, decode_players,
-};
+use halo_api::clients::hi::film::FilmEventKind;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
-    let film = halo.match_film(&match_id).await?;
-    let chunks = halo.film_chunks(&film).await?;
-    let players = decode_players(&chunks);
-    let events = decode_events(&chunks, &players);
+    let events = halo.match_highlight_events(&match_id).await?;
 
-    println!("Decoder diagnostics: {:?}", decode_diagnostics(&chunks));
-
-    println!("Players:");
-    for player in &players {
-        println!("  {} ({})", player.gamertag, player.xuid);
-    }
     println!("Timeline:");
     let mut kills = std::collections::BTreeMap::<String, usize>::new();
     let mut deaths = std::collections::BTreeMap::<String, usize>::new();

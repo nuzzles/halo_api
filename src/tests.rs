@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::sync::Arc;
 
 use crate::auth::endpoints::AuthEndpoints;
@@ -189,6 +190,53 @@ async fn player_matches_uses_supported_query_parameters() {
 
     assert!(history.results.is_empty());
     assert_eq!(history.result_count, 0);
+}
+
+#[tokio::test]
+async fn match_highlight_events_downloads_and_decodes_film() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+    encoder.write_all(&[]).unwrap();
+    let compressed_chunk = encoder.finish().unwrap();
+
+    Mock::given(method("GET"))
+        .and(path("/hi/films/matches/test-match/spectate"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "FilmStatusBond": 1,
+            "CustomData": {
+                "FilmLength": 1000,
+                "Chunks": [{
+                    "Index": 0,
+                    "ChunkStartTimeOffsetMilliseconds": 0,
+                    "DurationMilliseconds": 1000,
+                    "ChunkSize": compressed_chunk.len(),
+                    "FileRelativePath": "film/highlights.bin",
+                    "ChunkType": 3
+                }],
+                "HasGameEnded": true,
+                "ManifestRefreshSeconds": 60,
+                "MatchId": "test-match",
+                "FilmMajorVersion": 1
+            },
+            "BlobStoragePathPrefix": server.uri(),
+            "AssetId": "film-asset"
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/film/highlights.bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(compressed_chunk))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let events = halo.match_highlight_events("test-match").await.unwrap();
+
+    assert!(events.is_empty());
 }
 
 #[tokio::test]
