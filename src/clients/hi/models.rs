@@ -2018,6 +2018,359 @@ pub struct RankedArenaSeason {
     pub map_modes: Vec<RankedArenaMapMode>,
 }
 
+/// Which pool of games a service-record query aggregates over.
+///
+/// Filters (see [`ServiceRecordFilter`]) apply only to [`MatchType::Matchmade`]; Halo ignores them
+/// for custom and local records.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum MatchType {
+    #[default]
+    Matchmade,
+    Custom,
+    Local,
+}
+
+impl MatchType {
+    /// The path segment Halo expects, e.g. `Matchmade` in `.../{match_type}/servicerecord`.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Matchmade => "Matchmade",
+            Self::Custom => "Custom",
+            Self::Local => "Local",
+        }
+    }
+}
+
+/// Which games a match-history query returns.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum MatchHistoryType {
+    #[default]
+    All,
+    Matchmaking,
+    Custom,
+    Local,
+}
+
+impl MatchHistoryType {
+    /// The value sent in the `type` query parameter.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::All => "all",
+            Self::Matchmaking => "matchmaking",
+            Self::Custom => "custom",
+            Self::Local => "local",
+        }
+    }
+}
+
+/// Optional filters narrowing a matchmade service record to a season, playlist, or mode.
+///
+/// Halo only accepts specific combinations of these filters. The most common are a season on its
+/// own, or a season plus a game-variant category. Build one fluently:
+///
+/// ```
+/// use halo_api::clients::hi::models::ServiceRecordFilter;
+///
+/// let filter = ServiceRecordFilter::for_season("Csr/Seasons/CsrSeason5-1.json")
+///     .game_variant_category(6)
+///     .ranked(true);
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ServiceRecordFilter {
+    pub season_id: Option<String>,
+    pub game_variant_category: Option<i32>,
+    pub playlist_asset_id: Option<String>,
+    pub is_ranked: Option<bool>,
+    pub gameplay_interaction: Option<String>,
+}
+
+impl ServiceRecordFilter {
+    /// Starts a filter scoped to a CSR season file path.
+    pub fn for_season(season_id: impl Into<String>) -> Self {
+        Self {
+            season_id: Some(season_id.into()),
+            ..Self::default()
+        }
+    }
+
+    /// Sets the season file path (e.g. `Csr/Seasons/CsrSeason5-1.json`).
+    pub fn season(mut self, season_id: impl Into<String>) -> Self {
+        self.season_id = Some(season_id.into());
+        self
+    }
+
+    /// Restricts to a game-variant category (the numeric `GameVariantCategory`).
+    pub fn game_variant_category(mut self, category: i32) -> Self {
+        self.game_variant_category = Some(category);
+        self
+    }
+
+    /// Restricts to a single playlist asset ID.
+    pub fn playlist_asset_id(mut self, playlist_asset_id: impl Into<String>) -> Self {
+        self.playlist_asset_id = Some(playlist_asset_id.into());
+        self
+    }
+
+    /// Restricts to ranked (`true`) or social (`false`) results.
+    pub fn ranked(mut self, is_ranked: bool) -> Self {
+        self.is_ranked = Some(is_ranked);
+        self
+    }
+
+    /// Restricts to a gameplay-interaction value (e.g. `PvP`, `PvE`).
+    pub fn gameplay_interaction(mut self, gameplay_interaction: impl Into<String>) -> Self {
+        self.gameplay_interaction = Some(gameplay_interaction.into());
+        self
+    }
+
+    /// Returns `true` when no filter is set.
+    pub fn is_empty(&self) -> bool {
+        *self == Self::default()
+    }
+
+    /// Renders the filter as Halo's query parameters (lowercase, no separators).
+    pub(crate) fn to_query(&self) -> Vec<(&'static str, String)> {
+        let mut query = Vec::new();
+        if let Some(season_id) = &self.season_id {
+            query.push(("seasonid", season_id.clone()));
+        }
+        if let Some(category) = self.game_variant_category {
+            query.push(("gamevariantcategory", category.to_string()));
+        }
+        if let Some(playlist_asset_id) = &self.playlist_asset_id {
+            query.push(("playlistassetid", playlist_asset_id.clone()));
+        }
+        if let Some(is_ranked) = self.is_ranked {
+            // Halo expects Python-style capitalized booleans here.
+            query.push((
+                "isranked",
+                if is_ranked { "True" } else { "False" }.to_string(),
+            ));
+        }
+        if let Some(gameplay_interaction) = &self.gameplay_interaction {
+            query.push(("gameplayinteraction", gameplay_interaction.clone()));
+        }
+        query
+    }
+}
+
+/// Match counts across the different game experiences for a player.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MatchCount {
+    #[serde(rename = "CustomMatchesPlayedCount")]
+    pub custom: i64,
+    #[serde(rename = "MatchesPlayedCount")]
+    pub total: i64,
+    #[serde(rename = "MatchmadeMatchesPlayedCount")]
+    pub matchmade: i64,
+    #[serde(rename = "LocalMatchesPlayedCount")]
+    pub local: i64,
+}
+
+/// A player's progress on a reward track (career rank or operation pass).
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct RewardTrackProgress {
+    #[serde(rename = "Rank")]
+    pub rank: i32,
+    #[serde(rename = "PartialProgress")]
+    pub partial_progress: i64,
+    #[serde(rename = "HasReachedMaxRank")]
+    pub has_reached_max_rank: bool,
+}
+
+/// A player's current career-rank progression.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct PlayerCareerRank {
+    #[serde(rename = "CurrentProgress")]
+    pub current_progress: RewardTrackProgress,
+    #[serde(rename = "SpartanId")]
+    pub spartan_id: Option<String>,
+}
+
+/// A player's owned and available operation passes.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct PlayerOperationPasses {
+    #[serde(rename = "ActiveOperationRewardTrackPath")]
+    pub active_operation_reward_track_path: Option<String>,
+    #[serde(rename = "OperationRewardTracks")]
+    pub operation_reward_tracks: Vec<PlayerOperationPass>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerOperationPass {
+    #[serde(rename = "RewardTrackPath")]
+    pub reward_track_path: String,
+    #[serde(default, rename = "IsOwned")]
+    pub is_owned: bool,
+    #[serde(default, rename = "CurrentProgress")]
+    pub current_progress: RewardTrackProgress,
+}
+
+/// The career-rank reward-track definition from the Game CMS.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct CareerRewardTrack {
+    #[serde(rename = "TrackId")]
+    pub track_id: String,
+    #[serde(rename = "XpPerRank")]
+    pub xp_per_rank: i64,
+    #[serde(rename = "Ranks")]
+    pub ranks: Vec<RewardTrackRank>,
+}
+
+/// An operation (battle pass) reward-track definition from the Game CMS.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct OperationRewardTrack {
+    #[serde(rename = "Name")]
+    pub name: Option<LocalizedText>,
+    #[serde(rename = "Description")]
+    pub description: Option<LocalizedText>,
+    #[serde(rename = "XpPerRank")]
+    pub xp_per_rank: i64,
+    #[serde(rename = "Ranks")]
+    pub ranks: Vec<RewardTrackRank>,
+}
+
+/// One rank tier within a reward track, with the rewards granted at that rank.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct RewardTrackRank {
+    #[serde(rename = "Rank")]
+    pub rank: i32,
+    #[serde(rename = "XpRequiredForRank")]
+    pub xp_required_for_rank: i64,
+    #[serde(rename = "FreeRewards")]
+    pub free_rewards: RankRewards,
+    #[serde(rename = "PaidRewards")]
+    pub paid_rewards: RankRewards,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct RankRewards {
+    #[serde(
+        rename = "InventoryRewards",
+        deserialize_with = "deserialize_null_default"
+    )]
+    pub inventory_rewards: Vec<InventoryReward>,
+    #[serde(
+        rename = "CurrencyRewards",
+        deserialize_with = "deserialize_null_default"
+    )]
+    pub currency_rewards: Vec<CurrencyReward>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct InventoryReward {
+    #[serde(rename = "InventoryItemPath")]
+    pub inventory_item_path: String,
+    #[serde(default, rename = "Amount")]
+    pub amount: i64,
+    #[serde(default, rename = "Type")]
+    pub reward_type: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CurrencyReward {
+    #[serde(rename = "CurrencyPath")]
+    pub currency_path: String,
+    #[serde(default, rename = "Amount")]
+    pub amount: i64,
+}
+
+/// Per-player skill (CSR and MMR) results for a single match.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MatchSkill {
+    #[serde(rename = "Value")]
+    pub results: Vec<MatchSkillResult>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MatchSkillResult {
+    /// The player this entry describes, in `xuid(...)` form.
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "ResultCode")]
+    pub result_code: i32,
+    #[serde(rename = "Result")]
+    pub result: MatchSkillDetail,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MatchSkillDetail {
+    #[serde(rename = "TeamMmr")]
+    pub team_mmr: f64,
+    #[serde(rename = "TeamId")]
+    pub team_id: i32,
+    #[serde(rename = "TeamMmrs")]
+    pub team_mmrs: BTreeMap<String, f64>,
+    #[serde(rename = "RankRecap")]
+    pub rank_recap: RankRecap,
+    /// Modeled per-player kill/death performance, absent for some matches.
+    #[serde(rename = "StatPerformances")]
+    pub stat_performances: Option<StatPerformances>,
+    /// How the player's kills/deaths compared to expectations, absent for social matches.
+    #[serde(rename = "Counterfactuals")]
+    pub counterfactuals: Option<Counterfactuals>,
+}
+
+/// A player's CSR before and after the match.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct RankRecap {
+    #[serde(rename = "PreMatchCsr")]
+    pub pre_match_csr: CsrRecordRanking,
+    #[serde(rename = "PostMatchCsr")]
+    pub post_match_csr: CsrRecordRanking,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct StatPerformances {
+    #[serde(rename = "Kills")]
+    pub kills: StatPerformance,
+    #[serde(rename = "Deaths")]
+    pub deaths: StatPerformance,
+}
+
+/// A player's actual, expected, and variance for a single tracked stat.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct StatPerformance {
+    #[serde(rename = "Count")]
+    pub count: f64,
+    #[serde(rename = "Expected")]
+    pub expected: f64,
+    #[serde(rename = "StdDev")]
+    pub std_dev: f64,
+}
+
+/// How a player's kills and deaths compare to skill-model expectations.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct Counterfactuals {
+    #[serde(rename = "SelfCounterfactuals")]
+    pub own: Counterfactual,
+    #[serde(rename = "TierCounterfactuals")]
+    pub by_tier: BTreeMap<String, Counterfactual>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct Counterfactual {
+    #[serde(rename = "Kills")]
+    pub kills: f64,
+    #[serde(rename = "Deaths")]
+    pub deaths: f64,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2199,6 +2552,67 @@ mod tests {
         );
         assert!(calendar.current(gap).is_none());
         assert!(calendar.current(at_end).is_none());
+    }
+
+    #[test]
+    fn service_record_filter_renders_supported_query_shape() {
+        assert!(ServiceRecordFilter::default().is_empty());
+        assert!(ServiceRecordFilter::default().to_query().is_empty());
+
+        let filter = ServiceRecordFilter::for_season("Csr/Seasons/CsrSeason5-1.json")
+            .game_variant_category(6)
+            .playlist_asset_id("playlist-1")
+            .ranked(false)
+            .gameplay_interaction("PvP");
+        assert!(!filter.is_empty());
+        assert_eq!(
+            filter.to_query(),
+            vec![
+                ("seasonid", "Csr/Seasons/CsrSeason5-1.json".to_string()),
+                ("gamevariantcategory", "6".to_string()),
+                ("playlistassetid", "playlist-1".to_string()),
+                ("isranked", "False".to_string()),
+                ("gameplayinteraction", "PvP".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn deserializes_reward_track_and_operations_shapes() {
+        let passes: PlayerOperationPasses = serde_json::from_value(serde_json::json!({
+            "ActiveOperationRewardTrackPath": "RewardTracks/Operations/S05OpPassM01.json",
+            "OperationRewardTracks": [{
+                "RewardTrackPath": "RewardTracks/Operations/S05OpPassM01.json",
+                "IsOwned": true,
+                "CurrentProgress": { "Rank": 12, "PartialProgress": 300, "HasReachedMaxRank": false }
+            }]
+        }))
+        .unwrap();
+        assert_eq!(passes.operation_reward_tracks.len(), 1);
+        assert!(passes.operation_reward_tracks[0].is_owned);
+        assert_eq!(passes.operation_reward_tracks[0].current_progress.rank, 12);
+
+        let track: CareerRewardTrack = serde_json::from_value(serde_json::json!({
+            "TrackId": "careerRank1",
+            "XpPerRank": 1000,
+            "Ranks": [{
+                "Rank": 1,
+                "XpRequiredForRank": 0,
+                "FreeRewards": {
+                    "InventoryRewards": [{
+                        "InventoryItemPath": "Inventory/Armor/Helmets/x.json",
+                        "Amount": 1,
+                        "Type": "ArmorHelmet"
+                    }],
+                    "CurrencyRewards": null
+                },
+                "PaidRewards": { "InventoryRewards": null, "CurrencyRewards": null }
+            }]
+        }))
+        .unwrap();
+        assert_eq!(track.track_id, "careerRank1");
+        assert_eq!(track.ranks[0].free_rewards.inventory_rewards.len(), 1);
+        assert!(track.ranks[0].paid_rewards.inventory_rewards.is_empty());
     }
 
     #[test]

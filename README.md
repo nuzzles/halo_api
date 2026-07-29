@@ -14,7 +14,10 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 - Separates authentication (`AuthClient`) from Halo API operations (`HaloInfiniteClient`).
 - Acquires and caches both the Spartan token and Waypoint flight clearance.
-- Covers stats, skill, profile, UGC, progression, ban, and privacy endpoints.
+- Covers stats, skill, profile, UGC, progression, career rank, reward tracks, ban, and privacy endpoints.
+- Filters service records by season, playlist, mode, and ranked/social via `ServiceRecordFilter`.
+- Paces requests per Halo Waypoint origin (default 5/s) so bursts don't trip throttling; configure via
+  `HaloInfiniteClient::builder()`.
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 

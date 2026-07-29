@@ -10,42 +10,67 @@ use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::film::{FilmEvent, decode_events, decode_players};
 use super::models::{
-    AppearanceCustomization, BanMessage, BanSummary, CsrRecords, CsrSeason, CsrSeasonCalendar,
-    CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk, FilmChunkData,
-    FilmManifest, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset, MatchStats,
-    MatchesPrivacy, PlayerCustomizationCollection, PlayerMatchHistory, PlaylistAsset, PlaylistId,
-    PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason, SeasonCalendar, ServiceRecord,
-    UgcAssetKind, UgcSearchResults, UserInfo,
+    AppearanceCustomization, BanMessage, BanSummary, CareerRewardTrack, CsrRecords, CsrSeason,
+    CsrSeasonCalendar, CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk,
+    FilmChunkData, FilmManifest, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset,
+    MatchCount, MatchHistoryType, MatchSkill, MatchStats, MatchType, MatchesPrivacy,
+    OperationRewardTrack, PlayerCareerRank, PlayerCustomizationCollection, PlayerMatchHistory,
+    PlayerOperationPasses, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
+    RankedArenaSeason, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAssetKind,
+    UgcSearchResults, UserInfo,
 };
+use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuth, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
+/// Default per-origin request rate. Matches SPNKr's conservative default for this API.
+const DEFAULT_REQUESTS_PER_SECOND: u32 = 5;
 const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
 const HALO_WAYPOINT_USER_AGENT: &str =
     "HaloWaypoint/2021112313511900 CFNetwork/1327.0.4 Darwin/21.2.0";
 
+/// Returns the `scheme://host[:port]` prefix of a URL for per-origin rate limiting.
+///
+/// Falls back to the whole string if the URL has no path separator, which still keeps distinct
+/// origins in distinct rate-limit buckets.
+fn origin_of(url: &str) -> &str {
+    match url.split_once("://") {
+        Some((scheme, rest)) => {
+            let host_len = rest.find('/').unwrap_or(rest.len());
+            &url[..scheme.len() + 3 + host_len]
+        }
+        None => url,
+    }
+}
+
 /// Halo Infinite API client. Authentication is supplied by a separate [`HaloAuth`] client.
+///
+/// Construct one with [`HaloInfiniteClient::new`] for the defaults, or
+/// [`HaloInfiniteClient::builder`] to configure the request timeout and per-origin rate limit.
 pub struct HaloInfiniteClient {
     auth: Arc<dyn HaloAuth>,
     http: Client,
     endpoints: HaloEndpoints,
+    limiter: RateLimiter,
+    timeout: Duration,
 }
 
 impl HaloInfiniteClient {
     pub fn new<A: HaloAuth + 'static>(auth: impl Into<Arc<A>>) -> Self {
-        Self::with_endpoints(auth, HaloEndpoints::default())
+        Self::builder().build(auth)
     }
 
+    /// Starts configuring a client. See [`HaloInfiniteClientBuilder`].
+    pub fn builder() -> HaloInfiniteClientBuilder {
+        HaloInfiniteClientBuilder::default()
+    }
+
+    #[cfg(test)]
     pub(crate) fn with_endpoints<A: HaloAuth + 'static>(
         auth: impl Into<Arc<A>>,
         endpoints: HaloEndpoints,
     ) -> Self {
-        let auth: Arc<A> = auth.into();
-        Self {
-            auth,
-            http: Client::new(),
-            endpoints,
-        }
+        Self::builder().build_with_endpoints(auth, endpoints)
     }
 
     async fn get<T: DeserializeOwned>(
@@ -154,6 +179,7 @@ impl HaloInfiniteClient {
         credentials: &HaloCredentials,
         user_agent: &'static str,
     ) -> Result<T, InfiniteClientError> {
+        self.limiter.acquire(origin_of(url)).await;
         let mut request = self
             .http
             .get(url)
@@ -161,7 +187,7 @@ impl HaloInfiniteClient {
             .header("X-343-Authorization-Spartan", &credentials.spartan_token)
             .header("Accept", "application/json")
             .header("User-Agent", user_agent)
-            .timeout(DEFAULT_TIMEOUT);
+            .timeout(self.timeout);
         if let Some(clearance) = &credentials.clearance {
             request = request.header("343-Clearance", clearance);
         }
@@ -202,12 +228,13 @@ impl HaloInfiniteClient {
         url: &str,
         credentials: &HaloCredentials,
     ) -> Result<Vec<u8>, InfiniteClientError> {
+        self.limiter.acquire(origin_of(url)).await;
         let mut request = self
             .http
             .get(url)
             .header("X-343-Authorization-Spartan", &credentials.spartan_token)
             .header("User-Agent", HALO_PC_USER_AGENT)
-            .timeout(DEFAULT_TIMEOUT);
+            .timeout(self.timeout);
         if let Some(clearance) = &credentials.clearance {
             request = request.header("343-Clearance", clearance);
         }
@@ -248,12 +275,34 @@ impl HaloInfiniteClient {
         .await
     }
 
+    /// Gets a player's lifetime matchmade service record.
+    ///
+    /// Use [`Self::service_record_with`] to scope the record to a season, playlist, or mode, or to
+    /// query custom or local games instead of matchmaking.
     pub async fn service_record(&self, player: &str) -> Result<ServiceRecord, InfiniteClientError> {
+        self.service_record_with(
+            player,
+            MatchType::Matchmade,
+            &ServiceRecordFilter::default(),
+        )
+        .await
+    }
+
+    /// Gets a player's service record for a given match type, optionally filtered.
+    ///
+    /// Halo applies [`ServiceRecordFilter`] only to [`MatchType::Matchmade`] and rejects certain
+    /// filter combinations with a 400; see [`ServiceRecordFilter`] for the supported sets.
+    pub async fn service_record_with(
+        &self,
+        player: &str,
+        match_type: MatchType,
+        filter: &ServiceRecordFilter,
+    ) -> Result<ServiceRecord, InfiniteClientError> {
         let result = self
             .get(
                 &self.endpoints.halostats_base_url,
-                &format!("/hi/players/{player}/Matchmade/servicerecord"),
-                &[],
+                &format!("/hi/players/{player}/{}/servicerecord", match_type.as_str()),
+                &filter.to_query(),
             )
             .await;
         match result {
@@ -265,16 +314,36 @@ impl HaloInfiniteClient {
         }
     }
 
+    /// Gets a page of a player's matchmaking history (all match types).
+    ///
+    /// Use [`Self::player_matches_of_type`] to restrict to matchmaking, custom, or local games.
+    /// Halo caps `count` at 25 per page.
     pub async fn player_matches(
         &self,
         xuid: &Xuid,
         start: u32,
         count: u32,
     ) -> Result<PlayerMatchHistory, InfiniteClientError> {
+        self.player_matches_of_type(xuid, start, count, MatchHistoryType::All)
+            .await
+    }
+
+    /// Gets a page of a player's match history restricted to `match_type`.
+    pub async fn player_matches_of_type(
+        &self,
+        xuid: &Xuid,
+        start: u32,
+        count: u32,
+        match_type: MatchHistoryType,
+    ) -> Result<PlayerMatchHistory, InfiniteClientError> {
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches", wrap_xuid(xuid.as_str())),
-            &[("start", start.to_string()), ("count", count.to_string())],
+            &[
+                ("start", start.to_string()),
+                ("count", count.to_string()),
+                ("type", match_type.as_str().to_string()),
+            ],
         )
         .await
     }
@@ -346,11 +415,12 @@ impl HaloInfiniteClient {
         Ok(decode_events(&chunks, &players))
     }
 
+    /// Gets per-player CSR and MMR skill results for a completed match.
     pub async fn match_skill(
         &self,
         match_id: &str,
         xuids: &[Xuid],
-    ) -> Result<Value, InfiniteClientError> {
+    ) -> Result<MatchSkill, InfiniteClientError> {
         let players = xuids
             .iter()
             .map(|x| wrap_xuid(x.as_str()))
@@ -369,6 +439,16 @@ impl HaloInfiniteClient {
         self.get(
             &self.endpoints.profile_base_url,
             &format!("/users/gt({gamertag})"),
+            &[],
+        )
+        .await
+    }
+
+    /// Looks up profile information by XUID.
+    pub async fn user_by_id(&self, xuid: &Xuid) -> Result<UserInfo, InfiniteClientError> {
+        self.get(
+            &self.endpoints.profile_base_url,
+            &format!("/users/{}", wrap_xuid(xuid.as_str())),
             &[],
         )
         .await
@@ -675,10 +755,92 @@ impl HaloInfiniteClient {
         self.get(&self.endpoints.current_user_url, "", &[]).await
     }
 
-    pub async fn player_match_count(&self, xuid: &Xuid) -> Result<Value, InfiniteClientError> {
+    /// Gets a player's match counts across matchmade, custom, and local games.
+    pub async fn player_match_count(&self, xuid: &Xuid) -> Result<MatchCount, InfiniteClientError> {
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches/count", wrap_xuid(xuid.as_str())),
+            &[],
+        )
+        .await
+    }
+
+    /// Gets a player's active challenge decks.
+    ///
+    /// The response schema is undocumented, so this returns raw JSON.
+    pub async fn challenge_decks(&self, xuid: &Xuid) -> Result<Value, InfiniteClientError> {
+        self.get(
+            &self.endpoints.halostats_base_url,
+            &format!("/hi/players/{}/decks", wrap_xuid(xuid.as_str())),
+            &[],
+        )
+        .await
+    }
+
+    /// Gets a player's progress on a career-rank reward track.
+    ///
+    /// `reward_track_id` defaults to `careerRank1` via [`Self::career_rank`].
+    pub async fn career_rank_with_track(
+        &self,
+        xuid: &Xuid,
+        reward_track_id: &str,
+    ) -> Result<PlayerCareerRank, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.economy_base_url,
+            &format!(
+                "/hi/players/{}/rewardtracks/careerranks/{reward_track_id}",
+                wrap_xuid(xuid.as_str())
+            ),
+            &[],
+        )
+        .await
+    }
+
+    /// Gets a player's current career rank (the `careerRank1` track).
+    pub async fn career_rank(&self, xuid: &Xuid) -> Result<PlayerCareerRank, InfiniteClientError> {
+        self.career_rank_with_track(xuid, "careerRank1").await
+    }
+
+    /// Gets a player's owned and available operation passes.
+    pub async fn reward_track_operations(
+        &self,
+        xuid: &Xuid,
+    ) -> Result<PlayerOperationPasses, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.economy_base_url,
+            &format!(
+                "/hi/players/{}/rewardtracks/operations",
+                wrap_xuid(xuid.as_str())
+            ),
+            &[],
+        )
+        .await
+    }
+
+    /// Gets the career-rank reward-track definition (rank titles, XP, and rewards).
+    pub async fn career_reward_track(&self) -> Result<CareerRewardTrack, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            "/hi/Progression/file/RewardTracks/CareerRanks/careerRank1.json",
+            &[],
+        )
+        .await
+    }
+
+    /// Gets an operation (battle pass) reward-track definition by its CMS file path.
+    ///
+    /// The path is typically taken from [`Season::operation_track_path`] or
+    /// [`PlayerOperationPass::reward_track_path`], e.g. `RewardTracks/Operations/S05OpPassM01.json`.
+    pub async fn operation_reward_track(
+        &self,
+        reward_track_path: &str,
+    ) -> Result<OperationRewardTrack, InfiniteClientError> {
+        self.get_with_clearance(
+            &self.endpoints.game_cms_base_url,
+            &format!(
+                "/hi/Progression/file/{}",
+                reward_track_path.trim_start_matches('/')
+            ),
             &[],
         )
         .await
@@ -754,5 +916,83 @@ impl HaloInfiniteClient {
             &[],
         )
         .await
+    }
+}
+
+/// Configures a [`HaloInfiniteClient`].
+///
+/// ```no_run
+/// # use std::sync::Arc;
+/// # use std::time::Duration;
+/// # fn example(auth: halo_api::auth::AuthClient) {
+/// use halo_api::clients::hi::HaloInfiniteClient;
+///
+/// let halo = HaloInfiniteClient::builder()
+///     .timeout(Duration::from_secs(30))
+///     .requests_per_second(3)
+///     .build(auth);
+/// # let _ = halo;
+/// # }
+/// ```
+#[derive(Debug, Clone)]
+pub struct HaloInfiniteClientBuilder {
+    timeout: Duration,
+    requests_per_second: u32,
+    http: Option<Client>,
+}
+
+impl Default for HaloInfiniteClientBuilder {
+    fn default() -> Self {
+        Self {
+            timeout: DEFAULT_TIMEOUT,
+            requests_per_second: DEFAULT_REQUESTS_PER_SECOND,
+            http: None,
+        }
+    }
+}
+
+impl HaloInfiniteClientBuilder {
+    /// Sets the per-request timeout. Defaults to 10 seconds.
+    pub fn timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
+        self
+    }
+
+    /// Sets the maximum requests per second, enforced independently per Halo Waypoint origin.
+    ///
+    /// Defaults to 5. Pass `0` to disable client-side pacing entirely. This throttles an
+    /// undocumented API, so lowering it is safer than raising it.
+    pub fn requests_per_second(mut self, requests_per_second: u32) -> Self {
+        self.requests_per_second = requests_per_second;
+        self
+    }
+
+    /// Supplies a preconfigured [`reqwest::Client`], e.g. with a proxy or connection pool tuning.
+    ///
+    /// The per-request timeout from [`Self::timeout`] is still applied on top of any the client
+    /// carries.
+    pub fn http_client(mut self, http: Client) -> Self {
+        self.http = Some(http);
+        self
+    }
+
+    /// Builds the client against the real Halo Waypoint endpoints.
+    pub fn build<A: HaloAuth + 'static>(self, auth: impl Into<Arc<A>>) -> HaloInfiniteClient {
+        self.build_with_endpoints(auth, HaloEndpoints::default())
+    }
+
+    pub(crate) fn build_with_endpoints<A: HaloAuth + 'static>(
+        self,
+        auth: impl Into<Arc<A>>,
+        endpoints: HaloEndpoints,
+    ) -> HaloInfiniteClient {
+        let auth: Arc<A> = auth.into();
+        HaloInfiniteClient {
+            auth,
+            http: self.http.unwrap_or_default(),
+            endpoints,
+            limiter: RateLimiter::per_second(self.requests_per_second),
+            timeout: self.timeout,
+        }
     }
 }

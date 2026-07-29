@@ -4,7 +4,10 @@ use std::sync::Arc;
 use crate::auth::endpoints::AuthEndpoints;
 use crate::auth::{AuthClient, AuthError, HaloAuth, HaloCredentials};
 use crate::clients::hi::endpoints::HaloEndpoints;
-use crate::clients::hi::models::{CustomizationItemMetadata, EmblemImageAssets, PlaylistId};
+use crate::clients::hi::models::{
+    CustomizationItemMetadata, EmblemImageAssets, MatchHistoryType, MatchType, PlaylistId,
+    ServiceRecordFilter,
+};
 use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
@@ -176,6 +179,7 @@ async fn player_matches_uses_supported_query_parameters() {
         .and(path("/hi/players/xuid(123456789)/matches"))
         .and(query_param("start", "0"))
         .and(query_param("count", "1"))
+        .and(query_param("type", "all"))
         .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
         .respond_with(
             ResponseTemplate::new(200)
@@ -190,6 +194,220 @@ async fn player_matches_uses_supported_query_parameters() {
 
     assert!(history.results.is_empty());
     assert_eq!(history.result_count, 0);
+}
+
+#[tokio::test]
+async fn player_matches_of_type_sends_type_parameter() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches"))
+        .and(query_param("type", "matchmaking"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({ "Results": [], "ResultCount": 0 })),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    halo.player_matches_of_type(&xuid, 0, 25, MatchHistoryType::Matchmaking)
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn service_record_defaults_to_matchmade_without_filters() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/Player/Matchmade/servicerecord"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    halo.service_record("Player").await.unwrap();
+
+    let requests = server.received_requests().await.unwrap();
+    let request = requests
+        .iter()
+        .find(|request| request.url.path().ends_with("/servicerecord"))
+        .unwrap();
+    // No filters set → no query string.
+    assert!(request.url.query().is_none());
+}
+
+#[tokio::test]
+async fn service_record_with_filter_sends_lowercase_query_parameters() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/Player/Matchmade/servicerecord"))
+        .and(query_param("seasonid", "Csr/Seasons/CsrSeason5-1.json"))
+        .and(query_param("gamevariantcategory", "6"))
+        .and(query_param("isranked", "True"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let filter = ServiceRecordFilter::for_season("Csr/Seasons/CsrSeason5-1.json")
+        .game_variant_category(6)
+        .ranked(true);
+    halo.service_record_with("Player", MatchType::Matchmade, &filter)
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn match_skill_parses_typed_skill_results() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/matches/test-match/skill"))
+        .and(query_param("players", "xuid(123456789)"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "Value": [{
+                "Id": "xuid(123456789)",
+                "ResultCode": 0,
+                "Result": {
+                    "TeamMmr": 1500.5,
+                    "TeamId": 0,
+                    "TeamMmrs": { "0": 1500.5, "1": 1480.0 },
+                    "RankRecap": {
+                        "PreMatchCsr": { "Value": 1490, "Tier": "Platinum", "SubTier": 2 },
+                        "PostMatchCsr": { "Value": 1500, "Tier": "Platinum", "SubTier": 3 }
+                    },
+                    "StatPerformances": {
+                        "Kills": { "Count": 20.0, "Expected": 15.0, "StdDev": 4.0 },
+                        "Deaths": { "Count": 10.0, "Expected": 12.0, "StdDev": 3.0 }
+                    },
+                    "Counterfactuals": {
+                        "SelfCounterfactuals": { "Kills": 15.0, "Deaths": 12.0 },
+                        "TierCounterfactuals": {
+                            "Platinum": { "Kills": 14.0, "Deaths": 12.5 }
+                        }
+                    }
+                }
+            }]
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    let skill = halo.match_skill("test-match", &[xuid]).await.unwrap();
+
+    assert_eq!(skill.results.len(), 1);
+    let result = &skill.results[0];
+    assert_eq!(result.id, "xuid(123456789)");
+    assert_eq!(result.result.team_mmr, 1500.5);
+    assert_eq!(result.result.rank_recap.post_match_csr.value, 1500);
+    let performances = result.result.stat_performances.as_ref().unwrap();
+    assert_eq!(performances.kills.count, 20.0);
+    let counterfactuals = result.result.counterfactuals.as_ref().unwrap();
+    assert_eq!(counterfactuals.by_tier["Platinum"].kills, 14.0);
+}
+
+#[tokio::test]
+async fn match_skill_tolerates_social_match_null_fields() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    // Social matches return ResultCode 1 with empty/null skill fields; deserialization must not
+    // choke on `"Counterfactuals": null` or `"StatPerformances": {}`.
+    Mock::given(method("GET"))
+        .and(path("/hi/matches/social/skill"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "Value": [{
+                "Id": "xuid(123456789)",
+                "ResultCode": 1,
+                "Result": {
+                    "TeamMmr": 0.0,
+                    "RankRecap": {
+                        "PreMatchCsr": { "Value": 0, "Tier": "" },
+                        "PostMatchCsr": { "Value": 0, "Tier": "" }
+                    },
+                    "StatPerformances": {},
+                    "TeamId": 0,
+                    "TeamMmrs": {},
+                    "RankedRewards": null,
+                    "Counterfactuals": null
+                }
+            }]
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    let skill = halo.match_skill("social", &[xuid]).await.unwrap();
+
+    assert_eq!(skill.results[0].result_code, 1);
+    assert!(skill.results[0].result.counterfactuals.is_none());
+}
+
+#[tokio::test]
+async fn career_rank_uses_clearance_and_default_track() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/players/xuid(123456789)/rewardtracks/careerranks/careerRank1",
+        ))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "CurrentProgress": {
+                "Rank": 42,
+                "PartialProgress": 1200,
+                "HasReachedMaxRank": false
+            },
+            "SpartanId": "spartan-123"
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    let career = halo.career_rank(&xuid).await.unwrap();
+
+    assert_eq!(career.current_progress.rank, 42);
+    assert_eq!(career.current_progress.partial_progress, 1200);
+    assert_eq!(career.spartan_id.as_deref(), Some("spartan-123"));
+}
+
+#[tokio::test]
+async fn player_match_count_parses_typed_counts() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches/count"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "CustomMatchesPlayedCount": 10,
+            "MatchesPlayedCount": 100,
+            "MatchmadeMatchesPlayedCount": 85,
+            "LocalMatchesPlayedCount": 5
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let xuid = "123456789".into();
+    let count = halo.player_match_count(&xuid).await.unwrap();
+
+    assert_eq!(count.total, 100);
+    assert_eq!(count.matchmade, 85);
+    assert_eq!(count.custom, 10);
+    assert_eq!(count.local, 5);
 }
 
 #[tokio::test]
