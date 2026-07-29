@@ -13,7 +13,7 @@ use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CareerRewardTrack, CsrRecords, CsrSeason,
     CsrSeasonCalendar, CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk,
     FilmChunkData, FilmManifest, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset,
-    MatchCount, MatchHistoryType, MatchSkill, MatchStats, MatchType, MatchesPrivacy,
+    MatchCount, MatchHistoryType, MatchSkill, MatchStats, MatchType, MatchesPrivacy, MedalMetadata,
     OperationRewardTrack, PlayerCareerRank, PlayerCustomizationCollection, PlayerMatchHistory,
     PlayerOperationPasses, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
     RankedArenaSeason, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAssetKind,
@@ -621,7 +621,8 @@ impl HaloInfiniteClient {
         )
         .await
     }
-    pub async fn medals(&self) -> Result<Value, InfiniteClientError> {
+    /// Gets the localized metadata catalog for all obtainable medals.
+    pub async fn medals(&self) -> Result<MedalMetadata, InfiniteClientError> {
         self.get_with_clearance(
             &self.endpoints.game_cms_base_url,
             "/hi/Waypoint/file/medals/metadata.json",

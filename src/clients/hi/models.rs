@@ -754,7 +754,8 @@ pub struct UgcSearchResults {
     pub results: Vec<UgcSearchResult>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
 pub struct UgcSearchResult {
     #[serde(rename = "AssetId")]
     pub asset_id: String,
@@ -762,12 +763,34 @@ pub struct UgcSearchResult {
     pub version_id: String,
     #[serde(rename = "Name")]
     pub name: String,
+    #[serde(rename = "Description")]
+    pub description: String,
     #[serde(rename = "AssetKind")]
     pub asset_kind: i32,
-    #[serde(rename = "Tags")]
+    #[serde(rename = "Tags", deserialize_with = "deserialize_null_default")]
     pub tags: Vec<String>,
+    #[serde(rename = "ThumbnailUrl")]
+    pub thumbnail_url: String,
+    #[serde(rename = "OriginalAuthor")]
+    pub original_author: String,
+    #[serde(rename = "Contributors", deserialize_with = "deserialize_null_default")]
+    pub contributors: Vec<String>,
+    #[serde(rename = "Likes")]
+    pub likes: i64,
+    #[serde(rename = "Bookmarks")]
+    pub bookmarks: i64,
+    #[serde(rename = "PlaysRecent")]
+    pub plays_recent: i64,
+    #[serde(rename = "PlaysAllTime")]
+    pub plays_all_time: i64,
+    #[serde(rename = "NumberOfObjects")]
+    pub number_of_objects: i64,
+    #[serde(rename = "AverageRating")]
+    pub average_rating: f64,
+    #[serde(rename = "NumberOfRatings")]
+    pub number_of_ratings: i64,
     /// The catalog that owns the asset. Halo-owned assets use home `2`.
-    #[serde(default, rename = "AssetHome")]
+    #[serde(rename = "AssetHome")]
     pub asset_home: Option<i32>,
 }
 
@@ -958,14 +981,31 @@ pub struct MatchInfo {
     pub end_time: DateTime<Utc>,
     #[serde(rename = "Duration")]
     pub duration: String,
+    /// Time the match was actually playable, as an ISO-8601 duration.
+    #[serde(default, rename = "PlayableDuration")]
+    pub playable_duration: Option<String>,
     #[serde(rename = "GameVariantCategory")]
     pub game_variant_category: i32,
+    #[serde(default, rename = "LifecycleMode")]
+    pub lifecycle_mode: i32,
+    #[serde(default, rename = "GameplayInteraction")]
+    pub gameplay_interaction: i32,
+    #[serde(default, rename = "LevelId")]
+    pub level_id: Option<String>,
+    #[serde(default, rename = "SeasonId")]
+    pub season_id: Option<String>,
     #[serde(rename = "MapVariant")]
     pub map_variant: Option<MatchAssetLink>,
     #[serde(rename = "UgcGameVariant")]
     pub ugc_game_variant: Option<MatchAssetLink>,
     #[serde(rename = "Playlist")]
     pub playlist: Option<MatchPlaylist>,
+    #[serde(default, rename = "PlaylistExperience")]
+    pub playlist_experience: Option<i32>,
+    #[serde(default, rename = "TeamsEnabled")]
+    pub teams_enabled: bool,
+    #[serde(default, rename = "TeamScoringEnabled")]
+    pub team_scoring_enabled: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1001,16 +1041,28 @@ pub struct MatchStats {
 pub struct MatchPlayer {
     #[serde(rename = "PlayerId")]
     pub player_id: String,
+    /// Player type code. `1` denotes a human; bots use other values (see [`Self::is_human`]).
     #[serde(rename = "PlayerType")]
     pub player_type: i32,
+    #[serde(default, rename = "BotAttributes")]
+    pub bot_attributes: Option<BotAttributes>,
     #[serde(rename = "LastTeamId")]
     pub last_team_id: i32,
     #[serde(rename = "Outcome")]
     pub outcome: MatchOutcome,
     #[serde(rename = "Rank")]
     pub rank: i32,
+    #[serde(default, rename = "ParticipationInfo")]
+    pub participation_info: Option<ParticipationInfo>,
     #[serde(rename = "PlayerTeamStats")]
     pub team_stats: Vec<PlayerTeamStats>,
+}
+
+impl MatchPlayer {
+    /// Returns `true` when this is a human player rather than a bot.
+    pub fn is_human(&self) -> bool {
+        self.player_type == 1
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1033,35 +1085,83 @@ pub struct MatchTeam {
     pub stats: MatchStatsBlock,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
 pub struct MatchStatsBlock {
     #[serde(rename = "CoreStats")]
     pub core: MatchCoreStats,
+    /// Typed mode-specific stat blocks; only the one matching the match's mode is populated.
     #[serde(flatten)]
-    pub mode_stats: std::collections::BTreeMap<String, serde_json::Value>,
+    pub mode_stats: ModeStats,
 }
 
+/// Per-player or per-team core stats for a single match.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
 pub struct MatchCoreStats {
     #[serde(rename = "Score")]
-    pub score: i32,
+    pub score: i64,
     #[serde(rename = "PersonalScore")]
-    pub personal_score: i32,
+    pub personal_score: i64,
+    #[serde(rename = "RoundsWon")]
+    pub rounds_won: i64,
+    #[serde(rename = "RoundsLost")]
+    pub rounds_lost: i64,
+    #[serde(rename = "RoundsTied")]
+    pub rounds_tied: i64,
     #[serde(rename = "Kills")]
-    pub kills: i32,
+    pub kills: i64,
     #[serde(rename = "Deaths")]
-    pub deaths: i32,
+    pub deaths: i64,
     #[serde(rename = "Assists")]
-    pub assists: i32,
+    pub assists: i64,
     #[serde(rename = "KDA")]
     pub kda: f64,
+    #[serde(rename = "Suicides")]
+    pub suicides: i64,
+    #[serde(rename = "Betrayals")]
+    pub betrayals: i64,
+    /// Average life duration, as an ISO-8601 duration string.
+    #[serde(rename = "AverageLifeDuration")]
+    pub average_life_duration: String,
+    #[serde(rename = "GrenadeKills")]
+    pub grenade_kills: i64,
+    #[serde(rename = "HeadshotKills")]
+    pub headshot_kills: i64,
+    #[serde(rename = "MeleeKills")]
+    pub melee_kills: i64,
+    #[serde(rename = "PowerWeaponKills")]
+    pub power_weapon_kills: i64,
+    #[serde(rename = "ShotsFired")]
+    pub shots_fired: i64,
+    #[serde(rename = "ShotsHit")]
+    pub shots_hit: i64,
     #[serde(rename = "Accuracy")]
     pub accuracy: f64,
     #[serde(rename = "DamageDealt")]
     pub damage_dealt: i64,
     #[serde(rename = "DamageTaken")]
     pub damage_taken: i64,
+    #[serde(rename = "CalloutAssists")]
+    pub callout_assists: i64,
+    #[serde(rename = "VehicleDestroys")]
+    pub vehicle_destroys: i64,
+    #[serde(rename = "DriverAssists")]
+    pub driver_assists: i64,
+    #[serde(rename = "Hijacks")]
+    pub hijacks: i64,
+    #[serde(rename = "EmpAssists")]
+    pub emp_assists: i64,
+    #[serde(rename = "MaxKillingSpree")]
+    pub max_killing_spree: i64,
+    #[serde(rename = "Medals")]
+    pub medals: Vec<StatAward>,
+    #[serde(rename = "PersonalScores")]
+    pub personal_scores: Vec<StatAward>,
+    #[serde(rename = "Spawns")]
+    pub spawns: i64,
+    #[serde(rename = "ObjectivesCompleted")]
+    pub objectives_completed: i64,
 }
 
 /// Theater-film metadata and downloadable chunk inventory for a match.
@@ -1145,21 +1245,26 @@ pub struct ServiceRecord {
     #[serde(rename = "CoreStats")]
     pub core_stats: CoreStats,
     #[serde(rename = "BombStats")]
-    pub bomb_stats: serde_json::Value,
+    pub bomb_stats: Option<BombStats>,
     #[serde(rename = "CaptureTheFlagStats")]
-    pub capture_the_flag_stats: serde_json::Value,
+    pub capture_the_flag_stats: Option<CaptureTheFlagStats>,
     #[serde(rename = "EliminationStats")]
-    pub elimination_stats: serde_json::Value,
+    pub elimination_stats: Option<EliminationStats>,
     #[serde(rename = "ExtractionStats")]
-    pub extraction_stats: serde_json::Value,
+    pub extraction_stats: Option<ExtractionStats>,
     #[serde(rename = "InfectionStats")]
-    pub infection_stats: serde_json::Value,
+    pub infection_stats: Option<InfectionStats>,
     #[serde(rename = "OddballStats")]
-    pub oddball_stats: serde_json::Value,
+    pub oddball_stats: Option<OddballStats>,
+    /// Aggregated Zones stats, using `Zone`-prefixed field names (see [`ServiceRecordZonesStats`]).
     #[serde(rename = "ZonesStats")]
-    pub zones_stats: serde_json::Value,
+    pub zones_stats: Option<ServiceRecordZonesStats>,
     #[serde(rename = "StockpileStats")]
-    pub stockpile_stats: serde_json::Value,
+    pub stockpile_stats: Option<StockpileStats>,
+    #[serde(rename = "PvpStats")]
+    pub pvp_stats: Option<PvpStats>,
+    #[serde(rename = "PveStats")]
+    pub pve_stats: Option<PveStats>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -1254,9 +1359,12 @@ pub struct CoreStats {
     pub personal_scores: Vec<StatAward>,
     #[serde(rename = "Spawns")]
     pub spawns: i64,
+    #[serde(rename = "ObjectivesCompleted")]
+    pub objectives_completed: i64,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
 pub struct StatAward {
     #[serde(rename = "NameId")]
     pub name_id: i64,
@@ -2319,6 +2427,9 @@ pub struct MatchSkillDetail {
     /// How the player's kills/deaths compared to expectations, absent for social matches.
     #[serde(rename = "Counterfactuals")]
     pub counterfactuals: Option<Counterfactuals>,
+    /// Ranked reward for the match. Halo reports this as `null` in practice.
+    #[serde(default, rename = "RankedRewards")]
+    pub ranked_rewards: Option<RankedRewards>,
 }
 
 /// A player's CSR before and after the match.
@@ -2369,6 +2480,392 @@ pub struct Counterfactual {
     pub kills: f64,
     #[serde(rename = "Deaths")]
     pub deaths: f64,
+}
+
+/// Mode-specific stat blocks that accompany the core stats for a team or player.
+///
+/// Every field is optional: Halo only includes the block matching the match's mode. Durations are
+/// ISO-8601 duration strings (e.g. `PT10M30S`), matching [`MatchInfo::duration`].
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ModeStats {
+    #[serde(rename = "BombStats")]
+    pub bomb: Option<BombStats>,
+    #[serde(rename = "CaptureTheFlagStats")]
+    pub capture_the_flag: Option<CaptureTheFlagStats>,
+    #[serde(rename = "EliminationStats")]
+    pub elimination: Option<EliminationStats>,
+    #[serde(rename = "ExtractionStats")]
+    pub extraction: Option<ExtractionStats>,
+    #[serde(rename = "InfectionStats")]
+    pub infection: Option<InfectionStats>,
+    #[serde(rename = "OddballStats")]
+    pub oddball: Option<OddballStats>,
+    /// Per-match Zones (Strongholds) stats, using `Stronghold`-prefixed field names.
+    #[serde(rename = "ZonesStats")]
+    pub zones: Option<ZonesStats>,
+    #[serde(rename = "StockpileStats")]
+    pub stockpile: Option<StockpileStats>,
+    #[serde(rename = "PvpStats")]
+    pub pvp: Option<PvpStats>,
+    #[serde(rename = "PveStats")]
+    pub pve: Option<PveStats>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct BombStats {
+    #[serde(rename = "BombCarriersKilled")]
+    pub bomb_carriers_killed: i64,
+    #[serde(rename = "BombDefusals")]
+    pub bomb_defusals: i64,
+    #[serde(rename = "BombDefusersKilled")]
+    pub bomb_defusers_killed: i64,
+    #[serde(rename = "BombDetonations")]
+    pub bomb_detonations: i64,
+    #[serde(rename = "BombPickUps")]
+    pub bomb_pick_ups: i64,
+    #[serde(rename = "BombPlants")]
+    pub bomb_plants: i64,
+    #[serde(rename = "BombReturns")]
+    pub bomb_returns: i64,
+    #[serde(rename = "KillsAsBombCarrier")]
+    pub kills_as_bomb_carrier: i64,
+    #[serde(rename = "TimeAsBombCarrier")]
+    pub time_as_bomb_carrier: String,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct CaptureTheFlagStats {
+    #[serde(rename = "FlagCaptureAssists")]
+    pub flag_capture_assists: i64,
+    #[serde(rename = "FlagCaptures")]
+    pub flag_captures: i64,
+    #[serde(rename = "FlagCarriersKilled")]
+    pub flag_carriers_killed: i64,
+    #[serde(rename = "FlagGrabs")]
+    pub flag_grabs: i64,
+    #[serde(rename = "FlagReturnersKilled")]
+    pub flag_returners_killed: i64,
+    #[serde(rename = "FlagReturns")]
+    pub flag_returns: i64,
+    #[serde(rename = "FlagSecures")]
+    pub flag_secures: i64,
+    #[serde(rename = "FlagSteals")]
+    pub flag_steals: i64,
+    #[serde(rename = "KillsAsFlagCarrier")]
+    pub kills_as_flag_carrier: i64,
+    #[serde(rename = "KillsAsFlagReturner")]
+    pub kills_as_flag_returner: i64,
+    #[serde(rename = "TimeAsFlagCarrier")]
+    pub time_as_flag_carrier: String,
+}
+
+/// Elimination stats. The per-match block additionally carries `LivesRemaining` and
+/// `EliminationOrder`, which the service-record aggregate omits.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct EliminationStats {
+    #[serde(rename = "AlliesRevived")]
+    pub allies_revived: i64,
+    #[serde(rename = "EliminationAssists")]
+    pub elimination_assists: i64,
+    #[serde(rename = "Eliminations")]
+    pub eliminations: i64,
+    #[serde(rename = "EnemyRevivesDenied")]
+    pub enemy_revives_denied: i64,
+    #[serde(rename = "Executions")]
+    pub executions: i64,
+    #[serde(rename = "KillsAsLastPlayerStanding")]
+    pub kills_as_last_player_standing: i64,
+    #[serde(rename = "LastPlayersStandingKilled")]
+    pub last_players_standing_killed: i64,
+    #[serde(rename = "RoundsSurvived")]
+    pub rounds_survived: i64,
+    #[serde(rename = "TimesRevivedByAlly")]
+    pub times_revived_by_ally: i64,
+    #[serde(rename = "LivesRemaining")]
+    pub lives_remaining: Option<i64>,
+    #[serde(rename = "EliminationOrder")]
+    pub elimination_order: i64,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ExtractionStats {
+    #[serde(rename = "ExtractionConversionsCompleted")]
+    pub extraction_conversions_completed: i64,
+    #[serde(rename = "ExtractionConversionsDenied")]
+    pub extraction_conversions_denied: i64,
+    #[serde(rename = "ExtractionInitiationsCompleted")]
+    pub extraction_initiations_completed: i64,
+    #[serde(rename = "ExtractionInitiationsDenied")]
+    pub extraction_initiations_denied: i64,
+    #[serde(rename = "SuccessfulExtractions")]
+    pub successful_extractions: i64,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct InfectionStats {
+    #[serde(rename = "AlphasKilled")]
+    pub alphas_killed: i64,
+    #[serde(rename = "InfectedKilled")]
+    pub infected_killed: i64,
+    #[serde(rename = "KillsAsLastSpartanStanding")]
+    pub kills_as_last_spartan_standing: i64,
+    #[serde(rename = "LastSpartansStandingInfected")]
+    pub last_spartans_standing_infected: i64,
+    #[serde(rename = "RoundsAsAlpha")]
+    pub rounds_as_alpha: i64,
+    #[serde(rename = "RoundsAsLastSpartanStanding")]
+    pub rounds_as_last_spartan_standing: i64,
+    #[serde(rename = "RoundsFinishedAsInfected")]
+    pub rounds_finished_as_infected: i64,
+    #[serde(rename = "RoundsSurvivedAsLastSpartanStanding")]
+    pub rounds_survived_as_last_spartan_standing: i64,
+    #[serde(rename = "RoundsSurvivedAsSpartan")]
+    pub rounds_survived_as_spartan: i64,
+    #[serde(rename = "SpartansInfected")]
+    pub spartans_infected: i64,
+    #[serde(rename = "SpartansInfectedAsAlpha")]
+    pub spartans_infected_as_alpha: i64,
+    #[serde(rename = "TimeAsLastSpartanStanding")]
+    pub time_as_last_spartan_standing: String,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct OddballStats {
+    #[serde(rename = "KillsAsSkullCarrier")]
+    pub kills_as_skull_carrier: i64,
+    #[serde(rename = "LongestTimeAsSkullCarrier")]
+    pub longest_time_as_skull_carrier: String,
+    #[serde(rename = "SkullCarriersKilled")]
+    pub skull_carriers_killed: i64,
+    #[serde(rename = "SkullGrabs")]
+    pub skull_grabs: i64,
+    #[serde(rename = "SkullScoringTicks")]
+    pub skull_scoring_ticks: i64,
+    #[serde(rename = "TimeAsSkullCarrier")]
+    pub time_as_skull_carrier: String,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct StockpileStats {
+    #[serde(rename = "KillsAsPowerSeedCarrier")]
+    pub kills_as_power_seed_carrier: i64,
+    #[serde(rename = "PowerSeedCarriersKilled")]
+    pub power_seed_carriers_killed: i64,
+    #[serde(rename = "PowerSeedsDeposited")]
+    pub power_seeds_deposited: i64,
+    #[serde(rename = "PowerSeedsStolen")]
+    pub power_seeds_stolen: i64,
+    #[serde(rename = "TimeAsPowerSeedCarrier")]
+    pub time_as_power_seed_carrier: String,
+    #[serde(rename = "TimeAsPowerSeedDriver")]
+    pub time_as_power_seed_driver: String,
+}
+
+/// Per-match Zones (Strongholds) stats. The service record aggregates these under
+/// [`ServiceRecordZonesStats`] with `Zone`-prefixed field names instead.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ZonesStats {
+    #[serde(rename = "StrongholdCaptures")]
+    pub stronghold_captures: i64,
+    #[serde(rename = "StrongholdDefensiveKills")]
+    pub stronghold_defensive_kills: i64,
+    #[serde(rename = "StrongholdOffensiveKills")]
+    pub stronghold_offensive_kills: i64,
+    #[serde(rename = "StrongholdSecures")]
+    pub stronghold_secures: i64,
+    #[serde(rename = "StrongholdOccupationTime")]
+    pub stronghold_occupation_time: String,
+    #[serde(rename = "StrongholdScoringTicks")]
+    pub stronghold_scoring_ticks: i64,
+}
+
+/// Service-record Zones stats, aggregated with `Zone`-prefixed field names (unlike the per-match
+/// [`ZonesStats`], which uses `Stronghold` prefixes).
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ServiceRecordZonesStats {
+    #[serde(rename = "ZoneCaptures")]
+    pub zone_captures: i64,
+    #[serde(rename = "ZoneDefensiveKills")]
+    pub zone_defensive_kills: i64,
+    #[serde(rename = "ZoneOffensiveKills")]
+    pub zone_offensive_kills: i64,
+    #[serde(rename = "ZoneSecures")]
+    pub zone_secures: i64,
+    #[serde(rename = "TotalZoneOccupationTime")]
+    pub total_zone_occupation_time: String,
+    #[serde(rename = "ZoneScoringTicks")]
+    pub zone_scoring_ticks: i64,
+}
+
+/// Player-vs-player kill totals. The per-match block additionally carries `KDA`.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct PvpStats {
+    #[serde(rename = "Kills")]
+    pub kills: i64,
+    #[serde(rename = "Deaths")]
+    pub deaths: i64,
+    #[serde(rename = "Assists")]
+    pub assists: i64,
+    #[serde(rename = "KDA")]
+    pub kda: Option<f64>,
+}
+
+/// Player-vs-environment kill totals, broken down by enemy type. The per-match block also carries
+/// `KDA`.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct PveStats {
+    #[serde(rename = "Kills")]
+    pub kills: i64,
+    #[serde(rename = "Deaths")]
+    pub deaths: i64,
+    #[serde(rename = "Assists")]
+    pub assists: i64,
+    #[serde(rename = "KDA")]
+    pub kda: Option<f64>,
+    #[serde(rename = "BossKills")]
+    pub boss_kills: i64,
+    #[serde(rename = "BruteKills")]
+    pub brute_kills: i64,
+    #[serde(rename = "EliteKills")]
+    pub elite_kills: i64,
+    #[serde(rename = "GruntKills")]
+    pub grunt_kills: i64,
+    #[serde(rename = "HunterKills")]
+    pub hunter_kills: i64,
+    #[serde(rename = "JackalKills")]
+    pub jackal_kills: i64,
+    #[serde(rename = "MarineKills")]
+    pub marine_kills: i64,
+    #[serde(rename = "SentinelKills")]
+    pub sentinel_kills: i64,
+    #[serde(rename = "SkimmerKills")]
+    pub skimmer_kills: i64,
+}
+
+/// Localized medal metadata catalog from the Game CMS.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MedalMetadata {
+    pub difficulties: Vec<String>,
+    pub types: Vec<String>,
+    pub sprites: MedalSpriteSheets,
+    pub medals: Vec<Medal>,
+}
+
+impl MedalMetadata {
+    /// Looks up a medal definition by its `name_id`.
+    pub fn medal(&self, name_id: i64) -> Option<&Medal> {
+        self.medals.iter().find(|medal| medal.name_id == name_id)
+    }
+
+    /// Resolves a medal's difficulty label (e.g. `legendary`) via its difficulty index.
+    pub fn difficulty_of(&self, medal: &Medal) -> Option<&str> {
+        self.difficulties
+            .get(usize::try_from(medal.difficulty_index).ok()?)
+            .map(String::as_str)
+    }
+
+    /// Resolves a medal's type label (e.g. `multikill`) via its type index.
+    pub fn type_of(&self, medal: &Medal) -> Option<&str> {
+        self.types
+            .get(usize::try_from(medal.type_index).ok()?)
+            .map(String::as_str)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Medal {
+    #[serde(rename = "nameId")]
+    pub name_id: i64,
+    pub name: MedalText,
+    pub description: MedalText,
+    #[serde(rename = "spriteIndex")]
+    pub sprite_index: i64,
+    #[serde(rename = "sortingWeight")]
+    pub sorting_weight: i64,
+    /// Index into [`MedalMetadata::difficulties`].
+    #[serde(rename = "difficultyIndex")]
+    pub difficulty_index: i64,
+    /// Index into [`MedalMetadata::types`].
+    #[serde(rename = "typeIndex")]
+    pub type_index: i64,
+    #[serde(rename = "personalScore")]
+    pub personal_score: i64,
+}
+
+/// A medal's localized name or description. Unlike [`LocalizedText`], medal strings carry no
+/// `status` field.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MedalText {
+    pub value: String,
+    pub translations: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MedalSpriteSheets {
+    pub small: MedalSpriteSheet,
+    pub medium: MedalSpriteSheet,
+    #[serde(rename = "extra-large")]
+    pub extra_large: MedalSpriteSheet,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct MedalSpriteSheet {
+    pub path: String,
+    pub columns: i64,
+    pub size: i64,
+}
+
+/// Ranked reward granted for a match, when present. Halo reports this as `null` in practice.
+#[derive(Debug, Clone, Deserialize)]
+pub struct RankedRewards {
+    #[serde(rename = "RewardId")]
+    pub reward_id: String,
+}
+
+/// A player's participation window within a match.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ParticipationInfo {
+    #[serde(rename = "FirstJoinedTime")]
+    pub first_joined_time: Option<DateTime<Utc>>,
+    #[serde(rename = "LastLeaveTime")]
+    pub last_leave_time: Option<DateTime<Utc>>,
+    #[serde(rename = "PresentAtBeginning")]
+    pub present_at_beginning: bool,
+    #[serde(rename = "JoinedInProgress")]
+    pub joined_in_progress: bool,
+    #[serde(rename = "LeftInProgress")]
+    pub left_in_progress: bool,
+    #[serde(rename = "PresentAtCompletion")]
+    pub present_at_completion: bool,
+    #[serde(rename = "TimePlayed")]
+    pub time_played: String,
+    #[serde(rename = "ConfirmedParticipation")]
+    pub confirmed_participation: Option<bool>,
+}
+
+/// Bot difficulty attributes, present only for bot players.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct BotAttributes {
+    #[serde(rename = "Difficulty")]
+    pub difficulty: i32,
 }
 
 #[cfg(test)]
@@ -2575,6 +3072,94 @@ mod tests {
                 ("gameplayinteraction", "PvP".to_string()),
             ]
         );
+    }
+
+    #[test]
+    fn per_match_stats_use_typed_mode_blocks() {
+        // Shapes captured from live match_stats responses.
+        let block: MatchStatsBlock = serde_json::from_value(serde_json::json!({
+            "CoreStats": {
+                "Score": 100, "PersonalScore": 2500, "Kills": 20, "Deaths": 10, "Assists": 5,
+                "KDA": 1.5, "AverageLifeDuration": "PT30S", "Medals": [
+                    { "NameId": 622331684, "Count": 1, "TotalPersonalScoreAwarded": 50 }
+                ],
+                "ObjectivesCompleted": 3, "MaxKillingSpree": 4
+            },
+            "ZonesStats": {
+                "StrongholdCaptures": 6,
+                "StrongholdOccupationTime": "PT54.7S",
+                "StrongholdScoringTicks": 0
+            },
+            "PvpStats": { "Kills": 20, "Deaths": 10, "Assists": 5, "KDA": 1.5 }
+        }))
+        .unwrap();
+
+        assert_eq!(block.core.kills, 20);
+        assert_eq!(block.core.max_killing_spree, 4);
+        assert_eq!(block.core.objectives_completed, 3);
+        assert_eq!(block.core.medals[0].name_id, 622331684);
+        // Per-match zones use Stronghold-prefixed names.
+        let zones = block.mode_stats.zones.as_ref().unwrap();
+        assert_eq!(zones.stronghold_captures, 6);
+        assert_eq!(zones.stronghold_occupation_time, "PT54.7S");
+        let pvp = block.mode_stats.pvp.as_ref().unwrap();
+        assert_eq!(pvp.kills, 20);
+        assert_eq!(pvp.kda, Some(1.5));
+        assert!(block.mode_stats.oddball.is_none());
+    }
+
+    #[test]
+    fn service_record_zones_use_zone_prefixed_names() {
+        // The service-record aggregate uses Zone-prefixed names, unlike per-match Stronghold ones.
+        let record: ServiceRecord = serde_json::from_value(serde_json::json!({
+            "MatchesCompleted": 10,
+            "CoreStats": { "ObjectivesCompleted": 1517 },
+            "ZonesStats": {
+                "ZoneCaptures": 4689,
+                "TotalZoneOccupationTime": "PT21H6M9.7S",
+                "ZoneScoringTicks": 28672
+            },
+            "PveStats": { "Kills": 46998, "GruntKills": 40461 }
+        }))
+        .unwrap();
+
+        assert_eq!(record.core_stats.objectives_completed, 1517);
+        let zones = record.zones_stats.as_ref().unwrap();
+        assert_eq!(zones.zone_captures, 4689);
+        assert_eq!(zones.total_zone_occupation_time, "PT21H6M9.7S");
+        assert_eq!(record.pve_stats.as_ref().unwrap().grunt_kills, 40461);
+        assert!(record.bomb_stats.is_none());
+    }
+
+    #[test]
+    fn medal_metadata_resolves_indices() {
+        // Shape captured from the live medals metadata document (camelCase, hyphenated sprite key).
+        let metadata: MedalMetadata = serde_json::from_value(serde_json::json!({
+            "difficulties": ["normal", "heroic", "legendary", "mythic"],
+            "types": ["spree", "mode", "multikill", "proficiency", "skill", "style"],
+            "sprites": {
+                "small": { "path": "sm.png", "columns": 16, "size": 72 },
+                "medium": { "path": "med.png", "columns": 16, "size": 128 },
+                "extra-large": { "path": "xl.png", "columns": 16, "size": 256 }
+            },
+            "medals": [{
+                "nameId": 622331684,
+                "name": { "value": "Double Kill", "translations": { "de-DE": "Doppelter Abschuss" } },
+                "description": { "value": "Kill 2 enemies", "translations": {} },
+                "spriteIndex": 64,
+                "sortingWeight": 100,
+                "difficultyIndex": 1,
+                "typeIndex": 2,
+                "personalScore": 50
+            }]
+        }))
+        .unwrap();
+
+        let medal = metadata.medal(622331684).unwrap();
+        assert_eq!(medal.name.value, "Double Kill");
+        assert_eq!(metadata.difficulty_of(medal), Some("heroic"));
+        assert_eq!(metadata.type_of(medal), Some("multikill"));
+        assert_eq!(metadata.sprites.extra_large.size, 256);
     }
 
     #[test]
