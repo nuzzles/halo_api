@@ -12,6 +12,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+## [0.1.1] - 2026-07-30
+
+This release has an [MSRV][] of 1.96.
+
 ### Fixed
 
 - `hero_url`/`thumbnail_url` on `MapAsset`, `GameVariantAsset`, and `PlaylistAsset` now find the
@@ -39,4 +43,5 @@ This release has an [MSRV][] of 1.96.
 [MSRV]: README.md#msrv
 
 [Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.1.0...HEAD
+[0.1.1]: https://github.com/nuzzles/halo_api/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/nuzzles/halo_api/releases/tag/v0.1.0
