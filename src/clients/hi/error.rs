@@ -37,6 +37,9 @@ pub enum InfiniteClientError {
 
     #[error("Halo Infinite returned no career rank record for player \"{0}\"")]
     CareerRankNotFound(String),
+
+    #[error("an internal concurrent task was cancelled or panicked")]
+    TaskJoin,
 }
 
 impl From<reqwest::Error> for InfiniteClientError {

@@ -1026,29 +1026,39 @@ impl HaloInfiniteClient {
         let playlist = self
             .playlist(playlist_id, &metadata.ugc_playlist_version)
             .await?;
-        let mut map_modes = Vec::with_capacity(playlist.rotation_entries.len());
-        for rotation in playlist.rotation_entries {
-            let pair = self
-                .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
-                .await?;
-            let map = self
-                .map(MapId::new(
-                    pair.map.asset_id.clone(),
-                    pair.map.version_id.clone(),
-                ))
-                .await?;
-            let mode = self
-                .mode(GameModeId::new(
-                    pair.mode.asset_id.clone(),
-                    pair.mode.version_id.clone(),
-                ))
-                .await?;
-            map_modes.push(RankedArenaMapMode {
-                weight: rotation.metadata.weight,
-                pair,
-                map,
-                mode,
-            });
+
+        let tasks = playlist
+            .rotation_entries
+            .into_iter()
+            .map(|rotation| {
+                let client = self.clone();
+                tokio::spawn(async move {
+                    let pair = client
+                        .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
+                        .await?;
+                    let (map, mode) = tokio::try_join!(
+                        client.map(MapId::new(
+                            pair.map.asset_id.clone(),
+                            pair.map.version_id.clone(),
+                        )),
+                        client.mode(GameModeId::new(
+                            pair.mode.asset_id.clone(),
+                            pair.mode.version_id.clone(),
+                        ))
+                    )?;
+                    Ok::<_, InfiniteClientError>(RankedArenaMapMode {
+                        weight: rotation.metadata.weight,
+                        pair,
+                        map,
+                        mode,
+                    })
+                })
+            })
+            .collect::<Vec<_>>();
+
+        let mut map_modes = Vec::with_capacity(tasks.len());
+        for task in tasks {
+            map_modes.push(task.await.map_err(|_| InfiniteClientError::TaskJoin)??);
         }
         Ok(Some(RankedArenaSeason { season, map_modes }))
     }

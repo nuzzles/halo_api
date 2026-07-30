@@ -12,6 +12,12 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+### Changed
+
+- `current_ranked_arena` now fetches all rotation entries (map-mode pairs, maps, and game variants)
+  concurrently rather than sequentially. For a typical 26-entry rotation this reduces wall-clock
+  time from ~16 s at the default 5 req/s rate to the time of the single slowest request.
+
 ## [0.1.1] - 2026-07-30
 
 This release has an [MSRV][] of 1.96.
