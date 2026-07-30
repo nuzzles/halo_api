@@ -12,6 +12,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+## [0.2.0] - 2026-07-30
+
+This release has an [MSRV][] of 1.96.
+
 ### Changed
 
 - `current_ranked_arena` now fetches all rotation entries (map-mode pairs, maps, and game variants)
@@ -49,6 +53,7 @@ This release has an [MSRV][] of 1.96.
 
 [MSRV]: README.md#msrv
 
-[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/nuzzles/halo_api/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/nuzzles/halo_api/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/nuzzles/halo_api/releases/tag/v0.1.0
