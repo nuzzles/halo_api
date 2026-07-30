@@ -12,6 +12,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+### Fixed
+
+- `hero_url`/`thumbnail_url` on `MapAsset`, `GameVariantAsset`, and `PlaylistAsset` now find the
+  conventionally-named image regardless of its file extension. Halo serves some assets' hero and
+  thumbnail images as `.jpg`/`.jpeg` rather than `.png` (observed on several Ranked Arena rotation
+  maps), and the previous exact-filename match on `hero.png`/`thumbnail.png` silently returned
+  `None` for those, even though an image existed.
+
 ## [0.1.0] - 2026-07-30
 
 This release has an [MSRV][] of 1.96.

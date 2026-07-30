@@ -2065,13 +2065,24 @@ impl AssetFiles {
             .map(|path| self.url(path))
     }
 
-    fn named_image_url(&self, file_name: &str) -> Option<String> {
+    /// Finds an image file by name stem (e.g. `"thumbnail"`), regardless of its extension.
+    ///
+    /// Halo serves the same conventionally-named image (`hero`, `thumbnail`) under different
+    /// extensions across assets — some `.png`, others `.jpg` or `.jpeg` — so matching only a
+    /// single hardcoded extension misses real images that exist under a different one.
+    fn named_image_url(&self, stem: &str) -> Option<String> {
         self.relative_paths
             .iter()
             .find(|path| {
-                path.rsplit('/')
-                    .next()
-                    .is_some_and(|name| name.eq_ignore_ascii_case(file_name))
+                path.rsplit('/').next().is_some_and(|name| {
+                    name.rsplit_once('.').is_some_and(|(name_stem, extension)| {
+                        name_stem.eq_ignore_ascii_case(stem)
+                            && matches!(
+                                extension.to_ascii_lowercase().as_str(),
+                                "png" | "jpg" | "jpeg"
+                            )
+                    })
+                })
             })
             .map(|path| self.url(path))
     }
@@ -2104,14 +2115,14 @@ impl PlaylistAsset {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("hero.png"))
+            .and_then(|files| files.named_image_url("hero"))
     }
 
     pub fn thumbnail_url(&self) -> Option<String> {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("thumbnail.png"))
+            .and_then(|files| files.named_image_url("thumbnail"))
     }
 
     pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
@@ -2163,14 +2174,14 @@ impl MapAsset {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("hero.png"))
+            .and_then(|files| files.named_image_url("hero"))
     }
 
     pub fn thumbnail_url(&self) -> Option<String> {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("thumbnail.png"))
+            .and_then(|files| files.named_image_url("thumbnail"))
     }
 
     pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
@@ -2210,14 +2221,14 @@ impl GameVariantAsset {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("hero.png"))
+            .and_then(|files| files.named_image_url("hero"))
     }
 
     pub fn thumbnail_url(&self) -> Option<String> {
         self.asset
             .files
             .as_ref()
-            .and_then(|files| files.named_image_url("thumbnail.png"))
+            .and_then(|files| files.named_image_url("thumbnail"))
     }
 
     pub fn screenshot_urls(&self) -> impl Iterator<Item = String> + '_ {
@@ -3334,6 +3345,42 @@ mod tests {
         assert_eq!(
             mode.screenshot_urls().collect::<Vec<_>>(),
             ["https://cdn.example/mode/images/screenshot1.Png"]
+        );
+    }
+
+    #[test]
+    fn named_image_url_finds_jpg_and_jpeg_thumbnails_and_heroes() {
+        // Halo serves the conventionally-named hero/thumbnail images under different
+        // extensions across assets, not just `.png` (observed live for several Ranked Arena
+        // rotation maps, e.g. "Solitude - Ranked", which ship `images/thumbnail.jpg`).
+        let map: MapAsset = serde_json::from_value(serde_json::json!({
+            "AssetId": "asset",
+            "VersionId": "version",
+            "PublicName": "Solitude",
+            "Description": "",
+            "Files": {
+                "Prefix": "https://cdn.example/map/",
+                "FileRelativePaths": [
+                    "images/hero.jpeg",
+                    "images/thumbnail.jpg"
+                ]
+            },
+            "CustomData": {
+                "NumOfObjectsOnMap": 0,
+                "TagLevelId": 0,
+                "IsBaked": true,
+                "HasNodeGraph": false
+            }
+        }))
+        .unwrap();
+
+        assert_eq!(
+            map.hero_url().as_deref(),
+            Some("https://cdn.example/map/images/hero.jpeg")
+        );
+        assert_eq!(
+            map.thumbnail_url().as_deref(),
+            Some("https://cdn.example/map/images/thumbnail.jpg")
         );
     }
 
