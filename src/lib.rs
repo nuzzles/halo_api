@@ -11,7 +11,7 @@
 //!
 //! use halo_api::clients::hi::models::PlaylistId;
 //! use halo_api::auth::HaloAuthClient;
-//! use halo_api::clients::hi::HaloInfiniteClient;
+//! use halo_api::clients::hi::{HaloInfiniteClient, Player};
 //! use xbox::auth::LegacyPasswordProvider;
 //! use xbox::XboxClient;
 //!
@@ -23,7 +23,7 @@
 //! let halo = HaloInfiniteClient::new(auth);
 //!
 //! let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
-//! let csr = halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid).await?;
+//! let csr = halo.playlist_csr(PlaylistId::RANKED_ARENA, &Player::from(&xuid)).await?;
 //!
 //! println!("{csr:?}");
 //! # Ok(())

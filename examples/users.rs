@@ -2,7 +2,7 @@ mod common;
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
-    let (_, xuid) = common::player_xuid(&halo).await?;
-    println!("{:#?}", halo.users(&[xuid]).await?);
+    let (_, player) = common::player_xuid(&halo).await?;
+    println!("{:#?}", halo.users(&[player]).await?);
     Ok(())
 }

@@ -4,7 +4,7 @@ mod common;
 
 use std::collections::HashMap;
 
-use xbox::models::Xuid;
+use halo_api::clients::hi::Player;
 
 fn bare_xuid(player_id: &str) -> &str {
     player_id
@@ -17,18 +17,18 @@ fn bare_xuid(player_id: &str) -> &str {
 async fn main() -> Result<(), common::ExampleError> {
     let (xbox, halo) = common::halo_infinite_client()?;
     let (gamertag, xuid) = common::logged_in_player(&xbox).await?;
-    let history = halo.player_matches(&xuid, 0, 1).await?;
+    let history = halo.player_matches(&Player::from(&xuid), 0, 1).await?;
     let latest = history.results.first().ok_or("No recent matches found")?;
     let stats = halo.match_stats(&latest.match_id).await?;
 
-    let xuids = stats
+    let players = stats
         .players
         .iter()
         .filter(|player| player.player_type == 1)
-        .map(|player| Xuid::from(bare_xuid(&player.player_id)))
+        .map(|player| Player::xuid(bare_xuid(&player.player_id)))
         .collect::<Vec<_>>();
     let names = halo
-        .users(&xuids)
+        .users(&players)
         .await?
         .into_iter()
         .map(|user| (user.xuid, user.gamertag))

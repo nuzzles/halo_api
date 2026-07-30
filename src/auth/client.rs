@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use xbox::cache::ExpiryTokenCache;
+use chrono::{Duration as ChronoDuration, Utc};
+use xbox::cache::{CachedToken, ExpiryTokenCache};
 use xbox::{XboxClient, auth::XblAuthProvider};
 
 use super::{
@@ -27,6 +28,43 @@ struct HaloAuthState {
     clearance_cache: ExpiryTokenCache<String, AuthError>,
 }
 
+/// Non-refreshable credentials supplied directly by an application.
+///
+/// The enclosing caches still make token invalidation safe: a 401 clears the
+/// cached value and retries with the supplied credentials once. Applications
+/// using this source must create a new [`HaloAuthClient`] when their tokens
+/// expire or are rotated.
+struct StaticSpartanTokenSource {
+    token: String,
+}
+
+struct StaticClearanceTokenSource {
+    token: String,
+}
+
+#[async_trait::async_trait]
+impl SpartanTokenSource for StaticSpartanTokenSource {
+    async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError> {
+        Ok(static_token(&self.token))
+    }
+}
+
+#[async_trait::async_trait]
+impl ClearanceTokenSource for StaticClearanceTokenSource {
+    async fn clearance_token(
+        &self,
+        _spartan_token: &str,
+    ) -> Result<CachedToken<String>, AuthError> {
+        Ok(static_token(&self.token))
+    }
+}
+
+fn static_token(token: &str) -> CachedToken<String> {
+    // Raw credentials do not expose their expiry in this API. Keep them cached
+    // until an authorization failure or the caller replaces the auth client.
+    CachedToken::new(token.to_owned(), Utc::now() + ChronoDuration::days(3650))
+}
+
 /// Credentials attached internally to authenticated Halo Infinite requests.
 #[derive(Clone, Debug)]
 pub(crate) struct HaloCredentials {
@@ -45,6 +83,27 @@ impl HaloAuthClient {
         xbox: impl Into<Arc<XboxClient<P>>>,
     ) -> Self {
         Self::from_xbox_client_with_endpoints(xbox, &AuthEndpoints::default())
+    }
+
+    /// Uses existing Halo Waypoint credentials without performing an Xbox
+    /// sign-in or token exchange.
+    ///
+    /// This is intended for applications that already manage token acquisition.
+    /// The supplied values are kept private and are never exposed by this
+    /// client. They cannot be refreshed automatically; construct a new client
+    /// with replacement values after they expire.
+    pub fn from_tokens(
+        spartan_token: impl Into<String>,
+        clearance_token: impl Into<String>,
+    ) -> Self {
+        Self::with_sources(
+            Arc::new(StaticSpartanTokenSource {
+                token: spartan_token.into(),
+            }),
+            Arc::new(StaticClearanceTokenSource {
+                token: clearance_token.into(),
+            }),
+        )
     }
 
     /// Builds the authentication flow with overridable URLs for crate tests.

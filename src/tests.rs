@@ -8,7 +8,7 @@ use crate::clients::hi::models::{
     CustomizationItemMetadata, EmblemImageAssets, MatchHistoryType, MatchType, PlaylistId,
     ServiceRecordFilter,
 };
-use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError};
+use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError, Player};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
 use wiremock::matchers::{header, method, path, query_param};
@@ -170,13 +170,51 @@ async fn gets_playlist_csr_end_to_end() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
+    let player = Player::xuid("123456789");
     let csr = halo
-        .playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .playlist_csr(PlaylistId::RANKED_ARENA, &player)
         .await
         .unwrap();
 
     assert_eq!(csr.records.len(), 1);
+    assert_eq!(csr.records[0].result.current.value, 1500);
+}
+
+#[tokio::test]
+async fn supplied_halo_tokens_are_used_without_xbox_authentication() {
+    let server = MockServer::start().await;
+    let auth = HaloAuthClient::from_tokens("provided-spartan", "provided-clearance");
+    let halo = HaloInfiniteClient::with_endpoints(
+        auth,
+        HaloEndpoints {
+            skill_base_url: server.uri(),
+            halostats_base_url: server.uri(),
+            current_user_url: format!("{}/users/me", server.uri()),
+            profile_base_url: server.uri(),
+            game_cms_base_url: server.uri(),
+            ugc_base_url: server.uri(),
+            settings_base_url: server.uri(),
+            ban_base_url: server.uri(),
+            economy_base_url: server.uri(),
+        },
+    );
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/playlist/edfef3ac-9cbe-4fa2-b949-8f29deafd483/csrs",
+        ))
+        .and(header("X-343-Authorization-Spartan", "provided-spartan"))
+        .and(header("343-Clearance", "provided-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(csr_body(1500)))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let player = Player::xuid("123456789");
+    let csr = halo
+        .playlist_csr(PlaylistId::RANKED_ARENA, &player)
+        .await
+        .unwrap();
+
     assert_eq!(csr.records[0].result.current.value, 1500);
 }
 
@@ -199,8 +237,8 @@ async fn player_matches_uses_supported_query_parameters() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    let history = halo.player_matches(&xuid, 0, 1).await.unwrap();
+    let player = Player::xuid("123456789");
+    let history = halo.player_matches(&player, 0, 1).await.unwrap();
 
     assert!(history.results.is_empty());
     assert_eq!(history.result_count, 0);
@@ -222,8 +260,8 @@ async fn player_matches_of_type_sends_type_parameter() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    halo.player_matches_of_type(&xuid, 0, 25, MatchHistoryType::Matchmaking)
+    let player = Player::xuid("123456789");
+    halo.player_matches_of_type(&player, 0, 25, MatchHistoryType::Matchmaking)
         .await
         .unwrap();
 }
@@ -234,13 +272,26 @@ async fn service_record_defaults_to_matchmade_without_filters() {
     let (halo, _xbox) = test_client(&server).await;
 
     Mock::given(method("GET"))
-        .and(path("/hi/players/Player/Matchmade/servicerecord"))
+        .and(path("/users/gt(Player)"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "xuid": "123456789",
+            "gamertag": "Player",
+            "gamerpic": { "small": "", "medium": "", "large": "", "xlarge": "" }
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/Matchmade/servicerecord"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
         .expect(1)
         .mount(&server)
         .await;
 
-    halo.service_record("Player").await.unwrap();
+    halo.service_record(&Player::gamertag("Player"))
+        .await
+        .unwrap();
 
     let requests = server.received_requests().await.unwrap();
     let request = requests
@@ -257,7 +308,18 @@ async fn service_record_with_filter_sends_lowercase_query_parameters() {
     let (halo, _xbox) = test_client(&server).await;
 
     Mock::given(method("GET"))
-        .and(path("/hi/players/Player/Matchmade/servicerecord"))
+        .and(path("/users/gt(Player)"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "xuid": "123456789",
+            "gamertag": "Player",
+            "gamerpic": { "small": "", "medium": "", "large": "", "xlarge": "" }
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/Matchmade/servicerecord"))
         .and(query_param("seasonid", "Csr/Seasons/CsrSeason5-1.json"))
         .and(query_param("gamevariantcategory", "6"))
         .and(query_param("isranked", "True"))
@@ -269,7 +331,7 @@ async fn service_record_with_filter_sends_lowercase_query_parameters() {
     let filter = ServiceRecordFilter::for_season("Csr/Seasons/CsrSeason5-1.json")
         .game_variant_category(6)
         .ranked(true);
-    halo.service_record_with("Player", MatchType::Matchmade, &filter)
+    halo.service_record_with(&Player::gamertag("Player"), MatchType::Matchmade, &filter)
         .await
         .unwrap();
 }
@@ -311,8 +373,8 @@ async fn match_skill_parses_typed_skill_results() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    let skill = halo.match_skill("test-match", &[xuid]).await.unwrap();
+    let player = Player::xuid("123456789");
+    let skill = halo.match_skill("test-match", &[player]).await.unwrap();
 
     assert_eq!(skill.results.len(), 1);
     let result = &skill.results[0];
@@ -356,8 +418,8 @@ async fn match_skill_tolerates_social_match_null_fields() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    let skill = halo.match_skill("social", &[xuid]).await.unwrap();
+    let player = Player::xuid("123456789");
+    let skill = halo.match_skill("social", &[player]).await.unwrap();
 
     assert_eq!(skill.results[0].result_code, 1);
     assert!(skill.results[0].result.counterfactuals.is_none());
@@ -386,12 +448,48 @@ async fn career_rank_uses_clearance_and_default_track() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    let career = halo.career_rank(&xuid).await.unwrap();
+    let player = Player::xuid("123456789");
+    let career = halo.career_rank(&player).await.unwrap();
 
     assert_eq!(career.current_progress.rank, 42);
     assert_eq!(career.current_progress.partial_progress, 1200);
     assert_eq!(career.spartan_id.as_deref(), Some("spartan-123"));
+}
+
+#[tokio::test]
+async fn career_ranks_works_for_arbitrary_players() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/careerranks/careerRank1"))
+        .and(query_param("players", "xuid(123456789)"))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "RewardTracks": [{
+                "Id": "xuid(123456789)",
+                "ResultCode": "Success",
+                "Result": {
+                    "CurrentProgress": {
+                        "Rank": 271,
+                        "PartialProgress": 500,
+                        "HasReachedMaxRank": false
+                    },
+                    "SpartanId": "spartan-1234"
+                }
+            }]
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let player = Player::xuid("123456789");
+    let career = halo.career_rank_of(&player).await.unwrap();
+
+    assert_eq!(career.current_progress.rank, 271);
+    assert_eq!(career.current_progress.partial_progress, 500);
+    assert_eq!(career.spartan_id.as_deref(), Some("spartan-1234"));
 }
 
 #[tokio::test]
@@ -411,8 +509,8 @@ async fn player_match_count_parses_typed_counts() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    let count = halo.player_match_count(&xuid).await.unwrap();
+    let player = Player::xuid("123456789");
+    let count = halo.player_match_count(&player).await.unwrap();
 
     assert_eq!(count.total, 100);
     assert_eq!(count.matchmade, 85);
@@ -468,6 +566,75 @@ async fn match_highlight_events_downloads_and_decodes_film() {
 }
 
 #[tokio::test]
+async fn match_highlight_event_validation_fetches_film_and_stats_once() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+    encoder.write_all(&[]).unwrap();
+    let compressed_chunk = encoder.finish().unwrap();
+
+    Mock::given(method("GET"))
+        .and(path("/hi/films/matches/test-match/spectate"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "FilmStatusBond": 1,
+            "CustomData": {
+                "FilmLength": 1000,
+                "Chunks": [{
+                    "Index": 0,
+                    "ChunkStartTimeOffsetMilliseconds": 0,
+                    "DurationMilliseconds": 1000,
+                    "ChunkSize": compressed_chunk.len(),
+                    "FileRelativePath": "film/highlights.bin",
+                    "ChunkType": 3
+                }],
+                "HasGameEnded": true,
+                "ManifestRefreshSeconds": 60,
+                "MatchId": "test-match",
+                "FilmMajorVersion": 41
+            },
+            "BlobStoragePathPrefix": server.uri(),
+            "AssetId": "film-asset"
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/film/highlights.bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(compressed_chunk))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/hi/matches/test-match/stats"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "MatchId": "test-match",
+            "MatchInfo": {
+                "StartTime": "2026-01-01T00:00:00Z",
+                "EndTime": "2026-01-01T00:01:00Z",
+                "Duration": "PT1M",
+                "GameVariantCategory": 6,
+                "MapVariant": null,
+                "UgcGameVariant": null,
+                "Playlist": null
+            },
+            "Players": [],
+            "Teams": []
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let report = halo
+        .match_highlight_events_with_validation("test-match")
+        .await
+        .unwrap();
+
+    assert!(report.events.is_empty());
+    assert!(report.validation.matches_stats());
+}
+
+#[tokio::test]
 async fn spartan_token_is_cached_across_calls() {
     let server = MockServer::start().await;
     let (halo, _xbox) = test_client(&server).await;
@@ -480,11 +647,11 @@ async fn spartan_token_is_cached_across_calls() {
         .mount(&server)
         .await;
 
-    let xuid = "123456789".into();
-    halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+    let player = Player::xuid("123456789");
+    halo.playlist_csr(PlaylistId::RANKED_ARENA, &player)
         .await
         .unwrap();
-    halo.playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+    halo.playlist_csr(PlaylistId::RANKED_ARENA, &player)
         .await
         .unwrap();
 
@@ -520,12 +687,15 @@ async fn gamertag_not_found_maps_to_typed_error() {
     let (halo, _xbox) = test_client(&server).await;
 
     Mock::given(method("GET"))
-        .and(path("/hi/players/NoSuchGamer/Matchmade/servicerecord"))
+        .and(path("/users/gt(NoSuchGamer)"))
         .respond_with(ResponseTemplate::new(404))
         .mount(&server)
         .await;
 
-    let err = halo.service_record("NoSuchGamer").await.unwrap_err();
+    let err = halo
+        .service_record(&Player::gamertag("NoSuchGamer"))
+        .await
+        .unwrap_err();
     assert!(matches!(err, InfiniteClientError::GamertagNotFound(gt) if gt == "NoSuchGamer"));
 }
 
@@ -561,8 +731,8 @@ async fn ban_summary_uses_spartan_auth_without_clearance() {
         .mount(&server)
         .await;
 
-    let xuids = ["123456789".into(), "987654321".into()];
-    halo.ban_summary(&xuids).await.unwrap();
+    let players = [Player::xuid("123456789"), Player::xuid("987654321")];
+    halo.ban_summary(&players).await.unwrap();
 
     let requests = server.received_requests().await.unwrap();
     let request = requests
@@ -690,4 +860,305 @@ async fn emblem_image_download_uses_spartan_auth_and_clearance() {
         halo.customization_image(&metadata).await.unwrap().unwrap(),
         [4, 5, 6]
     );
+}
+
+#[tokio::test]
+async fn career_reward_track_exposes_rank_titles_and_icons() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/Progression/file/RewardTracks/CareerRanks/careerRank1.json",
+        ))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "TrackId": "careerRank1",
+            "XpPerRank": 1000,
+            "Ranks": [{
+                "Rank": 271,
+                "XpRequiredForRank": 45000,
+                "RankTitle": { "status": "Ready", "value": "Cadet", "translations": {} },
+                "RankSubTitle": { "status": "Ready", "value": "1", "translations": {} },
+                "RankTier": { "status": "Ready", "value": "Onyx", "translations": {} },
+                "TierType": "TierOnyx",
+                "RankIcon": "Progression/RewardTracks/CareerRanks/careerRank1/271_icon.png",
+                "RankLargeIcon": "Progression/RewardTracks/CareerRanks/careerRank1/271_large.png",
+                "RankAdornmentIcon": "Progression/RewardTracks/CareerRanks/careerRank1/271_adornment.png",
+                "RankGrade": 1
+            }]
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let track = halo.career_reward_track().await.unwrap();
+    let rank = track.rank(271).unwrap();
+
+    assert_eq!(rank.display_title().as_deref(), Some("Cadet 1"));
+    assert_eq!(rank.rank_tier.as_ref().unwrap().value, "Onyx");
+    assert_eq!(rank.tier_type.as_deref(), Some("TierOnyx"));
+    assert_eq!(rank.rank_grade, Some(1));
+    assert!(track.rank(9999).is_none());
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/images/file/Progression/RewardTracks/CareerRanks/careerRank1/271_adornment.png",
+        ))
+        .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes([7, 8, 9]))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let icon_path = rank.rank_adornment_icon.as_deref().unwrap();
+    assert_eq!(halo.rank_icon_image(icon_path).await.unwrap(), [7, 8, 9]);
+}
+
+#[tokio::test]
+async fn challenge_decks_parses_typed_deck_and_reward_track_shape() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/decks"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "AssignedDecks": [{
+                "Id": "deck-1",
+                "Path": "Progression/Decks/deck-1.json",
+                "ActiveChallenges": [{
+                    "Path": "Progression/Challenges/active.json",
+                    "Progress": 1,
+                    "Id": "active-challenge",
+                    "CanReroll": true
+                }],
+                "UpcomingChallenges": [{
+                    "Path": "Progression/Challenges/upcoming.json",
+                    "Progress": 0,
+                    "Id": "upcoming-challenge",
+                    "CanReroll": false,
+                    "Difficulty": "Medium",
+                    "TypeIconPath": "icon.png",
+                    "IsUserEvent": false,
+                    "Category": "Weekly",
+                    "Description": { "status": "Ready", "value": "Win 3 matches", "translations": {} },
+                    "Title": { "status": "Ready", "value": "Winner", "translations": {} },
+                    "ThresholdForSuccess": 3,
+                    "Reward": {
+                        "InventoryItems": ["item-1"],
+                        "SoftExperience": 500,
+                        "OperationExperience": 0
+                    }
+                }],
+                "CompletedChallenges": [],
+                "Expiration": { "ISO8601Date": "2026-08-01T00:00:00Z" }
+            }],
+            "ClearanceId": "fake-clearance",
+            "ActiveRewardTrack": {
+                "RewardTrackPath": "Progression/RewardTracks/weekly.json",
+                "TrackType": "Challenge",
+                "CurrentProgress": 100,
+                "PreviousProgress": 50,
+                "IsOwned": true,
+                "BaseXp": 100,
+                "BoostXp": 0,
+                "HasReachedMaxRank": false
+            },
+            "ScheduledRewardTrack": {
+                "RewardTrackPath": "Progression/RewardTracks/next-week.json",
+                "TrackType": "Challenge",
+                "CurrentProgress": 0,
+                "PreviousProgress": 0,
+                "IsOwned": false,
+                "BaseXp": 0,
+                "BoostXp": 0,
+                "HasReachedMaxRank": false
+            }
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let player = Player::xuid("123456789");
+    let decks = halo.challenge_decks(&player).await.unwrap();
+
+    assert_eq!(decks.clearance_id, "fake-clearance");
+    assert_eq!(decks.assigned_decks.len(), 1);
+    let deck = &decks.assigned_decks[0];
+    assert_eq!(deck.active_challenges[0].progress, 1);
+    assert!(deck.active_challenges[0].description.is_none());
+    let upcoming = &deck.upcoming_challenges[0];
+    assert_eq!(upcoming.title.as_ref().unwrap().value, "Winner");
+    assert_eq!(upcoming.reward.as_ref().unwrap().soft_experience, 500);
+    assert_eq!(decks.active_reward_track.current_progress, 100);
+    assert!(!decks.scheduled_reward_track.is_owned);
+}
+
+#[tokio::test]
+async fn settings_parses_hipc_manifest_as_json() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/settings/hipc/e2a0a7c6-6efe-42af-9283-c2ab73250c48"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "Authorities": {
+                "authority-1": {
+                    "AuthorityId": "authority-1",
+                    "Scheme": 2,
+                    "Hostname": "example.svc.halowaypoint.com",
+                    "Port": 443,
+                    "AuthenticationMethods": [1, 2]
+                }
+            },
+            "RetryPolicies": {
+                "policy-1": {
+                    "RetryPolicyId": "policy-1",
+                    "TimeoutMs": 5000,
+                    "RetryOptions": {
+                        "MaxRetryCount": 3,
+                        "RetryDelayMs": 100,
+                        "RetryGrowth": 2.0,
+                        "RetryJitterMs": 50,
+                        "RetryIfNotFound": false
+                    }
+                }
+            },
+            "Settings": { "SomeFlag": "true" },
+            "Endpoints": {
+                "endpoint-1": {
+                    "AuthorityId": "authority-1",
+                    "Path": "/hi/example",
+                    "QueryString": null,
+                    "RetryPolicyId": "policy-1",
+                    "TopicName": null,
+                    "AcknowledgementTypeId": 0,
+                    "AuthenticationLifetimeExtensionSupported": false,
+                    "ClearanceAware": true
+                }
+            }
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let settings = halo.settings().await.unwrap();
+
+    assert_eq!(
+        settings.authorities["authority-1"].hostname,
+        "example.svc.halowaypoint.com"
+    );
+    assert_eq!(settings.retry_policies["policy-1"].timeout_ms, 5000);
+    assert_eq!(settings.settings["SomeFlag"], "true");
+    assert!(settings.endpoints["endpoint-1"].clearance_aware);
+}
+
+#[tokio::test]
+async fn asset_fetches_typed_envelope_for_arbitrary_kind() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/films/some-film"))
+        .and(header("343-Clearance", "fake-clearance"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "AssetId": "some-film",
+            "VersionId": "v1",
+            "PublicName": "My Film",
+            "Description": ""
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let asset = halo.film_asset("some-film").await.unwrap();
+    assert_eq!(asset.asset.public_name, "My Film");
+}
+
+#[tokio::test]
+async fn match_history_pager_walks_pages_until_short_page() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    let full_page = (0..25)
+        .map(|index| {
+            serde_json::json!({
+                "MatchId": format!("match-{index}"),
+                "MatchInfo": {
+                    "StartTime": "2026-01-01T00:00:00Z",
+                    "EndTime": "2026-01-01T00:10:00Z",
+                    "Duration": "PT10M",
+                    "GameVariantCategory": 6,
+                    "MapVariant": null,
+                    "UgcGameVariant": null,
+                    "Playlist": null
+                },
+                "LastTeamId": 0,
+                "Outcome": 2,
+                "Rank": 1,
+                "PresentAtEndOfMatch": true
+            })
+        })
+        .collect::<Vec<_>>();
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches"))
+        .and(query_param("start", "0"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "Results": full_page,
+            "ResultCount": 25
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches"))
+        .and(query_param("start", "25"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "Results": [full_page[0].clone(), full_page[1].clone(), full_page[2].clone()],
+            "ResultCount": 3
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let mut pager = halo.player_matches_pager(Player::xuid("123456789"), MatchHistoryType::All);
+
+    let first = pager.next_page().await.unwrap();
+    assert_eq!(first.len(), 25);
+    assert!(!pager.is_done());
+
+    let second = pager.next_page().await.unwrap();
+    assert_eq!(second.len(), 3);
+    assert!(pager.is_done());
+
+    // Exhausted — no further request is made (mocks above each `.expect(1)`).
+    let third = pager.next_page().await.unwrap();
+    assert!(third.is_empty());
+}
+
+#[tokio::test]
+async fn match_history_pager_stops_immediately_on_empty_first_page() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+
+    Mock::given(method("GET"))
+        .and(path("/hi/players/xuid(123456789)/matches"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({ "Results": [], "ResultCount": 0 })),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let mut pager = halo.player_matches_pager(Player::xuid("123456789"), MatchHistoryType::All);
+
+    let page = pager.next_page().await.unwrap();
+    assert!(page.is_empty());
+    assert!(pager.is_done());
+
+    let again = pager.next_page().await.unwrap();
+    assert!(again.is_empty());
 }

@@ -1,10 +1,10 @@
 //! Experimental decoder for Halo Infinite Theater film chunks.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
-use super::models::FilmChunkData;
+use super::models::{FilmChunkData, MatchStats};
 
-const PLAYER_MARKER: [u8; 2] = [0x2d, 0xc0];
+const PLAYER_MARKERS: [[u8; 2]; 2] = [[0x2d, 0xc0], [0x25, 0xc0]];
 const REGISTRY_SLOT_SIZE: usize = 260;
 const REGISTRY_BLOCK_SLOTS: usize = 64;
 const REGISTRY_BLOCK_SIZE: usize = REGISTRY_SLOT_SIZE * REGISTRY_BLOCK_SLOTS;
@@ -480,6 +480,52 @@ pub struct FilmEvent {
     pub metadata: u8,
 }
 
+/// Counts of event categories represented in a Theater-film summary.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct FilmEventCounts {
+    pub kills: usize,
+    pub deaths: usize,
+    pub medals: usize,
+}
+
+/// A player's decoded summary-event counts compared with Halo's match record.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FilmPlayerEventValidation {
+    pub xuid: u64,
+    pub gamertag: Option<String>,
+    pub decoded: FilmEventCounts,
+    pub match_stats: FilmEventCounts,
+}
+
+impl FilmPlayerEventValidation {
+    /// Returns whether this player's decoded counts agree with the match record.
+    pub fn matches_stats(&self) -> bool {
+        self.decoded == self.match_stats
+    }
+}
+
+/// Per-player comparison between a Theater film's summary events and match stats.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct FilmEventValidation {
+    pub players: Vec<FilmPlayerEventValidation>,
+}
+
+impl FilmEventValidation {
+    /// Returns whether every represented human player has matching event counts.
+    pub fn matches_stats(&self) -> bool {
+        self.players
+            .iter()
+            .all(FilmPlayerEventValidation::matches_stats)
+    }
+}
+
+/// Decoded highlight events with their comparison to the match-statistics API.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FilmEventReport {
+    pub events: Vec<FilmEvent>,
+    pub validation: FilmEventValidation,
+}
+
 impl FilmEvent {
     pub fn medal(&self) -> Option<FilmMedal> {
         if matches!(self.kind, FilmEventKind::Medal) {
@@ -500,23 +546,25 @@ pub struct FilmDecodeDiagnostics {
 pub fn decode_diagnostics(chunks: &[FilmChunkData]) -> FilmDecodeDiagnostics {
     let mut diagnostics = FilmDecodeDiagnostics::default();
     for chunk in chunks.iter().filter(|chunk| chunk.metadata.chunk_type != 3) {
-        for marker_position in find_bit_pattern(&chunk.data, &PLAYER_MARKER) {
-            diagnostics.player_markers += 1;
-            let Some(xuid_position) = marker_position.checked_sub(8 * 8) else {
-                continue;
-            };
-            let Some(padding_position) = xuid_position.checked_sub(21 * 8) else {
-                continue;
-            };
-            if bits_are_zero(&chunk.data, padding_position, 21 * 8) {
-                diagnostics.markers_with_zero_padding += 1;
-                let Some(gamertag_position) = padding_position.checked_sub(32 * 8) else {
+        for marker in PLAYER_MARKERS {
+            for marker_position in find_bit_pattern(&chunk.data, &marker) {
+                diagnostics.player_markers += 1;
+                let Some(xuid_position) = marker_position.checked_sub(8 * 8) else {
                     continue;
                 };
-                if extract_bits(&chunk.data, gamertag_position, 32 * 8)
-                    .is_some_and(|bytes| !decode_utf16(&bytes).is_empty())
-                {
-                    diagnostics.decoded_gamertags += 1;
+                let Some(padding_position) = xuid_position.checked_sub(21 * 8) else {
+                    continue;
+                };
+                if bits_are_zero(&chunk.data, padding_position, 21 * 8) {
+                    diagnostics.markers_with_zero_padding += 1;
+                    let Some(gamertag_position) = padding_position.checked_sub(32 * 8) else {
+                        continue;
+                    };
+                    if extract_bits(&chunk.data, gamertag_position, 32 * 8)
+                        .is_some_and(|bytes| !decode_utf16(&bytes).is_empty())
+                    {
+                        diagnostics.decoded_gamertags += 1;
+                    }
                 }
             }
         }
@@ -527,32 +575,35 @@ pub fn decode_diagnostics(chunks: &[FilmChunkData]) -> FilmDecodeDiagnostics {
 pub fn decode_players(chunks: &[FilmChunkData]) -> Vec<FilmPlayer> {
     let mut players = BTreeMap::new();
     for chunk in chunks.iter().filter(|chunk| chunk.metadata.chunk_type != 3) {
-        for marker_position in find_bit_pattern(&chunk.data, &PLAYER_MARKER) {
-            let Some(xuid_position) = marker_position.checked_sub(8 * 8) else {
-                continue;
-            };
-            let Some(padding_position) = xuid_position.checked_sub(21 * 8) else {
-                continue;
-            };
-            let Some(gamertag_position) = padding_position.checked_sub(32 * 8) else {
-                continue;
-            };
-            let Some(xuid_bytes) = extract_bits(&chunk.data, xuid_position, 8 * 8) else {
-                continue;
-            };
-            if !bits_are_zero(&chunk.data, padding_position, 21 * 8) {
-                continue;
-            }
-            let xuid = u64::from_le_bytes(xuid_bytes.try_into().expect("eight XUID bytes"));
-            if xuid == 0 {
-                continue;
-            }
-            let Some(gamertag_bytes) = extract_bits(&chunk.data, gamertag_position, 32 * 8) else {
-                continue;
-            };
-            let gamertag = decode_utf16(&gamertag_bytes);
-            if !gamertag.is_empty() {
-                players.entry(xuid).or_insert(gamertag);
+        for marker in PLAYER_MARKERS {
+            for marker_position in find_bit_pattern(&chunk.data, &marker) {
+                let Some(xuid_position) = marker_position.checked_sub(8 * 8) else {
+                    continue;
+                };
+                let Some(padding_position) = xuid_position.checked_sub(21 * 8) else {
+                    continue;
+                };
+                let Some(gamertag_position) = padding_position.checked_sub(32 * 8) else {
+                    continue;
+                };
+                let Some(xuid_bytes) = extract_bits(&chunk.data, xuid_position, 8 * 8) else {
+                    continue;
+                };
+                if !bits_are_zero(&chunk.data, padding_position, 21 * 8) {
+                    continue;
+                }
+                let xuid = u64::from_le_bytes(xuid_bytes.try_into().expect("eight XUID bytes"));
+                if xuid == 0 {
+                    continue;
+                }
+                let Some(gamertag_bytes) = extract_bits(&chunk.data, gamertag_position, 32 * 8)
+                else {
+                    continue;
+                };
+                let gamertag = decode_utf16(&gamertag_bytes);
+                if !gamertag.is_empty() {
+                    players.entry(xuid).or_insert(gamertag);
+                }
             }
         }
     }
@@ -562,11 +613,23 @@ pub fn decode_players(chunks: &[FilmChunkData]) -> Vec<FilmPlayer> {
         .collect()
 }
 
-pub fn decode_events(chunks: &[FilmChunkData], players: &[FilmPlayer]) -> Vec<FilmEvent> {
-    const EVENT_HEADER_BYTES: usize = 12;
+/// Decodes summary events using the layout for `film_major_version`.
+///
+/// Major versions 39, 40, and 41 carry a 12-byte record prefix before the
+/// gamertag. Other known versions start the record at the gamertag itself.
+pub fn decode_events(
+    chunks: &[FilmChunkData],
+    players: &[FilmPlayer],
+    film_major_version: i32,
+) -> Vec<FilmEvent> {
+    const VERSION_39_TO_41_PREFIX_BYTES: usize = 12;
     const EVENT_GAMERTAG_BYTES: usize = 32;
     const EVENT_TAIL_BYTES: usize = 60;
     const PREFIX_PADDING_BYTES: usize = 3;
+    let event_prefix_bytes = match film_major_version {
+        39..=41 => VERSION_39_TO_41_PREFIX_BYTES,
+        _ => 0,
+    };
 
     let mut events = Vec::new();
     for chunk in chunks.iter().filter(|chunk| chunk.metadata.chunk_type == 3) {
@@ -575,7 +638,7 @@ pub fn decode_events(chunks: &[FilmChunkData], players: &[FilmPlayer]) -> Vec<Fi
                 continue;
             };
             for gamertag_position in find_bit_pattern(&chunk.data, &gamertag_field) {
-                let Some(event_position) = gamertag_position.checked_sub(EVENT_HEADER_BYTES * 8)
+                let Some(event_position) = gamertag_position.checked_sub(event_prefix_bytes * 8)
                 else {
                     continue;
                 };
@@ -607,6 +670,91 @@ pub fn decode_events(chunks: &[FilmChunkData], players: &[FilmPlayer]) -> Vec<Fi
     events.sort_by_key(|event| event.timestamp_ms);
     events.dedup();
     events
+}
+
+/// Compares decoded film event totals with the human-player counts in match stats.
+///
+/// Medal identity cannot be compared here because film summary medal codes and
+/// the stats API's `NameId` values use different namespaces. Medal totals are
+/// nevertheless useful for detecting a truncated or incorrectly decoded film.
+pub fn validate_events(
+    events: &[FilmEvent],
+    players: &[FilmPlayer],
+    match_stats: &MatchStats,
+) -> FilmEventValidation {
+    let mut decoded = BTreeMap::<u64, FilmEventCounts>::new();
+    for event in events {
+        let counts = decoded.entry(event.xuid).or_default();
+        match event.kind {
+            FilmEventKind::Kill => counts.kills += 1,
+            FilmEventKind::Death => counts.deaths += 1,
+            FilmEventKind::Medal => counts.medals += 1,
+            FilmEventKind::Mode | FilmEventKind::Other(_) => {}
+        }
+    }
+
+    let mut expected = BTreeMap::<u64, FilmEventCounts>::new();
+    for player in match_stats
+        .players
+        .iter()
+        .filter(|player| player.is_human())
+    {
+        let Some(xuid) = player_xuid(&player.player_id) else {
+            continue;
+        };
+        let counts = expected.entry(xuid).or_default();
+        for team in &player.team_stats {
+            counts.kills += nonnegative_count(team.stats.core.kills);
+            counts.deaths += nonnegative_count(team.stats.core.deaths);
+            counts.medals += team
+                .stats
+                .core
+                .medals
+                .iter()
+                .map(|medal| nonnegative_count(medal.count))
+                .sum::<usize>();
+        }
+    }
+
+    let mut gamertags = players
+        .iter()
+        .map(|player| (player.xuid, player.gamertag.clone()))
+        .collect::<BTreeMap<_, _>>();
+    for event in events {
+        gamertags
+            .entry(event.xuid)
+            .or_insert_with(|| event.gamertag.clone());
+    }
+    let xuids = decoded
+        .keys()
+        .chain(expected.keys())
+        .chain(gamertags.keys())
+        .copied()
+        .collect::<BTreeSet<_>>();
+
+    FilmEventValidation {
+        players: xuids
+            .into_iter()
+            .map(|xuid| FilmPlayerEventValidation {
+                xuid,
+                gamertag: gamertags.remove(&xuid),
+                decoded: decoded.remove(&xuid).unwrap_or_default(),
+                match_stats: expected.remove(&xuid).unwrap_or_default(),
+            })
+            .collect(),
+    }
+}
+
+fn player_xuid(player_id: &str) -> Option<u64> {
+    player_id
+        .strip_prefix("xuid(")?
+        .strip_suffix(')')?
+        .parse()
+        .ok()
+}
+
+fn nonnegative_count(value: i64) -> usize {
+    usize::try_from(value).unwrap_or_default()
 }
 
 fn padded_gamertag_field(gamertag: &str) -> Option<[u8; 32]> {
@@ -749,7 +897,7 @@ mod tests {
         ];
 
         assert_eq!(
-            decode_events(&chunks, &players),
+            decode_events(&chunks, &players, 39),
             [FilmEvent {
                 xuid: 2,
                 gamertag: "MsNuzzles".into(),
@@ -771,6 +919,170 @@ mod tests {
             }
         );
         assert_eq!(FilmMedal::from_id(255), FilmMedal::Unknown(255));
+    }
+
+    /// Speculative coverage for the zero-prefix fallback branch. No real film has confirmed a
+    /// gamertag-first layout yet — versions 39, 40, and 41 all use the 12-byte prefix — so this
+    /// exercises the fallback with a version number outside every confirmed case, not a verified
+    /// real layout. Update or remove once/if a real version is found needing zero prefix bytes.
+    #[test]
+    fn decodes_gamertag_first_summary_event_layouts_for_unconfirmed_versions() {
+        let mut data = vec![0; 3];
+        let mut event = [0u8; 60];
+        event[..32].copy_from_slice(&padded_gamertag_field("Nuzzles").unwrap());
+        event[47] = 20;
+        event[48..52].copy_from_slice(&42_000u32.to_be_bytes());
+        data.extend_from_slice(&event);
+        let chunks = [FilmChunkData {
+            metadata: FilmChunk {
+                index: 0,
+                start_time_offset_ms: 0,
+                duration_ms: 0,
+                size: data.len() as i64,
+                file_relative_path: String::new(),
+                chunk_type: 3,
+            },
+            data,
+        }];
+        let players = [FilmPlayer {
+            xuid: 1,
+            gamertag: "Nuzzles".into(),
+        }];
+
+        let events = decode_events(&chunks, &players, 999);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, FilmEventKind::Death);
+        assert_eq!(events[0].timestamp_ms, 42_000);
+        assert!(decode_events(&chunks, &players, 41).is_empty());
+    }
+
+    #[test]
+    fn decodes_both_player_marker_variants() {
+        let mut data = Vec::new();
+        for (xuid, gamertag, marker) in [
+            (1u64, "Nuzzles", [0x2d, 0xc0]),
+            (2u64, "MsNuzzles", [0x25, 0xc0]),
+        ] {
+            data.extend_from_slice(&padded_gamertag_field(gamertag).unwrap());
+            data.extend_from_slice(&[0; 21]);
+            data.extend_from_slice(&xuid.to_le_bytes());
+            data.extend_from_slice(&marker);
+        }
+        let chunks = [FilmChunkData {
+            metadata: FilmChunk {
+                index: 0,
+                start_time_offset_ms: 0,
+                duration_ms: 0,
+                size: data.len() as i64,
+                file_relative_path: String::new(),
+                chunk_type: 2,
+            },
+            data,
+        }];
+
+        assert_eq!(
+            decode_players(&chunks),
+            [
+                FilmPlayer {
+                    xuid: 1,
+                    gamertag: "Nuzzles".into(),
+                },
+                FilmPlayer {
+                    xuid: 2,
+                    gamertag: "MsNuzzles".into(),
+                },
+            ]
+        );
+        assert_eq!(decode_diagnostics(&chunks).player_markers, 2);
+    }
+
+    #[test]
+    fn validates_summary_counts_against_human_match_stats() {
+        let match_stats: MatchStats = serde_json::from_value(serde_json::json!({
+            "MatchId": "match",
+            "MatchInfo": {
+                "StartTime": "2026-01-01T00:00:00Z",
+                "EndTime": "2026-01-01T00:10:00Z",
+                "Duration": "PT10M",
+                "GameVariantCategory": 6,
+                "MapVariant": null,
+                "UgcGameVariant": null,
+                "Playlist": null
+            },
+            "Teams": [],
+            "Players": [
+                {
+                    "PlayerId": "xuid(1)",
+                    "PlayerType": 1,
+                    "LastTeamId": 0,
+                    "Outcome": 2,
+                    "Rank": 1,
+                    "PlayerTeamStats": [{
+                        "TeamId": 0,
+                        "Stats": { "CoreStats": {
+                            "Kills": 1, "Deaths": 1,
+                            "Medals": [{ "NameId": 1, "Count": 1 }]
+                        }}
+                    }]
+                },
+                {
+                    "PlayerId": "xuid(2)",
+                    "PlayerType": 1,
+                    "LastTeamId": 0,
+                    "Outcome": 2,
+                    "Rank": 1,
+                    "PlayerTeamStats": [{
+                        "TeamId": 0,
+                        "Stats": { "CoreStats": { "Kills": 1 } }
+                    }]
+                },
+                {
+                    "PlayerId": "xuid(3)",
+                    "PlayerType": 2,
+                    "LastTeamId": 0,
+                    "Outcome": 2,
+                    "Rank": 1,
+                    "PlayerTeamStats": []
+                }
+            ]
+        }))
+        .unwrap();
+        let players = [FilmPlayer {
+            xuid: 1,
+            gamertag: "Nuzzles".into(),
+        }];
+        let events = [
+            FilmEvent {
+                xuid: 1,
+                gamertag: "Nuzzles".into(),
+                timestamp_ms: 1,
+                kind: FilmEventKind::Kill,
+                medal_flag: 0,
+                metadata: 0,
+            },
+            FilmEvent {
+                xuid: 1,
+                gamertag: "Nuzzles".into(),
+                timestamp_ms: 2,
+                kind: FilmEventKind::Death,
+                medal_flag: 0,
+                metadata: 0,
+            },
+            FilmEvent {
+                xuid: 1,
+                gamertag: "Nuzzles".into(),
+                timestamp_ms: 3,
+                kind: FilmEventKind::Medal,
+                medal_flag: 1,
+                metadata: 0,
+            },
+        ];
+
+        let validation = validate_events(&events, &players, &match_stats);
+        assert_eq!(validation.players.len(), 2);
+        assert!(validation.players[0].matches_stats());
+        assert!(!validation.players[1].matches_stats());
+        assert!(!validation.matches_stats());
     }
 
     #[test]

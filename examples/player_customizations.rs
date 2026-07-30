@@ -2,21 +2,18 @@
 
 mod common;
 
-use xbox::models::Xuid;
+use halo_api::clients::hi::Player;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let gamertags = common::comma_separated("HALO_GAMERTAGS", "Gamertags (comma-separated)")?;
 
-    let mut xuids = Vec::with_capacity(gamertags.len());
-    for gamertag in &gamertags {
-        let user = halo.user(gamertag).await?;
-        println!("{} -> xuid({})", user.gamertag, user.xuid);
-        xuids.push(Xuid::from(user.xuid));
-    }
-
-    let customizations = halo.player_customizations(&xuids).await?;
+    let players = gamertags
+        .iter()
+        .map(|gamertag| Player::gamertag(gamertag.clone()))
+        .collect::<Vec<_>>();
+    let customizations = halo.player_customizations(&players).await?;
     let emblem_mapping = halo.emblem_mapping().await?;
     for player in customizations.player_customizations {
         let data = player.result;

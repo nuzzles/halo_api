@@ -2,23 +2,25 @@ use std::{io::Read, sync::Arc, time::Duration};
 
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
-use serde_json::Value;
 use xbox::models::Xuid;
 use xbox::util::wrap_xuid;
 
 use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
-use super::film::{FilmEvent, decode_events, decode_players};
+use super::film::{FilmEvent, FilmEventReport, decode_events, decode_players, validate_events};
 use super::models::{
-    AppearanceCustomization, BanMessage, BanSummary, CareerRewardTrack, CsrRecords, CsrSeason,
-    CsrSeasonCalendar, CustomizationItemMetadata, EmblemMapping, EmblemMetadata, FilmChunk,
-    FilmChunkData, FilmManifest, GameModeId, GameVariantAsset, MapAsset, MapId, MapModePairAsset,
-    MatchCount, MatchHistoryType, MatchSkill, MatchStats, MatchType, MatchesPrivacy, MedalMetadata,
-    OperationRewardTrack, PlayerCareerRank, PlayerCustomizationCollection, PlayerMatchHistory,
-    PlayerOperationPasses, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
-    RankedArenaSeason, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAssetKind,
-    UgcSearchResults, UserInfo,
+    AppearanceCustomization, BanMessage, BanSummary, CareerRanks, CareerRewardTrack, CsrRecords,
+    CsrSeason, CsrSeasonCalendar, CurrentUser, CustomizationItemMetadata, EmblemMapping,
+    EmblemMetadata, FilmChunk, FilmChunkData, FilmManifest, GameModeId, GameVariantAsset,
+    HipcSettings, MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill,
+    MatchStats, MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
+    PlayerChallengeDecks, PlayerCustomizationCollection, PlayerMatchHistory, PlayerOperationPasses,
+    PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
+    SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset, UgcAssetKind, UgcSearchResults,
+    UserInfo,
 };
+use super::pager::MatchHistoryPager;
+use super::player::Player;
 use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuthClient, HaloCredentials};
 
@@ -47,6 +49,10 @@ fn origin_of(url: &str) -> &str {
 ///
 /// Construct one with [`HaloInfiniteClient::new`] for the defaults, or
 /// [`HaloInfiniteClient::builder`] to configure the request timeout and per-origin rate limit.
+///
+/// Cloning is cheap: every field is `Arc`-backed or trivially copyable, and clones share the
+/// same credential cache and rate limiter.
+#[derive(Clone)]
 pub struct HaloInfiniteClient {
     auth: HaloAuthClient,
     http: Client,
@@ -245,29 +251,65 @@ impl HaloInfiniteClient {
         Ok(response.bytes().await?.to_vec())
     }
 
+    /// Resolves a [`Player`] to a numeric [`Xuid`], looking it up via [`Self::user`] if given a
+    /// gamertag. A no-op for [`Player::Xuid`].
+    async fn resolve_xuid(&self, player: &Player) -> Result<Xuid, InfiniteClientError> {
+        match player {
+            Player::Xuid(xuid) => Ok(xuid.clone()),
+            Player::Gamertag(_) => Ok(Xuid::from(self.user(player).await?.xuid)),
+        }
+    }
+
+    /// Resolves a slice of [`Player`]s to numeric [`Xuid`]s.
+    ///
+    /// Gamertags are resolved sequentially, one [`Self::user`] request per gamertag, before the
+    /// batch call proceeds. Batch endpoints are normally called with XUIDs already in hand from a
+    /// prior response, so this cold path is left simple rather than run concurrently.
+    async fn resolve_xuids(&self, players: &[Player]) -> Result<Vec<Xuid>, InfiniteClientError> {
+        let mut xuids = Vec::with_capacity(players.len());
+        for player in players {
+            xuids.push(self.resolve_xuid(player).await?);
+        }
+        Ok(xuids)
+    }
+
+    /// Renders a `xuid(...)`-wrapped, comma-joined player list for a batch query parameter.
+    fn join_wrapped_xuids(xuids: &[Xuid]) -> String {
+        xuids
+            .iter()
+            .map(|xuid| wrap_xuid(xuid.as_str()))
+            .collect::<Vec<_>>()
+            .join(",")
+    }
+
+    /// Renders a [`Player`] into the `gt(Name)`/`xuid(123)` form Halo's `/users/{...}`-style
+    /// endpoints accept for either variant directly, with no resolution required.
+    fn gt_or_xuid_segment(player: &Player) -> String {
+        match player {
+            Player::Gamertag(gamertag) => format!("gt({gamertag})"),
+            Player::Xuid(xuid) => wrap_xuid(xuid.as_str()),
+        }
+    }
+
     pub async fn playlist_csr(
         &self,
         playlist: PlaylistId,
-        xuid: &Xuid,
+        player: &Player,
     ) -> Result<CsrRecords, InfiniteClientError> {
-        self.playlist_csr_batch(playlist, std::slice::from_ref(xuid))
+        self.playlist_csr_batch(playlist, std::slice::from_ref(player))
             .await
     }
 
     pub async fn playlist_csr_batch(
         &self,
         playlist: PlaylistId,
-        xuids: &[Xuid],
+        players: &[Player],
     ) -> Result<CsrRecords, InfiniteClientError> {
-        let players = xuids
-            .iter()
-            .map(|x| wrap_xuid(x.as_str()))
-            .collect::<Vec<_>>()
-            .join(",");
+        let xuids = self.resolve_xuids(players).await?;
         self.get_with_clearance(
             &self.endpoints.skill_base_url,
             &format!("/hi/playlist/{playlist}/csrs"),
-            &[("players", players)],
+            &[("players", Self::join_wrapped_xuids(&xuids))],
         )
         .await
     }
@@ -276,7 +318,10 @@ impl HaloInfiniteClient {
     ///
     /// Use [`Self::service_record_with`] to scope the record to a season, playlist, or mode, or to
     /// query custom or local games instead of matchmaking.
-    pub async fn service_record(&self, player: &str) -> Result<ServiceRecord, InfiniteClientError> {
+    pub async fn service_record(
+        &self,
+        player: &Player,
+    ) -> Result<ServiceRecord, InfiniteClientError> {
         self.service_record_with(
             player,
             MatchType::Matchmade,
@@ -291,14 +336,26 @@ impl HaloInfiniteClient {
     /// filter combinations with a 400; see [`ServiceRecordFilter`] for the supported sets.
     pub async fn service_record_with(
         &self,
-        player: &str,
+        player: &Player,
         match_type: MatchType,
         filter: &ServiceRecordFilter,
     ) -> Result<ServiceRecord, InfiniteClientError> {
+        let not_found = || InfiniteClientError::GamertagNotFound(player.to_string());
+        let xuid = match self.resolve_xuid(player).await {
+            Err(InfiniteClientError::HttpStatus {
+                status: StatusCode::BAD_REQUEST | StatusCode::NOT_FOUND,
+                ..
+            }) => return Err(not_found()),
+            other => other?,
+        };
         let result = self
             .get(
                 &self.endpoints.halostats_base_url,
-                &format!("/hi/players/{player}/{}/servicerecord", match_type.as_str()),
+                &format!(
+                    "/hi/players/{}/{}/servicerecord",
+                    wrap_xuid(xuid.as_str()),
+                    match_type.as_str()
+                ),
                 &filter.to_query(),
             )
             .await;
@@ -306,7 +363,7 @@ impl HaloInfiniteClient {
             Err(InfiniteClientError::HttpStatus {
                 status: StatusCode::BAD_REQUEST | StatusCode::NOT_FOUND,
                 ..
-            }) => Err(InfiniteClientError::GamertagNotFound(player.to_string())),
+            }) => Err(not_found()),
             other => other,
         }
     }
@@ -314,25 +371,26 @@ impl HaloInfiniteClient {
     /// Gets a page of a player's matchmaking history (all match types).
     ///
     /// Use [`Self::player_matches_of_type`] to restrict to matchmaking, custom, or local games.
-    /// Halo caps `count` at 25 per page.
+    /// Halo caps `count` at 25 per page; use [`Self::player_matches_pager`] to walk full history.
     pub async fn player_matches(
         &self,
-        xuid: &Xuid,
+        player: &Player,
         start: u32,
         count: u32,
     ) -> Result<PlayerMatchHistory, InfiniteClientError> {
-        self.player_matches_of_type(xuid, start, count, MatchHistoryType::All)
+        self.player_matches_of_type(player, start, count, MatchHistoryType::All)
             .await
     }
 
     /// Gets a page of a player's match history restricted to `match_type`.
     pub async fn player_matches_of_type(
         &self,
-        xuid: &Xuid,
+        player: &Player,
         start: u32,
         count: u32,
         match_type: MatchHistoryType,
     ) -> Result<PlayerMatchHistory, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches", wrap_xuid(xuid.as_str())),
@@ -343,6 +401,15 @@ impl HaloInfiniteClient {
             ],
         )
         .await
+    }
+
+    /// Returns a pager that walks `player`'s match history of `match_type`, 25 entries per page.
+    pub fn player_matches_pager(
+        &self,
+        player: Player,
+        match_type: MatchHistoryType,
+    ) -> MatchHistoryPager {
+        MatchHistoryPager::new(self.clone(), player, match_type)
     }
 
     pub async fn match_stats(&self, match_id: &str) -> Result<MatchStats, InfiniteClientError> {
@@ -400,59 +467,73 @@ impl HaloInfiniteClient {
     ///
     /// Events include kills, deaths, mode-related events, and medals. Theater films do not
     /// contain highlight events for bots or AI opponents, and some events may be absent from a
-    /// film. Join these results with [`Self::match_stats`] when team or mode-specific details are
-    /// needed.
+    /// film. Use [`Self::match_highlight_events_with_validation`] to compare the decoded counts
+    /// with Halo's match-statistics record.
     pub async fn match_highlight_events(
         &self,
         match_id: &str,
     ) -> Result<Vec<FilmEvent>, InfiniteClientError> {
+        Ok(self.decoded_highlight_events(match_id).await?.0)
+    }
+
+    async fn decoded_highlight_events(
+        &self,
+        match_id: &str,
+    ) -> Result<(Vec<FilmEvent>, Vec<super::film::FilmPlayer>), InfiniteClientError> {
         let film = self.match_film(match_id).await?;
         let chunks = self.film_chunks(&film).await?;
         let players = decode_players(&chunks);
-        Ok(decode_events(&chunks, &players))
+        let events = decode_events(&chunks, &players, film.custom_data.film_major_version);
+        Ok((events, players))
+    }
+
+    /// Downloads a match's Theater highlights and compares each human player's
+    /// kill, death, and medal totals with the match-statistics API.
+    ///
+    /// A mismatch is returned in [`FilmEventReport::validation`] rather than
+    /// as an error because Theater films can omit summary events.
+    pub async fn match_highlight_events_with_validation(
+        &self,
+        match_id: &str,
+    ) -> Result<FilmEventReport, InfiniteClientError> {
+        let ((events, players), match_stats) = tokio::try_join!(
+            self.decoded_highlight_events(match_id),
+            self.match_stats(match_id)
+        )?;
+        Ok(FilmEventReport {
+            validation: validate_events(&events, &players, &match_stats),
+            events,
+        })
     }
 
     /// Gets per-player CSR and MMR skill results for a completed match.
     pub async fn match_skill(
         &self,
         match_id: &str,
-        xuids: &[Xuid],
+        players: &[Player],
     ) -> Result<MatchSkill, InfiniteClientError> {
-        let players = xuids
-            .iter()
-            .map(|x| wrap_xuid(x.as_str()))
-            .collect::<Vec<_>>()
-            .join(",");
+        let xuids = self.resolve_xuids(players).await?;
         self.get(
             &self.endpoints.skill_base_url,
             &format!("/hi/matches/{match_id}/skill"),
-            &[("players", players)],
+            &[("players", Self::join_wrapped_xuids(&xuids))],
         )
         .await
     }
 
-    /// Looks up profile information by gamertag.
-    pub async fn user(&self, gamertag: &str) -> Result<UserInfo, InfiniteClientError> {
+    /// Looks up profile information by gamertag or XUID.
+    pub async fn user(&self, player: &Player) -> Result<UserInfo, InfiniteClientError> {
         self.get(
             &self.endpoints.profile_base_url,
-            &format!("/users/gt({gamertag})"),
+            &format!("/users/{}", Self::gt_or_xuid_segment(player)),
             &[],
         )
         .await
     }
 
-    /// Looks up profile information by XUID.
-    pub async fn user_by_id(&self, xuid: &Xuid) -> Result<UserInfo, InfiniteClientError> {
-        self.get(
-            &self.endpoints.profile_base_url,
-            &format!("/users/{}", wrap_xuid(xuid.as_str())),
-            &[],
-        )
-        .await
-    }
-
-    /// Looks up profile information for multiple XUIDs.
-    pub async fn users(&self, xuids: &[Xuid]) -> Result<Vec<UserInfo>, InfiniteClientError> {
+    /// Looks up profile information for multiple players, resolving any gamertags first.
+    pub async fn users(&self, players: &[Player]) -> Result<Vec<UserInfo>, InfiniteClientError> {
+        let xuids = self.resolve_xuids(players).await?;
         self.get(
             &self.endpoints.profile_base_url,
             "/users",
@@ -471,8 +552,9 @@ impl HaloInfiniteClient {
     /// Gets a player's equipped service tag, emblem, backdrop, pose, and intro emote.
     pub async fn appearance(
         &self,
-        xuid: &Xuid,
+        player: &Player,
     ) -> Result<AppearanceCustomization, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get_with_clearance(
             &self.endpoints.economy_base_url,
             &format!(
@@ -484,43 +566,20 @@ impl HaloInfiniteClient {
         .await
     }
 
-    /// Gets public customization data for multiple players.
+    /// Gets public customization data for multiple players, resolving any gamertags first.
     pub async fn player_customizations(
         &self,
-        xuids: &[Xuid],
+        players: &[Player],
     ) -> Result<PlayerCustomizationCollection, InfiniteClientError> {
-        let players = xuids
-            .iter()
-            .map(|xuid| wrap_xuid(xuid.as_str()))
-            .collect::<Vec<_>>()
-            .join(",");
+        let xuids = self.resolve_xuids(players).await?;
         self.get_authenticated_with_user_agent(
             &self.endpoints.economy_base_url,
             "/hi/customization",
-            &[("players", players)],
+            &[("players", Self::join_wrapped_xuids(&xuids))],
             true,
             HALO_WAYPOINT_USER_AGENT,
         )
         .await
-    }
-
-    /// Resolves a gamertag and gets that player's equipped appearance.
-    pub async fn appearance_by_gamertag(
-        &self,
-        gamertag: &str,
-    ) -> Result<AppearanceCustomization, InfiniteClientError> {
-        let user = self.user(gamertag).await?;
-        let customization = self
-            .player_customizations(&[Xuid::from(user.xuid)])
-            .await?
-            .player_customizations
-            .into_iter()
-            .next()
-            .ok_or_else(|| InfiniteClientError::CustomizationNotFound(gamertag.to_string()))?;
-        Ok(AppearanceCustomization {
-            status: customization.result_code,
-            appearance: customization.result.appearance,
-        })
     }
 
     pub async fn map(&self, map: MapId) -> Result<MapAsset, InfiniteClientError> {
@@ -548,13 +607,40 @@ impl HaloInfiniteClient {
             .await
     }
 
-    pub async fn asset(&self, kind: &str, asset_id: &str) -> Result<Value, InfiniteClientError> {
+    /// Fetches the current (unversioned/"latest") revision of a UGC asset by kind and ID.
+    ///
+    /// For kinds with a dedicated typed method ([`Self::map`], [`Self::mode`],
+    /// [`Self::playlist`], [`Self::map_mode_pair`]), prefer those — they parse kind-specific
+    /// `CustomData`. This method covers every kind via the common asset envelope only.
+    pub async fn asset(
+        &self,
+        kind: UgcAssetKind,
+        asset_id: &str,
+    ) -> Result<UgcAsset, InfiniteClientError> {
         self.get_with_clearance(
             &self.endpoints.ugc_base_url,
-            &format!("/hi/{kind}/{asset_id}"),
+            &format!("/hi/{}/{asset_id}", kind.path_segment()),
             &[],
         )
         .await
+    }
+
+    /// Fetches the current (unversioned) revision of a Theater film asset.
+    pub async fn film_asset(&self, asset_id: &str) -> Result<UgcAsset, InfiniteClientError> {
+        self.asset(UgcAssetKind::Film, asset_id).await
+    }
+
+    /// Fetches the current (unversioned) revision of a prefab asset.
+    pub async fn prefab_asset(&self, asset_id: &str) -> Result<UgcAsset, InfiniteClientError> {
+        self.asset(UgcAssetKind::Prefab, asset_id).await
+    }
+
+    /// Fetches the current (unversioned) revision of an engine game variant asset.
+    pub async fn engine_game_variant(
+        &self,
+        asset_id: &str,
+    ) -> Result<UgcAsset, InfiniteClientError> {
+        self.asset(UgcAssetKind::EngineGameVariant, asset_id).await
     }
 
     /// Searches Halo Infinite's live UGC catalog.
@@ -667,12 +753,22 @@ impl HaloInfiniteClient {
         let Some(path) = metadata.image_cms_path() else {
             return Ok(None);
         };
+        self.game_cms_image(path).await.map(Some)
+    }
+
+    /// Downloads a career-rank icon (small, large, or adornment) by its CMS path, e.g.
+    /// [`RewardTrackRank::rank_icon`], [`RewardTrackRank::rank_large_icon`], or
+    /// [`RewardTrackRank::rank_adornment_icon`].
+    pub async fn rank_icon_image(&self, cms_path: &str) -> Result<Vec<u8>, InfiniteClientError> {
+        self.game_cms_image(cms_path).await
+    }
+
+    async fn game_cms_image(&self, cms_path: &str) -> Result<Vec<u8>, InfiniteClientError> {
         self.get_bytes_with_clearance(
             &self.endpoints.game_cms_base_url,
-            &format!("/hi/images/file/{}", path.trim_start_matches('/')),
+            &format!("/hi/images/file/{}", cms_path.trim_start_matches('/')),
         )
         .await
-        .map(Some)
     }
 
     /// Downloads an emblem PNG with the required Halo authentication headers.
@@ -698,30 +794,22 @@ impl HaloInfiniteClient {
         )
         .await
     }
-    /// Returns bans that Halo currently reports as being in effect for the targets.
+    /// Returns bans that Halo currently reports as being in effect for the targets, resolving any
+    /// gamertags first.
     ///
     /// An empty result does not indicate whether the player was historically banned or whether a
     /// third-party service independently classifies the account as banned.
-    pub async fn ban_summary(&self, xuids: &[Xuid]) -> Result<BanSummary, InfiniteClientError> {
-        let targets = xuids
-            .iter()
-            .map(|xuid| wrap_xuid(xuid.as_str()))
-            .collect::<Vec<_>>()
-            .join(",");
+    pub async fn ban_summary(&self, players: &[Player]) -> Result<BanSummary, InfiniteClientError> {
+        let xuids = self.resolve_xuids(players).await?;
         self.get(
             &self.endpoints.ban_base_url,
             "/hi/bansummary",
-            &[("auth", "st".to_string()), ("targets", targets)],
+            &[
+                ("auth", "st".to_string()),
+                ("targets", Self::join_wrapped_xuids(&xuids)),
+            ],
         )
         .await
-    }
-
-    pub async fn ban_summary_by_gamertag(
-        &self,
-        gamertag: &str,
-    ) -> Result<BanSummary, InfiniteClientError> {
-        let user = self.user(gamertag).await?;
-        self.ban_summary(&[Xuid::from(user.xuid)]).await
     }
 
     /// Resolves the localized title and body referenced by a ban summary entry.
@@ -739,8 +827,9 @@ impl HaloInfiniteClient {
     /// Halo rejects attempts to read this setting for a different player.
     pub async fn matches_privacy(
         &self,
-        xuid: &Xuid,
+        player: &Player,
     ) -> Result<MatchesPrivacy, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches-privacy", wrap_xuid(xuid.as_str())),
@@ -749,12 +838,17 @@ impl HaloInfiniteClient {
         .await
     }
 
-    pub async fn current_user(&self) -> Result<Value, InfiniteClientError> {
+    /// Looks up the authenticated player's own profile via `comms.svc.halowaypoint.com`.
+    pub async fn current_user(&self) -> Result<CurrentUser, InfiniteClientError> {
         self.get(&self.endpoints.current_user_url, "", &[]).await
     }
 
     /// Gets a player's match counts across matchmade, custom, and local games.
-    pub async fn player_match_count(&self, xuid: &Xuid) -> Result<MatchCount, InfiniteClientError> {
+    pub async fn player_match_count(
+        &self,
+        player: &Player,
+    ) -> Result<MatchCount, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/matches/count", wrap_xuid(xuid.as_str())),
@@ -764,9 +858,11 @@ impl HaloInfiniteClient {
     }
 
     /// Gets a player's active challenge decks.
-    ///
-    /// The response schema is undocumented, so this returns raw JSON.
-    pub async fn challenge_decks(&self, xuid: &Xuid) -> Result<Value, InfiniteClientError> {
+    pub async fn challenge_decks(
+        &self,
+        player: &Player,
+    ) -> Result<PlayerChallengeDecks, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get(
             &self.endpoints.halostats_base_url,
             &format!("/hi/players/{}/decks", wrap_xuid(xuid.as_str())),
@@ -780,9 +876,10 @@ impl HaloInfiniteClient {
     /// `reward_track_id` defaults to `careerRank1` via [`Self::career_rank`].
     pub async fn career_rank_with_track(
         &self,
-        xuid: &Xuid,
+        player: &Player,
         reward_track_id: &str,
     ) -> Result<PlayerCareerRank, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get_with_clearance(
             &self.endpoints.economy_base_url,
             &format!(
@@ -795,15 +892,54 @@ impl HaloInfiniteClient {
     }
 
     /// Gets a player's current career rank (the `careerRank1` track).
-    pub async fn career_rank(&self, xuid: &Xuid) -> Result<PlayerCareerRank, InfiniteClientError> {
-        self.career_rank_with_track(xuid, "careerRank1").await
+    ///
+    /// This only works for the authenticated player; use [`Self::career_ranks`] for other
+    /// players.
+    pub async fn career_rank(
+        &self,
+        player: &Player,
+    ) -> Result<PlayerCareerRank, InfiniteClientError> {
+        self.career_rank_with_track(player, "careerRank1").await
+    }
+
+    /// Gets the current career rank (the `careerRank1` track) for one player.
+    ///
+    /// Unlike [`Self::career_rank`], this works for any player.
+    pub async fn career_rank_of(
+        &self,
+        player: &Player,
+    ) -> Result<PlayerCareerRank, InfiniteClientError> {
+        let ranks = self.career_ranks(std::slice::from_ref(player)).await?;
+        ranks
+            .records
+            .into_iter()
+            .next()
+            .map(|record| record.result)
+            .ok_or_else(|| InfiniteClientError::CareerRankNotFound(player.to_string()))
+    }
+
+    /// Gets the current career rank (the `careerRank1` track) for multiple players.
+    ///
+    /// Unlike [`Self::career_rank`], this works for any player.
+    pub async fn career_ranks(
+        &self,
+        players: &[Player],
+    ) -> Result<CareerRanks, InfiniteClientError> {
+        let xuids = self.resolve_xuids(players).await?;
+        self.get_with_clearance(
+            &self.endpoints.economy_base_url,
+            "/hi/careerranks/careerRank1",
+            &[("players", Self::join_wrapped_xuids(&xuids))],
+        )
+        .await
     }
 
     /// Gets a player's owned and available operation passes.
     pub async fn reward_track_operations(
         &self,
-        xuid: &Xuid,
+        player: &Player,
     ) -> Result<PlayerOperationPasses, InfiniteClientError> {
+        let xuid = self.resolve_xuid(player).await?;
         self.get_with_clearance(
             &self.endpoints.economy_base_url,
             &format!(
@@ -855,8 +991,15 @@ impl HaloInfiniteClient {
 
     /// Fetches the progression document referenced by a CSR calendar entry.
     ///
-    /// The response remains JSON while the season-file schema is being explored.
-    pub async fn csr_season_file(&self, file_path: &str) -> Result<Value, InfiniteClientError> {
+    /// This intentionally stays untyped raw JSON. No community Halo Infinite client has ever
+    /// confirmed a schema for it — even the most complete one (OpenSpartan/grunt) notes this
+    /// endpoint returns a 403 Forbidden for them. It may be genuinely inaccessible at the auth
+    /// tier this crate uses, not merely unexplored, so a guessed struct would risk being simply
+    /// wrong.
+    pub async fn csr_season_file(
+        &self,
+        file_path: &str,
+    ) -> Result<serde_json::Value, InfiniteClientError> {
         let path = format!("/hi/Progression/file/{}", file_path.trim_start_matches('/'));
         self.get(&self.endpoints.game_cms_base_url, &path, &[])
             .await
@@ -907,7 +1050,12 @@ impl HaloInfiniteClient {
         Ok(Some(RankedArenaSeason { season, map_modes }))
     }
 
-    pub async fn settings(&self) -> Result<Value, InfiniteClientError> {
+    /// Gets Halo's HIPC endpoint-discovery manifest as JSON.
+    ///
+    /// This is the same manifest [`examples/discover_endpoints.rs`](https://github.com/nuzzles/halo_api/blob/main/examples/discover_endpoints.rs)
+    /// parses as XML directly (no authentication required there); this method fetches the JSON
+    /// content-negotiated representation instead, which requires an authenticated client.
+    pub async fn settings(&self) -> Result<HipcSettings, InfiniteClientError> {
         self.get(
             &self.endpoints.settings_base_url,
             "/settings/hipc/e2a0a7c6-6efe-42af-9283-c2ab73250c48",

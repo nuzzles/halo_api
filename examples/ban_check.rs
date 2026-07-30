@@ -2,7 +2,7 @@
 
 mod common;
 
-use xbox::models::Xuid;
+use halo_api::clients::hi::Player;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
@@ -12,13 +12,11 @@ async fn main() -> Result<(), common::ExampleError> {
         "Gamertags (comma-separated; try Glorified MVP)",
     )?;
 
-    let mut xuids = Vec::with_capacity(gamertags.len());
-    for gamertag in &gamertags {
-        let user = halo.user(gamertag).await?;
-        println!("{} -> xuid({})", user.gamertag, user.xuid);
-        xuids.push(Xuid::from(user.xuid));
-    }
-    let summary = halo.ban_summary(&xuids).await?;
+    let players = gamertags
+        .iter()
+        .map(|gamertag| Player::gamertag(gamertag.clone()))
+        .collect::<Vec<_>>();
+    let summary = halo.ban_summary(&players).await?;
 
     for result in summary.results {
         println!("{} (result code {})", result.id, result.result_code);

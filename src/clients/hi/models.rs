@@ -730,16 +730,52 @@ pub enum UgcAssetKind {
     Map,
     Playlist,
     GameMode,
+    MapModePair,
+    Film,
+    Prefab,
+    EngineGameVariant,
 }
 
 impl UgcAssetKind {
+    /// The `assetKind` filter value [`HaloInfiniteClient::search_assets`](crate::clients::hi::HaloInfiniteClient::search_assets) expects.
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Map => "Map",
             Self::Playlist => "Playlist",
             Self::GameMode => "UgcGameVariant",
+            Self::MapModePair => "MapModePair",
+            Self::Film => "Film",
+            Self::Prefab => "Prefab",
+            Self::EngineGameVariant => "EngineGameVariant",
         }
     }
+
+    /// The `/hi/{kind}/{asset_id}` URL path segment Halo expects — distinct casing from
+    /// [`Self::as_str`], which is the `assetKind` filter value used by `search_assets`.
+    pub(crate) const fn path_segment(self) -> &'static str {
+        match self {
+            Self::Map => "maps",
+            Self::Playlist => "playlists",
+            Self::GameMode => "ugcGameVariants",
+            Self::MapModePair => "mapModePairs",
+            Self::Film => "films",
+            Self::Prefab => "prefabs",
+            Self::EngineGameVariant => "engineGameVariants",
+        }
+    }
+}
+
+/// A UGC asset envelope with no kind-specific `CustomData` typed yet.
+///
+/// Halo's asset envelope (asset id, version id, name, description, files) is uniform across
+/// kinds; only `CustomData` varies. Kinds without a bespoke wrapper (see
+/// [`HaloInfiniteClient::map`](crate::clients::hi::HaloInfiniteClient::map)/
+/// [`HaloInfiniteClient::mode`](crate::clients::hi::HaloInfiniteClient::mode) for kinds that do)
+/// deserialize via this type, which ignores whatever `CustomData` the response carries.
+#[derive(Debug, Clone, Deserialize)]
+pub struct UgcAsset {
+    #[serde(flatten)]
+    pub asset: AssetLink,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -850,9 +886,35 @@ pub struct CsrRecordRanking {
     pub initial_demotion_protection_matches: i32,
 }
 
+const RANK_ICON_BASE_URL: &str = "https://trackercdn.com/cdn/tracker.gg/halo-infinite/skills/c";
+
 impl CsrRecordRanking {
     pub fn is_unranked(&self) -> bool {
         self.value == -1
+    }
+
+    /// Returns a rank icon URL from tracker.gg's public CDN (not a Halo Waypoint endpoint, and
+    /// not officially documented — no authentication required, but subject to change without
+    /// notice).
+    ///
+    /// Icons follow the pattern `{tier}-{subtier}.png` (lowercase tier, 1-indexed subtier),
+    /// except Onyx, which has no subtiers and uses a bare `onyx.png`.
+    pub fn rank_icon_url(&self) -> String {
+        if self.is_unranked() {
+            return Self::unranked_icon_url();
+        }
+        let tier = self.tier.to_lowercase();
+        if tier == "onyx" {
+            format!("{RANK_ICON_BASE_URL}/onyx.png")
+        } else {
+            format!("{RANK_ICON_BASE_URL}/{tier}-{}.png", self.sub_tier + 1)
+        }
+    }
+
+    /// Returns the "unranked" rank icon URL, for when there is no [`CsrRecordRanking`] at all
+    /// (e.g. a playlist CSR lookup failed) rather than one whose [`Self::is_unranked`].
+    pub fn unranked_icon_url() -> String {
+        format!("{RANK_ICON_BASE_URL}/unranked.png")
     }
 }
 
@@ -1381,6 +1443,19 @@ pub struct UserInfo {
     pub gamerpic: Gamerpic,
 }
 
+/// Response from the authenticated `/users/me` lookup on `comms.svc.halowaypoint.com`.
+///
+/// Only `xuid` is confirmed by community reverse-engineering for this specific authority — it is
+/// a sibling of, but distinct from, `profile.svc.halowaypoint.com`'s own `/users/{xuid}` lookup
+/// (typed as [`UserInfo`]). Other fields this endpoint may carry (gamertag, gamerpic) have not
+/// been independently verified here, so they are intentionally omitted rather than guessed; use
+/// [`HaloInfiniteClient::user`](crate::clients::hi::HaloInfiniteClient::user) if a gamertag or
+/// gamerpic is needed.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CurrentUser {
+    pub xuid: String,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Gamerpic {
     pub small: String,
@@ -1669,6 +1744,33 @@ impl EmblemMapping {
         self.get(metadata.image_id()?, configuration_id)
     }
 
+    /// Resolves an equipped emblem configuration's display assets, falling back to *any other*
+    /// mapped configuration of the same emblem if the exact equipped color variant isn't mapped.
+    ///
+    /// Halo's curated mapping table does not necessarily have an entry for every color variant
+    /// of every emblem (observed for several players' equipped configurations, not just negative
+    /// "Test" palettes), so this tries every configuration actually present in the mapping for
+    /// this emblem, preferring [`CustomizationItemMetadata::first_positive_configuration_id`]
+    /// first since that ID is most likely to also be the mapping's canonical entry.
+    ///
+    /// The fallback may not match the player's exact equipped color palette, but resolves to a
+    /// real image rather than nothing. Returns `None` only if the emblem has no mapped
+    /// configuration at all.
+    pub fn resolve_with_fallback(
+        &self,
+        configuration: &EmblemConfiguration,
+        metadata: &CustomizationItemMetadata,
+    ) -> Option<&EmblemImageAssets> {
+        self.resolve(configuration).or_else(|| {
+            let emblem_id = configuration.emblem_id()?;
+            let mapped_configurations = self.emblems.get(emblem_id)?;
+            metadata
+                .first_positive_configuration_id()
+                .and_then(|id| mapped_configurations.get(&id))
+                .or_else(|| mapped_configurations.values().next())
+        })
+    }
+
     pub fn resolve_customization_emblem(
         &self,
         emblem: &CustomizationEmblem,
@@ -1690,6 +1792,18 @@ pub struct EmblemImageAssets {
 pub struct CustomizationItemMetadata {
     #[serde(rename = "CommonData")]
     pub common_data: CustomizationItemCommonData,
+    /// Configuration variants available for this item (emblems only). Some emblems' *equipped*
+    /// configuration ID is negative — an internal "Test" palette with no image on the CDN — even
+    /// though the item itself has other, positive configuration IDs that do resolve to real
+    /// images. See [`Self::first_positive_configuration_id`].
+    #[serde(default, rename = "AvailableConfigurations")]
+    pub available_configurations: Vec<CustomizationConfiguration>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CustomizationConfiguration {
+    #[serde(rename = "ConfigurationId")]
+    pub configuration_id: i64,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1735,6 +1849,20 @@ impl CustomizationItemMetadata {
             .next()?
             .rsplit_once('.')
             .map(|(stem, _)| stem)
+    }
+
+    /// Returns the first positive configuration ID among [`Self::available_configurations`].
+    ///
+    /// Negative configuration IDs are internal "Test" palettes with no image published to the
+    /// CDN. When an [`EmblemMapping`] lookup misses for the player's actual (possibly negative)
+    /// equipped configuration, this gives a usable fallback configuration ID for the same
+    /// emblem — the resulting image may not match the player's exact equipped color palette, but
+    /// it will load, rather than the request 404ing.
+    pub fn first_positive_configuration_id(&self) -> Option<i64> {
+        self.available_configurations
+            .iter()
+            .map(|configuration| configuration.configuration_id)
+            .find(|id| *id > 0)
     }
 }
 
@@ -2298,6 +2426,27 @@ pub struct PlayerCareerRank {
     pub spartan_id: Option<String>,
 }
 
+/// Response body from the batch career-rank endpoint, keyed by player.
+///
+/// Unlike [`HaloInfiniteClient::career_rank`](crate::HaloInfiniteClient::career_rank), this
+/// endpoint works for any player, not just the authenticated one.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct CareerRanks {
+    #[serde(rename = "RewardTracks")]
+    pub records: Vec<CareerRankRecord>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CareerRankRecord {
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "ResultCode")]
+    pub result_code: String,
+    #[serde(rename = "Result")]
+    pub result: PlayerCareerRank,
+}
+
 /// A player's owned and available operation passes.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
@@ -2318,6 +2467,112 @@ pub struct PlayerOperationPass {
     pub current_progress: RewardTrackProgress,
 }
 
+/// A player's active, upcoming, and completed challenge decks.
+///
+/// Field names confirmed by cross-checking two independent community reverse-engineerings
+/// (OpenSpartan/grunt and SpartanReport) that agree on this shape.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PlayerChallengeDecks {
+    #[serde(rename = "AssignedDecks")]
+    pub assigned_decks: Vec<ChallengeDeck>,
+    #[serde(rename = "ClearanceId")]
+    pub clearance_id: String,
+    #[serde(rename = "ActiveRewardTrack")]
+    pub active_reward_track: ChallengeRewardTrack,
+    #[serde(rename = "ScheduledRewardTrack")]
+    pub scheduled_reward_track: ChallengeRewardTrack,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ChallengeDeck {
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "Path")]
+    pub path: String,
+    #[serde(rename = "ActiveChallenges")]
+    pub active_challenges: Vec<Challenge>,
+    #[serde(rename = "UpcomingChallenges")]
+    pub upcoming_challenges: Vec<Challenge>,
+    #[serde(rename = "CompletedChallenges")]
+    pub completed_challenges: Vec<Challenge>,
+    #[serde(rename = "Expiration")]
+    pub expiration: ApiDate,
+}
+
+/// A single challenge within a [`ChallengeDeck`].
+///
+/// Fields beyond `path`/`progress`/`id`/`can_reroll` are only populated on upcoming challenges.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct Challenge {
+    #[serde(rename = "Path")]
+    pub path: String,
+    #[serde(rename = "Progress")]
+    pub progress: i32,
+    #[serde(rename = "Id")]
+    pub id: String,
+    #[serde(rename = "CanReroll")]
+    pub can_reroll: bool,
+    #[serde(rename = "Difficulty")]
+    pub difficulty: Option<String>,
+    #[serde(rename = "TypeIconPath")]
+    pub type_icon_path: Option<String>,
+    #[serde(rename = "IsUserEvent")]
+    pub is_user_event: Option<bool>,
+    #[serde(rename = "Category")]
+    pub category: Option<String>,
+    #[serde(rename = "Description")]
+    pub description: Option<LocalizedText>,
+    #[serde(rename = "Title")]
+    pub title: Option<LocalizedText>,
+    #[serde(rename = "ThresholdForSuccess")]
+    pub threshold_for_success: Option<i32>,
+    #[serde(rename = "Reward")]
+    pub reward: Option<ChallengeReward>,
+    #[serde(rename = "SecondaryReward")]
+    pub secondary_reward: Option<ChallengeReward>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ChallengeReward {
+    #[serde(
+        rename = "InventoryItems",
+        deserialize_with = "deserialize_null_default"
+    )]
+    pub inventory_items: Vec<String>,
+    #[serde(rename = "SoftExperience")]
+    pub soft_experience: i64,
+    #[serde(rename = "OperationExperience")]
+    pub operation_experience: i64,
+}
+
+/// The reward-track summary embedded in [`PlayerChallengeDecks`].
+///
+/// Distinct from [`RewardTrackProgress`]/[`PlayerOperationPass`] — this endpoint's embedded
+/// summary carries extra fields (`track_type`, `previous_progress`, `base_xp`, `boost_xp`) those
+/// don't return, so it is not reused as either of them.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(default)]
+pub struct ChallengeRewardTrack {
+    #[serde(rename = "RewardTrackPath")]
+    pub reward_track_path: String,
+    #[serde(rename = "TrackType")]
+    pub track_type: String,
+    #[serde(rename = "CurrentProgress")]
+    pub current_progress: i64,
+    #[serde(rename = "PreviousProgress")]
+    pub previous_progress: i64,
+    #[serde(rename = "IsOwned")]
+    pub is_owned: bool,
+    #[serde(rename = "BaseXp")]
+    pub base_xp: i64,
+    #[serde(rename = "BoostXp")]
+    pub boost_xp: i64,
+    #[serde(rename = "HasReachedMaxRank")]
+    pub has_reached_max_rank: bool,
+}
+
 /// The career-rank reward-track definition from the Game CMS.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
@@ -2328,6 +2583,14 @@ pub struct CareerRewardTrack {
     pub xp_per_rank: i64,
     #[serde(rename = "Ranks")]
     pub ranks: Vec<RewardTrackRank>,
+}
+
+impl CareerRewardTrack {
+    /// Looks up the rank definition (title, tier, icons) for a numeric rank, as reported by
+    /// [`RewardTrackProgress::rank`] (via [`PlayerCareerRank`] or [`CareerRankRecord`]).
+    pub fn rank(&self, rank: i32) -> Option<&RewardTrackRank> {
+        self.ranks.iter().find(|entry| entry.rank == rank)
+    }
 }
 
 /// An operation (battle pass) reward-track definition from the Game CMS.
@@ -2345,6 +2608,10 @@ pub struct OperationRewardTrack {
 }
 
 /// One rank tier within a reward track, with the rewards granted at that rank.
+///
+/// For the career-rank track specifically, this also carries the rank's display title, tier,
+/// and icon paths (e.g. "Bronze Cadet 1"), which [`PlayerCareerRank::current_progress`]'s numeric
+/// rank does not include on its own.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
 pub struct RewardTrackRank {
@@ -2356,6 +2623,41 @@ pub struct RewardTrackRank {
     pub free_rewards: RankRewards,
     #[serde(rename = "PaidRewards")]
     pub paid_rewards: RankRewards,
+    /// The rank's title, e.g. "Cadet" (career rank only).
+    #[serde(rename = "RankTitle")]
+    pub rank_title: Option<LocalizedText>,
+    /// The rank's grade within its title, e.g. "1" (career rank only).
+    #[serde(rename = "RankSubTitle")]
+    pub rank_sub_title: Option<LocalizedText>,
+    /// The rank's tier name, e.g. "Bronze" (career rank only).
+    #[serde(rename = "RankTier")]
+    pub rank_tier: Option<LocalizedText>,
+    /// The rank's tier identifier, e.g. "TierBronze" (career rank only).
+    #[serde(rename = "TierType")]
+    pub tier_type: Option<String>,
+    /// CMS path to the small rank icon (career rank only).
+    #[serde(rename = "RankIcon")]
+    pub rank_icon: Option<String>,
+    /// CMS path to the large rank icon (career rank only).
+    #[serde(rename = "RankLargeIcon")]
+    pub rank_large_icon: Option<String>,
+    /// CMS path to the rank adornment icon (career rank only).
+    #[serde(rename = "RankAdornmentIcon")]
+    pub rank_adornment_icon: Option<String>,
+    /// The rank's numeric grade within its title, e.g. `1` (career rank only).
+    #[serde(rename = "RankGrade")]
+    pub rank_grade: Option<i32>,
+}
+
+impl RewardTrackRank {
+    /// Returns this rank's full display title, e.g. "Cadet 1" (career rank only).
+    pub fn display_title(&self) -> Option<String> {
+        let title = self.rank_title.as_ref()?.value.as_str();
+        match self.rank_sub_title.as_ref().map(|s| s.value.as_str()) {
+            Some(sub_title) if !sub_title.is_empty() => Some(format!("{title} {sub_title}")),
+            _ => Some(title.to_string()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -2868,6 +3170,81 @@ pub struct BotAttributes {
     pub difficulty: i32,
 }
 
+/// Halo's HIPC endpoint-discovery manifest.
+///
+/// This is the JSON content-negotiated representation of the same manifest
+/// `examples/discover_endpoints.rs` parses as XML directly; the fields are isomorphic to that
+/// already-known XML shape (same names, JSON key casing preserved).
+#[derive(Debug, Clone, Deserialize)]
+pub struct HipcSettings {
+    #[serde(rename = "Authorities")]
+    pub authorities: BTreeMap<String, Authority>,
+    #[serde(rename = "RetryPolicies")]
+    pub retry_policies: BTreeMap<String, RetryPolicy>,
+    #[serde(rename = "Settings")]
+    pub settings: BTreeMap<String, String>,
+    #[serde(rename = "Endpoints")]
+    pub endpoints: BTreeMap<String, Endpoint>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Authority {
+    #[serde(rename = "AuthorityId")]
+    pub authority_id: String,
+    #[serde(rename = "Scheme")]
+    pub scheme: i32,
+    #[serde(rename = "Hostname")]
+    pub hostname: String,
+    #[serde(rename = "Port")]
+    pub port: i32,
+    #[serde(rename = "AuthenticationMethods")]
+    pub authentication_methods: Vec<i32>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RetryPolicy {
+    #[serde(rename = "RetryPolicyId")]
+    pub retry_policy_id: String,
+    #[serde(rename = "TimeoutMs")]
+    pub timeout_ms: i32,
+    #[serde(rename = "RetryOptions")]
+    pub retry_options: RetryOptions,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RetryOptions {
+    #[serde(rename = "MaxRetryCount")]
+    pub max_retry_count: i32,
+    #[serde(rename = "RetryDelayMs")]
+    pub retry_delay_ms: i32,
+    #[serde(rename = "RetryGrowth")]
+    pub retry_growth: f64,
+    #[serde(rename = "RetryJitterMs")]
+    pub retry_jitter_ms: i32,
+    #[serde(rename = "RetryIfNotFound")]
+    pub retry_if_not_found: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Endpoint {
+    #[serde(rename = "AuthorityId")]
+    pub authority_id: String,
+    #[serde(rename = "Path")]
+    pub path: String,
+    #[serde(rename = "QueryString")]
+    pub query_string: Option<String>,
+    #[serde(rename = "RetryPolicyId")]
+    pub retry_policy_id: String,
+    #[serde(rename = "TopicName")]
+    pub topic_name: Option<String>,
+    #[serde(rename = "AcknowledgementTypeId")]
+    pub acknowledgement_type_id: i32,
+    #[serde(rename = "AuthenticationLifetimeExtensionSupported")]
+    pub authentication_lifetime_extension_supported: bool,
+    #[serde(rename = "ClearanceAware")]
+    pub clearance_aware: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2977,6 +3354,37 @@ mod tests {
     #[test]
     fn positive_value_is_ranked() {
         assert!(!ranking(1500).is_unranked());
+    }
+
+    #[test]
+    fn unranked_uses_unranked_icon() {
+        assert_eq!(
+            ranking(-1).rank_icon_url(),
+            "https://trackercdn.com/cdn/tracker.gg/halo-infinite/skills/c/unranked.png"
+        );
+    }
+
+    #[test]
+    fn named_tier_icon_uses_lowercase_tier_and_one_indexed_subtier() {
+        // `ranking()` fixes tier="Platinum", sub_tier=2 (0-indexed) -> "platinum-3.png".
+        assert_eq!(
+            ranking(1234).rank_icon_url(),
+            "https://trackercdn.com/cdn/tracker.gg/halo-infinite/skills/c/platinum-3.png"
+        );
+    }
+
+    #[test]
+    fn onyx_icon_has_no_subtier_suffix() {
+        let onyx = CsrRecordRanking {
+            value: 1650,
+            tier: "Onyx".to_string(),
+            sub_tier: 0,
+            ..CsrRecordRanking::default()
+        };
+        assert_eq!(
+            onyx.rank_icon_url(),
+            "https://trackercdn.com/cdn/tracker.gg/halo-infinite/skills/c/onyx.png"
+        );
     }
 
     #[test]
@@ -3435,5 +3843,127 @@ mod tests {
         .unwrap();
         assert_eq!(scoreboard.players[0].outcome, MatchOutcome::Win);
         assert_eq!(scoreboard.players[0].team_stats[0].stats.core.kills, 20);
+    }
+
+    #[test]
+    fn falls_back_to_a_positive_configuration_when_equipped_one_is_unmapped() {
+        let configuration = EmblemConfiguration {
+            emblem_path: "Inventory/Spartan/Emblems/3806589-SpartanEmblem.json".to_string(),
+            configuration_id: -1_766_636_888,
+        };
+        let metadata: EmblemMetadata = serde_json::from_value(serde_json::json!({
+            "CommonData": {
+                "Title": { "status": "Ready", "value": "Women's History Month", "translations": {} }
+            },
+            "AvailableConfigurations": [
+                { "ConfigurationId": -1_766_636_888 },
+                { "ConfigurationId": 651_339_664 }
+            ]
+        }))
+        .unwrap();
+        assert_eq!(
+            metadata.first_positive_configuration_id(),
+            Some(651_339_664)
+        );
+
+        let mapping: EmblemMapping = serde_json::from_value(serde_json::json!({
+            "3806589-SpartanEmblem": {
+                "651339664": {
+                    "emblemCmsPath": "images/emblems/whm.png",
+                    "nameplateCmsPath": "images/nameplates/whm.png",
+                    "textColor": "#FFFFFF"
+                }
+            }
+        }))
+        .unwrap();
+
+        // The equipped configuration (-1_766_636_888, a "Test" palette) is not mapped.
+        assert!(mapping.resolve(&configuration).is_none());
+        // Falling back finds the emblem's other, mapped configuration instead.
+        assert_eq!(
+            mapping
+                .resolve_with_fallback(&configuration, &metadata)
+                .unwrap()
+                .emblem_cms_path,
+            "images/emblems/whm.png"
+        );
+    }
+
+    #[test]
+    fn fallback_returns_none_when_emblem_has_no_positive_configuration() {
+        // The real-world 3806589-SpartanEmblem case: readable CMS JSON, but no positive
+        // configuration exists at all, so no fallback image can be found either.
+        let configuration = EmblemConfiguration {
+            emblem_path: "Inventory/Spartan/Emblems/3806589-SpartanEmblem.json".to_string(),
+            configuration_id: -1_766_636_888,
+        };
+        let metadata: EmblemMetadata = serde_json::from_value(serde_json::json!({
+            "CommonData": {
+                "Title": { "status": "Ready", "value": "Women's History Month", "translations": {} }
+            },
+            "AvailableConfigurations": [{ "ConfigurationId": -1_766_636_888 }]
+        }))
+        .unwrap();
+        let mapping = EmblemMapping {
+            emblems: Default::default(),
+        };
+        assert!(
+            mapping
+                .resolve_with_fallback(&configuration, &metadata)
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn falls_back_to_a_different_mapped_color_variant_of_the_same_emblem() {
+        // The player's equipped color variant (a positive, "real" configuration — not a
+        // negative "Test" palette) simply isn't in Halo's curated mapping table, but a
+        // different color variant of the same emblem is.
+        let configuration = EmblemConfiguration {
+            emblem_path: "Inventory/Spartan/Emblems/104-001-samurai-thega-d83dae85.json"
+                .to_string(),
+            configuration_id: 999_999_999,
+        };
+        let metadata: EmblemMetadata = serde_json::from_value(serde_json::json!({
+            "CommonData": {
+                "Title": { "status": "Ready", "value": "Samurai", "translations": {} }
+            },
+            "AvailableConfigurations": [
+                { "ConfigurationId": 999_999_999 },
+                { "ConfigurationId": 1_198_260_756 }
+            ]
+        }))
+        .unwrap();
+        // The mapping only has the *other* positive configuration — not the equipped one, and
+        // not the metadata's first positive configuration ID either.
+        let mapping: EmblemMapping = serde_json::from_value(serde_json::json!({
+            "104-001-samurai-thega-d83dae85": {
+                "-42": {
+                    "emblemCmsPath": "images/emblems/samurai-negative.png",
+                    "nameplateCmsPath": "images/nameplates/samurai-negative.png",
+                    "textColor": "#000000"
+                }
+            }
+        }))
+        .unwrap();
+
+        assert!(mapping.resolve(&configuration).is_none());
+        assert_eq!(
+            mapping
+                .resolve_with_fallback(&configuration, &metadata)
+                .unwrap()
+                .emblem_cms_path,
+            "images/emblems/samurai-negative.png"
+        );
+    }
+
+    #[test]
+    fn first_positive_configuration_id_returns_none_without_one() {
+        let metadata: EmblemMetadata = serde_json::from_value(serde_json::json!({
+            "CommonData": { "Title": { "status": "Ready", "value": "Test", "translations": {} } },
+            "AvailableConfigurations": [{ "ConfigurationId": -1_766_636_888 }]
+        }))
+        .unwrap();
+        assert_eq!(metadata.first_positive_configuration_id(), None);
     }
 }

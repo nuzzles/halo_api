@@ -2,14 +2,16 @@
 
 mod common;
 
+use halo_api::clients::hi::Player;
+
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (xbox, halo) = common::halo_infinite_client()?;
     let (gamertag, xuid) = common::logged_in_player(&xbox).await?;
-    let player = format!("xuid({xuid})");
+    let player = Player::from(&xuid);
     let (record, history) = tokio::try_join!(
         halo.service_record(&player),
-        halo.player_matches(&xuid, 0, 5),
+        halo.player_matches(&player, 0, 5),
     )?;
 
     println!("{gamertag} (xuid {xuid})");

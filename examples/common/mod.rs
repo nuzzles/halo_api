@@ -5,7 +5,7 @@ use std::io::{self, Write};
 use std::sync::Arc;
 
 use halo_api::auth::HaloAuthClient;
-use halo_api::clients::hi::HaloInfiniteClient;
+use halo_api::clients::hi::{HaloInfiniteClient, Player};
 use xbox::{RelyingParty, XboxClient, auth::LegacyPasswordProvider, models::Xuid};
 
 pub type ExampleError = Box<dyn std::error::Error>;
@@ -39,10 +39,10 @@ pub fn comma_separated(name: &str, label: &str) -> Result<Vec<String>, ExampleEr
     Ok(values)
 }
 
-pub async fn player_xuid(halo: &HaloInfiniteClient) -> Result<(String, Xuid), ExampleError> {
+pub async fn player_xuid(halo: &HaloInfiniteClient) -> Result<(String, Player), ExampleError> {
     let gamertag = value("HALO_GAMERTAG", "Gamertag")?;
-    let user = halo.user(&gamertag).await?;
-    Ok((user.gamertag, Xuid::from(user.xuid)))
+    let user = halo.user(&Player::gamertag(gamertag)).await?;
+    Ok((user.gamertag, Player::xuid(user.xuid)))
 }
 
 pub fn xbox_client() -> Result<Arc<ExampleXboxClient>, ExampleError> {

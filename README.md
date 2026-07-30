@@ -24,6 +24,10 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 This crate depends on the [`xbox`](https://crates.io/crates/xbox) crate for Xbox Live authentication (XSTS
 tickets and XUID resolution). [`HaloAuthClient`] acquires and refreshes all Halo Waypoint credentials.
 
+If your application already obtains Halo Waypoint credentials, use
+`HaloAuthClient::from_tokens(spartan_token, clearance_token)` instead. Those values remain private to the
+client, but the caller is responsible for replacing the client when they expire.
+
 ## Quick start
 
 ```rust,no_run
@@ -31,7 +35,7 @@ use std::sync::Arc;
 
 use halo_api::clients::hi::models::PlaylistId;
 use halo_api::auth::HaloAuthClient;
-use halo_api::clients::hi::HaloInfiniteClient;
+use halo_api::clients::hi::{HaloInfiniteClient, Player};
 use xbox::auth::LegacyPasswordProvider;
 use xbox::XboxClient;
 
@@ -46,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
     let csr = halo
-        .playlist_csr(PlaylistId::RANKED_ARENA, &xuid)
+        .playlist_csr(PlaylistId::RANKED_ARENA, &Player::from(&xuid))
         .await?;
 
     println!("{csr:?}");

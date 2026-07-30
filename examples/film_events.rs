@@ -8,6 +8,11 @@ use halo_api::clients::hi::film::FilmEventKind;
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
+    let film = halo.match_film(&match_id).await?;
+    eprintln!(
+        "film_major_version: {}",
+        film.custom_data.film_major_version
+    );
     let events = halo.match_highlight_events(&match_id).await?;
 
     println!("Timeline:");

@@ -10,17 +10,22 @@ use halo_api::clients::hi::models::{FilmChunk, FilmChunkData};
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
-    let chunks = if let Ok(directory) = std::env::var("HALO_FILM_DIR") {
-        local_chunks(&directory)?
+    let (chunks, film_major_version) = if let Ok(directory) = std::env::var("HALO_FILM_DIR") {
+        let version = std::env::var("HALO_FILM_MAJOR_VERSION")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(41);
+        (local_chunks(&directory)?, version)
     } else {
         let (_, halo) = common::halo_infinite_client()?;
         let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
         let film = halo.match_film(&match_id).await?;
-        halo.film_chunks(&film).await?
+        let version = film.custom_data.film_major_version;
+        (halo.film_chunks(&film).await?, version)
     };
     let players = decode_players(&chunks);
     let player_indices = decode_player_indices(&chunks, &players);
-    let events = decode_events(&chunks, &players);
+    let events = decode_events(&chunks, &players, film_major_version);
     let packets = index_packets(&chunks);
     let registry = decode_registry(&chunks).ok_or("Film had no ECS registry")?;
     let origin = packets

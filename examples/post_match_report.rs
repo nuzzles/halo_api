@@ -4,8 +4,8 @@ mod common;
 
 use std::collections::HashMap;
 
+use halo_api::clients::hi::Player;
 use halo_api::clients::hi::models::{GameModeId, MapId};
-use xbox::models::Xuid;
 
 fn bare_xuid(player_id: &str) -> &str {
     player_id
@@ -18,10 +18,10 @@ fn bare_xuid(player_id: &str) -> &str {
 async fn main() -> Result<(), common::ExampleError> {
     let gamertag = common::value("HALO_GAMERTAG", "Gamertag")?;
     let (_, halo) = common::halo_infinite_client()?;
-    let user = halo.user(&gamertag).await?;
-    let xuid = Xuid::from(user.xuid.clone());
+    let user = halo.user(&Player::gamertag(gamertag)).await?;
+    let player = Player::xuid(user.xuid.clone());
 
-    let history = halo.player_matches(&xuid, 0, 1).await?;
+    let history = halo.player_matches(&player, 0, 1).await?;
     let latest = history.results.first().ok_or("No recent matches found")?;
     let stats = halo.match_stats(&latest.match_id).await?;
 
@@ -51,14 +51,14 @@ async fn main() -> Result<(), common::ExampleError> {
         None
     };
 
-    let human_xuids = stats
+    let human_players = stats
         .players
         .iter()
         .filter(|player| player.player_type == 1)
-        .map(|player| Xuid::from(bare_xuid(&player.player_id)))
+        .map(|player| Player::xuid(bare_xuid(&player.player_id)))
         .collect::<Vec<_>>();
     let names = halo
-        .users(&human_xuids)
+        .users(&human_players)
         .await?
         .into_iter()
         .map(|user| (user.xuid, user.gamertag))

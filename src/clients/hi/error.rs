@@ -35,8 +35,8 @@ pub enum InfiniteClientError {
     #[error("no Halo Infinite record found for gamertag \"{0}\"")]
     GamertagNotFound(String),
 
-    #[error("Halo Infinite returned no customization for player \"{0}\"")]
-    CustomizationNotFound(String),
+    #[error("Halo Infinite returned no career rank record for player \"{0}\"")]
+    CareerRankNotFound(String),
 }
 
 impl From<reqwest::Error> for InfiniteClientError {

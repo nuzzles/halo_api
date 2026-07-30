@@ -1,8 +1,14 @@
 mod common;
+
+use halo_api::clients::hi::Player;
+
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
-    let player = common::value("HALO_GAMERTAG", "Gamertag")?;
-    println!("{:#?}", halo.service_record(&player).await?);
+    let gamertag = common::value("HALO_GAMERTAG", "Gamertag")?;
+    println!(
+        "{:#?}",
+        halo.service_record(&Player::gamertag(gamertag)).await?
+    );
     Ok(())
 }
