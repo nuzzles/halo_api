@@ -7,7 +7,7 @@ mod pager;
 mod player;
 mod rate_limit;
 
-pub use client::HaloInfiniteClient;
+pub use client::{HaloInfiniteClient, HaloInfiniteClientBuilder};
 pub use error::InfiniteClientError;
 pub use pager::{MAX_PAGE_SIZE, MatchHistoryPager};
 pub use player::Player;

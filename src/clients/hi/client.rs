@@ -757,8 +757,9 @@ impl HaloInfiniteClient {
     }
 
     /// Downloads a career-rank icon (small, large, or adornment) by its CMS path, e.g.
-    /// [`RewardTrackRank::rank_icon`], [`RewardTrackRank::rank_large_icon`], or
-    /// [`RewardTrackRank::rank_adornment_icon`].
+    /// [`RewardTrackRank::rank_icon`](super::models::RewardTrackRank::rank_icon),
+    /// [`RewardTrackRank::rank_large_icon`](super::models::RewardTrackRank::rank_large_icon), or
+    /// [`RewardTrackRank::rank_adornment_icon`](super::models::RewardTrackRank::rank_adornment_icon).
     pub async fn rank_icon_image(&self, cms_path: &str) -> Result<Vec<u8>, InfiniteClientError> {
         self.game_cms_image(cms_path).await
     }
@@ -963,8 +964,10 @@ impl HaloInfiniteClient {
 
     /// Gets an operation (battle pass) reward-track definition by its CMS file path.
     ///
-    /// The path is typically taken from [`Season::operation_track_path`] or
-    /// [`PlayerOperationPass::reward_track_path`], e.g. `RewardTracks/Operations/S05OpPassM01.json`.
+    /// The path is typically taken from
+    /// [`Season::operation_track_path`](super::models::Season::operation_track_path) or
+    /// [`PlayerOperationPass::reward_track_path`](super::models::PlayerOperationPass::reward_track_path),
+    /// e.g. `RewardTracks/Operations/S05OpPassM01.json`.
     pub async fn operation_reward_track(
         &self,
         reward_track_path: &str,
