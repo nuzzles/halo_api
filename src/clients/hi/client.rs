@@ -25,8 +25,8 @@ use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuthClient, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
-/// Default per-origin request rate. Matches SPNKr's conservative default for this API.
-const DEFAULT_REQUESTS_PER_SECOND: u32 = 5;
+/// Default per-origin request rate.
+const DEFAULT_REQUESTS_PER_SECOND: u32 = 9;
 const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
 const HALO_WAYPOINT_USER_AGENT: &str =
     "HaloWaypoint/2021112313511900 CFNetwork/1327.0.4 Darwin/21.2.0";
@@ -1118,7 +1118,7 @@ impl HaloInfiniteClientBuilder {
 
     /// Sets the maximum requests per second, enforced independently per Halo Waypoint origin.
     ///
-    /// Defaults to 5. Pass `0` to disable client-side pacing entirely. This throttles an
+    /// Defaults to 9. Pass `0` to disable client-side pacing entirely. This throttles an
     /// undocumented API, so lowering it is safer than raising it.
     pub fn requests_per_second(mut self, requests_per_second: u32) -> Self {
         self.requests_per_second = requests_per_second;

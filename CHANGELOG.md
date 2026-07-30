@@ -17,6 +17,7 @@ This release has an [MSRV][] of 1.96.
 - `current_ranked_arena` now fetches all rotation entries (map-mode pairs, maps, and game variants)
   concurrently rather than sequentially. For a typical 26-entry rotation this reduces wall-clock
   time from ~16 s at the default 5 req/s rate to the time of the single slowest request.
+- Raised the default per-origin request rate from 5/s to 9/s.
 
 ## [0.1.1] - 2026-07-30
 

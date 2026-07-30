@@ -2,8 +2,7 @@
 //!
 //! Halo Waypoint is an unofficial target, so bursts of traffic risk throttling or account
 //! flagging. This limiter spaces requests evenly rather than allowing bursts, and tracks each
-//! origin independently so a flurry of calls to one service does not stall another — mirroring
-//! the per-service rate limiting SPNKr applies.
+//! origin independently so a flurry of calls to one service does not stall another.
 
 use std::collections::HashMap;
 use std::sync::Arc;

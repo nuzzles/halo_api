@@ -325,8 +325,7 @@ pub enum FilmMedal {
     Unknown(u8),
 }
 
-/// Known film-medal IDs, including the SPNKr mappings catalogued in
-/// <https://den.dev/blog/extracting-stats-film-files-halo-infinite/>.
+/// Known film-medal IDs.
 pub const KNOWN_FILM_MEDALS: &[(u8, &str)] = &[
     (0, "Double Kill"),
     (1, "Triple Kill"),
