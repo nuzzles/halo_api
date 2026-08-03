@@ -213,7 +213,8 @@ impl HaloInfiniteClient {
                 request = request.header("343-Clearance", clearance);
             }
             let response = request.send().await?;
-            if response.status() == StatusCode::TOO_MANY_REQUESTS && attempt < self.rate_limit_retries
+            if response.status() == StatusCode::TOO_MANY_REQUESTS
+                && attempt < self.rate_limit_retries
             {
                 let delay = retry_delay(&response, attempt);
                 warn!(
@@ -277,7 +278,8 @@ impl HaloInfiniteClient {
                 request = request.header("343-Clearance", clearance);
             }
             let response = request.send().await?;
-            if response.status() == StatusCode::TOO_MANY_REQUESTS && attempt < self.rate_limit_retries
+            if response.status() == StatusCode::TOO_MANY_REQUESTS
+                && attempt < self.rate_limit_retries
             {
                 let delay = retry_delay(&response, attempt);
                 warn!(
