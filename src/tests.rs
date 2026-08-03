@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::auth::endpoints::AuthEndpoints;
 use crate::auth::{AuthError, ClearanceTokenSource, HaloAuthClient, SpartanTokenSource};
@@ -12,7 +13,7 @@ use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError, Player};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
 use wiremock::matchers::{header, method, path, query_param};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate};
 use xbox::auth::XblAuthProvider;
 use xbox::cache::CachedToken;
 use xbox::{XboxClient, XboxEndpoints, XboxError};
@@ -22,6 +23,20 @@ struct FakeAuthProvider;
 
 struct FailingSpartanTokenSource;
 struct UnusedClearanceTokenSource;
+
+struct RateLimitThenSuccess {
+    attempts: Arc<AtomicUsize>,
+}
+
+impl Respond for RateLimitThenSuccess {
+    fn respond(&self, _request: &Request) -> ResponseTemplate {
+        if self.attempts.fetch_add(1, Ordering::SeqCst) == 0 {
+            ResponseTemplate::new(429).insert_header("Retry-After", "0")
+        } else {
+            ResponseTemplate::new(200).set_body_json(csr_body(1500))
+        }
+    }
+}
 
 #[async_trait]
 impl SpartanTokenSource for FailingSpartanTokenSource {
@@ -178,6 +193,32 @@ async fn gets_playlist_csr_end_to_end() {
 
     assert_eq!(csr.records.len(), 1);
     assert_eq!(csr.records[0].result.current.value, 1500);
+}
+
+#[tokio::test]
+async fn retries_rate_limited_requests_in_the_shared_client() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+    let attempts = Arc::new(AtomicUsize::new(0));
+
+    Mock::given(method("GET"))
+        .and(path(
+            "/hi/playlist/edfef3ac-9cbe-4fa2-b949-8f29deafd483/csrs",
+        ))
+        .respond_with(RateLimitThenSuccess {
+            attempts: attempts.clone(),
+        })
+        .expect(2)
+        .mount(&server)
+        .await;
+
+    let csr = halo
+        .playlist_csr(PlaylistId::RANKED_ARENA, &Player::xuid("123456789"))
+        .await
+        .unwrap();
+
+    assert_eq!(csr.records[0].result.current.value, 1500);
+    assert_eq!(attempts.load(Ordering::SeqCst), 2);
 }
 
 #[tokio::test]

@@ -2,6 +2,7 @@ use std::{io::Read, sync::Arc, time::Duration};
 
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
+use tracing::warn;
 use xbox::models::Xuid;
 use xbox::util::wrap_xuid;
 
@@ -27,6 +28,8 @@ use crate::auth::{HaloAuthClient, HaloCredentials};
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 /// Default per-origin request rate.
 const DEFAULT_REQUESTS_PER_SECOND: u32 = 9;
+/// Default number of times a 429 response is retried before giving up.
+const DEFAULT_RATE_LIMIT_RETRIES: u32 = 3;
 const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
 const HALO_WAYPOINT_USER_AGENT: &str =
     "HaloWaypoint/2021112313511900 CFNetwork/1327.0.4 Darwin/21.2.0";
@@ -45,6 +48,18 @@ fn origin_of(url: &str) -> &str {
     }
 }
 
+/// Uses Waypoint's `Retry-After` header when present, falling back to exponential backoff that
+/// doubles from 1s on each successive `attempt` (0-indexed).
+fn retry_delay(response: &reqwest::Response, attempt: u32) -> Duration {
+    response
+        .headers()
+        .get(reqwest::header::RETRY_AFTER)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.parse::<u64>().ok())
+        .map(Duration::from_secs)
+        .unwrap_or_else(|| Duration::from_secs(1u64 << attempt.min(63)))
+}
+
 /// Halo Infinite API client. Authentication is supplied by a [`HaloAuthClient`].
 ///
 /// Construct one with [`HaloInfiniteClient::new`] for the defaults, or
@@ -59,6 +74,7 @@ pub struct HaloInfiniteClient {
     endpoints: HaloEndpoints,
     limiter: RateLimiter,
     timeout: Duration,
+    rate_limit_retries: u32,
 }
 
 impl HaloInfiniteClient {
@@ -182,31 +198,48 @@ impl HaloInfiniteClient {
         credentials: &HaloCredentials,
         user_agent: &'static str,
     ) -> Result<T, InfiniteClientError> {
-        self.limiter.acquire(origin_of(url)).await;
-        let mut request = self
-            .http
-            .get(url)
-            .query(query)
-            .header("X-343-Authorization-Spartan", &credentials.spartan_token)
-            .header("Accept", "application/json")
-            .header("User-Agent", user_agent)
-            .timeout(self.timeout);
-        if let Some(clearance) = &credentials.clearance {
-            request = request.header("343-Clearance", clearance);
+        let mut attempt = 0;
+        loop {
+            self.limiter.acquire(origin_of(url)).await;
+            let mut request = self
+                .http
+                .get(url)
+                .query(query)
+                .header("X-343-Authorization-Spartan", &credentials.spartan_token)
+                .header("Accept", "application/json")
+                .header("User-Agent", user_agent)
+                .timeout(self.timeout);
+            if let Some(clearance) = &credentials.clearance {
+                request = request.header("343-Clearance", clearance);
+            }
+            let response = request.send().await?;
+            if response.status() == StatusCode::TOO_MANY_REQUESTS && attempt < self.rate_limit_retries
+            {
+                let delay = retry_delay(&response, attempt);
+                warn!(
+                    url = %response.url(),
+                    attempt = attempt + 1,
+                    retry_after_seconds = delay.as_secs(),
+                    "Halo Waypoint request was rate limited; backing off"
+                );
+                self.limiter.backoff(origin_of(url), delay).await;
+                attempt += 1;
+                continue;
+            }
+
+            let url = response.url().to_string();
+            if !response.status().is_success() {
+                let status = response.status();
+                let body = response.text().await.unwrap_or_default();
+                break Err(InfiniteClientError::HttpStatus { url, status, body });
+            }
+            let body = response.text().await?;
+            break serde_json::from_str(&body).map_err(|source| InfiniteClientError::Decode {
+                url,
+                source: Arc::new(source),
+                body,
+            });
         }
-        let response = request.send().await?;
-        let url = response.url().to_string();
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(InfiniteClientError::HttpStatus { url, status, body });
-        }
-        let body = response.text().await?;
-        serde_json::from_str(&body).map_err(|source| InfiniteClientError::Decode {
-            url,
-            source: Arc::new(source),
-            body,
-        })
     }
 
     async fn get_bytes_with_clearance(
@@ -231,24 +264,41 @@ impl HaloInfiniteClient {
         url: &str,
         credentials: &HaloCredentials,
     ) -> Result<Vec<u8>, InfiniteClientError> {
-        self.limiter.acquire(origin_of(url)).await;
-        let mut request = self
-            .http
-            .get(url)
-            .header("X-343-Authorization-Spartan", &credentials.spartan_token)
-            .header("User-Agent", HALO_PC_USER_AGENT)
-            .timeout(self.timeout);
-        if let Some(clearance) = &credentials.clearance {
-            request = request.header("343-Clearance", clearance);
-        }
-        let response = request.send().await?;
-        if !response.status().is_success() {
+        let mut attempt = 0;
+        loop {
+            self.limiter.acquire(origin_of(url)).await;
+            let mut request = self
+                .http
+                .get(url)
+                .header("X-343-Authorization-Spartan", &credentials.spartan_token)
+                .header("User-Agent", HALO_PC_USER_AGENT)
+                .timeout(self.timeout);
+            if let Some(clearance) = &credentials.clearance {
+                request = request.header("343-Clearance", clearance);
+            }
+            let response = request.send().await?;
+            if response.status() == StatusCode::TOO_MANY_REQUESTS && attempt < self.rate_limit_retries
+            {
+                let delay = retry_delay(&response, attempt);
+                warn!(
+                    url = %response.url(),
+                    attempt = attempt + 1,
+                    retry_after_seconds = delay.as_secs(),
+                    "Halo Waypoint request was rate limited; backing off"
+                );
+                self.limiter.backoff(origin_of(url), delay).await;
+                attempt += 1;
+                continue;
+            }
+
+            if response.status().is_success() {
+                break Ok(response.bytes().await?.to_vec());
+            }
             let url = response.url().to_string();
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(InfiniteClientError::HttpStatus { url, status, body });
+            break Err(InfiniteClientError::HttpStatus { url, status, body });
         }
-        Ok(response.bytes().await?.to_vec())
     }
 
     /// Resolves a [`Player`] to a numeric [`Xuid`], looking it up via [`Self::user`] if given a
@@ -1096,6 +1146,7 @@ impl HaloInfiniteClient {
 pub struct HaloInfiniteClientBuilder {
     timeout: Duration,
     requests_per_second: u32,
+    rate_limit_retries: u32,
     http: Option<Client>,
 }
 
@@ -1104,6 +1155,7 @@ impl Default for HaloInfiniteClientBuilder {
         Self {
             timeout: DEFAULT_TIMEOUT,
             requests_per_second: DEFAULT_REQUESTS_PER_SECOND,
+            rate_limit_retries: DEFAULT_RATE_LIMIT_RETRIES,
             http: None,
         }
     }
@@ -1122,6 +1174,16 @@ impl HaloInfiniteClientBuilder {
     /// undocumented API, so lowering it is safer than raising it.
     pub fn requests_per_second(mut self, requests_per_second: u32) -> Self {
         self.requests_per_second = requests_per_second;
+        self
+    }
+
+    /// Sets how many times a rate-limited (429) response is retried before giving up.
+    ///
+    /// Defaults to 3. Each retry backs off using Waypoint's `Retry-After` header when present,
+    /// falling back to exponential delays starting at 1 second. Pass `0` to disable retries and
+    /// surface the first 429 as an error.
+    pub fn rate_limit_retries(mut self, rate_limit_retries: u32) -> Self {
+        self.rate_limit_retries = rate_limit_retries;
         self
     }
 
@@ -1150,6 +1212,7 @@ impl HaloInfiniteClientBuilder {
             endpoints,
             limiter: RateLimiter::per_second(self.requests_per_second),
             timeout: self.timeout,
+            rate_limit_retries: self.rate_limit_retries,
         }
     }
 }

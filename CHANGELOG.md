@@ -12,6 +12,22 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+### Added
+
+- `HaloInfiniteClientBuilder::rate_limit_retries` configures how many times a rate-limited (429)
+  response is retried before giving up. Defaults to 3.
+
+### Changed
+
+- Requests that hit a 429 (rate limited) response are now retried automatically, up to
+  [`rate_limit_retries`][] times (3 by default), instead of surfacing immediately as an error.
+  Each retry backs off using Waypoint's `Retry-After` header when present, falling back to
+  exponential delays starting at 1s. The cooldown is applied to the shared per-origin rate
+  limiter, so concurrent requests to the same origin also pause rather than immediately
+  re-triggering the limit.
+
+[`rate_limit_retries`]: https://docs.rs/halo_api/latest/halo_api/clients/hi/struct.HaloInfiniteClientBuilder.html#method.rate_limit_retries
+
 ## [0.2.0] - 2026-07-30
 
 This release has an [MSRV][] of 1.96.

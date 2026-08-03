@@ -11,7 +11,8 @@ use std::time::Duration;
 use tokio::sync::Mutex;
 use tokio::time::Instant;
 
-/// Evenly paces outgoing requests to at most `requests_per_second` per origin.
+/// Evenly paces outgoing requests to at most `requests_per_second` per origin and applies
+/// server-requested cooldowns after rate-limit responses.
 ///
 /// Cloning shares the same underlying schedule, so every clone of a client draws from one budget
 /// per origin.
@@ -39,9 +40,6 @@ impl RateLimiter {
     /// Reservations stack: concurrent callers targeting the same origin each claim the next slot
     /// under the lock, so they wake evenly spaced rather than all at once.
     pub(crate) async fn acquire(&self, origin: &str) {
-        let Some(interval) = self.interval else {
-            return;
-        };
         let now = Instant::now();
         let wait_until = {
             let mut next_allowed = self.next_allowed.lock().await;
@@ -49,12 +47,26 @@ impl RateLimiter {
                 Some(&prev) if prev > now => prev,
                 _ => now,
             };
-            next_allowed.insert(origin.to_string(), slot + interval);
+            let next = self.interval.map_or(slot, |interval| slot + interval);
+            next_allowed.insert(origin.to_string(), next);
             slot
         };
         if wait_until > now {
             tokio::time::sleep_until(wait_until).await;
         }
+    }
+
+    /// Defers all subsequent requests to `origin` for at least `delay`.
+    ///
+    /// The delay is shared by all clones of this limiter. Existing reservations are preserved if
+    /// they already extend beyond the requested cooldown.
+    pub(crate) async fn backoff(&self, origin: &str, delay: Duration) {
+        let blocked_until = Instant::now() + delay;
+        let mut next_allowed = self.next_allowed.lock().await;
+        next_allowed
+            .entry(origin.to_string())
+            .and_modify(|next| *next = (*next).max(blocked_until))
+            .or_insert(blocked_until);
     }
 }
 
@@ -102,5 +114,21 @@ mod tests {
         }
 
         assert!(start.elapsed() < Duration::from_millis(200));
+    }
+
+    #[tokio::test]
+    async fn backoff_delays_every_request_to_the_same_origin() {
+        let limiter = RateLimiter::per_second(0);
+        limiter
+            .backoff("https://skill.example", Duration::from_millis(50))
+            .await;
+
+        let start = Instant::now();
+        limiter.acquire("https://skill.example").await;
+
+        assert!(
+            start.elapsed() >= Duration::from_millis(45),
+            "backoff should delay requests even when normal pacing is disabled"
+        );
     }
 }
