@@ -1,0 +1,258 @@
+{
+  "firing": [
+    {
+      "hex": "d26804134616acdc44d42c9679f0",
+      "length": 108,
+      "source": [
+        "ranked-arena/02-oddball",
+        31,
+        658970,
+        0
+      ],
+      "expected": {
+        "serial": 128,
+        "wire": 128,
+        "generation": 1,
+        "player": 6,
+        "sequence": 166,
+        "weapon_window": "16acdc44d4"
+      }
+    },
+    {
+      "hex": "d267d43fc216acdc44d42c9679f0",
+      "length": 108,
+      "source": [
+        "ranked-arena/02-oddball",
+        31,
+        667453,
+        0
+      ],
+      "expected": {
+        "serial": 125,
+        "wire": 125,
+        "generation": 1,
+        "player": 2,
+        "sequence": 255,
+        "weapon_window": "16acdc44d4"
+      }
+    },
+    {
+      "hex": "d267d4000216acdc44d42c9679f0",
+      "length": 108,
+      "source": [
+        "ranked-arena/02-oddball",
+        31,
+        676303,
+        0
+      ],
+      "expected": {
+        "serial": 125,
+        "wire": 125,
+        "generation": 1,
+        "player": 2,
+        "sequence": 0,
+        "weapon_window": "16acdc44d4"
+      }
+    },
+    {
+      "hex": "d2600828c216acdc44d42c9679f0",
+      "length": 108,
+      "source": [
+        "ranked-arena/02-oddball",
+        59,
+        549601,
+        0
+      ],
+      "expected": {
+        "serial": 256,
+        "wire": 0,
+        "generation": 2,
+        "player": 2,
+        "sequence": 209,
+        "weapon_window": "16acdc44d4"
+      }
+    }
+  ],
+  "melee": [
+    {
+      "hex": "53401300a880216fa040c87a164b3cf8",
+      "length": 125,
+      "offset": 31,
+      "source": [
+        "force-end/13-melee",
+        2,
+        479937,
+        62
+      ],
+      "expected": {
+        "serial": 0,
+        "wire": 0,
+        "generation": 1,
+        "player": 0,
+        "weapon_window": "df408190f4"
+      }
+    },
+    {
+      "hex": "53401300a880216fa040c87a164b3cf8",
+      "length": 125,
+      "offset": 31,
+      "source": [
+        "natural-end/13-melee",
+        2,
+        494599,
+        62
+      ],
+      "expected": {
+        "serial": 0,
+        "wire": 0,
+        "generation": 1,
+        "player": 0,
+        "weapon_window": "df408190f4"
+      }
+    },
+    {
+      "hex": "d3425303a884a16b566e226a164b3cf8",
+      "length": 125,
+      "offset": 31,
+      "source": [
+        "bandit/01-evo",
+        3,
+        746442,
+        62
+      ],
+      "expected": {
+        "serial": 9,
+        "wire": 9,
+        "generation": 1,
+        "player": 3,
+        "weapon_window": "d6acdc44d4"
+      }
+    },
+    {
+      "hex": "d3415305a882a16800bac962164b3cf8",
+      "length": 125,
+      "offset": 31,
+      "source": [
+        "ranked-arena/02-oddball",
+        3,
+        750666,
+        62
+      ],
+      "expected": {
+        "serial": 5,
+        "wire": 5,
+        "generation": 1,
+        "player": 5,
+        "weapon_window": "d0017592c4"
+      }
+    },
+    {
+      "hex": "d37c9303a8f9216b566e226a164b3cf8",
+      "length": 125,
+      "offset": 31,
+      "source": [
+        "ranked-arena/02-oddball",
+        60,
+        801176,
+        62
+      ],
+      "expected": {
+        "serial": 242,
+        "wire": 242,
+        "generation": 1,
+        "player": 3,
+        "weapon_window": "d6acdc44d4"
+      }
+    }
+  ],
+  "vitality": [
+    {
+      "hex": "88053800aacedcf605dcb600f782401828d0e1f3db7750c0",
+      "length": 187,
+      "clock": 67,
+      "generation": 1,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        54,
+        57,
+        59
+      ],
+      "source": [
+        "ranked-arena/02-oddball",
+        "2",
+        "582785",
+        589
+      ],
+      "expected": {}
+    },
+    {
+      "hex": "898528008aab205ffa5f9d1822010113cf630004385f7dff3b80",
+      "length": 204,
+      "clock": 220,
+      "generation": 1,
+      "components": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "source": [
+        "ranked-arena/02-oddball",
+        "26",
+        "514733",
+        37
+      ],
+      "expected": {
+        "shield_raw": 48,
+        "shield_delay_ticks": 135,
+        "shield_state": "0000"
+      }
+    },
+    {
+      "hex": "8ae128008aab205f33e0128812000d598d320006b8750dfdb7a0",
+      "length": 204,
+      "clock": 189,
+      "generation": 1,
+      "components": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "source": [
+        "ranked-arena/02-oddball",
+        "43",
+        "665768",
+        344
+      ],
+      "expected": {
+        "shield_raw": 32,
+        "shield_delay_ticks": 215,
+        "shield_state": "0000"
+      }
+    },
+    {
+      "hex": "8802180cb405da5a0104811c6700",
+      "length": 107,
+      "clock": 156,
+      "generation": 2,
+      "components": [
+        0,
+        25,
+        26
+      ],
+      "source": [
+        "ranked-arena/02-oddball",
+        "58",
+        "798524",
+        37
+      ],
+      "expected": {}
+    }
+  ]
+}

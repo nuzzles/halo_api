@@ -1,0 +1,131 @@
+{
+  "note": "Weapon identity controls with captured firing packets. Original cases independently match magazine slots; the Stalker slot is corroborated by the preceding controlled selection and reported loadout. BR75 naming uses the separate BR75/Shock spawn control.",
+  "records": [
+    {
+      "film": "weapons/02-reload-comparison",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4",
+      "player": "Nuzzles",
+      "time_us": 21936667,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 487680,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d26004000016acdc44d42c9679f60aabe652003e103da1003e20042f03a201afbe00",
+      "expected": {
+        "slot": 0,
+        "fingerprint": "6acdc44d",
+        "window": "16acdc44d4"
+      }
+    },
+    {
+      "film": "weapons/02-reload-comparison",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4",
+      "player": "Nuzzles",
+      "time_us": 36901965,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 529689,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d2600401803f408190f42c9679f60aabe6520011103da1024220043082e201afbe00",
+      "expected": {
+        "slot": 1,
+        "fingerprint": "f408190f",
+        "window": "3f408190f4"
+      }
+    },
+    {
+      "film": "bandit/01-evo",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c",
+      "player": "Yet",
+      "time_us": 582000242,
+      "source": {
+        "chunk": 30,
+        "payload_byte": 540866,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d267341c4232b1824d542c9679f367a61982362218002645f1a9fed0818681ed0804113825001155640be91c00b700040287b16e0000a11dad40b481139a600115566102f8ccff6b4099030de46c98004642214fd52008f13ba5001155640bc7b3f96d036c16c7b1f26000a10a0740848113c2400155902f07f012340d60a28406e57fdf624089e928008aab20606ba01108126190e8076300050064060024094010a50b9aa81460841ceb5f50c2aa28104035ff8101df6e21205a1c6082e80e020fa07600",
+      "expected": {
+        "slot": 1,
+        "fingerprint": "2b1824d5",
+        "window": "32b1824d54"
+      }
+    },
+    {
+      "film": "bandit/01-evo",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c",
+      "player": "Miiindful",
+      "time_us": 332933079,
+      "source": {
+        "chunk": 17,
+        "payload_byte": 731641,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d263a43a8412b1824d542c9679f1548484000c9e7df0011a2f66d00e1c0b780c84e3a50000b29c131c969ef40422400009f46001483214d0103da1033e23a4c0022aacbc05ecde01c48120038fd80d30005507379e239e1162414602ac817d677f942000166e84ce7a2424a0022aac817c797f83201a00a83e0b054025815c37ace7a2434c002ab3cf605e445fcdf818801ad80d98203e173d42244480022b205e9f9feac81300dc8a11320008c873d122a40015590301e1000f40750c642e5de2520339e916d18008417b2b7faba04f8164d6c5a61b911ca008524d0d2b0a40010830bd47bfd7f023c2952d1509ab0ff8d5a2c8500d4711c67cb460841d2ce3eaf42fa40010830bf49bfa190248a198ea01a974820816fbe90903debe21209afbe082ebbf020dbe9a083efcd908",
+      "expected": {
+        "slot": 0,
+        "fingerprint": "2b1824d5",
+        "window": "12b1824d54"
+      }
+    },
+    {
+      "film": "octagon/02-ar-kill",
+      "match_id": "2b4e00fe-69c9-452e-b1b2-df3a9a0a6b3a",
+      "player": "Nuzzles",
+      "time_us": 22917991,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 493933,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d260040080148c19d2d42c9679f5540284000f5f85d84080c4060170028000591c002a594f7a021120001d59f0008c1e89e4081ed08083100235597a00700d4108b100a114d402580201afbe080ebef800",
+      "expected": {
+        "slot": 0,
+        "fingerprint": "48c19d2d",
+        "window": "148c19d2d4"
+      }
+    },
+    {
+      "film": "weapons/05-ar-stalker-rifle",
+      "match_id": "9ea11b0a-dddc-4061-a7f7-ac22fa62a05b",
+      "player": "Nuzzles",
+      "time_us": 59310053,
+      "source": {
+        "chunk": 3,
+        "payload_byte": 535774,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d2600400003daf193c742c9679f60aabe652003b103da1033e2004319504035f7c00",
+      "expected": {
+        "slot": 1,
+        "fingerprint": "daf193c7",
+        "window": "3daf193c74"
+      }
+    },
+    {
+      "film": "weapons/05-ar-stalker-rifle",
+      "match_id": "9ea11b0a-dddc-4061-a7f7-ac22fa62a05b",
+      "player": "Nuzzles",
+      "time_us": 68569291,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 508311,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "hex": "d260040080148c19d2d42c9679f60aabe6520023103da103ea20042f08e201afbe00",
+      "expected": {
+        "slot": 0,
+        "fingerprint": "48c19d2d",
+        "window": "148c19d2d4"
+      }
+    }
+  ]
+}

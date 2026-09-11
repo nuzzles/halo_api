@@ -1,0 +1,210 @@
+{
+  "match_id": "9a875c4e-03bc-4fff-a688-e21216d1618b",
+  "note": "Captured full Octagon match, first to 50. Additional spawn prefix with the established 15/15/17 partition. Independent tick-checked motion supports the same width tuple for all 100 lives.",
+  "cases": [
+    {
+      "spawn": {
+        "hex": "088018e1b1876bda000019d01204300020153fa57f5bd71cc10c9f01b0f9b891c1b88c575f08f43a973810",
+        "source": {
+          "chunk": 1,
+          "payload_byte": 499696,
+          "timestamp_us": 1913930545,
+          "spawn_bit": 562
+        },
+        "wire": 0,
+        "player": 0,
+        "expected": [
+          28195,
+          2795,
+          115261
+        ]
+      },
+      "first_position": {
+        "hex": "a07b4205e4400900059681b88c575f08f03a97385dbc531aea2013ef80",
+        "source": {
+          "chunk": 1,
+          "payload_byte": 500188,
+          "timestamp_us": 1913960335
+        },
+        "offset": 37,
+        "tick": 188,
+        "end": 177,
+        "expected": [
+          28195,
+          2795,
+          115260
+        ]
+      }
+    },
+    {
+      "spawn": {
+        "hex": "888058e1b1876bda004019d012043000209a94f97f5bd71cc10c9f01b0f9b891c1abb0684708703a973810",
+        "source": {
+          "chunk": 8,
+          "payload_byte": 508587,
+          "timestamp_us": 2056739509,
+          "spawn_bit": 0
+        },
+        "wire": 1,
+        "player": 1,
+        "expected": [
+          27372,
+          3336,
+          115228
+        ]
+      },
+      "first_position": {
+        "hex": "a07b4201644008c055906cee15afc21b29fcfe92c4402900059681abb06847086c658a63654403ba041019f7c0",
+        "source": {
+          "chunk": 8,
+          "payload_byte": 509047,
+          "timestamp_us": 2056770687
+        },
+        "offset": 165,
+        "tick": 44,
+        "end": 276,
+        "expected": [
+          27372,
+          3336,
+          115227
+        ]
+      }
+    },
+    {
+      "spawn": {
+        "hex": "088098e1b1876bda000019d01204300020153fa57f5bd71cc10c9f01b0f9b891c1b5d053a708703a973810",
+        "source": {
+          "chunk": 8,
+          "payload_byte": 533270,
+          "timestamp_us": 2060610718,
+          "spawn_bit": 87
+        },
+        "wire": 2,
+        "player": 0,
+        "expected": [
+          28020,
+          2676,
+          115228
+        ]
+      },
+      "first_position": {
+        "hex": "a07b4200a440294004555906b9f1b5dc21b08f24e5d800037479befe5144404900059681b5d053a7086c628a636a65684800210636898b58e110028412089a1fded8b1d7a3cad28c1083a18f9dfc40263e04075d0000",
+        "source": {
+          "chunk": 8,
+          "payload_byte": 533840,
+          "timestamp_us": 2060641377
+        },
+        "offset": 237,
+        "tick": 20,
+        "end": 348,
+        "expected": [
+          28020,
+          2676,
+          115227
+        ]
+      }
+    },
+    {
+      "spawn": {
+        "hex": "888858e1b1876bda000019d0120430002012a0f57f5bd71cc10c9f01b0f9b891c1b88c648f08f43a973810",
+        "source": {
+          "chunk": 12,
+          "payload_byte": 607683,
+          "timestamp_us": 2148532365,
+          "spawn_bit": 214
+        },
+        "wire": 33,
+        "player": 0,
+        "expected": [
+          28195,
+          3217,
+          115261
+        ]
+      },
+      "first_position": {
+        "hex": "a07b420554440900045641aa405c47086c00b321f40000ea1d5222148002cb40dc46324784781d4b9c2ed5299015980d20008418dbce329784403ad0085a640a41e9ae7eb7302240010831b6ac63df08a0783a4050ca6083870838b44028fe0407bd5c8400",
+        "source": {
+          "chunk": 12,
+          "payload_byte": 608293,
+          "timestamp_us": 2148563293
+        },
+        "offset": 206,
+        "tick": 170,
+        "end": 346,
+        "expected": [
+          28195,
+          3217,
+          115260
+        ]
+      }
+    },
+    {
+      "spawn": {
+        "hex": "089118e1b1876bda000019d0120430002012a0f57f5bd71cc10c9f01b0f9b891c1b88c648f08f43a973810",
+        "source": {
+          "chunk": 17,
+          "payload_byte": 563315,
+          "timestamp_us": 2241691924,
+          "spawn_bit": 214
+        },
+        "wire": 68,
+        "player": 0,
+        "expected": [
+          28195,
+          3217,
+          115261
+        ]
+      },
+      "first_position": {
+        "hex": "a07b4203d448694004555906b2d19d9c21b0124d85f00003a47be0fdd7a4488900059681b88c648f08f03a97385d7a5325a3359240010831b1cc4f67089448f2e081c581ae9856be0a6b34800210636590a18e11001b0e6181c6c9e68e6abbf0804f80080f3bf000",
+        "source": {
+          "chunk": 17,
+          "payload_byte": 563931,
+          "timestamp_us": 2241722920
+        },
+        "offset": 237,
+        "tick": 122,
+        "end": 377,
+        "expected": [
+          28195,
+          3217,
+          115260
+        ]
+      }
+    },
+    {
+      "spawn": {
+        "hex": "8898d8e1b1876bda000019d0120430002002a0f97f5bd71cc10c9f01b0f9b891c1a8f4576708f43a973810",
+        "source": {
+          "chunk": 21,
+          "payload_byte": 621026,
+          "timestamp_us": 2330280634,
+          "spawn_bit": 214
+        },
+        "wire": 99,
+        "player": 0,
+        "expected": [
+          27197,
+          2796,
+          115261
+        ]
+      },
+      "first_position": {
+        "hex": "a07b4201c44c2900045641b68c55cf086c2f6bf12600002b19c226348002cb40d47a2bb384781d4b9c2e9c29953d9d3520008418d6b6309b843a2e15388c482f87c97a290a2014600203ac7c00",
+        "source": {
+          "chunk": 21,
+          "payload_byte": 621592,
+          "timestamp_us": 2330311572
+        },
+        "offset": 206,
+        "tick": 56,
+        "end": 346,
+        "expected": [
+          27197,
+          2796,
+          115260
+        ]
+      }
+    }
+  ]
+}

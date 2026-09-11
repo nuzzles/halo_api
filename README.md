@@ -12,6 +12,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 ## What this crate does
 
+- Decodes supported v41 Theater films into typed, serializable player/life/event streams with `theater::Film`.
 - Separates authentication (`HaloAuthClient`) from Halo API operations (`HaloInfiniteClient`).
 - Acquires and caches both the Spartan token and Waypoint flight clearance.
 - Covers stats, skill, profile, UGC, progression, career rank, reward tracks, ban, and privacy endpoints.
@@ -57,6 +58,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
+## Theater films
+
+`halo_api::theater::Film::try_from_chunks(&chunks, options)` decodes decompressed
+Theater chunks without network or filesystem access. It consolidates the motion,
+aim, input, roster/lives, recorded armor appearance, combat, vitality, weapons,
+scope, and controlled grenade experiments. This remains a partial v41 decoder;
+unknown data is not guessed.
+The original `clients::hi::film` helpers remain available.
+
+See the [decoder API, folder example, JSON replay export, and measurements](experiments/THEATER_DECODER.md).
+The library is checked on `wasm32-unknown-unknown`; file loading and replay export
+live in the experiment example.
 
 ## MSRV
 

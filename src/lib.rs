@@ -32,6 +32,7 @@
 
 pub mod auth;
 pub mod clients;
+pub mod theater;
 
 pub use clients::hi::{HaloInfiniteClient, InfiniteClientError};
 

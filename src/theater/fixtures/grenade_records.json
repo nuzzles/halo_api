@@ -1,0 +1,153 @@
+{
+  "throws": [
+    {
+      "source": [
+        "force-end/09-grenade",
+        2,
+        479009,
+        0
+      ],
+      "hex": "d3c0104040f6840d0100d7df00",
+      "expected": {
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0
+      }
+    },
+    {
+      "source": [
+        "natural-end/09-grenade",
+        2,
+        494875,
+        0
+      ],
+      "hex": "d3c0104040f684027100d7df00",
+      "expected": {
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0
+      }
+    },
+    {
+      "source": [
+        "bandit/01-evo",
+        2,
+        611421,
+        0
+      ],
+      "hex": "d3c0d04340f68409f88012000aac81802a7ff6601406e5cd47f000fa99f44028c005902f30d007ac120004f3c6267d10123015640bcb840221023cde13e967d101a400155902ff790064c0b908d02672e44a0233e88112000aac8181a67f6aa048846dc52fef36fd19f440a900055640bd35403ef0240046572090557eecfa20648002ab2060b45fde28148179c8914d80c0f67d103a400155902f026fff141420ca8da81775192b3e94010a56972501429508294b908225a16f29821044b42de53242089685bca6884112d0b794d908225a16f29c21044b42de53a42089685bca7884112d0b7977d09e01eb001ebfffffc00a000333000199800055c0009020003330006050002ff80006f200003c00007c0003d8800116a000ab8000554800014800012400003a0201bf3e080efcd8205bf3e081efb58209bf60082efcf90906dfa7041f7e5800",
+      "expected": {
+        "wire": 3,
+        "generation": 1,
+        "serial": 3,
+        "player": 3
+      }
+    },
+    {
+      "source": [
+        "ranked-arena/02-oddball",
+        2,
+        558879,
+        0
+      ],
+      "hex": "d3c1504540f6840008801100c8177a8808d205e9004402900055640bb8cc034302f42f7e51d7c3689080220248002ab20609ce01118120145e8ceac1abea401101a400155902ef2d00f240bd011ba876ff81f32008811100c81824d8037e048100440a8c005903045300844090093e1a75c011032400155902ee8900ecc0bd01026475fdadffa00881d1800b206091a019e812013541cea80250042951e094050a523d252e42083eabd4a6084107d57a94c90820faaf529a21041f55ea53642083eabd4a7084107d57a94e90820faaf529e21041f55e84037e7c101df9a040b7e00103df9a04137d08105df9b2120dbf3e083efc0000",
+      "expected": {
+        "wire": 5,
+        "generation": 1,
+        "serial": 5,
+        "player": 5
+      }
+    },
+    {
+      "source": [
+        "ranked-arena/02-oddball",
+        60,
+        773338,
+        0
+      ],
+      "hex": "d3c0e04140fa840a1880620008ac817cdf7f48a0488472430c00000063a1440514004555902f7d2fe6e40f7024784668b0006837cae95a144070c055902fa69004040933508f0da1440b09567836ed1a1440d0450000508c5e4900055640be4a3fd2902e430a7a20bc57760d0a46886002105ee81fe0e81482cc4ca163785bc5235440010940bda43f95303900bc6810ce6fe4e603631214b7e05fac9000420c2f36effa7c0921727600e02dc1db0687c8dbf61200084185e6d1ff8181220b79580225859a8833aa7f7eca3001082f7eefe60c09713e64c8b16f4ea7100d7df04075f7c103dfab21209afbe0836d0f820fa07c00",
+      "expected": {
+        "wire": 3,
+        "generation": 2,
+        "serial": 259,
+        "player": 1
+      }
+    }
+  ],
+  "projectiles": [
+    {
+      "source": [
+        "force-end/09-grenade",
+        2,
+        480047,
+        37
+      ],
+      "hex": "a07b4207248008c00420ffbdff7eb5ac5fa1c689ac8eeb04035f7c00",
+      "expected": {
+        "xyz": [
+          16367,
+          16367,
+          109931
+        ],
+        "components": [
+          0,
+          1,
+          2
+        ],
+        "coordinate_bit": 79,
+        "checked_end_bit": 186
+      }
+    },
+    {
+      "source": [
+        "force-end/09-grenade",
+        2,
+        479978,
+        37
+      ],
+      "hex": "a07b42071c800900042143ff07ff7ad6c17e875a26b488a700000000806bef80",
+      "expected": {
+        "xyz": [
+          16368,
+          16379,
+          109932
+        ],
+        "components": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "coordinate_bit": 85,
+        "checked_end_bit": 221
+      }
+    },
+    {
+      "source": [
+        "force-end/09-grenade",
+        2,
+        480632,
+        37
+      ],
+      "hex": "a07b42076c800900042503fee7f05ad6217e84da34cb51d9808806bef800",
+      "expected": {
+        "xyz": [
+          16366,
+          16258,
+          109922
+        ],
+        "components": [
+          0,
+          1,
+          2,
+          20
+        ],
+        "coordinate_bit": 85,
+        "checked_end_bit": 201
+      }
+    }
+  ],
+  "weapon_switch_hex": "a03442a78ef4c76b35452a293d703da101304035f7c0"
+}

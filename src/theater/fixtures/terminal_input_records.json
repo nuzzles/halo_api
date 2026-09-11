@@ -1,0 +1,494 @@
+{
+  "note": "Captured v41 terminal command records. Slots 0/1 bind roster players across respawns. Tags 13/14 remain opaque. Four exact command forms are checked; physical posture is not asserted. Jump-only/combined forms corroborated with the jump control and position rises.",
+  "records": [
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 1,
+      "payload_byte": 504937,
+      "time_us": 5000096,
+      "hex": "a07b4200d88073ef80",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 14,
+          "axes": [
+            31,
+            31
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 40,
+          "end": 70,
+          "tail": "00000",
+          "life": 0
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 510534,
+      "time_us": 146509258,
+      "hex": "a07b4201ec400900055641b47c57c7086c05de21ad6457f89ea20148002ab20d5da341f843600396809f0e4004f4201c04c080ec0f80",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 14,
+          "axes": [
+            0,
+            38
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 370,
+          "end": 400,
+          "tail": "00000",
+          "life": 0
+        },
+        {
+          "player": 1,
+          "mode": 13,
+          "axes": [
+            32,
+            31
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 400,
+          "end": 430,
+          "tail": "00000",
+          "life": 1
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 561687,
+      "time_us": 154100610,
+      "hex": "a07b42002440494004555906cd31729c21b04146a5e88004a02e50ffd04440694004555906a5018d5c21b0ad9bc48880043c3e4afdd040806ca00203cc0000",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            37,
+            0
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 440,
+          "end": 470,
+          "tail": "00000",
+          "life": 2
+        },
+        {
+          "player": 1,
+          "mode": 14,
+          "axes": [
+            24,
+            0
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 470,
+          "end": 500,
+          "tail": "00000",
+          "life": 3
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 561889,
+      "time_us": 154133810,
+      "hex": "a07b420034404900155641b3505ccf086c10009305ca5ffa0c880d28008aab20d49c319f84420c6e2d0210008687cb5fb20c100d94004079700940",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            37,
+            0
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 403,
+          "end": 433,
+          "tail": "00000",
+          "life": 2
+        },
+        {
+          "player": 1,
+          "mode": 14,
+          "axes": [
+            23,
+            0
+          ],
+          "crouch": true,
+          "jump": true,
+          "start": 433,
+          "end": 469,
+          "tail": "00100101000",
+          "life": 3
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 566901,
+      "time_us": 154817540,
+      "hex": "a07b42017c40494004555906cc416f3c2590bf5627880004ac6ecf05d2f440689567ef10012f4ae4880046a37180dc2a9179f18ad95cd10008d46e306385580e45d8e2201aa7a420",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            20,
+            61
+          ],
+          "crouch": true,
+          "jump": false,
+          "start": 538,
+          "end": 574,
+          "tail": "00100001000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 567215,
+      "time_us": 154867528,
+      "hex": "a07b42019440494004555906cc416e5c2650c05327080004a06edf041324ae4880046a3617ffc2a9179ed0ad95cd10008d46c307385560e44c8e6201aa7c00",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            20,
+            62
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 470,
+          "end": 500,
+          "tail": "00000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 567729,
+      "time_us": 154950975,
+      "hex": "a07b4201bc40494004555906cc516cbc2710c1e546e000048c6ee1015374ae4880046a3417ebc2a6179e58b195cd10008d46a3087854e0e4300fe201aa7c4200",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            20,
+            62
+          ],
+          "crouch": true,
+          "jump": false,
+          "start": 470,
+          "end": 506,
+          "tail": "00100001000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 568899,
+      "time_us": 155134538,
+      "hex": "a07b42021440494004555906cc71691c27e0c0dac6400004606ea8fe1424ae4880046a3217bdc295179d54c595cd18008435198c2de14a8eafba4d9b0431c0806abf00",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            21,
+            62
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 504,
+          "end": 534,
+          "tail": "00000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 569214,
+      "time_us": 155184799,
+      "hex": "a07b42022c40494004555906cc81681c27d0c191a6400004546e40fb5454ae4880046a3117b1c28d179d0ccc95cd18008435198c30e1470ead54539b3189c08069ff1080",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            15,
+            62
+          ],
+          "crouch": true,
+          "jump": false,
+          "start": 504,
+          "end": 540,
+          "tail": "00100001000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 570084,
+      "time_us": 155318187,
+      "hex": "a07b42026c40494004555906cca1657c2810c34206780004346d3f0154d4ae4880046a2f1791c2731d002ce195cd18008435198c38e13b0eaada631be741d080683e80",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            1,
+            61
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 504,
+          "end": 534,
+          "tail": "00000",
+          "life": 2
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 575771,
+      "time_us": 156135927,
+      "hex": "a07b4203f440494004555906cc4156bc2680b6d886e80003706bdcfb97e4408900055641a8d0638f08841a94c207eda7fcbf040351f8101e701240",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            17,
+            62
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 405,
+          "end": 435,
+          "tail": "00000",
+          "life": 2
+        },
+        {
+          "player": 1,
+          "mode": 14,
+          "axes": [
+            28,
+            1
+          ],
+          "crouch": false,
+          "jump": true,
+          "start": 435,
+          "end": 471,
+          "tail": "00100100000",
+          "life": 4
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 10,
+      "payload_byte": 605491,
+      "time_us": 197410521,
+      "hex": "a07b42014442094004555906b001579c22105ee008180003d86358fc1284b709000420c6a34180dc21d1574dc0d494d14375af17896e520008418d4d2302b844206d9803676496c22fc68dc201c2fa4800",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 14,
+          "axes": [
+            5,
+            61
+          ],
+          "crouch": false,
+          "jump": true,
+          "start": 606,
+          "end": 642,
+          "tail": "00100100000",
+          "life": 16
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 15,
+      "payload_byte": 622831,
+      "time_us": 299980111,
+      "hex": "a07b42016446e900055641b260564f086c26d62979acf7e89622384a0022aac8362b8a38e10d82799b37880022c12617fc960403a300101ef1f000",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 14,
+          "axes": [
+            35,
+            0
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 405,
+          "end": 435,
+          "tail": "00000",
+          "life": 55
+        },
+        {
+          "player": 1,
+          "mode": 14,
+          "axes": [
+            60,
+            31
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 435,
+          "end": 465,
+          "tail": "00000",
+          "life": 56
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 20,
+      "payload_byte": 616342,
+      "time_us": 399996842,
+      "hex": "a07b4204bc4b2900055641ab00667f09a036bc09d9d777c4cba25b48002ab20d8ae296384361658d889ab840865c201ca7a080f5201080",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 14,
+          "axes": [
+            20,
+            61
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 370,
+          "end": 400,
+          "tail": "00000",
+          "life": 91
+        },
+        {
+          "player": 1,
+          "mode": 14,
+          "axes": [
+            41,
+            0
+          ],
+          "crouch": true,
+          "jump": false,
+          "start": 400,
+          "end": 436,
+          "tail": "00100001000",
+          "life": 89
+        }
+      ]
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "chunk": 2,
+      "payload_byte": 488421,
+      "time_us": 22202449,
+      "hex": "a07b4200f8806bef9080",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            31,
+            31
+          ],
+          "crouch": true,
+          "jump": false,
+          "start": 40,
+          "end": 76,
+          "tail": "00100001000",
+          "life": 0
+        }
+      ]
+    },
+    {
+      "film": "natural-end/02-jump",
+      "chunk": 2,
+      "payload_byte": 493817,
+      "time_us": 26037007,
+      "hex": "a07b4200844008c005903fe98035ad2b06a5d079440201afbe4800",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            31,
+            31
+          ],
+          "crouch": false,
+          "jump": true,
+          "start": 174,
+          "end": 210,
+          "tail": "00100100000",
+          "life": 0
+        }
+      ]
+    },
+    {
+      "film": "octagon/01-idle",
+      "chunk": 1,
+      "payload_byte": 511035,
+      "time_us": 5003201,
+      "hex": "a07b420058806bef8203afbe00",
+      "expected": [
+        {
+          "player": 0,
+          "mode": 13,
+          "axes": [
+            31,
+            31
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 40,
+          "end": 70,
+          "tail": "00000",
+          "life": 0
+        },
+        {
+          "player": 1,
+          "mode": 13,
+          "axes": [
+            31,
+            31
+          ],
+          "crouch": false,
+          "jump": false,
+          "start": 70,
+          "end": 100,
+          "tail": "00000",
+          "life": 1
+        }
+      ]
+    }
+  ]
+}
