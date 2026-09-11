@@ -66,6 +66,25 @@ def coverage(spans):
     return counts
 
 
+def coverage_counts(start, end, fields):
+    """Count the same priority union as partition without materializing bit regions."""
+    events = defaultdict(lambda: [0] * len(STATUSES))
+    for item in fields:
+        left, right = max(start, item['start']), min(end, item['end'])
+        if left < right:
+            priority = STATUSES.index(item['status'])
+            events[left][priority] += 1
+            events[right][priority] -= 1
+    events[end]  # Include trailing unannotated bits, even with no fields.
+    counts, active, previous = dict.fromkeys(STATUSES, 0), [0] * len(STATUSES), start
+    for position, changes in sorted(events.items()):
+        status = next((s for s, n in zip(STATUSES, active) if n), 'unparsed')
+        counts[status] += position - previous
+        active = [n + delta for n, delta in zip(active, changes)]
+        previous = position
+    return counts
+
+
 def annotate_delta(bits, offset, base, clock, source, name, serial, generation=1, vitality=False):
     parsed = delta_fields(bits, offset, clock, generation)
     if parsed is None:
@@ -216,6 +235,23 @@ class Inspector:
                                     {'size': self.path(label + '/' + chunk['file']).stat().st_size, 'packets': len(rows)})
         return result
 
+    @lru_cache(maxsize=8)
+    def csv_offsets(self, path, label_filter):
+        """Index record offsets once, avoiding full CSV rereads for every chunk."""
+        offsets = defaultdict(list)
+        with path.open(newline='') as file:
+            # readline preserves tell(); csv still handles quoted multiline values.
+            rows = csv.DictReader(iter(file.readline, ''))
+            headers = rows.fieldnames
+            while True:
+                offset = file.tell()
+                row = next(rows, None)
+                if row is None:
+                    break
+                key = (row['film'] if label_filter else None, int(row['chunk']))
+                offsets[key].append(offset)
+        return headers, offsets
+
     @lru_cache(maxsize=3)
     def evidence(self, label, chunk):
         """Load just one chunk's exported evidence; revalidate fields when viewed."""
@@ -224,10 +260,12 @@ class Inspector:
         def csv_rows(path, kind, label_filter=True):
             if not path.exists():
                 return
+            headers, offsets = self.csv_offsets(path, label_filter)
             with path.open(newline='') as file:
-                for row in csv.DictReader(file):
-                    if int(row['chunk']) == chunk and (not label_filter or row['film'] == label):
-                        result[int(row.get('payload_byte', row.get('payload_offset')))][kind].append(row)
+                for offset in offsets.get((label if label_filter else None, chunk), []):
+                    file.seek(offset)
+                    row = dict(zip(headers, next(csv.reader(file))))
+                    result[int(row.get('payload_byte', row.get('payload_offset')))][kind].append(row)
         if group:
             proof_path = self.path(f'analysis/{group}/decode_evidence.json')
             if proof_path.exists():
@@ -304,6 +342,32 @@ class Inspector:
                 'packets': [{k: row[k] for k in ('offset', 'size', 'kind', 'time')} |
                             {'evidence': list(evidence.get(row['payload'], {}))} for row in rows]}
 
+    @lru_cache(maxsize=512)
+    def chunk_coverage(self, label, index):
+        """Exact coverage of every decompressed bit; cache only the small totals."""
+        chunk, data, packets = self.chunk(label, index)
+        counts = dict.fromkeys(STATUSES, 0)
+        issue_count, issues = 0, []
+        if packets:
+            for packet in packets:
+                fields, errors = self.annotations(label, index, packet, data)
+                current = coverage_counts(packet['offset'] * 8,
+                                          (packet['payload'] + packet['size']) * 8, fields)
+                for status in STATUSES:
+                    counts[status] += current[status]
+                issue_count += len(errors)
+                for error in errors:
+                    if len(issues) < 8:
+                        issues.append({'offset': packet['offset'], 'message': error})
+        else:
+            fields = self.registry(data) if chunk['chunk_type'] == 1 else []
+            counts = coverage_counts(0, len(data) * 8, fields)
+        total = len(data) * 8
+        if sum(counts.values()) != total:
+            raise ValueError('Coverage does not account for every chunk bit')
+        return {'film': label, 'chunk': index, 'total_bits': total, 'coverage': counts,
+                'issue_count': issue_count, 'issues': issues}
+
     def seek(self, label, time):
         _, packets = self.film(label)
         candidates = ((abs(r['time'] - time), c, r) for c, rows in packets.items()
@@ -339,12 +403,13 @@ class Inspector:
         issues = []
         if packet['kind'] != 0:
             return fields, issues
-        bits = bit_string(data[payload:payload + size])
+        evidence = self.evidence(label, index).get(payload, {})
+        # Frames without exported fields only need the first 37 clock bits.
+        bits = bit_string(data[payload:payload + (size if evidence else min(size, 5))])
         clocks = CLOCKS if label == 'ranked-arena/02-oddball' else (CLOCK,)
         if bits.startswith(clocks) and len(bits) >= 37:
             fields += [field(base, base + 29, 'Clock signature', bits[:29], 'structure', 'Frame clock', 'Checked 37-bit clock record'),
                        field(base + 29, base + 37, 'Frame counter', int(bits[29:37], 2), record='Frame clock', source='Checked 37-bit clock record')]
-        evidence = self.evidence(label, index).get(payload, {})
         for kind, rows in evidence.items():
             for row in rows:
                 try:

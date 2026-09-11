@@ -4,6 +4,11 @@
 <body><main>
 <header><div><div class="eyebrow"><span class="mark">◈</span> THEATER LAB <span class="badge">EXPERIMENT 02</span></div><h1>Recording inspector<span>.</span></h1><p class="intro">Follow the bytes. See what we understand—and what is still unknown.</p></div><nav aria-label="Experiments"><a href="/replay">01 <span>Motion replay</span></a><a href="/" aria-current="page">02 <span>Recording inspector</span></a></nav></header>
 <section class="recording-panel"><label class="recording"><span class="label">RECORDING</span><select id="film" aria-label="Recording"></select></label><div id="film-meta" class="film-meta"></div><div class="local"><i></i> LOCAL CACHE <small>Original decompressed bytes · read only</small></div></section>
+<section id="recording-coverage" class="recording-coverage panel" aria-labelledby="recording-coverage-title" aria-busy="true">
+<div class="recording-coverage-heading"><h2 id="recording-coverage-title">Whole recording coverage</h2><p id="recording-coverage-status" role="status">Select a recording to calculate coverage.</p><p class="recording-coverage-note">All decompressed chunk bytes, including headers and padding. Verified inspector annotations only; decoder fields without exact bit annotations count as unparsed.</p><button id="export-coverage" disabled>Export coverage JSON</button></div>
+<div id="recording-coverage-chart" class="recording-coverage-chart" role="img" aria-label="Coverage not calculated"></div>
+<dl id="recording-coverage-stats" class="recording-coverage-stats"></dl>
+</section>
 <div id="notice" role="status" aria-live="polite">Loading the film catalog…</div>
 <section class="navigation" aria-label="Recording navigation"><label><span class="label">CHUNK</span><select id="chunk" aria-label="Chunk"></select></label><form id="time-form"><label><span class="label">FILM TIME · SECONDS</span><input id="time" type="number" min="0" step="any" value="30"></label><button>Go to frame →</button></form><form id="search-form"><label><span class="label">SEARCH THIS CHUNK</span><input id="search" placeholder="object-position or a0 7b 42" aria-label="Search query" required></label><select id="search-mode" aria-label="Search encoding"><option value="text">Text / UTF-8</option><option value="hex">Hex bytes</option></select><button>Find next</button></form></section>
 <section class="workspace">
@@ -16,4 +21,4 @@
 <aside class="decoded-panel panel"><div class="panel-head"><h2>Decoded view</h2><span id="field-count"></span></div><label class="decoded-filter"><select id="field-filter" aria-label="Filter decoded fields"><option value="all">All fields & gaps</option><option value="decoded">Decoded values</option><option value="structure">Checked structure</option><option value="opaque">Opaque fields</option><option value="unparsed">Unparsed regions</option></select></label><div id="fields" class="field-list"></div></aside>
 </section>
 <footer><span>Bit offsets are MSB-first within each byte. Packet header numbers are little-endian. Coordinates and vitality use provisional raw scales.</span><span>Unparsed means no annotation from the supported inspector sources; it does not prove those bytes are meaningless.</span></footer>
-</main><script src="/inspector.js"></script></body></html>
+</main><script src="/recordings.js"></script><script src="/inspector.js"></script></body></html>

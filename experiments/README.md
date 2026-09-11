@@ -10,9 +10,11 @@ Decoder code and independent byte fixtures live in the upstream
 ## Active recordings
 
 [films.csv](films.csv) contains **32 films** (31 replayable; Aquarius coordinates
-remain unresolved). Its `title` column supplies short
-replay dropdown labels; `description` retains the full experiment notes. The replay
-builder uses the catalog to override older cached titles and categories:
+remain unresolved). Both recording dropdowns use its short `title`, category and
+row order; `description` retains the full experiment notes. Hosted replay and the
+inspector read the same `/api/catalog` list of cached recordings. Switching views
+keeps the selected recording, including Aquarius. The offline replay embeds a
+catalog snapshot when built:
 
 
 | Group | Films |
@@ -36,8 +38,9 @@ Its `decoded` analysis profile means Rust decoding without legacy probe exports;
 the byte inspector can open its chunks but has no historical field annotations.
 Aquarius is also downloaded and cataloged. Its idle spawn has a new candidate
 coordinate window and changed flags, with insufficient evidence to partition
-the axes. The replay builder reports and skips films with no decoded positions;
-their chunks and partial JSON diagnostics remain available for investigation.
+the axes. Films without decoded positions stay in both dropdowns; replay shows
+an unavailable message and a link to inspect the same recording. Their chunks
+and partial JSON diagnostics remain available for investigation.
 
 **Raid gameplay → Raid · 1 hour** contains the 1:05:53.667 recording
 `9d644d09-38c3-429a-bf3d-de0ea577815f`: 20 players, 942 recognized lives,
@@ -118,6 +121,11 @@ python3 examples/theater_lab.py
 ```
 
 Open <http://127.0.0.1:8766/> for hex/text/bit inspection, or `/replay` for motion.
+The inspector's **Whole recording coverage** panel scans all cached chunks and
+shows a pie chart with decoded, checked structure, opaque and unparsed bit totals.
+Use **Export coverage JSON** to save the statistics. This measures verified
+inspector annotations; native decoder fields without exact bit annotations still
+count as unparsed. The separate packet coverage bar follows the current selection.
 In motion replay, use **Window**, **+ / −**, or scroll over the timeline to zoom.
 **Shift + scroll** or **Pan window** moves the visible range; **Fit** restores
 the whole timeline. Playback and loop bounds stay unchanged. Floating player

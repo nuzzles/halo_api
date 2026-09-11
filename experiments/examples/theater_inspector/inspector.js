@@ -7,17 +7,79 @@
   const hex = n => '0x' + n.toString(16).toUpperCase().padStart(8, '0');
   const el = (tag, text, cls) => { const e=document.createElement(tag); if(text!==undefined)e.textContent=text; if(cls)e.className=cls; return e; };
   let film=null, chunk=null, view=null, selected=null, selectedByte=0, packetPage=0, revision=0;
+  let recordingCoverage=null, coverageController=null, coverageRevision=0;
+  const coverageCache=new Map();
   let lastSearch='';
   function notice(message, error=false) { $('notice').textContent=message; $('notice').classList.toggle('error',error); }
-  async function api(path, args={}) {
-    const response=await fetch('/api/'+path+'?'+new URLSearchParams(args));
+  async function api(path, args={}, signal) {
+    const response=await fetch('/api/'+path+'?'+new URLSearchParams(args),{signal});
     const data=await response.json(); if(!response.ok)throw Error(data.error || 'Request failed'); return data;
   }
   function params(extra={}) { return {film:film.label, chunk:chunk.index, ...extra}; }
   function run(task) { const token=++revision; notice('Reading cached bytes and checking decoder evidence…'); return task(token).catch(e=>{if(token===revision)notice(e.message,true);}); }
   function tone(element,status) { element.style.setProperty('--tone',COLORS[status]); }
   function currentSpan(bit) { return view?.spans.find(s=>s.start<=bit && bit<s.end); }
-  function reportState() { window.theaterInspectorState={film:film?.label,chunk:chunk?.index,view,selected,selectedByte,revision}; }
+  function reportState() { window.theaterInspectorState={film:film?.label,chunk:chunk?.index,view,selected,selectedByte,revision,recordingCoverage}; }
+  function renderRecordingCoverage(message) {
+    const result=recordingCoverage, complete=Boolean(result?.complete), total=result?.total_bits || 0;
+    $('recording-coverage').setAttribute('aria-busy',String(Boolean(coverageController)));
+    $('recording-coverage-status').textContent=message;
+    $('export-coverage').disabled=!complete;
+    const stats=[],sectors=[],labels=[];let angle=0;
+    for(const status of Object.keys(COLORS)) {
+      const count=complete?result.coverage[status]:0, percent=total?count/total*100:0;
+      const percentage=count && percent<.01?'<0.01%':percent.toFixed(2)+'%';
+      const cell=el('div'),title=el('dt'),dot=el('i',undefined,'dot');dot.style.background=COLORS[status];
+      title.append(dot,el('span',TITLES[status]));
+      const value=el('dd',complete?percentage:'—');
+      value.append(el('small',complete?number(count)+' bits':'Not calculated'));
+      cell.dataset.status=status;cell.append(title,value);stats.push(cell);
+      sectors.push(`${COLORS[status]} ${angle}% ${angle+percent}%`);angle+=percent;
+      labels.push(`${TITLES[status]}: ${percentage}, ${number(count)} bits`);
+    }
+    $('recording-coverage-stats').replaceChildren(...stats);
+    $('recording-coverage-chart').style.background=complete&&total?`conic-gradient(${sectors.join(',')})`:'';
+    $('recording-coverage-chart').setAttribute('aria-label',complete?labels.join('; '):'Coverage not calculated');
+    reportState();
+  }
+  function resetRecordingCoverage() {
+    coverageController?.abort();coverageController=null;coverageRevision++;recordingCoverage=null;
+    renderRecordingCoverage('Loading recording…');
+  }
+  async function loadRecordingCoverage(recording) {
+    const token=coverageRevision;
+    if(coverageCache.has(recording.label)) {
+      recordingCoverage=coverageCache.get(recording.label);finishRecordingCoverage();return;
+    }
+    const controller=new AbortController();coverageController=controller;
+    const result={film:recording.label,match_id:recording.match_id,
+      basis:'Verified inspector annotations across all decompressed chunk bytes, including headers and padding. Decoder fields without exact annotations remain unparsed.',
+      total_bits:recording.chunks.reduce((n,c)=>n+c.size*8,0),scanned_bits:0,
+      coverage:Object.fromEntries(Object.keys(COLORS).map(s=>[s,0])),chunks_scanned:0,
+      chunks_total:recording.chunks.length,issue_count:0,issues:[],complete:false};
+    recordingCoverage=result;
+    renderRecordingCoverage(`Calculating · 0 / ${number(result.chunks_total)} chunks`);
+    try {
+      for(const c of recording.chunks) {
+        const row=await api('coverage',{film:recording.label,chunk:c.index},controller.signal);
+        if(token!==coverageRevision)return;
+        if(row.total_bits!==c.size*8 || Object.values(row.coverage).reduce((n,v)=>n+v,0)!==row.total_bits)throw Error('Chunk sizes changed; reload the inspector to recalculate.');
+        for(const status of Object.keys(COLORS))result.coverage[status]+=row.coverage[status];
+        result.scanned_bits+=row.total_bits;result.chunks_scanned++;result.issue_count+=row.issue_count;
+        result.issues.push(...row.issues.slice(0,Math.max(0,8-result.issues.length)).map(issue=>({...issue,chunk:c.index})));
+        renderRecordingCoverage(`Calculating · ${number(result.chunks_scanned)} / ${number(result.chunks_total)} chunks · ${number(result.scanned_bits/8)} / ${number(result.total_bits/8)} bytes checked`);
+      }
+      result.complete=true;coverageController=null;coverageCache.set(recording.label,result);finishRecordingCoverage();
+    } catch(error) {
+      if(token!==coverageRevision)return;
+      coverageController=null;
+      renderRecordingCoverage('Coverage unavailable · '+error.message);
+    }
+  }
+  function finishRecordingCoverage() {
+    const result=recordingCoverage;
+    renderRecordingCoverage(`${number(result.total_bits/8)} bytes · ${number(result.total_bits)} bits · ${number(result.chunks_total)} chunks${result.issue_count?' · '+number(result.issue_count)+' annotations withheld':''}`);
+  }
   async function show(offset, token, selection=null) {
     const result=await api('view',params({offset})); if(token!==revision)return;
     view=result;
@@ -37,8 +99,14 @@
     await show(offset,token,selection);
   }
   async function loadFilm(label, token) {
+    resetRecordingCoverage();
     const result=await api('film',{film:label}); if(token!==revision)return;
     film=result; $('film').value=label;
+    const query=new URLSearchParams({film:label});
+    history.replaceState(null,'','?'+query);
+    document.querySelector('nav a:not([aria-current])').href='/replay?'+new URLSearchParams({clip:label});
+    document.querySelector('nav a[aria-current]').href='/?'+query;
+    loadRecordingCoverage(result);
     $('film-meta').replaceChildren(el('div',`v${film.version} · ${number(film.chunks.length)} chunks · ${(film.duration/60).toFixed(2)} minutes · ${number(film.chunks.reduce((n,c)=>n+c.size,0))} bytes`),el('code',film.match_id));
     $('chunk').replaceChildren(...film.chunks.map(c=>{const o=el('option',`${String(c.index).padStart(3,'0')} · ${c.chunk_type===1?'Registry':c.chunk_type===2?'Replication':'Type '+c.chunk_type} · ${(c.size/1024).toFixed(0)} KiB`);o.value=c.index;return o;}));
     $('time').max=film.duration;
@@ -171,10 +239,14 @@
     const data={recording:film.match_id,chunk:chunk.index,offset:view.offset,hex:view.bytes.map(b=>b.toString(16).padStart(2,'0')).join(' '),selected,scope:view.scope,coverage:view.coverage,spans:view.spans,issues:view.issues};
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download=`theater-${chunk.index}-${view.offset}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
+  $('export-coverage').onclick=()=>{
+    if(!recordingCoverage?.complete)return;
+    const url=URL.createObjectURL(new Blob([JSON.stringify(recordingCoverage,null,2)],{type:'application/json'}));
+    const a=el('a');a.href=url;a.download=`theater-${recordingCoverage.match_id}-coverage.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
   run(async t=>{
     const catalog=await api('catalog');if(t!==revision)return;
-    const groups=new Map();
-    for(const row of catalog){if(!groups.has(row.category)){const g=el('optgroup');g.label=row.category;groups.set(row.category,g);$('film').append(g);}const o=el('option',row.description);o.value=row.label;groups.get(row.category).append(o);}
+    TheaterRecordings.populate($('film'),catalog);
     if(!catalog.length){notice('No cached recordings found. Download films using the experiment catalog.',true);return;}
     const requested=new URLSearchParams(location.search).get('film');await loadFilm(catalog.some(r=>r.label===requested)?requested:catalog[0].label,t);
   });

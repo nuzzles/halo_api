@@ -1,7 +1,7 @@
 # Theater Lab · Recording inspector
 
-> Active lab cleanup: 23 films are retained (natural-end and later controls,
-> plus the two Arena games). Forced-end recordings and standalone probes are
+> Active lab cleanup: 32 films are retained (natural-end and later controls,
+> plus the two Arena games and an hour-long raid). Forced-end recordings and standalone probes are
 > archived under `archive/cleanup-2026-09-10/` at the experiments root. Historical
 > 36-film/30-clip counts below describe earlier validation runs. See the main
 > experiments README for current commands. Python field readers used by the
@@ -9,7 +9,9 @@
 
 
 Experiment 02 is a read-only browser for the actual decompressed recording bytes.
-It opens Oddball by default and lists all 36 cached catalog recordings. The
+It shares the motion replay's list of 32 cached catalog recordings, short titles,
+category grouping and CSV row order. The first catalog entry opens by default;
+`?film=group/slug` selects a specific recording. The
 three linked views show hex/ASCII, decoded fields and gaps, and individual bits.
 
 ## Run
@@ -29,7 +31,9 @@ cache containing the catalog's recordings and analysis exports. The server expos
 only its UI, catalog-selected film data, and the generated replay; it is not a
 general filesystem server. It has no editing, upload, or write endpoints.
 
-The Motion replay and Recording inspector tabs switch between experiments. The
+The Motion replay and Recording inspector tabs preserve the selected recording
+when switching between experiments. Both menus use `/api/catalog` and the shared
+`recordings.js` menu code; unresolved films remain visible in both. The
 existing offline replay also links to the default inspector address. The inspector
 uses local HTTP to page through large recordings without embedding the entire
 corpus into an HTML file. The motion replay still opens directly from disk.
@@ -71,10 +75,30 @@ Coverage is counted in **bits**, without double counting overlapping annotations
 A semantic vitality window can replace an opaque component span; it does not
 make the rest of the record decoded.
 
-For replication chunks, coverage describes the **selected packet, including its
-16-byte header**. For other chunks it describes the visible byte window. It is
-not a percentage of the whole recording. Pages stop at packet boundaries so the
-byte and decoded views always describe the same packet. Packet header numbers
+The **Whole recording coverage** panel above navigation shows a compact pie chart
+and percentages plus exact bit counts for all four categories across **every
+decompressed chunk byte**, including packet headers, registry padding and unknown
+chunk types. The denominator is the sum of actual chunk file sizes × 8, not the
+compressed download size or just packets with exported fields. **Export coverage
+JSON** saves the match ID, denominator, category counts, annotation basis and any
+withheld-annotation issues.
+
+The first visit scans one chunk at a time and shows progress. Percentages appear
+only after every chunk is counted; unscanned chunks are not presented as unparsed.
+Small per-chunk summaries are cached on the server, and completed recording totals
+are cached in the page. Packet navigation does not change this chart. Switching
+recordings cancels the old request and clears its statistics.
+
+This measures the inspector's **verified annotations**, not every observation the
+Rust decoder can produce. Fields without exact inspector bit annotations remain
+unparsed, even when a native `SourceSpan` covers them. A broad source window cannot
+prove that all of its bits are understood. Missing exports leave their fields
+unparsed; rejected exports withhold their annotations and report the issue count.
+
+The smaller coverage bar within the workspace still describes the **selected
+packet, including its 16-byte header**, or the visible byte window in non-packet
+chunks. Pages stop at packet boundaries so the byte and decoded views always
+describe the same packet. Packet header numbers
 are little-endian; bit offsets count MSB-first within each chunk byte. Ranges in
 exports are half-open `[start, end)`.
 
@@ -109,7 +133,10 @@ forms remain unparsed. Both Ranked matches include checked firing, melee, grenad
 vitality windows, including generation reuse. Coordinate and health scales remain
 provisional; supported fields do not imply complete combat or damage coverage.
 
-The server keeps a small in-memory cache of film indexes and per-chunk evidence.
+The server keeps in-memory caches of film indexes, CSV record offsets, per-chunk
+evidence, and small coverage summaries. CSV indexes avoid rereading an entire
+large export for each chunk; overlap counting uses sorted range boundaries, not
+one entry per bit.
 Restart it after regenerating source exports or replacing chunk files.
 
 ## Validation
@@ -121,6 +148,8 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s experiments/examples -
 
 # With theater_lab.py running and Chrome installed:
 node experiments/examples/check_theater_inspector.cjs
+node experiments/examples/check_inspector_coverage.cjs
+node experiments/examples/check_recording_catalog.cjs
 ```
 
 The browser driver defaults to Chrome's macOS application path. Set `CHROME_PATH`
@@ -130,6 +159,8 @@ bit offsets, both Oddball spawn layouts, all three clocks, ID reuse, annotation
 rejection, opaque overlays, and exact coverage of unaligned fields. Browser checks
 cover hex/ASCII/bit/field linking, search, navigation, actual shield values,
 read-only API behavior, and desktop/mobile layout.
+The focused coverage check also covers complete clip totals, coverage JSON export,
+scan cancellation during film changes, cache reuse, and the pie chart on mobile.
 
 The reload comparison is `weapons/02-reload-comparison`. Seek to 26.875065 s
 (manual start), 39.337740 s (two-bit empty magazine), 39.371112 s (automatic

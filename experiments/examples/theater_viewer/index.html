@@ -15,6 +15,7 @@
       <span id="film-import-status" role="status"></span>
     </header>
     <nav class="experiment-nav" aria-label="Experiments"><a href="theater_viewer.html" aria-current="page">01 · Motion replay</a><a href="http://127.0.0.1:8766/" title="Start python3 experiments/examples/theater_lab.py to open the inspector">02 · Recording inspector ↗</a></nav>
+    <section id="replay-message" class="replay-message" role="status" hidden><strong id="replay-message-title"></strong><p id="replay-message-detail"></p><a id="inspect-recording">Open this recording in the inspector →</a></section>
     <nav id="roster" class="roster" aria-label="Player readout" hidden></nav>
     <section class="viewport" aria-label="3D player position and aim viewer">
       <div id="scene" tabindex="0" aria-label="Drag to orbit the 3D view. Scroll to zoom."></div>
@@ -58,6 +59,8 @@
   </main>
   <script>__THREE_JS__</script>
   <script>const CLIPS = __CLIP_DATA__;</script>
+  <script>const RECORDINGS = __RECORDING_DATA__;</script>
+  <script>__RECORDINGS_JS__</script>
   <script>__FILM_IMPORT_JS__</script>
   <script>const ARMOR_CATALOG = __ARMOR_CATALOG__;</script>
   <script>__ARMOR_JS__</script>

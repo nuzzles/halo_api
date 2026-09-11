@@ -31,10 +31,18 @@ open films/analysis/theater_viewer.html
 
 The builder includes existing `decoded-film.json` files. **Open decoded film**
 also imports a typed JSON file directly into the running replay. Both use the
-same adapter; neither parses bytes. The current native corpus build has **31 clips**.
-It includes checked spawns in idle
-clips and leaves initial aim unknown. Names/categories come from each folder's
-`film.json`; the longest film opens first.
+same adapter; neither parses bytes. The current native corpus build has **32
+recordings, 31 replayable**. It includes checked spawns in idle clips and leaves
+initial aim unknown. Titles, categories and menu order come from `films.csv`.
+The first catalog entry opens unless `?clip=group/slug` selects another recording.
+
+When served by Theater Lab, both views read the same `/api/catalog` list and use
+the shared `recordings.js` picker. Switching tabs keeps the selected recording.
+Aquarius stays in both menus; replay shows **Replay unavailable** with a link to
+its inspector until positions can be decoded. A cached recording missing from
+the embedded replay can load its existing `decoded-film.json` through the local
+server. Opening the HTML directly uses its embedded catalog snapshot and data.
+Files opened manually remain local to the replay session.
 
 The **CROUCH INPUT** badges now cover both players in **Octagon gameplay →
 Octagon · First to 50**. Seek to **2:34.84–2:35.36** to see Nuzzles toggle crouch

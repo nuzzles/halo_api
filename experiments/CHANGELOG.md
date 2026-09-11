@@ -1,5 +1,33 @@
 # Experiment changes
 
+## 2026-09-11 — shared recording list
+
+- Both views use the same cached-film catalog, short titles, category grouping,
+  CSV row order and shared menu code. Navigation preserves the selected recording.
+- Keep all 32 recordings in both menus, including unresolved Aquarius. Replay
+  displays an unavailable state without stale player data and links to the same
+  recording in the inspector. Hosted replay can open a local decoded export that
+  was absent from its embedded build; offline replay retains a catalog snapshot.
+- Validation: 11 Python tests, armor-name checks, and a focused Chrome check for
+  identical menus, both navigation directions, Aquarius, local export loading,
+  restored gameplay state and mobile layout. Rebuilt the 32-recording replay.
+
+## 2026-09-11 — whole-recording inspector coverage
+
+- Added a compact pie chart, percentages, exact bit counts and JSON export above
+  inspector navigation for decoded, checked structure, opaque and unparsed data.
+  Totals include every decompressed chunk byte, headers, padding and unknown types.
+- Scan chunks incrementally, cache small totals, and cancel stale requests on
+  recording changes. CSV offset indexes avoid rereading full exports for each
+  chunk; overlapping annotations count each bit once using the existing priority.
+- Keep the packet coverage bar and clearly label the whole-recording totals as
+  verified inspector coverage. Native source windows do not inflate semantic
+  coverage; missing or rejected annotations retain unknown regions.
+- Validation: 11 Python tests and the focused Chrome coverage check pass,
+  including JSON export, film changes during scanning, cached results and mobile
+  layout. The Oddball scan accounts for all 438,720,768 bits across 63 chunks:
+  55,061,934 decoded; 7,512,450 structure; 10,225,164 opaque; 365,921,220 unparsed.
+
 ## 2026-09-11 — track Theater Lab sources
 
 - Track experiment tools, replay assets, research documentation, and the film

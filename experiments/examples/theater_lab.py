@@ -45,10 +45,22 @@ def handler_for(inspector):
                     mime = {'html': 'text/html', 'js': 'text/javascript', 'css': 'text/css'}[name.rsplit('.', 1)[1]]
                     self.send((ASSETS / name).read_bytes(), mime + '; charset=utf-8')
                     return
+                if url.path == '/recordings.js':
+                    self.send((ASSETS.parent / 'recordings.js').read_bytes(), 'text/javascript; charset=utf-8')
+                    return
                 if url.path in ('/replay', '/theater_viewer.html'):
                     html = inspector.path('analysis/theater_viewer.html').read_bytes()
                     html = html.replace(b'href="http://127.0.0.1:8766/"', b'href="/"')
                     self.send(html, 'text/html; charset=utf-8')
+                    return
+                if url.path == '/api/decoded-film':
+                    label = query.get('film', [''])[0]
+                    if label not in inspector.catalog:
+                        raise ValueError('Recording is not in the catalog')
+                    file = inspector.path(label + '/decoded-film.json')
+                    if not file.exists():
+                        raise ValueError('This recording has not been decoded for replay yet.')
+                    self.send(file.read_bytes(), 'application/json')
                     return
                 if not url.path.startswith('/api/'):
                     self.send(b'Not found', 'text/plain', 404)
@@ -67,7 +79,7 @@ def handler_for(inspector):
             if route == '/api/catalog':
                 rows = [dict(r, label=label) for label, r in inspector.catalog.items()
                         if inspector.path(label + '/film.json').exists()]
-                return sorted(rows, key=lambda r: (r['label'] != 'ranked-arena/02-oddball', r['category'], r['label']))
+                return rows  # films.csv order is shared by both recording menus.
             label = arg('film')
             if label not in inspector.catalog:
                 raise ValueError('Recording is not in the catalog')
@@ -81,6 +93,8 @@ def handler_for(inspector):
             index = int(arg('chunk'))
             if route == '/api/chunk':
                 return inspector.chunk_info(label, index)
+            if route == '/api/coverage':
+                return inspector.chunk_coverage(label, index)
             if route == '/api/view':
                 return inspector.view(label, index, int(arg('offset', '0')), int(arg('count', '256')))
             if route == '/api/search':

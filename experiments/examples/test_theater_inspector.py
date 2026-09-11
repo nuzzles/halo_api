@@ -1,11 +1,16 @@
 """Original captured records and exact coverage accounting for the inspector."""
 
+import csv
 import json
 from pathlib import Path
+import random
+import struct
+import tempfile
 import unittest
+from unittest.mock import patch
 
 from theater_inspector_data import (Inspector, annotate_delta, annotate_spawn,
-                                    coverage, field, partition)
+                                    CLOCK, STATUSES, coverage, coverage_counts, field, partition)
 
 FIXTURES = json.loads((Path(__file__).resolve().parents[2] / 'src/theater/fixtures/oddball_records.json').read_text())
 
@@ -74,6 +79,79 @@ class InspectorFields(unittest.TestCase):
         self.assertEqual(coverage(spans), dict(decoded=24, structure=8, opaque=0, unparsed=16640 * 8 - 32))
         with self.assertRaises(ValueError):
             lab.path('../outside')
+
+    def test_recording_counts_match_independent_bit_priority_oracle(self):
+        rng = random.Random(41)
+        for _ in range(60):
+            fields = []
+            for i in range(rng.randrange(25)):
+                a, b = sorted(rng.sample(range(96), 2))
+                fields.append(field(a, b, str(i), None, rng.choice(STATUSES)))
+            expected = dict.fromkeys(STATUSES, 0)
+            for bit in range(7, 83):
+                candidates = [f['status'] for f in fields if f['start'] <= bit < f['end']]
+                winner = min(candidates, key=STATUSES.index) if candidates else 'unparsed'
+                expected[winner] += 1
+            self.assertEqual(coverage_counts(7, 83, fields), expected)
+            self.assertEqual(coverage_counts(7, 83, fields), coverage(partition(7, 83, fields)))
+        self.assertEqual(coverage_counts(0, 0, []), dict.fromkeys(STATUSES, 0))
+
+    def test_whole_chunks_include_headers_padding_unknown_types_and_withheld_fields(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, label = Path(directory), 'synthetic/coverage'
+            folder = root / label
+            folder.mkdir(parents=True)
+            registry = bytearray(16640)
+            registry[8:12] = b'aim\0'
+            clock = int(CLOCK + '00101010' + '000', 2).to_bytes(5, 'big')
+            replication = (struct.pack('<HHIQ', 0, 7, len(clock), 1000000) + clock
+                           + struct.pack('<HHIQ', 8, 2, 3, 1000100) + b'\0\xff\0')
+            chunks = []
+            for index, (kind, data) in enumerate([(1, registry), (2, replication), (99, b'\0\xff\0'), (99, b'')]):
+                name = f'chunk-{index}.bin'
+                (folder / name).write_bytes(data)
+                chunks.append(dict(index=index, file=name, chunk_type=kind))
+            (folder / 'film.json').write_text(json.dumps(dict(match_id='fixture', chunks=chunks)))
+            lab = Inspector(root)
+            lab.catalog[label] = dict(match_id='fixture')
+            with patch.object(lab, 'evidence', return_value={}):
+                registry_counts = lab.chunk_coverage(label, 0)
+                self.assertEqual(registry_counts['coverage'], dict(decoded=24, structure=8, opaque=0, unparsed=133088))
+                result = lab.chunk_coverage(label, 1)
+                self.assertEqual(result['coverage'], dict(decoded=232, structure=29, opaque=32, unparsed=27))
+                self.assertEqual(result['total_bits'], len(replication) * 8)
+                views = [lab.view(label, 1, offset) for offset in (0, 21)]
+                self.assertEqual(result['coverage'], {s: sum(v['coverage'][s] for v in views) for s in STATUSES})
+                self.assertEqual(lab.chunk_coverage(label, 2)['coverage'], dict(decoded=0, structure=0, opaque=0, unparsed=24))
+                self.assertEqual(lab.chunk_coverage(label, 3)['total_bits'], 0)
+                # The summary cache avoids rescanning when returning to a recording.
+                with patch.object(lab, 'annotations', side_effect=AssertionError('Unexpected rescan')):
+                    self.assertEqual(lab.chunk_coverage(label, 1), result)
+            lab.chunk_coverage.cache_clear()
+            with patch.object(lab, 'evidence', return_value={16: {'positions': [{}]}}), patch.object(lab, 'record_fields', side_effect=ValueError('Export / byte mismatch')):
+                rejected = lab.chunk_coverage(label, 1)
+                self.assertEqual(rejected['coverage'], result['coverage'])
+                self.assertEqual(rejected['issue_count'], 1)
+                self.assertIn('annotation withheld', rejected['issues'][0]['message'])
+
+    def test_csv_offset_index_preserves_quoted_records_and_film_chunk_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'analysis/all-films/positions.csv'
+            path.parent.mkdir(parents=True)
+            rows = [dict(film=film, chunk=chunk, payload_byte=payload, note=note)
+                    for film, chunk, payload, note in [('a', 1, 20, 'name, comma'),
+                                                     ('b', 1, 30, 'other film'),
+                                                     ('a', 2, 40, 'line\nbreak'),
+                                                     ('a', 1, 50, 'café')]]
+            with path.open('w', newline='') as file:
+                writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+                writer.writeheader()
+                writer.writerows(rows)
+            lab = Inspector(directory)
+            for label, chunk in [('a', 1), ('a', 2), ('b', 1), ('absent', 1)]:
+                actual = [row for packet in lab.evidence(label, chunk).values() for row in packet['positions']]
+                expected = [{k: str(v) for k, v in row.items()} for row in rows if row['film'] == label and row['chunk'] == chunk]
+                self.assertEqual(actual, expected)
 
 
 if __name__ == '__main__':

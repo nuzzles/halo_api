@@ -1,4 +1,4 @@
-/* Three.js is bundled locally under its MIT license. No network requests. */
+/* Three.js is bundled locally. Hosted replay shares the local lab catalog. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id), host = $('scene');
@@ -17,6 +17,8 @@
   const fill = new THREE.DirectionalLight(0x659fff, 2); fill.position.set(-60, 25, -40); scene.add(fill);
   let world = new THREE.Group(); scene.add(world);
   let clip, views = [], projectileViews = [], selected = 0, origin, timelineSamples = [], deathEvents = [];
+  let recordings = TheaterRecordings.normalize(RECORDINGS), selectionRevision = 0, selectionRequest = null;
+  const hosted = location.protocol === 'http:' || location.protocol === 'https:';
   let time = 0, start = 0, end = 1, playing = false, fullMode = false, showTrail = true, showLook = true, showCards = true;
   let windowStart = 0, windowEnd = 1;
   let radius = 100, size = 100, theta = .8, phi = 1.0, markerSize = 3, drag = null;
@@ -282,7 +284,8 @@
     selected = index; drawEvents(); drawCoverage(); updateTime(); updateLabels();
   }
   function loadClip(id) {
-    clip = CLIPS.find(c => c.id === id) || CLIPS[0]; playing = false; selected = Math.max(0, clip.players.findIndex(p => p.id === clip.selectedPlayer)); $('clip').value = clip.id;
+    clip = CLIPS.find(c => c.id === id); playing = false; selected = Math.max(0, clip.players.findIndex(p => p.id === clip.selectedPlayer)); $('clip').value = clip.id;
+    showReplayPanels(true);
     const tracks = clip.players, allPositions = tracks.flatMap(p => p.samples);
     const events = clip.events || [], deaths = events.filter(e => e.kind === 'Death'), kills = events.filter(e => e.kind === 'Kill');
     deathEvents = deaths.map(death => {
@@ -503,6 +506,7 @@
     return v.state;
   }
   function updateTime(followPlayhead = true) {
+    if (!clip) return;
     if (followPlayhead) revealPlayhead();
     $('timeline-detail').classList.toggle('playhead-outside', time < windowStart || time > windowEnd);
     $('timeline').value = time; $('current-time').textContent = formatTime(time); $('play').textContent = playing ? 'Ⅱ' : '▶'; $('play').setAttribute('aria-label', playing ? 'Pause' : 'Play');
@@ -640,29 +644,63 @@
     playing = false; time = destination; updateTime();
   }
   function updateClipPicker() {
-    $('clip').replaceChildren();
-    for (const groupName of [...new Set(CLIPS.map(c => c.category || c.group))]) {
-      const group = document.createElement('optgroup'); group.label = groupName;
-      for (const c of CLIPS.filter(c => (c.category || c.group) === groupName)) { const option = document.createElement('option'); option.value = c.id; option.textContent = c.name; group.append(option); }
-      $('clip').append(group);
-    }
+    TheaterRecordings.populate($('clip'), recordings);
   }
-  updateClipPicker();
+  function showReplayPanels(visible) {
+    for (const selector of ['.viewport', '.transport', '#armor-panel', 'main > footer']) document.querySelector(selector).hidden = !visible;
+    $('replay-message').hidden = visible;
+  }
+  function selectRecordingLink(id) {
+    $('clip').value = id;
+    const inspector = new URL(hosted ? '/' : 'http://127.0.0.1:8766/', location.href);
+    inspector.search = new URLSearchParams({ film: id });
+    document.querySelector('.experiment-nav a:not([aria-current])').href = inspector.href;
+    $('inspect-recording').href = inspector.href;
+    const replay = new URL(location.href); replay.search = new URLSearchParams({ clip: id });
+    document.querySelector('.experiment-nav a[aria-current]').href = replay.href;
+    if (hosted) history.replaceState(null, '', replay);
+  }
+  function replayUnavailable(id, message, loading = false) {
+    playing = false; clip = null; disposeWorld(); views = []; projectileViews = [];
+    $('roster').replaceChildren(); $('roster').hidden = true; showReplayPanels(false);
+    $('replay-message-title').textContent = loading ? 'Loading replay…' : 'Replay unavailable';
+    $('replay-message-detail').textContent = message;
+    window.theaterViewerState = { clip: id, available: false, loading, playing: false, players: [], armor: null };
+  }
+  async function selectRecording(id) {
+    const token = ++selectionRevision; selectionRequest?.abort(); selectionRequest = null;
+    const entry = recordings.find(row => row.id === id);
+    selectRecordingLink(id);
+    if (CLIPS.some(c => c.id === id)) { loadClip(id); return; }
+    replayUnavailable(id, hosted ? 'Opening this recording’s decoded film.' : entry?.replay_error || 'No decoded replay is included for this recording. Decode its chunks and rebuild the replay.', hosted);
+    if (!hosted || !entry) return;
+    const controller = new AbortController(); selectionRequest = controller;
+    try {
+      const response = await fetch('/api/decoded-film?' + new URLSearchParams({film:id}), {signal:controller.signal});
+      const film = await response.json();
+      if (token !== selectionRevision) return;
+      if (!response.ok) throw Error(film.error || 'Unable to open the decoded film.');
+      const imported = filmToClip(film, entry); CLIPS.push(imported); loadClip(imported.id);
+    } catch (error) {
+      if (token === selectionRevision) replayUnavailable(id, error.message);
+    } finally { if (token === selectionRevision) selectionRequest = null; }
+  }
   $('film-file').onchange = async event => {
     const file = event.target.files[0]; if (!file) return;
     $('film-import-status').textContent = 'Opening film…';
     try {
       const film = JSON.parse(await file.text());
-      const existing = CLIPS.find(c => c.match_id && c.match_id === film.match_id);
-      const imported = filmToClip(film, existing ? { id: existing.id, title: existing.name, description: existing.description, category: existing.category, group: existing.group } : {});
+      const existing = recordings.find(c => c.match_id && c.match_id === film.match_id);
+      const imported = filmToClip(film, existing || {});
       const index = CLIPS.findIndex(c => c.id === imported.id);
       if (index < 0) CLIPS.push(imported); else CLIPS[index] = imported;
-      updateClipPicker(); loadClip(imported.id);
+      if (!existing) recordings.push(...TheaterRecordings.normalize([imported]));
+      updateClipPicker(); selectRecording(imported.id);
       $('film-import-status').textContent = 'Film opened';
     } catch (error) { $('film-import-status').textContent = error.message; }
     event.target.value = '';
   };
-  $('clip').onchange = () => loadClip($('clip').value); $('play').onclick = playPause; $('previous').onclick = () => step(-1); $('next').onclick = () => step(1);
+  $('clip').onchange = () => selectRecording($('clip').value); $('play').onclick = playPause; $('previous').onclick = () => step(-1); $('next').onclick = () => step(1);
   $('timeline').oninput = () => { playing = false; time = +$('timeline').value; updateTime(); };
   $('timeline-zoom-in').onclick = () => zoomTimeline((windowEnd - windowStart) / 2);
   $('timeline-zoom-out').onclick = () => zoomTimeline((windowEnd - windowStart) * 2);
@@ -697,14 +735,29 @@
   for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) host.addEventListener(name, () => { drag = null; host.classList.remove('dragging'); });
   host.addEventListener('wheel', e => { e.preventDefault(); radius = Math.max(size * .35, Math.min(size * 8, radius * Math.exp(e.deltaY * .001))); updateCamera(); }, { passive: false });
   document.addEventListener('keydown', e => {
+    if (!clip) return;
     if (['SELECT', 'INPUT', 'BUTTON', 'SUMMARY'].includes(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); playPause(); }
     if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') { e.preventDefault(); step(e.code === 'ArrowRight' ? 1 : -1); }
     if (e.code === 'KeyR') resetCamera();
   });
-  const resize = () => { camera.aspect = host.clientWidth / host.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(host.clientWidth, host.clientHeight); if (clip) drawCoverage(); };
-  new ResizeObserver(resize).observe(host); loadClip(new URLSearchParams(location.search).get('clip') || CLIPS[0].id); resize();
+  const resize = () => { if (!host.clientWidth || !host.clientHeight) return; camera.aspect = host.clientWidth / host.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(host.clientWidth, host.clientHeight); if (clip) drawCoverage(); };
+  new ResizeObserver(resize).observe(host); resize();
+  (async () => {
+    if (hosted) {
+      try {
+        const response = await fetch('/api/catalog');
+        if (!response.ok) throw Error('Catalog unavailable');
+        recordings = TheaterRecordings.normalize(await response.json());
+      } catch { $('film-import-status').textContent = 'Using the embedded recording list; the shared catalog is unavailable.'; }
+    }
+    updateClipPicker();
+    const requested = new URLSearchParams(location.search).get('clip');
+    if (!recordings.length) { replayUnavailable('', 'No cached recordings found. Download films using the experiment catalog.'); return; }
+    selectRecording(recordings.some(row => row.id === requested) ? requested : recordings[0].id);
+  })();
   renderer.setAnimationLoop(() => {
+    if (!clip) return;
     const dt = Math.min(clock.getDelta(), .1);
     if (playing) { time += dt * +$('speed').value; if (time > end) { if ($('loop').checked) time = start + (time - start) % (end - start); else { time = end; playing = false; } } updateTime(); }
     updateLabels(); renderer.render(scene, camera);
