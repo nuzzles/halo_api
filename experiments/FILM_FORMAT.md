@@ -1,5 +1,9 @@
 # Halo Infinite Theater format: current status and research notes
 
+Pawn component 1 now yields 3D velocity direction and a raw nonlinear magnitude
+code, with an explicit short stationary form. Speed conversion is unresolved.
+See [FILM_VELOCITY.md](FILM_VELOCITY.md) for bit fields, controls and replay behavior.
+
 > Active lab: 32 films are retained, 31 replayable (natural-end and later controls,
 > Octagon gameplay, map/appearance/posture controls, two Arena games and the raid).
 > Forced-end recordings and standalone probes are

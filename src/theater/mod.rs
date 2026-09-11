@@ -25,6 +25,7 @@ mod motion;
 mod packets;
 mod projectile;
 mod types;
+mod velocity;
 
 pub use legacy::*;
 pub use types::*;

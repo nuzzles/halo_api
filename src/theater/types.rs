@@ -123,6 +123,23 @@ pub struct Position {
     /// Input axes in the same checked input chain, when present.
     pub input: Option<InputAxes>,
 }
+/// Recorded pawn velocity. Magnitude-to-world-speed conversion is not calibrated.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "form")]
+pub enum Velocity {
+    /// Explicit two-bit `01` form, observed when motion stops.
+    Stationary,
+    /// Long `00` form: a quantized unit direction and nonlinear magnitude code.
+    Directed {
+        /// Original 19-bit direction code.
+        direction_code: u32,
+        /// Unit direction in film X/Y/Z axes, before any map-coordinate scaling.
+        direction: [f32; 3],
+        /// Original 10-bit magnitude. Not speed in world units; zero in this
+        /// form is distinct from the explicit stationary form.
+        magnitude_code: u16,
+    },
+}
 /// Two analog movement axes; 31 is neutral and observed values span 0–62.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InputAxes {
@@ -319,6 +336,9 @@ pub struct PlayerTrack {
     pub lives: Vec<Life>,
     /// Raw positions, including checked spawns.
     pub positions: Vec<Sample<Position>>,
+    /// Pawn velocity observations with exact component source ranges.
+    #[serde(default)]
+    pub velocities: Vec<Sample<Velocity>>,
     /// Desired aim observations.
     pub aim: Vec<Sample<Aim>>,
     /// Movement input from checked wire-0/generation-1, roster-0 input chains.

@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from theater_inspector_data import (Inspector, annotate_delta, annotate_spawn,
+from theater_inspector_data import (Inspector, annotate_delta, annotate_spawn, annotate_velocity,
                                     CLOCK, STATUSES, coverage, coverage_counts, field, partition)
 
 FIXTURES = json.loads((Path(__file__).resolve().parents[2] / 'src/theater/fixtures/oddball_records.json').read_text())
@@ -20,6 +20,30 @@ def bits(row):
 
 
 class InspectorFields(unittest.TestCase):
+    def test_velocity_fields_preserve_unresolved_scale_and_reject_bad_evidence(self):
+        fixture_path = Path(__file__).resolve().parents[2] / 'src/theater/fixtures/velocity_records.json'
+        for row in json.loads(fixture_path.read_text())['records']:
+            raw = ''.join(f'{b:08b}' for b in bytes.fromhex(row['hex']))
+            offset, end = row['velocity_bit'], row['velocity_end']
+            fields = annotate_velocity(raw, offset, 0, 'Pawn', 'fixture')
+            counts = coverage(partition(offset, end, fields))
+            if row['direction_code'] is None:
+                self.assertEqual(counts, dict(decoded=2, structure=0, opaque=0, unparsed=0))
+            else:
+                self.assertEqual(counts, dict(decoded=29, structure=2, opaque=0, unparsed=0))
+                self.assertEqual(fields[1]['value']['code'], row['direction_code'])
+                self.assertEqual(fields[2]['value'], row['magnitude_code'])
+                self.assertIn('unresolved', fields[2]['note'])
+                corrupt = raw[:offset + 2] + '1' * 19 + raw[offset + 21:]
+                withheld = annotate_velocity(corrupt, offset, 0, 'Pawn', 'fixture')
+                self.assertEqual(coverage(partition(offset, end, withheld))['opaque'], 29)
+            evidence = dict(player=0, life=row['life'], bit=offset, end_bit=end,
+                            direction_code='' if row['direction_code'] is None else str(row['direction_code']),
+                            magnitude_code='' if row['magnitude_code'] is None else str(row['magnitude_code']))
+            self.assertTrue(Inspector().record_fields('', 'velocity', evidence, raw, 0))
+            with self.assertRaises(ValueError):
+                Inspector().record_fields('', 'velocity', evidence, raw[:offset], 0)
+
     def test_captured_delta_fields_point_to_original_bits(self):
         for row in FIXTURES['deltas']:
             with self.subTest(source=row['source']):

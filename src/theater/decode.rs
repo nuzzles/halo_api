@@ -399,6 +399,11 @@ impl Film {
                 if let Some(aim) = c.aim {
                     player.aim.push(sample(p, t, l.id, 37, c.end, aim));
                 }
+                if let Some((start, end, value)) = c.velocity {
+                    player
+                        .velocities
+                        .push(sample(p, t, l.id, start, end, value));
+                }
                 if let Some(input) = c.input {
                     player
                         .inputs
@@ -418,7 +423,7 @@ impl Film {
                 // This chain already owns its pawn observations and auxiliaries.
                 // Do not decode the same prefix again without its attached input.
                 previous_delta_end = c.end;
-                if c.position.is_some() || c.aim.is_some() {
+                if c.position.is_some() || c.aim.is_some() || c.velocity.is_some() {
                     accepted_deltas.push(l.id);
                 }
                 checked(
@@ -605,6 +610,11 @@ impl Film {
                         if let Some(aim) = d.aim {
                             player.aim.push(sample(p, t, l.id, o, d.end, aim));
                         }
+                        if let Some((start, end, value)) = d.velocity {
+                            player
+                                .velocities
+                                .push(sample(p, t, l.id, start, end, value));
+                        }
                         if let Some(body) = d.body {
                             player.body.push(sample(p, t, l.id, o, d.end, body));
                         }
@@ -619,6 +629,13 @@ impl Film {
                         );
                     }
                     if let Some(d) = motion::weapon_delta(b, o, l.layout, local_tick) {
+                        // A clocked prefix may already own this exact velocity.
+                        // normalize() removes that duplicate source observation.
+                        if let Some((start, end, value)) = d.velocity {
+                            player
+                                .velocities
+                                .push(sample(p, t, l.id, start, end, value));
+                        }
                         for m in d.magazines {
                             player.magazines.push(sample(p, t, l.id, o, d.end, m));
                         }
@@ -698,6 +715,7 @@ impl Film {
             normalize(&mut player.damage);
             normalize(&mut player.crouch_input);
             normalize(&mut player.positions);
+            normalize(&mut player.velocities);
             normalize(&mut player.aim);
             normalize(&mut player.inputs);
             let duplicates = normalize(&mut player.firing);

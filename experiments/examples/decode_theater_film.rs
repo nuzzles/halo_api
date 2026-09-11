@@ -6,7 +6,7 @@ use halo_api_upstream as halo_api;
 use serde::Deserialize;
 type ExampleError = Box<dyn std::error::Error>;
 
-use halo_api::theater::{DecodeOptions, Film};
+use halo_api::theater::{DecodeOptions, Film, Velocity};
 use std::{
     fs::File,
     io::{BufWriter, Write},
@@ -56,12 +56,40 @@ fn main() -> Result<(), ExampleError> {
     serde_json::to_writer(&mut writer, &film)?;
     writer.write_all(b"\n")?;
     writer.flush()?;
+    // Small, seekable evidence table: the inspector can read one chunk without
+    // loading a long match's entire typed Film or scanning for byte signatures.
+    let velocity_output = output.with_extension("velocity.csv");
+    let mut evidence = BufWriter::new(File::create(&velocity_output)?);
+    writeln!(
+        evidence,
+        "player,life,chunk,payload_byte,bit,end_bit,direction_code,magnitude_code"
+    )?;
+    for player in &film.players {
+        for sample in &player.velocities {
+            let s = sample.source;
+            write!(
+                evidence,
+                "{},{},{},{},{},{},",
+                player.id, sample.life, s.chunk, s.payload_byte, s.bit, s.end_bit
+            )?;
+            match sample.value {
+                Velocity::Stationary => writeln!(evidence, ",")?,
+                Velocity::Directed {
+                    direction_code,
+                    magnitude_code,
+                    ..
+                } => writeln!(evidence, "{direction_code},{magnitude_code}")?,
+            }
+        }
+    }
+    evidence.flush()?;
     let export_time = export.elapsed();
     let counts = serde_json::json!({
         "players": film.players.len(),
         "appearance": film.players.iter().map(|p|p.appearance.len()).sum::<usize>(),
         "lives": film.players.iter().map(|p|p.lives.len()).sum::<usize>(),
         "positions": film.players.iter().map(|p|p.positions.len()).sum::<usize>(),
+        "velocities": film.players.iter().map(|p|p.velocities.len()).sum::<usize>(),
         "aim": film.players.iter().map(|p|p.aim.len()).sum::<usize>(),
         "inputs": film.players.iter().map(|p|p.inputs.len()).sum::<usize>(),
         "crouch_input": film.players.iter().map(|p|p.crouch_input.len()).sum::<usize>(),
@@ -79,7 +107,7 @@ fn main() -> Result<(), ExampleError> {
     });
     println!(
         "{}",
-        serde_json::json!({"film":format!("{}/{}",input.group,input.slug),"match_id":film.match_id,"output":output,"counts":counts,"load_ms":load_time.as_secs_f64()*1000.,"decode_ms":decode_time.as_secs_f64()*1000.,"export_ms":export_time.as_secs_f64()*1000.})
+        serde_json::json!({"film":format!("{}/{}",input.group,input.slug),"match_id":film.match_id,"output":output,"velocity_evidence":velocity_output,"counts":counts,"load_ms":load_time.as_secs_f64()*1000.,"decode_ms":decode_time.as_secs_f64()*1000.,"export_ms":export_time.as_secs_f64()*1000.})
     );
     Ok(())
 }

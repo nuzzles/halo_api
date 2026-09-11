@@ -22,6 +22,10 @@
       appearance: (p.appearance || []).map(s => [seconds(s.time_us), s.value, s.source]),
       lives: p.lives.map(l => ({ id: l.id, start: seconds(l.start_us), end: seconds(l.end_us), death: l.death_us == null ? null : seconds(l.death_us) })),
       samples: rows(p.positions, (v, life) => [...v.raw, v.input?.forward ?? null, v.input?.left ?? null, life]),
+      // Compact presentation rows keep the hour-long replay practical to load.
+      // Stationary has no invented direction/magnitude; raw codes stay exact.
+      velocity: rows(p.velocities || [], (v, life) => v.form === 'Stationary' ? [life] :
+        [life, ...v.direction, v.magnitude_code, v.direction_code]),
       aim: rows(p.aim, (v, life) => [v.yaw, v.pitch, life]),
       crouch: rows(p.crouch_input || [], (v, life) => {
         if (typeof v !== 'boolean') throw new Error('Invalid crouch input');

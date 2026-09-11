@@ -44,6 +44,14 @@ the embedded replay can load its existing `decoded-film.json` through the local
 server. Opening the HTML directly uses its embedded catalog snapshot and data.
 Files opened manually remain local to the replay session.
 
+The **Velocity** toggle shows blue, fixed-length arrows for recent recorded
+velocity directions. **Velocity sample** shows unit XYZ, the nonlinear magnitude
+code, sample time, and previous/next controls for the selected player. The speed
+scale remains unknown. Arrows disappear after 100 ms without a sample, without a
+recent position, at death, and on life changes. A held value is labeled as the
+last sample; no velocities or positions are synthesized. See
+[velocity decoding](../../FILM_VELOCITY.md).
+
 The **CROUCH INPUT** badges now cover both players in **Octagon gameplay →
 Octagon · First to 50**. Seek to **2:34.84–2:35.36** to see Nuzzles toggle crouch
 during a recorded jump. The badges follow decoded input, reset to unknown after
@@ -54,7 +62,8 @@ They do not animate a physical stance or infer a slide. See
 **Raid gameplay → Raid · 1 hour** opens the 20-player raid, lasting 1:05:53.667.
 The complete timeline is available, including later wire-ID generations. The
 large film contributes almost one million recorded positions, so the combined
-offline HTML is about 110 MiB and its initial load is larger than the controls.
+offline HTML grows with the additional velocity stream and its initial load is
+larger than the controls.
 No samples are downsampled for export. See [the raid notes](../../FILM_RAID.md).
 
 See [the decoder guide](../../THEATER_DECODER.md) for decoding the whole corpus,

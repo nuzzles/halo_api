@@ -90,3 +90,12 @@
 .armor-items[hidden]{display:none}
 @media(max-width:760px){.armor-panel>summary{padding:14px;gap:10px}.armor-content{padding:14px}.armor-items{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.armor-items>div{padding:10px}.armor-items dd{font-size:12px}#armor-status{font-size:10px;max-width:95px;text-align:right}}
 .replay-message{padding:24px;border:1px solid var(--line);border-radius:10px;background:#10232e;font-size:13px;line-height:1.7}.replay-message p{color:#9cb6c2}.replay-message a{color:var(--accent)}
+
+.velocity-readout{border-top:1px solid #ffffff14;margin-top:10px;padding-top:8px;color:#91bad0;font-size:10px;line-height:1.6}
+.velocity-readout .firing-controls,.velocity-icon{color:#6ac7ff}
+.velocity-readout.held{border-top-style:dashed;color:#7894a3}
+#velocity-value{color:#c8e7f6;font-size:11px}
+#velocity-direction{font-variant-numeric:tabular-nums}
+.velocity-note{font-size:9px;color:#79949e}
+@media(min-width:761px){.position-card{max-height:calc(100% - 145px);overflow-y:auto;scrollbar-width:thin}}
+@media(max-width:760px){.view-tools .velocity-icon{display:inline}}

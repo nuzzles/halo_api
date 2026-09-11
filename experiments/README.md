@@ -7,6 +7,11 @@ Downloaded chunks and generated outputs under `films/`, build outputs under
 Decoder code and independent byte fixtures live in the upstream
 `../src/theater/` module.
 
+Pawn velocity direction is now decoded across the supported coordinate layouts.
+The replay's **Velocity** toggle shows a blue direction arrow, and the selected
+player's **Velocity sample** readout shows raw magnitude and sample time. Speed
+units remain unresolved. See [FILM_VELOCITY.md](FILM_VELOCITY.md).
+
 ## Active recordings
 
 [films.csv](films.csv) contains **32 films** (31 replayable; Aquarius coordinates
@@ -35,7 +40,8 @@ The Bazaar control adds the observed `X17Y17Z16` coordinate layout. Layout names
 now describe bit widths; they do not select gameplay-specific parsers. See
 [FILM_COORDINATES.md](FILM_COORDINATES.md) for the evidence and remaining limits.
 Its `decoded` analysis profile means Rust decoding without legacy probe exports;
-the byte inspector can open its chunks but has no historical field annotations.
+the byte inspector can open its chunks and use native velocity evidence, while
+other historical field annotations remain unavailable.
 Aquarius is also downloaded and cataloged. Its idle spawn has a new candidate
 coordinate window and changed flags, with insufficient evidence to partition
 the axes. Films without decoded positions stay in both dropdowns; replay shows

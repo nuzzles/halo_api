@@ -52,7 +52,8 @@ The Rust example reads `film.json` and its decompressed chunk files from the
 selected folder. It writes `decoded-film.json` there by default. An optional
 second path chooses another output file; `--compact` omits packet indexes and
 aggregate checked-region diagnostics, while retaining each sample's source.
-It reports loading, decoding, and JSON-writing times separately.
+It also writes `<output-stem>.velocity.csv` for exact velocity annotations in the
+inspector. It reports loading, decoding, and export times separately.
 
 The portable file is **typed JSON** rather than CSV: player lives, independent
 sample streams, source locations, optional values, and projectile tracks survive
@@ -79,7 +80,8 @@ node examples/build_decoded_replay.cjs --corpus films
 
 The existing `python3 examples/theater_lab.py` server also serves the generated
 HTML at `/replay`. Its detailed bit inspector remains a research tool using the
-historical field annotations. Rebuilding those annotations is unnecessary for
+historical field annotations plus the native velocity evidence CSV. Rebuilding
+the historical annotations is unnecessary for
 the new decode/export/replay workflow.
 
 ## Typed observations and limits
@@ -99,6 +101,10 @@ The decoder consolidates:
   recorded XUID/name independently of lives. No live-account defaults are used.
   See [FILM_APPEARANCE.md](FILM_APPEARANCE.md) for the controlled coating comparison.
 - Position, desired aim, analog axes, and checked input-chain boundaries.
+- Pawn velocity: explicit stationary form, decoded 3D unit direction, and raw
+  nonlinear magnitude code. Speed conversion remains unresolved. Optional
+  `PlayerTrack.velocities` retains compatibility with old schema-1 exports.
+  See [FILM_VELOCITY.md](FILM_VELOCITY.md).
 - Held/released crouch input from guarded command tails, including terminal
   roster-0/1 records across respawns, both observed header tags, and combined
   jump/crouch forms in Octagon gameplay. Other button forms and larger rosters

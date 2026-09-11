@@ -1,6 +1,6 @@
 use super::bits::Bits;
 use super::combat::{INPUT_END, clock};
-use super::{Aim, BodyVitality, CoordinateLayout, InputAxes, Magazine, ShieldVitality};
+use super::{Aim, BodyVitality, CoordinateLayout, InputAxes, Magazine, ShieldVitality, Velocity};
 
 pub(super) const SPAWN_BODY: &str = "1000111000011011000110000111011010111101101000000";
 // Observed prefixes precede coordinates; they do not identify playlists or
@@ -71,6 +71,7 @@ pub(super) struct Delta {
     pub end: usize,
     pub position: Option<[u32; 3]>,
     pub aim: Option<Aim>,
+    pub velocity: Option<(usize, usize, Velocity)>,
     pub body: Option<BodyVitality>,
     pub shield: Option<ShieldVitality>,
     pub magazines: Vec<Magazine>,
@@ -170,11 +171,9 @@ fn clocked_fields(b: Bits<'_>, o: usize, layout: CoordinateLayout, tick: u8) -> 
                 p += layout.position_bits();
             }
             1 => {
-                p += match b.read(p, 2)? {
-                    0 => 31,
-                    1 => 2,
-                    _ => return None,
-                };
+                let (value, end) = super::velocity::read(b, p)?;
+                d.velocity = value.map(|v| (p, end, v));
+                p = end;
             }
             4 => {
                 if !d.ids.contains(&5) {
@@ -259,11 +258,9 @@ pub(super) fn weapon_delta(
                 p += layout.position_bits();
             }
             1 => {
-                p += match b.read(p, 2)? {
-                    0 => 31,
-                    1 => 2,
-                    _ => return None,
-                };
+                let (value, end) = super::velocity::read(b, p)?;
+                d.velocity = value.map(|v| (p, end, v));
+                p = end;
             }
             4 => {
                 body(b, p)?;
@@ -352,6 +349,7 @@ pub(super) fn weapon_delta(
 pub(super) struct Chain {
     pub position: Option<[u32; 3]>,
     pub aim: Option<Aim>,
+    pub velocity: Option<(usize, usize, Velocity)>,
     pub input: Option<InputAxes>,
     pub end: usize,
     pub copied: Option<[u32; 3]>,
@@ -372,6 +370,7 @@ pub(super) fn input_chain(b: Bits<'_>, layout: CoordinateLayout) -> Option<Chain
         let d = clocked_fields(b, p, layout, tick)?;
         c.position = d.position;
         c.aim = d.aim;
+        c.velocity = d.velocity;
         p = d.end;
     }
     if b.is(p, "10001000000001") && b.is(p + 14, "010000100010") {

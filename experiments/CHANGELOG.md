@@ -1,5 +1,27 @@
 # Experiment changes
 
+## 2026-09-11 — pawn velocity direction
+
+- Decode component 1's 19-bit 3D direction and 10-bit nonlinear magnitude code,
+  plus its explicit two-bit stationary form. Six movement/jump cardinals, joystick
+  circles and multiplayer displacement checks corroborate the cube-face mapping.
+  World-speed conversion remains unresolved; no physical speed is invented.
+- Add typed `PlayerTrack.velocities` with exact source ranges, old-export defaults,
+  life guards and support in input chains, clocked prefixes and weapon records.
+  All 32 films retain their pre-existing streams and gain 1,318,149 velocity
+  samples, including 880,097 in the raid.
+- Add a blue direction arrow, toggle and selected-player sample readout with
+  previous/next navigation. Fixed arrow length, gap/death/respawn handling and
+  explicit held values keep uncertainty visible. Compact replay arrays preserve
+  all samples while limiting the added load for long recordings.
+- Export an inspector evidence CSV alongside the typed film. Revalidate each
+  velocity field against its bytes and replace opaque payloads with direction
+  and raw magnitude. Oddball decoded coverage rises from 12.55% to 14.34% with
+  zero annotation errors; aggregate source spans do not inflate coverage.
+- Validation: 40 native Theater tests, 12 Python tests, wasm check, Clippy, the
+  32-film preservation audit, and focused Chrome checks across controls, Bazaar,
+  Octagon, Oddball and the raid. See [FILM_VELOCITY.md](FILM_VELOCITY.md).
+
 ## 2026-09-11 — shared recording list
 
 - Both views use the same cached-film catalog, short titles, category grouping,

@@ -872,6 +872,11 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     data.extend(wrong_name); // Matching XUID with a different name must not bind.
     data.extend(frame(1_500_000, &shot)); // Before spawn: exclude.
     data.extend(frame(2_000_000, &spawn));
+    // Captured component-1/25-only packet from the natural-end idle control.
+    let stopped = bytes(&serde_json::json!({"hex":"a07b42058440088165d804035f7c00"}));
+    for stamp in [1_500_000, 2_200_000, 2_200_000, 5_000_000] {
+        data.extend(frame(stamp, &stopped)); // Before spawn, duplicate, at death.
+    }
     let crouches = fixture(include_str!("fixtures/crouch_input_records.json"));
     for (t, value) in [(1_700_000, true), (3_500_000, true), (3_600_000, false)] {
         let r = crouches["records"]
@@ -916,9 +921,19 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
             .iter()
             .map(|s| (s.time_us, s.value))
             .collect::<Vec<_>>(),
-        vec![(2_500_000, true), (2_600_000, false)]
+        vec![(1_200_000, false), (2_500_000, true), (2_600_000, false)]
     );
     assert_eq!(p.lives[0].death_us, Some(4_000_000));
+    assert_eq!(p.velocities.len(), 1);
+    assert_eq!(
+        (p.velocities[0].time_us, p.velocities[0].life),
+        (1_200_000, 0)
+    );
+    assert_eq!(p.velocities[0].value, Velocity::Stationary);
+    assert_eq!(
+        (p.velocities[0].source.bit, p.velocities[0].source.end_bit),
+        (70, 72)
+    );
     assert_eq!(p.positions.len(), 1);
     assert!(p.positions[0].value.spawn);
     assert_eq!(p.firing.len(), 2);
@@ -994,6 +1009,7 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
             .map(|s| (s.time_us, s.life, s.value))
             .collect::<Vec<_>>(),
         vec![
+            (1_200_000, 0, false),
             (2_500_000, 0, true),
             (2_600_000, 0, false),
             (4_300_000, 2, true),
@@ -1049,4 +1065,107 @@ fn captured_controlled_position_aim_and_analog_chains() {
         flip(&mut data, 29);
         assert!(motion::input_chain(Bits(&data), CoordinateLayout::X15Y15Z17).is_none());
     }
+}
+
+#[test]
+fn captured_velocity_directions_and_magnitudes_have_exact_source_ranges() {
+    let f = fixture(include_str!("fixtures/velocity_records.json"));
+    for r in f["records"].as_array().unwrap() {
+        let data = bytes(r);
+        let start = num(&r["velocity_bit"]);
+        let end = num(&r["velocity_end"]);
+        let (value, observed_end) = velocity::read(Bits(&data), start).unwrap();
+        assert_eq!(observed_end, end);
+        let value = value.unwrap();
+        if r["direction_code"].is_null() {
+            assert_eq!(value, Velocity::Stationary);
+        } else {
+            let Velocity::Directed {
+                direction_code,
+                direction,
+                magnitude_code,
+            } = value
+            else {
+                panic!("lost long velocity form")
+            };
+            assert_eq!(direction_code as usize, num(&r["direction_code"]));
+            assert_eq!(magnitude_code as usize, num(&r["magnitude_code"]));
+            for (actual, expected) in direction.iter().zip(r["direction"].as_array().unwrap()) {
+                assert!((f64::from(*actual) - expected.as_f64().unwrap()).abs() < 1e-7);
+            }
+        }
+        let layout = serde_json::from_value(r["layout"].clone()).unwrap();
+        let accepted = if let Some(c) = motion::input_chain(Bits(&data), layout) {
+            c.velocity
+        } else {
+            motion::clocked_delta(
+                Bits(&data),
+                num(&r["source"]["bit"]),
+                layout,
+                num(&r["tick"]) as u8,
+            )
+            .unwrap_or_else(|| panic!("{}", r["film"]))
+            .velocity
+        };
+        assert_eq!(accepted, Some((start, end, value)));
+        // Repack original component bits at all eight byte alignments.
+        for alignment in 0..8 {
+            let mut packed = vec![0; (alignment + end - start).div_ceil(8)];
+            for i in 0..end - start {
+                if Bits(&data).read(start + i, 1) == Some(1) {
+                    flip(&mut packed, alignment + i);
+                }
+            }
+            assert_eq!(
+                velocity::read(Bits(&packed), alignment),
+                Some((Some(value), alignment + end - start))
+            );
+            assert!(
+                velocity::read(
+                    Bits(&packed[..(alignment + end - start - 1) / 8]),
+                    alignment
+                )
+                .is_none()
+            );
+        }
+    }
+}
+
+#[test]
+fn unsupported_velocity_codes_do_not_discard_checked_position() {
+    // Unused face-grid slots, and the two codes beyond the last face.
+    for code in [293, 293 * 294, 87_380, 524_286, 524_287, u32::MAX] {
+        assert!(velocity::direction(code).is_none());
+    }
+    let f = fixture(include_str!("fixtures/velocity_records.json"));
+    let r = &f["records"][0];
+    let data = bytes(r);
+    let o = num(&r["source"]["bit"]);
+    let start = num(&r["velocity_bit"]);
+    let layout = serde_json::from_value(r["layout"].clone()).unwrap();
+    let tick = num(&r["tick"]) as u8;
+    let original = motion::clocked_delta(Bits(&data), o, layout, tick).unwrap();
+    let mut bad = data.clone();
+    // Set the 19-bit direction to all ones, retaining the checked field length.
+    for bit in start + 2..start + 21 {
+        if Bits(&bad).read(bit, 1) == Some(0) {
+            flip(&mut bad, bit);
+        }
+    }
+    let d = motion::clocked_delta(Bits(&bad), o, layout, tick).unwrap();
+    assert_eq!(d.position, original.position);
+    assert_eq!(d.end, original.end);
+    assert!(d.velocity.is_none());
+    flip(&mut bad, start); // Unsupported form 10 must not be skipped.
+    assert!(motion::clocked_delta(Bits(&bad), o, layout, tick).is_none());
+    assert!(velocity::read(Bits(&data), usize::MAX).is_none());
+    // Older portable exports remain readable without inventing stationary data.
+    let mut old = serde_json::to_value(PlayerTrack::default()).unwrap();
+    old.as_object_mut().unwrap().remove("velocities");
+    assert!(
+        serde_json::from_value::<PlayerTrack>(old)
+            .unwrap()
+            .velocities
+            .is_empty()
+    );
 }

@@ -19,7 +19,7 @@
   let clip, views = [], projectileViews = [], selected = 0, origin, timelineSamples = [], deathEvents = [];
   let recordings = TheaterRecordings.normalize(RECORDINGS), selectionRevision = 0, selectionRequest = null;
   const hosted = location.protocol === 'http:' || location.protocol === 'https:';
-  let time = 0, start = 0, end = 1, playing = false, fullMode = false, showTrail = true, showLook = true, showCards = true;
+  let time = 0, start = 0, end = 1, playing = false, fullMode = false, showTrail = true, showLook = true, showVelocity = true, showCards = true;
   let windowStart = 0, windowEnd = 1;
   let radius = 100, size = 100, theta = .8, phi = 1.0, markerSize = 3, drag = null;
   const target = new THREE.Vector3(), overviewTarget = new THREE.Vector3(), clock = new THREE.Clock(), MAX_GAP = .1, FIRING_PULSE = .15, MELEE_PULSE = .35, GRENADE_PULSE = .45, TAU = Math.PI * 2;
@@ -162,6 +162,14 @@
       return { value: null, time: null };
     return { value: row[2], time: row[0] };
   }
+  function velocityState(track, life, dead) {
+    const rows = track.velocity || [], row = rows[sampleIndex(time, rows)];
+    if (dead || !life || time >= life.end || !row || row[1] !== life.id)
+      return { value: null, time: null, age: null, stale: false };
+    const value = row.length === 2 ? { form: 'Stationary' } :
+      { form: 'Directed', direction: row.slice(2, 5), magnitude_code: row[5], direction_code: row[6] };
+    return { value, time: row[0], age: time - row[0], stale: time - row[0] > MAX_GAP };
+  }
   function paintZoom(element, state) {
     const z = state.zoom;
     element.textContent = state.dead ? 'Scope —' : z.level === null ? 'Scope ?' : `Scope sample ${z.level}`;
@@ -225,6 +233,10 @@
     flame.scale.set(.65, .65, 1.8);
     mesh(new THREE.SphereGeometry(markerSize * .13, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff2c5, fog: false }), muzzle);
     muzzle.visible = false;
+    // Fixed length expresses direction only: magnitude is a nonlinear raw code.
+    const velocityArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, markerSize, 0), markerSize * 5, 0x6ac7ff, markerSize * .8, markerSize * .4);
+    velocityArrow.visible = false; avatar.add(velocityArrow);
     const look = new THREE.Group(); look.renderOrder = 10; look.position.y = markerSize * 1.94; avatar.add(look);
     const lookLength = size * (clip.players.length > 2 ? .11 : .46);
     const gold = new THREE.MeshBasicMaterial({ color: 0xffd38a, transparent: true, opacity: .95, depthWrite: false, fog: false });
@@ -250,7 +262,7 @@
     meterGroup.append(...meters.map(m => m.root)); label.append(meterGroup);
     const vitalityChanges = [...new Set(Object.values(track.vitality || {}).flatMap(rows => rows.filter((r, i) => !i || r[1] !== rows[i - 1][1] || r.at(-1) !== rows[i - 1].at(-1)).map(r => r[0])))].sort((a, b) => a - b).map(t => [t]);
     for (const m of [shell, dark, visor]) m.transparent = true;
-    return { track, segments, trail, fullTrail, avatar, body, head, gun, muzzle, bodyMaterials: [shell, dark, visor], look, lookMaterials: [gold, ring.material], halo, shadow, dropLine, deathMark, label, labelName, activity, weaponLabel, zoomLabel, meleeRing, meters, meterGroup, vitalityChanges, state: null };
+    return { track, segments, trail, fullTrail, avatar, body, head, gun, muzzle, bodyMaterials: [shell, dark, visor], look, lookMaterials: [gold, ring.material], velocityArrow, halo, shadow, dropLine, deathMark, label, labelName, activity, weaponLabel, zoomLabel, meleeRing, meters, meterGroup, vitalityChanges, state: null };
   }
   function createProjectile(track) {
     const ball = mesh(new THREE.SphereGeometry(markerSize * .4, 14, 10), material('#77dfed', { emissive: '#278393', emissiveIntensity: .8 }), world);
@@ -437,6 +449,12 @@
       halo.material.opacity = age > MAX_GAP && !track.stationary ? .25 : .75;
     } else { halo.material.opacity = .35; if (aimIndex >= 0) positionStatus = 'Position unavailable · schematic pivot'; }
     const stale = index >= 0 && !dead && !track.stationary && positionAge > MAX_GAP;
+    const velocity = velocityState(track, life, dead);
+    v.velocityArrow.visible = showVelocity && index >= 0 && !stale && !velocity.stale && velocity.value?.form === 'Directed';
+    if (v.velocityArrow.visible) {
+      const [x, y, z] = velocity.value.direction;
+      v.velocityArrow.setDirection(new THREE.Vector3(x, z, -y));
+    }
     for (const m of bodyMaterials) m.opacity = stale && track.lives ? .28 : 1;
     avatar.visible = shadow.visible = index >= 0 || aimIndex >= 0;
     avatar.position.copy(current); shadow.position.set(current.x, .02, current.z); shadow.material.opacity = .65 / (1 + current.y / (markerSize * 5));
@@ -498,6 +516,7 @@
     trail.geometry.setDrawRange(first * 2, Math.max(0, count - first) * 2); trail.visible = showTrail;
     fullTrail.visible = showTrail && !clip.trailWindow;
     v.state = { id: track.id, name: track.name, life: life?.id ?? null, sample: index, position: index < 0 ? null : [current.x, -current.z, current.y], positionAge, stale,
+      velocity, velocityVisible: v.velocityArrow.visible,
       aimSample: aimIndex, aim, lookVisible: look.visible, avatarVisible: avatar.visible, schematicPivot: index < 0 && aimIndex >= 0, dead, positionStatus, aimStatus,
       trailSegments: Math.max(0, count - first), firing, firingIndex, firingTime: firingRow?.[0] ?? null,
       firingSupported: Array.isArray(track.firing), muzzleVisible: muzzle.visible, weapon, zoom, crouch: crouchState(track, life, dead),
@@ -517,6 +536,15 @@
     $('observation').textContent = s.positionStatus;
     $('aim-yaw').textContent = s.aim ? String(Math.round(s.aim.yawRaw) % 4096) : '—'; $('aim-pitch').textContent = s.aim ? String(Math.round(s.aim.pitchRaw)) : '—';
     $('aim-observation').textContent = s.aimStatus;
+    const velocity = s.velocity, value = velocity.value;
+    $('velocity-value').textContent = !value ? 'Unknown' : value.form === 'Stationary' ? 'Stationary' : `Magnitude code ${value.magnitude_code}`;
+    $('velocity-direction').textContent = value?.form === 'Directed' ? 'XYZ ' + value.direction.map(v => v.toFixed(3)).join(' / ') : '—';
+    $('velocity-observation').textContent = !value ? 'No velocity sample this life' :
+      `${velocity.stale ? 'Last sample' : 'Recorded sample'} · ${velocity.time.toFixed(3)} s${velocity.stale ? ` · ${velocity.age.toFixed(1)} s ago` : ''}`;
+    $('velocity-readout').classList.toggle('held', velocity.stale);
+    const velocityRows = views[selected].track.velocity || [];
+    $('previous-velocity').disabled = sampleIndex(time - .0005, velocityRows) < 0;
+    $('next-velocity').disabled = sampleIndex(time + .0005, velocityRows) + 1 >= velocityRows.length;
     paintZoom($('zoom-state'), s);
     $('zoom-observation').textContent = s.zoom.time === null ? 'No scope observation' : `Last sample · ${s.zoom.time.toFixed(3)} s · stage, not magnification`;
     const zoomRows = views[selected].track.zoom || [];
@@ -727,6 +755,8 @@
   $('previous-reload').onclick = () => jumpFiring(-1, 'reload'); $('next-reload').onclick = () => jumpFiring(1, 'reload');
   $('previous-zoom').onclick = () => jumpFiring(-1, 'zoom'); $('next-zoom').onclick = () => jumpFiring(1, 'zoom');
   $('previous-vitality').onclick = () => jumpVitality(-1); $('next-vitality').onclick = () => jumpVitality(1);
+  $('previous-velocity').onclick = () => jumpFiring(-1, 'velocity'); $('next-velocity').onclick = () => jumpFiring(1, 'velocity');
+  $('velocity-toggle').onclick = () => { showVelocity = !showVelocity; $('velocity-toggle').setAttribute('aria-pressed', String(showVelocity)); updateTime(); };
   $('trail-toggle').onclick = () => { showTrail = !showTrail; $('trail-toggle').setAttribute('aria-pressed', String(showTrail)); updateTime(); };
   $('look-toggle').onclick = () => { showLook = !showLook; $('look-toggle').setAttribute('aria-pressed', String(showLook)); updateTime(); };
   $('cards-toggle').onclick = () => { showCards = !showCards; $('cards-toggle').setAttribute('aria-pressed', String(showCards)); updateLabels(); };

@@ -9,6 +9,7 @@ from collections import defaultdict
 import csv
 from functools import lru_cache
 import json
+import math
 from pathlib import Path
 import struct
 
@@ -110,9 +111,7 @@ def annotate_delta(bits, offset, base, clock, source, name, serial, generation=1
             cursor += 58
         elif component == 1:
             n = 31 if bits[cursor:cursor + 2] == '00' else 2
-            add(cursor, 2, 'Velocity form', bits[cursor:cursor + 2], 'structure')
-            if n > 2:
-                add(cursor + 2, n - 2, 'Velocity payload', None, 'opaque', 'Length is checked; velocity encoding is not decoded.')
+            result.extend(annotate_velocity(bits, cursor, base, record, source))
             cursor += n
         elif component in (4, 5):
             n = 11 if component == 4 else 29
@@ -137,6 +136,33 @@ def annotate_delta(bits, offset, base, clock, source, name, serial, generation=1
             add(cursor + 9, 1, 'Tick suffix', '0', 'structure')
             break
     return result, parsed
+
+
+def annotate_velocity(bits, offset, base, record, source):
+    def f(start, width, label, value, status='decoded', note=''):
+        return field(base + offset + start, base + offset + start + width,
+                     label, value, status, record, source, note)
+    form = bits[offset:offset + 2]
+    if form == '01':
+        return [f(0, 2, 'Velocity stationary form', '01', note='Explicit short form observed at stops. Missing samples do not imply stationary.')]
+    if form != '00' or len(bits[offset:offset + 31]) != 31:
+        raise ValueError('Unsupported or truncated velocity form')
+    code = int(bits[offset + 2:offset + 21], 2)
+    magnitude = int(bits[offset + 21:offset + 31], 2)
+    face, remainder = divmod(code, 87381)
+    u, v = divmod(remainder, 294)
+    result = [f(0, 2, 'Velocity form', form, 'structure')]
+    if face >= 6 or u >= 293 or v >= 293:
+        return result + [f(2, 29, 'Velocity payload', None, 'opaque', 'Unsupported direction code; length only is checked.')]
+    direction = [(u + .5) * 2 / 293 - 1, (v + .5) * 2 / 293 - 1]
+    direction.insert(face % 3, 1 if face < 3 else -1)
+    length = math.sqrt(sum(x*x for x in direction))
+    direction = [round(x / length, 6) for x in direction]
+    return result + [
+        f(2, 19, 'Velocity direction', dict(code=code, xyz=direction),
+          note='Six-face unit-vector quantization, in film X/Y/Z axes. Coordinate/world scales remain uncalibrated.'),
+        f(21, 10, 'Velocity magnitude code', magnitude,
+          note='Nonlinear speed code; conversion to world speed is unresolved. Long-form code 0 is distinct from the stationary form.')]
 
 
 def annotate_vitality(start, component, values, record, source):
@@ -266,6 +292,7 @@ class Inspector:
                     file.seek(offset)
                     row = dict(zip(headers, next(csv.reader(file))))
                     result[int(row.get('payload_byte', row.get('payload_offset')))][kind].append(row)
+        csv_rows(self.path(label + '/decoded-film.velocity.csv'), 'velocity', False)
         if group:
             proof_path = self.path(f'analysis/{group}/decode_evidence.json')
             if proof_path.exists():
@@ -420,6 +447,15 @@ class Inspector:
         return fields, issues
 
     def record_fields(self, label, kind, row, bits, base):
+        if kind == 'velocity':
+            offset, end = int(row['bit']), int(row['end_bit'])
+            raw = bits[offset:end]
+            if (row['direction_code'] == '' and raw != '01') or (row['direction_code'] != '' and
+                    (len(raw) != 31 or raw[:2] != '00' or int(raw[2:21], 2) != int(row['direction_code']) or
+                     int(raw[21:], 2) != int(row['magnitude_code']))):
+                raise ValueError('Native velocity export / byte mismatch')
+            return annotate_velocity(bits, offset, base,
+                f"Velocity · roster {row['player']} · life {row['life']}", 'halo_api::theater · decoded-film.velocity.csv')
         if kind == 'zoom':
             offset = row['bit']
             decoded = zoom_fields(bits, offset)
@@ -653,6 +689,8 @@ class Inspector:
             tail = coordinates + 47
             if counter > tail:
                 f(tail, counter - tail, 'Position continuation', None, 'opaque')
+            if not short:
+                result.extend(annotate_velocity(bits, a + 93, base, record, source))
         else:
             return []
         check(counter, 8, row['clock']); check(counter + 8, 1, 0)
