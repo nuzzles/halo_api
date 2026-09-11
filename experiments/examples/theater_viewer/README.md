@@ -1,6 +1,6 @@
 # Theater motion and aiming replay
 
-> Active lab cleanup: 32 films are retained, 31 replayable (natural-end and later controls,
+> Active lab cleanup: 32 replayable films are retained (natural-end and later controls,
 > plus the two Arena games and an hour-long raid). Forced-end recordings and standalone probes are
 > archived under `archive/cleanup-2026-09-10/` at the experiments root. Historical
 > 36-film/30-clip counts below describe earlier validation runs. See the main
@@ -32,22 +32,20 @@ open films/analysis/theater_viewer.html
 The builder includes existing `decoded-film.json` files. **Open decoded film**
 also imports a typed JSON file directly into the running replay. Both use the
 same adapter; neither parses bytes. The current native corpus build has **32
-recordings, 31 replayable**. It includes checked spawns in idle clips and leaves
+recordings, 32 replayable**. It includes checked spawns in idle clips and leaves
 initial aim unknown. Titles, categories and menu order come from `films.csv`.
 The first catalog entry opens unless `?clip=group/slug` selects another recording.
 
 When served by Theater Lab, both views read the same `/api/catalog` list and use
 the shared `recordings.js` picker. Switching tabs keeps the selected recording.
-Aquarius stays in both menus; replay shows **Replay unavailable** with a link to
-its inspector until positions can be decoded. A cached recording missing from
+Aquarius now replays its bounds-supported idle spawn. A cached recording missing from
 the embedded replay can load its existing `decoded-film.json` through the local
 server. Opening the HTML directly uses its embedded catalog snapshot and data.
 Files opened manually remain local to the replay session.
 
 The **Velocity** toggle shows blue, fixed-length arrows for recent recorded
 velocity directions. **Velocity sample** shows unit XYZ, the nonlinear magnitude
-code, sample time, and previous/next controls for the selected player. The speed
-scale remains unknown. Arrows disappear after 100 ms without a sample, without a
+code, world units/s, sample time, and previous/next controls for the selected player. Arrows disappear after 100 ms without a sample, without a
 recent position, at death, and on life changes. A held value is labeled as the
 last sample; no velocities or positions are synthesized. See
 [velocity decoding](../../FILM_VELOCITY.md).
@@ -554,3 +552,7 @@ ammo, backward seeks, new-life resets, and desktop/mobile readouts.
 Scope checks cover all 1,414 observations, five BR/S7 transitions, literal zero
 and second zoom, held state, selection/death/new-life resets, backward seeking,
 and responsive scope readouts.
+
+Projectile paths now cover supported records in both Ranked games. Cyan markers
+use recorded positions and blue arrows show recorded velocity. Type and explosion
+locations remain unknown. See [projectile motion](../../FILM_PROJECTILE_MOTION.md).

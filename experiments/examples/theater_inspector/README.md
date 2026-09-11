@@ -18,7 +18,9 @@ Native velocity observations now supply exact component fields through the
 `decoded-film.velocity.csv` companion written by `decode_theater_film`. This adds
 annotations to newer films even when no legacy probe exports exist. The inspector
 rechecks each source window before counting direction/magnitude bits as decoded;
-world-speed conversion remains explicitly unresolved. Restart the server after
+the derived speed is shown in world units/s. Native projectile evidence uses
+`decoded-film.projectile.csv` and revalidates positions, thrower references,
+velocity and rest flags against the original bytes. Restart the server after
 refreshing exports to clear its cached evidence and coverage totals. See
 [velocity decoding](../../FILM_VELOCITY.md).
 

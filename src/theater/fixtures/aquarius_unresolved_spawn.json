@@ -1,7 +1,7 @@
 {
   "match_id": "16d67b8c-09c2-4ab8-8b94-892f7edb6212",
   "map": "Aquarius",
-  "note": "Recorder confirmed staying still. Candidate coordinate window is 36 bits at relative 263; changed preceding flags and absent position deltas leave its per-axis interpretation unresolved. Do not assume 12/12/12.",
+  "note": "Historical unresolved-spawn fixture. Aquarius map identity and independently published BSP bounds now corroborate 13/12/11 widths: raw [1980,2469,727]. No movement validation exists because the recorder stayed still.",
   "hex": "088018e1b1876bda000019d0120430002002a0f97f5bd71cc10c9f01b0f9b890c07bc9a55ae1d4b9c080",
   "length": 329,
   "source": {

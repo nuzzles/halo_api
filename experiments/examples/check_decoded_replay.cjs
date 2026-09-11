@@ -34,7 +34,7 @@ async function scrub(t){return evaluate(`document.getElementById('timeline').val
   await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Emulation.setDeviceMetricsOverride',{width:1400,height:1100,deviceScaleFactor:1,mobile:false});
   await cdp('Page.navigate',{url:pathToFileURL(path.resolve(__dirname,'../films/analysis/theater_viewer.html')).href});
   let state;for(let n=0;n<100;n++){state=await evaluate('window.theaterViewerState');if(state)break;await delay(100);}
-  assert(state);assert.equal(await evaluate('CLIPS.length'),31);
+  assert(state);assert.equal(await evaluate('CLIPS.length'),32);
   await evaluate(`document.getElementById('timeline').step='any'`);
   async function choose(id){return evaluate(`document.getElementById('clip').value=${JSON.stringify(id)};document.getElementById('clip').dispatchEvent(new Event('change'));window.theaterViewerState`)}
   await choose('raids/01-hour-long-raid');await click('full-mode');
@@ -273,19 +273,18 @@ async function scrub(t){return evaluate(`document.getElementById('timeline').val
   for(let n=0;n<100;n++){if(await evaluate(`document.getElementById('film-import-status').textContent==='Film opened'`))break;await delay(50);}
   assert.equal(await evaluate(`document.getElementById('film-import-status').textContent`),'Film opened');
   await click('full-mode');state=await scrub(36.81);assert.equal(state.players[0].zoom.level,2);
-  // A recognized film with an unresolved coordinate layout must not open a blank scene.
-  const previousClip = await evaluate(`document.getElementById('clip').value`);
+  // Aquarius now imports its single recorded spawn and no invented movement.
   await cdp('DOM.setFileInputFiles',{nodeId:input.nodeId,files:[path.resolve(__dirname,'../films/maps/02-aquarius/decoded-film.json')]});
-  for(let n=0;n<100;n++){if(await evaluate(`document.getElementById('film-import-status').textContent==='No decoded player positions are available for replay.'`))break;await delay(50);}
-  assert.equal(await evaluate(`document.getElementById('film-import-status').textContent`),'No decoded player positions are available for replay.');
-  assert.equal(await evaluate(`document.getElementById('clip').value`),previousClip);
-  assert.equal(await evaluate('CLIPS.length'),31);
+  for(let n=0;n<100;n++){if(await evaluate(`document.getElementById('film-import-status').textContent==='Film opened'`))break;await delay(50);}
+  assert.equal(await evaluate(`document.getElementById('film-import-status').textContent`),'Film opened');
+  assert.deepEqual(await evaluate(`CLIPS.find(c=>c.match_id==='16d67b8c-09c2-4ab8-8b94-892f7edb6212').players[0].samples[0].slice(1,4)`),[1980,2469,727]);
+  assert.equal(await evaluate('CLIPS.length'),32);
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:1200,deviceScaleFactor:1,mobile:true});await delay(150);assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));
   assert(await evaluate(`['.clip-picker', '.film-import', '#film-import-status'].every(selector => {const r=document.querySelector(selector).getBoundingClientRect();return r.left>=0 && r.right<=innerWidth;})`));
   await evaluate(`document.getElementById('armor-panel').scrollIntoView({block:'center'})`);
   assert(await evaluate(`document.getElementById('armor-panel').getBoundingClientRect().right<=innerWidth`));
   await snap('native-theater-armor-mobile');
   await snap('native-theater-import');assert.deepEqual(errors,[]);
-  console.log('PASS: timeline zoom/pan/precision/auto-follow, anchored player cards with occlusion-only fading and stacking by camera distance, selected-player armor with recorded accessory/mythic names and unknown states, and 31 native films including Stalker/AR firing, AR ammo, both switches and raid Stalker naming, the BR75/Shock switch control, BR75 naming in either slot, the 20-player hour-long raid, generation-4 respawns and late/reverse seeking, Octagon crouch toggles during jumps, two-player input/respawn binding, crouch-control holds/releases/reverse seek, both High Ground appearance controls, full Octagon gameplay, death/reverse seek, Bazaar, unresolved Aquarius import, vitality, scope, ammo/reload, projectile path, JSON import, mobile layout');
+  console.log('PASS: timeline zoom/pan/precision/auto-follow, anchored player cards with occlusion-only fading and stacking by camera distance, selected-player armor with recorded accessory/mythic names and unknown states, and 32 native films including Stalker/AR firing, AR ammo, both switches and raid Stalker naming, the BR75/Shock switch control, BR75 naming in either slot, the 20-player hour-long raid, generation-4 respawns and late/reverse seeking, Octagon crouch toggles during jumps, two-player input/respawn binding, crouch-control holds/releases/reverse seek, both High Ground appearance controls, full Octagon gameplay, death/reverse seek, Bazaar, Aquarius spawn import, vitality, scope, ammo/reload, projectile path, JSON import, mobile layout');
  } finally {chrome.kill();fs.rmSync(profile,{recursive:true,force:true});}
 })().catch(error=>{console.error(error);process.exitCode=1;});

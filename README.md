@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 `halo_api::theater::Film::try_from_chunks(&chunks, options)` decodes decompressed
 Theater chunks without network or filesystem access. It consolidates the motion,
 aim, input, roster/lives, recorded armor appearance, combat, vitality, weapons,
-scope, and controlled grenade experiments. This remains a partial v41 decoder;
+scope, velocity, and projectile motion experiments. This remains a partial v41 decoder;
 unknown data is not guessed.
 The original `clients::hi::film` helpers remain available.
 

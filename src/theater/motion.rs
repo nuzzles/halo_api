@@ -39,6 +39,7 @@ pub(super) fn spawn(b: Bits<'_>, o: usize) -> Option<Spawn> {
             continue;
         }
         for layout in [
+            CoordinateLayout::X13Y12Z11,
             CoordinateLayout::X15Y15Z17,
             CoordinateLayout::X17Y17Z16,
             CoordinateLayout::X18Y18Z15,

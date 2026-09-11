@@ -132,20 +132,29 @@ and captured records in `src/theater/fixtures/terminal_input_records.json` at th
 repository root. The existing `crouch-input.csv` and `evidence.json` are refreshed
 for the control; the JSON retains the initial input-chain-only counts.
 
-## Sliding remains open
+## Physical stance and sliding remain unverified
 
-No checked sparse pawn update containing component 29 (`unit-crouch-component`)
-or 62 (`biped-slide-component`) was found in this control. That does not mean
-those states are absent from the film: another record form may carry them.
+The extended scan checks sparse masks, the proposed dense 64-bit mask and
+baseline-selector variants, binding candidate headers to living pawn identities.
+It finds **no component-29 or component-62 candidate in the crouch/slide control**.
+In Octagon, all 49 apparent hits are dense-mask interpretations at unanchored
+interior offsets: none starts at the checked clock boundary and none is a sparse
+record. Without a complete preceding parse, these are not accepted evidence.
+They must not produce physical stance or slide samples.
 
-Two tick-checked prefixes contain components 57 and 59 at 36.734105 and
-37.534851 seconds. Seven bits after the known fields change from `1010000` to
-`0000000`, immediately before the existing copied-position record. Their
-registry names are general Spartan-ability state components. The split between
-those two fields, sprint semantics, and any relationship to sliding are not yet
-validated; none is exported as sprint/slide state. Component-28 updates also
-occur nearby, but the registry calls that active-camo state, so temporal
-correlation is not used to rename it.
+Two tick-checked prefixes still contain components 57 and 59 at 36.734105 and
+37.534851 seconds. Their seven bits change from `1010000` to `0000000`. The
+external Infinite reference proposes a 2-bit component 57 plus a 5-bit component
+59 for these forms, consistent with the following copied-position boundary.
+This does not identify sprint or slide semantics. These bytes stay opaque in
+the production decoder. Component 28 is active-camo state, not posture.
+
+The reference proposes component 29 as a flag plus 10-bit crouch amount, and
+component 62 as an active flag followed by a packed vector and three bytes.
+No aligned active capture has validated these schemas in our films. Local
+prediction may reconstruct posture from commands; that possibility is not proof
+that physical state is absent elsewhere. A second player observing an isolated
+crouch/slide control would be the most useful new capture.
 
 ## API and replay
 

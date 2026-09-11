@@ -4,7 +4,7 @@ The version-41 pawn component **1**, named
 `object-translational-velocity-dynamic-precision-component` in the registry,
 contains a direction and a nonlinear magnitude. Direction is now decoded in
 `halo_api::theater` and displayed in motion replay. The magnitude-to-world-speed
-conversion remains unresolved.
+conversion is now decoded in world units per second.
 
 ## Wire forms
 
@@ -84,24 +84,48 @@ introduce differences.
 All eligible horizontal directions in straight keyboard controls were exact;
 all 62 eligible jump-axis sign comparisons agreed. Vertical angles cannot be
 calibrated against raw position differences without knowing the per-axis world
-scales. The same direction decoder applies to all three supported position
+scales. The same direction decoder applies to all observed position
 layouts; it does not use match IDs, map names or playlist categories.
 
-## Magnitude limits
+## Magnitude conversion
 
-The initial sample set spans magnitude codes 0–484. They rise and fall with
-movement speed independently of direction, but are **not linear speed**. Jump
-acceleration and controller changes suggest a logarithmic-like companding curve.
-An empirical fit alone does not establish the engine's quantizer or its constants.
-Frame timestamps may bunch together, so naive `distance / timestamp delta` is
-also unreliable. The wrapping command clock advances at nominal 60 Hz in these
-controls. Raw position axes have uncalibrated, potentially different scales.
+For the recorded 10-bit magnitude code `q`, the supported Infinite quantizer is:
 
-Consequently the API exports `magnitude_code`, not guessed metres per second,
-and replay never integrates it to fill gaps. A useful next control would isolate
-steady movement and jumps with known map/world distances; the unresolved code
-range, quantization endpoints and any dynamic-precision alternatives still need
-evidence.
+```text
+q == 0:    0.03
+q == 1023: 350.0
+otherwise: exp((q + 0.5) * ln(350.97) / 1024) - 0.97
+```
+
+These are **world units per second**, not metres per second. The explicit short
+stationary form is zero; long-form q0 is 0.03. The native calculation uses f32,
+matching the reference's float arithmetic. It retains raw codes in JSON and
+computes speed/vector through `Velocity::speed()` and `Velocity::vector()`;
+it does not serialize redundant floats for every sample of the hour-long raid.
+
+The constants and equation are corroborated by the disassembly-derived
+[Infinite reference](https://github.com/JGtm/LevelUp/blob/cf333a3889771c6462dfce9e1bc287a897043a47/apps/go-api/internal/analysis/filmdec/components_cubemap.go)
+and checked independently against Bazaar's recorded displacement, exact map
+identity and external BSP bounds. `python3 examples/check_motion_leads.py` checks
+325 centered comparisons using the 60 Hz command clock:
+
+- Median observed/predicted speed: **1.00412**.
+- Median absolute error: **0.04929 world units/s**.
+- 90th-percentile error: **0.13587 world units/s**.
+
+Centered differences span a few samples; they are not instantaneous velocity.
+An earlier fit assuming constant gravity across the jump suggested a different
+maximum, but that assumption did not survive the independent movement calibration.
+Applying another Forge map's bounds to the controls was also exploratory, not a
+valid world-coordinate calibration. Neither assumption is used in production.
+
+Projectile component 1 shares the 19-bit direction and 10-bit magnitude, with
+one fewer leading bit: `0 + direction19 + magnitude10`, or `1` for stationary.
+The controlled grenade launches at q418, **10.00059 world units/s**. See
+[FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md).
+
+The reference also suggests a 97-bit pawn raw-float form. No independently bounded
+capture of that form has been established, so the parser still rejects it.
 
 ## API, replay and inspector
 
@@ -119,7 +143,7 @@ are rejected. Each exported source span is exactly 2 or 31 bits.
 
 The replay's **Velocity** toggle shows a blue, fixed-length direction arrow for
 recent samples, separate from the gold aim ray. The selected-player readout shows
-unit X/Y/Z, raw magnitude and sample time, with previous/next sample buttons.
+unit X/Y/Z, world speed, raw magnitude and sample time, with previous/next sample buttons.
 After 100 ms without a sample it labels the value as a last observation and hides
 the arrow. Missing positions, death and new lives also prevent a current arrow.
 No position samples or existing position interpolation rules are changed.
@@ -130,7 +154,7 @@ inspector evidence index, not a replacement replay file. The inspector reads one
 chunk's accepted source locations and rechecks their form/codes against the bytes.
 It marks the direction's 19 bits and raw magnitude's 10 bits decoded, the long
 form's two bits checked structure, and the short stationary form's two bits
-decoded. It retains the explicit speed-scale caveat. Unsupported directions stay
+decoded. It shows the derived world speed without claiming metres per second. Unsupported directions stay
 opaque. Legacy controlled/ranked annotations use the same field display.
 
 Coverage still measures the union of verified inspector annotations across **all

@@ -131,7 +131,7 @@ fn coordinate_layout_names_round_trip_and_read_older_exports() {
 }
 
 #[test]
-fn captured_idle_aquarius_does_not_guess_an_axis_partition() {
+fn captured_idle_aquarius_matches_map_derived_axis_partition() {
     let f = fixture(include_str!("fixtures/aquarius_unresolved_spawn.json"));
     let data = bytes(&f);
     let b = Bits(&data);
@@ -139,9 +139,11 @@ fn captured_idle_aquarius_does_not_guess_an_axis_partition() {
     assert!(b.is(192, f["coordinate_prefix"].as_str().unwrap()));
     assert!(b.is(263, f["candidate_coordinate_bits"].as_str().unwrap()));
     assert!(b.is(299, motion::COORD_SUFFIX));
-    // A 36-bit window and one static value cannot establish the per-axis widths.
-    // Its prefix also occurs in Octagon, but that film's position window is 47 bits.
-    assert!(motion::spawn(b, 0).is_none());
+    // Independently supplied Aquarius BSP bounds predict 13/12/11, rather than
+    // dividing the 36-bit window evenly or using its non-unique prefix.
+    let s = motion::spawn(b, 0).unwrap();
+    assert_eq!(s.layout, CoordinateLayout::X13Y12Z11);
+    assert_eq!(s.xyz, [1980, 2469, 727]);
 }
 
 #[test]
@@ -1168,4 +1170,179 @@ fn unsupported_velocity_codes_do_not_discard_checked_position() {
             .velocities
             .is_empty()
     );
+}
+
+#[test]
+fn captured_projectile_spawns_and_velocity_records_use_recorded_owners() {
+    let f = fixture(include_str!("fixtures/projectile_motion_records.json"));
+    for r in f["records"].as_array().unwrap() {
+        let data = bytes(r);
+        let o = num(&r["bit"]);
+        let layout: CoordinateLayout = serde_json::from_value(r["layout"].clone()).unwrap();
+        if r["kind"] == "spawn" {
+            let (s, _) = projectile::birth(Bits(&data), o, layout).unwrap();
+            assert_eq!(usize::from(s.id), num(&r["id"]));
+            assert_eq!(usize::from(s.generation), num(&r["gen"]));
+            assert_eq!(usize::from(s.player), num(&r["player"]));
+            assert_eq!(usize::from(s.life), num(&r["life"]));
+            let mut corrupt = data.clone();
+            flip(&mut corrupt, o + 20); // A different archetype is not a projectile.
+            assert!(projectile::birth(Bits(&corrupt), o, layout).is_none());
+        } else {
+            let d = projectile::record(Bits(&data), o, layout).unwrap();
+            assert_eq!(d.end, num(&r["end"]));
+            assert_eq!(usize::from(d.id), num(&r["id"]));
+            assert_eq!(usize::from(d.generation), num(&r["gen"]));
+            assert_eq!(
+                serde_json::to_value(d.position.map(|(_, _, v)| v)).unwrap(),
+                r["xyz"]
+            );
+            let (a, end, v) = d.velocity;
+            if r["vel"] == "stationary" {
+                assert_eq!(v, Velocity::Stationary);
+                assert_eq!(end - a, 1);
+            } else {
+                let Velocity::Directed {
+                    direction_code,
+                    magnitude_code,
+                    ..
+                } = v
+                else {
+                    panic!("lost projectile velocity")
+                };
+                assert_eq!(end - a, 30);
+                assert_eq!(direction_code as usize, num(&r["vel"][0]));
+                assert_eq!(usize::from(magnitude_code), num(&r["vel"][1]));
+            }
+            assert!(projectile::record(Bits(&data[..end / 8]), o, layout).is_none());
+            let mut corrupt = data.clone();
+            flip(&mut corrupt, o + 16); // Unsupported header/baseline.
+            assert!(projectile::record(Bits(&corrupt), o, layout).is_none());
+        }
+    }
+}
+
+#[test]
+fn velocity_speed_quantizer_has_distinct_zero_and_exact_endpoints() {
+    let directed = |q| Velocity::Directed {
+        direction_code: 392594,
+        direction: [0., -1., 0.],
+        magnitude_code: q,
+    };
+    assert_eq!(Velocity::Stationary.speed(), 0.);
+    assert_eq!(Velocity::Stationary.vector(), [0.; 3]);
+    assert_eq!(directed(0).speed(), 0.03);
+    assert_eq!(directed(1023).speed(), 350.);
+    // Captured grenade launch q418; independently checked against position motion.
+    assert!((directed(418).speed() - 10.00059).abs() < 0.0001);
+    assert_eq!(directed(418).vector(), [0., -directed(418).speed(), 0.]);
+    for q in 1..=1023 {
+        assert!(directed(q).speed() > directed(q - 1).speed());
+    }
+}
+
+#[test]
+fn map_bounds_predict_bazaar_and_aquarius_coordinate_widths() {
+    let aquarius = CoordinateBounds {
+        min: [-39.014282, -27.861597, -2.8262208],
+        max: [38.79729, 18.353075, 15.290748],
+    };
+    let bazaar = CoordinateBounds {
+        min: [-973.866, -361.43918, -86.55155],
+        max: [179.37695, 1047.0077, 489.09164],
+    };
+    assert_eq!(aquarius.axis_bits(), Some([13, 12, 11]));
+    assert_eq!(bazaar.axis_bits(), Some([17, 17, 16]));
+    let spawn = aquarius
+        .world_position([1980, 2469, 727], CoordinateLayout::X13Y12Z11)
+        .unwrap();
+    assert!((spawn[0] + 20.2022).abs() < 0.01);
+    assert!(
+        aquarius
+            .world_position([1980, 2469, 727], CoordinateLayout::X15Y15Z17)
+            .is_none()
+    );
+    assert!(
+        aquarius
+            .world_position([8192, 0, 0], CoordinateLayout::X13Y12Z11)
+            .is_none()
+    );
+    assert!(
+        CoordinateBounds {
+            min: [0.; 3],
+            max: [f32::NAN; 3]
+        }
+        .axis_bits()
+        .is_none()
+    );
+    assert!(
+        CoordinateBounds {
+            min: [1.; 3],
+            max: [0.; 3]
+        }
+        .axis_bits()
+        .is_none()
+    );
+}
+
+#[test]
+fn projectile_tracks_reject_wrong_owner_generation_and_discontinuous_updates() {
+    let f = fixture(include_str!("fixtures/projectile_motion_records.json"));
+    let rows = f["records"].as_array().unwrap();
+    for invalid in 0..4 {
+        let player = PlayerTrack {
+            id: 0,
+            lives: vec![serde_json::from_value(f["controlled_life"].clone()).unwrap()],
+            ..PlayerTrack::default()
+        };
+        let birth_row = &rows[0];
+        let birth_bytes = bytes(birth_row);
+        let layout = CoordinateLayout::X15Y15Z17;
+        let (mut birth, end) =
+            projectile::birth(Bits(&birth_bytes), num(&birth_row["bit"]), layout).unwrap();
+        if invalid == 1 {
+            birth.player = 1;
+        }
+        let source = SourceSpan {
+            chunk: 2,
+            payload_byte: 495715,
+            bit: num(&birth_row["bit"]),
+            end_bit: end,
+        };
+        let start = 26_709_491;
+        let mut candidates = projectile::Tracks {
+            births: vec![Sample {
+                time_us: start,
+                life: 0,
+                source,
+                value: birth,
+            }],
+            ..Default::default()
+        };
+        for row in rows
+            .iter()
+            .filter(|r| r["layout"] == "X15Y15Z17" && r["kind"] == "delta")
+            .take(2)
+        {
+            let data = bytes(row);
+            let mut record = projectile::record(Bits(&data), num(&row["bit"]), layout).unwrap();
+            if invalid == 2 {
+                record.generation = 2;
+            }
+            let time_us = (row["time"].as_f64().unwrap() * 1e6).round() as u64
+                + if invalid == 3 { 1_000_000 } else { 0 };
+            candidates.records.push(Sample {
+                time_us,
+                life: 0,
+                source,
+                value: record,
+            });
+        }
+        let tracks = candidates.finish(&[player]);
+        assert_eq!(tracks.len(), usize::from(invalid == 0));
+        if invalid == 0 {
+            assert_eq!(tracks[0].positions.len(), 3);
+            assert!(tracks[0].terminal.is_none());
+        }
+    }
 }

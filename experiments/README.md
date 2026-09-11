@@ -9,13 +9,11 @@ Decoder code and independent byte fixtures live in the upstream
 
 Pawn velocity direction is now decoded across the supported coordinate layouts.
 The replay's **Velocity** toggle shows a blue direction arrow, and the selected
-player's **Velocity sample** readout shows raw magnitude and sample time. Speed
-units remain unresolved. See [FILM_VELOCITY.md](FILM_VELOCITY.md).
+player's **Velocity sample** readout shows world units/s, raw magnitude and sample time. See [FILM_VELOCITY.md](FILM_VELOCITY.md).
 
 ## Active recordings
 
-[films.csv](films.csv) contains **32 films** (31 replayable; Aquarius coordinates
-remain unresolved). Both recording dropdowns use its short `title`, category and
+[films.csv](films.csv) contains **32 replayable films**. Both recording dropdowns use its short `title`, category and
 row order; `description` retains the full experiment notes. Hosted replay and the
 inspector read the same `/api/catalog` list of cached recordings. Switching views
 keeps the selected recording, including Aquarius. The offline replay embeds a
@@ -42,11 +40,10 @@ now describe bit widths; they do not select gameplay-specific parsers. See
 Its `decoded` analysis profile means Rust decoding without legacy probe exports;
 the byte inspector can open its chunks and use native velocity evidence, while
 other historical field annotations remain unavailable.
-Aquarius is also downloaded and cataloged. Its idle spawn has a new candidate
-coordinate window and changed flags, with insufficient evidence to partition
-the axes. Films without decoded positions stay in both dropdowns; replay shows
-an unavailable message and a link to inspect the same recording. Their chunks
-and partial JSON diagnostics remain available for investigation.
+Aquarius now uses the bounds-supported `X13Y12Z11` layout and replays its recorded
+idle spawn. Both Ranked games now include identity-bound projectile paths and
+recorded projectile velocity. Unknown grenade type/explosion locations are not
+inferred. See [FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md).
 
 **Raid gameplay → Raid · 1 hour** contains the 1:05:53.667 recording
 `9d644d09-38c3-429a-bf3d-de0ea577815f`: 20 players, 942 recognized lives,
@@ -207,3 +204,14 @@ toy continues to use schematic player colors.
 **Octagon gameplay → Octagon · First to 50** now shows both players' recorded
 crouch inputs across respawns; Nuzzles toggles during a jump around film **2:35**.
 Physical slide state remains unresolved; the badge is explicitly an input sample.
+
+### Map provenance and motion calibration
+
+`cargo run --release --example download_film_maps` caches each available film's
+exact match-history and map asset revision in its ignored `settings/` folder.
+It searches the first 1,000 history entries and reports recordings it cannot find.
+It validates cached asset/version identities and does not fetch map geometry.
+
+`python3 examples/check_motion_leads.py` verifies the world-speed formula against
+Bazaar's positions and command ticks using the pinned external BSP bounds in
+`reference/map-coordinate-bounds.json`. It does not fit a map scale from speed.

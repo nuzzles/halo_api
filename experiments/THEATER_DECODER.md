@@ -1,6 +1,6 @@
 # Upstream Theater decoder
 
-> Active lab cleanup: 32 films are retained (31 replayable; Aquarius unresolved),
+> Active lab cleanup: 32 replayable films are retained,
 > including natural-end and later controls, Octagon gameplay, and the two Arena
 > games, plus the hour-long raid. Forced-end recordings and standalone probes are
 > archived under `archive/cleanup-2026-09-10/` at the experiments root. Historical
@@ -102,7 +102,7 @@ The decoder consolidates:
   See [FILM_APPEARANCE.md](FILM_APPEARANCE.md) for the controlled coating comparison.
 - Position, desired aim, analog axes, and checked input-chain boundaries.
 - Pawn velocity: explicit stationary form, decoded 3D unit direction, and raw
-  nonlinear magnitude code. Speed conversion remains unresolved. Optional
+  nonlinear magnitude code. `Velocity::speed()` and `vector()` decode world units/s. Optional
   `PlayerTrack.velocities` retains compatibility with old schema-1 exports.
   See [FILM_VELOCITY.md](FILM_VELOCITY.md).
 - Held/released crouch input from guarded command tails, including terminal
@@ -144,24 +144,29 @@ The decoder consolidates:
   See [Stalker evidence](FILM_WEAPONS.md#stalker-rifle-firing-control).
 - Victim-bound weapon-hit prefixes with an immediately preceding guarded firing
   record. These do not supply a damage amount, health value, or descope transition.
-- Both controlled grenade paths, including recorded spawn/position/terminal
-  locations. Single-player/life, release timing, sample-count, and coordinate
-  continuity checks must all pass. Ranked paths remain unsupported.
+- Supported projectile paths in both Ranked games, the raid, and the natural-end
+  grenade control. Spawns carry explicit owner references; updates carry positions,
+  velocities and optional rest flags. Tracks are bounded by recorded identity and
+  generation, with no inferred explosions. See
+  [FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md).
 - Existing registry, roster, packet, and kill/death/medal summary decoding and
   API aggregate-validation helpers, preserved under the compatibility API.
 
-`CoordinateLayout` now names the three observed encodings: `X15Y15Z17`,
-`X17Y17Z16` (Bazaar), and `X18Y18Z15`. `axis_bits()` returns the widths; position
-offsets derive from them. The two former JSON names, `Controlled` and `Ranked`,
-remain accepted as deserialization aliases. New exports use the numeric names.
-Spawn prefixes alone do not determine widths: Bazaar shares the Forge-control
-prefix but has 50 coordinate bits instead of 47. Supported suffix boundaries
-select the observed tuples; general map-bound/precision metadata is still unknown.
-See [FILM_COORDINATES.md](FILM_COORDINATES.md) for captured evidence and limits.
-The idle Aquarius capture has changed spawn flags and a 36-bit candidate window;
-its per-axis split is unresolved. It deliberately does not add another enum
-variant or fabricate a spawn position. The replay builder skips films with no
-decoded positions, retaining their partial Film JSON and diagnostics for inspection.
+`CoordinateLayout` names four observed encodings: `X13Y12Z11` (Aquarius),
+`X15Y15Z17`, `X17Y17Z16` (Bazaar), and `X18Y18Z15`. `axis_bits()` returns their
+widths; position offsets derive from them. Former JSON names `Controlled` and
+`Ranked` remain accepted aliases. Spawn prefixes alone do not determine widths.
+
+`CoordinateBounds` accepts externally supplied BSP bounds, predicts widths at
+precision level 16 and midpoint-dequantizes positions when those widths match.
+No map bounds are fetched or silently assigned by the core library. Exact map
+identity plus external bounds now supports Aquarius's 13/12/11 spawn. See
+[FILM_COORDINATES.md](FILM_COORDINATES.md).
+
+The example also writes pawn velocity and projectile CSV evidence indexes for
+the inspector, alongside the typed JSON consumed by replay. Projectile records
+retain their original entity generation, owner life, position, velocity and rest
+source spans. General track ends are observation boundaries, not explosions.
 
 `SourceSpan` identifies a **checked window**, not necessarily the exact scalar
 bits or the entire record. Offsets are relative to decompressed packet payloads;
@@ -179,6 +184,19 @@ bullet count; reload cause and animation duration are not decoded.
 Scope values remain recorded samples; hits never synthesize an unscoped value.
 The separate [settings lookup](FILM_SETTINGS.md) retrieves the match's saved
 variant and engine revision, without changing the offline decoder or replay.
+
+## Current motion verification
+
+The 32-film refresh preserves all pre-existing player streams except Aquarius's
+newly decoded spawn/input observations, and preserves the original control's
+positions and terminal. It exports 577 projectile tracks with 41,750 positions
+and 43,064 velocities: 139 Bandit, 283 Oddball, 154 raid, and one natural-end
+control. This is partial path coverage. Native decoding across the corpus took
+18.21 seconds locally, excluding loading/export/audit work.
+
+44 Theater tests, wasm compilation and Clippy checks cover the core. Inspector
+validation rechecked 84,929 projectile CSV annotations against the bytes.
+`check_motion_leads.py` independently tests world-speed calibration on Bazaar.
 
 ## Verification and measured performance
 

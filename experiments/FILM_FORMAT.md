@@ -4,7 +4,7 @@ Pawn component 1 now yields 3D velocity direction and a raw nonlinear magnitude
 code, with an explicit short stationary form. Speed conversion is unresolved.
 See [FILM_VELOCITY.md](FILM_VELOCITY.md) for bit fields, controls and replay behavior.
 
-> Active lab: 32 films are retained, 31 replayable (natural-end and later controls,
+> Active lab: 32 replayable films are retained (natural-end and later controls,
 > Octagon gameplay, map/appearance/posture controls, two Arena games and the raid).
 > Forced-end recordings and standalone probes are
 > archived under `archive/cleanup-2026-09-10/` at the experiments root. Historical
@@ -34,7 +34,8 @@ wasm checks, corpus parity, and performance. Superseded probes are archived;
 | Area | Supported result | Remaining limit |
 | --- | --- | --- |
 | Packet/time structure | 16-byte packet headers, microsecond timestamps, 37-bit clock record with wrapping 8-bit counter | Clock constants and some packet kinds are unknown |
-| Position | Observed X/Y/Z widths 15/15/17, 17/17/16 (Bazaar), and 18/18/15; Aquarius has an unresolved 36-bit candidate window | Width names do not identify playlists; Aquarius axis split, map-bound/precision metadata and physical units remain unknown |
+| Position | X/Y/Z widths 13/12/11 (Aquarius), 15/15/17, 17/17/16 (Bazaar), and 18/18/15; external map bounds predict widths | Bounds are not extracted from films; exact Forge/Recharge bounds and other precision levels remain open |
+| Velocity | Pawn and projectile direction plus logarithmic magnitude in world units/s; exact zero form and raw codes retained | Other dynamic-precision forms remain unsupported; no position integration |
 | Movement input | Two 6-bit axes, neutral 31; every level 0–62 observed with a controller; terminal roster-0/1 inputs bind across Octagon respawns | Physical stick response, other command headers and larger rosters remain open |
 | Crouch input | Held/released commands in controls and both Octagon gameplay players, including combined jump/crouch forms | Physical posture and slide remain unresolved; absent samples stay unknown |
 | Aim | Cyclic yaw12 and upward-increasing pitch11; decoded alongside movement for all eight Ranked players | Exact angular quantizers, camera/weapon transforms, and exact scoped FOV are unknown |
@@ -44,7 +45,7 @@ wasm checks, corpus parity, and performance. Superseded probes are archived;
 | Lives/events | Bandit: 127 spawns/122 deaths; Oddball: 264 spawns/248 deaths and round resets; per-player event totals match the API | Aggregate validation does not decode shots, damage, or every medal identity |
 | Firing | Guarded spawn/roster bindings; 1,579 Bandit and 3,360 Oddball indicators; ID generation and sequence wraps checked | API shot totals differ slightly; exact bullet accounting and hit locations remain open |
 | Melee | Event plus companion identity; 105 events across both controls and both Ranked films | Partial activity coverage; hit outcomes and animation duration unresolved |
-| Grenades | 362 checked throws with life/roster binding; two controlled projectile tracks with 87 samples each | Other event continuations, general Ranked projectile paths, grenade type and blast damage remain open |
+| Grenades | Guarded throw events and spawn/owner/generation-bound projectile paths in both Ranked games and the control; recorded projectile velocity and rest flags | Partial paths; grenade type, explosions, blast damage and unsupported forms remain open |
 | Scope | Stage 0 unscoped, 1 first zoom, 2 second zoom; five BR/S7 transitions and 1,409 Ranked observations | Partial coverage; magnification, FOV, scope-out cause, and other record forms remain open |
 | Weapons | Recorded reload starts; 19,723 magazine observations, both carried-slot selections, and seven calibrated 32-bit weapon fingerprints | Partial magazine coverage; starting inventory, manual/automatic cause, energy ammo, reserves, other selection forms, and Shock firing confirmation remain open |
 | Vitality | Registry components 4/5 identify body health/shields; checked amount windows and 300-tick regeneration delay | Partial export; scalar calibration, initial/terminal forms, and complete damage-frame coverage remain open |
@@ -93,7 +94,7 @@ Key corrections to earlier interpretations:
 
 ## Current corpus and artifacts
 
-The [CSV catalog](films.csv) tracks **32 active films** (31 replayable), including both decoded Ranked
+The [CSV catalog](films.csv) tracks **32 active, replayable films**, including both decoded Ranked
 Arena gameplay scenes: Bandit EVO and Oddball.
 Run all reproduction commands from `experiments/`.
 
@@ -106,7 +107,7 @@ Run all reproduction commands from `experiments/`.
 | Weapon controls | 5 | Bandit-to-pistol switch, reload comparison, reported BR/S7 scope stages, BR75/Shock switches, and AR/Stalker firing |
 | Ranked Arena gameplay | 2 | Checked Bandit EVO and three-round Oddball captures |
 | Octagon gameplay | 1 | Full first-to-50 match |
-| Map controls | 2 | Bazaar and unresolved Aquarius |
+| Map controls | 2 | Bazaar and Aquarius |
 | Armor customization | 2 | Cadet Blue / Cadet Brick comparison |
 | Posture controls | 1 | Crouch holds and sprint/slide |
 | Raid gameplay | 1 | Hour-long, 20-player raid |
@@ -604,3 +605,6 @@ Hard-won, each from an actual mistake in this project:
 - Treat zero-component results as a diagnostic, not automatic proof of invalidity.
   The current pawn extractor requires component 25 and cannot establish how
   zero-component records behave in the general format.
+
+Velocity now includes world-speed conversion; see [FILM_VELOCITY.md](FILM_VELOCITY.md).
+Projectile field boundaries and ownership evidence are in [FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md).

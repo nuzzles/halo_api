@@ -36,8 +36,8 @@ unit-resolution changes and no jumps of 128 units or more when comparing samples
 less than 100 ms apart within a life. The observed maxima are `[21,20,28]`.
 
 Only the prefix whitelist needed extending; no new coordinate variant, match-ID
-special case, or gameplay-specific parser was added. Aquarius's 36-bit window
-remains unsupported. Evidence is retained in
+special case, or gameplay-specific parser was added. Aquarius's 36-bit window is now independently supported as 13/12/11
+using map-bound evidence; see FILM_COORDINATES.md. Evidence is retained in
 `films/analysis/octagon-gameplay/coordinate-evidence.json` and captured spawn/first
 update regression cases in `../src/theater/fixtures/octagon_gameplay_records.json`.
 

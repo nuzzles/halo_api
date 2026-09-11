@@ -29,10 +29,17 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
  try {
   const target=await cdp('Target.createTarget',{url:'about:blank'},null);session=(await cdp('Target.attachToTarget',{targetId:target.targetId,flatten:true},null)).sessionId;
   await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Emulation.setDeviceMetricsOverride',{width:1600,height:1250,deviceScaleFactor:1,mobile:false});
-  await cdp('Page.navigate',{url:process.env.THEATER_LAB_URL || 'http://127.0.0.1:8766/'});
+  const inspectorUrl = new URL(process.env.THEATER_LAB_URL || 'http://127.0.0.1:8766/');
+  inspectorUrl.searchParams.set('film', 'ranked-arena/02-oddball');
+  await cdp('Page.navigate',{url:inspectorUrl.href});
   async function waitFor(expression){for(let n=0;n<200;n++){const value=await evaluate(expression);if(value)return value;await delay(100);}throw Error('Timed out waiting for '+expression);}
   let state=await waitFor('window.theaterInspectorState?.view && window.theaterInspectorState');
-  assert.equal(state.film,'ranked-arena/02-oddball');assert.equal(await evaluate('document.querySelectorAll("#film option").length'),23);
+  assert.equal(state.film,'ranked-arena/02-oddball');assert.equal(await evaluate('document.querySelectorAll("#film option").length'),32);
+  const spawnFixture=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../src/theater/fixtures/oddball_records.json'))).spawns[0];
+  await evaluate(`document.getElementById('chunk').value=${JSON.stringify(String(1))};document.getElementById('chunk').dispatchEvent(new Event('change'))`);
+  await waitFor('window.theaterInspectorState.chunk===1 && window.theaterInspectorState.view.offset===0');
+  await evaluate(`document.getElementById('offset').value='${spawnFixture.source[1]}';document.getElementById('offset-form').requestSubmit()`);
+  state=await waitFor('window.theaterInspectorState.view.spans.some(s=>s.label==="X raw") && window.theaterInspectorState');
   assert(state.view.spans.some(s=>s.label==='X raw'));assert.equal(state.view.issues.length,0);
   assert.equal(Object.values(state.view.coverage).reduce((a,b)=>a+b),state.view.scope[1]-state.view.scope[0]);
   const field=state.view.spans.find(s=>s.label==='X raw');
@@ -107,8 +114,8 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   for(const view of grenadeViews){assert.deepEqual(view.issues,[]);assert.equal(Object.values(view.coverage).reduce((a,b)=>a+b),view.scope[1]-view.scope[0]);}
   assert(grenadeViews[0].spans.some(s=>s.label==='Grenade throw signature'));
   assert(grenadeViews[1].spans.some(s=>s.label==='Roster index'));
-  assert(grenadeViews[2].spans.some(s=>s.label==='Grenade X raw'));
-  assert(grenadeViews[3].spans.some(s=>s.label==='Grenade Z raw'));
+  assert(grenadeViews[2].spans.some(s=>/^(Projectile|Grenade) X raw$/.test(s.label)));
+  assert(grenadeViews[3].spans.some(s=>/^(Projectile|Grenade) Z raw$/.test(s.label)));
   assert(grenadeViews[4].spans.some(s=>s.label==='Projectile terminal signature'));
 
   // Exercise the HTTP boundary independently: path restrictions, invalid hex,
@@ -125,11 +132,12 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));
   assert(await evaluate(`(()=>{const a=document.querySelector('.hex-scroll');return a.scrollWidth>a.clientWidth})()`));
   await cdp('Emulation.setDeviceMetricsOverride',{width:1400,height:1100,deviceScaleFactor:1,mobile:false});
-  await evaluate(`document.querySelector('nav a[href="/replay"]').click()`);
-  await waitFor(`window.theaterViewerState?.clip==='ranked-arena/02-oddball'`);
-  assert.equal(await evaluate(`document.querySelector('.experiment-nav a:not([aria-current])').getAttribute('href')`),'/');
+  const navigationFilm=await evaluate('window.theaterInspectorState.film');
+  await evaluate(`document.querySelector('nav a:not([aria-current])').click()`);
+  await waitFor(`window.theaterViewerState?.clip===${JSON.stringify(navigationFilm)}`);
+  assert.equal(await evaluate(`new URL(document.querySelector('.experiment-nav a:not([aria-current])').href).searchParams.get('film')`),navigationFilm);
   await evaluate(`document.querySelector('.experiment-nav a:not([aria-current])').click()`);
-  await waitFor(`window.theaterInspectorState?.film==='ranked-arena/02-oddball'`);
+  await waitFor(`window.theaterInspectorState?.film===${JSON.stringify(navigationFilm)}`);
   await evaluate(`document.getElementById('film').value='weapons/02-reload-comparison';document.getElementById('film').dispatchEvent(new Event('change'))`);
   await waitFor(`window.theaterInspectorState.film==='weapons/02-reload-comparison'`);
   for(const [t,label,value] of [[26.875065,'Reload start guard','0001000'],[39.371112,'Reload start guard','0001000'],[39.33774,'Magazine rounds',0],[40.171841,'Magazine rounds',12],[32.246683,'Selected weapon slot',1]]){
@@ -152,6 +160,6 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   }
   await snap('theater-inspector-scope');console.log('PASS all five scope-stage byte annotations and two-bit selection.');
   assert.equal(errors.length,0,JSON.stringify(errors));
-  console.log('PASS: 23 recordings; Oddball fields; exact bit coverage; linked field/hex/ASCII/bit selection; unknown filtering; registry text search; invalid hex handling; offset/time navigation; post-wrap frames; zero shield value; firing/melee annotations including reused IDs and opaque weapon fields; API validation and read-only methods; desktop/mobile layout; navigation to the replay and back; no runtime errors.');
+  console.log('PASS: 32 recordings; Oddball fields; exact bit coverage; linked field/hex/ASCII/bit selection; unknown filtering; registry text search; invalid hex handling; offset/time navigation; post-wrap frames; zero shield value; firing/melee annotations including reused IDs and opaque weapon fields; API validation and read-only methods; desktop/mobile layout; navigation to the replay and back; no runtime errors.');
  }finally{chrome.kill('SIGTERM');for(const p of pending.values())clearTimeout(p.timer);}
 })().catch(e=>{console.error(e);process.exitCode=1;});

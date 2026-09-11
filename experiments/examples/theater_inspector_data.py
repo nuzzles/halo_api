@@ -138,31 +138,36 @@ def annotate_delta(bits, offset, base, clock, source, name, serial, generation=1
     return result, parsed
 
 
-def annotate_velocity(bits, offset, base, record, source):
+def velocity_speed(code):
+    return .03 if code == 0 else 350. if code == 1023 else math.exp((code + .5) * math.log(350.97) / 1024) - .97
+
+
+def annotate_velocity(bits, offset, base, record, source, pawn=True):
     def f(start, width, label, value, status='decoded', note=''):
         return field(base + offset + start, base + offset + start + width,
                      label, value, status, record, source, note)
-    form = bits[offset:offset + 2]
-    if form == '01':
-        return [f(0, 2, 'Velocity stationary form', '01', note='Explicit short form observed at stops. Missing samples do not imply stationary.')]
-    if form != '00' or len(bits[offset:offset + 31]) != 31:
+    lead = 2 if pawn else 1
+    form = bits[offset:offset + lead]
+    if form == ('01' if pawn else '1'):
+        return [f(0, lead, 'Velocity stationary form', form, note='Explicit zero velocity. Missing samples do not imply stationary.')]
+    if form != '0' * lead or len(bits[offset:offset + lead + 29]) != lead + 29:
         raise ValueError('Unsupported or truncated velocity form')
-    code = int(bits[offset + 2:offset + 21], 2)
-    magnitude = int(bits[offset + 21:offset + 31], 2)
+    code = int(bits[offset + lead:offset + lead + 19], 2)
+    magnitude = int(bits[offset + lead + 19:offset + lead + 29], 2)
     face, remainder = divmod(code, 87381)
     u, v = divmod(remainder, 294)
-    result = [f(0, 2, 'Velocity form', form, 'structure')]
+    result = [f(0, lead, 'Velocity form', form, 'structure')]
     if face >= 6 or u >= 293 or v >= 293:
-        return result + [f(2, 29, 'Velocity payload', None, 'opaque', 'Unsupported direction code; length only is checked.')]
+        return result + [f(lead, 29, 'Velocity payload', None, 'opaque', 'Unsupported direction code; length only is checked.')]
     direction = [(u + .5) * 2 / 293 - 1, (v + .5) * 2 / 293 - 1]
     direction.insert(face % 3, 1 if face < 3 else -1)
     length = math.sqrt(sum(x*x for x in direction))
     direction = [round(x / length, 6) for x in direction]
     return result + [
-        f(2, 19, 'Velocity direction', dict(code=code, xyz=direction),
-          note='Six-face unit-vector quantization, in film X/Y/Z axes. Coordinate/world scales remain uncalibrated.'),
-        f(21, 10, 'Velocity magnitude code', magnitude,
-          note='Nonlinear speed code; conversion to world speed is unresolved. Long-form code 0 is distinct from the stationary form.')]
+        f(lead, 19, 'Velocity direction', dict(code=code, xyz=direction),
+          note='Six-face unit-vector quantization, in film X/Y/Z axes. World-space direction; position quantization uses separate per-axis map bounds.'),
+        f(lead + 19, 10, 'Velocity magnitude code', magnitude,
+          note=f'{velocity_speed(magnitude):.6f} world units/s. Logarithmic quantizer, endpoints 0.03 and 350; long code 0 is not stationary.')]
 
 
 def annotate_vitality(start, component, values, record, source):
@@ -293,6 +298,7 @@ class Inspector:
                     row = dict(zip(headers, next(csv.reader(file))))
                     result[int(row.get('payload_byte', row.get('payload_offset')))][kind].append(row)
         csv_rows(self.path(label + '/decoded-film.velocity.csv'), 'velocity', False)
+        csv_rows(self.path(label + '/decoded-film.projectile.csv'), 'native_projectile', False)
         if group:
             proof_path = self.path(f'analysis/{group}/decode_evidence.json')
             if proof_path.exists():
@@ -447,6 +453,62 @@ class Inspector:
         return fields, issues
 
     def record_fields(self, label, kind, row, bits, base):
+        if kind == 'native_projectile':
+            offset, end = int(row['bit']), int(row['end_bit'])
+            raw = bits[offset:end]
+            record = f"Projectile {row['track']} · roster {row['player']} · life {row['life']}"
+            source = 'halo_api::theater · decoded-film.projectile.csv'
+            def f(start, width, label, value, status='decoded', note=''):
+                return field(base + start, base + start + width, label, value, status, record, source, note)
+            if row['kind'] == 'velocity':
+                if (row['direction_code'] == '' and raw != '1') or (row['direction_code'] != '' and
+                        (len(raw) != 30 or raw[0] != '0' or int(raw[1:20], 2) != int(row['direction_code']) or
+                         int(raw[20:], 2) != int(row['magnitude_code']))):
+                    raise ValueError('Projectile velocity export / byte mismatch')
+                return annotate_velocity(bits, offset, base, record, source, pawn=False)
+            if row['kind'] == 'rest':
+                if len(raw) not in (2, 21) or int(raw[0], 2) != int(row['rest']) or (raw[1] == '1') != (len(raw) == 21):
+                    raise ValueError('Projectile rest export / byte mismatch')
+                result = [f(offset, 1, 'Projectile at rest', bool(int(row['rest'])), note='Rest does not establish explosion or destruction.'),
+                          f(offset + 1, 1, 'Optional rest payload', raw[1], 'structure')]
+                if len(raw) == 21:
+                    result.append(f(offset + 2, 19, 'Rest payload', None, 'opaque'))
+                return result
+            widths = [int(row[k + '_bits']) for k in 'xyz']
+            if widths not in ([15,15,17], [17,17,16], [18,18,15], [13,12,11]):
+                raise ValueError('Unsupported coordinate widths')
+            result = []
+            if row['kind'] == 'spawn':
+                if (raw[20:124] != PROJECTILE_SPAWN[20:124] or raw[129:133] != PROJECTILE_SPAWN[129:133]
+                        or raw[143:226] != PROJECTILE_SPAWN[143:226] or raw[:2] == '11' or raw[2:4] != '00'
+                        or int(raw[4:18], 2) >> 8 != 36 or int(raw[124:129], 2) != int(row['player'])
+                        or int(raw[133:141], 2) + 256 * ((int(raw[141:143], 2) - 1) % 4) != int(row['life'])):
+                    raise ValueError('Projectile spawn export / byte mismatch')
+                result.extend([f(offset, 226, 'Spawn default state / component mask', None, 'opaque'),
+                    f(offset + 4, 14, 'Projectile entity identity', int(raw[4:18], 2)),
+                    f(offset + 18, 2, 'Projectile generation', int(raw[18:20], 2)),
+                    f(offset + 20, 6, 'Archetype index', 41),
+                    f(offset + 124, 5, 'Thrower roster index', int(row['player'])),
+                    f(offset + 133, 8, 'Thrower pawn wire identity', int(raw[133:141], 2)),
+                    f(offset + 141, 2, 'Thrower pawn generation', int(raw[141:143], 2))])
+                coordinate = offset + 226
+            elif row['kind'] == 'position':
+                if len(raw) != sum(widths) + 5 or raw[:3] != '000' or raw[-2:] != '00':
+                    raise ValueError('Projectile position guards mismatch')
+                coordinate = offset + 3
+                result.append(f(offset, 3, 'Position prefix', '000', 'structure'))
+            else:
+                raise ValueError('Unknown projectile evidence kind')
+            for axis, width in zip('xyz', widths):
+                value = int(bits[coordinate:coordinate + width], 2)
+                if value != int(row[axis]):
+                    raise ValueError('Projectile coordinate mismatch')
+                result.append(f(coordinate, width, 'Projectile ' + axis.upper() + ' raw', value))
+                coordinate += width
+            if bits[coordinate:coordinate + 2] != '00':
+                raise ValueError('Projectile coordinate suffix mismatch')
+            result.append(f(coordinate, 2, 'Position suffix', '00', 'structure'))
+            return result
         if kind == 'velocity':
             offset, end = int(row['bit']), int(row['end_bit'])
             raw = bits[offset:end]

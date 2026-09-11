@@ -1,4 +1,15 @@
-# Grenade throws and controlled projectile paths
+# Grenade throws and projectile paths
+
+Current native support includes recorded projectile velocity and paths in both Ranked
+Arena films: **139 Bandit tracks and 283 Oddball tracks**, plus the natural-end
+control. Thrower references are decoded from the spawn. See
+[FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md) for the current grammar,
+source ranges, tests and limits. Grenade type and explosion locations remain unknown.
+
+## Original throw/control investigation (historical)
+
+The following notes preserve the original 36-film experiment, including the
+subsequently archived forced-end control and the earlier restricted path decoder.
 
 Run commands from `experiments/`. The new grenade probe reads all **36** cached
 films. It exports **362 checked throw events** and two recorded projectile paths.

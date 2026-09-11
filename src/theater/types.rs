@@ -80,10 +80,13 @@ pub struct Sample<T> {
 
 /// Supported raw coordinate bit widths, checked against spawn record boundaries.
 ///
-/// These describe wire encodings, not playlists or map categories. The rule that
-/// selects the per-axis widths is not yet decoded; other layouts remain unsupported.
+/// These describe wire encodings, not playlists or map categories. Map bounds
+/// predict the widths at precision level 16; spawn boundaries independently
+/// check the total width. Other layouts remain unsupported.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CoordinateLayout {
+    /// X: 13 bits, Y: 12 bits, Z: 11 bits; Aquarius map bounds and spawn.
+    X13Y12Z11,
     /// X: 15 bits, Y: 15 bits, Z: 17 bits.
     #[serde(alias = "Controlled")]
     X15Y15Z17,
@@ -97,6 +100,7 @@ impl CoordinateLayout {
     /// Width of each raw axis, in X/Y/Z order.
     pub const fn axis_bits(self) -> [usize; 3] {
         match self {
+            Self::X13Y12Z11 => [13, 12, 11],
             Self::X15Y15Z17 => [15, 15, 17],
             Self::X17Y17Z16 => [17, 17, 16],
             Self::X18Y18Z15 => [18, 18, 15],
@@ -113,7 +117,8 @@ impl CoordinateLayout {
     }
 }
 
-/// Recorded raw position. World units and origin are not calibrated.
+/// Recorded raw position. Use independently supplied [`super::CoordinateBounds`]
+/// for world units and origin; bounds are not extracted from the film.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Position {
     /// X, Y, Z extraction windows.
@@ -123,13 +128,14 @@ pub struct Position {
     /// Input axes in the same checked input chain, when present.
     pub input: Option<InputAxes>,
 }
-/// Recorded pawn velocity. Magnitude-to-world-speed conversion is not calibrated.
+/// Recorded velocity. [`Velocity::speed`] and [`Velocity::vector`] decode the
+/// magnitude in world units per second without enlarging serialized samples.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "form")]
 pub enum Velocity {
-    /// Explicit two-bit `01` form, observed when motion stops.
+    /// Explicit stationary form: pawn `01`, projectile `1`.
     Stationary,
-    /// Long `00` form: a quantized unit direction and nonlinear magnitude code.
+    /// Quantized unit direction and nonlinear magnitude (pawn `00`, projectile `0`).
     Directed {
         /// Original 19-bit direction code.
         direction_code: u32,
@@ -415,23 +421,36 @@ pub struct ClockSample {
     /// Original location.
     pub source: SourceSpan,
 }
-/// Controlled grenade track; general Ranked projectile grammar remains unsupported.
+/// Recorded projectile path, bound to a checked spawn identity and thrower.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectileTrack {
-    /// Checked identity in the two controlled paths.
+    /// Recorded entity identity, including the replication class bit.
     pub id: u16,
-    /// Owner roster index, established only under the single-player control guards.
+    /// Raw two-bit generation tag; reused slots start separate tracks.
+    #[serde(default = "projectile_generation")]
+    pub generation: u8,
+    /// Owner roster index from the spawn's recorded reference.
     pub player: u8,
     /// Thrower's life, independent of projectile lifetime.
     pub life: u16,
     /// Projectile spawn time.
     pub start_us: u64,
-    /// Checked terminal-event time, not a decoded explosion center.
+    /// End of observed tracking: terminal time when available, otherwise one
+    /// microsecond after the last observation. Not an explosion or object death.
     pub end_us: u64,
     /// Recorded coordinates, including spawn; never a simulated ballistic arc.
     pub positions: Vec<Sample<[u32; 3]>>,
-    /// Terminal-event source.
-    pub terminal: SourceSpan,
+    /// Recorded fixed-precision velocity, never used to invent positions.
+    #[serde(default)]
+    pub velocities: Vec<Sample<Velocity>>,
+    /// Explicit projectile-at-rest flag; resting does not mean exploding.
+    #[serde(default)]
+    pub at_rest: Vec<Sample<bool>>,
+    /// Terminal-event source, only in the established single-projectile control.
+    pub terminal: Option<SourceSpan>,
+}
+fn projectile_generation() -> u8 {
+    1
 }
 /// A structurally checked region; it may include opaque fields, not decoded semantics.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -476,7 +495,7 @@ pub struct Film {
     pub summary_events: Vec<SummaryEvent>,
     /// Checked clocks, including changes between rounds.
     pub clocks: Vec<ClockSample>,
-    /// Only the established controlled grenade tracks.
+    /// Supported identity-bound projectile paths; coverage is partial.
     pub projectiles: Vec<ProjectileTrack>,
     /// Unsupported candidates, checked source ranges and scope limitations.
     pub diagnostics: DecodeDiagnostics,

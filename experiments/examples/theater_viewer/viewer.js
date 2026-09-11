@@ -168,7 +168,11 @@
       return { value: null, time: null, age: null, stale: false };
     const value = row.length === 2 ? { form: 'Stationary' } :
       { form: 'Directed', direction: row.slice(2, 5), magnitude_code: row[5], direction_code: row[6] };
+    value.speed = value.form === 'Stationary' ? 0 : velocitySpeed(value.magnitude_code);
     return { value, time: row[0], age: time - row[0], stale: time - row[0] > MAX_GAP };
+  }
+  function velocitySpeed(q) {
+    return q === 0 ? .03 : q === 1023 ? 350 : Math.exp((q + .5) * Math.log(350.97) / 1024) - .97;
   }
   function paintZoom(element, state) {
     const z = state.zoom;
@@ -275,19 +279,30 @@
     }
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     const trail = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: '#77dfed', transparent: true, opacity: .8 })); world.add(trail);
-    const label = document.createElement('span'); label.className = 'projectile-name'; label.textContent = 'GRENADE'; labels.append(label);
-    return { track, ball, trail, segments, label };
+    const label = document.createElement('span'); label.className = 'projectile-name'; label.textContent = 'PROJECTILE'; labels.append(label);
+    const velocityArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), markerSize * 2.5, '#82bfff', markerSize * .6, markerSize * .3);
+    world.add(velocityArrow);
+    return { track, ball, trail, segments, label, velocityArrow };
   }
   function updateProjectile(v) {
     const {track, ball, trail, segments} = v, index = sampleIndex(time, track.samples), row = track.samples[index], next = track.samples[index + 1];
-    const visible = time >= track.start && time < track.end && index >= 0;
+    const visible = time >= track.start && time < track.end && index >= 0 && time - row[0] <= MAX_GAP;
     ball.visible = visible; trail.visible = showTrail && time >= track.start && time < track.end + 1;
     trail.geometry.setDrawRange(0, (sampleIndex(time, segments) + 1) * 2);
     if (visible) {
       ball.position.copy(local(row));
       if (next && next[0] - row[0] <= MAX_GAP) ball.position.lerp(local(next), (time - row[0]) / (next[0] - row[0]));
     }
-    return {id: track.id, player: track.player, visible, sample: visible ? index : null,
+    const velocities = track.velocity || [], velocity = velocities[sampleIndex(time, velocities)];
+    v.velocityArrow.visible = showVelocity && visible && velocity?.length === 5 && time - velocity[0] <= MAX_GAP;
+    if (v.velocityArrow.visible) {
+      v.velocityArrow.position.copy(ball.position);
+      v.velocityArrow.setDirection(new THREE.Vector3(velocity[1], velocity[3], -velocity[2]));
+    }
+    const rest = (track.rest || [])[sampleIndex(time, track.rest || [])];
+    v.label.textContent = rest?.[1] ? 'PROJECTILE · AT REST' : 'PROJECTILE';
+    v.label.title = 'Recorded path · type and explosion unknown';
+    return {id: track.id, player: track.player, visible, speed: velocity && time - velocity[0] <= MAX_GAP ? (velocity.length === 1 ? 0 : velocitySpeed(velocity[4])) : null, atRest: rest?.[1] ?? null, sample: visible ? index : null,
       position: visible ? [ball.position.x, -ball.position.z, ball.position.y] : null,
       stale: visible && time - row[0] > MAX_GAP, trailVisible: trail.visible};
   }
@@ -335,7 +350,7 @@
     }));
     $('roster').hidden = false;
     $('clip-info').textContent = `${views.length > 1 ? views.length + ' players · ' : ''}${allPositions.length.toLocaleString()} positions · ${tracks.reduce((n, p) => n + p.aim.length, 0).toLocaleString()} aim samples`;
-    if (projectileViews.length) $('clip-info').textContent += ` · ${projectileViews.reduce((n, p) => n + p.track.samples.length, 0)} grenade samples`;
+    if (projectileViews.length) $('clip-info').textContent += ` · ${projectileViews.reduce((n, p) => n + p.track.samples.length, 0)} projectile samples`;
     $('scene-note').textContent = clip.note || 'Schematic player and floor. World units are not calibrated.';
     $('aim-note').hidden = !tracks.some(p => p.aim.length || p.initialAim);
     setRange(false); resetCamera(); updateTime(); updateLabels();
@@ -537,7 +552,7 @@
     $('aim-yaw').textContent = s.aim ? String(Math.round(s.aim.yawRaw) % 4096) : '—'; $('aim-pitch').textContent = s.aim ? String(Math.round(s.aim.pitchRaw)) : '—';
     $('aim-observation').textContent = s.aimStatus;
     const velocity = s.velocity, value = velocity.value;
-    $('velocity-value').textContent = !value ? 'Unknown' : value.form === 'Stationary' ? 'Stationary' : `Magnitude code ${value.magnitude_code}`;
+    $('velocity-value').textContent = !value ? 'Unknown' : value.form === 'Stationary' ? 'Stationary' : `${value.speed.toFixed(2)} world units/s · code ${value.magnitude_code}`;
     $('velocity-direction').textContent = value?.form === 'Directed' ? 'XYZ ' + value.direction.map(v => v.toFixed(3)).join(' / ') : '—';
     $('velocity-observation').textContent = !value ? 'No velocity sample this life' :
       `${velocity.stale ? 'Last sample' : 'Recorded sample'} · ${velocity.time.toFixed(3)} s${velocity.stale ? ` · ${velocity.age.toFixed(1)} s ago` : ''}`;

@@ -20,7 +20,7 @@ def bits(row):
 
 
 class InspectorFields(unittest.TestCase):
-    def test_velocity_fields_preserve_unresolved_scale_and_reject_bad_evidence(self):
+    def test_velocity_fields_show_world_speed_and_reject_bad_evidence(self):
         fixture_path = Path(__file__).resolve().parents[2] / 'src/theater/fixtures/velocity_records.json'
         for row in json.loads(fixture_path.read_text())['records']:
             raw = ''.join(f'{b:08b}' for b in bytes.fromhex(row['hex']))
@@ -33,7 +33,7 @@ class InspectorFields(unittest.TestCase):
                 self.assertEqual(counts, dict(decoded=29, structure=2, opaque=0, unparsed=0))
                 self.assertEqual(fields[1]['value']['code'], row['direction_code'])
                 self.assertEqual(fields[2]['value'], row['magnitude_code'])
-                self.assertIn('unresolved', fields[2]['note'])
+                self.assertIn('world units/s', fields[2]['note'])
                 corrupt = raw[:offset + 2] + '1' * 19 + raw[offset + 21:]
                 withheld = annotate_velocity(corrupt, offset, 0, 'Pawn', 'fixture')
                 self.assertEqual(coverage(partition(offset, end, withheld))['opaque'], 29)
@@ -43,6 +43,26 @@ class InspectorFields(unittest.TestCase):
             self.assertTrue(Inspector().record_fields('', 'velocity', evidence, raw, 0))
             with self.assertRaises(ValueError):
                 Inspector().record_fields('', 'velocity', evidence, raw[:offset], 0)
+
+    def test_native_projectile_velocity_annotations_use_fixed_precision_and_reject_corruption(self):
+        fixture = json.loads((Path(__file__).resolve().parents[2] / 'src/theater/fixtures/projectile_motion_records.json').read_text())
+        inspector = Inspector()
+        for r in fixture['records']:
+            if r['kind'] != 'delta':
+                continue
+            raw = ''.join(f'{b:08b}' for b in bytes.fromhex(r['hex']))
+            _, start, end = next(f for f in r['fields'] if f[0] == 1)
+            stationary = r['vel'] == 'stationary'
+            row = dict(track='0', player='0', life='0', bit=str(start), end_bit=str(end), kind='velocity',
+                       direction_code='' if stationary else str(r['vel'][0]),
+                       magnitude_code='' if stationary else str(r['vel'][1]))
+            fields = inspector.record_fields('', 'native_projectile', row, raw, 0)
+            counts = coverage(partition(start, end, fields))
+            self.assertEqual(counts['decoded'], 1 if stationary else 29)
+            self.assertEqual(counts['structure'], 0 if stationary else 1)
+            corrupt = raw[:start] + ('1' if raw[start] == '0' else '0') + raw[start+1:]
+            with self.assertRaises(ValueError):
+                inspector.record_fields('', 'native_projectile', row, corrupt, 0)
 
     def test_captured_delta_fields_point_to_original_bits(self):
         for row in FIXTURES['deltas']:

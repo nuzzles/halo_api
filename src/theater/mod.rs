@@ -3,7 +3,7 @@
 //! [`Film::try_from_chunks`] consumes decompressed chunk bytes, without filesystem,
 //! network, clocks, or native-only APIs. Version 41 support consolidates the
 //! captured motion, aim, input, lifecycle, appearance, combat, vitality, weapon, scope and
-//! controlled-projectile experiments. It is a **partial** decoder: unknown
+//! projectile motion experiments. It is a **partial** decoder: unknown
 //! components never cause guessed skips or fabricated observations.
 //!
 //! ```no_run
@@ -18,6 +18,7 @@
 mod appearance;
 mod bits;
 mod combat;
+mod coordinates;
 mod decode;
 mod input;
 mod legacy;
@@ -27,6 +28,7 @@ mod projectile;
 mod types;
 mod velocity;
 
+pub use coordinates::*;
 pub use legacy::*;
 pub use types::*;
 

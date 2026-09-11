@@ -83,6 +83,84 @@ fn main() -> Result<(), ExampleError> {
         }
     }
     evidence.flush()?;
+    let projectile_output = output.with_extension("projectile.csv");
+    let mut evidence = csv::Writer::from_path(&projectile_output)?;
+    evidence.write_record([
+        "track",
+        "player",
+        "life",
+        "chunk",
+        "payload_byte",
+        "bit",
+        "end_bit",
+        "kind",
+        "x",
+        "y",
+        "z",
+        "direction_code",
+        "magnitude_code",
+        "rest",
+        "x_bits",
+        "y_bits",
+        "z_bits",
+    ])?;
+    for (track, projectile) in film.projectiles.iter().enumerate() {
+        let life = film
+            .players
+            .iter()
+            .find(|p| p.id == projectile.player)
+            .and_then(|p| p.lives.iter().find(|l| l.id == projectile.life))
+            .ok_or("Unbound projectile")?;
+        let widths = life.layout.axis_bits();
+        let row = |source: halo_api::theater::SourceSpan, kind: &str| {
+            let mut row = vec![
+                track.to_string(),
+                projectile.player.to_string(),
+                projectile.life.to_string(),
+                source.chunk.to_string(),
+                source.payload_byte.to_string(),
+                source.bit.to_string(),
+                source.end_bit.to_string(),
+                kind.to_owned(),
+            ];
+            row.extend([
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+            ]);
+            row.extend(widths.map(|w| w.to_string()));
+            row
+        };
+        for (i, sample) in projectile.positions.iter().enumerate() {
+            let mut row = row(sample.source, if i == 0 { "spawn" } else { "position" });
+            for (cell, value) in row[8..11].iter_mut().zip(sample.value) {
+                *cell = value.to_string();
+            }
+            evidence.write_record(row)?;
+        }
+        for sample in &projectile.velocities {
+            let mut row = row(sample.source, "velocity");
+            if let Velocity::Directed {
+                direction_code,
+                magnitude_code,
+                ..
+            } = sample.value
+            {
+                row[11] = direction_code.to_string();
+                row[12] = magnitude_code.to_string();
+            }
+            evidence.write_record(row)?;
+        }
+        for sample in &projectile.at_rest {
+            let mut row = row(sample.source, "rest");
+            row[13] = u8::from(sample.value).to_string();
+            evidence.write_record(row)?;
+        }
+    }
+    evidence.flush()?;
     let export_time = export.elapsed();
     let counts = serde_json::json!({
         "players": film.players.len(),
@@ -107,7 +185,7 @@ fn main() -> Result<(), ExampleError> {
     });
     println!(
         "{}",
-        serde_json::json!({"film":format!("{}/{}",input.group,input.slug),"match_id":film.match_id,"output":output,"velocity_evidence":velocity_output,"counts":counts,"load_ms":load_time.as_secs_f64()*1000.,"decode_ms":decode_time.as_secs_f64()*1000.,"export_ms":export_time.as_secs_f64()*1000.})
+        serde_json::json!({"film":format!("{}/{}",input.group,input.slug),"match_id":film.match_id,"output":output,"velocity_evidence":velocity_output,"projectile_evidence":projectile_output,"counts":counts,"load_ms":load_time.as_secs_f64()*1000.,"decode_ms":decode_time.as_secs_f64()*1000.,"export_ms":export_time.as_secs_f64()*1000.})
     );
     Ok(())
 }

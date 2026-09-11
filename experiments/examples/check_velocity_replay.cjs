@@ -46,7 +46,7 @@ async function scrub(t){return evaluate(`document.getElementById('timeline').val
       return r;
     })()`);
     assert(observation,id+' has a simultaneous recorded direction and position');
-    const expected={form:'Directed',direction:observation.slice(2,5),magnitude_code:observation[5],direction_code:observation[6]};
+    const expected={form:'Directed',direction:observation.slice(2,5),magnitude_code:observation[5],direction_code:observation[6],speed:Math.exp((observation[5]+.5)*Math.log(350.97)/1024)-.97};
     state=await scrub(observation[0]);assert.deepEqual(state.velocity.value,expected);assert(state.velocityVisible,id);assert(!state.velocity.stale);
     const position=state.position;
     state=await click('velocity-toggle');assert(!state.velocityVisible);assert.deepEqual(state.position,position);assert.deepEqual(state.velocity.value,expected);
@@ -57,6 +57,18 @@ async function scrub(t){return evaluate(`document.getElementById('timeline').val
       assert(bounds.cardBottom < bounds.toolsTop, 'Readout leaves camera controls accessible');
     }
   }
+  for (const id of ['bandit/01-evo','ranked-arena/02-oddball']) {
+    await choose(id);
+    const track=await evaluate(`CLIPS.find(c=>c.id===${JSON.stringify(id)}).projectiles[0]`);
+    assert(track.samples.length>=3); assert(track.velocity.length>=3);
+    state=await scrub(track.samples[1][0]);
+    const projectile=state.projectiles.find(p=>p.id===track.id);
+    assert(projectile.visible); assert(projectile.speed>0); assert.equal(projectile.player,track.player);
+    await snap('theater-projectile-'+id.split('/')[0]);
+    state=await scrub(track.end+.101);assert(!state.projectiles.find(p=>p.id===track.id).visible);
+  }
+  await choose('maps/02-aquarius'); state=await scrub(3.04); assert.equal(state.players.length,1);
+  assert.deepEqual(await evaluate(`CLIPS.find(c=>c.id==='maps/02-aquarius').players[0].samples[0].slice(1,4)`),[1980,2469,727]);
   await choose('natural-end/02-jump');
   const jump=await evaluate(`CLIPS.find(c=>c.id==='natural-end/02-jump').players[0].velocity`);
   for(const sign of [1,-1]){

@@ -59,9 +59,11 @@
       duration, action: [start, Math.max(duration, start + .001)], players, events,
       selectedPlayer: players.find(p => p.name === 'Nuzzles')?.id || players[0].id,
       trailWindow: players.length > 2 ? 8 : undefined,
-      projectiles: film.projectiles.map(p => ({ id: String(p.id), player: String(p.player), serial: p.life,
-        start: seconds(p.start_us), end: seconds(p.end_us), samples: rows(p.positions, xyz => xyz) })),
-      note: 'Decoded Film · raw world units. Missing aim, health, ammo and scope remain unknown. Grenade paths are available only for the supported controls.',
+      projectiles: film.projectiles.map(p => ({ id: `${p.id}:${p.generation ?? 1}:${p.start_us}`, player: String(p.player), serial: p.life,
+        start: seconds(p.start_us), end: seconds(p.end_us), samples: rows(p.positions, xyz => xyz),
+        velocity: rows(p.velocities || [], v => v.form === 'Stationary' ? [] : [...v.direction, v.magnitude_code]),
+        rest: rows(p.at_rest || [], v => [v]), terminal: p.terminal != null })),
+      note: 'Decoded Film · raw coordinate codes. Missing aim, health, ammo and scope remain unknown. Projectile paths use recorded samples; type and explosions remain unknown.',
     };
   }
   if (typeof module !== 'undefined' && module.exports) module.exports = { filmToClip };

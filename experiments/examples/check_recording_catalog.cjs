@@ -43,15 +43,13 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   await waitFor('window.theaterViewerState?.clip==="weapons/05-ar-stalker-rifle" && window.theaterViewerState.players.length===1');
   assert.deepEqual(await menu('clip'),inspectorMenu);
   assert.equal(await evaluate('document.getElementById("clip").value'),'weapons/05-ar-stalker-rifle');
-  // Aquarius remains selectable, with no invented positions or stale old scene.
+  // Aquarius now has a recorded spawn and shares selection with the inspector.
   await evaluate('document.getElementById("clip").value="maps/02-aquarius";document.getElementById("clip").dispatchEvent(new Event("change"))');
   await waitFor('window.theaterViewerState?.clip==="maps/02-aquarius" && !window.theaterViewerState.loading');
-  assert.equal(await evaluate('window.theaterViewerState.available'),false);
-  assert.equal(await evaluate('window.theaterViewerState.players.length'),0);
-  assert(await evaluate('document.querySelector(".viewport").hidden && document.getElementById("armor-panel").hidden'));
-  assert.match(await evaluate('document.getElementById("replay-message-detail").textContent'),/No decoded player positions/);
-  await snap('theater-shared-catalog-unresolved');
-  await evaluate('document.getElementById("inspect-recording").click()');
+  assert.equal(await evaluate('window.theaterViewerState.players.length'),1);
+  assert(await evaluate('!document.querySelector(".viewport").hidden'));
+  await snap('theater-shared-catalog-aquarius');
+  await evaluate('document.querySelector("nav a:not([aria-current])").click()');
   await waitFor('window.theaterInspectorState?.film==="maps/02-aquarius" && window.theaterInspectorState.view');
   assert.equal(await evaluate('document.getElementById("film").value'),'maps/02-aquarius');
   assert.deepEqual(await menu('film'),inspectorMenu);
@@ -69,7 +67,7 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));
   await snap('theater-shared-catalog-mobile');
   assert.deepEqual(errors,[]);
-  console.log('PASS: identical 32-recording menus, canonical titles/categories/order, both navigation directions, unresolved Aquarius with no stale replay, current local export loading and mobile layout');
+  console.log('PASS: identical 32-recording menus, canonical titles/categories/order, both navigation directions, Aquarius idle spawn, current local export loading and mobile layout');
  } finally {
   const stopped=new Promise(resolve=>chrome.once('exit',resolve));chrome.kill('SIGTERM');await stopped;
   for(const p of pending.values())clearTimeout(p.timer);

@@ -1,64 +1,71 @@
 # Coordinate layouts across maps
 
-The new Aquarius capture supports map-dependent position encoding, but does not
-establish that every map has a unique layout or recover the selection rule.
+Position widths depend on the map's quantization bounds. They are not playlist
+IDs, and different maps can share a layout. At the observed precision level 16,
+the external Infinite decoder reference gives, per axis:
 
-| Captures | X/Y/Z widths | Total coordinate-window bits |
+```text
+extent = maximum - minimum
+bits = min(26, ceil(log2(ceil(60 * extent))))
+world = minimum + (raw + 0.5) * extent / 2^bits
+```
+
+| Captures | X/Y/Z widths | Coordinate bits |
 | --- | --- | ---: |
-| Original Forge and Octagon controls | 15/15/17 | 47 |
-| Full Octagon first-to-50 gameplay | 15/15/17, different spawn prefix | 47 |
-| Bazaar | 17/17/16, empirically inferred | 50 |
-| Two Arena captures | 18/18/15 | 51 |
-| Aquarius, idle | Unresolved | 36, candidate window |
+| Forge controls, Octagon gameplay, raid | 15/15/17 | 47 |
+| Bazaar | 17/17/16 | 50 |
+| Both Ranked Arena games (Recharge) | 18/18/15 | 51 |
+| Aquarius | 13/12/11 | 36 |
 
-The registry calls pawn component 0 `object-position-dynamic-precision-component`.
-Map bounds and precision settings are plausible causes of the differing widths.
-Neither their metadata nor a formula relating them to bit widths is decoded.
-Repeated captures of each map with movement and differing spawn locations would
-help distinguish a stable map layout from other encoding choices.
+The native `CoordinateBounds` API computes widths and dequantizes a raw position
+only when the supplied bounds agree with its checked `CoordinateLayout`. Bounds
+are supplied separately; the library performs no network or filesystem access.
+Only the four captured layouts are accepted by spawn parsing. The bounds formula
+has not been established for every precision level or every map/record form.
 
-## Aquarius: a distinct but unresolved encoding
+## Aquarius: recovered spawn
 
-Match `16d67b8c-09c2-4ab8-8b94-892f7edb6212` is a v41 film with a recorded end,
-seven chunks, and 5,366 replication frames. The recorder confirmed staying still
-throughout. It has one recognizable pawn-spawn candidate in chunk 1, payload
-byte 505970, at payload bit 3470 (film second 3.036471).
+Match `16d67b8c-09c2-4ab8-8b94-892f7edb6212` contains one idle spawn at film
+3.036471 s, chunk 1, payload byte 505970, bit 3470. Its coordinate window starts
+at spawn+263 and ends at +299. Its prefix is also used on Octagon, so the prefix
+alone cannot select widths.
 
-The known spawn body and suffix are present. Relative to the spawn start:
+The exact match-history reference identifies Aquarius (`ctf_aquarius`), level
+`fc878857-e778-4daf-b0ef-5d826b922f3f`, map asset
+`c395f3ac-4614-45f9-a83a-56f69e8ae962`, version
+`dda9eaa7-441d-45ef-983b-bf9e89298be5`. Independently published BSP bounds predict
+**13/12/11**. That split fits the recorded suffix and yields raw
+**[1980, 2469, 727]**. The native decoder now emits this spawn and 4,753 input
+observations. Replay can open Aquarius. It does not invent movement or initial aim.
 
-- The 63-bit pre-coordinate prefix at 192 differs from Bazaar at bit **210**.
-- Bits 255–262 are `01100000`, versus Bazaar's `11100000`.
-- The known 30-bit suffix starts at **299**, versus 310/313/314 in the other captures.
-- Keeping the previously established coordinate start at 263 gives a **36-bit
-  candidate window**, `001111011110010011010010101011010111`.
+The retained fixture `aquarius_unresolved_spawn.json` keeps its historical filename;
+its current test verifies the bounds-supported partition. There is still no
+movement-based validation on Aquarius because the recorder stayed still.
 
-The changed preceding flags make this a new structure to validate. Without a
-position delta, the same start and overhead cannot be independently confirmed.
-The subsequent [full Octagon gameplay capture](FILM_OCTAGON.md) shares this prefix
-but has a 47-bit window and motion supporting 15/15/17. Its prefix is now accepted
-by the decoder; Aquarius's unresolved 36-bit window still fails the supported
-coordinate boundaries. This is another example of a prefix not identifying widths.
-An all-offset scan found no component-0 update candidates for the initial pawn,
-consistent with the recorder's idle description. Its candidate position window
-appears only once, so there is no independent copy or motion continuity check.
+## Bounds provenance and limits
 
-Do **not** infer 12/12/12 merely because the total is 36. That split yields
-`[990,1234,2775]`, while 13/13/10 yields `[1980,4938,727]`, and 12/13/11 yields
-`[990,2469,727]`. A single uncalibrated position cannot distinguish them.
+[reference/map-coordinate-bounds.json](reference/map-coordinate-bounds.json)
+contains only Aquarius and Bazaar, with a pinned external source and independently
+retrieved level IDs. The reference comes from JGtm/LevelUp commit
+`cf333a3889771c6462dfce9e1bc287a897043a47`, not from a decoded map-bounds field in
+our films. `download_film_maps` caches exact match-history and map asset revisions
+under each film's `settings/`. It found 19 of the 32 films in the first 1,000
+history results; 13 older natural-end controls were outside that search.
 
-No new `CoordinateLayout` variant was added. The partial Film JSON retains its
-registry, roster, clocks, and unsupported-spawn diagnostics; player position
-remains unavailable. The replay builder reports and skips this film, and direct
-import explains that no decoded positions are available instead of opening an
-empty scene. The downloaded chunks remain available in the byte inspector.
+Bazaar validates both its predicted widths and the world-speed conversion against
+recorded movement (325 comparisons; median speed error 0.0493 world units/s).
+See [FILM_VELOCITY.md](FILM_VELOCITY.md).
 
-Captured evidence is in `films/analysis/aquarius/coordinate-evidence.json` and
-the tracked `../src/theater/fixtures/aquarius_unresolved_spawn.json`. A regression
-test preserves the unknown result, guarding against accidental assignment to an
-existing tuple. The next useful control is Aquarius with several seconds of
-forward movement, sideways movement, and a jump, keeping the camera fixed.
+The newer Str8 Octagon controls and Facility Aetheria raid identify the Forge canvas
+`fo11_blank`. Both Ranked games identify Recharge (`sgh_blueprint`). Their exact BSP
+bounds remain unavailable here. An exploratory use of Vagabond bounds for the
+controls gave plausible numbers but was **not established** and is not used by
+the decoder. Matching widths never establishes matching origins or scales.
+The bootstrap registry is largely identical across these maps; it cannot by
+itself supply their distinct bounds. Map `.mvar` metadata identifies the base map
+but does not provide a decoded BSP bound table in our current work.
 
-## Bazaar: the third supported partition
+## Earlier Bazaar inference
 
 Match `79bce30e-0d61-4c57-93dd-92d61124e80c`, reported as a one-minute idle
 game on Bazaar, introduces a third empirically supported X/Y/Z encoding:
@@ -152,7 +159,7 @@ forms, combined position/aim, and continuation versus End/input boundaries.
 Rust tests check the extracted fields, wrong-width/tick rejection, suffix
 corruption, JSON compatibility, and input grammar with multiple width tuples.
 
-Validation after adding Aquarius: 26 Theater tests, eight retained catalog/inspector
+Historical validation before the bounds-supported Aquarius partition: 26 Theater tests, eight retained catalog/inspector
 tests, and the 24-film browser replay check (including unresolved Aquarius import)
 pass. The preceding parser refactor also passed clippy and wasm compilation. The original
 23 films retain all 1,108,962 historical observations/lifetimes. Generalized

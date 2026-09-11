@@ -361,7 +361,26 @@ impl Film {
             );
         }
         let mut clocks = Vec::new();
-        let mut projectiles = projectile::Candidates::default();
+        let mut projectiles = projectile::Tracks::default();
+        let projectile_layout = lives
+            .values()
+            .next()
+            .map(|l| l.layout)
+            .filter(|layout| lives.values().all(|l| l.layout == *layout))
+            .filter(|_| {
+                registry.archetype(41).is_some_and(|a| {
+                    [
+                        (0, "object-position-component"),
+                        (1, "object-translational-velocity-component"),
+                        (2, "object-forward-and-up-component"),
+                        (5, "object-shield-vitality-component"),
+                        (18, "projectile-at-rest-state"),
+                        (20, "projectile-command_tick"),
+                    ]
+                    .iter()
+                    .all(|(i, name)| a.components.get(*i).map(String::as_str) == Some(*name))
+                })
+            });
         // All motion, vitality, combat, weapon, clock and projectile candidates
         // share a single rolling byte window in this second pass.
         for p in packets
@@ -659,15 +678,20 @@ impl Film {
                         );
                     }
                 }
-                if w >> 48 == pattern(&projectile::PROJECTILE_SPAWN[..16])
-                    && let Some((xyz, end)) = projectile::spawn(b, o)
-                {
-                    projectiles.spawns.push(sample(p, t, 0, o, end, xyz));
-                }
-                if w >> 46 == pattern(projectile::PROJECTILE_DELTA)
-                    && let Some((xyz, end)) = projectile::delta(b, o)
-                {
-                    projectiles.positions.push(sample(p, t, 0, o, end, xyz));
+                if let Some(layout) = projectile_layout {
+                    if (w >> 58) & 15 == 2
+                        && let Some((value, end)) = projectile::birth(b, o, layout)
+                    {
+                        projectiles
+                            .births
+                            .push(sample(p, t, value.life, o, end, value));
+                    }
+                    if matches!(w >> 56, 0x90..=0x93)
+                        && let Some(value) = projectile::record(b, o, layout)
+                    {
+                        let end = value.end;
+                        projectiles.records.push(sample(p, t, 0, o, end, value));
+                    }
                 }
             }
             // This suffix grammar is validated on one/two-player recordings.
@@ -796,12 +820,12 @@ impl Film {
         }
         let players: Vec<_> = players.into_values().collect();
         let has_projectile_candidates =
-            !projectiles.spawns.is_empty() || !projectiles.positions.is_empty();
-        let projectiles: Vec<_> = projectiles.finish(&players).into_iter().collect();
+            !projectiles.births.is_empty() || !projectiles.records.is_empty();
+        let projectiles = projectiles.finish(&players);
         if has_projectile_candidates && projectiles.is_empty() {
             reject(
                 &mut diagnostics,
-                "projectile candidates outside controlled-path guards",
+                "projectile candidates outside spawn/identity/continuity guards",
             );
         }
         for projectile in &projectiles {
@@ -810,22 +834,32 @@ impl Film {
                     &mut diagnostics,
                     options.retain_coverage,
                     s.source,
-                    "controlled projectile (includes opaque fields)",
+                    "projectile position (spawn includes opaque fields)",
                 );
             }
-            checked(
-                &mut diagnostics,
-                options.retain_coverage,
-                projectile.terminal,
-                "controlled projectile terminal",
-            );
+            for s in &projectile.velocities {
+                checked(
+                    &mut diagnostics,
+                    options.retain_coverage,
+                    s.source,
+                    "projectile velocity",
+                );
+            }
+            if let Some(source) = projectile.terminal {
+                checked(
+                    &mut diagnostics,
+                    options.retain_coverage,
+                    source,
+                    "controlled projectile terminal",
+                );
+            }
         }
         diagnostics.limitations.extend([
             "Partial signature-guarded v41 grammar; unsupported records/components remain unparsed. Checked ranges can include opaque bits.",
-            "Raw coordinates have uncalibrated units/origin; aim conversion and vitality display scales remain provisional.",
+            "Raw positions require independently supplied map bounds for world coordinates. Velocity is in world units/s; aim and vitality display scales remain provisional.",
             "No inferred initial aim, health, ammo or scope. Input axes/crouch commands support the checked wire-0 chain and terminal roster-0/1 records in one/two-player films. Other command forms, larger rosters, physical crouch and slide remain unsupported.",
             "Firing is activity, not an exact bullet count; reload cause/duration, reserves and full inventory are unknown.",
-            "Grenade paths require the two established single-player control guards; Ranked projectile trajectories remain unsupported.",
+            "Projectile paths require checked spawns, thrower references and continuous supported updates. Grenade type and explosion locations remain unknown; track ends are observation boundaries.",
         ].map(str::to_owned));
         Ok(Film {
             schema_version: 1,
