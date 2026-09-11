@@ -42,14 +42,16 @@ struct StaticClearanceTokenSource {
     token: String,
 }
 
-#[async_trait::async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
 impl SpartanTokenSource for StaticSpartanTokenSource {
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError> {
         Ok(static_token(&self.token))
     }
 }
 
-#[async_trait::async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
 impl ClearanceTokenSource for StaticClearanceTokenSource {
     async fn clearance_token(
         &self,

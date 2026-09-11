@@ -1084,7 +1084,7 @@ impl HaloInfiniteClient {
             .into_iter()
             .map(|rotation| {
                 let client = self.clone();
-                tokio::spawn(async move {
+                let task = async move {
                     let pair = client
                         .map_mode_pair(&rotation.asset.asset_id, &rotation.asset.version_id)
                         .await?;
@@ -1104,13 +1104,20 @@ impl HaloInfiniteClient {
                         map,
                         mode,
                     })
-                })
+                };
+                // Browser fetch futures are local to the JavaScript event loop.
+                #[cfg(not(target_arch = "wasm32"))]
+                let task = tokio::spawn(task);
+                task
             })
             .collect::<Vec<_>>();
 
         let mut map_modes = Vec::with_capacity(tasks.len());
         for task in tasks {
+            #[cfg(not(target_arch = "wasm32"))]
             map_modes.push(task.await.map_err(|_| InfiniteClientError::TaskJoin)??);
+            #[cfg(target_arch = "wasm32")]
+            map_modes.push(task.await?);
         }
         Ok(Some(RankedArenaSeason { season, map_modes }))
     }

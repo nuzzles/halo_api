@@ -10,7 +10,8 @@ use crate::auth::AuthError;
 
 const TIMEOUT: Duration = Duration::from_secs(10);
 
-#[async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub(crate) trait ClearanceTokenSource: Send + Sync {
     async fn clearance_token(&self, spartan_token: &str) -> Result<CachedToken<String>, AuthError>;
 }
@@ -45,7 +46,8 @@ struct ClearanceResponse {
     flight_configuration_id: String,
 }
 
-#[async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl ClearanceTokenSource for WaypointClearanceProvider {
     async fn clearance_token(&self, spartan_token: &str) -> Result<CachedToken<String>, AuthError> {
         let current_user_response = self

@@ -16,7 +16,8 @@ use super::endpoints::AuthEndpoints;
 const SPARTAN_TOKEN_TIMEOUT: Duration = Duration::from_secs(10);
 const HALO_RELYING_PARTY: RelyingParty = RelyingParty::new("https://prod.xsts.halowaypoint.com/");
 
-#[async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub(crate) trait SpartanTokenSource: Send + Sync {
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError>;
 }
@@ -51,7 +52,8 @@ impl<P: XblAuthProvider> XboxSpartanTokenProvider<P> {
     }
 }
 
-#[async_trait]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<P: XblAuthProvider> SpartanTokenSource for XboxSpartanTokenProvider<P> {
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError> {
         let xsts = self
