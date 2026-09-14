@@ -1,5 +1,5 @@
 {
-  "note": "Captured v41 terminal command records. Slots 0/1 bind roster players across respawns. Tags 13/14 remain opaque. Four exact command forms are checked; physical posture is not asserted. Jump-only/combined forms corroborated with the jump control and position rises.",
+  "note": "Captured v41 terminal command records. Slots 0/1 bind roster players across respawns. Tags 13/14 remain opaque. Four exact command forms are checked; physical posture is not asserted. Jump-only/combined forms corroborated with the jump control and position rises. Correction: paired commands establish 10-bit nonempty tails; the former 11th zero terminates the final command before byte padding.",
   "records": [
     {
       "film": "octagon/03-first-to-50",
@@ -129,8 +129,8 @@
           "crouch": true,
           "jump": true,
           "start": 433,
-          "end": 469,
-          "tail": "00100101000",
+          "end": 468,
+          "tail": "0010010100",
           "life": 3
         }
       ]
@@ -152,8 +152,8 @@
           "crouch": true,
           "jump": false,
           "start": 538,
-          "end": 574,
-          "tail": "00100001000",
+          "end": 573,
+          "tail": "0010000100",
           "life": 2
         }
       ]
@@ -198,8 +198,8 @@
           "crouch": true,
           "jump": false,
           "start": 470,
-          "end": 506,
-          "tail": "00100001000",
+          "end": 505,
+          "tail": "0010000100",
           "life": 2
         }
       ]
@@ -244,8 +244,8 @@
           "crouch": true,
           "jump": false,
           "start": 504,
-          "end": 540,
-          "tail": "00100001000",
+          "end": 539,
+          "tail": "0010000100",
           "life": 2
         }
       ]
@@ -304,8 +304,8 @@
           "crouch": false,
           "jump": true,
           "start": 435,
-          "end": 471,
-          "tail": "00100100000",
+          "end": 470,
+          "tail": "0010010000",
           "life": 4
         }
       ]
@@ -327,8 +327,8 @@
           "crouch": false,
           "jump": true,
           "start": 606,
-          "end": 642,
-          "tail": "00100100000",
+          "end": 641,
+          "tail": "0010010000",
           "life": 16
         }
       ]
@@ -401,8 +401,8 @@
           "crouch": true,
           "jump": false,
           "start": 400,
-          "end": 436,
-          "tail": "00100001000",
+          "end": 435,
+          "tail": "0010000100",
           "life": 89
         }
       ]
@@ -424,8 +424,8 @@
           "crouch": true,
           "jump": false,
           "start": 40,
-          "end": 76,
-          "tail": "00100001000",
+          "end": 75,
+          "tail": "0010000100",
           "life": 0
         }
       ]
@@ -447,8 +447,8 @@
           "crouch": false,
           "jump": true,
           "start": 174,
-          "end": 210,
-          "tail": "00100100000",
+          "end": 209,
+          "tail": "0010010000",
           "life": 0
         }
       ]

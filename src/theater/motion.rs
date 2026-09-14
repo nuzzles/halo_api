@@ -151,7 +151,11 @@ pub(super) fn clocked_delta(
     let d = clocked_fields(b, o, layout, tick)?;
     // A supported prefix is followed by another record or the checked End/input
     // boundary. This is a packet-grammar check, independent of axis widths.
-    if d.ids.last() == Some(&25) && b.read(d.end, 1)? != 1 && !b.is(d.end, INPUT_END) {
+    if d.ids.last() == Some(&25)
+        && b.read(d.end, 1)? != 1
+        && !b.is(d.end, INPUT_END)
+        && super::input::terminal_at(b, d.end).is_none()
+    {
         return None;
     }
     Some(d)
@@ -422,15 +426,16 @@ pub(super) fn input_chain(b: Bits<'_>, layout: CoordinateLayout) -> Option<Chain
 /// This is a crouch command, not proof of the resulting physical posture/slide.
 /// The exact final-byte padding rejects additional players/buttons and unknown forms.
 pub(super) fn crouch_input(b: Bits<'_>, o: usize) -> Option<(bool, usize)> {
-    let (value, width) = if b.is(o, "00100001000") {
-        (true, 11)
+    let (value, width) = if b.is(o, "0010000100") {
+        (true, 10)
     } else if b.is(o, "00000") {
         (false, 5)
     } else {
         return None;
     };
     let end = o.checked_add(width)?;
-    if end.div_ceil(8) * 8 != b.len() || b.read(end, b.len().checked_sub(end)?)? != 0 {
+    let terminal_end = end + usize::from(value);
+    if terminal_end.div_ceil(8) * 8 != b.len() || b.read(end, b.len().checked_sub(end)?)? != 0 {
         return None;
     }
     Some((value, end))

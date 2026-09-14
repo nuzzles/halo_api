@@ -1,0 +1,415 @@
+{
+  "note": "Captured full Octagon FRAME payloads. Pawn motion ends at a repeated command tick and End + terminal roster commands. Paired commands establish ten-bit nonempty tails; final nonempty commands have a separate zero terminator before byte padding. Tags are opaque; positions and aim are raw captured fields.",
+  "records": [
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 509444,
+      "time_us": 146309148,
+      "hex": "a07b42018c40094005565c06cff15c9c21b026f98805795fda6250220148002ab20d5d834238436000b7809f034004c4201cfbe080ec0f80",
+      "sha256": "6123f1a98a82539f102d33c3accbab3fe51724a448d844224097be57cf468576",
+      "offset": 218,
+      "serial": 1,
+      "ids": [
+        0,
+        1,
+        21,
+        25
+      ],
+      "end": 383,
+      "position": [
+        27372,
+        3336,
+        115227
+      ],
+      "aim": {
+        "yaw": 3590,
+        "pitch": 1024
+      },
+      "tick": 49,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 386,
+          "buttons": 411,
+          "end": 416,
+          "tail": "00000"
+        },
+        {
+          "player": 1,
+          "tag": 13,
+          "start": 416,
+          "buttons": 441,
+          "end": 446,
+          "tail": "00000"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 515540,
+      "time_us": 147360279,
+      "hex": "a07b42038440094004555906d43167fc21b03a62a6590004782c54ff970440294004555906b411a47c21b01b0f45498004943c2affd7008077c290901db7e210",
+      "sha256": "f27f0e7724326fc8482847ebd6a5621b3f89eb1478f04a4d90dd8a7c270057d6",
+      "offset": 237,
+      "serial": 1,
+      "ids": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "end": 437,
+      "position": [
+        27457,
+        3363,
+        115227
+      ],
+      "aim": {
+        "yaw": 3605,
+        "pitch": 1023
+      },
+      "tick": 112,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 475,
+          "tail": "0010000100"
+        },
+        {
+          "player": 1,
+          "tag": 13,
+          "start": 475,
+          "buttons": 500,
+          "end": 510,
+          "tail": "0010000100"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 8,
+      "payload_byte": 522041,
+      "time_us": 148377829,
+      "hex": "a07b42056c40094004555906d4e16c9c2210662da7d00004986c1cff5ad4402900155641adb86a67086c10008b078160135a100e73e24203ac7a00",
+      "sha256": "c38932a4aa38fd9a98ae72a1217b8cd0aacaa7aa1b47d4a361c4fa69203b0c17",
+      "offset": 237,
+      "serial": 1,
+      "ids": [
+        0,
+        5,
+        21,
+        25
+      ],
+      "end": 400,
+      "position": [
+        27502,
+        3404,
+        115227
+      ],
+      "aim": {
+        "yaw": 3589,
+        "pitch": 1026
+      },
+      "tick": 173,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 403,
+          "buttons": 428,
+          "end": 438,
+          "tail": "0010010000"
+        },
+        {
+          "player": 1,
+          "tag": 13,
+          "start": 438,
+          "buttons": 463,
+          "end": 468,
+          "tail": "00000"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 12,
+      "payload_byte": 554130,
+      "time_us": 230093689,
+      "hex": "a07b42067c43894004555906d1519dfc21b0fd4b48180004847d32f79cf443a900055641b73864d7086c0437818370381ee7840380548480f7ca1080",
+      "sha256": "2aa737754574abe517f85cafda586d347d2a6e25c2076ebbae55e6d234879bbc",
+      "offset": 237,
+      "serial": 29,
+      "ids": [
+        0,
+        1,
+        21,
+        25
+      ],
+      "end": 402,
+      "position": [
+        28110,
+        3226,
+        115227
+      ],
+      "aim": {
+        "yaw": 1795,
+        "pitch": 1039
+      },
+      "tick": 207,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 405,
+          "buttons": 430,
+          "end": 440,
+          "tail": "0010000100"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 475,
+          "tail": "0010000100"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 13,
+      "payload_byte": 601553,
+      "time_us": 257303673,
+      "hex": "a07b42017444e94004555906d3c15c7c21b08c2124e900045832ed00d2e445094004555906b7f13f3c21b0216045300004186474ff12e08072400203d93600",
+      "sha256": "ab97f5139bf1649f888ba87e5c34e97b5bc9b14bc58ba9bb2301fadd781cc055",
+      "offset": 237,
+      "serial": 40,
+      "ids": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "end": 437,
+      "position": [
+        27519,
+        2553,
+        115227
+      ],
+      "aim": {
+        "yaw": 570,
+        "pitch": 1020
+      },
+      "tick": 46,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 470,
+          "tail": "00000"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 470,
+          "buttons": 495,
+          "end": 500,
+          "tail": "00000"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 13,
+      "payload_byte": 601654,
+      "time_us": 257320467,
+      "hex": "a07b42017c44e94004555906d3a15c5c21b08cb4253900045432ed00d2f445094004555906b8013f3c21b01d8004c0000414646cff12f08072608203da3400",
+      "sha256": "ffdbe349e73304fe9421ef3f6d86966b07ea97b5d629a35c5e85549658c721d2",
+      "offset": 237,
+      "serial": 40,
+      "ids": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "end": 437,
+      "position": [
+        27520,
+        2553,
+        115227
+      ],
+      "aim": {
+        "yaw": 566,
+        "pitch": 1020
+      },
+      "tick": 47,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 470,
+          "tail": "00000"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 470,
+          "buttons": 495,
+          "end": 500,
+          "tail": "00000"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 13,
+      "payload_byte": 601957,
+      "time_us": 257370520,
+      "hex": "a07b42019444e94004555906d3415c1c21b08dfee61100044832e900932445094004555906b8413f3c21b00db583d000040863d8ff932080720090901ee97000",
+      "sha256": "23b646dddf912ff768aa5d5e85a70104191337140e08a6e1a552cbe51ce0dcba",
+      "offset": 237,
+      "serial": 40,
+      "ids": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "end": 437,
+      "position": [
+        27524,
+        2553,
+        115227
+      ],
+      "aim": {
+        "yaw": 492,
+        "pitch": 1022
+      },
+      "tick": 50,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 475,
+          "tail": "0010000100"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 475,
+          "buttons": 500,
+          "end": 505,
+          "tail": "00000"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 18,
+      "payload_byte": 533456,
+      "time_us": 346626759,
+      "hex": "a07b4200c449294004555906cb61705c21b088d3e43000045c7161055184494900055641aa5c564f086c348491750b080c8c0403aa008480f7b91080",
+      "sha256": "f9e78e095270ffae2290149063e912e241df0fcbab375daec2d9fd498f008e93",
+      "offset": 237,
+      "serial": 74,
+      "ids": [
+        0,
+        1,
+        21,
+        25
+      ],
+      "end": 402,
+      "position": [
+        27287,
+        2761,
+        115227
+      ],
+      "aim": {
+        "yaw": 176,
+        "pitch": 1030
+      },
+      "tick": 24,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 405,
+          "buttons": 430,
+          "end": 440,
+          "tail": "0010000100"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 475,
+          "tail": "0010000100"
+        }
+      ]
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "chunk": 20,
+      "payload_byte": 553159,
+      "time_us": 390653947,
+      "hex": "a07b42033c4ac94004555906b891801c21b0137384080002e07a54f916744ae94004555906bc016e7c22106bbfe86080049829c0f5d67080701412901e9fe000",
+      "sha256": "27aa64af26e78b397500f08adfd72f37f5bc7ed842adc861e271de3d3acfb8bd",
+      "offset": 237,
+      "serial": 87,
+      "ids": [
+        0,
+        1,
+        5,
+        21,
+        25
+      ],
+      "end": 437,
+      "position": [
+        27584,
+        2931,
+        115233
+      ],
+      "aim": {
+        "yaw": 1248,
+        "pitch": 983
+      },
+      "tick": 103,
+      "commands": [
+        {
+          "player": 0,
+          "tag": 14,
+          "start": 440,
+          "buttons": 465,
+          "end": 475,
+          "tail": "0010010100"
+        },
+        {
+          "player": 1,
+          "tag": 14,
+          "start": 475,
+          "buttons": 500,
+          "end": 505,
+          "tail": "00000"
+        }
+      ]
+    }
+  ]
+}

@@ -17,13 +17,10 @@ pub(super) struct Command {
 /// generalized button mask or a physical stance/slide component.
 pub(super) fn terminal(b: Bits<'_>) -> Option<Vec<Command>> {
     // Two maximum-width commands, their preceding zero guard, and byte padding.
-    const MAX_BITS: usize = 2 * (25 + 11) + 3 + 7;
+    const MAX_BITS: usize = 2 * (25 + 10) + 3 + 1 + 7;
     let mut found: Option<Vec<Command>> = None;
     for guard in b.len().saturating_sub(MAX_BITS)..b.len().saturating_sub(32) {
-        if b.read(guard, 3) != Some(0) {
-            continue;
-        }
-        let Some(rows) = sequence(b, guard + 3) else {
+        let Some(rows) = terminal_at(b, guard) else {
             continue;
         };
         if let Some(previous) = &found {
@@ -37,6 +34,15 @@ pub(super) fn terminal(b: Bits<'_>) -> Option<Vec<Command>> {
         }
     }
     found
+}
+
+/// Validate a terminal command suffix at an already decoded replication End.
+/// Motion records can use this same grammar for both header tags and roster slots.
+pub(super) fn terminal_at(b: Bits<'_>, guard: usize) -> Option<Vec<Command>> {
+    if b.read(guard, 3)? != 0 {
+        return None;
+    }
+    sequence(b, guard.checked_add(3)?)
 }
 
 fn sequence(b: Bits<'_>, mut p: usize) -> Option<Vec<Command>> {
@@ -62,15 +68,17 @@ fn sequence(b: Bits<'_>, mut p: usize) -> Option<Vec<Command>> {
         let buttons = p;
         let (crouch, width) = if b.is(p, "00000") {
             (false, 5)
-        } else if b.is(p, "00100001000") {
-            (true, 11)
-        } else if b.is(p, "00100100000") {
-            (false, 11) // Jump without crouch in the independent jump control.
-        } else if b.is(p, "00100101000") {
-            (true, 11) // Combined jump/crouch, also captured in Octagon.
+        } else if b.is(p, "0010000100") {
+            (true, 10)
+        } else if b.is(p, "0010010000") {
+            (false, 10) // Jump without crouch in the independent jump control.
+        } else if b.is(p, "0010010100") {
+            (true, 10) // Combined jump/crouch, also captured in Octagon.
         } else {
             return None;
         };
+        // Paired commands establish the ten-bit nonempty tail. The next bit
+        // starts the following command, or is a zero terminator before padding.
         p += width;
         rows.push(Command {
             player,
@@ -80,7 +88,8 @@ fn sequence(b: Bits<'_>, mut p: usize) -> Option<Vec<Command>> {
             buttons,
             end: p,
         });
-        if p.div_ceil(8) * 8 == b.len() {
+        let terminal_end = p + usize::from(width == 10);
+        if terminal_end.div_ceil(8) * 8 == b.len() {
             return (b.read(p, b.len().checked_sub(p)?)? == 0).then_some(rows);
         }
     }

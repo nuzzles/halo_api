@@ -706,7 +706,7 @@ fn captured_crouch_command_tails_preserve_release_and_reject_other_inputs() {
         let decoded = motion::crouch_input(Bits(&data), chain.end);
         assert_eq!(decoded.map(|s| s.0), expected);
         if let Some((value, end)) = decoded {
-            assert_eq!(end, chain.end + if value { 11 } else { 5 });
+            assert_eq!(end, chain.end + if value { 10 } else { 5 });
             // Additional command data must not be mistaken for final padding.
             let mut extended = data.clone();
             extended.push(0);
@@ -715,6 +715,73 @@ fn captured_crouch_command_tails_preserve_release_and_reject_other_inputs() {
             let mut corrupt = data.clone();
             flip(&mut corrupt, end - 1);
             assert!(motion::crouch_input(Bits(&corrupt), chain.end).is_none());
+        }
+    }
+}
+
+#[test]
+fn captured_motion_ends_at_paired_terminal_commands() {
+    let f = fixture(include_str!("fixtures/motion_input_boundary_records.json"));
+    for r in f["records"].as_array().unwrap() {
+        let data = bytes(r);
+        let o = num(&r["offset"]);
+        let tick = num(&r["tick"]) as u8;
+        let read = |data: &[u8], layout, tick| motion::clocked_delta(Bits(data), o, layout, tick);
+        let d = read(&data, CoordinateLayout::X15Y15Z17, tick).unwrap();
+        assert_eq!(d.end, num(&r["end"]));
+        assert_eq!(serde_json::to_value(d.position).unwrap(), r["position"]);
+        assert_eq!(serde_json::to_value(d.aim).unwrap(), r["aim"]);
+        let commands = input::terminal_at(Bits(&data), d.end).unwrap();
+        assert_eq!(commands.len(), 2);
+        let scanned = input::terminal(Bits(&data)).unwrap();
+        assert_eq!(
+            scanned.iter().map(|c| (c.start, c.end)).collect::<Vec<_>>(),
+            commands
+                .iter()
+                .map(|c| (c.start, c.end))
+                .collect::<Vec<_>>()
+        );
+        for (command, expected) in commands.iter().zip(r["commands"].as_array().unwrap()) {
+            assert_eq!(usize::from(command.player), num(&expected["player"]));
+            assert_eq!(command.start, num(&expected["start"]));
+            assert_eq!(command.end, num(&expected["end"]));
+            assert_eq!(
+                command.crouch,
+                matches!(
+                    expected["tail"].as_str().unwrap(),
+                    "0010000100" | "0010010100"
+                )
+            );
+        }
+        assert_eq!(commands[0].end, commands[1].start);
+        // End, tag, repeated tick, command buttons and byte padding all matter.
+        for bit in [
+            d.end + 1,
+            d.end - 1,
+            commands[0].start + 9,
+            commands[1].start + 9,
+            commands[0].buttons,
+            data.len() * 8 - 1,
+        ] {
+            let mut corrupt = data.clone();
+            flip(&mut corrupt, bit);
+            assert!(
+                read(&corrupt, CoordinateLayout::X15Y15Z17, tick).is_none(),
+                "{} bit {bit}",
+                r["payload_byte"]
+            );
+        }
+        let mut extended = data.clone();
+        extended.push(0);
+        assert!(read(&extended, CoordinateLayout::X15Y15Z17, tick).is_none());
+        assert!(read(&data[..data.len() - 1], CoordinateLayout::X15Y15Z17, tick).is_none());
+        assert!(read(&data, CoordinateLayout::X15Y15Z17, tick.wrapping_add(1)).is_none());
+        for layout in [
+            CoordinateLayout::X13Y12Z11,
+            CoordinateLayout::X17Y17Z16,
+            CoordinateLayout::X18Y18Z15,
+        ] {
+            assert!(read(&data, layout, tick).is_none());
         }
     }
 }
