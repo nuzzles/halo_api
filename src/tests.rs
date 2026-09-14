@@ -560,7 +560,57 @@ async fn player_match_count_parses_typed_counts() {
 }
 
 #[tokio::test]
-async fn match_highlight_events_downloads_and_decodes_film() {
+async fn summary_events_download_only_footer_and_keep_named_medals() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+    let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+    encoder
+        .write_all(include_bytes!("theater/fixtures/summary-v41.bin"))
+        .unwrap();
+    let compressed = encoder.finish().unwrap();
+    Mock::given(method("GET"))
+        .and(path("/hi/films/matches/test-match/spectate"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "FilmStatusBond":1, "AssetId":"film-asset", "BlobStoragePathPrefix":server.uri(),
+            "CustomData": { "FilmLength":80000, "FilmMajorVersion":41, "HasGameEnded":true,
+                "ManifestRefreshSeconds":60, "MatchId":"test-match", "Chunks":[
+                    {"Index":0, "ChunkType":1, "FileRelativePath":"bootstrap.bin", "ChunkStartTimeOffsetMilliseconds":0, "DurationMilliseconds":0, "ChunkSize":1},
+                    {"Index":1, "ChunkType":2, "FileRelativePath":"gameplay.bin", "ChunkStartTimeOffsetMilliseconds":0, "DurationMilliseconds":80000, "ChunkSize":1},
+                    {"Index":2, "ChunkType":3, "FileRelativePath":"summary.bin", "ChunkStartTimeOffsetMilliseconds":0, "DurationMilliseconds":80000, "ChunkSize":compressed.len()}
+                ]}
+        })))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/summary.bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(compressed))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/bootstrap.bin"))
+        .respond_with(ResponseTemplate::new(500))
+        .expect(0)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/gameplay.bin"))
+        .respond_with(ResponseTemplate::new(500))
+        .expect(0)
+        .mount(&server)
+        .await;
+    let report = halo.match_summary_events("test-match").await.unwrap();
+    assert!(report.matches_declared_counts());
+    assert_eq!(report.events.len(), 3);
+    assert_eq!(
+        report.events[2].medal.as_ref().unwrap().name.as_deref(),
+        Some("Steaktacular")
+    );
+}
+
+#[tokio::test]
+async fn match_highlight_events_rejects_unsupported_version_before_downloading() {
     let server = MockServer::start().await;
     let (halo, _xbox) = test_client(&server).await;
 
@@ -597,13 +647,13 @@ async fn match_highlight_events_downloads_and_decodes_film() {
     Mock::given(method("GET"))
         .and(path("/film/highlights.bin"))
         .respond_with(ResponseTemplate::new(200).set_body_bytes(compressed_chunk))
-        .expect(1)
+        .expect(0)
         .mount(&server)
         .await;
 
-    let events = halo.match_highlight_events("test-match").await.unwrap();
-
-    assert!(events.is_empty());
+    let error = halo.match_highlight_events("test-match").await.unwrap_err();
+    assert!(matches!(error, InfiniteClientError::FilmDecode(error)
+        if matches!(*error, crate::theater::DecodeError::UnsupportedVersion(1))));
 }
 
 #[tokio::test]
@@ -612,7 +662,9 @@ async fn match_highlight_event_validation_fetches_film_and_stats_once() {
     let (halo, _xbox) = test_client(&server).await;
 
     let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
-    encoder.write_all(&[]).unwrap();
+    encoder
+        .write_all(include_bytes!("theater/fixtures/summary-v41.bin"))
+        .unwrap();
     let compressed_chunk = encoder.finish().unwrap();
 
     Mock::given(method("GET"))
@@ -646,22 +698,13 @@ async fn match_highlight_event_validation_fetches_film_and_stats_once() {
         .expect(1)
         .mount(&server)
         .await;
+    let mut stats: serde_json::Value =
+        serde_json::from_slice(include_bytes!("theater/fixtures/summary-match-stats.json"))
+            .unwrap();
+    stats["MatchId"] = "test-match".into();
     Mock::given(method("GET"))
         .and(path("/hi/matches/test-match/stats"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-            "MatchId": "test-match",
-            "MatchInfo": {
-                "StartTime": "2026-01-01T00:00:00Z",
-                "EndTime": "2026-01-01T00:01:00Z",
-                "Duration": "PT1M",
-                "GameVariantCategory": 6,
-                "MapVariant": null,
-                "UgcGameVariant": null,
-                "Playlist": null
-            },
-            "Players": [],
-            "Teams": []
-        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(stats))
         .expect(1)
         .mount(&server)
         .await;
@@ -671,7 +714,11 @@ async fn match_highlight_event_validation_fetches_film_and_stats_once() {
         .await
         .unwrap();
 
-    assert!(report.events.is_empty());
+    assert_eq!(report.events.len(), 3);
+    assert_eq!(report.events[0].gamertag, "Nuzzles");
+    assert_eq!(report.events[0].timestamp_ms, 25344);
+    assert_eq!(report.events[2].medal().unwrap().name(), "Steaktacular");
+    assert_eq!(report.validation.players.len(), 2);
     assert!(report.validation.matches_stats());
 }
 

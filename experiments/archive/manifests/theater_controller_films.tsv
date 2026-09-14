@@ -1,0 +1,6 @@
+# Controller follow-up to the 26-film keyboard corpus.
+# One-minute natural end. Circles performed from 0:55 to 0:30 remaining
+# (gameplay elapsed 5..30 seconds). Left stick circles with varying tilt;
+# camera stayed still, as confirmed by the recorder.
+# Columns: group<TAB>slug<TAB>match_id<TAB>description
+controller	01-stick-circles	df0fadd0-5d20-4f4a-ae99-e1f62656c502	Left stick circles with varying tilt and stationary camera from 0:55 to 0:30 remaining; one-minute natural end

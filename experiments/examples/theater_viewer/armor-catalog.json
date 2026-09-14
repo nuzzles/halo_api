@@ -1,0 +1,7210 @@
+{
+  "note": "Official Game CMS item metadata used only to label identifiers read from the film; current equipment never supplies replay state.",
+  "items": [
+    {
+      "kind": "armor",
+      "name": "Chimera",
+      "path": "Inventory/Armor/Themes/007-001-fwl-c13d0b38.json",
+      "match": {
+        "armor_variant_id": 270486441
+      }
+    },
+    {
+      "kind": "armor",
+      "name": "Mark VII",
+      "path": "Inventory/Armor/Themes/007-001-olympus-c13d0b38.json",
+      "match": {
+        "armor_variant_id": 332549919
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "AAP/Dakh Ordnance Pack",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-60a5d306.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -11895077
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "AAP/Drachen Ordnance Pack",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-8e4313e5.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -214652631
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Achilles' Breastplate",
+      "path": "Inventory/Armor/ChestAttachments/3839860-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 238985618
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Adamant Chrysalis",
+      "path": "Inventory/Armor/ChestAttachments/4256942-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 690276714
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Agitator Heartplate",
+      "path": "Inventory/Armor/ChestAttachments/3839724-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -891321294
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Artificer Heartwheel",
+      "path": "Inventory/Armor/ChestAttachments/4256956-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 577917669
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Candy Pain",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-c26bc1d6.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 33483347
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Clonely Bear",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-aec0de89.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 842448649
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Colosseum Prize",
+      "path": "Inventory/Armor/ChestAttachments/3877285-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 559876356
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Copperhead Harness",
+      "path": "Inventory/Armor/ChestAttachments/4206365-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 319835740
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Dominar Heartplate",
+      "path": "Inventory/Armor/ChestAttachments/3840017-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 102290327
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Emissary Heartplate",
+      "path": "Inventory/Armor/ChestAttachments/3839717-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 924630698
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Fire Serpent's Favor",
+      "path": "Inventory/Armor/ChestAttachments/4077056-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1409459988
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "First Vanguard Mandate",
+      "path": "Inventory/Armor/ChestAttachments/4256916-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 941075514
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Helioskrill Harness",
+      "path": "Inventory/Armor/ChestAttachments/3839935-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1087469767
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Helljumper Harness",
+      "path": "Inventory/Armor/ChestAttachments/4206356-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1590853712
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Hunter Harness",
+      "path": "Inventory/Armor/ChestAttachments/4206374-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 175049067
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Hunter's Bounty",
+      "path": "Inventory/Armor/ChestAttachments/4077077-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 594389209
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Keep Breathing Plate",
+      "path": "Inventory/Armor/ChestAttachments/3626948-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1211628464
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Keeper's Ribguard",
+      "path": "Inventory/Armor/ChestAttachments/3839833-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -94107270
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "M9009 EAP/2549 Rev C",
+      "path": "Inventory/Armor/ChestAttachments/4061550-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -577642140
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Magister's Seal",
+      "path": "Inventory/Armor/ChestAttachments/3839846-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -570049338
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Mr. Bones",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-caac1b8d.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1774678782
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Ornamental",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-6db7ca2e.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1939489549
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Petal Metal",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-74acfb6f.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1570143790
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Psychapple",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-b7dbefc8.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -578878557
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Reanimation Rig",
+      "path": "Inventory/Armor/ChestAttachments/3839826-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 36233613
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Renegade Heartplate",
+      "path": "Inventory/Armor/ChestAttachments/3839710-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1239685502
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Sanguine Gift",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-b424c9b6.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -460854839
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Serpin Breastplate",
+      "path": "Inventory/Armor/ChestAttachments/4256910-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1518148290
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Signet of Arrival",
+      "path": "Inventory/Armor/ChestAttachments/4256995-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -552894076
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Sovereign Badge",
+      "path": "Inventory/Armor/ChestAttachments/3839853-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -856596664
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/AHD Type 3ZY",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-79bee247.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -370182246
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/DOLIOS",
+      "path": "Inventory/Armor/ChestAttachments/4061567-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1529215356
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/Letter Openers",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-72107ce8.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 910564060
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/Liberty Rig",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-a56e4026.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1353491941
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/M2497 Pouches",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-c1028522.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 280819514
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/MK 88 Ratio",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-d0082762.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 213069532
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/Packrat Rig",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-975822a4.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1915707601
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/Paradise Rig",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-cc109c0a.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 190395410
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "TAC/SHRD Plate",
+      "path": "Inventory/Armor/ChestAttachments/4076978-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 501629724
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Tactical Presentation",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-e12a7b07.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 445497042
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Tangent Caress",
+      "path": "Inventory/Armor/ChestAttachments/4077070-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1100870505
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Thremaleon Harness",
+      "path": "Inventory/Armor/ChestAttachments/4025502-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -385905836
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Tribune Breastplate",
+      "path": "Inventory/Armor/ChestAttachments/4077049-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -307544049
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/COG",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-3d51ea2f.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1328964853
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/DSTT",
+      "path": "Inventory/Armor/ChestAttachments/4076985-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1047076383
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Double Guard",
+      "path": "Inventory/Armor/ChestAttachments/3626944-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 597530266
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Kontakt Plate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-bc757167.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -26408973
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/M Series Plate",
+      "path": "Inventory/Armor/ChestAttachments/4206338-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1840995997
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/M532 Plate",
+      "path": "Inventory/Armor/ChestAttachments/4025498-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 78363103
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/M550D Halfplate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-4b8880c5.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -64022937
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/M557 Jackplate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-d50bad4b.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 485037562
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/M560 Plate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-9cf6bc0b.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1487782387
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/MACROSPLINE",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-e181484e.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1907743458
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Malachit Plate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-04c91602.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -292571966
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/NERA-APS",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-0f6788ad.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -728680002
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/NS Plate",
+      "path": "Inventory/Armor/ChestAttachments/4206383-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 519307992
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Prefect",
+      "path": "Inventory/Armor/ChestAttachments/4061592-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -768733563
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/RTC4",
+      "path": "Inventory/Armor/ChestAttachments/4076964-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 2038669627
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Relikt Cuirass",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-5293b184.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1769380297
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/Relikt Plate [MOD]",
+      "path": "Inventory/Armor/ChestAttachments/4061581-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 949234067
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/SECOPS Plate",
+      "path": "Inventory/Armor/ChestAttachments/4076894-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -944153168
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/SR Plating",
+      "path": "Inventory/Armor/ChestAttachments/4206347-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1234807037
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/TIGERPLATE",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-d3b72acc.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1568120839
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/X800 Plate",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-ad3ff8f7.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -175987489
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UA/XG-102 Kyn",
+      "path": "Inventory/Armor/ChestAttachments/4076971-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 2111697577
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/ARESTOR",
+      "path": "Inventory/Armor/ChestAttachments/4061574-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1197222963
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/ENAV Beacon",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-2fe445c1.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 2081390076
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/FliSP Mark 89",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-244adb6e.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -2147114869
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/KHILPK Cooling Unit",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-36ff7480.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -2011313275
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/M8 Flaregun",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-167cb9ec.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1118740359
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "UTIL/PGY Pack",
+      "path": "Inventory/Armor/ChestAttachments/001-001-olympus-85ed8d4a.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1977917029
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Victory Crest",
+      "path": "Inventory/Armor/ChestAttachments/3877279-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -1460097443
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Vindicator Breastplate",
+      "path": "Inventory/Armor/ChestAttachments/4061613-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1101381147
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "Warmonger Heartplate",
+      "path": "Inventory/Armor/ChestAttachments/3840024-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": 1972642487
+        }
+      }
+    },
+    {
+      "kind": "chest",
+      "name": "XEP/CANDLEFLAME Thrusterpack",
+      "path": "Inventory/Armor/ChestAttachments/4061560-ArmorChestAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "chest_tag_id": -399054586
+        }
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Cadet Blue",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-80607276.json",
+      "match": {
+        "coating_style_id": 1362766512
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Cadet Brick",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-bc220d04.json",
+      "match": {
+        "coating_style_id": 1920803940
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Cadet Grey",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-c07553ed.json",
+      "match": {
+        "coating_style_id": -299000182
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Cloaked Dagger",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-4c757a66.json",
+      "match": {
+        "coating_style_id": 1687800761
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Granular",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-33b49735.json",
+      "match": {
+        "coating_style_id": -1510153284
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Kaolin Strand",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-97186be7.json",
+      "match": {
+        "coating_style_id": -380089477
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Marked Scars",
+      "path": "Inventory/Armor/Coatings/3839740-ArmorCoating-Mark-VII.json",
+      "match": {
+        "coating_style_id": 2036754566
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Monarch",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-7676d1f0.json",
+      "match": {
+        "coating_style_id": 517489110
+      }
+    },
+    {
+      "kind": "coating",
+      "name": "Power Loader",
+      "path": "Inventory/Armor/Coatings/002-001-olympus-70b3bac0.json",
+      "match": {
+        "coating_style_id": -1078810674
+      }
+    },
+    {
+      "kind": "gloves",
+      "name": "Capaxx",
+      "path": "Inventory/Armor/Gloves/003-001-olympus-c13d0b38.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          }
+        ]
+      }
+    },
+    {
+      "kind": "gloves",
+      "name": "Serene Manipulars",
+      "path": "Inventory/Armor/Gloves/003-001-fwl-54758435.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 765472553
+          }
+        ]
+      }
+    },
+    {
+      "kind": "helmet",
+      "name": "CAVALLINO",
+      "path": "Inventory/Armor/Helmets/005-001-olympus-609a5d1c.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": -436735957,
+            "permutation_id": 497615889
+          }
+        ]
+      }
+    },
+    {
+      "kind": "helmet",
+      "name": "Vindicator",
+      "path": "Inventory/Armor/Helmets/4061610-ArmorHelmet-Mark-VII.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": -436735957,
+            "permutation_id": -1413796017
+          }
+        ]
+      }
+    },
+    {
+      "kind": "knees",
+      "name": "Experiment 21C",
+      "path": "Inventory/Armor/KneePads/006-001-fwl-54758435.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": -2012771059,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 765472553
+          }
+        ]
+      }
+    },
+    {
+      "kind": "knees",
+      "name": "UA/Type SA",
+      "path": "Inventory/Armor/KneePads/006-001-olympus-c13d0b38.json",
+      "match": {
+        "regions": [
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          }
+        ]
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Aberrant Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3626934-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 381410452
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Achilles' Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839859-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -167069726
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Adamant Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/4256941-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -188861121
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Advanced Gardbrace",
+      "path": "Inventory/Armor/ShouldersLeft/4077034-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1089755528
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Alpha Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-7f58d7f6.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -103362575
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Armored Glowbox",
+      "path": "Inventory/Armor/ShouldersLeft/3626947-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1767980679
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Artificer Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/4256955-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1607127913
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Assailer Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839770-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 409112072
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "BANISHED TROPHY",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-1821e976.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 884020191
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "BIOLOCKER",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-193afec1.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1129384324
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "BRACEPAD",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-0021cf80.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 517012951
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Bladed Maple",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-8478605d.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -639461761
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Bloodeye",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-436957d8.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -105084595
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Bluesteel Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3626961-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1579849699
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Butterfly Petal",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-28cd2f51.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1482404645
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "CRABSHELL",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-eag-352633f4.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 352288315
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "CRASHGUARD",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-ac94808c.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 487501611
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Cave Bear Guard",
+      "path": "Inventory/Armor/ShouldersLeft/3839743-ArmorLeftShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1397223664
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Champion's Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3877284-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -946348024
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Cleansing  Alchemy",
+      "path": "Inventory/Armor/ShouldersLeft/4077076-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 268137005
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Crescent Moon",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-31d61e10.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 387322171
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Cursed Guard",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-eb011f90.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -663894101
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Cutthroat Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839763-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1373020617
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Defiled Guard",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-8f6dda94.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 640901220
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Defiled Plate",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-bd5bb816.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1835301465
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Deimos Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/4256948-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -188737481
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Dominar Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3840016-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -773308362
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Dominarch Spaulders",
+      "path": "Inventory/Armor/ShouldersLeft/4256929-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -242922007
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Dragonbark",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-678cb996.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1938121161
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Dragonborn Noble",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-03e07c92.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 430138189
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "EXO-X/ORCUS",
+      "path": "Inventory/Armor/ShouldersLeft/4061541-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1375548912
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Emissary Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839716-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 159949386
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Epsilon Series Augmenter",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-022f23b3.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -679040180
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "FAM-55 Airgap",
+      "path": "Inventory/Armor/ShouldersLeft/3839955-ArmorLeftShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1132707946
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "FAM-90 STABILIZER",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-c5ea5ca0.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 361835170
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "FAN VENT",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-3217ad02.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -14708665
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "FX1T ARM",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-b58fb1cd.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -933569555
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Fateful Finds",
+      "path": "Inventory/Armor/ShouldersLeft/3839791-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -633481130
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Fire Serpent's Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/4077055-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2143108628
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "First Movement",
+      "path": "Inventory/Armor/ShouldersLeft/3839736-ArmorLeftShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -598625109
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "First Vanguard Spaulders",
+      "path": "Inventory/Armor/ShouldersLeft/4256915-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1810302503
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Flayer Crysknife",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-29027070.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -858027745
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Flexcomposite Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-54758435.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1666683782
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Flue Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3626921-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1955167071
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "GRAVE MARKERS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-9fb9f5b9.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1028567157
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "GROGNARDS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-eag-2c3d02b5.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -843030767
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Gatekeeper",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-55badb14.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1167524241
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "HIGHCOM Sentinel",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-0f5806b7.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1578866828
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "HITEK SHOULDER PLATE",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-2b0c9c43.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 572337486
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Heaven's Cry",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-90714834.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1980736619
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Helioskrill Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839934-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 35878397
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Hellcat Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/4061605-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1248077028
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Hierodyne Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-4d6eb574.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1735361291
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "IMA/Bartizan",
+      "path": "Inventory/Armor/ShouldersLeft/3691979-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1370410048
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "IMA/Garita",
+      "path": "Inventory/Armor/ShouldersLeft/3626863-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -203685417
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "IMA/Lodbrok",
+      "path": "Inventory/Armor/ShouldersLeft/4077041-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -417741502
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "IMA/SGN",
+      "path": "Inventory/Armor/ShouldersLeft/3691992-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 662445646
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "INTERPRES RECEIVER",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-715f355a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -352581083
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "IRONGRIP RAILS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-6844041b.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -2119601672
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Inciter Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839900-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1663506351
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Infractor Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3840009-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1400460223
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Iron Tortoise",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-f41d8d30.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -816138904
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Kappa Series Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/4077083-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 545121390
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Karmawall Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-1b3412f2.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1777450437
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Krampus Canes",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-1b512ede.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1768243724
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "LIFEGUARD OXYLINK",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-567b6806.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2118881869
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Latchpoint",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-a18699a4.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -433848271
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Load Bearing Shoulder",
+      "path": "Inventory/Armor/ShouldersLeft/3626940-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -437356923
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "M77 Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/4061549-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1232708667
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Magister's Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3839845-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -686546736
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Marrow Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3839832-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 477255710
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Mountain Cave",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-c62befb2.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1508589491
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Observation Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/4077020-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 925262218
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Oracle Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3979476-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1924247268
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Patchwork Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/3839825-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 475201981
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Pinion Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3839818-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1539138280
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Plasm Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3626927-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1441651174
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "RAK-60",
+      "path": "Inventory/Armor/ShouldersLeft/3839962-ArmorLeftShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1699436161
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Radiant Spaulders",
+      "path": "Inventory/Armor/ShouldersLeft/4256909-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -817491876
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Rat Pack",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-eag-7a67a533.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -335190643
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Reavian Werewolf",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-9676ebd5.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2052986704
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Redsteel Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/3626955-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1320849243
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Renegade Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839709-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1351058702
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAMPLE PACK",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-4f605947.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1129977176
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/AAPH",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-47b4509c.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -482179245
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/BASE",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-e0af813f.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1398410926
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/Boola",
+      "path": "Inventory/Armor/ShouldersLeft/4076949-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -879923950
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/Bronia Plate",
+      "path": "Inventory/Armor/ShouldersLeft/4077006-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1864018603
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/CDO",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-0e4941dc.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 10043815
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/CQC",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-d299e3bd.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1386864348
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/DJAP",
+      "path": "Inventory/Armor/ShouldersLeft/4061534-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1552159050
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/ELT",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-c02c4c53.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -296326919
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/EVA",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-733eb599.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1137828720
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/FJ",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-edbd9817.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1884578477
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/GND",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-6a2584d8.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 64071238
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/GUNGNIR",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-cb82d2fc.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1159411390
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/Guardpro MAX",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-de3a1c75.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 498112910
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/HAZOP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-84c3443b.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 842634469
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/HPAD",
+      "path": "Inventory/Armor/ShouldersLeft/4076900-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 693342645
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/HVISTLA PLATING",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-c9e3523f.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 605016762
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/JFO",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-9dd8757a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1479229721
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/JJ",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-4c1ace33.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -2065760252
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/LWAS-Rev3",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-ae5ff118.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 587835726
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/M",
+      "path": "Inventory/Armor/ShouldersLeft/4206337-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1582627732
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/MKV",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-1752709d.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2075157207
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/MT",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-afee17f8.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1086152159
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/ODST",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-f9b4b07e.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1289249320
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/ODST-HS",
+      "path": "Inventory/Armor/ShouldersLeft/4061622-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -960121137
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/OP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-5813e65a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1434094493
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/OSPA",
+      "path": "Inventory/Armor/ShouldersLeft/3839798-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -178281781
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/RECON",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-b6f526b9.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1582253654
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/ROG",
+      "path": "Inventory/Armor/ShouldersLeft/4076942-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 746173387
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SAE",
+      "path": "Inventory/Armor/ShouldersLeft/4076935-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 312934584
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SEC",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-5501ff72.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 658555912
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SEC [K]",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-4108d71b.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -642941729
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SHAP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-f21a2ed1.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1106466681
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SHO",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-5eaf61dd.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1436788773
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SKR",
+      "path": "Inventory/Armor/ShouldersLeft/4256987-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1947083662
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/SNP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-f4a6a956.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1978414905
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/STE-MODEL 2",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-9c69939a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1734749989
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/T-49 Plating",
+      "path": "Inventory/Armor/ShouldersLeft/4077013-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1930607471
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SAP/UrsaPad",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-c7212d34.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1663911047
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SKULLBEARER TROPHY",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-013ad837.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -332624471
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SOFTPOINT",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-7d563bc5.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1725465532
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SOTUS",
+      "path": "Inventory/Armor/ShouldersLeft/4076963-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1968304008
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SPRAYWALL",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-dcf16de1.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1806741354
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "SX/RKG Balance Augmentors",
+      "path": "Inventory/Armor/ShouldersLeft/4256980-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1138424767
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sanguine Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-4e5f9c6f.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -272972377
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Scented Clasp",
+      "path": "Inventory/Armor/ShouldersLeft/3839750-ArmorLeftShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1114259515
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Secondary Mandate",
+      "path": "Inventory/Armor/ShouldersLeft/3759785-ArmorLeftShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1388321854
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Seedwarden Assayers",
+      "path": "Inventory/Armor/ShouldersLeft/4256962-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -226118868
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Segmented Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839723-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 397553661
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sengir Node",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-1533f05e.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -890334877
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Shadow Crow",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-1afb4dd3.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1954055633
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Shroudshot Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-fwl-30194131.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -123509242
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sibyl Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/4256994-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1453022971
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sixth Gate",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-7e9788d7.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 389588971
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sovereign Host",
+      "path": "Inventory/Armor/ShouldersLeft/3839852-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1897846463
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Sundered Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/4061598-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1558061817
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Best Friend",
+      "path": "Inventory/Armor/ShouldersLeft/3626882-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -24318081
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/CWA-AM",
+      "path": "Inventory/Armor/ShouldersLeft/3839907-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1297572182
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Crys Flatblade",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-37d1bdf1.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 771499997
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Gregor",
+      "path": "Inventory/Armor/ShouldersLeft/3796633-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -559058617
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/LACEWEB SCM-P",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-59a200ba.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1034168324
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/PLQ-196E THREEPACK",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-e2ce01fc.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1248943299
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/SIA/CHISELSCOOP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-fbd530bd.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -937948552
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/SRA-ISR MIXON",
+      "path": "Inventory/Armor/ShouldersLeft/4061573-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -301378806
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Sykes DELTA",
+      "path": "Inventory/Armor/ShouldersLeft/3626892-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1315912202
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Thornblade",
+      "path": "Inventory/Armor/ShouldersLeft/3691986-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 505380332
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TAC/Thornblade Brace",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-b7e461d2.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1643320272
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "THREATWAVE SMI",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-haz-eec70f63.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -474893944
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TYPE-1 DEFENDERS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-eag-1e0b6037.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -90034091
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "TYPE-11 DEFENDERS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-eag-637c9472.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 200390187
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tactor Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3626916-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 541331349
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tertiary Mobility Core",
+      "path": "Inventory/Armor/ShouldersLeft/4256922-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1607640215
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Thieving Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3839777-ArmorLeftShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -564220536
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Three Prayers",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-0c28c11f.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -205968797
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Thremaleon Spaulders",
+      "path": "Inventory/Armor/ShouldersLeft/4025501-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 723061199
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tormenter's Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3877278-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1583695023
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tracer Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3579425-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2097545355
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tribune Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/4077048-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -183744268
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Tricky Treats",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-reach-2eca8cb0.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1723276112
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "True Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/4077069-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -2111456730
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Type-10 Defenders",
+      "path": "Inventory/Armor/ShouldersLeft/3839941-ArmorLeftShoulderPad-Eaglestrike.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1112382576
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/AHALA",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-a3ed49bb.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -210603468
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Adair",
+      "path": "Inventory/Armor/ShouldersLeft/3626904-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1175825131
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Aeson",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-09e48130.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -141064983
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Agathius",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-c13d0b38.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1301538519
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Alair",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-52ac3f9e.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1637455487
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Almonte",
+      "path": "Inventory/Armor/ShouldersLeft/3770610-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 888113876
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Arethor",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-d388a4d6.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1387962237
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Ashen",
+      "path": "Inventory/Armor/ShouldersLeft/4256975-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1470084480
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/BGO-R",
+      "path": "Inventory/Armor/ShouldersLeft/4076914-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 637316425
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/C2SI AP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-0ff8a73c.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 50483101
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/CDS-SPI-REV6",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-24d5f4ff.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 51762841
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/CMA SN5 TYPE 11",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-ad8f973b.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1658741189
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Cambra",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-2fdbcbdb.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -901985323
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Castus",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-f30b69ba.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -969416648
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Chaka",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-5902a131.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1123031223
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Clayton",
+      "path": "Inventory/Armor/ShouldersLeft/3626870-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1407594698
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/DEMIL CAT-III",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-5a726699.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1591580390
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Deming",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-164337f6.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 389000335
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Edla",
+      "path": "Inventory/Armor/ShouldersLeft/4206355-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 567221587
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Efrem",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-a551ce3c.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1444532255
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Eger",
+      "path": "Inventory/Armor/ShouldersLeft/4206346-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1516861298
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/FLSF Type C",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-e1bec654.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -217784163
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Farah",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-6b34c3b3.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1872263037
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Faunus",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-8e7c9dff.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -93110219
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Gidos",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-36c0fa9a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1226582110
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Gordius",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-9767acbe.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1518312155
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Guardpro MAX",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-3dcec5be.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -309802762
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/HTEACH",
+      "path": "Inventory/Armor/ShouldersLeft/3839880-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1532878413
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/HYBL",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-40199070.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 655412313
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Hampus",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-10ffb071.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 264292955
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/HiBrace Custom",
+      "path": "Inventory/Armor/ShouldersLeft/3626876-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -298793844
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Koper",
+      "path": "Inventory/Armor/ShouldersLeft/4206364-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -289161515
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Mark VI MOD",
+      "path": "Inventory/Armor/ShouldersLeft/4061559-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 438855892
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Mark VI [GEN1]",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-024a1f9f.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -640647135
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Matsue",
+      "path": "Inventory/Armor/ShouldersLeft/4206382-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1783106575
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Model 48",
+      "path": "Inventory/Armor/ShouldersLeft/4025497-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1910879977
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/NERA-DAP",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-ca939597.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 597556218
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Nampa",
+      "path": "Inventory/Armor/ShouldersLeft/4061580-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 375779426
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Nasica",
+      "path": "Inventory/Armor/ShouldersLeft/4076907-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -847196713
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Nerva",
+      "path": "Inventory/Armor/ShouldersLeft/4076977-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 73040288
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Norax",
+      "path": "Inventory/Armor/ShouldersLeft/4061566-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1337514320
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/ODP",
+      "path": "Inventory/Armor/ShouldersLeft/4076928-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2000101380
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Philes",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-1deda959.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -632163412
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Piran",
+      "path": "Inventory/Armor/ShouldersLeft/4206373-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -680896815
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Pomeroy",
+      "path": "Inventory/Armor/ShouldersLeft/3626910-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 318298668
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Prefect",
+      "path": "Inventory/Armor/ShouldersLeft/4061591-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -278699892
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Rath",
+      "path": "Inventory/Armor/ShouldersLeft/4076984-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1206854350
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Renfu",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-a843d714.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1960621185
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Rosillo",
+      "path": "Inventory/Armor/ShouldersLeft/3770614-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 303627752
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/SO",
+      "path": "Inventory/Armor/ShouldersLeft/4076893-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 694594036
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/SOSIUS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-baf678fa.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 129867363
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/T-55",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-f8a5f715.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -567898759
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/T-Guard",
+      "path": "Inventory/Armor/ShouldersLeft/3626898-ArmorLeftShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1249926121
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/TLES-1",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-8572a2db.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2101722096
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/TacUp A22",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-728f5379.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 892914869
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Tatius",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-79816c5d.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 25775284
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Teutobod",
+      "path": "Inventory/Armor/ShouldersLeft/3579419-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1283986818
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Theocles",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-609a5d1c.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -730116258
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Toktu",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-722ff2f2.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 146085608
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Tomris",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-b158e655.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2070469233
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/VALENS",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-3d6e6435.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 791243944
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Velius",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-4bb70edf.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -955942344
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Viator",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-bc4aff7d.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1035335988
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Viator-2A3",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-24755574.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1542220441
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Vitus",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-ea1058fb.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1242640320
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/Vorenus",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-04f69818.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -921491158
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UA/XG-90",
+      "path": "Inventory/Armor/ShouldersLeft/4076970-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 758473269
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/COOLSHOT",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-86a2c4f8.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 803066824
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/EmerSound Mark I",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-olympus-aeff5093.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1756454379
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/PEM-2P",
+      "path": "Inventory/Armor/ShouldersLeft/3839914-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1195189160
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/PRO-Tek ComNet-2020",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-6b946238.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2062045016
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/Paradigm Terminal",
+      "path": "Inventory/Armor/ShouldersLeft/4076999-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1229638153
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/RP Prototype Factor One",
+      "path": "Inventory/Armor/ShouldersLeft/3839805-ArmorLeftShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -283415407
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/SuperPower Outback",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-spi-40b931fb.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1414147660
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "UTIL/TECCNIQE IOTA-12",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-wlv-b494a67a.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1344461690
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Velocity Augmentor",
+      "path": "Inventory/Armor/ShouldersLeft/3579413-ArmorLeftShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 600725850
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Vindicator Pauldrons",
+      "path": "Inventory/Armor/ShouldersLeft/4061612-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 1547014227
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Warmonger Mantle",
+      "path": "Inventory/Armor/ShouldersLeft/3840023-ArmorLeftShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 2092694632
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Wave Slicer",
+      "path": "Inventory/Armor/ShouldersLeft/008-001-samurai-ed06bc71.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": 960167630
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Wenn Pads",
+      "path": "Inventory/Armor/ShouldersLeft/3839969-ArmorLeftShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -955610826
+        }
+      }
+    },
+    {
+      "kind": "left_shoulder",
+      "name": "Wreck-Salvaged Pauldron",
+      "path": "Inventory/Armor/ShouldersLeft/3877378-ArmorLeftShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "left_shoulder_tag_id": -1946560706
+        }
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Ark Reaction",
+      "path": "Inventory/Armor/FXMythic/3627026-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1477605443,
+          -1840974772,
+          658085938,
+          -609767535
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Beyond the Burrow",
+      "path": "Inventory/Armor/FXMythic/016-000-dance-of-glib-1a5d1bdd.json",
+      "match": {
+        "mythic_effect_ids": [
+          1385495886,
+          -1697600461,
+          -185323300,
+          1618680591
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Cruel Tread",
+      "path": "Inventory/Armor/FXMythic/016-000-s5-nar-fx-002-9f9515d3.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1379562657,
+          138138761,
+          -1068200687,
+          -86576062
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Enlightened Path",
+      "path": "Inventory/Armor/FXMythic/016-000-flower-petals-57a94281.json",
+      "match": {
+        "mythic_effect_ids": [
+          -444885440,
+          -399966497,
+          -1029069665,
+          -1819381916
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Fiesta Fury",
+      "path": "Inventory/Armor/FXMythic/016-000-celebration-d7554000.json",
+      "match": {
+        "mythic_effect_ids": [
+          -505568182,
+          160857762,
+          632623807,
+          -1258061546
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Firecrash Protocol",
+      "path": "Inventory/Armor/FXMythic/3627030-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          720541562,
+          -838108025,
+          -1603472319,
+          1270365814
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Gansai Gear",
+      "path": "Inventory/Armor/FXMythic/016-000-gansai-gear-c5494136.json",
+      "match": {
+        "mythic_effect_ids": [
+          674102968,
+          -488857732,
+          1413907565,
+          -2092870775
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Gifted Step",
+      "path": "Inventory/Armor/FXMythic/016-000-s5-win-fx-002-da0013a5.json",
+      "match": {
+        "mythic_effect_ids": [
+          1860315085,
+          1424319063,
+          -2014617899,
+          1504963426
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Hazmat Haven",
+      "path": "Inventory/Armor/FXMythic/016-000-hazmat-haven-ae7666d2.json",
+      "match": {
+        "mythic_effect_ids": [
+          1310445933,
+          -1188005766,
+          360791890,
+          1827515687
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Huntmaster's Trail",
+      "path": "Inventory/Armor/FXMythic/016-000-the-wild-hunt-4b2098d8.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1063845280,
+          1878565790,
+          -1104186943,
+          1969492498
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Judgment Flame",
+      "path": "Inventory/Armor/FXMythic/016-000-olympus-ff9f8007.json",
+      "match": {
+        "mythic_effect_ids": [
+          249536831,
+          284452914,
+          1226624143,
+          1207799342
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Legacy of War",
+      "path": "Inventory/Armor/FXMythic/016-000-dogs-of-war-c9ff346f.json",
+      "match": {
+        "mythic_effect_ids": [
+          -129133994,
+          -1966220918,
+          1021800736,
+          -2082157262
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Lunar Trails",
+      "path": "Inventory/Armor/FXMythic/3603529-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          -627017328,
+          -261195279,
+          1071882682,
+          -554517804
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Mischief Machine",
+      "path": "Inventory/Armor/FXMythic/016-000-s5-hlw-fx-005-917c6075.json",
+      "match": {
+        "mythic_effect_ids": [
+          -58929047,
+          -411280011,
+          1015601874,
+          -517960263
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Neon Beat",
+      "path": "Inventory/Armor/FXMythic/016-000-synthwave-178fd347.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1627358649,
+          1848561879,
+          -1027920055,
+          -1758996586
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Paths to Dominance",
+      "path": "Inventory/Armor/FXMythic/3839730-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1612477143,
+          -353085212,
+          -1790953722,
+          847808616
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Perfect Sector",
+      "path": "Inventory/Armor/FXMythic/016-000-tech-66736c8b.json",
+      "match": {
+        "mythic_effect_ids": [
+          -925377993,
+          595958614,
+          -1448224849,
+          -253346055
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Photon Groove",
+      "path": "Inventory/Armor/FXMythic/016-000-photon-groove-fc0eaf3d.json",
+      "match": {
+        "mythic_effect_ids": [
+          668515611,
+          852179380,
+          319877493,
+          -1315672474
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Retrode Aftermarket",
+      "path": "Inventory/Armor/FXMythic/016-000-retrode-after-d647c84b.json",
+      "match": {
+        "mythic_effect_ids": [
+          449366522,
+          -1726734827,
+          -147542313,
+          460249789
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Rhythm and Ruin",
+      "path": "Inventory/Armor/FXMythic/3627034-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          131350428,
+          1672449690,
+          1095064901,
+          1196832637
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Slipstream Sectorlink",
+      "path": "Inventory/Armor/FXMythic/016-000-slipstream-se-0521ca65.json",
+      "match": {
+        "mythic_effect_ids": [
+          -91761174,
+          1456261120,
+          -1792068175,
+          1553155439
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Synthetic Markers",
+      "path": "Inventory/Armor/FXMythic/016-000-synthetic-mar-d1d48ab9.json",
+      "match": {
+        "mythic_effect_ids": [
+          1241479489,
+          338155371,
+          -356967587,
+          -955519374
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Uncanny Energies",
+      "path": "Inventory/Armor/FXMythic/3839866-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          -916722467,
+          -1754619413,
+          2138007189,
+          -1259232222
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Verglas Dream",
+      "path": "Inventory/Armor/FXMythic/016-000-winter-f45f2340.json",
+      "match": {
+        "mythic_effect_ids": [
+          -1168462327,
+          1086087626,
+          -1360033215,
+          2129103307
+        ]
+      }
+    },
+    {
+      "kind": "mythic",
+      "name": "Wyrd Aura",
+      "path": "Inventory/Armor/FXMythic/4061638-ArmorMythicFx.json",
+      "match": {
+        "mythic_effect_ids": [
+          1754333563,
+          2072115114,
+          -1662071234,
+          -1613536831
+        ]
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Aberrant Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3626934-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1270422305
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Achilles' Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839859-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 470854031
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Adamant Mantle",
+      "path": "Inventory/Armor/ShouldersRight/4256941-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -455518693
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Advanced Gardbrace",
+      "path": "Inventory/Armor/ShouldersRight/4077034-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -941666327
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Alpha Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-7f58d7f6.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1762653079
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Armored Glowbox",
+      "path": "Inventory/Armor/ShouldersRight/3626947-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 367977402
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Artificer Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/4256955-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 186665546
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Assailer Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839770-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 799678830
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "BANISHED TROPHY",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-1821e976.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1591728784
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "BIOLOCKER",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-193afec1.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1368276549
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "BRACEPAD",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-0021cf80.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1687240610
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Bladed Maple",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-8478605d.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1624621151
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Bloodeye",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-436957d8.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 830385615
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Bluesteel Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3626961-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 425413392
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Butterfly Petal",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-28cd2f51.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -443178239
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "CRABSHELL",
+      "path": "Inventory/Armor/ShouldersRight/009-001-eag-352633f4.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1073164286
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "CRASHGUARD",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-ac94808c.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -786738362
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Cave Bear Guard",
+      "path": "Inventory/Armor/ShouldersRight/3839743-ArmorRightShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1524338968
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Champion's Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3877284-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1131760119
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Cleansing  Alchemy",
+      "path": "Inventory/Armor/ShouldersRight/4077076-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1485590080
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Crescent Moon",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-31d61e10.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1916644822
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Cursed Guard",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-eb011f90.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -290264651
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Cutthroat Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839763-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -933094302
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Defiled Guard",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-8f6dda94.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 640080955
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Defiled Plate",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-bd5bb816.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -274851177
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Deimos Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/4256948-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1608523885
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Dominar Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3840016-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1079935907
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Dominarch Spaulders",
+      "path": "Inventory/Armor/ShouldersRight/4256929-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2099897213
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Dragonbark",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-678cb996.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -282954716
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Dragonborn Noble",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-03e07c92.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 379435504
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "EXO-X/ORCUS",
+      "path": "Inventory/Armor/ShouldersRight/4061541-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 915955232
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Emissary Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839716-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1607754717
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Epsilon Series Augmenter",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-022f23b3.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1241718488
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "FAM-55 Airgap",
+      "path": "Inventory/Armor/ShouldersRight/3839955-ArmorRightShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -228898703
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "FAM-90 STABILIZER",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-c5ea5ca0.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1394855313
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "FAN VENT",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-3217ad02.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1840444561
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "FX1T ARM",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-b58fb1cd.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1053721447
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Fateful Finds",
+      "path": "Inventory/Armor/ShouldersRight/3839791-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1924437439
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Fire Serpent's Mantle",
+      "path": "Inventory/Armor/ShouldersRight/4077055-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 923197987
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "First Movement",
+      "path": "Inventory/Armor/ShouldersRight/3839736-ArmorRightShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1196783302
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "First Vanguard Spaulders",
+      "path": "Inventory/Armor/ShouldersRight/4256915-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -912049222
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Flayer Crysknife",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-29027070.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1978610264
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Flexcomposite Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-54758435.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1267832546
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Flue Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3626921-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 866290888
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "GRAVE MARKERS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-9fb9f5b9.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 492772963
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "GROGNARDS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-eag-2c3d02b5.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1283725332
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Gatekeeper",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-55badb14.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1109131089
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "HIGHCOM Sentinel",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-0f5806b7.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1164368928
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "HITEK SHOULDER PLATE",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-2b0c9c43.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1784580859
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Heaven's Cry",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-90714834.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1209123788
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Helioskrill Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839934-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1318496457
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Hellcat Mantle",
+      "path": "Inventory/Armor/ShouldersRight/4061605-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1073748107
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Hierodyne Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-4d6eb574.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1967591475
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "IMA/Garita",
+      "path": "Inventory/Armor/ShouldersRight/3626863-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -133322990
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "IMA/Garita Omega",
+      "path": "Inventory/Armor/ShouldersRight/3691986-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 542674703
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "IMA/Garita Omega Sykes",
+      "path": "Inventory/Armor/ShouldersRight/3691992-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1457662624
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "IMA/Lodbrok",
+      "path": "Inventory/Armor/ShouldersRight/4077041-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1927562229
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "INTERPRES RECEIVER",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-715f355a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1051962041
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "IRONGRIP RAILS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-6844041b.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1687740349
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Inciter Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839900-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 204978629
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Infractor Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3840009-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -178795580
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Iron Tortoise",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-f41d8d30.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1444640535
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Kappa Series Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/4077083-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 645658345
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Karmawall Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-1b3412f2.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -463446003
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Krampus Canes",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-1b512ede.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2122307295
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "LIFEGUARD OXYLINK",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-567b6806.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 110965481
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Latchpoint",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-a18699a4.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1195841643
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Load Bearing Shoulder",
+      "path": "Inventory/Armor/ShouldersRight/3626940-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -804899627
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "M77 Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/4061549-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1827997672
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Magister's Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3839845-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1085045093
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Marrow Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3839832-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1655612743
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Mountain Cave",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-c62befb2.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 407771679
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Observation Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/4077020-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1344245402
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Oracle Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3979476-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 161169364
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Patchwork Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/3839825-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2128484573
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Pinion Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3839818-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 487137186
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Plasm Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3626927-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -243819479
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "RAK-60",
+      "path": "Inventory/Armor/ShouldersRight/3839962-ArmorRightShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2128706770
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Radiant Spaulders",
+      "path": "Inventory/Armor/ShouldersRight/4256909-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -947995441
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Rat Pack",
+      "path": "Inventory/Armor/ShouldersRight/009-001-eag-7a67a533.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1709199584
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Reavian Werewolf",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-9676ebd5.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2059473693
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Redsteel Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/3626955-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1251416518
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Renegade Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839709-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 77184038
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAMPLE PACK",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-4f605947.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1067864560
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/AAPH",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-47b4509c.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1835692731
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/BASE",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-e0af813f.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -549979377
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/Boola",
+      "path": "Inventory/Armor/ShouldersRight/4076949-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2053923984
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/Bronia Plate",
+      "path": "Inventory/Armor/ShouldersRight/4077006-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1703342237
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/CDO",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-0e4941dc.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1904190780
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/CQC",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-d299e3bd.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 313931991
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/DJAP",
+      "path": "Inventory/Armor/ShouldersRight/4061534-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1825746207
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/ELT",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-c02c4c53.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1254129349
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/EVA",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-733eb599.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 765839952
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/FJ",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-edbd9817.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2077360339
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/GND",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-6a2584d8.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2140401227
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/GUNGNIR",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-cb82d2fc.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1869985857
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/Guardpro MAX",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-de3a1c75.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1064217441
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/HAZOP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-84c3443b.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -795740751
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/HPAD",
+      "path": "Inventory/Armor/ShouldersRight/4076900-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1104583458
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/HVISTLA PLATING",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-c9e3523f.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1227839975
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/JFO",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-9dd8757a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1783262993
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/JJ",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-4c1ace33.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1985233540
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/LWAS-Rev3",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-ae5ff118.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1026506904
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/M",
+      "path": "Inventory/Armor/ShouldersRight/4206337-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -569728433
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/MKV",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-1752709d.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1229057972
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/MT",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-afee17f8.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1533495865
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/ODST",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-f9b4b07e.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 931107547
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/ODST-HS",
+      "path": "Inventory/Armor/ShouldersRight/4061622-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 509248955
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/OP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-5813e65a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -781835395
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/OSPA",
+      "path": "Inventory/Armor/ShouldersRight/3839798-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1343571977
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/RECON",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-b6f526b9.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1622994315
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/ROG",
+      "path": "Inventory/Armor/ShouldersRight/4076942-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1144687250
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SAE",
+      "path": "Inventory/Armor/ShouldersRight/4076935-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1313114977
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SEC",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-5501ff72.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -786767876
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SEC [K]",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-4108d71b.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 192536571
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SHAP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-f21a2ed1.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1658601128
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SHO",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-5eaf61dd.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 825975561
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SKR",
+      "path": "Inventory/Armor/ShouldersRight/4256987-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2134653254
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/SNP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-f4a6a956.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1096374311
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/STE-MODEL 2",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-9c69939a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1994599293
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/T-49 Plating",
+      "path": "Inventory/Armor/ShouldersRight/4077013-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 345973961
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SAP/UrsaPad",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-c7212d34.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1563025387
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SKULLBEARER TROPHY",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-013ad837.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2007278265
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SOFTPOINT",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-7d563bc5.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1590369165
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SOTUS",
+      "path": "Inventory/Armor/ShouldersRight/4076963-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1309417410
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SPRAYWALL",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-dcf16de1.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1622217927
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "SX/RKG Balance Augmentors",
+      "path": "Inventory/Armor/ShouldersRight/4256980-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 248402632
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sanguine Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-4e5f9c6f.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 30332999
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Scented Clasp",
+      "path": "Inventory/Armor/ShouldersRight/3839750-ArmorRightShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -976282796
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Secondary Mandate",
+      "path": "Inventory/Armor/ShouldersRight/3759785-ArmorRightShoulderPad-Yoroi.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1991867366
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Seedwarden Assayers",
+      "path": "Inventory/Armor/ShouldersRight/4256962-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1245892432
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Segmented Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839723-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 777065068
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sengir Node",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-1533f05e.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -350972479
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Shadow Crow",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-1afb4dd3.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1962734425
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Shroudshot Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-fwl-30194131.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 115698423
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sibyl Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/4256994-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1422738631
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sixth Gate",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-7e9788d7.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1838589773
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sovereign Host",
+      "path": "Inventory/Armor/ShouldersRight/3839852-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -777605236
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Sundered Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/4061598-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -60149879
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Best Friend",
+      "path": "Inventory/Armor/ShouldersRight/3626882-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1000073362
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/CWA-AM",
+      "path": "Inventory/Armor/ShouldersRight/3839907-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -468981430
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Crys Flatblade",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-37d1bdf1.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1719555273
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Garita Omega",
+      "path": "Inventory/Armor/ShouldersRight/3691979-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 351598928
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Gregor",
+      "path": "Inventory/Armor/ShouldersRight/3796633-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1879557341
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/LACEWEB SCM-P",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-59a200ba.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1491991134
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/PLQ-196E THREEPACK",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-e2ce01fc.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1536178015
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/SIA/CHISELSCOOP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-fbd530bd.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1750537904
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/SRA-ISR MIXON",
+      "path": "Inventory/Armor/ShouldersRight/4061573-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1940140909
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Sykes DELTA",
+      "path": "Inventory/Armor/ShouldersRight/3626892-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1634675610
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TAC/Thornblade Brace",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-b7e461d2.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1806899634
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "THREATWAVE SMI",
+      "path": "Inventory/Armor/ShouldersRight/009-001-haz-eec70f63.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1562977970
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TYPE-1 DEFENDERS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-eag-1e0b6037.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1602432317
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "TYPE-11 DEFENDERS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-eag-637c9472.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 596116833
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tactor Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3626916-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -241466371
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tertiary Mobility Core",
+      "path": "Inventory/Armor/ShouldersRight/4256922-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -815034265
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Thieving Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3839777-ArmorRightShoulderPad-Rakshasa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1998070010
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Three Prayers",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-0c28c11f.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 652968014
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Thremaleon Spaulders",
+      "path": "Inventory/Armor/ShouldersRight/4025501-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1465510475
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tormenter's Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3877278-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1185256699
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tracer Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3579425-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1214853061
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tribune Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/4077048-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2054067643
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Tricky Treats",
+      "path": "Inventory/Armor/ShouldersRight/009-001-reach-2eca8cb0.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2095794289
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "True Mantle",
+      "path": "Inventory/Armor/ShouldersRight/4077069-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1902947945
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Type-10 Defenders",
+      "path": "Inventory/Armor/ShouldersRight/3839941-ArmorRightShoulderPad-Eaglestrike.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 957922671
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/AHALA",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-a3ed49bb.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1678918759
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Adair",
+      "path": "Inventory/Armor/ShouldersRight/3626904-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2006840663
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Aeson",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-09e48130.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 819689172
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Agathius",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-c13d0b38.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1331436127
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Alair",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-52ac3f9e.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 446948562
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Almonte",
+      "path": "Inventory/Armor/ShouldersRight/3770610-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2023392506
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Arethor",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-d388a4d6.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2085207121
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Ashen",
+      "path": "Inventory/Armor/ShouldersRight/4256975-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 22565833
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/BGO-R",
+      "path": "Inventory/Armor/ShouldersRight/4076914-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 981318226
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/C2SI AP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-0ff8a73c.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 410258506
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/CDS-SPI-REV6",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-24d5f4ff.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1941642301
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/CMA SN5 TYPE 11",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-ad8f973b.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 570249325
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Cambra",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-2fdbcbdb.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2050669853
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Castus",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-f30b69ba.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 611537833
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Chaka",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-5902a131.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -114163987
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Clayton",
+      "path": "Inventory/Armor/ShouldersRight/3626870-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 810500586
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/DEMIL CAT-III",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-5a726699.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2033009575
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Deming",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-164337f6.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 423325743
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Edla",
+      "path": "Inventory/Armor/ShouldersRight/4206355-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 510895405
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Efrem",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-a551ce3c.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1291618392
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Eger",
+      "path": "Inventory/Armor/ShouldersRight/4206346-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -868010671
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/FLSF Type C",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-e1bec654.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1747642233
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Farah",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-6b34c3b3.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1199089095
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Faunus",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-8e7c9dff.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1771932449
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Gidos",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-36c0fa9a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2008593892
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Gordius",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-9767acbe.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -906387635
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Guardpro MAX",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-3dcec5be.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 501960448
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/HTEACH",
+      "path": "Inventory/Armor/ShouldersRight/3839880-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 885002951
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/HYBL",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-40199070.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1118069841
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Hampus",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-10ffb071.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -491341483
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/HiBrace Custom",
+      "path": "Inventory/Armor/ShouldersRight/3626876-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -688256707
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Koper",
+      "path": "Inventory/Armor/ShouldersRight/4206364-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1428846124
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Mark VI MOD",
+      "path": "Inventory/Armor/ShouldersRight/4061559-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1610733912
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Mark VI [GEN1]",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-024a1f9f.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1734033454
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Matsue",
+      "path": "Inventory/Armor/ShouldersRight/4206382-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2024305509
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Model 48",
+      "path": "Inventory/Armor/ShouldersRight/4025497-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1035538033
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/NERA-DAP",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-ca939597.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -902720857
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Nampa",
+      "path": "Inventory/Armor/ShouldersRight/4061580-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -492875039
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Nasica",
+      "path": "Inventory/Armor/ShouldersRight/4076907-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2018024400
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Nerva",
+      "path": "Inventory/Armor/ShouldersRight/4076977-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 798737684
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Norax",
+      "path": "Inventory/Armor/ShouldersRight/4061566-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 492191528
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/ODP",
+      "path": "Inventory/Armor/ShouldersRight/4076928-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 2095255711
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Philes",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-1deda959.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -806524077
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Piran",
+      "path": "Inventory/Armor/ShouldersRight/4206373-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1935962778
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Pomeroy",
+      "path": "Inventory/Armor/ShouldersRight/3626910-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -512911914
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Prefect",
+      "path": "Inventory/Armor/ShouldersRight/4061591-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1785996797
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Rath",
+      "path": "Inventory/Armor/ShouldersRight/4076984-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1199348182
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Renfu",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-a843d714.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -543827288
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Rosillo",
+      "path": "Inventory/Armor/ShouldersRight/3770614-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 87896961
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/SO",
+      "path": "Inventory/Armor/ShouldersRight/4076893-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1231503164
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/SOSIUS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-baf678fa.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1874743297
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/T-55",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-f8a5f715.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -67721757
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/T-Guard",
+      "path": "Inventory/Armor/ShouldersRight/3626898-ArmorRightShoulderPad-Mark-IV.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -270039175
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/TLES-1",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-8572a2db.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1534225975
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/TacUp A22",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-728f5379.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1909584613
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Tatius",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-79816c5d.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -10118407
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Teutobod",
+      "path": "Inventory/Armor/ShouldersRight/3579419-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -563741056
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Theocles",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-609a5d1c.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 980115053
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Toktu",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-722ff2f2.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 707132879
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Tomris",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-b158e655.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1216229915
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/VALENS",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-3d6e6435.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 375818275
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Velius",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-4bb70edf.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 337007696
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Viator",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-bc4aff7d.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 302252065
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Viator-2A3",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-24755574.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1667927058
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Vitus",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-ea1058fb.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1065742201
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/Vorenus",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-04f69818.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1719096426
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UA/XG-90",
+      "path": "Inventory/Armor/ShouldersRight/4076970-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 950594047
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/COOLSHOT",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-86a2c4f8.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 43533946
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/EmerSound Mark I",
+      "path": "Inventory/Armor/ShouldersRight/009-001-olympus-aeff5093.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 473483419
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/PEM-2P",
+      "path": "Inventory/Armor/ShouldersRight/3839914-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1917138040
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/PRO-Tek ComNet-2020",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-6b946238.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 594800578
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/Paradigm Terminal",
+      "path": "Inventory/Armor/ShouldersRight/4076999-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 882537145
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/RP Prototype Factor One",
+      "path": "Inventory/Armor/ShouldersRight/3839805-ArmorRightShoulderPad-Mark-V-B.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -976539463
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/SuperPower Outback",
+      "path": "Inventory/Armor/ShouldersRight/009-001-spi-40b931fb.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1785984961
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "UTIL/TECCNIQE IOTA-12",
+      "path": "Inventory/Armor/ShouldersRight/009-001-wlv-b494a67a.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 25593399
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Velocity Augmentor",
+      "path": "Inventory/Armor/ShouldersRight/3579413-ArmorRightShoulderPad-Chimera.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -303926213
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Vindicator Pauldrons",
+      "path": "Inventory/Armor/ShouldersRight/4061612-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1684339742
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Warmonger Mantle",
+      "path": "Inventory/Armor/ShouldersRight/3840023-ArmorRightShoulderPad-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1063226483
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Wave Slicer",
+      "path": "Inventory/Armor/ShouldersRight/009-001-samurai-ed06bc71.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": 1911109015
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Wenn Pads",
+      "path": "Inventory/Armor/ShouldersRight/3839969-ArmorRightShoulderPad-Hazmat.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -1123459765
+        }
+      }
+    },
+    {
+      "kind": "right_shoulder",
+      "name": "Wreck-Salvaged Pauldron",
+      "path": "Inventory/Armor/ShouldersRight/3877378-ArmorRightShoulderPad-Mirage-IIC.json",
+      "match": {
+        "attachments": {
+          "right_shoulder_tag_id": -2132288208
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "AAP/Ordnance Pack Mike",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-1416aed0.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1870444035
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Achilles' Plate",
+      "path": "Inventory/Armor/HipAttachments/3839861-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1914514158
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Adamant Plate",
+      "path": "Inventory/Armor/HipAttachments/4256943-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 153329372
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Agitator Belt",
+      "path": "Inventory/Armor/HipAttachments/3839725-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1482214956
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Artificer Foundation",
+      "path": "Inventory/Armor/HipAttachments/4256957-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1503903446
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Beacon Prototype",
+      "path": "Inventory/Armor/HipAttachments/3839711-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1483804018
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Blighted Vitality",
+      "path": "Inventory/Armor/HipAttachments/4077071-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -77799277
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Blistered Plate",
+      "path": "Inventory/Armor/HipAttachments/3997286-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1534565375
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Castigator Grenades",
+      "path": "Inventory/Armor/HipAttachments/4077078-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1356396765
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Connection Lock",
+      "path": "Inventory/Armor/HipAttachments/4206357-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 187382454
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Crowd Pleaser",
+      "path": "Inventory/Armor/HipAttachments/3877286-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 310697457
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Cut to the Quick",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-8a95835e.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -2009167669
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Emissary Belt",
+      "path": "Inventory/Armor/HipAttachments/3839718-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1536663464
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Fidget Keepawake",
+      "path": "Inventory/Armor/HipAttachments/3626949-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1097717564
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Fire Serpent's Girdle",
+      "path": "Inventory/Armor/HipAttachments/4077057-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 479897732
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "First Vanguard Plating",
+      "path": "Inventory/Armor/HipAttachments/4256917-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -607736336
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Flayer Knife",
+      "path": "Inventory/Armor/HipAttachments/3840018-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 802405817
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "GTAS Upper Leg Protector",
+      "path": "Inventory/Armor/HipAttachments/4061551-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -102114444
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Helioskrill Cuisse",
+      "path": "Inventory/Armor/HipAttachments/3839936-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -922451405
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Insurance Plate",
+      "path": "Inventory/Armor/HipAttachments/3626941-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -706729322
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Leg Sleeve",
+      "path": "Inventory/Armor/HipAttachments/4076965-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 774661814
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "MAT-2550/Grenade Pack",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-3f3bfd13.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1248937113
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "MLB Belt",
+      "path": "Inventory/Armor/HipAttachments/4061568-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -849917901
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Magister's Blade",
+      "path": "Inventory/Armor/HipAttachments/3839847-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1122316933
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "MedAux Unit/Type I",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-69615a95.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1568937137
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "MedAux Unit/Type II",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-0d0d9f91.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1925444653
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Myesel Ammo Pouch",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-707a6bd4.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -263674835
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "PacCyber Techscanner Custom",
+      "path": "Inventory/Armor/HipAttachments/4061575-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -832211735
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Pogey Packs",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-98202cb0.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 71627260
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Project TASKMANTIS",
+      "path": "Inventory/Armor/HipAttachments/4206375-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1568355433
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Radiant Cuisse",
+      "path": "Inventory/Armor/HipAttachments/4256911-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1231279285
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Scav Patch",
+      "path": "Inventory/Armor/HipAttachments/3626966-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -594616501
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Sibyl Girdle",
+      "path": "Inventory/Armor/HipAttachments/4256996-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -2146375249
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Sovereign Petal",
+      "path": "Inventory/Armor/HipAttachments/3839854-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 533705684
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "TAC/ESIS Duty Case",
+      "path": "Inventory/Armor/HipAttachments/4076895-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -756218411
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "TAC/Gravspinner",
+      "path": "Inventory/Armor/HipAttachments/4061593-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -2082800519
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "TAC/IS5 Core",
+      "path": "Inventory/Armor/HipAttachments/4206339-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -339595912
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "TAC/MX CUTTER",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-7bd4f57b.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1335154097
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "TAC/Model 52 Navy Knife",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-2620cc52.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 2028495059
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Thremaleon Cuisse",
+      "path": "Inventory/Armor/HipAttachments/4025503-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1748486234
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Tribune Belt",
+      "path": "Inventory/Armor/HipAttachments/4077050-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 403101426
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/GEN2 Plate",
+      "path": "Inventory/Armor/HipAttachments/4061561-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 509951707
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/GPAA",
+      "path": "Inventory/Armor/HipAttachments/4076986-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1201557322
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/NS Storage Pack",
+      "path": "Inventory/Armor/HipAttachments/4206384-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1615091233
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/RAPT",
+      "path": "Inventory/Armor/HipAttachments/4206348-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1566679865
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/S-Plate",
+      "path": "Inventory/Armor/HipAttachments/3579422-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1731053824
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/SWAP",
+      "path": "Inventory/Armor/HipAttachments/4076979-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1436591280
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/TYPE REA",
+      "path": "Inventory/Armor/HipAttachments/4061582-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 864807548
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/ULAP",
+      "path": "Inventory/Armor/HipAttachments/4025499-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1297658806
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UA/XG-15 Plate",
+      "path": "Inventory/Armor/HipAttachments/4076972-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 942046932
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UTIL/Artisan Pouch",
+      "path": "Inventory/Armor/HipAttachments/4206366-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 921528010
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UTIL/S-PAK",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-49e297f9.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -707435765
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "UTIL/SIREN REAVER",
+      "path": "Inventory/Armor/HipAttachments/3839834-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -888277255
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "VAPOR EAGLE",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-938eb21f.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 891311453
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Vindicator Girdle",
+      "path": "Inventory/Armor/HipAttachments/4061614-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": -1346898441
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Warmonger Plates",
+      "path": "Inventory/Armor/HipAttachments/3840025-ArmorHipAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 1894799656
+        }
+      }
+    },
+    {
+      "kind": "utility",
+      "name": "Watsmil Ammo Pouch",
+      "path": "Inventory/Armor/HipAttachments/010-001-olympus-424c0956.json",
+      "match": {
+        "attachments": {
+          "utility_tag_id": 793295989
+        }
+      }
+    },
+    {
+      "kind": "visor",
+      "name": "Arcadian Green",
+      "path": "Inventory/Armor/Visors/012-001-c8b988cf.json",
+      "match": {
+        "visor_id": -611521361,
+        "visor_color_id": 994132079
+      }
+    },
+    {
+      "kind": "visor",
+      "name": "Sansar Obsidian",
+      "path": "Inventory/Armor/Visors/012-001-b4c44fb1.json",
+      "match": {
+        "visor_id": 1544031111,
+        "visor_color_id": 267723541
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Achilles' Protection",
+      "path": "Inventory/Armor/WristAttachments/3839862-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1487127843
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Adamant Crest",
+      "path": "Inventory/Armor/WristAttachments/4241926-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1230634956
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Artificer Vambrace",
+      "path": "Inventory/Armor/WristAttachments/4241927-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1975245852
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Crimson Compliment",
+      "path": "Inventory/Armor/WristAttachments/3877281-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 263921876
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "DEACONCREST Shield Node",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-dccb99fa.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1723566143
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "First Vanguard Bracers",
+      "path": "Inventory/Armor/WristAttachments/4241930-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 303748142
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "GTAS Forearm Guards",
+      "path": "Inventory/Armor/WristAttachments/4083540-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 586550853
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Gameday Sleeve",
+      "path": "Inventory/Armor/WristAttachments/3626965-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1360603448
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Gravestone Growth",
+      "path": "Inventory/Armor/WristAttachments/4241921-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1117972069
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Magister's Locution",
+      "path": "Inventory/Armor/WristAttachments/3839848-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 374768972
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Pike Gauntlets",
+      "path": "Inventory/Armor/WristAttachments/4097476-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -68851306
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Project CASKLOOM",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-938a0f3d.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 416396641
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Project STEPSWEEP",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-c5d0a8bb.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1269273844
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Radiant Bracers",
+      "path": "Inventory/Armor/WristAttachments/4241929-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 216796297
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Redsteel Vambrace",
+      "path": "Inventory/Armor/WristAttachments/3626942-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -119521547
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Reinforced Vambrace",
+      "path": "Inventory/Armor/WristAttachments/3877287-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1667448450
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Sharp Bracer",
+      "path": "Inventory/Armor/WristAttachments/3839726-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -2112533472
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Sibyl Vambrace",
+      "path": "Inventory/Armor/WristAttachments/4241934-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 2100164323
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "TAC/Dewclaw",
+      "path": "Inventory/Armor/WristAttachments/4083566-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 508382535
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "TAC/Holodyne Milspec",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-b309c251.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1709170885
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "TAC/IS5 Pad",
+      "path": "Inventory/Armor/WristAttachments/4206340-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1412910346
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "TAC/LI-100 Firebee",
+      "path": "Inventory/Armor/WristAttachments/4097477-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -177125118
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "TAC/Spike Lantern",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-8a913e7c.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1737396609
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Tribune Bracers",
+      "path": "Inventory/Armor/WristAttachments/4241919-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1288673210
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Lockplate",
+      "path": "Inventory/Armor/WristAttachments/4083563-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1187299110
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Prefect Buckler",
+      "path": "Inventory/Armor/WristAttachments/4083570-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 439355242
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/RDR",
+      "path": "Inventory/Armor/WristAttachments/4097676-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -146440828
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/S-ONI",
+      "path": "Inventory/Armor/WristAttachments/4206376-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 1830713282
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Sention",
+      "path": "Inventory/Armor/WristAttachments/4206367-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1116856168
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/T1A1",
+      "path": "Inventory/Armor/WristAttachments/4097675-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -411976500
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/TSAA",
+      "path": "Inventory/Armor/WristAttachments/4206385-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -136679418
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Type 22 Wristguard",
+      "path": "Inventory/Armor/WristAttachments/4206358-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1431309834
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Type 83",
+      "path": "Inventory/Armor/WristAttachments/4097433-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 390167793
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Type II-A1 Buckler",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-f7e6ca39.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 170094857
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Type MGSA",
+      "path": "Inventory/Armor/WristAttachments/4206349-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 263702736
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/Type WDEAM-2560",
+      "path": "Inventory/Armor/WristAttachments/4083567-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -106521695
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UA/WD-Testbed 201",
+      "path": "Inventory/Armor/WristAttachments/4083565-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 517952296
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UTIL/BattleBuddy",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-ce7e3614.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -1608628532
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UTIL/ECell Carrier",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-fc485496.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 76737298
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UTIL/Project ORANGEWALK",
+      "path": "Inventory/Armor/WristAttachments/3839835-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 89611035
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "UTIL/RailGrip",
+      "path": "Inventory/Armor/WristAttachments/011-001-olympus-e55365d7.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -298864690
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Vindicator Vambrace",
+      "path": "Inventory/Armor/WristAttachments/4083573-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": -758230290
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Warrior's Seal",
+      "path": "Inventory/Armor/WristAttachments/4241920-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 818839568
+        }
+      }
+    },
+    {
+      "kind": "wrist",
+      "name": "Whisperdart Launcher",
+      "path": "Inventory/Armor/WristAttachments/4241922-ArmorWristAttachment-Mark-VII.json",
+      "match": {
+        "attachments": {
+          "wrist_tag_id": 334786303
+        }
+      }
+    }
+  ]
+}

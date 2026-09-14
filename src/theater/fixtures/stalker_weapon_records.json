@@ -1,0 +1,496 @@
+{
+  "match_id": "9ea11b0a-dddc-4061-a7f7-ac22fa62a05b",
+  "selection": {
+    "time_us": 67050945,
+    "source": {
+      "chunk": 4,
+      "payload_byte": 503906,
+      "bit": 37,
+      "end_bit": 86
+    },
+    "hex": "a07b4204fc4008a3a810444035f7c0",
+    "ids": [
+      35,
+      42
+    ],
+    "fields": [
+      {
+        "id": 35,
+        "bit": 70,
+        "end_bit": 79,
+        "bits": "000001000"
+      },
+      {
+        "id": 42,
+        "bit": 79,
+        "end_bit": 86,
+        "bits": "0010001"
+      }
+    ],
+    "tick": 159
+  },
+  "standalone_states": [
+    {
+      "time_us": 59310053,
+      "source": {
+        "chunk": 3,
+        "payload_byte": 535774,
+        "bit": 198,
+        "end_bit": 234
+      },
+      "hex": "d2600400003daf193c742c9679f60aabe652003b103da1033e2004319504035f7c00",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 225,
+          "end_bit": 234,
+          "bits": "001010100"
+        }
+      ]
+    },
+    {
+      "time_us": 59626797,
+      "source": {
+        "chunk": 3,
+        "payload_byte": 536807,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420714400863280806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "001010000"
+        }
+      ]
+    },
+    {
+      "time_us": 60027665,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 482249,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4207d4400863260806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "001001100"
+        }
+      ]
+    },
+    {
+      "time_us": 60427577,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 483473,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420094400863240806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "001001000"
+        }
+      ]
+    },
+    {
+      "time_us": 60827973,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 484709,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420154400863220806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "001000100"
+        }
+      ]
+    },
+    {
+      "time_us": 61228650,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 485945,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420214400863200806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "001000000"
+        }
+      ]
+    },
+    {
+      "time_us": 61612563,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 487130,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4202cc4008631e0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000111100"
+        }
+      ]
+    },
+    {
+      "time_us": 62012680,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 488370,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42038c4008631c0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000111000"
+        }
+      ]
+    },
+    {
+      "time_us": 62412946,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 489594,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42044c4008631a0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000110100"
+        }
+      ]
+    },
+    {
+      "time_us": 62846655,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 490932,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42051c400863180806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000110000"
+        }
+      ]
+    },
+    {
+      "time_us": 63213863,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 492076,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4205cc400863160806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000101100"
+        }
+      ]
+    },
+    {
+      "time_us": 63597590,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 493253,
+        "bit": 101,
+        "end_bit": 137
+      },
+      "hex": "a0024228037000c1a07b420684400863140806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 128,
+          "end_bit": 137,
+          "bits": "000101000"
+        }
+      ]
+    },
+    {
+      "time_us": 63998009,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 494497,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420744400863120806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000100100"
+        }
+      ]
+    },
+    {
+      "time_us": 64398315,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 495725,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b420004400863100806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000100000"
+        }
+      ]
+    },
+    {
+      "time_us": 64831999,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 497063,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4200d44008630e0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000011100"
+        }
+      ]
+    },
+    {
+      "time_us": 65199112,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 498197,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4201844008630c0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000011000"
+        }
+      ]
+    },
+    {
+      "time_us": 65582707,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 499374,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42023c4008630a0806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000010100"
+        }
+      ]
+    },
+    {
+      "time_us": 65983137,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 500618,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4202fc400863080806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000010000"
+        }
+      ]
+    },
+    {
+      "time_us": 66383601,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 501850,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4203bc400863060806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000001100"
+        }
+      ]
+    },
+    {
+      "time_us": 66783937,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 503082,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42047c400863040806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000001000"
+        }
+      ]
+    },
+    {
+      "time_us": 67184388,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 504340,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b42053c400863020806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000000100"
+        }
+      ]
+    },
+    {
+      "time_us": 67568061,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 505530,
+        "bit": 37,
+        "end_bit": 73
+      },
+      "hex": "a07b4205f4400863000806bef800",
+      "ids": [
+        35
+      ],
+      "fields": [
+        {
+          "id": 35,
+          "bit": 64,
+          "end_bit": 73,
+          "bits": "000000000"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "records": [
+    {
+      "evidence": {
+        "film": "weapons/03-br-sniper-zoom",
+        "time": 22.036707,
+        "chunk": 2,
+        "payload_byte": 487955,
+        "bit": 0,
+        "player": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "level": 1,
+        "clock_bit": 24,
+        "auxiliary_bit": null,
+        "following_zoom_bits": []
+      },
+      "hex": "cac008a07b4200a8806bef80",
+      "match_id": "0131715c-568e-49d8-af6a-90e63c5c8156"
+    },
+    {
+      "evidence": {
+        "film": "weapons/03-br-sniper-zoom",
+        "time": 26.674662,
+        "chunk": 2,
+        "payload_byte": 500818,
+        "bit": 0,
+        "player": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "level": 0,
+        "clock_bit": 24,
+        "auxiliary_bit": null,
+        "following_zoom_bits": []
+      },
+      "hex": "cac008207b420158806bef80",
+      "match_id": "0131715c-568e-49d8-af6a-90e63c5c8156"
+    },
+    {
+      "evidence": {
+        "film": "weapons/03-br-sniper-zoom",
+        "time": 32.08004,
+        "chunk": 2,
+        "payload_byte": 515818,
+        "bit": 0,
+        "player": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "level": 1,
+        "clock_bit": 24,
+        "auxiliary_bit": null,
+        "following_zoom_bits": []
+      },
+      "hex": "cac008a07b420378806bef80",
+      "match_id": "0131715c-568e-49d8-af6a-90e63c5c8156"
+    },
+    {
+      "evidence": {
+        "film": "weapons/03-br-sniper-zoom",
+        "time": 36.801706,
+        "chunk": 2,
+        "payload_byte": 528911,
+        "bit": 0,
+        "player": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "level": 2,
+        "clock_bit": 24,
+        "auxiliary_bit": null,
+        "following_zoom_bits": []
+      },
+      "hex": "cac009207b420450806bef80",
+      "match_id": "0131715c-568e-49d8-af6a-90e63c5c8156"
+    },
+    {
+      "evidence": {
+        "film": "weapons/03-br-sniper-zoom",
+        "time": 41.889813,
+        "chunk": 3,
+        "payload_byte": 487420,
+        "bit": 0,
+        "player": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "level": 0,
+        "clock_bit": 88,
+        "auxiliary_bit": 24,
+        "following_zoom_bits": []
+      },
+      "hex": "cac008200242600000026ce07b4205d8806bef80",
+      "match_id": "0131715c-568e-49d8-af6a-90e63c5c8156"
+    },
+    {
+      "evidence": {
+        "film": "ranked-arena/02-oddball",
+        "time": 1169.164069,
+        "chunk": 59,
+        "payload_byte": 671037,
+        "bit": 0,
+        "player": 7,
+        "wire": 2,
+        "generation": 2,
+        "serial": 258,
+        "level": 0,
+        "clock_bit": 24,
+        "auxiliary_bit": null,
+        "following_zoom_bits": []
+      },
+      "hex": "cac050207d4203bc4030c005902fd1cfdccc11a0804e87d5dd10146001559e7b02ed43004a412002286449c075ffaeea117925001155640bed74007100e82e56a1900000b61cd1c315dd17d25001155640be1e3f3fb036030f7013e60004b084043e5dd17f2400155902fa2afce34106013eb2714131f7aee8bfd2000aac817f707e69209182c901452f58f497748bb100042502fe28fd03412002bc65595a3e02a8058c4852372d631a14a90f5f4a8425c76f98bea5200084185f8c5fe06800226683816c2b2c64bd1f0cf7d5a30020c2fca2ff024001161c52d5638b0404037e8c103d74004135f00105df9a041b7ea4107dfbe000",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73"
+    },
+    {
+      "evidence": {
+        "film": "bandit/01-evo",
+        "time": 38.519682,
+        "chunk": 2,
+        "payload_byte": 810432,
+        "bit": 0,
+        "player": 6,
+        "wire": 6,
+        "generation": 1,
+        "serial": 6,
+        "level": 0,
+        "clock_bit": 48,
+        "auxiliary_bit": null,
+        "following_zoom_bits": [
+          24
+        ]
+      },
+      "hex": "cac0c84ac028207b42070440294004555902f9e3008bc1200179d45a80004247a18ff9e04408880640be59c01c70240f0220548002ab205e6ca022781220a82c8aaedac2178110325001155640bf843f66f04802e1801800001271a82c02781280214bc914a02852d7cd2f7210848762b25f34213430c98cbec8425c08c9097e110418e17256b19c6014bf48820d0ff178b2fe220831df9db3880edbf0209bf5c082ebff020da07a00",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c"
+    }
+  ],
+  "unchecked": [
+    {
+      "evidence": {
+        "film": "bandit/01-evo",
+        "time": 33.165108,
+        "chunk": 2,
+        "payload_byte": 690800,
+        "bit": 0,
+        "player": 7,
+        "wire": 7,
+        "generation": 1,
+        "serial": 7,
+        "level": 0
+      },
+      "hex": "cac0e8726004d6757c79000000006f6fd4a629303a00838b566e226a164b3cfaaa034200052f44f0003517a577f39605bc0603703af9e0fcd40ea2fecf7a021120000789f00194148a70080090980000007b380dd080607b4204fc40094004555902f99eff19c0350b40ea5790004a42d6d0a19f44028c015902f84900fbc1200d000ce19f440494004555902f796fe64c0c400814c7c928047824d6fa59f440694004555902fa6100384093008b262e18004b034870019f440894004555902fbdaff06400001507c4e180038c2b770c19f440a900055640bd6840463024007fc3159d367accfa20648002ab206018dfbfe824009aab44abc53d867d103a600115565e02f4a6fe75c08f02e2ee5d8800494246effd9f033280214b4024a02852b9552f1a35586880000204035ff8101df94040b7d048481ebcf8209a180082ebff10906d71c041f60f80",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c"
+    }
+  ]
+}

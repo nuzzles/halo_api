@@ -1,0 +1,97 @@
+use super::InputAxes;
+use super::bits::Bits;
+
+#[derive(Debug)]
+pub(super) struct Command {
+    pub player: u8,
+    pub axes: InputAxes,
+    pub crouch: bool,
+    pub start: usize,
+    pub buttons: usize,
+    pub end: usize,
+}
+
+/// Checked terminal command records for roster slots 0/1. Replication records
+/// before this suffix can remain opaque; no component lengths are guessed.
+/// The two header tags and four button forms are captured encodings, not a
+/// generalized button mask or a physical stance/slide component.
+pub(super) fn terminal(b: Bits<'_>) -> Option<Vec<Command>> {
+    // Two maximum-width commands, their preceding zero guard, and byte padding.
+    const MAX_BITS: usize = 2 * (25 + 10) + 3 + 1 + 7;
+    let mut found: Option<Vec<Command>> = None;
+    for guard in b.len().saturating_sub(MAX_BITS)..b.len().saturating_sub(32) {
+        let Some(rows) = terminal_at(b, guard) else {
+            continue;
+        };
+        if let Some(previous) = &found {
+            // The second player's record also forms a valid suffix. Keep the
+            // longest sequence; reject overlapping, incompatible interpretations.
+            if !previous.iter().any(|r| r.start == rows[0].start) {
+                return None;
+            }
+        } else {
+            found = Some(rows);
+        }
+    }
+    found
+}
+
+/// Validate a terminal command suffix at an already decoded replication End.
+/// Motion records can use this same grammar for both header tags and roster slots.
+pub(super) fn terminal_at(b: Bits<'_>, guard: usize) -> Option<Vec<Command>> {
+    if b.read(guard, 3)? != 0 {
+        return None;
+    }
+    sequence(b, guard.checked_add(3)?)
+}
+
+fn sequence(b: Bits<'_>, mut p: usize) -> Option<Vec<Command>> {
+    let mut rows: Vec<Command> = Vec::with_capacity(2);
+    for _ in 0..2 {
+        let start = p;
+        if b.read(p, 1)? != 1 {
+            return None;
+        }
+        let player = b.read(p + 1, 8)? as u8;
+        if player > 1
+            || rows.last().is_some_and(|r| r.player >= player)
+            || !matches!(b.read(p + 9, 4)?, 13 | 14)
+        {
+            return None;
+        }
+        let forward = b.read(p + 13, 6)? as u8;
+        let left = b.read(p + 19, 6)? as u8;
+        if forward > 62 || left > 62 {
+            return None;
+        }
+        p += 25;
+        let buttons = p;
+        let (crouch, width) = if b.is(p, "00000") {
+            (false, 5)
+        } else if b.is(p, "0010000100") {
+            (true, 10)
+        } else if b.is(p, "0010010000") {
+            (false, 10) // Jump without crouch in the independent jump control.
+        } else if b.is(p, "0010010100") {
+            (true, 10) // Combined jump/crouch, also captured in Octagon.
+        } else {
+            return None;
+        };
+        // Paired commands establish the ten-bit nonempty tail. The next bit
+        // starts the following command, or is a zero terminator before padding.
+        p += width;
+        rows.push(Command {
+            player,
+            axes: InputAxes { forward, left },
+            crouch,
+            start,
+            buttons,
+            end: p,
+        });
+        let terminal_end = p + usize::from(width == 10);
+        if terminal_end.div_ceil(8) * 8 == b.len() {
+            return (b.read(p, b.len().checked_sub(p)?)? == 0).then_some(rows);
+        }
+    }
+    None
+}

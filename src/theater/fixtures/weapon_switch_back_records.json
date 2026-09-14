@@ -1,0 +1,156 @@
+{
+  "film": "weapons/04-br-shock-rifle",
+  "match_id": "731ef1f7-a119-49ca-a056-4b8305aaf7c6",
+  "records": [
+    {
+      "time_us": 57011430,
+      "source": {
+        "chunk": 3,
+        "payload_byte": 529423,
+        "bit": 37,
+        "end_bit": 71
+      },
+      "hex": "a07b42022c40086a26201afbe000",
+      "tick": 69,
+      "expected": 1,
+      "expected_magazines": []
+    },
+    {
+      "time_us": 66971899,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 501534,
+        "bit": 37,
+        "end_bit": 71
+      },
+      "hex": "a07b4204d440086a22201afbe000",
+      "tick": 154,
+      "expected": 0,
+      "expected_magazines": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "match_id": "9d644d09-38c3-429a-bf3d-de0ea577815f",
+      "player": "Orbital",
+      "time_us": 452443784,
+      "source": {
+        "chunk": 23,
+        "payload_byte": 770242,
+        "bit": 1478,
+        "end_bit": 1672
+      },
+      "hex": "d260d4084d32b1824d542c9679f2234396ba018ad2302b860db5ca07b4203dc40494004555903f826ea5b6790b03064f91800032e82fbd7b4406900055640f849b12edbc00d34b0193997dcbda20448002ab207b6d01636d2a0892d82fd443cb5ed102a50011556411775bd3edf6c0a7621765201000ad13d85ed1042400155903fd76e35b6790a565262db761daf688292000aac81fcab73adb3c024bab2eed550397b4418900045640f1edc04edb6c02755104720000cbda20d4c002ab30d408c00e17b6cee118424a199f3ef5ec1d91884112acd5b9f6af6884d18aab280012708b73ef5ed10ba3001640fe71fcbed8780440e0457b4436900055640ffadb42ed44c2c4ca1fda4379cbda21d46002c82402c01fdaa484e3ea396f6887912acc11df5af6887d100c81cb7c5c9daa297b4440900055640eaaa6956d62825d341c7530728bda2224a0022aac82214cfefdad1012235344e800019e88820bda2244a0022aac823274db6daa280dbec31cb00222196b7f2bda3034a002106c822384c76daac0046a14589b8f11bf95d1e800a19fa3f7b460c8c10d95bda44446002107f22dccb6dae27e15b8a9af54133b3a208304c469950af6069f15200084188e692b536a90126fa832a0a31269f1452f3e3a400108311c1256aed5340c04b038787308c7910ddc4036bf8101df9f040b7ef8103d82028209affc082ec40020dbf3e4241f5f7c108dcd804275f7c10ad840042f5df8a0866ce0021ba8ee087ebef8221afbe088e8140225bf3a089efc711701c589180e08ce1870",
+      "tick": 123,
+      "expected": 0,
+      "expected_magazines": [
+        {
+          "slot": 1,
+          "rounds": 29
+        }
+      ],
+      "fields": [
+        {
+          "id": 0,
+          "bit": 1535,
+          "end_bit": 1589,
+          "bits": "000001000110000000000111000010111101101101100111011100"
+        },
+        {
+          "id": 1,
+          "bit": 1589,
+          "end_bit": 1620,
+          "bits": "0010001100001000010010010100001"
+        },
+        {
+          "id": 21,
+          "bit": 1620,
+          "end_bit": 1645,
+          "bits": "1001100111110011111011110"
+        },
+        {
+          "id": 25,
+          "bit": 1645,
+          "end_bit": 1655,
+          "bits": "1011110110"
+        },
+        {
+          "id": 33,
+          "bit": 1655,
+          "end_bit": 1665,
+          "bits": "0000111011"
+        },
+        {
+          "id": 42,
+          "bit": 1665,
+          "end_bit": 1672,
+          "bits": "0010001"
+        }
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "match_id": "9d644d09-38c3-429a-bf3d-de0ea577815f",
+      "player": "Orbital",
+      "time_us": 478701547,
+      "source": {
+        "chunk": 24,
+        "payload_byte": 895566,
+        "bit": 1173,
+        "end_bit": 1384
+      },
+      "hex": "cac1485343530da686a69a81190820100881ed0814310125001155640fb8dba56d9dc2465696a4600de0a35bf9685101a5001155640fbc1be4ed9dc1282191a60004b0ba141e68510223001640f6120126d9341aea01d5a1441090005564111c9c436d9dc0a4831776507cad0a20a46002c81fc5373ddb3c01583321342883120008ac81e34b7d1db6d806dac2386400ca1a1441a9c00556618aa045de70f1b67709203e0edae1f4b421244f11885d28008aab207f32fdff6c4001cdc88b16000066cee06b42886d28008aab207c74dc3b6cee053b10eb120000647edf1b42887918aab27400840a943d268510fa400155903c6e7141b6db088f8a427ca9f1b4288811800b207522fdf76a7a18c99cebd0a221462aaca0003c835c4d8da144448c005903a3790e9b5830c0fba76685113a4001559049a598dbb67d069ee45f747e843428c0d2800841b20798931736ab20808a55426b26d48db3135803a7309ce85183250010836411dce4e6ed550284ef9fe4de7fde8027f3b6c39b505ad0a75542d1a73b3a208368989d51784b039fe5200084188fc71b576aa62bc28884a561bf004611c4201bf3c080eb400205affc081eb8014104d6f104175f7c106df9f041f5f7c108d68004277db010adf99042f7e7ca0866d28021bb0c20876fb1821faffc0886bef8227bf5dfa800",
+      "tick": 161,
+      "expected": 0,
+      "expected_magazines": [
+        {
+          "slot": 1,
+          "rounds": 36
+        }
+      ],
+      "fields": [
+        {
+          "id": 0,
+          "bit": 1236,
+          "end_bit": 1290,
+          "bits": "000001000101110111100111000011110001101101100111011100"
+        },
+        {
+          "id": 1,
+          "bit": 1290,
+          "end_bit": 1321,
+          "bits": "0010010010000000111110000011101"
+        },
+        {
+          "id": 21,
+          "bit": 1321,
+          "end_bit": 1346,
+          "bits": "1011010111000011111010010"
+        },
+        {
+          "id": 25,
+          "bit": 1346,
+          "end_bit": 1356,
+          "bits": "1101000010"
+        },
+        {
+          "id": 33,
+          "bit": 1356,
+          "end_bit": 1366,
+          "bits": "0001001001"
+        },
+        {
+          "id": 34,
+          "bit": 1366,
+          "end_bit": 1377,
+          "bits": "00010011110"
+        },
+        {
+          "id": 42,
+          "bit": 1377,
+          "end_bit": 1384,
+          "bits": "0010001"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,582 @@
+{
+  "reloads": [
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 26.875065,
+        "chunk": 2,
+        "payload_byte": 501848,
+        "bit": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock_bit": 95,
+        "auxiliary": true
+      },
+      "hex": "d3401100400484c000000329c0f684037100d7df00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 39.371112,
+        "chunk": 2,
+        "payload_byte": 538021,
+        "bit": 0,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock_bit": 31,
+        "auxiliary": false
+      },
+      "hex": "d340110040f684024880112acc00201248100d7df000",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "ranked-arena/02-oddball",
+        "time": 1176.021391,
+        "chunk": 59,
+        "payload_byte": 780220,
+        "bit": 0,
+        "wire": 1,
+        "generation": 2,
+        "serial": 257,
+        "player": 6,
+        "clock_bit": 31,
+        "auxiliary": false
+      },
+      "hex": "d340610640fa84012880620008ac817a4c7e94606c87027c3bc8001fc1124405100055640bce33fb61023c061e715fc6b7fe89220388002ab205f92e05198008188948e9e3dbf944917925001155640bcfb3f67302402fec91066000f60e7441044963121498c158c6852cb4565721681a151502000afbec1200084185f089fa1381b6113fe804d6a69b29a576597dea20010be41bf3d903644b293036fbf4800210617c8d7e8aa06d0939824d2cf5b56b047effdf849000420c2fc14fced41221774304235701c60914ca3101df60040f5500106dfbd041f5ff8840",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73"
+    }
+  ],
+  "deltas": [
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 21.936667,
+        "chunk": 2,
+        "payload_byte": 487680,
+        "bit": 198,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 15,
+        "components": [
+          30
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 0,
+            "value": 14,
+            "bit": 225,
+            "end": 235
+          }
+        ],
+        "end": 235
+      },
+      "hex": "d26004000016acdc44d42c9679f60aabe652003e103da1003e20042f03a201afbe00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 22.353776,
+        "chunk": 2,
+        "payload_byte": 488990,
+        "bit": 198,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 40,
+        "components": [
+          30
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 0,
+            "value": 13,
+            "bit": 225,
+            "end": 235
+          }
+        ],
+        "end": 235
+      },
+      "hex": "d26004008016acdc44d42c9679f60aabe652003f103da100a220042f036201afbe00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 22.754345,
+        "chunk": 2,
+        "payload_byte": 490262,
+        "bit": 198,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 64,
+        "components": [
+          30
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 0,
+            "value": 12,
+            "bit": 225,
+            "end": 235
+          }
+        ],
+        "end": 235
+      },
+      "hex": "d26004010016acdc44d42c9679f60aabe652000d103da1010220042f032201afbe00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 28.192607,
+        "chunk": 2,
+        "payload_byte": 505510,
+        "bit": 37,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 134,
+        "components": [
+          30
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 0,
+            "value": 15,
+            "bit": 64,
+            "end": 74
+          }
+        ],
+        "end": 74
+      },
+      "hex": "a07b42043440085e07c4035f7c00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 32.246683,
+        "chunk": 2,
+        "payload_byte": 516757,
+        "bit": 37,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 121,
+        "components": [
+          42
+        ],
+        "fields": [
+          {
+            "kind": "switch",
+            "slot": 1,
+            "bit": 64,
+            "end": 71
+          }
+        ],
+        "end": 71
+      },
+      "hex": "a07b4203cc40086a26201afbe000",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 36.901965,
+        "chunk": 2,
+        "payload_byte": 529689,
+        "bit": 198,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 144,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 11,
+            "bit": 225,
+            "end": 235
+          }
+        ],
+        "end": 235
+      },
+      "hex": "d2600401803f408190f42c9679f60aabe6520011103da1024220043082e201afbe00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 37.151975,
+        "chunk": 2,
+        "payload_byte": 530512,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 159,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 10,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600402003f408190f42c9679f60aabe6536c009040f68409f88010c20a8806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 37.385617,
+        "chunk": 2,
+        "payload_byte": 531290,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 173,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 9,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600402803f408190f42c9679f60aabe653e000e840f6840ad88010c2098806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 37.619068,
+        "chunk": 2,
+        "payload_byte": 532076,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 187,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 8,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600403003f408190f42c9679f60aabe653bc00bc40f6840bb88010c2088806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 37.836029,
+        "chunk": 2,
+        "payload_byte": 532808,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 200,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 7,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600403803f408190f42c9679f60aabe653b0001440f6840c888010c2078806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 38.053111,
+        "chunk": 2,
+        "payload_byte": 533548,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 213,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 6,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600404003f408190f42c9679f60aabe653a8001840f6840d588010c2068806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 38.269758,
+        "chunk": 2,
+        "payload_byte": 534271,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 226,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 5,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600404803f408190f42c9679f60aabe653ac008440f6840e288010c2058806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 38.470591,
+        "chunk": 2,
+        "payload_byte": 534948,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 238,
+        "components": [
+          21,
+          25,
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 4,
+            "bit": 278,
+            "end": 288
+          }
+        ],
+        "end": 288
+      },
+      "hex": "d2600405003f408190f42c9679f60aabe653b0009440f6840ee88011aacc3000800f7009100d7df000",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 38.703727,
+        "chunk": 2,
+        "payload_byte": 535740,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 252,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 3,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600405803f408190f42c9679f60aabe653a000d040f6840fc88010c2038806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 38.9208,
+        "chunk": 2,
+        "payload_byte": 536480,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 9,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 2,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600406003f408190f42c9679f60aabe653c4005c40f68400988010c2028806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 39.137516,
+        "chunk": 2,
+        "payload_byte": 537212,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 22,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 1,
+            "bit": 231,
+            "end": 241
+          }
+        ],
+        "end": 241
+      },
+      "hex": "d2600406803f408190f42c9679f60aabe653b400ec40f68401688010c2018806bef800",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 39.33774,
+        "chunk": 2,
+        "payload_byte": 537889,
+        "bit": 204,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 34,
+        "components": [
+          21,
+          25,
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 0,
+            "bit": 278,
+            "end": 280
+          }
+        ],
+        "end": 280
+      },
+      "hex": "d2600407003f408190f42c9679f60aabe653b4004040f68402288011aacc3000800913100d7df000",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    },
+    {
+      "evidence": {
+        "film": "weapons/02-reload-comparison",
+        "time": 40.171841,
+        "chunk": 3,
+        "payload_byte": 482657,
+        "bit": 37,
+        "wire": 0,
+        "generation": 1,
+        "serial": 0,
+        "player": 0,
+        "clock": 84,
+        "components": [
+          33
+        ],
+        "fields": [
+          {
+            "kind": "ammo",
+            "slot": 1,
+            "value": 12,
+            "bit": 64,
+            "end": 74
+          }
+        ],
+        "end": 74
+      },
+      "hex": "a07b4202a44008610644035f7c00",
+      "match_id": "4050c25f-3da5-4b16-9a50-2fab9660fed4"
+    }
+  ]
+}

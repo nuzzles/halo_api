@@ -1,0 +1,4 @@
+# Aiming follow-up. One-minute games; actions at 0:55 through 0:45 remaining.
+# Columns: group<TAB>slug<TAB>match_id<TAB>description
+aim	01-pitch-up	128deecd-95ba-4887-9d50-660710358c77	Slowly aim upward from 0:55 to 0:45 remaining; reaches maximum upward pitch at 0:45
+aim	02-yaw-right	a7861b2f-9435-47d6-924e-4f3bd9555b50	Turn right with acceleration from 0:55 to 0:45 remaining; completes many full circles
