@@ -1,0 +1,195 @@
+/* Blog presentation. The renderer keeps the original recorded observations. */
+html:has(.replay-embed), .replay-embed { height: 100%; }
+.replay-embed {
+  --accent: #2047d6;
+  --ink: #171813;
+  --muted: #68675a;
+  --line: #8f8b7a;
+  --paper: #f3eedf;
+  --raised: #fcfaf3;
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: Barlow, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.replay-embed main {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  height: 100%;
+  min-height: 520px;
+  padding: 0;
+}
+.replay-embed #roster,
+.replay-embed .position-card,
+.replay-embed .vitality-card,
+.replay-embed #armor-panel,
+.replay-embed .range-mode,
+.replay-embed .timeline-tools,
+.replay-embed .timeline-pan,
+.replay-embed #event-picker,
+.replay-embed .timeline-footer,
+.replay-embed .scene-top,
+.replay-embed .scene-help,
+.replay-embed .view-tools,
+.replay-embed .embed-tools,
+.replay-embed footer,
+.replay-embed #coverage,
+.replay-embed #events,
+.replay-embed .time-label { display: none; }
+.replay-embed .viewport {
+  display: block;
+  flex: 1 0 240px;
+  height: auto;
+  min-height: 240px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+}
+.replay-embed #scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+.replay-embed button, .replay-embed select, .replay-embed input[type=text] {
+  color: var(--ink);
+  background: var(--raised);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  font: inherit;
+}
+.replay-embed button:hover { background: #e1e7fc; border-color: var(--accent); }
+.replay-embed button:focus-visible, .replay-embed input:focus-visible, .replay-embed select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.replay-embed .player-name {
+  width: 132px;
+  max-width: 150px;
+  padding: 6px 8px;
+  background: #fcfaf3f2;
+  border: 1px solid var(--player-color);
+  border-radius: 0;
+  text-shadow: none;
+  box-shadow: 2px 2px 0 var(--player-color);
+}
+.replay-embed .player-name-text { font-size: 11px; line-height: 14px; letter-spacing: 0; }
+.replay-embed .player-name.defeated .player-name-text { text-decoration: line-through; }
+.replay-embed .player-name .zoom-summary,
+.replay-embed .player-name .combat-badge:not(.active),
+.replay-embed .player-name .combat-badges:not(:has(.active)) { display: none; }
+.replay-embed .player-name .weapon-summary { display: block; margin-top: 3px; font-size: 10px; line-height: 13px; color: var(--muted); }
+.replay-embed .player-name .weapon-summary:empty { display: none; }
+.replay-embed .player-name .combat-badge.active {
+  color: var(--ink);
+  background: var(--paper);
+  border-color: var(--line);
+  border-radius: 0;
+}
+.replay-embed .player-name.firing,
+.replay-embed .player-name.melee,
+.replay-embed .player-name.grenade { color: var(--ink) !important; background: var(--raised); }
+.replay-embed .player-name .player-vitality {
+  display: flex;
+  min-width: 0;
+  gap: 0;
+  margin-top: 5px;
+}
+.replay-embed .player-vitality .vitality-meter.compact { display: block; position: relative; }
+.replay-embed .player-vitality .meter-heading {
+  position: absolute;
+  inset: 0 3px;
+  z-index: 1;
+  color: #fff;
+  text-shadow: 0 1px 1px #0009;
+  font-size: 7px;
+  line-height: 10px;
+}
+.replay-embed .player-vitality .meter-heading strong { font-size: 7px; }
+.replay-embed .player-vitality .meter-heading > span { display: none; }
+.replay-embed .player-vitality .meter-heading { justify-content: center; }
+.replay-embed .player-vitality .meter-bar {
+  height: 10px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #dad5c7;
+}
+.replay-embed .player-vitality .shield { --meter: #2047d6; order: 1; flex: 0 0 75%; border-left: 1px solid var(--raised); }
+.replay-embed .player-vitality .body { --meter: #c23d35; order: 0; flex: 0 0 25%; }
+.replay-embed .player-name.camera-player {
+  left: 50% !important;
+  top: 12px !important;
+  bottom: auto;
+  transform: translateX(-50%);
+  opacity: 1 !important;
+}
+.replay-embed .player-vitality .held .meter-bar { opacity: .75; }
+.replay-embed #event-status {
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+  right: auto;
+  max-width: calc(100% - 195px);
+  padding: 6px 9px;
+  font-size: 10px;
+  color: var(--ink);
+  background: #fcfaf3ee;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+}
+.replay-embed .transport {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--raised);
+}
+.replay-embed .transport-top { padding-right: 0; }
+.replay-embed .playback { gap: 7px; }
+.replay-embed .play { color: var(--raised); background: var(--accent); border-color: var(--accent); }
+.replay-embed .play:hover { background: #1838ae; }
+.replay-embed .time { margin: 0 4px; }
+.replay-embed .camera-picker { display: flex; align-items: center; gap: 7px; margin-left: auto; font-size: 11px; color: var(--muted); }
+.replay-embed #camera-view { max-width: 185px; min-width: 0; padding: 7px; font-size: 11px; }
+.replay-embed #current-time { font-size: 17px; letter-spacing: 0; }
+.replay-embed .timeline { margin-top: 10px; height: 55px; }
+.replay-embed #timeline::-webkit-slider-runnable-track { height: 6px; border-radius: 0; background: #d2ccb9; }
+.replay-embed #timeline::-webkit-slider-thumb { margin-top: -9px; height: 24px; width: 6px; border-radius: 0; background: var(--accent); box-shadow: none; }
+.replay-embed #timeline::-moz-range-track { height: 6px; border-radius: 0; background: #d2ccb9; }
+.replay-embed #timeline::-moz-range-thumb { height: 24px; width: 6px; border-radius: 0; background: var(--accent); box-shadow: none; }
+.replay-embed #ticks { color: var(--muted); top: 39px; }
+.replay-embed #replay-score {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--ink);
+  background: #fcfaf3f2;
+  font-size: 10px;
+  pointer-events: none;
+}
+.replay-embed .score-label { grid-column: 1 / -1; font-size: 8px; letter-spacing: 1px; color: var(--muted); }
+.replay-embed .score-player { display: grid; gap: 2px; text-align: center; color: var(--player-color); }
+.replay-embed .score-player strong { font-size: 23px; line-height: 1; font-variant-numeric: tabular-nums; }
+.replay-embed #webgl-error { color: var(--ink); background: var(--raised); border: 1px solid var(--ink); }
+.replay-embed .replay-message { margin: auto; color: var(--ink); background: var(--raised); border-radius: 0; }
+.replay-embed noscript { padding: 12px; }
+@media (max-width: 480px) {
+  .replay-embed .transport { padding: 10px; }
+  .replay-embed #ticks { font-size: 8px; }
+  .replay-embed .transport-top { padding-right: 0; }
+  .replay-embed .player-name { width: 108px; padding: 4px 6px; }
+  .replay-embed .camera-picker { gap: 5px; }
+  .replay-embed #camera-view { max-width: 155px; }
+  .replay-embed #replay-score { right: 10px; bottom: 10px; }
+  .replay-embed #event-status { left: 10px; bottom: 10px; max-width: calc(100% - 175px); font-size: 9px; overflow-wrap: anywhere; }
+}
+@media (max-width: 360px) {
+  .replay-embed .playback { gap: 3px; }
+  .replay-embed #current-time { font-size: 16px; }
+}

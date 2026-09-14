@@ -163,6 +163,8 @@ fn main() -> Result<(), ExampleError> {
     evidence.flush()?;
     let export_time = export.elapsed();
     let counts = serde_json::json!({
+        "summary_events": film.summary_events.len(),
+        "medal_awards": film.summary_events.iter().filter(|e| e.medal.is_some()).count(),
         "players": film.players.len(),
         "appearance": film.players.iter().map(|p|p.appearance.len()).sum::<usize>(),
         "lives": film.players.iter().map(|p|p.lives.len()).sum::<usize>(),

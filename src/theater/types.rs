@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-use super::{FilmPacket, FilmRegistry};
+use super::FilmRegistry;
 
 /// Input contract for a versioned, partial decode. Chunk data must be decompressed.
 #[derive(Debug, Clone)]
@@ -394,6 +394,18 @@ pub struct SummaryEvent {
     pub metadata: u8,
     /// Raw medal flag.
     pub medal_flag: u8,
+    /// Original type byte; for medals this is the recorded sorting weight.
+    #[serde(default)]
+    pub type_code: Option<u8>,
+    /// Named medal and its distinct stats API identifier, when known.
+    #[serde(default)]
+    pub medal: Option<super::MedalAward>,
+    /// Exact 60-byte event tail; intervening identity state is not decoded.
+    #[serde(default)]
+    pub source: Option<SourceSpan>,
+    /// Recorded XUID field, independently of the roster and gamertag.
+    #[serde(default)]
+    pub identity_source: Option<SourceSpan>,
 }
 /// Summary kinds; no pairing of kills/deaths is implied.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -408,6 +420,21 @@ pub enum SummaryKind {
     Medal,
     /// Unrecognized code.
     Other(u8),
+}
+impl SummaryKind {
+    /// Interpret the event-type byte and medal flag. Byte decoders separately
+    /// validate which flag values their supported recording layout accepts.
+    pub const fn from_fields(code: u8, medal_flag: u8) -> Self {
+        if medal_flag != 0 {
+            return Self::Medal;
+        }
+        match code {
+            10 => Self::Mode,
+            20 => Self::Death,
+            50 => Self::Kill,
+            other => Self::Other(other),
+        }
+    }
 }
 /// A checked clock observation. Round signature changes are retained explicitly.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -499,4 +526,24 @@ pub struct Film {
     pub projectiles: Vec<ProjectileTrack>,
     /// Unsupported candidates, checked source ranges and scope limitations.
     pub diagnostics: DecodeDiagnostics,
+}
+
+/// One checked byte-aligned replication packet.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct FilmPacket {
+    pub chunk_index: i32,
+    pub packet_type: u16,
+    pub byte_2: u8,
+    pub byte_3: u8,
+    pub payload_offset: usize,
+    pub payload_size: usize,
+    pub timestamp_us: u64,
+}
+
+/// Counts of event categories represented in a Theater-film summary.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct FilmEventCounts {
+    pub kills: usize,
+    pub deaths: usize,
+    pub medals: usize,
 }

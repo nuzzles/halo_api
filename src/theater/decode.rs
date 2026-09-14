@@ -187,25 +187,27 @@ impl Film {
                 return Err(DecodeError::Inconsistent("ambiguous roster index".into()));
             }
         }
-        let summary_events: Vec<_> = decode_events(chunks, &roster, 41)
+        let summary = decode_summary_events(chunks, 41)?;
+        let summary_counts_match = summary.matches_declared_counts();
+        let summary_events: Vec<_> = summary
+            .events
             .into_iter()
-            .map(|e| SummaryEvent {
-                xuid: e.xuid.to_string(),
-                player: indices.get(&e.xuid).copied(),
-                name: e.gamertag,
-                time_us: u64::from(e.timestamp_ms) * 1000,
-                kind: match e.kind {
-                    FilmEventKind::Mode => SummaryKind::Mode,
-                    FilmEventKind::Death => SummaryKind::Death,
-                    FilmEventKind::Kill => SummaryKind::Kill,
-                    FilmEventKind::Medal => SummaryKind::Medal,
-                    FilmEventKind::Other(k) => SummaryKind::Other(k),
-                },
-                metadata: e.metadata,
-                medal_flag: e.medal_flag,
+            .map(|mut e| {
+                e.player = e
+                    .xuid
+                    .parse::<u64>()
+                    .ok()
+                    .and_then(|xuid| indices.get(&xuid).copied());
+                e
             })
             .collect();
         let mut diagnostics = DecodeDiagnostics::default();
+        if !summary_counts_match {
+            diagnostics.limitations.push(
+                "Summary footer missing or decoded event count differs from its declared count"
+                    .into(),
+            );
+        }
         for p in packets
             .iter()
             .filter(|p| p.packet_type == 8 && p.timestamp_us >= origin)

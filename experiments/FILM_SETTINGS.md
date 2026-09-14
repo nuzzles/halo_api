@@ -60,9 +60,16 @@ Files are under [the clip's settings folder](films/octagon/03-first-to-50/settin
 - `menu-parameters.json`: 114 extracted enumerated menu parameters, names,
   descriptions, choices, and source byte offsets. This is a schema snapshot,
   not a list of settings effective in the match. The structural `*-bond.json`
-  dumps retain field IDs/types/offsets for further research.
+dumps retain field IDs/types/offsets for further research.
 
 The Infinite Ammo menu parameter occupies bytes `[36008,36230)`, and Bottomless
 Clip `[36230,36452)`. The latter's Off and On entries begin at 36421 and 36437.
 The exploratory Bond dumps are research artifacts; the download example retains
 the original bytes and does not yet implement a supported settings decoder.
+
+The follow-up reusable reader in `examples/bond_compact.py` also handles these
+structures: `parse(data)` for the engine file and
+`parse(data, allow_zero_padding=True)` for the padded menu. Padding is reported
+separately. It preserves raw numeric fields and supplies no effective setting
+defaults. See [FILM_MAP_ASSETS.md](FILM_MAP_ASSETS.md) for the bounded reader and
+its independently checked map-placement application.

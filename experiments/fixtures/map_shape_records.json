@@ -1,0 +1,101 @@
+{
+  "scope": "Captured raw volume bags. Numeric fixed-point fields are parsed; box/cylinder semantics follow an external schema, not a local gameplay oracle.",
+  "records": [
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/map.mvar",
+      "sha256": "b8cc7d9732c1d361b2472bae021b67297bd6ffdc9eade962e612e67f365c7438",
+      "index": 3,
+      "offset": 569,
+      "end": 737,
+      "hex": "a6014a0710d497d1a801006a100700003243279a9916434700004a42008a06470000803f00aa0b072d441435270000803f00c3071cca08670b4a3d0b4a3010062a01004a01006a01008a0100aa06108080c80600ca0606108080e80200ca07051080802800ca08051080802800003004d00800ca0d0100002b4a070b4a0310000000cb0e4a0100cb184a0e10022a0710ccbdd5f40300500400cb1d4a010000ca090100ca0a010000",
+      "expected_family": 3,
+      "expected_parameters": [
+        6881280,
+        2949120,
+        327680,
+        327680
+      ],
+      "parameter_byte_ranges": [
+        [
+          648,
+          652
+        ],
+        [
+          657,
+          661
+        ],
+        [
+          666,
+          669
+        ],
+        [
+          674,
+          677
+        ]
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/325b3aee-e747-4580-8e0b-98c36af994cf/ae5e40fb-2070-4d6e-902a-f6954be940b8/fo11_blank.mvar",
+      "sha256": "e89c46d00311ea27ce925e136086b84476545deba2e860b4b93bea9218ac17fb",
+      "index": 96,
+      "offset": 12013,
+      "end": 12186,
+      "hex": "ab014a07108dcf87800b006a1007010000b5270000d0404700004a42008a06470000803f00aa06070000803f00c30701ca086b0b4a4b0b4a2e10042a01004a01006a01008a0100aa051080800800ca06051080800800ca07051080801000ca08051080800200003004cb096a0710c1a7b1dc050007109ab38ff30f00ca0d0100002b4a070b4a0310000000cb184a0e10022a0710a0abb884070050040000ca090100ca0a0710a3e38bc9020000",
+      "expected_family": 2,
+      "expected_parameters": [
+        65536,
+        65536,
+        131072,
+        16384
+      ],
+      "parameter_byte_ranges": [
+        [
+          12087,
+          12090
+        ],
+        [
+          12095,
+          12098
+        ],
+        [
+          12103,
+          12106
+        ],
+        [
+          12111,
+          12114
+        ]
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/336b5174-3579-4fd8-b2f0-922e4a5f7628/c0c6705e-167b-4335-afe0-2bafc7290f40/map.mvar",
+      "sha256": "8f4a065c6992042d699de8ec49f35b9dadbd1cda2ad7d21a392f3c09ff9add4b",
+      "index": 215,
+      "offset": 26049,
+      "end": 26220,
+      "hex": "a9014a0710bce79bc60d006a10073b23b7412767a8104147e76b0d40008a06470000803f00aa0b072ebd3bb3270000803f00c30701ca086a0b4a4a0b4a2a10062a01004a01006a01008a0100aa051080802800ca060510e6cc1900ca07051098b31200ca080100003004d00802cb096a071087bfa78b0a000710c08fa4890300ca0d0100002b4a070b4a0310000000cb184a0e10022a0710d4ce9bde070050040000ca090100ca0a010000",
+      "expected_family": 3,
+      "expected_parameters": [
+        327680,
+        209715,
+        150732,
+        null
+      ],
+      "parameter_byte_ranges": [
+        [
+          26128,
+          26131
+        ],
+        [
+          26136,
+          26139
+        ],
+        [
+          26144,
+          26147
+        ],
+        null
+      ]
+    }
+  ]
+}

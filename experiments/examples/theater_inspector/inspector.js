@@ -48,11 +48,12 @@
   }
   async function loadRecordingCoverage(recording) {
     const token=coverageRevision;
-    if(coverageCache.has(recording.label)) {
-      recordingCoverage=coverageCache.get(recording.label);finishRecordingCoverage();return;
+    const key=recording.label+'/'+recording.revision;
+    if(coverageCache.has(key)) {
+      recordingCoverage=coverageCache.get(key);finishRecordingCoverage();return;
     }
     const controller=new AbortController();coverageController=controller;
-    const result={film:recording.label,match_id:recording.match_id,
+    const result={film:recording.label,match_id:recording.match_id,revision:recording.revision,
       basis:'Verified inspector annotations across all decompressed chunk bytes, including headers and padding. Decoder fields without exact annotations remain unparsed.',
       total_bits:recording.chunks.reduce((n,c)=>n+c.size*8,0),scanned_bits:0,
       coverage:Object.fromEntries(Object.keys(COLORS).map(s=>[s,0])),chunks_scanned:0,
@@ -69,7 +70,7 @@
         result.issues.push(...row.issues.slice(0,Math.max(0,8-result.issues.length)).map(issue=>({...issue,chunk:c.index})));
         renderRecordingCoverage(`Calculating · ${number(result.chunks_scanned)} / ${number(result.chunks_total)} chunks · ${number(result.scanned_bits/8)} / ${number(result.total_bits/8)} bytes checked`);
       }
-      result.complete=true;coverageController=null;coverageCache.set(recording.label,result);finishRecordingCoverage();
+      result.complete=true;coverageController=null;coverageCache.set(key,result);finishRecordingCoverage();
     } catch(error) {
       if(token!==coverageRevision)return;
       coverageController=null;
@@ -85,11 +86,16 @@
     view=result;
     selected=selection || {start:offset*8,end:offset*8+8}; selectedByte=Math.floor(selected.start/8);
     render();
-    notice(view.issues.length ? view.issues.join(' · ') : 'Read only · Select a field or byte to inspect its exact bits. Unannotated regions stay unparsed.', view.issues.length>0);
+    const issues=[...(chunk.issues||[]),...view.issues];
+    notice(issues.length ? issues.join(' · ') : chunk.type===3 ? `Match summary · ${number(chunk.events.length)} events · ${number(chunk.events.filter(e=>e.medal).length)} medals. Select an event to inspect its bytes. Percentages include the still-opaque event state.` : 'Read only · Select a field or byte to inspect its exact bits. Unannotated regions stay unparsed.', issues.length>0);
   }
   async function loadChunk(index, offset, token, selection=null, preferEvidence=false) {
     const result=await api('chunk',{film:film.label,chunk:index}); if(token!==revision)return;
     chunk=result; $('chunk').value=index; packetPage=0; lastSearch='';
+    $('summary-event-wrap').hidden=chunk.type!==3;
+    $('summary-event').replaceChildren(...chunk.events.map((e,i)=>{const o=el('option',e.title);o.value=i;return o;}));
+    $('summary-event').disabled=!chunk.events.length;
+    if(chunk.type===3 && offset===0 && chunk.events.length)offset=chunk.events[0].offset;
     if(preferEvidence && !chunk.packets.find(p=>p.offset===offset)?.evidence.length) {
       const candidates=chunk.packets.filter(p=>p.evidence.length);
       if(candidates.length)offset=candidates.reduce((a,b)=>Math.abs(a.offset-offset)<Math.abs(b.offset-offset)?a:b).offset;
@@ -98,9 +104,9 @@
     if(selectedIndex>=0)packetPage=Math.floor(selectedIndex/40);
     await show(offset,token,selection);
   }
-  async function loadFilm(label, token) {
+  async function loadFilm(label, token, {refresh=false,events=false}={}) {
     resetRecordingCoverage();
-    const result=await api('film',{film:label}); if(token!==revision)return;
+    const result=await api('film',{film:label,refresh:refresh?'1':'0'}); if(token!==revision)return;
     film=result; $('film').value=label;
     const query=new URLSearchParams({film:label});
     history.replaceState(null,'','?'+query);
@@ -108,11 +114,20 @@
     document.querySelector('nav a[aria-current]').href='/?'+query;
     loadRecordingCoverage(result);
     $('film-meta').replaceChildren(el('div',`v${film.version} · ${number(film.chunks.length)} chunks · ${(film.duration/60).toFixed(2)} minutes · ${number(film.chunks.reduce((n,c)=>n+c.size,0))} bytes`),el('code',film.match_id));
-    $('chunk').replaceChildren(...film.chunks.map(c=>{const o=el('option',`${String(c.index).padStart(3,'0')} · ${c.chunk_type===1?'Registry':c.chunk_type===2?'Replication':'Type '+c.chunk_type} · ${(c.size/1024).toFixed(0)} KiB`);o.value=c.index;return o;}));
+    $('chunk').replaceChildren(...film.chunks.map(c=>{const o=el('option',`${String(c.index).padStart(3,'0')} · ${c.chunk_type===1?'Registry':c.chunk_type===2?'Replication':c.chunk_type===3?'Match summary':'Type '+c.chunk_type} · ${(c.size/1024).toFixed(0)} KiB`);o.value=c.index;return o;}));
+    $('match-events').disabled=!film.chunks.some(c=>c.chunk_type===3);
     $('time').max=film.duration;
     const time=Math.min(30,film.duration); $('time').value=time;
+    if(events){await openSummary(token);return;}
     const target=await api('seek',{film:label,time}); if(token!==revision)return;
     await loadChunk(target.chunk,target.offset,token,null,true);
+  }
+  async function openSummary(token) {
+    const summary=film.chunks.find(c=>c.chunk_type===3);
+    if(!summary)return notice('This recording has no summary chunk.');
+    $('packet-filter').value='all';
+    history.replaceState(null,'','?'+new URLSearchParams({film:film.label,events:'1'}));
+    await loadChunk(summary.index,0,token);
   }
   function filteredPackets() {
     if(!chunk)return [];
@@ -124,7 +139,7 @@
     $('packet-count').textContent=number(chunk.packets.length);
     const buttons=rows.slice(packetPage*40,packetPage*40+40).map(p=>{
       const b=el('button',undefined,'packet'+(view.packet?.offset===p.offset?' selected':''));
-      const title=el('strong');title.append(el('span',p.time==null?'No timestamp':p.time.toFixed(3)+' s'),el('span',p.kind===0?'FRAME':p.kind===10?'MARKER':'KIND '+p.kind));
+      const title=el('strong');title.append(el('span',p.time==null?'No timestamp':p.time.toFixed(3)+' s'),el('span',p.kind===0?'FRAME':p.kind===9?'SUMMARY':p.kind===7?'END':p.kind===10?'MARKER':'KIND '+p.kind));
       b.append(title,el('small',hex(p.offset)+' · '+number(p.size)+' B'),el('small',p.evidence.join(' · ')||'Packet header'));
       b.onclick=()=>run(t=>show(p.offset,t));return b;
     });
@@ -134,7 +149,7 @@
   }
   function renderCoverage() {
     const total=view.scope[1]-view.scope[0];
-    $('scope-title').textContent=view.packet?`${view.packet.kind===0?'Frame':'Packet '+view.packet.kind} · ${view.packet.time==null?'no timestamp':view.packet.time.toFixed(6)+' s'}`:'Current byte window';
+    $('scope-title').textContent=view.packet?`${view.packet.kind===0?'Frame':view.packet.kind===9?'Match summary':'Packet '+view.packet.kind} · ${view.packet.time==null?'no timestamp':view.packet.time.toFixed(6)+' s'}`:'Current byte window';
     $('scope-size').textContent=number(total/8)+' bytes';
     const bars=[],legends=[];
     for(const [status,n] of Object.entries(view.coverage)) {
@@ -174,7 +189,7 @@
   }
   function renderFields() {
     const filter=$('field-filter').value,rows=view.spans.filter(s=>filter==='all'||s.status===filter);
-    $('field-count').textContent=number(view.spans.length)+' regions';
+    $('field-count').textContent=number(view.spans.length)+(view.fields_scope==='visible summary bytes'?' page regions':' regions');
     const fragment=document.createDocumentFragment();let lastRecord=null;
     for(const s of rows) {
       if(lastRecord!==s.record){fragment.append(el('div',s.record,'record-label'));lastRecord=s.record;}
@@ -218,6 +233,9 @@
   }
   function render() {renderPackets();renderCoverage();renderBytes();renderFields();renderSelection();reportState();}
   $('film').onchange=()=>run(t=>loadFilm($('film').value,t));
+  $('refresh-decoding').onclick=()=>{coverageCache.clear();const events=chunk?.type===3;run(t=>loadFilm(film.label,t,{refresh:true,events}));};
+  $('match-events').onclick=()=>run(t=>openSummary(t));
+  $('summary-event').onchange=()=>{const event=chunk.events[Number($('summary-event').value)];if(event)run(t=>show(event.offset,t));};
   $('chunk').onchange=()=>run(t=>loadChunk(Number($('chunk').value),0,t));
   $('packet-filter').onchange=()=>{packetPage=0;renderPackets();};
   $('packets-prev').onclick=()=>{packetPage--;renderPackets();};$('packets-next').onclick=()=>{packetPage++;renderPackets();};
@@ -236,7 +254,7 @@
   $('copy-hex').textContent='Copy page hex';$('export-json').textContent='Export page JSON';
   $('copy-hex').onclick=async()=>{try{await navigator.clipboard.writeText(view.bytes.map(b=>b.toString(16).padStart(2,'0')).join(' '));notice('Visible byte page copied as hex.');}catch{notice('Clipboard unavailable. Use Export page JSON to save the bytes.',true);}};
   $('export-json').onclick=()=>{
-    const data={recording:film.match_id,chunk:chunk.index,offset:view.offset,hex:view.bytes.map(b=>b.toString(16).padStart(2,'0')).join(' '),selected,scope:view.scope,coverage:view.coverage,spans:view.spans,issues:view.issues};
+    const data={recording:film.match_id,chunk:chunk.index,offset:view.offset,hex:view.bytes.map(b=>b.toString(16).padStart(2,'0')).join(' '),selected,scope:view.scope,fields_scope:view.fields_scope,coverage:view.coverage,spans:view.spans,issues:view.issues};
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download=`theater-${chunk.index}-${view.offset}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
   $('export-coverage').onclick=()=>{
@@ -248,6 +266,6 @@
     const catalog=await api('catalog');if(t!==revision)return;
     TheaterRecordings.populate($('film'),catalog);
     if(!catalog.length){notice('No cached recordings found. Download films using the experiment catalog.',true);return;}
-    const requested=new URLSearchParams(location.search).get('film');await loadFilm(catalog.some(r=>r.label===requested)?requested:catalog[0].label,t);
+    const query=new URLSearchParams(location.search),requested=query.get('film');await loadFilm(catalog.some(r=>r.label===requested)?requested:catalog[0].label,t,{events:query.get('events')==='1'});
   });
 })();

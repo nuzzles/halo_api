@@ -1,0 +1,936 @@
+{
+  "cms_sha256": "c8d9f44bb2cbf97d8d028741fac1876f557d1fe2804931901ecd2ae57259cf30",
+  "cms_count": 151,
+  "definitions": [
+    {
+      "film_id": 0,
+      "name": "Double Kill",
+      "name_id": 622331684,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 1,
+      "name": "Triple Kill",
+      "name_id": 2063152177,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 2,
+      "name": "Overkill",
+      "name_id": 835814121,
+      "sorting_weight": 220
+    },
+    {
+      "film_id": 3,
+      "name": "Killtacular",
+      "name_id": 2137071619,
+      "sorting_weight": 225
+    },
+    {
+      "film_id": 4,
+      "name": "Killtrocity",
+      "name_id": 1430343434,
+      "sorting_weight": 230
+    },
+    {
+      "film_id": 5,
+      "name": "Killamanjaro",
+      "name_id": 3835606176,
+      "sorting_weight": 235
+    },
+    {
+      "film_id": 6,
+      "name": "Killtastrophe",
+      "name_id": 2242633421,
+      "sorting_weight": 240
+    },
+    {
+      "film_id": 7,
+      "name": "Killpocalypse",
+      "name_id": 3352648716,
+      "sorting_weight": 245
+    },
+    {
+      "film_id": 8,
+      "name": "Killionaire",
+      "name_id": 3233051772,
+      "sorting_weight": 250
+    },
+    {
+      "film_id": 9,
+      "name": "Killing Spree",
+      "name_id": 2780740615,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 10,
+      "name": "Killing Frenzy",
+      "name_id": 4261842076,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 11,
+      "name": "Running Riot",
+      "name_id": 418532952,
+      "sorting_weight": 205
+    },
+    {
+      "film_id": 12,
+      "name": "Rampage",
+      "name_id": 1486797009,
+      "sorting_weight": 210
+    },
+    {
+      "film_id": 13,
+      "name": "Perfection",
+      "name_id": 865763896,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 26,
+      "name": "Killjoy",
+      "name_id": 3233952928,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 27,
+      "name": "Nightmare",
+      "name_id": 710323196,
+      "sorting_weight": 220
+    },
+    {
+      "film_id": 28,
+      "name": "Boogeyman",
+      "name_id": 1720896992,
+      "sorting_weight": 230
+    },
+    {
+      "film_id": 29,
+      "name": "Grim Reaper",
+      "name_id": 2567026752,
+      "sorting_weight": 240
+    },
+    {
+      "film_id": 30,
+      "name": "Demon",
+      "name_id": 2875941471,
+      "sorting_weight": 250
+    },
+    {
+      "film_id": 31,
+      "name": "Flawless Victory",
+      "name_id": 1680000231,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 32,
+      "name": "Steaktacular",
+      "name_id": 1169390319,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 36,
+      "name": "Stopped Short",
+      "name_id": 3488248720,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 37,
+      "name": "Flag Joust",
+      "name_id": 976049027,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 38,
+      "name": "Goal Line Stand",
+      "name_id": 3227840152,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 39,
+      "name": "Necromancer",
+      "name_id": 3011158621,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 40,
+      "name": "Immortal",
+      "name_id": 3120600565,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 41,
+      "name": "Lone Wolf",
+      "name_id": 2623698509,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 42,
+      "name": "Duelist",
+      "name_id": 4247875860,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 43,
+      "name": "Ace",
+      "name_id": 521420212,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 44,
+      "name": "Extermination",
+      "name_id": 4100966367,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 45,
+      "name": "Sole Survivor",
+      "name_id": 2717755703,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 46,
+      "name": "Untainted",
+      "name_id": 1064731598,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 47,
+      "name": "Blight",
+      "name_id": 88914608,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 48,
+      "name": "Disease",
+      "name_id": 1155542859,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 49,
+      "name": "Plague",
+      "name_id": 3786134933,
+      "sorting_weight": 205
+    },
+    {
+      "film_id": 50,
+      "name": "Scourge",
+      "name_id": 3520382976,
+      "sorting_weight": 220
+    },
+    {
+      "film_id": 51,
+      "name": "Pestilence",
+      "name_id": 1719203329,
+      "sorting_weight": 210
+    },
+    {
+      "film_id": 52,
+      "name": "Apocalypse",
+      "name_id": 3653884673,
+      "sorting_weight": 230
+    },
+    {
+      "film_id": 53,
+      "name": "Culling",
+      "name_id": 1025827095,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 54,
+      "name": "Cleansing",
+      "name_id": 1765213446,
+      "sorting_weight": 205
+    },
+    {
+      "film_id": 55,
+      "name": "Purge",
+      "name_id": 3467301935,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 56,
+      "name": "Purification",
+      "name_id": 496411737,
+      "sorting_weight": 220
+    },
+    {
+      "film_id": 57,
+      "name": "Divine Intervention",
+      "name_id": 2164872967,
+      "sorting_weight": 230
+    },
+    {
+      "film_id": 58,
+      "name": "Zombie Slayer",
+      "name_id": 557309779,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 59,
+      "name": "Undead Hunter",
+      "name_id": 1447057920,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 60,
+      "name": "Hell's Janitor",
+      "name_id": 217730222,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 61,
+      "name": "The Sickness",
+      "name_id": 17866865,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 62,
+      "name": "Spotter",
+      "name_id": 2477555653,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 63,
+      "name": "Treasure Hunter",
+      "name_id": 1685043466,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 64,
+      "name": "Saboteur",
+      "name_id": 20397755,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 65,
+      "name": "Wingman",
+      "name_id": 1284032216,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 66,
+      "name": "Wheelman",
+      "name_id": 2926348688,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 67,
+      "name": "Gunner",
+      "name_id": 3783455472,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 68,
+      "name": "Driver",
+      "name_id": 3027762381,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 69,
+      "name": "Pilot",
+      "name_id": 2593226288,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 70,
+      "name": "Tanker",
+      "name_id": 2278023431,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 71,
+      "name": "Rifleman",
+      "name_id": 2852571933,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 72,
+      "name": "Bomber",
+      "name_id": 1146876011,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 73,
+      "name": "Grenadier",
+      "name_id": 2648272972,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 74,
+      "name": "Boxer",
+      "name_id": 269174970,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 75,
+      "name": "Warrior",
+      "name_id": 1210678802,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 76,
+      "name": "Gunslinger",
+      "name_id": 1172766553,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 77,
+      "name": "Scattergunner",
+      "name_id": 3347922939,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 78,
+      "name": "Sharpshooter",
+      "name_id": 4277328263,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 79,
+      "name": "Marksman",
+      "name_id": 2758320809,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 80,
+      "name": "Heavy",
+      "name_id": 4086138034,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 81,
+      "name": "Bodyguard",
+      "name_id": 555849395,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 82,
+      "name": "Back Smack",
+      "name_id": 548533137,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 83,
+      "name": "Nuclear Football",
+      "name_id": 2253222811,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 84,
+      "name": "Boom Block",
+      "name_id": 524758914,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 85,
+      "name": "Bulltrue",
+      "name_id": 3114137341,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 86,
+      "name": "Cluster Luck",
+      "name_id": 3905838030,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 87,
+      "name": "Dogfight",
+      "name_id": 1229018603,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 88,
+      "name": "Harpoon",
+      "name_id": 2418616582,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 89,
+      "name": "Mind the Gap",
+      "name_id": 1880789493,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 90,
+      "name": "Ninja",
+      "name_id": 3085856613,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 91,
+      "name": "Odin's Raven",
+      "name_id": 87172902,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 92,
+      "name": "Pancake",
+      "name_id": 3876426273,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 93,
+      "name": "Quigley",
+      "name_id": 1312042926,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 94,
+      "name": "Remote Detonation",
+      "name_id": 3160646854,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 95,
+      "name": "Return to Sender",
+      "name_id": 3059799290,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 96,
+      "name": "Rideshare",
+      "name_id": 656245292,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 97,
+      "name": "Skyjack",
+      "name_id": 731054446,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 98,
+      "name": "Stick",
+      "name_id": 3655682764,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 99,
+      "name": "Tag & Bag",
+      "name_id": 1841872491,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 100,
+      "name": "Whiplash",
+      "name_id": 1734214473,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 101,
+      "name": "Kong",
+      "name_id": 3546244406,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 102,
+      "name": "Autopilot Engaged",
+      "name_id": 1623236079,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 103,
+      "name": "Sneak King",
+      "name_id": 670606868,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 104,
+      "name": "Windshield Wiper",
+      "name_id": 2827657131,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 105,
+      "name": "Reversal",
+      "name_id": 2123530881,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 106,
+      "name": "Hail Mary",
+      "name_id": 3934547153,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 107,
+      "name": "Nade Shot",
+      "name_id": 265478668,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 108,
+      "name": "Snipe",
+      "name_id": 4229934157,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 109,
+      "name": "Perfect",
+      "name_id": 1512363953,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 110,
+      "name": "Bank Shot",
+      "name_id": 2414983178,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 111,
+      "name": "Fire & Forget",
+      "name_id": 988255960,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 112,
+      "name": "Ballista",
+      "name_id": 4215552487,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 113,
+      "name": "Pull",
+      "name_id": 4132863117,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 114,
+      "name": "No Scope",
+      "name_id": 2602963073,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 115,
+      "name": "Achilles Spine",
+      "name_id": 3217141618,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 116,
+      "name": "Grand Slam",
+      "name_id": 1646928910,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 117,
+      "name": "Guardian Angel",
+      "name_id": 3334154676,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 118,
+      "name": "Interlinked",
+      "name_id": 651256911,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 119,
+      "name": "Death Race",
+      "name_id": 677323068,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 120,
+      "name": "Chain Reaction",
+      "name_id": 1969067783,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 121,
+      "name": "360",
+      "name_id": 1427176344,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 122,
+      "name": "Combat Evolved",
+      "name_id": 641726424,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 123,
+      "name": "Deadly Catch",
+      "name_id": 2396845048,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 124,
+      "name": "Driveby",
+      "name_id": 197913196,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 125,
+      "name": "Fastball",
+      "name_id": 1211820913,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 126,
+      "name": "Flyin' High",
+      "name_id": 3739610597,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 127,
+      "name": "From the Grave",
+      "name_id": 2625820422,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 128,
+      "name": "From the Void",
+      "name_id": 3588869844,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 129,
+      "name": "Grapple-jack",
+      "name_id": 690125105,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 130,
+      "name": "Hold This",
+      "name_id": 175594566,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 131,
+      "name": "Last Shot",
+      "name_id": 3091261182,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 132,
+      "name": "Lawnmower",
+      "name_id": 3475540930,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 133,
+      "name": "Mount Up",
+      "name_id": 1065136443,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 134,
+      "name": "Off the Rack",
+      "name_id": 1283796619,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 135,
+      "name": "Quick Draw",
+      "name_id": 2861418269,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 136,
+      "name": "Party's Over",
+      "name_id": 3583966655,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 137,
+      "name": "Pineapple Express",
+      "name_id": 2019283350,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 138,
+      "name": "Ramming Speed",
+      "name_id": 1298835518,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 139,
+      "name": "Reclaimer",
+      "name_id": 1445036152,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 140,
+      "name": "Shot Caller",
+      "name_id": 1169571763,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 141,
+      "name": "Yard Sale",
+      "name_id": 1176569867,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 142,
+      "name": "Special Delivery",
+      "name_id": 275666139,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 143,
+      "name": "Street Sweeper",
+      "name_id": 2967011722,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 146,
+      "name": "Fumble",
+      "name_id": 3732790338,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 148,
+      "name": "Straight Balling",
+      "name_id": 781229683,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 150,
+      "name": "Big Deal",
+      "name_id": null,
+      "sorting_weight": null
+    },
+    {
+      "film_id": 151,
+      "name": "Always Rotating",
+      "name_id": 1472686630,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 152,
+      "name": "Hill Guardian",
+      "name_id": 580478179,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 153,
+      "name": "Clock Stop",
+      "name_id": 3630529364,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 154,
+      "name": "Secure Line",
+      "name_id": 2426456555,
+      "sorting_weight": 101
+    },
+    {
+      "film_id": 155,
+      "name": "Signal Block",
+      "name_id": 3931425309,
+      "sorting_weight": 101
+    },
+    {
+      "film_id": 156,
+      "name": "Splatter",
+      "name_id": 221693153,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 157,
+      "name": "Clash of Kings",
+      "name_id": null,
+      "sorting_weight": null
+    },
+    {
+      "film_id": 158,
+      "name": "Contract Killer",
+      "name_id": null,
+      "sorting_weight": null
+    },
+    {
+      "film_id": 160,
+      "name": "Watch the Throne",
+      "name_id": null,
+      "sorting_weight": null
+    },
+    {
+      "film_id": 162,
+      "name": "All That Juice",
+      "name_id": 3528500956,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 163,
+      "name": "Great Journey",
+      "name_id": 1376646881,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 164,
+      "name": "Power Outage",
+      "name_id": 629165579,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 165,
+      "name": "Breacher",
+      "name_id": 2750622016,
+      "sorting_weight": 50
+    },
+    {
+      "film_id": 166,
+      "name": "Mounted & Loaded",
+      "name_id": 1331361851,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 167,
+      "name": "Monopoly",
+      "name_id": 1090931685,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 168,
+      "name": "Counter-snipe",
+      "name_id": 1477806194,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 174,
+      "name": "Driving Spree",
+      "name_id": 3169118333,
+      "sorting_weight": 100
+    },
+    {
+      "film_id": 175,
+      "name": "Death Cabbie",
+      "name_id": 2848470465,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 176,
+      "name": "Immortal Chauffeur",
+      "name_id": 1739996188,
+      "sorting_weight": 200
+    },
+    {
+      "film_id": 177,
+      "name": "Blind Fire",
+      "name_id": 4007438389,
+      "sorting_weight": 150
+    },
+    {
+      "film_id": 178,
+      "name": "Hang Up",
+      "name_id": 4285712605,
+      "sorting_weight": 51
+    },
+    {
+      "film_id": 179,
+      "name": "Call Blocked",
+      "name_id": 2964157454,
+      "sorting_weight": 52
+    },
+    {
+      "film_id": 180,
+      "name": "Clear Reception",
+      "name_id": 394349536,
+      "sorting_weight": 101
+    }
+  ]
+}

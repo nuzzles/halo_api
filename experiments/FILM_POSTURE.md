@@ -36,7 +36,7 @@ The parser first validates the existing clock/entity/End/input-axis chain, bound
 to wire 0, generation 1, roster player 0. At the end of its 25-bit input window:
 
 - `00000`: explicit empty command tail, interpreted as released crouch input.
-- `00100001000`: held crouch input in the checked control form.
+- `0010000100`: held crouch input, then a zero terminator before byte padding.
 
 In the original reader, only zero padding to the next byte may follow. This exact length check rejects
 other buttons, combined inputs, additional players, and arbitrary extra bytes.
@@ -52,7 +52,9 @@ held:     a07b4200d0806bef9080
 
 Both have clock bits [0,37), End [37,40), input prefix/axes [40,65).
 The released tail is [65,70), followed by two zero bits. The held tail is
-[65,76), followed by four zero bits. The opaque command prefix is not relabeled
+[65,75), followed by the zero terminator and four padding bits. The initial
+eleven-bit interpretation included that terminator; paired commands establish
+the corrected ten-bit boundary. The opaque command prefix is not relabeled
 as a physical-pose component.
 
 ## Terminal commands and multiplayer crouch
@@ -73,9 +75,17 @@ analog input fields. Four exact tail forms are supported:
 | Tail | Crouch input | Other corroborated input |
 | --- | --- | --- |
 | `00000` | released | empty checked form |
-| `00100001000` | held | crouch form from both controls |
-| `00100100000` | released | jump form from the separate jump control |
-| `00100101000` | held | combined jump/crouch form in Octagon |
+| `0010000100` | held | crouch form from both controls |
+| `0010010000` | released | jump form from the separate jump control |
+| `0010010100` | held | combined jump/crouch form in Octagon |
+
+**2026-09-13 correction:** the three nonempty forms occupy ten bits. A following
+player's command begins immediately; a final nonempty command instead has a
+zero terminator before byte padding. Keeping that final zero as an eleventh
+button bit rejected paired commands whenever the first player crouched/jumped.
+The shared motion boundary check now uses this corrected grammar too. Octagon
+has 32,029 crouch-input samples after the fix; the earlier counts below describe
+the initial terminal reader. See [movement-gap evidence](FILM_OCTAGON.md#movement-freshness-and-terminal-command-boundaries).
 
 This is a list of validated encodings, not a decoder for arbitrary button masks.
 The jump-only form occurs at Nuzzles's film time **197.410521 s** as his recorded
@@ -155,6 +165,21 @@ No aligned active capture has validated these schemas in our films. Local
 prediction may reconstruct posture from commands; that possibility is not proof
 that physical state is absent elsewhere. A second player observing an isolated
 crouch/slide control would be the most useful new capture.
+
+### Snapshot timing check
+
+The existing controls do not hold crouch across a periodic snapshot. Packet 2
+snapshots in `posture/01-crouch-slide` occur at film seconds 0.000320, 19.992886,
+39.995307, 60.000698 and 80.002130. All three held-input runs above fall between
+snapshots. The older `natural-end/08-crouch` hold at 26.439–28.391 likewise falls
+between snapshots at 19.990877 and 39.994265. Packet 8 follows the same cadence.
+These timestamps come from packet headers, not an inferred action clock.
+
+This explains a limitation of comparing these baselines; it does not prove that
+physical posture is absent from film data. A better control would use a second
+player observing Nuzzles: stand still, then hold crouch for **at least 25 seconds**,
+release and stand still again, followed by one isolated sprint/slide. That hold
+crosses a 20-second snapshot boundary regardless of pregame timing.
 
 ## API and replay
 

@@ -49,8 +49,10 @@ contains only Aquarius and Bazaar, with a pinned external source and independent
 retrieved level IDs. The reference comes from JGtm/LevelUp commit
 `cf333a3889771c6462dfce9e1bc287a897043a47`, not from a decoded map-bounds field in
 our films. `download_film_maps` caches exact match-history and map asset revisions
-under each film's `settings/`. It found 19 of the 32 films in the first 1,000
-history results; 13 older natural-end controls were outside that search.
+under each film's `settings/`. The initial signed-in-account lookup found 19 of
+32 films. Searching **Neutral's** history subsequently found all 13 early controls
+in its first page: these were a participant mismatch, not established age-limit
+failures. All 32 films now have exact map references.
 
 Bazaar validates both its predicted widths and the world-speed conversion against
 recorded movement (325 comparisons; median speed error 0.0493 world units/s).
@@ -64,6 +66,24 @@ the decoder. Matching widths never establishes matching origins or scales.
 The bootstrap registry is largely identical across these maps; it cannot by
 itself supply their distinct bounds. Map `.mvar` metadata identifies the base map
 but does not provide a decoded BSP bound table in our current work.
+
+### Map-placement validation
+
+The follow-up [map asset reader](FILM_MAP_ASSETS.md) parses eleven exact-revision
+`.mvar` files and extracts object placements with byte provenance. Aquarius's
+independently dequantized spawn closely matches the explicit X/Z of a map object.
+Y is omitted in that object and remains unknown in the schema-free export.
+
+Recharge now has an empirical affine calibration fitted to 55 distinct Oddball
+spawns and independently checked against 42 Bandit spawns, with a maximum matched
+validation distance of 0.01345 world units. Eight distinct positions in each film
+remain unmatched. This fit is kept in research reports; it is not an exact BSP
+bounds table and is not passed into the native API or replay.
+
+Exact map metadata also distinguishes the two Octagons: Str8 controls use
+`fo11_blank`, while the first-to-50 AHP Octagon uses `fo09_academy`. Both have
+15/15/17 coordinate widths. See the map asset notes for the tentative shared-Forge
+transform comparisons and their limits.
 
 ## Earlier Bazaar inference
 

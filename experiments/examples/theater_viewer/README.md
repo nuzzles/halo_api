@@ -148,6 +148,104 @@ clear the name until the next shot. Stalker ammo stays unknown; the cooling-shap
 component is not a magazine count. Stalker names also appear on 279 raid shots.
 See [the control evidence](../../FILM_WEAPONS.md#stalker-rifle-firing-control).
 
+## Single-file blog embed
+
+Export one decoded film as a self-contained HTML viewer:
+
+Each embed export also writes a sibling `.json.gz` file with an exact compressed
+copy of its decoded source JSON. A surrounding page can link to that file using
+the HTML `download` attribute; the viewer does not fetch it during playback.
+
+```sh
+node experiments/examples/build_decoded_replay.cjs --embed \
+  experiments/films/octagon/03-first-to-50/decoded-film.json \
+  --octagon-walls --fixed-loadout 'Bandit EVO,S7 Sniper' \
+  --output /path/to/blog/assets/motion-replay/octagon.html
+```
+
+Run this from the repository root. Without `--output`, the embed goes to
+`experiments/films/analysis/motion_replay_embed.html`; the full lab export is
+not overwritten. `--embed` accepts exactly one decoded JSON file and rejects
+`--corpus`. The browser never parses original Theater bytes. The builder uses
+the existing `filmToClip` adapter and the same renderer as the full viewer.
+
+The exported file includes its one replay, Three.js, styles, scripts, and license
+notices. Serve it as a static asset; it needs no server API, CDN, catalog, or other
+files. It has no recording picker, upload control, inspector links, or armor and
+raw-value panels. Playback starts paused, with looping off. Readers can play,
+pause, scrub, and select Nuzzles's or timesknightt's over-shoulder camera (or
+Overview). Nuzzles is the default when present; other films use their selected player.
+Only the viewport and
+timeline are visible: there is no roster above the viewport, camera button row, or
+help footer. Use R to reset the camera. Normal scrolling moves the page; Ctrl/Command plus
+scroll zooms the camera. Mouse/touch dragging orbits in Overview. Player observations, gaps, unknown
+values, and life boundaries retain the full viewer's semantics. Each player's
+solid 5-pixel trail shows the previous 10 seconds and the dashed trail shows the next
+10 seconds, bounded by the playback window, sample gaps, and the current life.
+Recorded velocity arrows are enabled. Each vitality bar uses the left 25% for red
+health and the right 75% for shields. Bars show numeric raw values; unknown values
+display full (health 126, shields 64), while the underlying value and accessibility
+readout remain unknown. Defeated players
+show empty bars and struck-through names on their cards. The event feed stays at
+the bottom left and uses “Nuzzles killed timesknightt” wording. A followed player's
+card stays at the top center. The bottom-right score counts recorded
+kill events up to the playhead, including events before the configured start.
+
+The embed uses articulated procedural Spartan models from `spartan.js`, with
+distinct Bandit EVO and S7 Sniper silhouettes selected from decoded weapon identity.
+Unknown weapons use a neutral rifle.
+Each player card shows the decoded held weapon, or “Weapon unknown” until observed;
+death clears the weapon label. The shoulder camera frames the rifle from its weapon
+side and adapts to the embed width. Recorded action events drive illustrative
+recoil, melee, grenade, and reload gestures; current crouch input and observed
+movement drive posture and walking. Every pose is computed from film time so
+backward seeking restores it. These are stylized models and display animations,
+not extracted armor assets or decoded skeletal animation. The Octagon recording
+has no grenade or reload events; those gestures are available for other films.
+
+For a confirmed fixed two-weapon mode, `--fixed-loadout 'Bandit EVO,S7 Sniper'`
+configures slot 0 and slot 1. The embed starts each life in slot 0, follows decoded
+slot selections, and assumes a toggle at a weapon-set update whose slot is unknown.
+Confirmed firing observations reconcile the displayed weapon. This is presentation
+inference, not extra decoder coverage: the Octagon export has 153 weapon-set
+updates but no explicit slot selections, and missing changes can leave the inferred
+weapon wrong until the next shot. Model and card use the same causal timeline;
+raw `weapon` observations remain unchanged. `presentation.heldWeapon` and the card
+tooltip identify the source and assumptions. Omit the option for variable loadouts.
+
+Start/end bounds are configured only in the iframe URL, for example
+`#start=146.2` or `#start=146.2&end=206.2`. Values accept seconds or `m:ss.sss`.
+There are no visible range, speed, loop, or origin-axis controls. Playback runs
+at 1× and stops at the configured end. Invalid bounds fall back to the full clip,
+with a diagnostic in `window.theaterViewerState.playbackWindowError`.
+
+`--octagon-walls` adds eight translucent placeholder walls fitted around the
+recorded player positions. They are illustrative, have no collision behavior,
+and do not represent extracted map geometry. Omit the flag for other recordings.
+`--blog-fonts /path/to/homepage/public/fonts` embeds Barlow 400/600 and its OFL
+license so the cream-and-blue blog styling works without font requests.
+
+```html
+<iframe src="/assets/motion-replay/octagon.html" title="Octagon motion replay"
+  width="100%" height="620" loading="lazy" sandbox="allow-scripts"></iframe>
+```
+
+Use an iframe at least 280 px wide and 620 px tall; this gives the scene more
+room on phones. JavaScript and WebGL are required. The floor and players remain
+schematic; optional walls are placeholders. Keep a caption or video fallback
+in the surrounding post. Re-export the HTML after updating the replay or renderer.
+
+Validate the export and compare it against the full viewer:
+
+```sh
+node experiments/examples/check_replay_embed.cjs
+```
+
+This uses the cached first-to-50 film and local Chrome (`CHROME_PATH` overrides
+the executable). An optional first argument selects another decoded film. Checks
+cover rejected inputs, offline playback, reverse seeking across life boundaries,
+end/restart, narrow layouts, full-viewer parity, and WebGL failure messaging.
+
 ## Selected-player armor
 
 The separate **Selected player · Armor** panel is below the timeline. It shows

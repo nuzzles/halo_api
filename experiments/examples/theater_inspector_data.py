@@ -8,6 +8,7 @@ from bisect import bisect_right
 from collections import defaultdict
 import csv
 from functools import lru_cache
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -17,6 +18,7 @@ from legacy.build_bandit_scene import CLOCK, SPAWN_COORD_PREFIX, delta_fields
 from legacy.build_octagon_scene import COORD_PREFIX, COORD_SUFFIX, SPAWN_BODY
 from legacy.build_oddball_scene import CLOCKS, spawn_fields
 from film_catalog import EXPERIMENTS_ROOT, load_catalog
+from theater_summary_data import annotate_summary_event, decode_summary
 from legacy.film_firing_probe import firing_fields
 from legacy.film_melee_probe import melee_fields
 from legacy.film_grenade_probe import grenade_fields, projectile_fields, PROJECTILE_SPAWN, PROJECTILE_END
@@ -220,6 +222,63 @@ class Inspector:
     def __init__(self, corpus=EXPERIMENTS_ROOT / 'films'):
         self.corpus = Path(corpus).resolve()
         self.catalog = {f"{r['group']}/{r['slug']}": r for r in load_catalog()}
+        self.revisions = {}
+
+    def refresh(self, label, force=False):
+        """Invalidate packet/evidence totals when sources or downloaded files change."""
+        paths = [*self.path(label).glob('*'),
+                 *self.path('analysis').rglob('*.csv'), *self.path('analysis').rglob('*.json'),
+                 *EXPERIMENTS_ROOT.parent.joinpath('src').rglob('*.rs'),
+                 EXPERIMENTS_ROOT / 'examples/decode_film_events.rs',
+                 EXPERIMENTS_ROOT / 'Cargo.toml', EXPERIMENTS_ROOT / 'Cargo.lock',
+                 EXPERIMENTS_ROOT.parent / 'Cargo.toml']
+        signature = [(str(p), p.stat().st_mtime_ns, p.stat().st_size)
+                     for p in sorted(paths) if p.is_file()]
+        revision = hashlib.sha256(repr(signature).encode()).hexdigest()[:16]
+        if force or self.revisions.get(label) != revision:
+            for method in (self.film, self.chunk, self.evidence, self.csv_offsets,
+                           self.chunk_coverage, self.summary, self.summary_fields):
+                method.cache_clear()
+            self.revisions[label] = revision
+        return revision
+
+    @lru_cache(maxsize=3)
+    def summary(self, label):
+        result = decode_summary(self.path(label), EXPERIMENTS_ROOT)
+        metadata, _ = self.film(label)
+        if (result['match_id'] != metadata['match_id']
+                or result['major_version'] != metadata['film_major_version']):
+            raise ValueError('Native summary / film identity mismatch')
+        return result['summary']
+
+    @lru_cache(maxsize=8)
+    def summary_fields(self, label, index, payload):
+        _, data, packets = self.chunk(label, index)
+        packet = next(p for p in packets if p['payload'] == payload)
+        base = payload * 8
+        if packet['size'] < 4:
+            return [], ['Truncated summary event count']
+        count = int.from_bytes(data[payload:payload + 4], 'big')
+        fields = [field(base, base + 32, 'Declared summary events', count,
+                        record='Match summary', source='halo_api::theater::decode_summary_events')]
+        issues = []
+        try:
+            report = self.summary(label)
+            diagnostic = next(p for p in report['packets'] if p['chunk'] == index and p['payload_byte'] == payload)
+            events = [e for e in report['events'] if e['source']['chunk'] == index
+                      and e['source']['payload_byte'] == payload]
+            if diagnostic['declared_events'] != count or diagnostic['decoded_events'] != len(events):
+                raise ValueError('Summary count / byte mismatch')
+            if len(events) != count:
+                issues.append(f'Summary decoder accepted {len(events)} of {count} declared events')
+            for event in events:
+                try:
+                    fields.extend(annotate_summary_event(event, data, packet, index, field))
+                except (ValueError, KeyError, TypeError, IndexError) as error:
+                    issues.append(f'Summary event: {error}; annotation withheld')
+        except (ValueError, KeyError, StopIteration) as error:
+            issues.append(f'Summary: {error}; annotations withheld')
+        return fields, issues
 
     def path(self, relative):
         path = (self.corpus / relative).resolve()
@@ -235,7 +294,7 @@ class Inspector:
             raise ValueError('Catalog / film match ID mismatch')
         packets, origin = {}, None
         for chunk in metadata['chunks']:
-            if chunk['chunk_type'] != 2:
+            if chunk['chunk_type'] not in (2, 3):
                 continue
             data = self.path(label + '/' + chunk['file']).read_bytes()
             rows, offset = [], 0
@@ -247,7 +306,7 @@ class Inspector:
                     raise ValueError('Truncated packet payload')
                 rows.append(dict(offset=offset, payload=offset + 16, size=size, kind=kind,
                                  unknown=unknown, timestamp=timestamp))
-                if timestamp:
+                if timestamp and chunk['chunk_type'] == 2:
                     origin = min(origin, timestamp) if origin is not None else timestamp
                 offset += 16 + size
             packets[chunk['index']] = rows
@@ -256,10 +315,11 @@ class Inspector:
                 row['time'] = (row['timestamp'] - origin) / 1e6 if row['timestamp'] and origin is not None else None
         return metadata, packets
 
-    def describe(self, label):
+    def describe(self, label, refresh=False):
+        revision = self.refresh(label, refresh)
         metadata, packets = self.film(label)
         result = {**self.catalog[label], 'label': label, 'version': metadata['film_major_version'],
-                  'duration': metadata['film_length'] / 1000, 'chunks': []}
+                  'duration': metadata['film_length'] / 1000, 'chunks': [], 'revision': revision}
         for chunk in metadata['chunks']:
             rows = packets.get(chunk['index'], [])
             result['chunks'].append({k: chunk[k] for k in ('index', 'file', 'chunk_type', 'start_time_offset_ms', 'duration_ms')} |
@@ -370,8 +430,23 @@ class Inspector:
 
     def chunk_info(self, label, index):
         chunk, data, rows = self.chunk(label, index)
-        evidence = self.evidence(label, index) if rows else {}
+        events, issues = [], []
+        if chunk['chunk_type'] == 3:
+            evidence = {r['payload']: {'summary': []} for r in rows if r['kind'] == 9}
+            try:
+                for event in self.summary(label)['events']:
+                    source = event['source']
+                    if source['chunk'] == index:
+                        title = (event.get('medal') or {}).get('name') or str(event['kind'])
+                        events.append({'title': f"{event['time_us']/1e6:.3f} s · {event['name']} · {title}",
+                                       'offset': source['payload_byte'] + source['bit'] // 8,
+                                       'medal': event.get('medal') is not None})
+            except (ValueError, KeyError) as error:
+                issues.append(str(error))
+        else:
+            evidence = self.evidence(label, index) if rows else {}
         return {'index': index, 'size': len(data), 'type': chunk['chunk_type'],
+                'events': events, 'issues': issues,
                 'packets': [{k: row[k] for k in ('offset', 'size', 'kind', 'time')} |
                             {'evidence': list(evidence.get(row['payload'], {}))} for row in rows]}
 
@@ -434,6 +509,9 @@ class Inspector:
                   field(offset * 8 + 32, offset * 8 + 64, 'Payload length (bytes)', size, source=source),
                   field(offset * 8 + 64, offset * 8 + 128, 'Timestamp (µs)', str(packet['timestamp']), source=source)]
         issues = []
+        if packet['kind'] == 9 and self.chunk(label, index)[0]['chunk_type'] == 3:
+            more, issues = self.summary_fields(label, index, payload)
+            return fields + more, issues
         if packet['kind'] != 0:
             return fields, issues
         evidence = self.evidence(label, index).get(payload, {})
@@ -778,7 +856,12 @@ class Inspector:
             scope_start, scope_end = offset * 8, end * 8
             fields = self.registry(data) if chunk['chunk_type'] == 1 else []
             issues = []
-        spans = partition(scope_start, scope_end, fields)
+        # Large summaries contain thousands of events in one packet. Show fields
+        # beside the visible bytes; coverage still measures the complete packet.
+        summary = packet is not None and packet['kind'] == 9 and chunk['chunk_type'] == 3
+        spans = partition(offset * 8, end * 8, fields) if summary else partition(scope_start, scope_end, fields)
         return {'film': label, 'chunk': index, 'offset': offset, 'end': end, 'bytes': list(data[offset:end]),
                 'packet': packet, 'scope': [scope_start, scope_end], 'spans': spans,
-                'coverage': coverage(spans), 'issues': issues, 'chunk_size': len(data)}
+                'coverage': coverage_counts(scope_start, scope_end, fields) if summary else coverage(spans),
+                'fields_scope': 'visible summary bytes' if summary else 'packet',
+                'issues': issues, 'chunk_size': len(data)}

@@ -6,6 +6,10 @@
 //! projectile motion experiments. It is a **partial** decoder: unknown
 //! components never cause guessed skips or fabricated observations.
 //!
+//! [`decode_summary_events`] reads stored kills, deaths, mode highlights and named
+//! medal awards using only decompressed footer chunks. [`validate_summary_events`]
+//! compares per-player counts and individual medal identities with match stats.
+//!
 //! ```no_run
 //! use halo_api::theater::{DecodeOptions, Film};
 //! # fn example(chunks: &[halo_api::clients::hi::models::FilmChunkData])
@@ -20,16 +24,24 @@ mod bits;
 mod combat;
 mod coordinates;
 mod decode;
+mod highlights;
 mod input;
-mod legacy;
+mod medals;
 mod motion;
 mod packets;
 mod projectile;
+mod registry;
+mod roster;
+mod summary;
 mod types;
 mod velocity;
 
 pub use coordinates::*;
-pub use legacy::*;
+pub use highlights::*;
+pub use medals::*;
+pub use registry::*;
+pub use roster::*;
+pub use summary::*;
 pub use types::*;
 
 #[cfg(test)]

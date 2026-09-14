@@ -1,5 +1,176 @@
 # Experiment changes
 
+## 2026-09-13 — recover Octagon motion at terminal command boundaries
+
+- Share exact terminal-command validation with the pawn motion reader. The old
+  short End/input guard rejected motion followed by roster 0 / tag 14 or roster 1.
+- Correct nonempty crouch/jump tails from eleven bits to ten: paired commands
+  establish the boundary; final nonempty commands retain a separate zero
+  terminator and exact byte padding. Correct their exported source endpoints.
+- Octagon gains 5,098 positions, 4,777 aim, 4,924 velocity, 2,441 shield and 3,778
+  crouch/input observations. Same-life gaps >=400 ms containing firing fall
+  from 67 to zero. Preserve the replay's 100 ms threshold and recorded-only motion.
+- Retain nine full FRAME regression payloads; check both the motion boundary and
+  suffix scanner, invalid tags/ticks/buttons/padding, truncation, extra bytes and
+  incorrect coordinate layouts. All 97 library tests, Clippy and wasm checks pass.
+- Validate all 32 full films: all prior observations survive, with only the
+  crouch source endpoint corrected by one bit where it included the terminator.
+  Additional observations are confined to Octagon gameplay. Refresh the typed
+  film exports and evidence CSVs for replay.
+- Document before/after evidence and remaining non-leading-clock limitations in
+  [FILM_OCTAGON.md](FILM_OCTAGON.md#movement-freshness-and-terminal-command-boundaries).
+
+## 2026-09-13 — remove the legacy Theater decoder
+
+- Remove `src/theater/legacy.rs`, the old gamertag-based event scanner, permissive
+  packet scanner, duplicate bit helpers, unused world/diagnostic types, and
+  speculative record-header/component-mask readers.
+- Move active registry and roster readers into focused modules and use the
+  shared bounded bit reader. Packet models and event counts belong to `types.rs`.
+- Keep the highlight client return types through adapters over the current
+  summary decoder and validation; unsupported versions now consistently error.
+  Share `SummaryKind` with the `FilmEventKind` API name.
+- Update `position_probe` to report actual typed lives and positions, removing
+  guessed respawn-frame correlations. Document removed low-level helpers and
+  their supported replacements in [THEATER_DECODER.md](THEATER_DECODER.md).
+- Validation: 96 library tests, four doc tests, Clippy and wasm compilation pass.
+  Fresh full exports of all 32 films preserve registry, player/life streams,
+  clocks and projectiles exactly, and all 3,667 summary events match the footer
+  decoder. Obsolete speculative-parser tests were removed with those parsers.
+
+## 2026-09-13 — connect native medals to recording inspector
+
+- Index summary chunk packets 9/7 and consume the current native footer decoder
+  through a read-only `--stdout` mode. Saved summary JSON is no longer needed
+  for inspector evidence. Add a Match events shortcut and named event selector.
+- Count only exact semantic fields as decoded; keep name padding/guards as
+  checked structure and intervening event state as opaque. Catalog NameIds do
+  not inflate decoded coverage. Page summary fields alongside visible bytes so
+  the hour-long raid remains responsive.
+- Add Refresh decoding and source-revision cache invalidation for packet/evidence
+  indexes and whole-recording percentages. Check original AR-kill byte spans,
+  rejected stale evidence, cache invalidation and native decoder failures.
+- Validation: 13 inspector tests, Clippy, all 32 native footer annotations
+  (3,667 events / 722 medals), and desktop/mobile browser checks for Oddball's
+  full coverage, medal byte selection and cache refresh. Oddball now reports
+  14.86% decoded, 1.78% checked structure, 3.08% opaque and 80.28% unparsed.
+
+## 2026-09-13 — upstream recorded match events and complete medal catalog
+
+- Add a wasm-compatible v41 footer-only summary decoder with declared-count
+  diagnostics, recorded identities, raw type codes, and exact tail/XUID source
+  spans. `Film::try_from_chunks` uses it for the normal typed export.
+- Cover all 155 published film medal codes and all 151 current CMS `NameId`
+  mappings, following Den's article and pinned SPNKr references. Correct Mounted
+  & Loaded and identify 52 awards missing from the previous name table.
+- Validate all 3,667 declared events and 722 medals across 32 films. All five
+  nonempty films match each human player's kills, deaths, and individual medal
+  counts against independently cached match stats. Warm footer loading/decoding
+  takes about 100 ms across the corpus.
+- Add `match_summary_events`, `match_summary_events_with_validation`, offline
+  `decode_film_events`, and the reference-cache example. Existing v41 highlight
+  client calls now download footer chunks only. Preserve unknown codes and
+  distinct duplicate awards; do not infer assists, mode subtypes, or kill pairings.
+- Document the empirical identity-to-tail offset and opaque state in
+  [FILM_EVENTS.md](FILM_EVENTS.md); retain real byte/stats fixtures for fast tests.
+- Verification: 104 library tests, four doc tests, Clippy, wasm library check,
+  and full Oddball export with all 734 enriched events and unchanged motion streams.
+
+## 2026-09-13 — pause geometry research and preserve extraction routes
+
+- Return research focus to the Theater film format at the user's request.
+  Document Ekur's experimental level importer and the raw-module alternative,
+  including the Recharge asset folder, portable exports and validation work.
+- Record feasibility: Forge navigation surfaces are demonstrated; built-in map
+  render meshes have concrete external extraction routes. Recharge remains
+  unextracted pending game assets. Preserve existing work without treating missing
+  assets as an impossibility or adding their coverage to film decoding.
+
+## 2026-09-13 — Recharge mesh availability
+
+- Check the Ranked Oddball film's exact Recharge map revision: only images and
+  `.mvar` placements are published; a direct navigation-asset GET returns
+  HTTP 404 `BlobNotFound`. Record the missing geometry input and Ekur extraction
+  lead. No Oddball mesh has been generated; film coverage is unchanged.
+
+## 2026-09-13 — spatial tree, face links and boundary distances
+
+- Compare AHP's seven small outer polygons with exact-revision `.mvar` placements:
+  each has both spawn-like types directly above it. Find an eighth outer pair
+  without a separate navigation polygon and 16 placements inside the central
+  polygon. Preserve the 30 matches / 2 unmatched records with byte provenance;
+  active spawn settings and film-to-map alignment remain unresolved.
+- Add upper/lower surface groups to frame separated geometry, including AHP's
+  eight upper arena polygons independently of its large canvas floor. Add
+  camera panning, cursor-centered zoom and a Frame selection button; selecting
+  a group exits tree mode. These controls do not change decoded coordinates.
+- Decode the fourth Havok object's six-byte bounds nodes, relative array and
+  child offsets. All 49,910 nodes form valid trees; all 24,956 leaf indices
+  uniquely reference the spatial cells. Squared-nibble/226 bounds with float32
+  intermediates contain every cell without enlarging the decoded boxes.
+- Decode the sample face index at +16: all 395,710 positions fit their referenced
+  polygon in XY. Decode +40 as squared XY distance to the connected region's
+  boundary: all 54,810 supplied values agree within 0.000003805. Keep 340,900
+  unavailable sentinels null and preserve 24 opaque bytes per sample.
+- Extend the standalone preview with parent/child navigation and cell lookup,
+  displaying compressed tree boxes alongside the original cell bounds.
+- Capture complete trees/cell headers and samples from every referenced face.
+  Validate malformed references, bounds, distance outliers, missing values and
+  work budgets. All 46 Python tests pass in about one second; both full assets
+  pass the new checks. Core film decoding and film coverage remain unchanged.
+
+## 2026-09-13 — navigation surfaces and spatial samples
+
+- Decode the existing Str8/AHP `navmesh.blob` envelopes as Bond v2 with zlib,
+  declared lengths and four bounded Havok TAG0 objects. Add `--navmesh` downloads.
+- Read the first `hkaiNavMesh` through a checked SDK/schema and ITEM/PTCH links:
+  69 vertices, 15 closed polygons, and four reciprocal shared-edge pairs.
+- Establish the fifth block's complete record grammar: 24,956 enclosing boxes
+  with 395,710 spatial samples. Every position lies inside its recorded box;
+  the remaining 32 bytes per sample stay opaque. These are spatial subdivisions,
+  not decoded Forge-object bounds. Other Havok values remain opaque.
+- Export JSON with decompressed byte provenance, OBJ polygons, an HTML orbit
+  preview and original XYZ samples as binary PLY. No inferred geometry, film
+  coordinate transforms, or core/replay changes.
+- Export 284 separate `.mvar` shape records using raw and 16.16 scalar values;
+  219 have all four dimensions explicit. Keep missing fields null and externally
+  sourced family labels provisional. Document why render-model size references
+  do not yet settle Neutral's wall dimensions.
+- Validation: 36 Python tests, both full navigation assets, all eleven `.mvar`
+  files, offline downloader Clippy, and a local Chrome preview render.
+
+## 2026-09-13 — Neutral's minimal Forge map
+
+- Correct the 13 early controls' recorder attribution to Neutral. Add
+  `HALO_PLAYER_XUID` to map lookup; Neutral's first history page recovers all 13
+  missing map references, bringing exact map provenance to 32 of 32 films.
+- Verify that all 13 use the same NuzMapTest revision. Its 1,780-byte custom map
+  contains exactly two objects, matching the reported wall and spawn point.
+  Preserve the entire map as a captured regression fixture, including the wall's
+  three raw candidate scale values. Object dimensions/bounds remain unverified.
+- Record that the wall is a flat floor beneath the spawn; find the same type-like
+  identifier on 184 AHP Octagon objects. Capture one of those instances for direct
+  comparison. Validation: 23 Python tests and offline downloader build/Clippy pass.
+
+## 2026-09-12 — map assets and coordinate anchors
+
+- Add a bounded offline Bond Compact Binary v2 reader and `.mvar` inspector with
+  scalar byte ranges, raw identifiers and nulls for omitted coordinates. Nine
+  exact-revision assets parse to EOF, exposing 4,595 object records.
+- Fit an empirical Recharge transform from 55 distinct Oddball spawn positions.
+  Independently match 42 Bandit positions, maximum distance 0.01345 world units;
+  retain eight unmatched points per film. Keep the fit separate from exact BSP
+  bounds and replay. Aquarius's map placement independently corroborates X/Z.
+- Add optional `.mvar` downloads and a single-film filter to `download_film_maps`.
+  Capture small object fixtures from four maps. Document the distinct Str8/AHP
+  Octagon canvases despite their shared coordinate widths.
+- Check the posture controls against snapshot times: all holds fall between
+  snapshots. Document a longer observed hold as the next useful control without
+  promoting physical crouch/slide hypotheses.
+- Validation: 22 Python tests, both earlier engine/menu Bond files, the two-film
+  calibration check, and offline Cargo check/Clippy for the downloader. Core
+  decoder and replay observations are unchanged.
+
 ## 2026-09-11 — pawn velocity direction
 
 - Decode component 1's 19-bit 3D direction and 10-bit nonlinear magnitude code,

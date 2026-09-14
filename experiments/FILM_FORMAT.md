@@ -1,8 +1,13 @@
 # Halo Infinite Theater format: current status and research notes
 
-Pawn component 1 now yields 3D velocity direction and a raw nonlinear magnitude
-code, with an explicit short stationary form. Speed conversion is unresolved.
-See [FILM_VELOCITY.md](FILM_VELOCITY.md) for bit fields, controls and replay behavior.
+The footer-only summary decoder now resolves named medals and their stats API
+identities: all 3,667 declared events and 722 awards across 32 films decode.
+See [FILM_EVENTS.md](FILM_EVENTS.md) for the layout, validation, and remaining limits.
+
+Octagon's combat-time movement gaps exposed two terminal-command boundary bugs.
+The shared input validator and corrected ten-bit nonempty tails recover 5,098
+recorded positions, without changing replay freshness or inferring motion from
+activity. See [FILM_OCTAGON.md](FILM_OCTAGON.md#movement-freshness-and-terminal-command-boundaries).
 
 > Active lab: 32 replayable films are retained (natural-end and later controls,
 > Octagon gameplay, map/appearance/posture controls, two Arena games and the raid).
@@ -13,7 +18,7 @@ See [FILM_VELOCITY.md](FILM_VELOCITY.md) for bit fields, controls and replay beh
 > byte inspector now live under `examples/legacy/`.
 
 
-**Updated 2026-09-10 · film major version 41.** The current replay shows all eight
+**Updated 2026-09-13 · film major version 41.** The current replay shows all eight
 players in the Ranked Arena Bandit EVO match, including simultaneous movement and
 aiming, deaths, and respawns. The recorder reviewed it and said, “This looks very
 good and correct!” This is qualitative visual confirmation alongside the byte
@@ -42,7 +47,8 @@ wasm checks, corpus parity, and performance. Superseded probes are archived;
 | Armor | Recorded model/visor/coating identifiers, five attachment TagIds and mythic FxIds; one selected-player equipment panel with offline metadata names | Helmet attachments, armor effects, kits, emblems and some geometry variants remain unknown; schematic body does not render armor assets |
 | Pawn component list | Observed generation tag + `00`, count3 at body bit 4, then `n` sorted 6-bit indices at bit 7 | Unknown components still block complete chain walking |
 | Player identity | Spawn wire ID maps to roster identity; two record flags precede the 16-bit `8704 + wire_id` field and two-bit generation tag | Raid checks tags `01/10/11/00`; identical wire/tag reuse after a full cycle remains unresolved |
-| Lives/events | Bandit: 127 spawns/122 deaths; Oddball: 264 spawns/248 deaths and round resets; per-player event totals match the API | Aggregate validation does not decode shots, damage, or every medal identity |
+| Lives | Bandit: 127 spawns/122 deaths; Oddball: 264 spawns/248 deaths and round resets | Lifecycle observations do not establish complete damage or kill attribution |
+| Summary events/medals | 3,667 declared events and 722 named awards in 32 films; 155 film codes, 151 CMS identities; per-player kill/death and individual medal counts match the API for all five nonempty films | Captured v41 layout; opaque intervening state; assists, objective subtypes and killer/victim pairings unresolved |
 | Firing | Guarded spawn/roster bindings; 1,579 Bandit and 3,360 Oddball indicators; ID generation and sequence wraps checked | API shot totals differ slightly; exact bullet accounting and hit locations remain open |
 | Melee | Event plus companion identity; 105 events across both controls and both Ranked films | Partial activity coverage; hit outcomes and animation duration unresolved |
 | Grenades | Guarded throw events and spawn/owner/generation-bound projectile paths in both Ranked games and the control; recorded projectile velocity and rest flags | Partial paths; grenade type, explosions, blast damage and unsupported forms remain open |
@@ -77,6 +83,7 @@ Key corrections to earlier interpretations:
 | --- | --- |
 | [Replay guide](examples/theater_viewer/README.md) | Downloads, safe rebuild commands, controls, data sources, and gaps |
 | [Recording inspector](examples/theater_inspector/README.md) | Linked byte/text/bit and decoded views, field provenance, exact unknown/opaque coverage |
+| [Match events and medals](FILM_EVENTS.md) | Footer-only APIs, complete published medal catalog, raw fields, declared counts, and independent per-medal validation |
 | [Motion](FILM_MOTION.md) | Original 26-film position/input evidence and checked record boundaries |
 | [Controller](FILM_CONTROLLER.md) | Intermediate input levels, stick-calibration limits, position-copy records |
 | [Crouch/posture](FILM_POSTURE.md) | Controlled holds, terminal multiplayer commands, Octagon crouch toggles during jumps, and unresolved physical slide state |
@@ -167,8 +174,9 @@ Do not run an unfiltered old probe over the full corpus into existing CSV output
    boundaries, independent position copies, spawn-to-first-position agreement,
    and no conflicting accepted observations. The Ranked scanner decodes checked
    prefixes; it does not claim to walk every record in the chain.
-2. **API:** every player's kill/death/medal totals agree for the two Octagon films
-   and both Ranked matches. This checks aggregate summary events, not position or aim.
+2. **API:** every human player's kills, deaths, and individual medal `NameId`
+   counts agree for both nonempty Octagon films, both Ranked matches, and the raid.
+   This checks summary events, not position or aim; see [FILM_EVENTS.md](FILM_EVENTS.md).
 3. **Browser:** all 391 Ranked spawns and 370 deaths, all displayed firing/melee/grenade/reload
    events, controlled projectile paths, sampled vitality, clearing old-life state, backward scrubbing, compact
    health layout, and earlier clips are checked by `check_theater_replay.cjs`.
@@ -388,10 +396,22 @@ Frame-byte delta versus the group's do-nothing baseline (force-end):
 ### Summary-event validation
 
 The type-3 chunk is **36 bytes in all 26 original clips**, with an empty event
-list. That initial corpus could not validate nonempty summary events. Later, the
-Octagon and Ranked captures supplied real kills, deaths, and medals, and all
-players' totals matched the API; see [FILM_OCTAGON.md](FILM_OCTAGON.md) and
-[FILM_BANDIT.md](FILM_BANDIT.md).
+list. That initial corpus could not validate nonempty summary events. The current
+32-film corpus includes five nonempty summaries: both Ranked games, the AR-kill
+control, full Octagon, and the raid. All **3,667 declared events** decode, including
+**722 medal awards**. Each human player's kills, deaths, and individual medal
+`NameId` counts match independently fetched match stats in those five films.
+
+The upstream decoder reads packet type 9 in manifest chunk type 3, independently
+of bootstrap and replication data. Checked XUID and 60-byte tail windows share a
+14,926-bit relative offset in this v41 corpus. The intervening state stays opaque.
+The tail's type byte is the CMS sorting weight for medals; all observed weights
+agree. The catalog now covers 155 published film codes, including all 151 current
+CMS medals. Raw unknown codes and separate duplicate awards are preserved.
+
+See [FILM_EVENTS.md](FILM_EVENTS.md) for the exact fields, Den/SPNKr provenance,
+APIs, fixtures and commands. Declared-count completeness does not imply a complete
+gameplay log: assists, mode subtypes, and kill/death pairings remain unresolved.
 
 ---
 

@@ -64,9 +64,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 `halo_api::theater::Film::try_from_chunks(&chunks, options)` decodes decompressed
 Theater chunks without network or filesystem access. It consolidates the motion,
 aim, input, roster/lives, recorded armor appearance, combat, vitality, weapons,
-scope, velocity, and projectile motion experiments. This remains a partial v41 decoder;
+scope, velocity, projectile motion, and named summary-event experiments. This remains a partial v41 decoder;
 unknown data is not guessed.
-The original `clients::hi::film` helpers remain available.
+`clients::hi::film` reexports the current theater API. The highlight client methods
+remain available as adapters over the v41 summary decoder.
+
+For kills, deaths, mode highlights, and medal awards alone, use
+`theater::decode_summary_events(&chunks, 41)` or
+`halo.match_summary_events(match_id).await`: only footer chunks are needed.
+`match_summary_events_with_validation` additionally compares each player's
+kills, deaths, and individual medal `NameId` counts against match stats.
+The catalog covers 155 published film codes, including all 151 current CMS
+medals. Unknown codes stay inspectable; assists and objective subtypes remain
+unresolved. See [event format, evidence, and examples](experiments/FILM_EVENTS.md).
 
 See the [decoder API, folder example, JSON replay export, and measurements](experiments/THEATER_DECODER.md).
 The library is checked on `wasm32-unknown-unknown`; file loading and replay export

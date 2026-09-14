@@ -1,6 +1,7 @@
 """Original captured records and exact coverage accounting for the inspector."""
 
 import csv
+import copy
 import json
 from pathlib import Path
 import random
@@ -20,6 +21,81 @@ def bits(row):
 
 
 class InspectorFields(unittest.TestCase):
+    def summary_fixture(self, root):
+        label = 'synthetic/summary'
+        folder = root / label
+        folder.mkdir(parents=True)
+        data = (Path(__file__).resolve().parents[2] / 'src/theater/fixtures/summary-v41.bin').read_bytes()
+        (folder / 'footer.bin').write_bytes(data)
+        (folder / 'film.json').write_text(json.dumps(dict(
+            match_id='fixture', film_major_version=41, film_length=80000,
+            chunks=[dict(index=6, file='footer.bin', chunk_type=3, start_time_offset_ms=0, duration_ms=80000)])))
+        events = []
+        # Positions and values from the captured AR-kill footer, not synthetic bytes.
+        for xuid, name, time, kind, code, metadata, tail, identity in [
+            ('2535472547643888', 'Nuzzles', 25344000, 'Kill', 50, 0, 27404, 12478),
+            ('2535443507298499', 'Yet', 25344000, 'Death', 20, 1, 43882, 28956),
+            ('2535472547643888', 'Nuzzles', 77279000, 'Medal', 150, 32, 71766, 56840),
+        ]:
+            events.append(dict(xuid=xuid, name=name, time_us=time, kind=kind,
+                type_code=code, metadata=metadata, medal_flag=int(kind=='Medal'),
+                medal=dict(film_id=32, name='Steaktacular', name_id=1169390319) if kind=='Medal' else None,
+                source=dict(chunk=6, payload_byte=16, bit=tail, end_bit=tail+480),
+                identity_source=dict(chunk=6, payload_byte=16, bit=identity, end_bit=identity+64)))
+        result = dict(match_id='fixture', major_version=41, summary=dict(events=events,
+            packets=[dict(chunk=6, payload_byte=16, declared_events=3, decoded_events=3)]))
+        lab = Inspector(root)
+        lab.catalog[label] = dict(match_id='fixture')
+        return lab, label, result
+
+    def test_native_summary_packets_medals_exact_coverage_and_refresh(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lab, label, result = self.summary_fixture(Path(directory))
+            with patch('theater_inspector_data.decode_summary', return_value=result) as native:
+                desc = lab.describe(label)
+                self.assertEqual(desc['chunks'][0]['packets'], 2)
+                info = lab.chunk_info(label, 6)
+                self.assertEqual([p['kind'] for p in info['packets']], [9, 7])
+                self.assertEqual(len(info['events']), 3)
+                self.assertIn('Steaktacular', info['events'][-1]['title'])
+                counts = lab.chunk_coverage(label, 6)
+                self.assertEqual(counts['issues'], [])
+                # Text padding is structure; the catalog NameId contributes zero bits.
+                self.assertEqual(counts['coverage'], dict(decoded=872, structure=784, opaque=44946, unparsed=25934))
+                self.assertEqual(sum(counts['coverage'].values()), 9067*8)
+                view = lab.view(label, 6, info['events'][-1]['offset'])
+                medal = next(f for f in view['spans'] if f['label']=='Medal')
+                self.assertEqual((medal['start'], medal['end']), (16*8+71766+59*8, 16*8+71766+60*8))
+                self.assertEqual(medal['end']-medal['start'], 8)
+                self.assertIn('1169390319', medal['note'])
+                self.assertEqual(view['fields_scope'], 'visible summary bytes')
+                self.assertLess(len(view['spans']), 20)
+                self.assertEqual(native.call_count, 1)
+                lab.describe(label)
+                lab.chunk_coverage(label, 6)
+                self.assertEqual(native.call_count, 1)
+                # Same running Inspector notices a replaced export and invalidates totals.
+                lab.path(label+'/decoded-film.velocity.csv').write_text('refreshed evidence')
+                self.assertNotEqual(lab.describe(label)['revision'], desc['revision'])
+                lab.chunk_coverage(label, 6)
+                self.assertEqual(native.call_count, 2)
+
+    def test_summary_stale_values_withhold_fields_and_decoder_failure_is_visible(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lab, label, result = self.summary_fixture(Path(directory))
+            bad = copy.deepcopy(result)
+            bad['summary']['events'][-1]['metadata'] = 255
+            with patch('theater_inspector_data.decode_summary', return_value=bad):
+                counts = lab.chunk_coverage(label, 6)
+                self.assertEqual(counts['issue_count'], 1)
+                self.assertIn('byte mismatch', counts['issues'][0]['message'])
+                self.assertLess(counts['coverage']['decoded'], 872)
+            lab.refresh(label, force=True)
+            with patch('theater_inspector_data.decode_summary', side_effect=ValueError('decoder unavailable')):
+                counts = lab.chunk_coverage(label, 6)
+                self.assertIn('decoder unavailable', counts['issues'][0]['message'])
+                self.assertEqual(counts['coverage']['decoded'], 256)  # Headers + declared count only.
+
     def test_velocity_fields_show_world_speed_and_reject_bad_evidence(self):
         fixture_path = Path(__file__).resolve().parents[2] / 'src/theater/fixtures/velocity_records.json'
         for row in json.loads(fixture_path.read_text())['records']:

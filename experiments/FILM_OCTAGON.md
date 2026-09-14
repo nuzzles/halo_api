@@ -10,8 +10,8 @@ its summary records timesknightt winning **50–49** against Nuzzles. Nuzzles ha
 50 deaths and timesknightt 49. The decoder binds all 100 lives (50 per player).
 Nuzzles spawns at film second 3.39; timesknightt first appears at 146.19.
 
-The native export includes 19,185 position samples, 16,533 aim samples, 570
-firing events, two melee events, 100 scope observations, 9,516 shield samples,
+The native export includes 24,283 position samples, 21,310 aim samples, 570
+firing events, two melee events, 100 scope observations, 11,957 shield samples,
 and eight body-health samples. Body health is especially sparse; gaps remain
 unknown. This does not claim a complete shot count, inventory, or damage stream.
 
@@ -46,6 +46,50 @@ HALO_PROBE_FILM=octagon/03-first-to-50 cargo run --example download_film_chunks
 cargo run --release --example decode_theater_film -- films/octagon/03-first-to-50 --compact
 node examples/build_decoded_replay.cjs --corpus films
 ```
+
+## Movement freshness and terminal command boundaries
+
+The replay marks position stale after 100 ms without a supported sample. Firing,
+health and input are separate observation streams, so a shot does not refresh
+position. The long gaps seen during combat were primarily decoder rejections,
+not an absence of recorded motion.
+
+Two boundary corrections on 2026-09-13 recover the recorded data:
+
+- Pawn component-25 prefixes now accept the shared, fully checked terminal-input
+  grammar after End. The old short guard only recognized roster 0 / tag 13;
+  Octagon also uses tag 14 and roster 1. Position, aim, velocity and shields in
+  otherwise valid pawn prefixes were discarded together.
+- Paired commands establish ten-bit nonempty crouch/jump tails. The former
+  eleven-bit form included the final zero terminator. Consuming that bit as part
+  of the command rejected a following player's header. Terminal nonempty tails
+  still require the zero terminator and exact byte padding.
+
+| Octagon observation | Before | After |
+| --- | ---: | ---: |
+| Position samples | 19,185 | 24,283 |
+| Aim samples | 16,533 | 21,310 |
+| Shield samples | 9,516 | 11,957 |
+| Crouch-input samples | 28,251 | 32,029 |
+| Same-life position gaps >=100 ms | 172 | 27 |
+| Same-life gaps >=400 ms containing firing | 67 | 0 |
+
+Nuzzles's 257.287–259.089 s interval formerly had no interior position samples
+despite five shots. It now contains 93 positions including the endpoints, with
+a maximum gap of 49.920 ms. New neighboring observations remain continuous:
+maximum per-axis changes within 100 ms are `[12,17,18]` for Nuzzles and
+`[13,9,22]` for timesknightt.
+
+The 100 ms replay threshold is unchanged. There are still sparse intervals,
+including the long opening, and short unsupported frames. Motion decoding still
+requires its strict leading frame clock; observed non-leading clock forms are a
+separate lead. Neither activity nor a last-known velocity creates new positions.
+
+Evidence: `films/analysis/octagon-gameplay/motion-gap-evidence.json` compares
+same-life intervals before/after. Nine full FRAME payloads and raw position/aim
+values are retained in `../src/theater/fixtures/motion_input_boundary_records.json`.
+Tests reject corrupt ticks, End, tags, buttons, padding, truncation, appended
+bytes and wrong coordinate layouts.
 
 ## Earlier controlled recordings (historical Python replay)
 

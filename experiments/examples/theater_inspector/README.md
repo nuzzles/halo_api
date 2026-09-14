@@ -20,9 +20,19 @@ annotations to newer films even when no legacy probe exports exist. The inspecto
 rechecks each source window before counting direction/magnitude bits as decoded;
 the derived speed is shown in world units/s. Native projectile evidence uses
 `decoded-film.projectile.csv` and revalidates positions, thrower references,
-velocity and rest flags against the original bytes. Restart the server after
-refreshing exports to clear its cached evidence and coverage totals. See
+velocity and rest flags against the original bytes. **Refresh decoding** clears
+cached evidence and coverage totals; reselecting a film also checks source-file
+revisions. See
 [velocity decoding](../../FILM_VELOCITY.md).
+
+**Match events** opens the summary chunk, including packet 9 and its end packet.
+The event selector jumps to each recorded kill, death, mode highlight or named
+medal. `?film=ranked-arena/02-oddball&events=1` opens it directly. Summary evidence
+comes from the current Rust decoder, not a saved `summary-events.json` export:
+the server runs the offline `decode_film_events --stdout` example and caches its
+result. Cargo builds the release example if needed, so Rust/Cargo and the existing
+offline dependencies must be available. There are no network calls or writes to
+film/export files. Native errors remain visible as withheld-annotation issues.
 
 ## Run
 
@@ -50,8 +60,12 @@ corpus into an HTML file. The motion replay still opens directly from disk.
 
 ## Explore a recording
 
-- Choose a recording and chunk. Every cached chunk is byte-addressable, including
-  registry and summary chunks without a supported packet parser.
+- Choose a recording and chunk. Every cached chunk is byte-addressable. Replication
+  and summary chunks have packet navigation; registry chunks expose component names.
+- Choose **Match events**, then a recorded event to inspect its name, timestamp,
+  XUID, raw type/metadata, medal code and mapped stats `NameId`. The decoded pane
+  pages alongside the bytes for large summaries, while the coverage bar still
+  measures the entire selected packet.
 - Jump to a film time in seconds, or enter a decimal / `0x` chunk byte offset.
   Time navigation chooses the nearest frame. The initial view selects a nearby
   frame with exported fields so there is decoded data to inspect immediately.
@@ -122,7 +136,8 @@ another probe may recognize but that this inspector has not integrated.
 
 | Region | Annotation source |
 | --- | --- |
-| Replication packet headers | 16-byte `<HHIQ` layout; the second 16-bit word remains opaque |
+| Replication and summary packet headers | 16-byte `<HHIQ` layout; the second 16-bit word remains opaque |
+| Match events and medals | Current `halo_api::theater::decode_summary_events` through `--stdout`; exact XUID/tail windows rechecked against bytes. Names, timestamps, types, flags and medal codes count as decoded; padding/guards as structure; intervening state and unknown tail fields as opaque. Catalog `NameId` mappings add no decoded bits. |
 | Frame clocks | Checked 37-bit clock layout, including all three Oddball prefixes |
 | Registry component names | Fixed slot geometry used by `film.rs::decode_registry`; headers and padding stay unparsed |
 | Ranked spawn / identity / positions / aim / command tick | `analysis/{bandit,oddball}/decode_evidence.json` and `delta_evidence.csv`, revalidated with the capture decoders |
@@ -137,7 +152,7 @@ another probe may recognize but that this inspector has not integrated.
 | Octagon body health/shields | `analysis/vitality/samples.csv`, revalidated against isolated component and boundary guards |
 
 Missing exports leave those regions unparsed. The inspector does not automatically
-rerun probes or fetch recordings. Summary-event payloads, general entity-chain
+rerun legacy probes or fetch recordings. Unsupported summary fields, general entity-chain
 walking, unknown components, registry metadata/padding, and unsupported input
 forms remain unparsed. Both Ranked matches include checked firing, melee, grenade throw, and
 vitality windows, including generation reuse. Coordinate and health scales remain
@@ -147,7 +162,10 @@ The server keeps in-memory caches of film indexes, CSV record offsets, per-chunk
 evidence, and small coverage summaries. CSV indexes avoid rereading an entire
 large export for each chunk; overlap counting uses sorted range boundaries, not
 one entry per bit.
-Restart it after regenerating source exports or replacing chunk files.
+Use **Refresh decoding** after regenerating source exports or replacing chunk
+files. Loading a film detects changed source/export/chunk revisions automatically;
+the page keys its whole-recording totals by that revision. Python/server code
+changes still require restarting the server.
 
 ## Validation
 

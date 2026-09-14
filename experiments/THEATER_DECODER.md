@@ -12,7 +12,26 @@
 The supported parsing findings now live in [`halo_api::theater`](../src/theater/mod.rs).
 The production path uses bounded byte reads and shared candidate scans, with no
 Python subprocesses, expanded bit strings, filesystem calls, or corpus-specific
-match IDs in the library. The original `clients::hi::film` imports remain compatible.
+match IDs in the library. `clients::hi::film` reexports the current theater API.
+
+The old `legacy.rs` decoder is removed. Bootstrap registry and recorded roster
+readers live in `registry.rs` and `roster.rs`; packet models and summary counts
+live in `types.rs`. Roster reads use the shared bounded `Bits` implementation.
+`highlights.rs` only adapts current summary results into the existing client
+return types; it does not scan bytes or maintain another event parser.
+
+Superseded low-level helpers (`decode_events`, `validate_events`,
+`index_packets`, the speculative record-header/component-mask readers,
+`FilmWorld`, `FilmBitReader`, and marker diagnostics) are removed. Use
+`decode_summary_events` / `validate_summary_events` for summaries and
+`Film::try_from_chunks` for checked packets, lives and observations. The
+`position_probe` example now prints recorded lives and positions from `Film`.
+Both highlight client entry points reject unsupported versions; the speculative
+fallback for older/unknown film versions is gone.
+
+The cleanup passes 96 library tests, four doc tests, Clippy and wasm compilation.
+Fresh exports across all 32 films preserve registry, player/life streams, clocks
+and projectiles exactly, with all 3,667 summary events matching the footer decoder.
 
 ```rust
 use halo_api::theater::{DecodeOptions, Film};
@@ -80,7 +99,10 @@ node examples/build_decoded_replay.cjs --corpus films
 
 The existing `python3 examples/theater_lab.py` server also serves the generated
 HTML at `/replay`. Its detailed bit inspector remains a research tool using the
-historical field annotations plus the native velocity evidence CSV. Rebuilding
+historical field annotations plus native velocity/projectile evidence CSVs.
+Its summary packet/event view calls the current native footer decoder directly
+and contributes exact fields to coverage totals; **Match events** opens it.
+Rebuilding
 the historical annotations is unnecessary for
 the new decode/export/replay workflow.
 
@@ -101,6 +123,10 @@ The decoder consolidates:
   recorded XUID/name independently of lives. No live-account defaults are used.
   See [FILM_APPEARANCE.md](FILM_APPEARANCE.md) for the controlled coating comparison.
 - Position, desired aim, analog axes, and checked input-chain boundaries.
+  Pawn prefixes ending at component 25 share the terminal command validator,
+  including both observed header tags and paired ten-bit crouch/jump tails.
+  This recovers Octagon motion previously rejected at input boundaries; see
+  [FILM_OCTAGON.md](FILM_OCTAGON.md#movement-freshness-and-terminal-command-boundaries).
 - Pawn velocity: explicit stationary form, decoded 3D unit direction, and raw
   nonlinear magnitude code. `Velocity::speed()` and `vector()` decode world units/s. Optional
   `PlayerTrack.velocities` retains compatibility with old schema-1 exports.
@@ -149,8 +175,14 @@ The decoder consolidates:
   velocities and optional rest flags. Tracks are bounded by recorded identity and
   generation, with no inferred explosions. See
   [FILM_PROJECTILE_MOTION.md](FILM_PROJECTILE_MOTION.md).
-- Existing registry, roster, packet, and kill/death/medal summary decoding and
-  API aggregate-validation helpers, preserved under the compatibility API.
+- Recorded kill/death/mode/medal summaries with raw codes, named awards, stats
+  `NameId` mappings, and source spans. The independent footer-only
+  `decode_summary_events` path needs no roster or gameplay packets; its client
+  equivalent downloads only summary chunks. All 3,667 declared events across
+  32 films decode, including 722 named awards. The five nonempty films pass
+  per-player kill/death and individual medal-identity validation against the API.
+  See [FILM_EVENTS.md](FILM_EVENTS.md) for APIs, provenance, and reproduction.
+  Mode highlights remain generic; assists and kill/death pairings are not inferred.
 
 `CoordinateLayout` names four observed encodings: `X13Y12Z11` (Aquarius),
 `X15Y15Z17`, `X17Y17Z16` (Bazaar), and `X18Y18Z15`. `axis_bits()` returns their
@@ -194,9 +226,14 @@ and 43,064 velocities: 139 Bandit, 283 Oddball, 154 raid, and one natural-end
 control. This is partial path coverage. Native decoding across the corpus took
 18.21 seconds locally, excluding loading/export/audit work.
 
-44 Theater tests, wasm compilation and Clippy checks cover the core. Inspector
+The original motion refresh passed 44 Theater tests, wasm compilation and Clippy. Inspector
 validation rechecked 84,929 projectile CSV annotations against the bytes.
 `check_motion_leads.py` independently tests world-speed calibration on Bazaar.
+
+The September 13 summary-event update passes 104 library tests, four doc tests,
+Clippy and the wasm library check. A fresh full Oddball export contains all 734
+enriched summary events with roster bindings; its player, projectile and clock
+streams exactly match the prior export. See [FILM_EVENTS.md](FILM_EVENTS.md).
 
 ## Verification and measured performance
 

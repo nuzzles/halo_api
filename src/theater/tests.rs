@@ -960,12 +960,20 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
         data.extend(frame(3_000_000, payload));
     }
     data.extend(frame(5_000_000, &shot)); // At death: exclude.
-    let mut summary = vec![0; 15];
     let mut event = vec![0; 60];
     event[..32].copy_from_slice(&tag);
     event[47] = 20;
     event[48..52].copy_from_slice(&4000u32.to_be_bytes());
-    summary.extend(event);
+    // Version-41 footer packet with a recorded identity and checked event-tail offset.
+    let tail_bit = 32 + 14_926;
+    let mut payload = vec![0; (tail_bit + 480 + 32_usize).div_ceil(8)];
+    payload[..4].copy_from_slice(&1u32.to_be_bytes());
+    put_bytes(&mut payload, 32, &1u64.to_le_bytes());
+    put_bytes(&mut payload, 96, &[0x2d, 0xc0]);
+    put_bytes(&mut payload, tail_bit, &event);
+    put_bytes(&mut payload, tail_bit + 480, &[0, 0, 0x2e, 0xe0]);
+    let mut summary = frame(0, &payload);
+    summary[0] = 9;
     let mut chunks = vec![
         chunk(3, 3, summary),
         chunk(2, 2, data),

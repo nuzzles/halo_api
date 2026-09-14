@@ -84,7 +84,7 @@ def handler_for(inspector):
             if label not in inspector.catalog:
                 raise ValueError('Recording is not in the catalog')
             if route == '/api/film':
-                return inspector.describe(label)
+                return inspector.describe(label, refresh=arg('refresh', '0') == '1')
             if route == '/api/seek':
                 time = float(arg('time'))
                 if not 0 <= time <= inspector.describe(label)['duration']:

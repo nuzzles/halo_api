@@ -69,12 +69,39 @@ async function snap(name){await delay(150);const r=await cdp('Page.captureScreen
   assert(Object.values(totals.coverage).every(n=>n>0));
   assert.equal(await evaluate('document.getElementById("recording-coverage").getAttribute("aria-busy")'),'false');
   await snap('theater-inspector-recording-coverage');
+  // Current native summary packets contribute to coverage and link medal names to exact bits.
+  await evaluate('document.getElementById("match-events").click()');
+  state=await waitFor('window.theaterInspectorState.view.packet?.kind===9 && window.theaterInspectorState');
+  const summary=await evaluate(`(async()=>await(await fetch('/api/chunk?'+new URLSearchParams({film:'ranked-arena/02-oddball',chunk:${state.chunk}}))).json())()`);
+  assert.deepEqual(summary.packets.map(p=>p.kind),[9,7]);
+  assert.equal(summary.events.length,734);assert.equal(summary.events.filter(e=>e.medal).length,132);
+  assert.equal(await evaluate('document.querySelectorAll("#summary-event option").length'),734);
+  assert.match(await evaluate('document.getElementById("notice").textContent'),/132 medals/);
+  const medalIndex=summary.events.findIndex(e=>e.medal);
+  async function selectMedal(){
+    await evaluate(`document.getElementById('summary-event').value='${medalIndex}';document.getElementById('summary-event').dispatchEvent(new Event('change'))`);
+    return waitFor('window.theaterInspectorState.view.spans.some(s=>s.label==="Medal") && window.theaterInspectorState');
+  }
+  state=await selectMedal();
+  assert(state.view.spans.length<40,'Summary fields must be paged, including in long films');
+  assert(state.view.coverage.opaque>state.view.coverage.decoded);
+  const medal=state.view.spans.find(s=>s.label==='Medal');
+  assert.equal(medal.end-medal.start,8);assert.match(medal.note,/NameId/);
+  await evaluate(`document.querySelector('.field[data-start="${medal.start}"]').click()`);
+  state=await waitFor(`window.theaterInspectorState.selected.start===${medal.start} && window.theaterInspectorState`);
+  assert.equal(state.selected.end-state.selected.start,8);
+  await snap('theater-inspector-medals');
+  await evaluate('document.getElementById("refresh-decoding").click()');
+  await complete('ranked-arena/02-oddball');
+  await waitFor('window.theaterInspectorState.view.packet?.kind===9');
+  assert.deepEqual(await evaluate('window.theaterInspectorState.recordingCoverage.coverage'),totals.coverage);
+  await selectMedal();
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:1100,deviceScaleFactor:1,mobile:true});
   await snap('theater-inspector-recording-coverage-mobile');
   assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));
   assert(await evaluate('[...document.querySelectorAll("#recording-coverage-chart, #recording-coverage-stats")].every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;})'));
   assert.deepEqual(errors,[]);
-  console.log('PASS: whole-recording bit totals, four-category pie/stats, stable packet navigation, JSON export, stale-scan cancellation, cache reuse, Oddball corpus scan and mobile layout');
+  console.log('PASS: whole-recording totals, pie/stats, JSON export, cache refresh, current native summary packets, all Oddball medals, exact byte linking, paged fields and mobile layout');
   console.log(JSON.stringify(totals));
  }finally{
   const stopped=new Promise(resolve=>chrome.once('exit',resolve));chrome.kill('SIGTERM');await stopped;

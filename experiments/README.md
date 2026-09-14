@@ -117,6 +117,30 @@ Download filters: `HALO_PROBE_FILM=group/slug` or
 `HALO_PROBE_CATEGORY="Ranked Arena gameplay"`. `HALO_TIMEOUT_SECS` controls
 experimental Halo API/auth timeouts; Xbox sign-in has separate timeouts.
 
+## Recorded events and medals
+
+The upstream footer-only decoder exports kills, deaths, generic mode highlights,
+and named medals without parsing motion. All 3,667 declared events in the 32-film
+corpus decode, including 722 awards; the five nonempty films match the independent
+API's per-player kills, deaths, and individual medal counts. See
+[FILM_EVENTS.md](FILM_EVENTS.md) for the 155-code catalog, checked layout, and limits.
+
+```sh
+# Offline footer decode; also validates if settings/match-stats.json is cached.
+cargo run --release --offline --example decode_film_events -- films/ranked-arena/02-oddball
+
+# Cache independent official references (authentication required; skips existing files).
+cargo run --release --example cache_film_event_references -- ranked-arena/02-oddball
+```
+
+The outputs are `summary-events.json` and, when stats are cached,
+`summary-events-validation.json` in the film folder. Rebuilding with
+`decode_theater_film` also includes the enriched events in the normal Film JSON.
+In the inspector, **Match events** opens the named medal/event fields directly
+from the current native decoder; no export refresh is required. **Refresh decoding**
+clears cached evidence and coverage totals. Source revisions invalidate totals
+when reloading a recording.
+
 ## Byte inspector and Python
 
 ```sh
@@ -207,10 +231,58 @@ Physical slide state remains unresolved; the badge is explicitly an input sample
 
 ### Map provenance and motion calibration
 
+**Geometry research is paused; active work returns to film decoding.** Useful
+surfaces are already demonstrated by the Forge navigation exports. Built-in map
+meshes have concrete extraction routes through [Ekur](https://github.com/TheHaloArchive/ekur)
+or the LevelUp module research, but Recharge still needs source game assets and
+validation. See [the geometry status and handoff](FILM_MAP_ASSETS.md#status-geometry-research-paused).
+
 `cargo run --release --example download_film_maps` caches each available film's
 exact match-history and map asset revision in its ignored `settings/` folder.
 It searches the first 1,000 history entries and reports recordings it cannot find.
-It validates cached asset/version identities and does not fetch map geometry.
+Set `HALO_PLAYER_XUID` to query a participant other than the signed-in account.
+Neutral's first history page supplies all 13 early controls, bringing exact map
+references to all 32 films. Those controls share NuzMapTest, a two-object variant
+containing the reported wall and spawn point.
+It validates cached asset/version identities. Add `-- --assets` to download the
+referenced `.mvar` placement files, optionally selecting one film with
+`HALO_PROBE_FILM=group/slug`. These assets do not supply mesh geometry.
+
+`python3 examples/decode_map_variant.py path/to/map.mvar --tree --output dump.json`
+exports numeric Bond fields, object positions and byte offsets offline. Omitted
+components remain null. `python3 examples/check_map_coordinates.py` fits Recharge
+coordinates using Oddball spawns and validates against the separate Bandit film.
+This calibration is research evidence, not a decoded BSP bounds table or replay
+state. See [FILM_MAP_ASSETS.md](FILM_MAP_ASSETS.md) for results and captured tests.
+
+Add `-- --navmesh` to cache a listed `navmesh.blob`. The offline reader
+exports navigation polygons and spatial samples from the existing Str8/AHP companions:
+
+```sh
+python3 examples/decode_navmesh.py path/to/navmesh.blob --output navmesh.json \
+  --obj navmesh.obj --preview navmesh.html --points navmesh-points.ply
+```
+
+The Ranked Oddball recording on Recharge has no published navigation companion;
+the exact revision's `navmesh.blob` returned HTTP 404. Its mesh preview needs
+game geometry assets. See [the Recharge asset check](FILM_MAP_ASSETS.md#recharge-oddball-mesh-source-still-needed)
+for the exact revision and extraction lead.
+
+Open the generated HTML to orbit the polygons or isolate a face. Together these
+assets supply 15 validated polygons and 395,710 spatial samples in 24,956 cells.
+For AHP's arena, choose **Show → Upper surfaces (8 polygons)** to frame the
+small upper cluster separately from the large canvas floor. Height groups are
+camera filters derived from gaps in polygon Z ranges. Shift-drag or right-drag
+to pan, scroll to zoom toward the cursor, and use **Frame selection** to recenter.
+Enable **Spatial tree** to navigate parent/child nodes or jump to a cell. All
+49,910 tree nodes are decoded; every leaf references one cell and encloses its
+stored bounds. Samples reference navigation faces, and 54,810 recorded values
+match squared XY distance to the connected region's boundary. Unavailable
+distance values remain null. Twenty-four bytes per sample still remain opaque.
+These are navigation surfaces and spatial subdivisions, not every Forge object's
+collision bounds. Other sample fields stay opaque; no replay transform is assumed.
+The map-variant export also preserves 284 separate volume records, including
+missing dimensions as nulls. Downloaded/generated assets remain ignored by Git.
 
 `python3 examples/check_motion_leads.py` verifies the world-speed formula against
 Bazaar's positions and command ticks using the pinned external BSP bounds in
