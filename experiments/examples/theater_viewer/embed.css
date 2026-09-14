@@ -17,7 +17,7 @@ html:has(.replay-embed), .replay-embed { height: 100%; }
   flex-direction: column;
   max-width: none;
   height: 100%;
-  min-height: 520px;
+  min-height: 0;
   padding: 0;
 }
 .replay-embed #roster,
@@ -39,9 +39,9 @@ html:has(.replay-embed), .replay-embed { height: 100%; }
 .replay-embed .time-label { display: none; }
 .replay-embed .viewport {
   display: block;
-  flex: 1 0 240px;
+  flex: 1 1 240px;
   height: auto;
-  min-height: 240px;
+  min-height: 120px;
   padding: 0;
   border: 0;
   border-bottom: 1px solid var(--ink);
@@ -145,20 +145,23 @@ html:has(.replay-embed), .replay-embed { height: 100%; }
   border-radius: 0;
   background: var(--raised);
 }
-.replay-embed .transport-top { padding-right: 0; }
-.replay-embed .playback { gap: 7px; }
+.replay-embed .transport-top { padding-right: 0; flex-wrap: nowrap; gap: 6px; }
+.replay-embed .playback { gap: 5px; flex-shrink: 0; }
+.replay-embed .play { width: 44px; height: 44px; }
 .replay-embed .play { color: var(--raised); background: var(--accent); border-color: var(--accent); }
 .replay-embed .play:hover { background: #1838ae; }
 .replay-embed .time { margin: 0 4px; }
-.replay-embed .camera-picker { display: flex; align-items: center; gap: 7px; margin-left: auto; font-size: 11px; color: var(--muted); }
-.replay-embed #camera-view { max-width: 185px; min-width: 0; padding: 7px; font-size: 11px; }
+.replay-embed .camera-picker { display: flex; align-items: center; gap: 7px; margin-left: auto; min-width: 0; font-size: 11px; color: var(--muted); }
+.replay-embed #camera-view { width: 116px; max-width: 100%; min-width: 0; min-height: 44px; padding: 5px; font-size: 16px; }
 .replay-embed #current-time { font-size: 17px; letter-spacing: 0; }
-.replay-embed .timeline { margin-top: 10px; height: 55px; }
+.replay-embed .timeline { margin-top: 8px; height: 62px; }
+.replay-embed #timeline { height: 44px; touch-action: none; }
+.replay-embed #ticks { pointer-events: none; }
 .replay-embed #timeline::-webkit-slider-runnable-track { height: 6px; border-radius: 0; background: #d2ccb9; }
-.replay-embed #timeline::-webkit-slider-thumb { margin-top: -9px; height: 24px; width: 6px; border-radius: 0; background: var(--accent); box-shadow: none; }
+.replay-embed #timeline::-webkit-slider-thumb { margin-top: -13px; height: 32px; width: 20px; border-radius: 0; background: var(--accent); box-shadow: none; }
 .replay-embed #timeline::-moz-range-track { height: 6px; border-radius: 0; background: #d2ccb9; }
-.replay-embed #timeline::-moz-range-thumb { height: 24px; width: 6px; border-radius: 0; background: var(--accent); box-shadow: none; }
-.replay-embed #ticks { color: var(--muted); top: 39px; }
+.replay-embed #timeline::-moz-range-thumb { height: 32px; width: 20px; border-radius: 0; background: var(--accent); box-shadow: none; }
+.replay-embed #ticks { color: var(--muted); top: 48px; }
 .replay-embed #replay-score {
   position: absolute;
   right: 12px;
@@ -185,11 +188,16 @@ html:has(.replay-embed), .replay-embed { height: 100%; }
   .replay-embed .transport-top { padding-right: 0; }
   .replay-embed .player-name { width: 108px; padding: 4px 6px; }
   .replay-embed .camera-picker { gap: 5px; }
-  .replay-embed #camera-view { max-width: 155px; }
+  .replay-embed #camera-view { max-width: 116px; }
   .replay-embed #replay-score { right: 10px; bottom: 10px; }
   .replay-embed #event-status { left: 10px; bottom: 10px; max-width: calc(100% - 175px); font-size: 9px; overflow-wrap: anywhere; }
 }
 @media (max-width: 360px) {
   .replay-embed .playback { gap: 3px; }
   .replay-embed #current-time { font-size: 16px; }
+}
+
+@media (max-width: 360px) {
+  .replay-embed .camera-picker > span { display: none; }
+  .replay-embed #ticks > :nth-child(2), .replay-embed #ticks > :nth-child(4), .replay-embed #ticks > :nth-child(5) { display: none; }
 }

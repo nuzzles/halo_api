@@ -524,8 +524,8 @@
     placeholderArena = embedded && clip.placeholderArena === 'octagon' ? addOctagonWalls(allPositions.map(local)) : null;
     views = tracks.map(createPlayer);
     if (embedded) {
-      const overview = document.createElement('option'); overview.value = 'overview'; overview.textContent = 'Overview';
-      $('camera-view').replaceChildren(...views.map(v => { const option = document.createElement('option'); option.value = v.track.id; option.textContent = v.track.name + ' · Shoulder'; return option; }), overview);
+      const overview = document.createElement('option'); overview.value = 'overview'; overview.textContent = 'Map';
+      $('camera-view').replaceChildren(...views.map(v => { const option = document.createElement('option'); option.value = v.track.id; option.textContent = v.track.name; return option; }), overview);
       cameraMode = (views.find(v => v.track.name === 'Nuzzles') || views[selected]).track.id;
       $('camera-view').value = cameraMode; shoulderDistance = 1;
       scoreTracks = views.map(v => {
@@ -1023,6 +1023,34 @@
   $('play').onclick = playPause;
   if (!embedded) { $('previous').onclick = () => step(-1); $('next').onclick = () => step(1); }
   $('timeline').oninput = () => { playing = false; time = +$('timeline').value; updateTime(); };
+  if (embedded) {
+    // Capture touch scrubbing so Safari cannot turn a drag into page scrolling.
+    const timeline = $('timeline');
+    let scrubPointer = null;
+    const scrub = event => {
+      const rect = timeline.getBoundingClientRect(), thumb = 20;
+      const fraction = Math.max(0, Math.min(1, (event.clientX - rect.left - thumb / 2) / Math.max(1, rect.width - thumb)));
+      timeline.value = Number(timeline.min) + fraction * (Number(timeline.max) - Number(timeline.min));
+      timeline.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    timeline.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      event.preventDefault();
+      scrubPointer = event.pointerId;
+      timeline.setPointerCapture(scrubPointer);
+      timeline.focus({ preventScroll: true });
+      scrub(event);
+    });
+    timeline.addEventListener('pointermove', event => { if (event.pointerId === scrubPointer) scrub(event); });
+    for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) timeline.addEventListener(name, event => {
+      if (event.pointerId !== scrubPointer) return;
+      if (name === 'pointerup') scrub(event);
+      scrubPointer = null;
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && window.parent !== window) window.parent.postMessage({ type: 'motion-replay:escape' }, '*');
+    });
+  }
   $('timeline-zoom-in').onclick = () => zoomTimeline((windowEnd - windowStart) / 2);
   $('timeline-zoom-out').onclick = () => zoomTimeline((windowEnd - windowStart) * 2);
   $('timeline-fit').onclick = () => zoomTimeline(end - start, start, 0);
