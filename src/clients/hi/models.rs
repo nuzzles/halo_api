@@ -773,12 +773,14 @@ impl UgcAssetKind {
 /// [`HaloInfiniteClient::mode`](crate::clients::hi::HaloInfiniteClient::mode) for kinds that do)
 /// deserialize via this type, which ignores whatever `CustomData` the response carries.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct UgcAsset {
     #[serde(flatten)]
     pub asset: AssetLink,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct UgcSearchResults {
     #[serde(rename = "EstimatedTotal")]
     pub estimated_total: u32,
@@ -791,6 +793,7 @@ pub struct UgcSearchResults {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct UgcSearchResult {
     #[serde(rename = "AssetId")]
@@ -832,12 +835,14 @@ pub struct UgcSearchResult {
 
 /// Response body from the playlist CSR endpoint.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CsrRecords {
     #[serde(rename = "Value")]
     pub records: Vec<CsrRecord>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CsrRecord {
     #[serde(rename = "Id")]
     pub id: String,
@@ -848,6 +853,7 @@ pub struct CsrRecord {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CsrRecordResult {
     #[serde(rename = "Current")]
     pub current: CsrRecordRanking,
@@ -858,6 +864,7 @@ pub struct CsrRecordResult {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct CsrRecordRanking {
     /// Numeric CSR value, or `-1` if the player is unranked in this playlist.
@@ -919,6 +926,7 @@ impl CsrRecordRanking {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchesPrivacy {
     #[serde(rename = "MatchmadeGames")]
     pub matchmade_games: i32,
@@ -955,6 +963,7 @@ impl MatchesPrivacy {
 
 /// A page of a player's match history.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerMatchHistory {
     #[serde(rename = "Results")]
     pub results: Vec<MatchHistoryEntry>,
@@ -1004,6 +1013,17 @@ impl MatchOutcome {
     }
 }
 
+#[cfg(feature = "serde")]
+impl serde::Serialize for MatchOutcome {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // Preserve Halo's numeric wire codes, including unrecognized future values.
+        serializer.serialize_i32(self.code())
+    }
+}
+
 impl<'de> Deserialize<'de> for MatchOutcome {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -1020,6 +1040,7 @@ impl std::fmt::Display for MatchOutcome {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchHistoryEntry {
     #[serde(rename = "MatchId")]
     pub match_id: String,
@@ -1036,6 +1057,7 @@ pub struct MatchHistoryEntry {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchInfo {
     #[serde(rename = "StartTime")]
     pub start_time: DateTime<Utc>,
@@ -1071,12 +1093,14 @@ pub struct MatchInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchPlaylist {
     #[serde(rename = "AssetId")]
     pub asset_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchAssetLink {
     #[serde(rename = "AssetId")]
     pub asset_id: String,
@@ -1088,6 +1112,7 @@ pub struct MatchAssetLink {
 
 /// Detailed scoreboard returned for one match.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchStats {
     #[serde(rename = "MatchId")]
     pub match_id: String,
@@ -1100,6 +1125,7 @@ pub struct MatchStats {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchPlayer {
     #[serde(rename = "PlayerId")]
     pub player_id: String,
@@ -1128,6 +1154,7 @@ impl MatchPlayer {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerTeamStats {
     #[serde(rename = "TeamId")]
     pub team_id: i32,
@@ -1136,6 +1163,7 @@ pub struct PlayerTeamStats {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchTeam {
     #[serde(rename = "TeamId")]
     pub team_id: i32,
@@ -1148,6 +1176,7 @@ pub struct MatchTeam {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MatchStatsBlock {
     #[serde(rename = "CoreStats")]
@@ -1159,6 +1188,7 @@ pub struct MatchStatsBlock {
 
 /// Per-player or per-team core stats for a single match.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MatchCoreStats {
     #[serde(rename = "Score")]
@@ -1228,6 +1258,7 @@ pub struct MatchCoreStats {
 
 /// Theater-film metadata and downloadable chunk inventory for a match.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FilmManifest {
     #[serde(rename = "FilmStatusBond")]
     pub status: i32,
@@ -1250,6 +1281,7 @@ impl FilmManifest {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FilmCustomData {
     #[serde(rename = "FilmLength")]
     pub film_length: i64,
@@ -1266,6 +1298,7 @@ pub struct FilmCustomData {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FilmChunk {
     #[serde(rename = "Index")]
     pub index: i32,
@@ -1290,6 +1323,7 @@ pub struct FilmChunkData {
 
 /// Response body from the matchmade service record endpoint.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ServiceRecord {
     #[serde(rename = "Subqueries")]
@@ -1330,6 +1364,7 @@ pub struct ServiceRecord {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ServiceRecordSubqueries {
     #[serde(
@@ -1361,6 +1396,7 @@ pub struct ServiceRecordSubqueries {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct CoreStats {
     #[serde(rename = "Score")]
@@ -1426,6 +1462,7 @@ pub struct CoreStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct StatAward {
     #[serde(rename = "NameId")]
@@ -1437,6 +1474,7 @@ pub struct StatAward {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct UserInfo {
     pub xuid: String,
     pub gamertag: String,
@@ -1452,11 +1490,13 @@ pub struct UserInfo {
 /// [`HaloInfiniteClient::user`](crate::clients::hi::HaloInfiniteClient::user) if a gamertag or
 /// gamerpic is needed.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CurrentUser {
     pub xuid: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Gamerpic {
     pub small: String,
     pub medium: String,
@@ -1465,6 +1505,7 @@ pub struct Gamerpic {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AppearanceCustomization {
     #[serde(rename = "Status")]
     pub status: String,
@@ -1473,12 +1514,14 @@ pub struct AppearanceCustomization {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerCustomizationCollection {
     #[serde(rename = "PlayerCustomizations")]
     pub player_customizations: Vec<PlayerCustomization>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerCustomization {
     #[serde(rename = "Id")]
     pub id: String,
@@ -1489,6 +1532,7 @@ pub struct PlayerCustomization {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerCustomizationData {
     #[serde(rename = "Appearance")]
     pub appearance: PlayerAppearance,
@@ -1505,12 +1549,14 @@ pub struct PlayerCustomizationData {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AiCoreCollection {
     #[serde(default, rename = "AiCores")]
     pub cores: Vec<AiCore>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct AiCore {
     pub core_id: String,
@@ -1521,6 +1567,7 @@ pub struct AiCore {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct AiTheme {
     pub color_path: String,
@@ -1533,6 +1580,7 @@ pub struct AiTheme {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ArmorCoreCollection {
     #[serde(default, rename = "ArmorCores")]
     pub cores: Vec<ArmorCore>,
@@ -1545,6 +1593,7 @@ impl ArmorCoreCollection {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct ArmorCore {
     pub core_id: String,
@@ -1561,6 +1610,7 @@ impl ArmorCore {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct ArmorTheme {
     pub armor_fx_path: String,
@@ -1588,12 +1638,14 @@ pub struct ArmorTheme {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VehicleCoreCollection {
     #[serde(default, rename = "VehicleCores")]
     pub cores: Vec<VehicleCore>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct VehicleCore {
     pub core_id: String,
@@ -1603,6 +1655,7 @@ pub struct VehicleCore {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct VehicleTheme {
     pub alternate_geometry_region_path: String,
@@ -1620,12 +1673,14 @@ pub struct VehicleTheme {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct WeaponCoreCollection {
     #[serde(default, rename = "WeaponCores")]
     pub cores: Vec<WeaponCore>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct WeaponCore {
     pub core_id: String,
@@ -1635,6 +1690,7 @@ pub struct WeaponCore {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct WeaponTheme {
     pub alternate_geometry_region_path: String,
@@ -1653,6 +1709,7 @@ pub struct WeaponTheme {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct SpartanBody {
     pub body_type: String,
@@ -1665,6 +1722,7 @@ pub struct SpartanBody {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerAppearance {
     #[serde(rename = "LastModifiedDateUtc")]
     pub last_modified: Option<ApiDate>,
@@ -1683,6 +1741,7 @@ pub struct PlayerAppearance {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct EmblemConfiguration {
     #[serde(rename = "EmblemPath")]
     pub emblem_path: String,
@@ -1692,6 +1751,7 @@ pub struct EmblemConfiguration {
 
 /// An emblem applied to an armor, weapon, or vehicle location.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "PascalCase")]
 pub struct CustomizationEmblem {
     pub path: String,
@@ -1720,6 +1780,7 @@ impl EmblemConfiguration {
 
 /// Waypoint image assets indexed by emblem identifier and configuration ID.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(transparent)]
 pub struct EmblemMapping {
     pub emblems: BTreeMap<String, BTreeMap<i64, EmblemImageAssets>>,
@@ -1780,6 +1841,7 @@ impl EmblemMapping {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(rename_all = "camelCase")]
 pub struct EmblemImageAssets {
     pub emblem_cms_path: String,
@@ -1789,6 +1851,7 @@ pub struct EmblemImageAssets {
 
 /// Display metadata for a customization inventory item or core.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationItemMetadata {
     #[serde(rename = "CommonData")]
     pub common_data: CustomizationItemCommonData,
@@ -1801,12 +1864,14 @@ pub struct CustomizationItemMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationConfiguration {
     #[serde(rename = "ConfigurationId")]
     pub configuration_id: i64,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationItemCommonData {
     #[serde(rename = "Title")]
     pub title: LocalizedText,
@@ -1815,18 +1880,21 @@ pub struct CustomizationItemCommonData {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationDisplayPath {
     #[serde(rename = "Media")]
     pub media: CustomizationMedia,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationMedia {
     #[serde(rename = "MediaUrl")]
     pub media_url: CustomizationMediaUrl,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CustomizationMediaUrl {
     #[serde(rename = "Path")]
     pub path: String,
@@ -1893,12 +1961,14 @@ fn waypoint_file_url(path: &str) -> String {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BanSummary {
     #[serde(rename = "Results")]
     pub results: Vec<BanSummaryResult>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BanSummaryResult {
     #[serde(rename = "Id")]
     pub id: String,
@@ -1909,12 +1979,14 @@ pub struct BanSummaryResult {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BanResult {
     #[serde(rename = "BansInEffect")]
     pub bans_in_effect: Vec<BanInEffect>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BanInEffect {
     #[serde(rename = "Type")]
     pub ban_type: i32,
@@ -1927,6 +1999,7 @@ pub struct BanInEffect {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BanMessage {
     #[serde(rename = "Title")]
     pub title: String,
@@ -1935,6 +2008,7 @@ pub struct BanMessage {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct LocalizedText {
     pub status: String,
     pub value: String,
@@ -1942,12 +2016,14 @@ pub struct LocalizedText {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CsrSeasonCalendar {
     #[serde(rename = "Seasons")]
     pub seasons: Vec<CsrSeason>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SeasonCalendar {
     #[serde(rename = "Seasons")]
     pub seasons: Vec<Season>,
@@ -1958,6 +2034,7 @@ pub struct SeasonCalendar {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Season {
     #[serde(rename = "CsrSeasonFilePath")]
     pub csr_season_file_path: String,
@@ -1972,6 +2049,7 @@ pub struct Season {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SeasonEvent {
     #[serde(rename = "RewardTrackPath")]
     pub reward_track_path: String,
@@ -1982,12 +2060,14 @@ pub struct SeasonEvent {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CareerRank {
     #[serde(rename = "RewardTrackPath")]
     pub reward_track_path: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CsrSeason {
     #[serde(rename = "CsrSeasonFilePath")]
     pub csr_season_file_path: String,
@@ -2009,12 +2089,14 @@ impl CsrSeasonCalendar {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ApiDate {
     #[serde(rename = "ISO8601Date")]
     pub iso8601_date: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlaylistMetadata {
     #[serde(rename = "NameHint")]
     pub name_hint: String,
@@ -2025,6 +2107,7 @@ pub struct PlaylistMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AssetLink {
     #[serde(rename = "AssetId")]
     pub asset_id: String,
@@ -2039,6 +2122,7 @@ pub struct AssetLink {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AssetFiles {
     #[serde(rename = "Prefix")]
     pub prefix: String,
@@ -2103,6 +2187,7 @@ impl AssetFiles {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlaylistAsset {
     #[serde(flatten)]
     pub asset: AssetLink,
@@ -2138,6 +2223,7 @@ impl PlaylistAsset {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct RotationEntry {
     #[serde(flatten)]
     pub asset: AssetLink,
@@ -2146,12 +2232,14 @@ pub struct RotationEntry {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct RotationMetadata {
     #[serde(rename = "Weight")]
     pub weight: f64,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MapModePairAsset {
     #[serde(flatten)]
     pub asset: AssetLink,
@@ -2162,6 +2250,7 @@ pub struct MapModePairAsset {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MapAsset {
     #[serde(flatten)]
     pub asset: AssetLink,
@@ -2197,6 +2286,7 @@ impl MapAsset {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MapCustomData {
     #[serde(rename = "NumOfObjectsOnMap")]
     pub object_count: i64,
@@ -2209,6 +2299,7 @@ pub struct MapCustomData {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct GameVariantAsset {
     #[serde(flatten)]
     pub asset: AssetLink,
@@ -2244,6 +2335,7 @@ impl GameVariantAsset {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct GameVariantCustomData {
     #[serde(rename = "KeyValues")]
     pub key_values: serde_json::Value,
@@ -2403,6 +2495,7 @@ impl ServiceRecordFilter {
 
 /// Match counts across the different game experiences for a player.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MatchCount {
     #[serde(rename = "CustomMatchesPlayedCount")]
@@ -2417,6 +2510,7 @@ pub struct MatchCount {
 
 /// A player's progress on a reward track (career rank or operation pass).
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct RewardTrackProgress {
     #[serde(rename = "Rank")]
@@ -2429,6 +2523,7 @@ pub struct RewardTrackProgress {
 
 /// A player's current career-rank progression.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct PlayerCareerRank {
     #[serde(rename = "CurrentProgress")]
@@ -2442,6 +2537,7 @@ pub struct PlayerCareerRank {
 /// Unlike [`HaloInfiniteClient::career_rank`](crate::HaloInfiniteClient::career_rank), this
 /// endpoint works for any player, not just the authenticated one.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct CareerRanks {
     #[serde(rename = "RewardTracks")]
@@ -2449,6 +2545,7 @@ pub struct CareerRanks {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CareerRankRecord {
     #[serde(rename = "Id")]
     pub id: String,
@@ -2460,6 +2557,7 @@ pub struct CareerRankRecord {
 
 /// A player's owned and available operation passes.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct PlayerOperationPasses {
     #[serde(rename = "ActiveOperationRewardTrackPath")]
@@ -2469,6 +2567,7 @@ pub struct PlayerOperationPasses {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerOperationPass {
     #[serde(rename = "RewardTrackPath")]
     pub reward_track_path: String,
@@ -2483,6 +2582,7 @@ pub struct PlayerOperationPass {
 /// Field names confirmed by cross-checking two independent community reverse-engineerings
 /// (OpenSpartan/grunt and SpartanReport) that agree on this shape.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PlayerChallengeDecks {
     #[serde(rename = "AssignedDecks")]
     pub assigned_decks: Vec<ChallengeDeck>,
@@ -2495,6 +2595,7 @@ pub struct PlayerChallengeDecks {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ChallengeDeck {
     #[serde(rename = "Id")]
     pub id: String,
@@ -2514,6 +2615,7 @@ pub struct ChallengeDeck {
 ///
 /// Fields beyond `path`/`progress`/`id`/`can_reroll` are only populated on upcoming challenges.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct Challenge {
     #[serde(rename = "Path")]
@@ -2545,6 +2647,7 @@ pub struct Challenge {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ChallengeReward {
     #[serde(
@@ -2564,6 +2667,7 @@ pub struct ChallengeReward {
 /// summary carries extra fields (`track_type`, `previous_progress`, `base_xp`, `boost_xp`) those
 /// don't return, so it is not reused as either of them.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ChallengeRewardTrack {
     #[serde(rename = "RewardTrackPath")]
@@ -2586,6 +2690,7 @@ pub struct ChallengeRewardTrack {
 
 /// The career-rank reward-track definition from the Game CMS.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct CareerRewardTrack {
     #[serde(rename = "TrackId")]
@@ -2606,6 +2711,7 @@ impl CareerRewardTrack {
 
 /// An operation (battle pass) reward-track definition from the Game CMS.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct OperationRewardTrack {
     #[serde(rename = "Name")]
@@ -2624,6 +2730,7 @@ pub struct OperationRewardTrack {
 /// and icon paths (e.g. "Bronze Cadet 1"), which [`PlayerCareerRank::current_progress`]'s numeric
 /// rank does not include on its own.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct RewardTrackRank {
     #[serde(rename = "Rank")]
@@ -2672,6 +2779,7 @@ impl RewardTrackRank {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct RankRewards {
     #[serde(
@@ -2687,6 +2795,7 @@ pub struct RankRewards {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct InventoryReward {
     #[serde(rename = "InventoryItemPath")]
     pub inventory_item_path: String,
@@ -2697,6 +2806,7 @@ pub struct InventoryReward {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CurrencyReward {
     #[serde(rename = "CurrencyPath")]
     pub currency_path: String,
@@ -2706,6 +2816,7 @@ pub struct CurrencyReward {
 
 /// Per-player skill (CSR and MMR) results for a single match.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MatchSkill {
     #[serde(rename = "Value")]
@@ -2713,6 +2824,7 @@ pub struct MatchSkill {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MatchSkillResult {
     /// The player this entry describes, in `xuid(...)` form.
     #[serde(rename = "Id")]
@@ -2724,6 +2836,7 @@ pub struct MatchSkillResult {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MatchSkillDetail {
     #[serde(rename = "TeamMmr")]
@@ -2747,6 +2860,7 @@ pub struct MatchSkillDetail {
 
 /// A player's CSR before and after the match.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct RankRecap {
     #[serde(rename = "PreMatchCsr")]
@@ -2756,6 +2870,7 @@ pub struct RankRecap {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct StatPerformances {
     #[serde(rename = "Kills")]
@@ -2766,6 +2881,7 @@ pub struct StatPerformances {
 
 /// A player's actual, expected, and variance for a single tracked stat.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct StatPerformance {
     #[serde(rename = "Count")]
@@ -2778,6 +2894,7 @@ pub struct StatPerformance {
 
 /// How a player's kills and deaths compare to skill-model expectations.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct Counterfactuals {
     #[serde(rename = "SelfCounterfactuals")]
@@ -2787,6 +2904,7 @@ pub struct Counterfactuals {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct Counterfactual {
     #[serde(rename = "Kills")]
@@ -2800,6 +2918,7 @@ pub struct Counterfactual {
 /// Every field is optional: Halo only includes the block matching the match's mode. Durations are
 /// ISO-8601 duration strings (e.g. `PT10M30S`), matching [`MatchInfo::duration`].
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ModeStats {
     #[serde(rename = "BombStats")]
@@ -2826,6 +2945,7 @@ pub struct ModeStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct BombStats {
     #[serde(rename = "BombCarriersKilled")]
@@ -2849,6 +2969,7 @@ pub struct BombStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct CaptureTheFlagStats {
     #[serde(rename = "FlagCaptureAssists")]
@@ -2878,6 +2999,7 @@ pub struct CaptureTheFlagStats {
 /// Elimination stats. The per-match block additionally carries `LivesRemaining` and
 /// `EliminationOrder`, which the service-record aggregate omits.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct EliminationStats {
     #[serde(rename = "AlliesRevived")]
@@ -2905,6 +3027,7 @@ pub struct EliminationStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ExtractionStats {
     #[serde(rename = "ExtractionConversionsCompleted")]
@@ -2920,6 +3043,7 @@ pub struct ExtractionStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct InfectionStats {
     #[serde(rename = "AlphasKilled")]
@@ -2949,6 +3073,7 @@ pub struct InfectionStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct OddballStats {
     #[serde(rename = "KillsAsSkullCarrier")]
@@ -2966,6 +3091,7 @@ pub struct OddballStats {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct StockpileStats {
     #[serde(rename = "KillsAsPowerSeedCarrier")]
@@ -2985,6 +3111,7 @@ pub struct StockpileStats {
 /// Per-match Zones (Strongholds) stats. The service record aggregates these under
 /// [`ServiceRecordZonesStats`] with `Zone`-prefixed field names instead.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ZonesStats {
     #[serde(rename = "StrongholdCaptures")]
@@ -3004,6 +3131,7 @@ pub struct ZonesStats {
 /// Service-record Zones stats, aggregated with `Zone`-prefixed field names (unlike the per-match
 /// [`ZonesStats`], which uses `Stronghold` prefixes).
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ServiceRecordZonesStats {
     #[serde(rename = "ZoneCaptures")]
@@ -3022,6 +3150,7 @@ pub struct ServiceRecordZonesStats {
 
 /// Player-vs-player kill totals. The per-match block additionally carries `KDA`.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct PvpStats {
     #[serde(rename = "Kills")]
@@ -3037,6 +3166,7 @@ pub struct PvpStats {
 /// Player-vs-environment kill totals, broken down by enemy type. The per-match block also carries
 /// `KDA`.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct PveStats {
     #[serde(rename = "Kills")]
@@ -3069,6 +3199,7 @@ pub struct PveStats {
 
 /// Localized medal metadata catalog from the Game CMS.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MedalMetadata {
     pub difficulties: Vec<String>,
@@ -3099,6 +3230,7 @@ impl MedalMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Medal {
     #[serde(rename = "nameId")]
     pub name_id: i64,
@@ -3121,6 +3253,7 @@ pub struct Medal {
 /// A medal's localized name or description. Unlike [`LocalizedText`], medal strings carry no
 /// `status` field.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MedalText {
     pub value: String,
@@ -3128,6 +3261,7 @@ pub struct MedalText {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MedalSpriteSheets {
     pub small: MedalSpriteSheet,
@@ -3137,6 +3271,7 @@ pub struct MedalSpriteSheets {
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct MedalSpriteSheet {
     pub path: String,
@@ -3146,6 +3281,7 @@ pub struct MedalSpriteSheet {
 
 /// Ranked reward granted for a match, when present. Halo reports this as `null` in practice.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct RankedRewards {
     #[serde(rename = "RewardId")]
     pub reward_id: String,
@@ -3153,6 +3289,7 @@ pub struct RankedRewards {
 
 /// A player's participation window within a match.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct ParticipationInfo {
     #[serde(rename = "FirstJoinedTime")]
@@ -3175,6 +3312,7 @@ pub struct ParticipationInfo {
 
 /// Bot difficulty attributes, present only for bot players.
 #[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[serde(default)]
 pub struct BotAttributes {
     #[serde(rename = "Difficulty")]
@@ -3187,6 +3325,7 @@ pub struct BotAttributes {
 /// `examples/discover_endpoints.rs` parses as XML directly; the fields are isomorphic to that
 /// already-known XML shape (same names, JSON key casing preserved).
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct HipcSettings {
     #[serde(rename = "Authorities")]
     pub authorities: BTreeMap<String, Authority>,
@@ -3199,6 +3338,7 @@ pub struct HipcSettings {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Authority {
     #[serde(rename = "AuthorityId")]
     pub authority_id: String,
@@ -3213,6 +3353,7 @@ pub struct Authority {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct RetryPolicy {
     #[serde(rename = "RetryPolicyId")]
     pub retry_policy_id: String,
@@ -3223,6 +3364,7 @@ pub struct RetryPolicy {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct RetryOptions {
     #[serde(rename = "MaxRetryCount")]
     pub max_retry_count: i32,
@@ -3237,6 +3379,7 @@ pub struct RetryOptions {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Endpoint {
     #[serde(rename = "AuthorityId")]
     pub authority_id: String,
