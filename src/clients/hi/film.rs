@@ -35,12 +35,16 @@ pub fn decode_registry(chunks: &[FilmChunkData]) -> Option<FilmRegistry> {
         .find(|chunk| chunk.metadata.chunk_type == 1)?
         .data;
     let archetypes = data
-        .chunks_exact(REGISTRY_BLOCK_SIZE)
+        .as_chunks::<REGISTRY_BLOCK_SIZE>()
+        .0
+        .iter()
         .enumerate()
         .map(|(index, block)| {
             let components = block
-                .chunks_exact(REGISTRY_SLOT_SIZE)
-                .map(registry_slot_name)
+                .as_chunks::<REGISTRY_SLOT_SIZE>()
+                .0
+                .iter()
+                .map(|slot| registry_slot_name(slot))
                 .take_while(Option::is_some)
                 .flatten()
                 .collect();
@@ -768,8 +772,10 @@ fn padded_gamertag_field(gamertag: &str) -> Option<[u8; 32]> {
 
 fn decode_utf16(bytes: &[u8]) -> String {
     let values = bytes
-        .chunks_exact(2)
-        .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|pair| u16::from_le_bytes(*pair))
         .collect::<Vec<_>>();
     String::from_utf16_lossy(&values)
         .trim_matches('\0')
