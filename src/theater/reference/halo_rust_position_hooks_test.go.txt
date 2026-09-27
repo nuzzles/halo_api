@@ -1,0 +1,11 @@
+package grammar
+import "math"
+func haloRustPositionHooks(obs *Observation) *[]any {
+ out:=haloRustComponentHooks(obs)
+ obs.PosCaptureHook=func(s PositionSample){*out=append(*out,map[string]any{"kind":"position","position_kind":[]string{"None","Baseline","Absolute","AbsoluteFallback","Delta8","DeltaAxis"}[int(s.Kind)],"slot":s.Slot,"bit":s.BitPos,"vector_bits":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}
+ return out
+}
+func haloRustPositionEncoding(cfg FrameConfig) any {
+ p:=cfg.Profil;lo,hi:=[3]uint32{},[3]uint32{};for i,r:=range p.Mouvement.Range{lo[i]=math.Float32bits(r.Min);hi[i]=math.Float32bits(r.Max)}
+ return map[string]any{"min_bits":lo,"max_bits":hi,"quantum_bits":math.Float32bits(p.Mouvement.DeltaQuantum),"region":p.Mouvement.WorldObject.Region,"axis_widths":p.Mouvement.WorldObject.AxisW,"region_index_bits":p.Mouvement.WorldObject.IndexW}
+}

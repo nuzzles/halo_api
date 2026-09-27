@@ -1,0 +1,15 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustReplayGrapple(t *testing.T) {
+ rng:=rand.New(rand.NewSource(934317));rows:=[]any{}
+ catalog,e:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if e!=nil {t.Fatal(e)}
+ entry,e:=catalog.Lookup("recharge");if e!=nil {t.Fatal(e)}
+ for run:=0;run<1024;run++ {
+  raw:=[]types.GrappleRead{};origin:=uint64(run%5)*1000000;step:=uint64(run%5)*100000
+  for j:=0;j<run%47;j++ {r:=types.GrappleRead{Slot:uint32(rng.Intn(5)),TimestampUS:uint64(rng.Intn(100))*100000,Heavy:rng.Intn(2)==0};for k:=0;k<3;k++ {r.PosQ[k]=uint32(rng.Intn(1<<entry.AxisWidths[k]))};raw=append(raw,r)}
+  tracks:=[]Track{};for j:=0;j<run%13;j++ {tr:=Track{Points:[]Point{},Slot:uint32(rng.Intn(5)),StartFrame:rng.Intn(45)-10,EndFrame:rng.Intn(120)};for k:=0;k<run%101;k++ {tr.Points=append(tr.Points,Point{T:rng.Intn(140)-10,X:float32(rng.Intn(200)-100),Y:float32(rng.Intn(200)-100),Z:float32(rng.Intn(50)-25)})};tracks=append(tracks,tr)}
+  pub,cov:=buildGrappleLines(raw,entry,origin,step,tracks);if pub==nil {pub=[]GrappleLine{}}
+  rows=append(rows,map[string]any{"raw":raw,"origin":origin,"step":step,"tracks":tracks,"map":entry,"output":map[string]any{"lines":pub,"coverage":cov}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-grapple.json",b,0600);e!=nil {t.Fatal(e)}
+}

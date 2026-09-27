@@ -1,0 +1,90 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"testing"
+)
+
+func TestHaloRustNavpointSetup(t *testing.T) {
+	rows := []any{}
+	orders := [][]int{{0, 1, 2}, {0, 1, 3}, {0, 2, 1}, {1, 2}, {0}, {0, 1, 1}, {0, 1, 2, 4}, {-1, 1, 2}}
+	for c := 0; c < 256; c++ {
+		order := orders[c%len(orders)]
+		raw := source.MemoryChunks{}
+		meta := []types.ChunkMeta{}
+		inputs := []any{}
+		packet := func(kind uint16, body []byte) []byte {
+			p := make([]byte, 16)
+			binary.LittleEndian.PutUint16(p, kind)
+			binary.LittleEndian.PutUint32(p[4:], uint32(len(body)))
+			binary.LittleEndian.PutUint64(p[8:], uint64(1000+c))
+			return append(p, body...)
+		}
+		for i, num := range order {
+			var w bitWriter
+			w.bits(0, 1)
+			w.bits(uint64((1<<30)|uint32(512+i)), 32)
+			w.bits(12, 32)
+			w.bits(0, 44)
+			w.bits(0, 32)
+			w.bits(0, 32)
+			w.bits(0, 64)
+			data := packet(2, w.buf)
+			data = append(data, packet(0, []byte{0, 0, 0, 0})...)
+			switch (c / 8) % 4 {
+			case 1:
+				data = append(data, 1, 2, 3)
+			case 2:
+				p := packet(0, []byte{0})
+				binary.LittleEndian.PutUint32(p[4:], 1000)
+				data = append(data, p...)
+			case 3:
+				data = append(data, packet(0, []byte{0, 0, 0, 0})...)
+			}
+			raw = append(raw, data)
+			meta = append(meta, types.ChunkMeta{Index: num})
+			inputs = append(inputs, map[string]any{"index": num, "hex": hex.EncodeToString(data)})
+		}
+		film, e := source.Load(raw, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+		arches := make([]Archetype, 13)
+		for i := range arches {
+			arches[i].Index = i
+		}
+		if c/128 == 1 {
+			arches = arches[:12]
+		}
+		cfg := DefaultFrameConfig()
+		fc := NewFilmContext(film)
+		fc.reg = &Registry{Archetypes: arches}
+		fc.regLu = true
+		fc.bal = cfg.Profil
+		fc.corrLu = true
+		scan, err := ScanNavpointRadial(fc, nil)
+		errorKind := ""
+		if err == ErrNoFilmChunk {
+			errorKind = "source"
+		} else if err != nil {
+			errorKind = "archetype"
+		}
+
+		p := cfg.Profil
+		encoding := map[string]any{"index_bits": p.Mouvement.WorldObject.IndexW, "world_axis_bits": p.Mouvement.WorldObject.AxisW, "handle_bits": p.Mouvement.Traversal.IndexW, "traversal_axis_bits": p.Mouvement.Traversal.AxisW, "default_axis_bits": profile.LargeursAxeParDefautDuBuild(16), "region_axis_bits": map[string]any{"0": p.Mouvement.WorldObject.AxisW, "1": p.Mouvement.WorldObject.AxisW}, "delta_axis_bits": [3]uint{p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth}, "full_precision": p.Mouvement.FullPrecision, "writer_absolute": false, "delta_handle_tail": false}
+		rows = append(rows, map[string]any{"errorKind": errorKind, "registryCase": c / 128, "inputs": inputs, "encoding": encoding, "scan": scan, "error": err != nil})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-navpoint-setup.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

@@ -1,0 +1,27 @@
+package grammar
+
+import("encoding/binary";"encoding/hex";"encoding/json";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustDeltaContextWalk(t *testing.T){
+ rows:=[]any{}
+ for c:=0;c<256;c++ {
+  lay:=profile.I0Layout{GateBits:6,AxisW:[3]uint{8,9,10},Region:uint32(c%2)}
+  flags:=map[uint32]bool{512:true,514:true};if c%7==0{flags=map[uint32]bool{}}
+  w:=&translocWriter{};w.put(c%8,0)
+  for j:=0;j<8;j++ {
+   w.put(1,1);w.put(13,uint64(512+j%3));tag:=uint64(1);if j==2{tag=2};w.put(2,tag);w.put(2,0)
+   mask:=[]int{0,6,43,48};if j==3{mask=[]int{0,43,6}};w.put(3,uint64(len(mask)));for _,m:=range mask{w.put(6,uint64(m))}
+   gate:=uint64(0);if j==4{gate=1};w.put(4,gate);region:=lay.Region;if j==5{region^=1};w.put(2,uint64(region))
+   for _,width:=range lay.AxisW{w.put(int(width),uint64(j%2))};w.put(2,0)
+  }
+  payload:=w.pay;if c%4==0{payload=payload[:len(payload)-3]}
+  packet:=func(kind uint16,ts uint64)[]byte{b:=make([]byte,16);binary.LittleEndian.PutUint16(b,kind);binary.LittleEndian.PutUint32(b[4:],uint32(len(payload)));binary.LittleEndian.PutUint64(b[8:],ts);return append(b,payload...)}
+  raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};inputs:=[]any{}
+  orders:=[][]int{{0,1,2},{0,2,1},{0,1,3},{1,1},{0}}
+  for k,num:=range orders[c%len(orders)]{b:=append(packet(2,10),packet(0,uint64(100+k))...);b=append(b,packet(0,uint64(200+k))...);raw=append(raw,b);meta=append(meta,types.ChunkMeta{Index:num});inputs=append(inputs,map[string]any{"index":num,"hex":hex.EncodeToString(b)})}
+  film,e:=source.Load(raw,meta);if e!=nil{t.Fatal(e)};fc:=NewFilmContext(film)
+  selection:=[][]int{{},{1},{2,1,2},{99},{0}}[(c/5)%5];chunks:=selection;if c%2==0{chunks=fc.ChunkNumbers()}
+  records:=[]any{};walkDeltaBipedRecords(fc,chunks,NewSlotBand(flags),lay,func(r deltaBipedRecord){records=append(records,map[string]any{"chunk":r.Chunk,"time":r.Packet.TimestampUS,"i0":r.I0,"slot":r.Slot,"mask":r.Mask,"total":r.Total,"hex":hex.EncodeToString(r.Payload)})})
+  rows=append(rows,map[string]any{"inputs":inputs,"chunks":chunks,"slots":flags,"records":records,"region":lay.Region})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-delta-context-walk.json",b,0600);e!=nil{t.Fatal(e)}
+}

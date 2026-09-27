@@ -1,0 +1,104 @@
+package replay
+
+import (
+	"encoding/json"
+	"fmt"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/facts/objectives"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"math/rand"
+	"os"
+	"sort"
+	"testing"
+)
+
+func TestHaloRustReplayScorePlayers(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	h := &rustScoreSeriesHandler{}
+	slog.SetDefault(slog.New(h))
+	rng := rand.New(rand.NewSource(412710))
+	rows := []any{}
+	for run := 0; run < 1536; run++ {
+		records := []types.StatRecord{}
+		deaths := []Death{}
+		lines := []types.PlayerLine{}
+		flat := map[int]string{}
+		nr := 1 + run%4
+		np := 1 + run%6
+		if run >= 1024 {
+			np = 1
+		}
+		for p := 0; p < np; p++ {
+			x := fmt.Sprint(p + 100)
+			lines = append(lines, types.PlayerLine{XUID: x, Kills: nr * (p + 4), Deaths: nr * (p + 3), Assists: nr * p})
+		}
+		for round := 0; round < nr; round++ {
+			for p := 0; p < np; p++ {
+				slot := 10 + 2*((p+round)%np)
+				flat[slot] = fmt.Sprint(100 + p)
+				limit := p + 3
+				if run >= 1024 {
+					limit = 30
+				}
+				for j := 0; j <= limit; j++ {
+					at := round*30000 + j*1000 + p*240
+					if run >= 1024 {
+						at = (nr-round)*30000 + j*1000
+					}
+					dv := j
+					if run%17 == 0 && j == 2 {
+						dv = 1001
+					}
+					if run%19 == 0 && j == 1 {
+						dv = -1
+					}
+					records = append(records, types.StatRecord{Slot: slot, Round: round, TimeMS: at, Comps: map[int]types.StatValue{0: {A: int64(j), B: 0}, 1: {A: 0, B: int64(j*100 + p*10)}, 2: {A: int64(j + 1), B: int64(dv)}, 3: {A: int64(p)}}})
+					if j > 0 {
+						deaths = append(deaths, Death{XUID: uint64(100 + p), TimeMS: int64(at + []int{-151, -150, 0, 150, 151}[run%5])})
+					}
+				}
+			}
+		}
+		if run%11 == 0 {
+			rng.Shuffle(len(records), func(i, j int) { records[i], records[j] = records[j], records[i] })
+		} else {
+			sort.SliceStable(records, func(i, j int) bool { return records[i].TimeMS < records[j].TimeMS })
+		}
+		if run%13 == 0 {
+			deaths = []Death{}
+		}
+		if run%7 == 0 {
+			lines = nil
+		}
+		if run%23 == 0 {
+			for s := range flat {
+				flat[s] = "duplicate"
+			}
+		}
+		clock := scoreClock{originMS: (run%9 - 2) * 1000, intervalMS: []int{0, -1, 16, 100, 500}[run%5], frames: []int{-1, 0, 10, 1000, 10000}[run%5]}
+		h.records = []any{}
+		auto := buildPlayerScores(records, objectives.SlotIdentityFrom(records, lines), lines, deaths, clock)
+		autoLogs := h.records
+		h.records = []any{}
+		direct := buildPlayerScoresFlat(records, flat, clock)
+		directLogs := h.records
+		if auto == nil {
+			auto = []PlayerScore{}
+		}
+		if direct == nil {
+			direct = []PlayerScore{}
+		}
+		if lines == nil {
+			lines = []types.PlayerLine{}
+		}
+		rows = append(rows, map[string]any{"records": records, "lines": lines, "deaths": deathInstantsOf(deaths), "flat": flat, "clock": map[string]int{"origin_ms": clock.originMS, "interval_ms": clock.intervalMS, "frames": clock.frames}, "automatic": auto, "direct": direct, "automatic_logs": autoLogs, "direct_logs": directLogs})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-replay-score-players.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

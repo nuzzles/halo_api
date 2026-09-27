@@ -1,0 +1,58 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fix": "Native contextual slot lookup consumes the Delta baseline selector before an unbound-slot failure. Strict-generation entry points retain their prior policy.",
+  "instrumentation": {
+    "source": "internal/grammar/frame_harvest.go",
+    "source_sha256": "90c2faa1a7350babae02b75a9c63eede86b0678943ec84535797c92ac162028d",
+    "method": "Go AST clone; rename, append int result and br.BitPos() at four returns only.",
+    "regeneration_equal": true,
+    "original_function_outputs_equal": true
+  },
+  "native_cases": {
+    "cases": 70,
+    "returned_records": 24582,
+    "acceptance_calls": 21,
+    "baseline_forms": "one-bit absent and eight-bit present selectors",
+    "scope": "Raw recovery, truncation, callback mutation, rejection, unbound slots, prefixes and guard limits."
+  },
+  "validation": {
+    "full_theater_passed": 592,
+    "full_theater_failed": 0,
+    "full_theater_ignored": 49,
+    "full_theater_seconds": 83.69,
+    "wasm": "70 cursor cases plus previous harness controls passed.",
+    "clippy": "passed",
+    "clippy_seconds": 14.13,
+    "format": "passed",
+    "diff_check": "passed",
+    "reference_hashes": 485
+  },
+  "captured_march": {
+    "status": "passed",
+    "films": [
+      "maps/01-bazaar-idle",
+      "maps/02-aquarius",
+      "bandit/01-evo",
+      "ranked-arena/02-oddball"
+    ],
+    "seconds": 1896.42,
+    "profile": "debug",
+    "log": "/private/tmp/halo-reader-cursor-captured.log",
+    "scope": "Earlier signed-reader binary; predates the final unbound-Delta baseline correction. Current-code release regression tracked separately."
+  },
+  "remaining": "Broader signed-cursor, source/runtime and captured-mode gates remain; architecture remains deferred.",
+  "current_code_captured_march": {
+    "status": "passed",
+    "films": [
+      "maps/01-bazaar-idle",
+      "maps/02-aquarius",
+      "bandit/01-evo",
+      "ranked-arena/02-oddball"
+    ],
+    "seconds": 81.3,
+    "build_seconds": 160,
+    "profile": "release",
+    "log": "/private/tmp/halo-resync-current-captured.log",
+    "scope": "Includes unbound-Delta baseline correction; all native-context march output/configuration comparisons pass. Predates display-only provenance addition."
+  }
+}

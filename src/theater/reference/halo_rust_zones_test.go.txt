@@ -1,0 +1,30 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"sort";"fmt";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/replay/mapvar")
+func TestHaloRustZones(t *testing.T){
+ rng:=rand.New(rand.NewSource(41700));rows:=[]any{}
+ convert:=func(m map[uint32][]zoneSample)map[uint32][]any{out:=map[uint32][]any{};for k,ss:=range m{out[k]=[]any{};for _,s:=range ss{out[k]=append(out[k],map[string]any{"t":s.t,"v":s.v})}};return out}
+ _=convert
+ for i:=0;i<1024;i++{
+  ser:=zoneSeries{gauge:map[uint32][]zoneSample{},owner:map[uint32][]zoneSample{},keys:map[uint32]uint32{},desig:map[uint32][]zoneSample{},ownerChained:map[uint32][]zoneSample{}}
+  pairs:=[]zonePair{};pairRows:=[]any{};count:=i%4+1
+  for z:=0;z<count;z++{gs:=uint32(10+z);oslot:=uint32(20+z);cs:=uint32(30+z);ser.keys[gs]=uint32(z*123);ser.owner[oslot]=[]zoneSample{{t:0,v:0xffffffff}}
+   for k:=0;k<8;k++{t0:=10+z*20+k*100;team:=uint64(k%2);top:=uint64(8472493);if (i+k)%5==0{top=8420000};ser.gauge[gs]=append(ser.gauge[gs],zoneSample{t:t0,v:8388607},zoneSample{t:t0+2,v:8400000},zoneSample{t:t0+4,v:top},zoneSample{t:t0+5,v:8388607});ov:=team;if (i+k)%13==0{ov=8};ser.owner[oslot]=append(ser.owner[oslot],zoneSample{t:t0+4,v:ov});cv:=team;if i%7==0{cv=0xffffffff};if i%11==0{cv=8};if i%3!=0{ser.ownerChained[cs]=append(ser.ownerChained[cs],zoneSample{t:t0+2,v:cv})};p:=zonePair{t:t0+4,ref:z,xuid:fmt.Sprint(team)};pairs=append(pairs,p)
+   }
+  }
+  // Noise with out-of-range camps can never be a capturing-team channel.
+  ser.ownerChained[99]=[]zoneSample{{t:10,v:999}};if i%9==0{pairs=nil}
+  for _,p:=range pairs{pairRows=append(pairRows,map[string]any{"t":p.t,"zone_ref":p.ref,"xuid":p.xuid})}
+  for _,m:=range []map[uint32][]zoneSample{ser.gauge,ser.owner,ser.ownerChained}{for s:=range m{sort.SliceStable(m[s],func(a,b int)bool{return m[s][a].t<m[s][b].t})}}
+  teams:=map[string]int{"0":0,"1":1};if i%4==0{teams=map[string]int{}};frames:=900;if i%17==0{frames=0};interval:=[]int{100,500,1000,2000}[i%4];catalog:=count;if i%6==0{catalog+=rng.Intn(3)};hill:=i%8==0
+  reads:=[]grammar.ManagedPropertyRead{};origin:=uint64(1000);step:=uint64(100000);for tag,m:=range map[int]map[uint32][]zoneSample{3:ser.gauge,4:ser.owner,5:ser.desig}{for slot,ss:=range m{for _,r:=range ss{reads=append(reads,grammar.ManagedPropertyRead{Slot:slot,TimestampUS:origin+uint64(r.t)*step,Tag:tag,Value:r.v,HasValue:true,Chained:true})}}}
+  // Ordered input avoids map iteration defining equal-time read order.
+  sort.SliceStable(reads,func(a,b int)bool{if reads[a].Slot!=reads[b].Slot{return reads[a].Slot<reads[b].Slot};return reads[a].TimestampUS<reads[b].TimestampUS})
+  entry:=MapObjectivesEntry{Objectives:[]mapvar.Objective{}};ptr:=func(v float64)*float64{return &v};for z:=0;z<catalog;z++{entry.Objectives=append(entry.Objectives,mapvar.Objective{Role:"strongholds_zone",Labels:[]string{},Pos:mapvar.Vec3{X:float64(z*30)},Shape:&mapvar.Shape{Family:mapvar.ShapeBox,HalfX:ptr(3),HalfY:ptr(3),UpZ:2,DownZ:1,Forward:mapvar.Vec3{X:1},Up:mapvar.Vec3{Z:1}}})}
+  actions:=[]ObjectiveAction{};tracks:=[]Track{};bridge:=map[uint32]uint64{1:1};for _,p:=range pairs{stat:="zone_captures";if i%3==0{stat="zone_secures"};if i%5==0{stat="hill_kills"};actions=append(actions,ObjectiveAction{T:p.t,XUID:p.xuid,Stat:stat});tr:=Track{Slot:1,XUID:p.xuid,Points:[]Point{{T:p.t,X:float32(p.ref*30)}}};if i%7==0{tr.XUID=""};if i%11==0{tr.Points[0].X+=1000};tracks=append(tracks,tr)}
+  if i%13==0{entry.Objectives=nil};scanned:=i%17!=0;if i%19==0{step=0};hill=i%2==0
+  fb:=fallback.NouveauCompteur();states,cov:=buildZoneStates(ZoneInput{Scanned:scanned,Reads:reads,Zones:entry.ZonesOfRole("strongholds_zone").Zones,Roles:"strongholds_zone",TeamByXUID:teams,Hill:hill},zoneCtx{origin:origin,step:step,frames:frames,intervalMS:interval,tracks:tracks,actions:actions,slotXUID:bridge,fb:fb})
+  if states==nil{states=[]ZoneState{}};if entry.Objectives==nil{entry.Objectives=[]mapvar.Objective{}}
+  rows=append(rows,map[string]any{"entry":entry,"reads":reads,"tracks":tracks,"actions":actions,"bridge":bridge,"teams":teams,"frames":frames,"interval":interval,"origin":origin,"step":step,"scanned":scanned,"hill":hill,"output":map[string]any{"states":states,"coverage":cov,"inferred_capture_teams":fb.Compte(fallback.NomZoneCampDeCaptureDeduitDeLIssue),"hill_fallbacks":map[string]any{"whole_period_votes":fb.Compte(fallback.NomCollineVotesPeriodeEntiere),"open_owner_tail":fb.Compte(fallback.NomCollineDernierIntervalleOuvert)}}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-zones.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,16 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os";"math/rand")
+func TestHaloRustLeafReaders(t *testing.T){
+ rng:=rand.New(rand.NewSource(77141));rows:=[]any{}
+ for i:=0;i<768;i++ {
+  data:=make([]byte,i%19);rng.Read(data);start:=i%13;category:=i%12;steps:=[]any{}
+  for mode:=0;mode<6;mode++{
+   br:=LecteurSur(data);ctx:=ContexteParDefaut();ctx.Obs=NouvelleObservation();refs:=[]UnitRefRead{};ctx.Obs.UnitRefHook=func(r UnitRefRead){refs=append(refs,r)};br.PoserContexte(ctx);br.Skip(start)
+   var value,tail uint64;present:=false;width:=uint(i%65)
+   switch mode{case 0:value,tail=readVarWidthInt(br,category);case 1:value,tail,present=consume1408f0ac4Probe(br,category);case 2:consumeOpt32(br);case 3:consumeGateR(br,width);case 4:consumeGate0R(br,width);case 5:consumeID2(br)}
+   steps=append(steps,map[string]any{"mode":mode,"end":br.BitPos(),"value":value,"tail":tail,"present":present,"references":refs})
+  }
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"start":start,"category":category,"width":i%65,"steps":steps})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-leaf-readers.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,19 @@
+package grammar
+import("encoding/json";"math";"os";"testing")
+func TestHaloRustIsolationGapDomain(t *testing.T){
+ rows:=[]any{}
+ samples:=[][]BipedPosition{
+  {},{{Slot:0,TimestampUS:0}},{{Slot:0,TimestampUS:0},{Slot:0,TimestampUS:1000}},
+  {{Slot:0,TimestampUS:0},{Slot:0,TimestampUS:1001}},
+  {{Slot:0,TimestampUS:0},{Slot:0,TimestampUS:0}},
+  {{Slot:0,TimestampUS:1000},{Slot:0,TimestampUS:0}},
+  {{Slot:0,TimestampUS:0},{Slot:1,TimestampUS:0},{Slot:0,TimestampUS:1}},
+  {{Slot:0,TimestampUS:math.MaxUint64},{Slot:0,TimestampUS:0}},
+ }
+ for _,gap:=range []int{math.MinInt64,-1,0,1,15000,1<<61,(1<<61)+1,math.MaxInt64}{for c,input:=range samples{
+  data:=append([]BipedPosition{},input...);for i:=range data{data[i].X=float32(i)}
+  out:=DropIsolated(data,gap);kept:=[]int{};for _,p:=range out{kept=append(kept,int(p.X))}
+  rows=append(rows,map[string]any{"case":c,"gap_ms":gap,"enabled":gap>0,"threshold_us":uint64(gap)*1000,"samples":data,"kept":kept})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-isolation-gap-domain.json",raw,0600);e!=nil{t.Fatal(e)}
+}

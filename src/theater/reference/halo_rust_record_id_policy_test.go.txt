@@ -1,0 +1,21 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os")
+func TestHaloRustRecordIDPolicy(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []int{-128,-1,-1<<63,0,1,5,30,31,32,33,64,65,130,4097,1<<32,(1<<63)-1}{for _,base:=range []uint32{0,1,0x3fffffff,0x40000000,0xffffffff}{for mode:=0;mode<5;mode++{for start:=0;start<8;start++{for _,value:=range []uint64{0,0xffffffffffffffff,0x123456789abcdef0}{
+  if mode!=0&&width>4097{continue}
+  var bw bitWriter;bw.bits(0,start)
+  if mode==4{bw.bit(1)}else{bw.bits(uint64(mode),3)}
+  if mode!=0{if width>0{bw.bits(value,width)};bw.bits(3,2)}
+  if mode==1{bw.bits(3,6)};for j:=0;j<8;j++{bw.bits(0,32)}
+  br:=LecteurSur(bw.buf);br.SetBitPos(start);kind:=readRecordType(br);var id any
+  if kind!=0{id=readRecordID(br,width,base)}
+  headerEnd:=br.BitPos()
+  reg:=&Registry{Archetypes:make([]Archetype,4)};for i:=range reg.Archetypes{reg.Archetypes[i]=Archetype{Index:i,Components:[]string{},Levels:[]uint32{}}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=width;cfg.IDBase=base;cfg.PacketPreambleBits=0;cfg.Profil.Grammaire.DeserEtatParArchetype=false
+  world:=NewWorld(reg);if id!=nil{world.BindFull(id.(uint32),3)}
+  br=LecteurSur(bw.buf);br.SetBitPos(start);records,err:=DecodeFrameRecords(br,world,cfg);if records==nil{records=[]FrameRecord{}}
+  rows=append(rows,map[string]any{"records":records,"complete":err==nil,"frame_end":br.BitPos(),"slots":world.slots,"width":width,"base":base,"mode":mode,"start":start,"value":value,"hex":hex.EncodeToString(bw.buf),"kind":kind,"id":id,"end":headerEnd})
+ }}}}}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-record-id-policy.json",b,0600);e!=nil{t.Fatal(e)}
+}

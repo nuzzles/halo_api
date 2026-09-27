@@ -1,0 +1,30 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "movement-scan-v41.json.zlib",
+  "sha256": "430fa71365d6d6393891f680b8113636f003987b3568ad9c1a08993aa6656c04",
+  "generator": "halo_rust_movement_scan_test.go.txt",
+  "source_fixture": "context-movement-v41.json.zlib",
+  "cases": 224,
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-host.log",
+    "tests": 2
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-wasm.log",
+    "selected_calls": 2
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-clippy.log"
+  },
+  "full_v41_parity_complete": false,
+  "limits": [
+    "No native panic cases in the loaded source fixture.",
+    "Embedding runtime must wire the diagnostic observer and finish all phases before capture.",
+    "Reference agreement is not independent gameplay annotation."
+  ],
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed"
+}

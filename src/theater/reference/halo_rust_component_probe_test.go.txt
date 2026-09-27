@@ -1,0 +1,17 @@
+package grammar
+import("testing";"math/rand";"encoding/json";"encoding/hex";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustComponentProbe(t *testing.T){
+ rng:=rand.New(rand.NewSource(74142));rows:=[]any{}
+ names:=[]string{"object-position-dynamic-precision-component","simulation-state-component","player-primary-respawn-object-component","object-dead-state-component","unit-crouch-component","biped-emp-timer-component","not-ported",""}
+ for c:=0;c<1024;c++{
+  name:=names[c%len(names)];level:=uint32(c%4);ti:=uint32([]int{0,35,40,70}[c%4]);start:=c%19
+  cfg:=DefaultFrameConfig();cfg.Obs=NouvelleObservation();cfg.Profil.Grammaire.SimStateComplet=c%3==0;cfg.Profil.Grammaire.ControleDeCorruption=c%5==0;cfg.Profil.Mouvement.FullPrecision=c%7==0
+  cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{name:77};cfg.Profil.Grammaire.LargeursBouchon=map[string]int{name:91}
+  data:=make([]byte,2048);if c%3!=0{rng.Read(data)};if c%4==0{data=data[:c%32]};if c%11==0{data=nil}
+  observations:=haloRustPositionHooks(cfg.Obs);cfg.Obs.EtatMouvementHook=func(comp EtatMouvementComposant,slot uint32,v []uint64){*observations=append(*observations,map[string]any{"kind":"movement_state","component":comp.String(),"slot":slot,"values":v})}
+  end,ported:=ConsumeComponentAt(data,start,name,ti,level,ContexteDeLecture{Profil:cfg.Profil,Obs:cfg.Obs})
+  p:=cfg.Profil;encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  rows=append(rows,map[string]any{"name":name,"archetype":ti,"level":level,"start":start,"hex":hex.EncodeToString(data),"encoding":encoding,"capture":haloRustPositionEncoding(cfg),"simulation":cfg.Profil.Grammaire.SimStateComplet,"corruption":cfg.Profil.Grammaire.ControleDeCorruption,"end":end,"ported":ported,"observations":*observations})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-component-probe.json",b,0600);e!=nil{t.Fatal(e)}
+}

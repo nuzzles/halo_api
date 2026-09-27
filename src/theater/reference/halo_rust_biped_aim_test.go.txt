@@ -1,0 +1,27 @@
+package grammar
+import("testing";"os";"encoding/json";"math/rand")
+func TestHaloRustBipedAim(t *testing.T){
+ rng:=rand.New(rand.NewSource(289130));rows:=[]any{}
+ masks:=[][]int{{21},{21,25},{1,21},{2,21},{3,21},{4,21},{5,21},{1,2,3,4,5,21},{0,21},{6,21},{21,21},{25},{1,21,20}}
+ for run:=0;run<2048;run++{
+  slots:=[]uint32{512,514,515};band:=NewSlotBand(map[uint32]bool{512:true,514:true,515:true});w:=&translocWriter{}
+  for record:=0;record<8;record++{
+   w.put(rng.Intn(8),0);w.put(1,1);w.put(13,uint64(512+rng.Intn(5)));tag:=1;if record==6{tag=rng.Intn(4)};w.put(2,uint64(tag));zeros:=0;if record==7{zeros=rng.Intn(4)};w.put(2,uint64(zeros))
+   mask:=masks[(run+record)%len(masks)];w.put(3,uint64(len(mask)));for _,id:=range mask{w.put(6,uint64(id))}
+   for _,id:=range mask{
+    switch id{
+    case 1: if run%3==0{w.put(1,1);w.put(64,rng.Uint64());w.put(32,uint64(rng.Uint32()))}else{w.put(1,0);w.put(1,0);w.put(19,uint64(rng.Uint32()));w.put(10,uint64(rng.Uint32()))}
+    case 2:w.put(1,0);w.put(19,uint64(rng.Uint32()));w.put(8,uint64(rng.Uint32()))
+    case 3:w.put(1,0);w.put(27,uint64(rng.Uint32()))
+    case 4,5:w.put(64,rng.Uint64());w.put(64,rng.Uint64())
+    case 21:w.put(1,uint64(rng.Intn(2)));w.put(12,uint64(rng.Uint32()));w.put(11,uint64(rng.Uint32()));if record%2==0{w.put(32,uint64(rng.Uint32()))}
+    default:w.put(32,uint64(rng.Uint32()))
+    }
+   }
+  }
+  pay:=w.pay;if run%4==0{pay=pay[:rng.Intn(len(pay)+1)]};if run%9==0{rng.Read(pay)}
+  aims:=ScanBipedAimRecords(pay,band,ContexteParDefaut());if aims==nil{aims=[]BipedAim{}}
+  data:=[]int{};for _,b:=range pay{data=append(data,int(b))};rows=append(rows,map[string]any{"payload":data,"band":slots,"aims":aims,"headings":[]float32{(BipedAim{YawRaw:uint32(run)}).AimHeadingDeg(),(BipedAim{YawRaw:uint32(run+2048)}).AimHeadingDeg()},"pitch":(BipedAim{PitchRaw:uint32(run)}).AimPitchDeg()})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-biped-aim.json",b,0600);e!=nil{t.Fatal(e)}
+}

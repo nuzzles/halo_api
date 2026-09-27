@@ -1,0 +1,102 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestHaloRustKFQCorpus(t *testing.T) {
+	rows := []any{}
+	for _, folder := range []string{"maps/01-bazaar-idle", "maps/02-aquarius", "bandit/01-evo", "ranked-arena/02-oddball"} {
+		root := filepath.Join("/Users/simbleau/git/halo_api/experiments/films", folder)
+		var meta struct {
+			Chunks []struct {
+				Index int    `json:"index"`
+				File  string `json:"file"`
+			}
+		}
+		raw, e := os.ReadFile(filepath.Join(root, "film.json"))
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = json.Unmarshal(raw, &meta); e != nil {
+			t.Fatal(e)
+		}
+		var reg *Registry
+		for _, c := range meta.Chunks {
+			if c.Index == 0 {
+				d, e := os.ReadFile(filepath.Join(root, c.File))
+				if e != nil {
+					t.Fatal(e)
+				}
+				reg, e = ParseRegistryChunk(source.Inflate(d))
+				if e != nil {
+					t.Fatal(e)
+				}
+			}
+		}
+		if reg == nil {
+			t.Fatal("registry absent")
+		}
+		nDelta, nKey := 0, 0
+		seedFile := ""
+		seedIndex := 0
+		var anchors []KeyframeRec
+		for _, c := range meta.Chunks {
+			if c.Index < 1 {
+				continue
+			}
+			data, e := os.ReadFile(filepath.Join(root, c.File))
+			if e != nil {
+				t.Fatal(e)
+			}
+			data = source.Inflate(data)
+			for _, pk := range WalkPackets(data) {
+				if pk.Type == 2 {
+					anchors = WalkKeyframeWorld(pk.Payload(data))
+					seedFile = c.File
+					seedIndex = pk.Index
+				}
+				if pk.Type != 0 && pk.Type != 2 {
+					continue
+				}
+				if pk.Type == 0 && nDelta >= 6 || pk.Type == 2 && nKey >= 2 {
+					continue
+				}
+				if pk.Type == 0 {
+					nDelta++
+				} else {
+					nKey++
+				}
+				for _, seeded := range []bool{false, true} {
+					seed := func() *World {
+						w := NewWorld(reg)
+						if seeded {
+							for _, r := range anchors {
+								w.BindFull(uint32((r.Gen<<30)|r.Slot), uint32(r.TI))
+							}
+						}
+						return w
+					}
+					vs := KFQFrameVariants(11, 14)
+					best, all := BestVariant(reg, pk.Payload(data), vs, seed)
+					rows = append(rows, map[string]any{"folder": folder, "file": c.File, "packet": pk.Index, "kind": pk.Type, "seeded": seeded, "seed_file": seedFile, "seed_packet": seedIndex, "variants": vs, "best": best, "all": all})
+				}
+			}
+			if nDelta >= 6 && nKey >= 2 {
+				break
+			}
+		}
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-kfq-corpus.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+	t.Log("cases", len(rows))
+}

@@ -1,0 +1,146 @@
+package replay
+
+import (
+	"bytes"
+	"compress/zlib"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"levelup/go-api/internal/games/halo_infinite/film/replay/mapvar"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestHaloRustCTFDocument(t *testing.T)            { haloRustCTFDocument(t, false, false) }
+func TestHaloRustCTFDecodedKillDocument(t *testing.T) { haloRustCTFDocument(t, true, false) }
+func TestHaloRustCTFGeometryDocument(t *testing.T)    { haloRustCTFDocument(t, true, true) }
+func haloRustCTFDocument(t *testing.T, integrated, geometry bool) {
+	root := "/private/tmp/halo-levelup-v75/apps/go-api/internal/api/wire/testdata/film_e2e/c0a82e88"
+	manifest, e := os.ReadFile(filepath.Join(root, "fixture.json"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	var meta struct {
+		Chunks []struct {
+			Index    int    `json:"index"`
+			Kind     int    `json:"chunkType"`
+			Start    int    `json:"startMs"`
+			Duration int    `json:"durationMs"`
+			File     string `json:"file"`
+		}
+		Facts any `json:"facts"`
+	}
+	if e = json.Unmarshal(manifest, &meta); e != nil {
+		t.Fatal(e)
+	}
+	corpus := t.TempDir()
+	folder := "upstream/ctf-c0a82e88"
+	dir := filepath.Join(corpus, folder)
+	if e = os.MkdirAll(dir, 0700); e != nil {
+		t.Fatal(e)
+	}
+	normalized := []any{}
+	captured := []any{}
+	for _, c := range meta.Chunks {
+		compressed, e := os.ReadFile(filepath.Join(root, "chunks", c.File))
+		if e != nil {
+			t.Fatal(e)
+		}
+		zr, e := zlib.NewReader(bytes.NewReader(compressed))
+		if e != nil {
+			t.Fatal(e)
+		}
+		raw, e := io.ReadAll(zr)
+		zr.Close()
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = os.WriteFile(filepath.Join(dir, c.File), raw, 0600); e != nil {
+			t.Fatal(e)
+		}
+		fields := map[string]any{"index": c.Index, "chunk_type": c.Kind, "start_time_offset_ms": c.Start, "duration_ms": c.Duration, "file": c.File}
+		normalized = append(normalized, fields)
+		captured = append(captured, map[string]any{"metadata": fields, "hex": hex.EncodeToString(raw), "compressed_sha256": fmt.Sprintf("%x", sha256.Sum256(compressed))})
+	}
+	factsBytes, _ := json.Marshal(meta.Facts)
+	var facts struct {
+		Players []types.PlayerLine `json:"players"`
+		MapID   string             `json:"mapId"`
+	}
+	if e = json.Unmarshal(factsBytes, &facts); e != nil {
+		t.Fatal(e)
+	}
+	mapID := ""
+	if geometry {
+		mapID = facts.MapID
+	}
+	b, e := json.Marshal(map[string]any{"chunks": normalized, "ctf": true, "lines": facts.Players, "map_id": mapID})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile(filepath.Join(dir, "film.json"), b, 0600); e != nil {
+		t.Fatal(e)
+	}
+	output := "/private/tmp/halo-ctf-document.json"
+	if integrated {
+		output = "/private/tmp/halo-ctf-decoded-kill-document.json"
+		if geometry {
+			output = "/private/tmp/halo-ctf-geometry-document.json"
+		}
+		haloRustDecodedKillDocumentRoot(t, []struct{ Folder, Map string }{{folder, "corpo"}}, output, corpus)
+	} else {
+		haloRustFullDocumentRoot(t, []struct{ Folder, Map string }{{folder, "corpo"}}, output, corpus)
+	}
+	b, e = os.ReadFile(output)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var rows []map[string]any
+	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder.UseNumber()
+	if e = decoder.Decode(&rows); e != nil {
+		t.Fatal(e)
+	}
+	rows[0]["captured_chunks"] = captured
+	rows[0]["independent_match_facts"] = meta.Facts
+	if geometry {
+		catalogBytes, e := os.ReadFile("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_objectives.json")
+		if e != nil {
+			t.Fatal(e)
+		}
+		rows[0]["map_catalog_sha256"] = fmt.Sprintf("%x", sha256.Sum256(catalogBytes))
+	}
+	b, e = json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile(output, b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+// Same native catalog projection as replaybuild.flagSpawns, including label priority.
+func haloRustFlagSpawns(t *testing.T, mapID string) []FlagSpawn {
+	t.Helper()
+	catalog, e := LoadMapObjectives("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_objectives.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	entry, e := catalog.Lookup(mapID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var out []FlagSpawn
+	for _, p := range entry.PointsOfRole(mapvar.RoleFlagSpawn) {
+		team := p.TeamIndex
+		if p.Neutral {
+			team = TeamNeutral
+		}
+		out = append(out, FlagSpawn{Team: team, Neutral: p.Neutral, X: float32(p.Center.X), Y: float32(p.Center.Y)})
+	}
+	return out
+}

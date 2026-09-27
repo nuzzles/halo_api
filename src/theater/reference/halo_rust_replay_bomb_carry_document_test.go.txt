@@ -1,0 +1,31 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustReplayBombCarryDocument(t *testing.T){
+ rng:=rand.New(rand.NewSource(41301));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  recycled:=run%3!=0;bridge:=run%7!=0
+  lives:=[]lifeSpan{{slot:10,from:0,to:10000000,xuid:100},{slot:11,from:0,to:50000000,xuid:100}}
+  if recycled{lives=append(lives,lifeSpan{slot:10,from:12000000,to:25000000,xuid:101})}
+  clock:=replayClock{origin:uint64(run%3)*1000000,step:[]uint64{0,100000,1000000}[run%3],frames:[]int{0,30,1000}[run%3]}
+  offset:=[]int64{0,1000,-1000,-1<<63,1<<63-1}[run%5]
+  reg:=IdentityRegistry{own:OwnerReport{lives:lives,DeathOffsetMS:offset}}
+  if bridge{reg.own.SlotXUID=map[uint32]uint64{10:100,11:100};if recycled{reg.own.SlotAmbiguous=map[uint32]bool{10:true}}}
+  changes:=[]types.HeldWeaponChange{};deaths:=[]Death{}
+  for j:=0;j<run%35;j++{
+   ts:=uint64(rng.Intn(35000))*1000;if j%11==0{ts=rng.Uint64()}
+   fam:=[]uint32{0,bombHeldFamily,1}
+   changes=append(changes,types.HeldWeaponChange{TimestampUS:ts,Slot:uint32(10+j%3),Family:fam[rng.Intn(3)],Previous:fam[rng.Intn(3)]})
+   deaths=append(deaths,Death{XUID:uint64(100+j%2),TimeMS:int64(rng.Intn(35000))})
+  }
+  tracks:=[]Track{{Slot:10,XUID:"100",StartFrame:10,EndFrame:80},{Slot:10,XUID:"101",StartFrame:100,EndFrame:180}}
+  if run%4==0{tracks=append(tracks,Track{Slot:12,StartFrame:0,EndFrame:1000})}
+  deduced:=map[int]bool{};if run%5==0{deduced[0]=true}
+  doc:=ReplayDocument{Tracks:tracks,BombCarries:[]BombCarry{{XUID:"seed",T0:1,T1:2}}}
+  if run%2==0{doc.Coverage=&Coverage{BombCarries:&BombCarriesCoverage{Events:999}}}
+  before,_:=json.Marshal(doc);scanned:=run%11!=0
+  raw:=attachBombCarries(&doc,Options{Bomb:BombInput{CarryScanned:scanned},WeaponChanges:changes,Deaths:deaths},reg,clock,deduced)
+  if raw.Events==nil{raw.Events=[]HeldObjectEvent{}};if raw.Periods==nil{raw.Periods=[]HeldObjectPeriod{}};if raw.CarryMSByXUID==nil{raw.CarryMSByXUID=map[uint64]int{}}
+  rows=append(rows,map[string]any{"recycled":recycled,"bridge":bridge,"changes":changes,"deaths":deaths,"deduced":deduced,"scanned":scanned,"before":json.RawMessage(before),"after":doc,"raw":raw,"clock":map[string]any{"origin_us":clock.origin,"step_us":clock.step,"frames":clock.frames,"death_offset_ms":offset}})
+ }
+ data,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-bomb-carry-document.json",data,0600);e!=nil{t.Fatal(e)}
+}

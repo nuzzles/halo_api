@@ -1,0 +1,15 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing")
+func TestHaloRustSignedViewContinuation(t *testing.T){
+ rows:=[]any{}
+ for _,classes:=range []bool{false,true}{for mode:=0;mode<2;mode++{for _,width:=range []int{-83,-19,0,1<<32}{
+  var bw bitWriter;bw.bits(0,32);bw.bit(1);bw.bits(0,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(0,64)
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"view-tail"},Levels:[]uint32{0}}}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=true;cfg.PacketPreambleBits=0;cfg.Profil.Grammaire.ClassesDeVue=classes;cfg.Profil.Grammaire.InferenceChaine=false;cfg.Obs=NouvelleObservation()
+  widths:=map[string]int{"view-tail":width};if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=widths}else{cfg.Profil.Grammaire.LargeursBouchon=widths}
+  w:=NewWorld(reg);w.BindFull(0,0);w.PoserVueCourante(7)
+  records,views,end:=DecodeFrameViewsCurseur(bw.buf,w,cfg,3,0)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"classes":classes,"mode":mode,"width":width,"records":records,"views":views,"end":end,"world_view":w.vueCourante})
+ }}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-view-continuation.json",raw,0600);e!=nil{t.Fatal(e)}
+}

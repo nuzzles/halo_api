@@ -1,0 +1,15 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"fmt")
+func TestHaloRustZonePairing(t *testing.T){
+ rng:=rand.New(rand.NewSource(41500));rows:=[]any{}
+ convert:=func(m map[uint32][]zoneSample)map[uint32][]any{out:=map[uint32][]any{};for k,ss:=range m{out[k]=[]any{};for _,s:=range ss{out[k]=append(out[k],map[string]any{"t":s.t,"v":s.v})}};return out}
+ for i:=0;i<1024;i++{
+  ser:=zoneSeries{gauge:map[uint32][]zoneSample{},owner:map[uint32][]zoneSample{},keys:map[uint32]uint32{},desig:map[uint32][]zoneSample{},ownerChained:map[uint32][]zoneSample{}}
+  for s:=0;s<i%12;s++{for j:=0;j<80;j++{ser.gauge[uint32(s)]=append(ser.gauge[uint32(s)],zoneSample{t:j/2,v:uint64((j+s)%9*4096)});v:=uint64(rng.Intn(4));if v==3{v=0xffffffff};if s%5==0{v=0xffffffff};ser.owner[uint32(s)]=append(ser.owner[uint32(s)],zoneSample{t:j/2,v:v})}}
+  pairs:=[]zonePair{};pairRows:=[]any{};for j:=0;j<80;j++{p:=zonePair{t:rng.Intn(50)-5,ref:rng.Intn(5),xuid:fmt.Sprint(j%4)};pairs=append(pairs,p);pairRows=append(pairRows,map[string]any{"t":p.t,"zone_ref":p.ref,"xuid":p.xuid})}
+  teams:=map[string]int{};if i%3!=0{teams=map[string]int{"0":0,"1":1,"2":-1}};win:=[]int{-1,0,1,2,5,20}[i%6]
+  gauge,n:=pairGaugeSlots(zoneRampsOf(ser),pairs,win);cs:=zoneOwnerCandidates(ser,pairs,teams,win);cands:=[]any{};for _,c:=range cs{cands=append(cands,map[string]any{"slot":c.slot,"zone_ref":c.ref,"score":c.score})};owners:=electZoneOwners(cs)
+  rows=append(rows,map[string]any{"series":map[string]any{"gauge":convert(ser.gauge),"owner":convert(ser.owner),"keys":ser.keys,"desig":convert(ser.desig),"owner_chained":convert(ser.ownerChained),"slots":ser.slots},"pairs":pairRows,"teams":teams,"win":win,"gauges":gauge,"unpaired":n,"candidates":cands,"owners":owners})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-zone-pairing.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,29 @@
+package grammar
+import("encoding/json";"math";"os";"testing")
+func TestHaloRustLiveObserver(t *testing.T){
+ rows:=[]any{}
+ for i:=0;i<256;i++ {
+  data:=make([]byte,i%65);for j:=range data{data[j]=byte(i*71+j*37)}
+  fc:=NewFilmContext(nil);p:=fc.ProfilDeBalayage();p.Mouvement.FullPrecision=i%2==0;fc.PoserProfilDeBalayage(p)
+  br:=fc.NouveauLecteur(data);br.cap.accumSlot=19;br.cap.slot=19;obs:=fc.Observation();events:=[]any{}
+  movement:=func(c EtatMouvementComposant,s uint32,v []uint64){events=append(events,[]any{"movement",c.String(),s,v})}
+  refs:=func(r UnitRefRead){events=append(events,[]any{"ref",r.Kind.String(),r.StartBit,r.EndBit,r.Present,r.Val,r.Tail,r.Probe})}
+  if i%2!=0{obs.EtatMouvementHook=movement;obs.UnitRefHook=refs}
+  obs.MobilityActionHook=func(a,b bool){
+   events=append(events,[]any{"mobility",a,b})
+   if i%2==0{obs.EtatMouvementHook=movement;obs.UnitRefHook=refs}else{obs.EtatMouvementHook=nil;obs.UnitRefHook=nil}
+  }
+  obs.PosCaptureHook=func(s PositionSample){
+   hist:=obs.prendreIndexAbsolus()
+   events=append(events,[]any{"position",s.Kind.String(),[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])},s.BitPos,s.Slot,hist})
+  }
+  br.Skip(i%8);steps:=[]any{}
+  for _,name:=range []string{"biped-mobility-action-component","object-position-dynamic-precision-component","simulation-state-component","object-position-dynamic-precision-component","biped-mobility-action-component"}{
+   _,_,ok:=consumeByName(br,name,35,0)
+   hist:=map[int]int{};for k,v:=range obs.IndexAbsolus{hist[k]=v}
+   steps=append(steps,map[string]any{"name":name,"ok":ok,"end":br.BitPos(),"events":append([]any{},events...),"hist":hist})
+  }
+  rows=append(rows,map[string]any{"case":i,"steps":steps,"last_hist":obs.prendreIndexAbsolus(),"empty_hist":obs.prendreIndexAbsolus()})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-live-observer.json",b,0600);e!=nil{t.Fatal(e)}
+}

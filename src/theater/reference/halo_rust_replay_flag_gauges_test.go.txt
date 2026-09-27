@@ -1,0 +1,18 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustReplayFlagGauges(t *testing.T){
+ rng:=rand.New(rand.NewSource(41800));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  c:=matchClock{origin:uint64(run%3)*1000000,step:[]uint64{100000,16667,1000000,100}[run%4],frames:1000};carries:=[]FlagCarry{}
+  for f:=0;f<4;f++{spans:=[]FlagSpan{};for j:=0;j<10;j++{state:=FlagStateHome;if j%2==f%2{state=FlagStateDropped};spans=append(spans,FlagSpan{State:state,T0:j*100,T1:j*100+99,X:float32(f),Y:0})};carries=append(carries,FlagCarry{Team:f,Spans:spans})}
+  if run%29==0{carries=[]FlagCarry{}}
+  reads:=[]grammar.ManagedPropertyRead{}
+  for slot:=0;slot<8;slot++{for j:=0;j<5+run%80;j++{f:=rng.Intn(1000);if slot<4{f=(j%5)*200+(slot%2)*100+rng.Intn(100)};q:=uint64(8388607+rng.Intn(100000));if j%7==0{q=uint64(rng.Intn(8388608))};field:=grammar.ManagedPropertyScalar;tag:=3;has:=true;if slot>=6{field=grammar.ManagedPropertyField(j%2);tag=j%8;has=j%3!=0};reads=append(reads,grammar.ManagedPropertyRead{Slot:uint32(slot),TimestampUS:c.origin+uint64(f)*c.step,Field:field,Tag:tag,FilmIndex:-1,Value:q,HasValue:has,Chained:j%2==0})}}
+  if run%17==0{reads=append(reads,grammar.ManagedPropertyRead{Slot:9,TimestampUS:0,Field:grammar.ManagedPropertyScalar,Tag:3,Value:8389000,HasValue:true})}
+  rng.Shuffle(len(reads),func(i,j int){reads[i],reads[j]=reads[j],reads[i]});slots:=flagGaugeSlotsOf(reads,c);slotRows:=[]any{};for _,s:=range slots{ss:=[]any{};for _,p:=range s.samples{ss=append(ss,map[string]any{"t":p.t,"v":p.v})};slotRows=append(slotRows,map[string]any{"slot":s.slot,"samples":ss})};bound:=bindFlagGauges(slots,carries);binding:=map[int]int{};for f,s:=range bound{for i,x:=range slots{if x.slot==s.slot{binding[f]=i}}}
+  before,_:=json.Marshal(carries);scanned:=run%13!=0;pubClock:=c;if run%19==0{pubClock.step=0};cov:=&FlagCarriesCoverage{};attachFlagReturnGauges(carries,FlagInput{GaugeScanned:scanned,Gauge:reads},pubClock,cov)
+  samples:=[]zoneSample{};for j:=0;j<80;j++{samples=append(samples,zoneSample{t:rng.Intn(100),v:uint64(8388607+rng.Intn(100000))})};sort.SliceStable(samples,func(i,j int)bool{return samples[i].t<samples[j].t});sampleRows:=[]any{};for _,s:=range samples{sampleRows=append(sampleRows,map[string]any{"t":s.t,"v":s.v})};windows:=[]zoneGaugeWindow{{t0:40,t1:70},{t0:10,t1:50},{t0:75,t1:90}};winRows:=[][2]int{{40,70},{10,50},{75,90}};series:=zoneGaugeSeriesOf(samples,windows,zoneGaugeGapFrames(int(c.step/1000)));if series==nil{series=[]GaugePoint{}};thin,next:=appendGaugeThinned(nil,samples,20,65,zoneGaugeGapFrames(int(c.step/1000)));if thin==nil{thin=[]GaugePoint{}}
+  rows=append(rows,map[string]any{"clock":map[string]any{"origin_us":c.origin,"step_us":c.step,"frames":c.frames,"death_offset_ms":0},"zero_step":pubClock.step==0,"scanned":scanned,"reads":reads,"before":json.RawMessage(before),"slots":slotRows,"binding":binding,"after":carries,"coverage":cov,"samples":sampleRows,"windows":winRows,"series":series,"thin":thin,"next":next})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-flag-gauges.json",raw,0600);e!=nil{t.Fatal(e)}
+}

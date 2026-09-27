@@ -1,0 +1,18 @@
+package killsource
+import("testing";"encoding/json";"os";"math/rand";"sort")
+func TestHaloRustKillRoster(t *testing.T){
+ rng:=rand.New(rand.NewSource(314));rows:=[]any{}
+ bots:=func(bs []bot)[]any{out:=[]any{};for _,b:=range bs{out=append(out,map[string]any{"slot":b.Slot,"bot_id":b.BotID,"name":b.Name})};return out}
+ keys:=func(m map[int]bool)[]int{out:=[]int{};for k,v:=range m{if v{out=append(out,k)}};sort.Ints(out);return out}
+ for i:=0;i<1024;i++ {
+  names:=[]string{};for j:=0;j<i%9;j++{names=append(names,[]string{"A","B","C","D","E","?5","B","G"}[j])};bm:=botMeta{};for j:=0;j<i%7;j++{bm.Bots=append(bm.Bots,bot{Slot:rng.Intn(36)-1,BotID:j,Name:[]string{"Alpha","Bravo","Charlie"}[j%3]})}
+  tab:=FilmTable{Seats:map[int]string{},Build:"test"};if i%5==0{tab.Refusal=FilmTableUnknownBuild};for j:=0;j<i%11;j++{tab.Seats[rng.Intn(36)-1]=[]string{"A","B","C","New","","Other"}[rng.Intn(6)]}
+  m:=indexParMotif{nomParIndex:map[int]string{},lectures:i%3,desaccords:i%5,absents:i%7};for j:=0;j<i%8;j++{m.nomParIndex[rng.Intn(32)]=[]string{"A","B","C","New","Other","?X"}[rng.Intn(6)]}
+  r:=buildRoster(&killFeed{names:names},bm,i%3!=0,tab,m);r.perm=[]int{};for j:=0;j<r.nPlay;j++{r.perm=append(r.perm,rng.Intn(len(r.names)+2)-1)}
+  free,freeNames:=r.freeSlots();if free==nil{free=[]int{}};if freeNames==nil{freeNames=[]int{}};nms,origins:=[]string{},[]string{};for j:=-1;j<=r.nPlay;j++{nms=append(nms,r.nameOf(j));origins=append(origins,string(r.originOf(j)))}
+  t:=r.table;table:=map[string]any{"refusal":t.Refusal,"build":t.Build,"seats":t.Seats,"pinned":t.Pinned,"added_names":t.AddedNames,"bot_conflict":t.BotConflict,"duplicate_name":t.DuplicateName,"out_of_range":t.OutOfRange,"inferred":t.Inferred,"free_names":t.FreeNames,"motif_pinned":t.MotifPinned,"motif_agree":t.MotifAgree,"motif_contradict":t.MotifContradict,"motif_duplicate":t.MotifDuplicate,"motif_readings":t.MotifReadings,"motif_disagreements":t.MotifDisagreements,"motif_absent":t.MotifAbsent,"agree":t.Agree,"contradict":t.Contradict,"silent":t.Silent}
+  if r.names==nil{r.names=[]string{}}
+  rows=append(rows,map[string]any{"names":names,"bots":bots(bm.Bots),"use_bots":i%3!=0,"table":map[string]any{"seats":tab.Seats,"build":tab.Build,"occupied":0,"vacant":0,"interleaved_vacant":false,"refusal":tab.Refusal},"motif":map[string]any{"names":m.nomParIndex,"readings":m.lectures,"disagreements":m.desaccords,"absent":m.absents},"expected":map[string]any{"evidence":map[string]any{"names":r.names,"pins":r.pin,"seat_pins":keys(r.seatPin),"motif_pins":keys(r.motifPin)},"player_count":r.nPlay,"humans":r.nHumans,"bots":bots(r.bots.Bots),"unpinned_bots":bots(r.unpinned),"permutation":r.perm,"bots_succeeded":r.botsSuccedes,"table":table},"free":free,"free_names":freeNames,"resolved":nms,"origins":origins})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-roster.json",b,0600);e!=nil{t.Fatal(e)}
+}

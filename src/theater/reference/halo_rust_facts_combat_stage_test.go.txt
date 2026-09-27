@@ -1,0 +1,28 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustFactsCombatStage(t *testing.T){
+ rng:=rand.New(rand.NewSource(42021));rows:=[]any{}
+ tags:=[]uint32{0xb0171062,0xc0e34c44,0x3b2567d4,0x9212e428,0,1}
+ for run:=0;run<1024;run++{
+  pos:=[]grammar.BipedPosition{};throws:=[]grammar.GrenadeThrow{};owner:=map[uint32]int{};proj:=[]types.ProjectileTrack{};published:=[]Track{};slots:=[]uint32{}
+  for slot:=0;slot<6;slot++{if run%7!=0{owner[uint32(slot)]=[]int{-9223372036854775808,-1,0,256,4294967296,9223372036854775807}[slot%6]};if rng.Intn(3)!=0{published=append(published,Track{Slot:uint32(slot)});slots=append(slots,uint32(slot))}}
+  for i:=0;i<run%70;i++{pos=append(pos,grammar.BipedPosition{Slot:uint32(rng.Intn(6)),TimestampUS:uint64(rng.Intn(10))*200000,HasWorld:rng.Intn(4)!=0,X:float32(rng.Intn(20)),Y:float32(rng.Intn(20))})}
+  for i:=0;i<run%35;i++{tr:=types.ProjectileTrack{Slot:uint32(i),Pts:[]types.ProjectileSample{}};stamp:=uint64(rng.Intn(10))*200000+[]uint64{0,200000,200001}[i%3];x,y:=float32(rng.Intn(20)),float32(rng.Intn(20));for j:=0;j<i%8;j++{tr.Pts=append(tr.Pts,types.ProjectileSample{TimestampUS:stamp+uint64(j)*100000,Chunk:int(rng.Uint64()),X:x+float32(j)/10,Y:y,Z:float32(i%2),AtRest:j%2==0})};proj=append(proj,tr)}
+  for i:=0;i<run%50;i++{stamp:=uint64(rng.Intn(10))*200000;if run%17==0{stamp=^uint64(0)-100000};throws=append(throws,grammar.GrenadeThrow{TimestampUS:stamp,FilmIndex:[]int{-9223372036854775808,-1,0,256,4294967296,9223372036854775807,7}[rng.Intn(7)],TypeID:tags[rng.Intn(len(tags))]})}
+  sort.SliceStable(pos,func(i,j int)bool{return pos[i].TimestampUS<pos[j].TimestampUS})
+  for i:=range published{published[i].Points=[]Point{}}
+  for i:=range proj{if run%5==0 && len(proj[i].Pts)>3{proj[i].Pts[3].X+=30}}
+  fire:=[]grammar.FireEvent{};loads:=[]types.KeyframeLoadout{}
+  families:=[]uint32{};for f:=range loadoutFamilies(){families=append(families,f)};sort.Slice(families,func(i,j int)bool{return families[i]<families[j]})
+  for j,g:=range throws{fire=append(fire,grammar.FireEvent{TimestampUS:g.TimestampUS,FilmIndex:g.FilmIndex,WeaponID:uint64(j%4),HasAim:j%3!=0,Aim:[3]float32{1,0,0}})}
+  for j,p:=range pos{loads=append(loads,types.KeyframeLoadout{TimestampUS:p.TimestampUS,Slot:p.Slot,Families:[]uint32{families[j%len(families)]}})}
+  origin:=uint64(run%3)*100000;step:=uint64(run%3+1)*100000
+  doc:=ReplayDocument{Tracks:published};if run%2==0{doc.Coverage=&Coverage{Shots:LayerCoverage{Available:999}}}
+  before,_:=json.Marshal(doc)
+  a:=assemblage{matchID:"fixture",doc:doc,sorted:pos,fire:fire,origin:origin,step:step,reg:IdentityRegistry{own:OwnerReport{Owner:owner}},opt:Options{Loadouts:loads,Grenades:throws,Projectiles:proj}}
+  a.poserTirsProjectilesEtGrenades()
+  orphans:=[]any{};for _,o:=range a.shotOrphans{reason:="NoSlot";if o.reason==reasonOutOfWindow{reason="OutOfWindow"};orphans=append(orphans,map[string]any{"event":o.ev,"reason":reason})}
+  rows=append(rows,map[string]any{"positions":pos,"fire":fire,"throws":throws,"loadouts":loads,"owners":owner,"projectiles":proj,"origin":origin,"step":step,"before":json.RawMessage(before),"after":a.doc,"shot_cov":a.shotCov,"grenade_cov":a.grenCov,"projectile_cov":a.projCov,"orphans":orphans})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-combat-stage.json",b,0600);e!=nil{t.Fatal(e)}
+}

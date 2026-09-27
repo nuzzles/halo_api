@@ -1,4 +1,4 @@
-//! Film medal IDs are distinct from the stats API NameId namespace.
+//! LegacyFilm medal IDs are distinct from the stats API NameId namespace.
 //! Mapping: SPNKr medal_codes.json; see experiments/FILM_EVENTS.md for provenance.
 
 use crate::clients::hi::models::{Medal, MedalMetadata};

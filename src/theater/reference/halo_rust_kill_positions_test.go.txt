@@ -1,0 +1,22 @@
+package replay
+import("encoding/json";"math/rand";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustKillPositions(t *testing.T){
+ rng:=rand.New(rand.NewSource(419242));rows:=[]any{}
+ convert:=func(ps []KillPosition,r KillPosReport) any {out:=[]any{};for _,p:=range ps {vec:=func(v *Vec3) any {if v==nil{return nil};return []float64{v.X,v.Y,v.Z}};out=append(out,map[string]any{"KillerXUID":p.KillerXUID,"VictimXUID":p.VictimXUID,"TimeMS":p.TimeMS,"killer":vec(p.Killer),"victim":vec(p.Victim)})};return map[string]any{"positions":out,"report":map[string]any{"kills":r.Kills,"both":r.Both,"killer_only":r.KillerOnly,"victim_only":r.VictimOnly,"dropped":r.Dropped,"no_bridge":r.NoBridge,"opening_out_of_life":r.OpeningOutOfLife}}}
+ for run:=0;run<512;run++ {
+  lives:=[]lifeSpan{};ls:=[]any{};pos:=[]grammar.BipedPosition{};indices:=map[uint64]int{1:1,2:2,3:3}
+  for i:=0;i<4;i++ {slot:=uint32(i+10);x:=uint64(i%3+1);from:=int64(10000000);to:=int64(20000000);if i==3&&run%2==0{slot=10;x=3;from=21000000;to=30000000};if run%7==0&&i==2{x=0}
+   lives=append(lives,lifeSpan{slot:slot,xuid:x,from:from,to:to});ls=append(ls,map[string]any{"slot":slot,"xuid":x,"from":from,"to":to,"bid":"","cause":"","named_by":""})
+   for j:=0;j<60;j++ {ts:=from+int64(j)*100000;if run%5==0&&j>25{ts+=6000000};pos=append(pos,grammar.BipedPosition{Slot:slot,TimestampUS:uint64(ts),X:float32(rng.Intn(100))/3,Y:float32(rng.Intn(100))/7,Z:float32(j),HasWorld:(run+i+j)%11!=0})}
+  }
+  if run%17==0{indices=map[uint64]int{}};if run%23==0{pos=nil}
+  owner,bridge,ambiguous:=ownersFromLives(lives,indices);reg:=IdentityRegistry{own:OwnerReport{lives:lives,Owner:owner,SlotXUID:bridge,SlotAmbiguous:ambiguous}}
+  offset:=int64(run%5-2)*1000000;kills:=[]KillRef{}
+  for _,ts:=range []int64{-1,0,9880,9879,10000,10150,11500,12500,14000,16020,16021,21100,23000,31000} {kills=append(kills,KillRef{KillerXUID:uint64(run%4),VictimXUID:uint64((run+1)%4),TimeMS:ts})}
+  delta:=int64(run%9-4)*1000
+  ps,r:=BuildKillPositions(pos,reg,kills,offset);op,or:=BuildKillOpenings(pos,reg,kills,offset)
+  if pos==nil{pos=[]grammar.BipedPosition{}}
+  rows=append(rows,map[string]any{"positions":pos,"lives":ls,"indices":indices,"kills":kills,"offset":offset,"delta":delta,"shifted":ShiftKillRefs(kills,delta),"placed":convert(ps,r),"openings":convert(op,or)})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-positions.json",raw,0600);e!=nil{t.Fatal(e)}
+}

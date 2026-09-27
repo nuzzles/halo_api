@@ -1,0 +1,42 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded world-object census and context position tracks",
+  "census": {
+    "fixture": "world-census-v41.json.zlib",
+    "generated_cases": 64,
+    "source_identity_checks": true
+  },
+  "tracks": {
+    "fixture": "context-world-tracks-v41.json.zlib",
+    "sha256": "79a6713c0bd0b4920cde5b4b76dff39bccc16f15ab37557f6c685f6a1101833a",
+    "generator": "halo_rust_context_world_tracks_test.go.txt",
+    "cases": 112,
+    "reads": 1722,
+    "tracks": 138,
+    "missing_bounds": 11,
+    "missing_chunks": 30
+  },
+  "host": {
+    "passed": 15,
+    "ignored": 1,
+    "log": "/private/tmp/halo-context-world-tracks-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-world-tracks-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-world-tracks-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "The bounded convenience descriptor retains its width limits; loaded context scans now use the native u64 descriptor directly. See the projectile validation report for wide/signed precision evidence and limits.",
+    "Keyframe anchors are heuristic recovery, not fully decoded record bodies.",
+    "Synthetic reference agreement does not establish independently annotated gameplay truth.",
+    "Placement calibration and complete world phase remain open."
+  ],
+  "loaded_precision_followup": "context-projectile-validation.json"
+}

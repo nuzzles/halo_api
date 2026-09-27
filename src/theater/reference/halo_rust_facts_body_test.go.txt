@@ -1,0 +1,47 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing")
+func haloRustBodyValue(v reflect.Value)any{
+ switch v.Kind(){
+ case reflect.Pointer:if v.IsNil(){return nil};return haloRustBodyValue(v.Elem())
+ case reflect.Slice:if v.IsNil(){return nil};fallthrough
+ case reflect.Array:out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustBodyValue(v.Index(i)))};return out
+ case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustBodyValue(v.Field(i))};return out
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:return v.Int()
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:return v.Uint()
+ case reflect.Bool:return v.Bool()
+ case reflect.Float32:return math.Float32bits(v.Interface().(float32))
+ case reflect.Float64:return math.Float64bits(v.Float())
+ };panic(v.Kind())
+}
+func haloRustBodyFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){
+ case reflect.Pointer:if n%3!=0{v.Set(reflect.New(v.Type().Elem()));haloRustBodyFill(v.Elem(),rng,n)}
+ case reflect.Slice:if n%4!=0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3));for i:=0;i<v.Len();i++{haloRustBodyFill(v.Index(i),rng,n+i+1)}}
+ case reflect.Array:for i:=0;i<v.Len();i++{haloRustBodyFill(v.Index(i),rng,n+i)}
+ case reflect.Struct:for i:=0;i<v.NumField();i++{haloRustBodyFill(v.Field(i),rng,n+i)}
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:v.SetInt(int64(rng.Uint64()))
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:v.SetUint(rng.Uint64())
+ case reflect.Bool:v.SetBool(rng.Intn(2)==0)
+ case reflect.Float32:v.Set(reflect.ValueOf(math.Float32frombits(rng.Uint32())))
+ case reflect.Float64:v.SetFloat(math.Float64frombits(rng.Uint64()))
+ default:panic(v.Kind())}}
+func TestHaloRustFactsBody(t *testing.T){
+ type spec struct{name string;fields map[string][]string;encode func(*gwriter,*FilmFacts);decode func(*greader,*FilmFacts)}
+ specs:=[]spec{
+ {"events",map[string][]string{"Fire":{"TimestampUS","FilmIndex","WeaponID","HasAim","Aim"},"Loadouts":{"TimestampUS","Slot","Families"},"Grenades":{"TimestampUS","FilmIndex","TypeID"},"Projectiles":{"Slot","Gen","Pts"}},encodeEvenements,decodeEvenements},
+ {"inventory",map[string][]string{"Inventory":{"TimestampUS","Slot","GrenadesRead","Grenades","SelectedGrenadeRank","AbilityRank","DrawnSlot","AmmoCandidates","AmmoRead","Ammo"},"InventoryDeltas":{"TimestampUS","Slot","Grenades","SelRead","Sel","Mask"}},encodeInventaire,decodeInventaire},
+ };rows:=[]any{};inventory:=map[string]any{};rng:=rand.New(rand.NewSource(4100252))
+ for _,sp:=range specs{
+ project:=func(g *FilmFacts)any{out:=map[string]any{};for field,keys:=range sp.fields{v:=reflect.ValueOf(g).Elem().FieldByName(field);a:=[]any{};for i:=0;i<v.Len();i++{item:=map[string]any{};for _,key:=range keys{item[key]=haloRustBodyValue(v.Index(i).FieldByName(key))};a=append(a,item)};out[field]=a};return out}
+ add:=func(g *FilmFacts,encoded,input []byte){r:=greader{b:input};got:=&FilmFacts{};panicked:=false;func(){defer func(){if recover()!=nil{panicked=true}}();sp.decode(&r,got)}();err:="";if r.err!=nil{err=r.err.Error()};rows=append(rows,map[string]any{"kind":sp.name,"source":project(g),"encoded":hex.EncodeToString(encoded),"input":hex.EncodeToString(input),"decoded":project(got),"offset":r.off,"error":err,"panic":panicked})}
+ inv:=map[string]any{};for field,keys:=range sp.fields{v:=reflect.ValueOf(&FilmFacts{}).Elem().FieldByName(field);all:=[]string{};for i:=0;i<v.Type().Elem().NumField();i++{all=append(all,v.Type().Elem().Field(i).Name)};inv[field]=map[string]any{"native_fields":all,"transported_fields":keys}};inventory[sp.name]=inv
+ // Fixed field order makes the seeded generator reproducible despite Go map iteration.
+ order:=[]string{"Fire","Loadouts","Grenades","Projectiles","Inventory","InventoryDeltas"}
+ for n:=0;n<48;n++{g:=&FilmFacts{};for _,field:=range order{keys,ok:=sp.fields[field];if !ok{continue};v:=reflect.ValueOf(g).Elem().FieldByName(field);if n>0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3))};for i:=0;i<v.Len();i++{for _,key:=range keys{haloRustBodyFill(v.Index(i).FieldByName(key),rng,n+i)}}};w:=gwriter{};sp.encode(&w,g);for end:=0;end<=len(w.b);end++{add(g,w.b,w.b[:end])};add(g,w.b,append(append([]byte{},w.b...),0,255))}
+ g:=&FilmFacts{};w:=gwriter{};sp.encode(&w,g)
+ for _,count:=range []uint64{1<<63,^uint64(0)}{bad:=gwriter{};bad.u(count);add(g,w.b,bad.b)
+  // Negative nested counts skip their loop, unlike the outer make capacity.
+  if sp.name=="events"{bad=gwriter{b:[]byte{0,1,0,0}};bad.u(count);bad.b=append(bad.b,0,0);add(g,w.b,bad.b)}else{bad=gwriter{b:[]byte{0,1,0,0}};bad.u(count);bad.b=append(bad.b,0,0,0);add(g,w.b,bad.b)}
+ }
+ }
+ raw,err:=json.Marshal(map[string]any{"cases":rows,"inventory":inventory});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-body.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("body cases=%d\n",len(rows))
+}

@@ -1,0 +1,197 @@
+package replay
+
+import (
+ "bytes"
+ "log/slog"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustFactsAbilityActions(t *testing.T) {
+	previous := slog.Default(); defer slog.SetDefault(previous)
+ rng := rand.New(rand.NewSource(741128))
+ domain:=[]int{-9223372036854775808,-4294967296,-2,-1,0,1,2,3,2147483648,4294967296,9223372036854775807}
+	rows := []any{}
+	for run := 0; run < 1024; run++ {
+		in := abilityChargeInputs{stats: types.AbilityChargeStats{Absent: run%7 == 0}}
+		var palette any
+		if run%5 != 0 {
+			in.palette = &AbilityPalette{Families: map[int]string{0: "", 1: "grapple", 2: "thruster", 3: "wall"}}
+			in.palette.Families[domain[run%len(domain)]]="grapple"
+            palette = in.palette.Families
+		}
+		in.measured = []string{}
+		if run%4 != 0 {
+			in.measured = append(in.measured, []string{"", "grapple", "thruster"}[run%3])
+		}
+		if run%6 == 0 {
+			in.measured = append(in.measured, "grapple", "thruster")
+		}
+		lives := []any{}
+		for j := 0; j < run%13; j++ {
+			l := lifeSpan{slot: uint32(rng.Intn(5)), from: int64(rng.Intn(20)-2) * 1000000, to: int64(rng.Intn(20)) * 1000000}
+			if j%7==6 {l.from=int64(domain[(run+j)%len(domain)]);l.to=int64(domain[(run+j+1)%len(domain)])}
+            in.lives = append(in.lives, l)
+			lives = append(lives, map[string]any{"slot": l.slot, "from": l.from, "to": l.to})
+		}
+		ranks := []any{}
+		for j := 0; j < run%41; j++ {
+			r := types.AbilityRank{Slot: uint32(rng.Intn(5)), TimestampUS: uint64(rng.Intn(25)) * 1000000, Rank: domain[rng.Intn(len(domain))]}
+			if j%31 == 30 {
+				r.TimestampUS = ^uint64(0)
+			}
+			in.ranks = append(in.ranks, r)
+			ranks = append(ranks, map[string]any{"slot": r.Slot, "time": r.TimestampUS, "rank": r.Rank})
+		}
+		reads := []any{}
+		for j := 0; j < run%35; j++ {
+			r := types.AbilityCharge{Slot: uint32(rng.Intn(5)), TimestampUS: uint64(rng.Intn(25)) * 1000000, Charges: domain[rng.Intn(len(domain))], Emplacement:domain[(run+j)%len(domain)], Low:domain[(run+2*j)%len(domain)]}
+			if j%29 == 28 {
+				r.TimestampUS = ^uint64(0)
+			}
+			in.reads = append(in.reads, r)
+			reads = append(reads, map[string]any{"slot": r.Slot, "time": r.TimestampUS, "charges": r.Charges,"emplacement":r.Emplacement,"low":r.Low})
+		}
+		tracks := []Track{}
+		published := []uint32{}
+		for j := 0; j < run%6; j++ {
+			tracks = append(tracks, Track{Slot: uint32(j)})
+			published = append(published, uint32(j))
+		}
+		origin := uint64(run%3) * 1000000
+		step := []uint64{0, 1, 100000, 1000000}[run%4]
+		charges, coverage := buildAbilityCharges(in, tracks, origin, step)
+		if charges == nil {
+			charges = []AbilityCharge{}
+		}
+		idx := newAbilityRankIndex(in.ranks, in.lives)
+		probes := []any{}
+		for j := 0; j < 32; j++ {
+			slot := uint32(rng.Intn(5))
+			at := uint64(rng.Intn(25)) * 1000000
+			if j == 31 {
+				at = ^uint64(0)
+			}
+			rank, ok := idx.rankInLife(slot, at)
+			var value any
+			if ok {
+				value = rank
+			}
+			probes = append(probes, map[string]any{"slot": slot, "at": at, "rank": value})
+		}
+		impulseInput := abilityImpulseInputs{ranks: in.ranks, lives: in.lives, palette: in.palette, measured: in.measured, stats: types.AbilityImpulseStats{Scanned: run%3 != 0, Absent: run%7 == 0, Records: domain[run%len(domain)], WithI57: domain[(run+1)%len(domain)], WithI59: domain[(run+2)%len(domain)], Read: domain[(run+3)%len(domain)], Unread: domain[(run+4)%len(domain)], Tag1: domain[(run+5)%len(domain)]}}
+		for j, r := range in.reads {
+			impulseInput.reads = append(impulseInput.reads, types.AbilityImpulse{Slot: r.Slot, TimestampUS: r.TimestampUS, Predicted: j%2 == 0})
+		}
+		impulses, impulseCoverage := buildAbilityImpulses(impulseInput, tracks, origin, step)
+		if impulses == nil {
+			impulses = []AbilityImpulse{}
+		}
+		folded := []any{}
+		for _, e := range foldAbilityImpulses(impulseInput.reads) {
+			folded = append(folded, map[string]any{"slot": e.slot, "timestamp_us": e.tsUS})
+		}
+		inventory := []KeyframeInventory{}
+		for j := 0; j < run%17; j++ {
+			inventory = append(inventory, KeyframeInventory{Slot: uint32(j % 5), TimestampUS: uint64(j) * 1000000, AbilityRank: j*3 - 1})
+		}
+		palettes := []AbilityPalette{}
+		for j := 0; j < run%4; j++ {
+			p := AbilityPalette{ID: []string{"a", "b", "c"}[j], Markers: []int{j, j + 1}, Ranks: map[int]Label{}, Families: map[int]string{}}
+			for rank := 0; rank < 5; rank++ {
+				p.Ranks[rank] = Label{En: "name", Fr: "nom", Img: "icon", Tinted: rank%2 == 0, Family: "stale"}
+				if rank%2 == 0 {
+					p.Families[rank] = "grapple"
+				}
+			}
+			palettes = append(palettes, p)
+		}
+		paletteJSON := func(p *AbilityPalette) any {
+			if p == nil {
+				return nil
+			}
+			return map[string]any{"id": p.ID, "markers": p.Markers, "ranks": p.Ranks, "families": p.Families}
+		}
+		paletteRows := []any{}
+		for i := range palettes {
+			paletteRows = append(paletteRows, paletteJSON(&palettes[i]))
+		}
+		projectionStep := step
+		if projectionStep == 0 {
+			projectionStep = 1
+		}
+		rawAbilities := buildAbilityReads(in.ranks, inventory, origin, projectionStep)
+		rawCopy := append([]AbilityRead{}, rawAbilities...)
+		clean, noise := rejectAbilityScanNoise(rawAbilities)
+		publishedAbilities := keepAbilitiesOfPublishedTracks(clean, tracks)
+		abilityCoverage := buildAbilityCoverage(rawAbilities, clean, publishedAbilities, noise)
+		selected := classifyAbilityPalette(publishedAbilities, palettes)
+		labels := abilityLabelsUsed(publishedAbilities, selected)
+		if labels == nil {
+			labels = map[string]Label{}
+		}
+		if publishedAbilities == nil {
+			publishedAbilities = []AbilityRead{}
+		}
+		abilityOutput := map[string]any{"reads": publishedAbilities, "coverage": abilityCoverage, "palette": paletteJSON(selected), "labels": labels}
+		classifications := []any{}
+		for j := 0; j < 16; j++ {
+			probe := []AbilityRead{}
+			for k := 0; k < j; k++ {
+				rank := run % 5
+				if k == j-1 && run%2 == 0 {
+					rank = 30
+				}
+				probe = append(probe, AbilityRead{R: rank})
+			}
+			p := classifyAbilityPalette(probe, palettes)
+			var selectedID any
+			if p != nil {
+				selectedID = p.ID
+			}
+			classifications = append(classifications, map[string]any{"reads": probe, "selected": selectedID})
+		}
+        var buf bytes.Buffer
+        slog.SetDefault(slog.New(slog.NewJSONHandler(&buf, nil)))
+        logAbilityCoverage(abilityCoverage)
+        chargeScanned := run%4 != 0
+        a := assemblage{origin: origin, step: step, palette: in.palette, reg: IdentityRegistry{own: OwnerReport{lives: in.lives}}}
+        a.doc.Coverage = &Coverage{}
+        a.doc.Tracks = tracks
+        a.opt.AbilityRanks = in.ranks
+        a.opt.AbilityImpulses = impulseInput.reads
+        a.opt.AbilityImpulseStats = impulseInput.stats
+        a.opt.AbilityCharges = in.reads
+        a.opt.AbilityChargeStats = in.stats
+        a.opt.AbilityChargeStats.Scanned = chargeScanned
+        a.opt.Labels.AbilityImpulseFamilies = in.measured
+        a.opt.Labels.AbilityChargeFamilies = in.measured
+        a.poserImpulsionsEtCharges()
+        logs := []any{}
+        dec := json.NewDecoder(&buf)
+        for dec.More() { event := map[string]any{}; if err := dec.Decode(&event); err != nil { t.Fatal(err) }; delete(event, "time"); logs = append(logs, event) }
+        buf.Reset()
+        b := assemblage{origin: origin, step: projectionStep}
+        b.doc.Coverage = &Coverage{}
+        b.doc.Tracks = tracks
+        b.opt.AbilityRanks = in.ranks
+        b.opt.Inventory = inventory
+        b.opt.Labels.Abilities = palettes
+        b.poserCapacitesEtTranslocations()
+        var paletteLog map[string]any
+        dec = json.NewDecoder(&buf)
+        for dec.More() { event := map[string]any{}; if err := dec.Decode(&event); err != nil { t.Fatal(err) }; if event["msg"] == "rejeu : a.palette de capacites" { delete(event, "time"); paletteLog = event } }
+        if paletteLog == nil { t.Fatal("native palette log missing") }
+		rows = append(rows, map[string]any{"impulses":impulseInput.reads,"palette_log": paletteLog, "logs": logs, "charge_scanned": chargeScanned, "inventory": inventory, "palettes": paletteRows, "raw_abilities": rawCopy, "ability_output": abilityOutput, "classifications": classifications, "impulse_stats": impulseInput.stats, "impulse_output": map[string]any{"impulses": impulses, "coverage": impulseCoverage}, "folded": folded, "palette": palette, "measured": in.measured, "lives": lives, "ranks": ranks, "reads": reads, "published": published, "absent": in.stats.Absent, "origin": origin, "step": step, "output": map[string]any{"charges": charges, "coverage": coverage}, "probes": probes})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-facts-ability-actions.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

@@ -104,8 +104,9 @@ fn normalize<T: PartialEq>(rows: &mut Vec<Sample<T>>) -> usize {
     before - written
 }
 
-fn registry(chunks: &[FilmChunkData]) -> Result<FilmRegistry, DecodeError> {
-    let registry = decode_registry(chunks).ok_or(DecodeError::Missing("bootstrap registry"))?;
+// Only the older signature readers require this fixed pawn layout. Native
+// readers resolve component roles from the registry and report their own errors.
+fn legacy_registry(registry: &FilmRegistry) -> Result<(), DecodeError> {
     let pawn = registry
         .archetype(35)
         .ok_or(DecodeError::Missing("pawn component registry"))?;
@@ -132,13 +133,19 @@ fn registry(chunks: &[FilmChunkData]) -> Result<FilmRegistry, DecodeError> {
             )));
         }
     }
-    Ok(registry)
+    Ok(())
 }
-impl Film {
+#[allow(dead_code)]
+impl LegacyFilm {
     /// Decode supported version-41 observations from decompressed chunks.
     ///
-    /// Chunk order is irrelevant. Framing/version/registry errors return `Err`;
-    /// unsupported record forms stay unparsed. Samples use integer microseconds
+    /// Core packet indexing uses chunk numbers. Native scan exports follow the
+    /// supplied metadata's contiguous prefix, matching the reference.
+    /// Framing/version/bootstrap-registry errors return `Err`. Invalid datum
+    /// payloads are retained in `datum_failures`; surrounding packets still decode.
+    /// An unsupported legacy pawn layout disables signature observations with a diagnostic;
+    /// native scanners retain their independent registry-based decoding.
+    /// Unsupported record forms stay unparsed. Samples use integer microseconds
     /// relative to the earliest nonzero packet timestamp. No filesystem, network,
     /// platform timers, or experiment exports are used.
     pub fn try_from_chunks(
@@ -149,7 +156,32 @@ impl Film {
             return Err(DecodeError::UnsupportedVersion(options.major_version));
         }
         let packets = packets::index(chunks)?;
-        let registry = registry(chunks)?;
+        let bootstrap_chunk = chunks
+            .iter()
+            .find(|c| c.metadata.chunk_type == 1)
+            .ok_or(DecodeError::Missing("bootstrap registry"))?;
+        let bootstrap = &bootstrap_chunk.data;
+        let registry_read = parse_registry_chunk(bootstrap)
+            .map_err(|_| DecodeError::Missing("bootstrap registry"))?;
+        // Preserve the existing constructor's complete-header requirement. The
+        // lower-level result API can represent shorter native registry reads.
+        if registry_read.header.is_none() {
+            return Err(DecodeError::Missing("bootstrap registry"));
+        }
+        let registry_diagnostics = Some(FilmRegistrySourceDiagnostics {
+            chunk_index: bootstrap_chunk.metadata.index,
+            source_byte_len: bootstrap.len(),
+            truncated_bytes: registry_read.truncated_bytes,
+        });
+        let registry = registry_read.registry;
+        let legacy_error = legacy_registry(&registry).err();
+        let legacy_supported = legacy_error.is_none();
+        let identity = decode_film_identity(bootstrap, &registry)?;
+        let key = super::film_key::film_key_from_identity(
+            registry.format_version,
+            Some(registry.major_version),
+            identity.as_ref(),
+        );
         let origin = packets
             .iter()
             .filter_map(|p| (p.timestamp_us != 0).then_some(p.timestamp_us))
@@ -167,6 +199,50 @@ impl Film {
             .iter()
             .map(|c| (c.metadata.index, c.data.as_slice()))
             .collect();
+        let mut datum_tables = Vec::new();
+        let mut datum_failures = Vec::new();
+        for p in packets.iter().filter(|p| p.packet_type == 1) {
+            let payload =
+                &bytes[&p.chunk_index][p.payload_offset..p.payload_offset + p.payload_size];
+            match decode_datum_table(payload) {
+                Ok(table) => datum_tables.push(DatumSnapshot {
+                    chunk_index: p.chunk_index,
+                    payload_byte: p.payload_offset,
+                    timestamp_us: p.timestamp_us,
+                    table,
+                }),
+                Err(error) => datum_failures.push(super::DatumDecodeFailure {
+                    source: *p,
+                    message: error.to_string(),
+                    native_error: match &error {
+                        DecodeError::Datums(reason) => Some(reason.clone()),
+                        _ => None,
+                    },
+                    payload: payload.to_vec(),
+                }),
+            }
+        }
+        let roster_updates = identity
+            .as_ref()
+            .filter(|id| matches!(id.build.as_str(), "HI_1_12_0" | "HI_1_13_0"))
+            .map(|_| {
+                packets
+                    .iter()
+                    .filter(|p| p.packet_type == 8)
+                    .map(|p| {
+                        let payload = &bytes[&p.chunk_index]
+                            [p.payload_offset..p.payload_offset + p.payload_size];
+                        super::FilmRosterUpdate {
+                            source: *p,
+                            roster: super::decode_roster_update(
+                                payload,
+                                registry.format_version,
+                                1852 * 8,
+                            ),
+                        }
+                    })
+                    .collect()
+            });
         let roster = decode_players(chunks);
         let indices = decode_player_indices(chunks, &roster);
         let mut players: BTreeMap<u8, PlayerTrack> = BTreeMap::new();
@@ -189,6 +265,10 @@ impl Film {
         }
         let summary = decode_summary_events(chunks, 41)?;
         let summary_counts_match = summary.matches_declared_counts();
+        let summary_diagnostics = Some(super::SummaryDecodeDiagnostics {
+            packets: summary.packets,
+            unparsed_packet_types: summary.unparsed_packet_types,
+        });
         let summary_events: Vec<_> = summary
             .events
             .into_iter()
@@ -202,6 +282,32 @@ impl Film {
             })
             .collect();
         let mut diagnostics = DecodeDiagnostics::default();
+        if let Some(error) = legacy_error {
+            diagnostics.limitations.push(format!(
+                "Legacy signature observations unavailable: {error}; native scans remain enabled"
+            ));
+        }
+        let native_highlights = match scan_film_highlights(chunks, 41) {
+            Ok(mut stream) => {
+                stream.profile = Some(v41_highlight_profile_from_header(bootstrap)?);
+                Some(stream)
+            }
+            Err(DecodeError::Missing("readable film chunk")) => None,
+            Err(error) => {
+                diagnostics
+                    .limitations
+                    .push(format!("Native highlights unavailable: {error}"));
+                None
+            }
+        };
+        let native_identity_inputs = super::replay_evidence::retain_film_identity_inputs(
+            chunks,
+            native_highlights.as_ref().map_or_else(
+                || scan_film_deaths(chunks, 41),
+                super::FilmHighlightStream::deaths,
+            ),
+            &[],
+        );
         if !summary_counts_match {
             diagnostics.limitations.push(
                 "Summary footer missing or decoded event count differs from its declared count"
@@ -210,7 +316,7 @@ impl Film {
         }
         for p in packets
             .iter()
-            .filter(|p| p.packet_type == 8 && p.timestamp_us >= origin)
+            .filter(|p| legacy_supported && p.packet_type == 8 && p.timestamp_us >= origin)
         {
             let b =
                 Bits(&bytes[&p.chunk_index][p.payload_offset..p.payload_offset + p.payload_size]);
@@ -253,7 +359,7 @@ impl Film {
         // First pass binds identities before accepting any per-player observations.
         for p in packets
             .iter()
-            .filter(|p| p.packet_type == 0 && p.timestamp_us >= origin)
+            .filter(|p| legacy_supported && p.packet_type == 0 && p.timestamp_us >= origin)
         {
             let b =
                 Bits(&bytes[&p.chunk_index][p.payload_offset..p.payload_offset + p.payload_size]);
@@ -387,7 +493,7 @@ impl Film {
         // share a single rolling byte window in this second pass.
         for p in packets
             .iter()
-            .filter(|p| p.packet_type == 0 && p.timestamp_us >= origin)
+            .filter(|p| legacy_supported && p.packet_type == 0 && p.timestamp_us >= origin)
         {
             let b =
                 Bits(&bytes[&p.chunk_index][p.payload_offset..p.payload_offset + p.payload_size]);
@@ -863,13 +969,172 @@ impl Film {
             "Firing is activity, not an exact bullet count; reload cause/duration, reserves and full inventory are unknown.",
             "Projectile paths require checked spawns, thrower references and continuous supported updates. Grenade type and explosion locations remain unknown; track ends are observation boundaries.",
         ].map(str::to_owned));
-        Ok(Film {
+        let head_events = super::scan_packet_head_events(chunks)?;
+        let (biped_creations, biped_creations_error) = match super::scan_biped_creations(chunks) {
+            Ok(stream) => (stream, None),
+            Err(error) => (Default::default(), Some(error.to_string())),
+        };
+        let pickups = super::biped_pickups_from_heads(&head_events, biped_creations.slot_band);
+        let zoom_events = super::biped_zoom_from_heads(&head_events);
+        let (equipment_spawns, equipment_spawns_error) =
+            match super::scan_equipment_spawn_events(chunks) {
+                Ok(stream) => (stream, None),
+                Err(error) => (Default::default(), Some(error.to_string())),
+            };
+        let (statborg, statborg_diagnostics) = super::scan_film_statborg_with_diagnostics(
+            chunks,
+            options.match_id.as_deref().unwrap_or_default(),
+        );
+        let (keyframe_inventory, keyframe_inventory_error) =
+            super::scan_keyframe_inventory_with_diagnostics(
+                chunks,
+                &super::v41_weapon_families().keys().copied().collect(),
+                0,
+            );
+        let player_table = identity
+            .as_ref()
+            .map(|id| super::decode_player_table(bootstrap, id));
+        let player_table_diagnostics =
+            super::ReplayFilmPlayerTableDiagnostics::from_decoded(player_table.as_ref());
+        let player_table_publication = player_table
+            .as_ref()
+            .map(super::ReplayFilmPlayerTable::from_decoded)
+            .unwrap_or_else(|| super::ReplayFilmPlayerTable {
+                refusal: "sans_section".into(),
+                ..Default::default()
+            });
+        player_table_publication.log(
+            options.match_id.as_deref().unwrap_or_default(),
+            &player_table_diagnostics,
+        );
+        let player_table_diagnostics = Some(player_table_diagnostics);
+        let (weapon_hits, weapon_hits_error) =
+            match super::scan_film_weapon_hits(chunks, &registry, None) {
+                Ok(hits) => (Some(hits), None),
+                Err(error) => (None, Some(error.to_string())),
+            };
+        Ok(LegacyFilm {
+            source_chunks: options
+                .retain_coverage
+                .then(|| chunks.iter().map(FilmSourceChunk::from).collect()),
+            scan_precision: None,
+            weapon_hits,
+            weapon_hits_error,
+            keyframe_record_spans: None,
+            vehicle_keyframe_states: None,
+            bot_metadata: super::scan_film_bot_metadata(chunks),
+            statborg,
+            statborg_diagnostics,
+            player_teams: Some(super::scan_film_player_teams(
+                chunks,
+                Some(&registry),
+                identity.as_ref().is_some_and(|id| id.corruption_checks),
+            )),
             schema_version: 1,
             major_version: 41,
             match_id: options.match_id,
             duration_us: duration,
             origin_timestamp_us: origin,
+            native_clock_origin: Some(super::read_replay_clock_origin(chunks)),
+            grenade_throws: match super::scan_grenade_throws(
+                chunks,
+                Some(&registry),
+                identity.as_ref(),
+            ) {
+                Ok(stream) => Some(stream),
+                Err(DecodeError::Missing("readable film chunks")) => None,
+                Err(e) => return Err(e),
+            },
             registry,
+            registry_diagnostics,
+            player_table,
+            player_table_diagnostics,
+            identity,
+            roster_updates,
+            fire_events: match super::scan_fire_events(chunks) {
+                Ok(events) => events,
+                Err(DecodeError::Missing("readable film chunks")) => Vec::new(),
+                Err(e) => return Err(e),
+            },
+            datum_tables,
+            datum_failures,
+            replication: None,
+            key: Some(key),
+            profile: None,
+            kill_sources: None,
+            kill_sources_error: None,
+            head_events,
+            pickups,
+            native_pickups: super::scan_native_biped_pickups(chunks),
+            zoom_events,
+            native_zoom_events: super::scan_native_zoom_events(chunks),
+            equipment_spawns,
+            equipment_spawns_error,
+            translocations: super::scan_translocator_events(chunks, None)?,
+            native_translocations: super::scan_native_translocator_events(chunks, None),
+            native_translocations_scanned: true,
+            biped_positions: None,
+            keyframe_position_probes: super::scan_keyframe_position_probes(chunks),
+            weapon_patterns: super::scan_weapon_patterns(chunks),
+            biped_channels: None,
+            biped_channels_error: None,
+            inventory_deltas: None,
+            inventory_deltas_error: None,
+            equipment_changes: None,
+            equipment_changes_error: None,
+            ability_states: None,
+            ability_states_error: None,
+            ability_charges: None,
+            ability_charges_error: None,
+            unit_equipment: None,
+            unit_equipment_error: None,
+            movement_states: None,
+            movement_states_error: None,
+            movement_states_error_stats: None,
+            native_projectiles: None,
+            equipment_placements: None,
+            equipment_state: None,
+            objective_scan: None,
+            objective_scan_error: None,
+            equipment_state_error: None,
+            equipment_pad_creations: None,
+            ground_weapon_creations: None,
+            ground_object_tracks: Default::default(),
+            world_object_keyframes: super::scan_world_object_keyframes_for_archetypes(
+                chunks,
+                &[37, 38, 41, 42],
+            ),
+            keyframe_ground_weapons: match super::scan_keyframe_ground_weapons(chunks) {
+                Ok(v) => v,
+                Err(DecodeError::Missing("readable film chunks")) => Vec::new(),
+                Err(e) => return Err(e),
+            },
+            keyframe_loadouts: match super::scan_keyframe_loadouts(chunks) {
+                Ok(v) => v,
+                Err(DecodeError::Missing("readable film chunks")) => Vec::new(),
+                Err(e) => return Err(e),
+            },
+            navpoint_radial: None,
+            navpoint_radial_error: None,
+            managed_properties: None,
+            managed_properties_error: None,
+            objective_footer: super::scan_film_objective_footer(chunks),
+            capture_bursts_ms: match super::scan_capture_bursts(chunks) {
+                Ok(bursts) => bursts,
+                Err(DecodeError::Missing("readable film chunks")) => Vec::new(),
+                Err(error) => return Err(error),
+            },
+            carrier_marks: match super::scan_carrier_marks(chunks) {
+                Ok(scan) => Some(scan),
+                Err(DecodeError::Missing("readable film chunks")) => None,
+                Err(error) => return Err(error),
+            },
+            keyframe_inventory: Some(keyframe_inventory),
+            keyframe_inventory_error: keyframe_inventory_error.map(|error| error.to_string()),
+            weapon_changes: None,
+            weapon_changes_error: None,
+            biped_creations,
+            biped_creations_error,
             packets: if options.retain_coverage {
                 packets
             } else {
@@ -877,6 +1142,11 @@ impl Film {
             },
             players,
             summary_events,
+            summary_diagnostics,
+            native_highlights,
+            native_identity_inputs: Some(native_identity_inputs),
+            native_march_facts: None,
+            native_vehicles: None,
             clocks,
             projectiles,
             diagnostics,

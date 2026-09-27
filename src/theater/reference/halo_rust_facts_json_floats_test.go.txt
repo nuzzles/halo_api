@@ -1,0 +1,3 @@
+package replay
+import("encoding/json";"math";"math/rand";"os";"testing";"fmt")
+func TestHaloRustFactsJSONFloats(t *testing.T){rows:=[]any{};rng:=rand.New(rand.NewSource(419981));add:=func(bits uint32){raw,err:=json.Marshal(math.Float32frombits(bits));message:="";if err!=nil{message=err.Error()};rows=append(rows,map[string]any{"bits":bits,"json":string(raw),"error":message})};for n:=0;n<65536;n++{add(rng.Uint32())};for exp:=0;exp<256;exp++{for _,mantissa:=range []uint32{0,1,0x3fffff,0x400000,0x7ffffe,0x7fffff}{bits:=uint32(exp)<<23|mantissa;add(bits);add(bits|0x80000000)}};raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-json-floats.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("JSON float32 cases=%d\n",len(rows))}

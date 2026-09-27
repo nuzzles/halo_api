@@ -1,0 +1,53 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_background_index_and_directory_cache",
+  "native": {
+    "directory_actions": 19,
+    "raw_key_catalogs": 4,
+    "pure_catalogs": 257,
+    "lookups": 7408,
+    "all_unicode_scalars": 1112064,
+    "native_directory_tests": "passed including existing IndexFonds tests and vanished/lexical assertions",
+    "log": "/private/tmp/halo-background-directory-native-final.log"
+  },
+  "focused": {
+    "passed": 8,
+    "failed": 0,
+    "seconds": 1.6,
+    "log": "/private/tmp/halo-background-directory-final.log"
+  },
+  "host_suite": {
+    "passed": 646,
+    "failed": 0,
+    "ignored": 49,
+    "seconds": 89.02,
+    "log": "/private/tmp/halo-background-directory-suite.log",
+    "includes": "final lexical-path cache identity and concurrent cache callers"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds_including_build_lock_wait": 42.16,
+    "log": "/private/tmp/halo-background-directory-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 25.17,
+    "log": "/private/tmp/halo-background-directory-wasm.log",
+    "scope": "portable pure index,raw keys,Unicode normalization and prior parser harness; host filesystem module cfg-excluded"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "fixture_native_byte_identity": true,
+  "format_diff_scripts": "passed",
+  "limits": "Raw invalid filename bytes tested through native pure helpers because macOS filesystem rejects such filenames. Host filesystem tests ran on macOS. Full v41 parity incomplete; architecture deferred.",
+  "sha256": {
+    "map_background_index.rs": "5f48b065b3c139f1e03b6b55ec0752548091ce05b4d50fcec0dd8c7966ed74bc",
+    "map_background_directory.rs": "1a7d48907938ecba32bb4605baf3107da077216442a20ce4efbaf6b607606831",
+    "map_background_index_tests.rs": "966b5ab484afdef856a603a413893d015a5eed1bc6f38e20fe536ecef7762f76",
+    "map_background_directory_tests.rs": "5452e2665d95678e25620af31d12b4566b444e73869584ba9666fdfd51b9d71a",
+    "fixtures/background-directory-v41.json.zlib": "d67f316cb7ff0455274fa3a76df1a59511ec5c53ffac7143ffdec7b42e9e0745",
+    "fixtures/background-index-v41.json.zlib": "2c3fc6fc43dccb4ad033ab9660826c9c2583df453a69f55c04d91b1bc5ef9cc7"
+  }
+}

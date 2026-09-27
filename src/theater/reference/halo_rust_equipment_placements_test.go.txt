@@ -1,0 +1,13 @@
+package grammar
+import("testing";"os";"encoding/json";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustEquipmentPlacements(t *testing.T){
+ rng:=rand.New(rand.NewSource(3737));rows:=[]any{}
+ for run:=0;run<512;run++{
+  tracks:=[]types.ProjectileTrack{};cre:=[]types.EquipmentCreation{}
+  for i:=0;i<80;i++{slot:=uint32(rng.Intn(3));gen:=uint32(rng.Intn(2));ts:=uint64(rng.Intn(8))*100000;pos:=[3]float32{float32(rng.Intn(3)),float32(rng.Intn(3)),float32(rng.Intn(3))};pts:=[]types.ProjectileSample{};for j:=0;j<rng.Intn(5);j++{pts=append(pts,types.ProjectileSample{TimestampUS:ts+uint64(j)*50000,X:pos[0],Y:pos[1],Z:pos[2]})};tracks=append(tracks,types.ProjectileTrack{Slot:slot,Gen:gen,Pts:pts});for j:=0;j<3;j++{c:=types.EquipmentCreation{Slot:slot,Gen:gen,TimestampUS:uint64(rng.Intn(12))*100000,X:pos[0],Y:pos[1],Z:pos[2]};c.MPPVal[1]=uint64(rng.Uint32());if j==1{c.X+=0.5};cre=append(cre,c)}}
+  spans:=EquipmentLifeSpans(tracks);st:=EquipmentPlacementStats{};placements:=confirmPlacements(cre,spans,[3]float32{0.8,1.2,1.6},&st);projection:=[]any{};keys:=[]types.EquipmentLifeKey{};for k:=range spans{keys=append(keys,k)};sort.Slice(keys,func(i,j int)bool{if keys[i].Slot!=keys[j].Slot{return keys[i].Slot<keys[j].Slot};return keys[i].Gen<keys[j].Gen});for _,k:=range keys{projection=append(projection,map[string]any{"key":k,"spans":spans[k]})}
+  scores:=map[profile.MPPWidths]int{};scoreRows:=[]any{};for _,w:=range mppCandidates(){n:=rng.Intn(20);if run%3==0{n=rng.Intn(4)};if n>0{scores[w]=n;scoreRows=append(scoreRows,map[string]any{"key":w,"value":n})}};v,ok:=mppCalibVerdict(scores);if !ok{v.widths=profile.MPPWidths{}}
+  rows=append(rows,map[string]any{"scores":scoreRows,"verdict":map[string]any{"Widths":v.widths,"Agree":v.agree,"Runner":v.runner,"RunnerAgree":v.runnerAgree},"conclusive":ok,"tracks":tracks,"creations":cre,"spans":projection,"placements":placements,"confirmed":st.Confirmed})
+ }
+ d,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-equipment-placements.json",d,0600);e!=nil{t.Fatal(e)}
+}

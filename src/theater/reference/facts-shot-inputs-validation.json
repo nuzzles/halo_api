@@ -1,0 +1,36 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "cache_shot_and_vehicle_recovery_host_wasm_validated",
+  "native": {
+    "shot_cases": 1024,
+    "vehicle_recovery_cases": 1024,
+    "fixtures_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-facts-shots-native.log",
+      "/private/tmp/halo-facts-vehicle-shots-native.log"
+    ],
+    "document_vehicle_recovery_cases": 1024
+  },
+  "host": {
+    "passed": 7,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 1.41,
+    "build_seconds": 62.0,
+    "scope": "Cache and recording shot tests, including direct document shot/vehicle coverage and verdict assertions against native expectations",
+    "log": "/private/tmp/halo-facts-document-vehicle-shots-host.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-document-vehicle-shots-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Two selected cache shot/recovery oracle calls including document field assertions, not full suite",
+    "log": "/private/tmp/halo-facts-document-vehicle-shots-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "Complete cached document composition in native pass order, pre-assembly capture, fallback restoration, caller option precedence, wider legacy replay domains and final parity reconciliation. New recovery log emission is source-matched but not independently captured by the document-field oracle."
+}

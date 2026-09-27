@@ -1,0 +1,17 @@
+package grammar
+import("testing";"encoding/json";"os")
+func TestHaloRustWeaponHits(t *testing.T){
+ rows:=[]any{}
+ for c:=0;c<1024;c++{
+ shots:=[]WeaponShot{}; damages:=[]WeaponDamage{}; tracks:=map[uint32][]hitPosSample{}; wire:=map[uint32][]any{}
+ for j:=0;j<40;j++{ts:=uint64((j*17+c*31)%19)*60000;shots=append(shots,WeaponShot{TimestampUS:ts,Attacker:uint64(j%8),WeaponID:uint64(j%3),FilmIndex:j%5,HasPair:j%7!=0});damages=append(damages,WeaponDamage{TimestampUS:ts,VictimIdx:j%9-1,ResponsibleIdx:j%8-1,Source:uint64(j),Negative:j%2==0,MagRaw:uint64(j%32)})}
+ for j:=0;j<12;j++{slot:=uint32(448+c%129+j);for k:=0;k<25;k++{p:=hitPosSample{uint64(k)*60000,float32(j)*1.3,float32(k)*0.7,float32(j-k)};tracks[slot]=append(tracks[slot],p);wire[slot]=append(wire[slot],map[string]any{"timestamp_us":p.ts,"position":[3]float32{p.x,p.y,p.z}})}}
+ base:=ResolveHitDistanceBase(damages,tracks);window:=[]uint64{0,60000,120000,1000000,^uint64(0)}[c%5]
+ dist:=NewWeaponHitDistanceFunc(tracks,base)
+ calls:=[]WeaponDamage{}
+ observed:=func(d WeaponDamage)(float64,bool){calls=append(calls,d);return dist(d)}
+ stats:=PairWeaponHits(shots,damages,window,observed)
+ rows=append(rows,map[string]any{"shots":shots,"damages":damages,"tracks":wire,"base":base,"window":window,"stats":stats,"distance_calls":calls,"bucket_count":WeaponHitBucketCount(),"without":PairWeaponHits(shots,damages,window,nil)})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-weapon-hits.json",b,0600);e!=nil{t.Fatal(e)}
+}

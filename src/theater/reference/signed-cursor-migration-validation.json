@@ -1,0 +1,61 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "scope": "Signed native component traversal and direct-component stateful cursor; deferred architecture unchanged.",
+  "host_record_oracle": {
+    "cases": 96,
+    "mismatches": 0,
+    "ignored": false
+  },
+  "host_direct_component_oracle": {
+    "cases": 80,
+    "panics": 28,
+    "mismatches": 0,
+    "fixture_matches_native_output_bytes": true
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 9.02,
+    "direct_component_nonpanic_cases": 52,
+    "public_signed_frame_cases": 4,
+    "base_harness_report": "14554 cases; historical headline excludes supplemental controls",
+    "known_header_limit": "large New skip succeeds; following header outside wasm address domain stops Truncated"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 18.19
+  },
+  "reference_hashes": {
+    "files": 485,
+    "failures": 0
+  },
+  "format": "passed",
+  "diff_check": "passed",
+  "full_suite": {
+    "status": "passed",
+    "log": "/private/tmp/halo-signed-migration-final-suite.log",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.0
+  },
+  "captured_march": {
+    "status": "passed",
+    "log": "/private/tmp/halo-signed-migration-captured.log",
+    "films": 4,
+    "seconds": 84.28,
+    "release_build_seconds": 205
+  },
+  "complete_documents": {
+    "status": "passed",
+    "log": "/private/tmp/halo-signed-migration-documents.log",
+    "films": 6,
+    "seconds": 108.0
+  },
+  "remaining_gates": [
+    "Signed/address-sized native headers",
+    "MPP/raw-width domain",
+    "Whole-frame post-panic stateful cursor",
+    "Dynamic payload/callback and complete all-data acceptance"
+  ]
+}

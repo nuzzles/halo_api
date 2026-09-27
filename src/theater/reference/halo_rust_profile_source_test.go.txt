@@ -1,0 +1,39 @@
+package grammar
+import (
+ "bytes"
+ "compress/zlib"
+ "encoding/binary"
+ "encoding/json"
+ "errors"
+ "io"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+)
+func TestHaloRustProfileSource(t *testing.T){
+ compressed,e:=os.ReadFile("/Users/simbleau/git/halo_api/src/theater/fixtures/bootstrap-v41.zlib");if e!=nil{t.Fatal(e)}
+ zr,e:=zlib.NewReader(bytes.NewReader(compressed));if e!=nil{t.Fatal(e)};base,e:=io.ReadAll(zr);if e!=nil{t.Fatal(e)};zr.Close()
+ id,e:=ReadFilmIdentity(base);if e!=nil{t.Fatal(e)}
+ rows:=[]any{}
+ for i:=0;i<64;i++{
+  data:=append([]byte{},base...)
+  format:=[]uint32{0,20,21,24,25,27,99,0xffffffff}[i%8]
+  binary.LittleEndian.PutUint32(data[4:],format)
+  build:=[]string{"HI_1_13_0","HI_1_12_0","HI_UNKNOWN"}[(i/8)%3]
+  clear(data[id.BuildOffset:id.BuildOffset+32]);copy(data[id.BuildOffset:],[]byte(build))
+  cut:=len(data);if i<16{cut=i%9};if i>=16&&i<24{cut=id.BuildOffset+64};data=data[:cut]
+  var film *source.Film
+  missing:=i%13==0
+  if !missing{film,e=source.Load(source.MemoryChunks{data},[]types.ChunkMeta{{Index:0}});if e!=nil{t.Fatal(e)}}
+  var entry *profile.MapQuantEntry
+  if i%2==0{entry=&profile.MapQuantEntry{Module:"synthetic",AxisWidths:[3]uint{17,16,18},Region:3,RegionIndexBits:2}}
+  p:=ResolveProfile(film,entry)
+  fc:=NewFilmContext(film);if fc.profLu{t.Fatal("eager")};cached:=fc.Profile();if !fc.profLu{t.Fatal("not cached")}
+  copyID:=cached.Identity();if len(copyID.TypeVersions)>0{copyID.TypeVersions[0]++;if fc.Profile().Identity().TypeVersions[0]==copyID.TypeVersions[0]{t.Fatal("aliased identity")}}
+  errText:="";if p.Err()!=nil{errText=p.Err().Error()}
+  rows=append(rows,map[string]any{"error":errText,"format_input":format,"build_input":build,"cut":cut,"missing":missing,"entry":entry,"format":p.FormatVersion(),"build":p.Build(),"identity_read":p.IdentityRead(),"identity":p.Identity(),"highlight":p.Highlight(),"keyframe":p.Keyframe(),"movement":p.Movement(),"slots":p.Slots(),"mpp":p.MPP(),"map":p.Map(),"unknown_format":errors.Is(p.Err(),profile.ErrUnknownFormat),"unknown_build":errors.Is(p.Err(),profile.ErrUnknownBuild)})
+ }
+ raw,e:=json.Marshal(map[string]any{"build_offset":id.BuildOffset,"rows":rows});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-profile-source.json",raw,0600);e!=nil{t.Fatal(e)}
+}

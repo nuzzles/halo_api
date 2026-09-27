@@ -1,0 +1,22 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/binary";"path/filepath";"crypto/sha256";"encoding/hex")
+
+func TestHaloRustRecoveryParity(t *testing.T) {
+ root:="/Users/simbleau/git/halo_api/experiments/films"
+ paths,err:=filepath.Glob(root+"/*/*/chunk-*-type-2.bin");if err!=nil{t.Fatal(err)}
+ rows:=[]any{}
+ for _,path:=range paths {
+  data,err:=os.ReadFile(path);if err!=nil{t.Fatal(err)}
+  for offset:=0;offset<len(data); {
+   n:=int(binary.LittleEndian.Uint32(data[offset+4:]));pay:=data[offset+16:offset+16+n]
+   if binary.LittleEndian.Uint16(data[offset:])==2 {
+    rel,err:=filepath.Rel(root,path);if err!=nil{t.Fatal(err)}
+    hash:=sha256.Sum256(pay)
+    rows=append(rows,map[string]any{"file":rel,"payload_byte":offset+16,"size":n,"sha256":hex.EncodeToString(hash[:]),"anchors":WalkKeyframeWorld(pay)})
+   }
+   offset+=16+n
+  }
+ }
+ data,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-levelup-recovery-oracle.json",data,0600);err!=nil{t.Fatal(err)}
+}

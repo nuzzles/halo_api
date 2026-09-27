@@ -1,0 +1,20 @@
+package objectives
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
+type rustStatBits struct{data []byte;n int}
+func(b *rustStatBits)put(v uint64,n int){for i:=n-1;i>=0;i--{if b.n%8==0{b.data=append(b.data,0)};b.data[b.n/8]|=byte((v>>i)&1)<<uint(7-b.n%8);b.n++}}
+func TestHaloRustStatborgDecode(t *testing.T){
+ rng:=rand.New(rand.NewSource(7651));rows:=[]any{}
+ for run:=0;run<2048;run++{
+  b:=rustStatBits{};b.put(0,run%11);b.put(1,1);slot:=6+2*(run%10);if run%17==0{slot++};b.put(uint64(slot),14);b.put(2,2)
+  indices:=[]int{};for i:=0;i<58;i++{if rng.Intn(8)==0{indices=append(indices,i)}};if len(indices)==0{indices=[]int{0}}
+  if run%2==0{b.put(1,1);mask:=uint64(0);for _,i:=range indices{mask|=1<<i};if run%19==0{mask|=1<<62};b.put(mask,64)}else{if len(indices)>7{indices=indices[:7]};b.put(0,1);b.put(uint64(len(indices)),3);for _,i:=range indices{b.put(uint64(i),6)}}
+  for j:=range indices{r:=uint64(run%9);b.put(r,5);if run%23==0{r++};b.put(r,5);if j>0&&run%5==0{ /* later round headers are not constrained */ }
+   for ch:=0;ch<2;ch++{sel:=rng.Intn(3);if run%29==0{sel=3};b.put(uint64(sel),2);width:=8<<sel;vals:=[]uint64{0,1,127,128,255,32767,32768,65535,1<<20,(1<<20)+1,0xffffffff};b.put(vals[rng.Intn(len(vals))],width)}
+   flags:=run%4;b.put(uint64(flags),2);for f:=1;f>=0;f--{if flags>>f&1!=0{b.put(2,2);b.put(uint64(rng.Uint32()),32)}}
+  }
+  b.put(0,64);pay:=b.data;if run%7==0{pay=pay[:len(pay)/2]};if run%31==0{pay=make([]byte,run%100);rng.Read(pay)}
+  ts:=int64(run-1024);recs:=scanFrameForRecords(pay,int(ts));if recs==nil{recs=[]types.StatRecord{}}
+  rows=append(rows,map[string]any{"payload":hex.EncodeToString(pay),"time_ms":ts,"records":recs})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-statborg-decode.json",raw,0600);e!=nil{t.Fatal(e)}
+}

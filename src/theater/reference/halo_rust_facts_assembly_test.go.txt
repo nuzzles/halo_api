@@ -1,0 +1,43 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func haloRustAssemblyValue(v reflect.Value)any{
+ switch v.Kind(){
+ case reflect.Map:if v.IsNil(){return nil};out:=map[string]any{};iter:=v.MapRange();for iter.Next(){out[fmt.Sprint(iter.Key().Interface())]=haloRustAssemblyValue(iter.Value())};return out
+ case reflect.String:out:=[]uint64{};for _,b:=range []byte(v.String()){out=append(out,uint64(b))};return out
+ case reflect.Pointer:if v.IsNil(){return nil};return haloRustAssemblyValue(v.Elem())
+ case reflect.Slice:if v.IsNil(){return nil};fallthrough
+ case reflect.Array:out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustAssemblyValue(v.Index(i)))};return out
+ case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustAssemblyValue(v.Field(i))};return out
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:return v.Int()
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:return v.Uint()
+ case reflect.Bool:return v.Bool()
+ case reflect.Float32:return math.Float32bits(v.Interface().(float32))
+ case reflect.Float64:return math.Float64bits(v.Float())
+ };panic(v.Kind())
+}
+func haloRustAssemblyFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){
+ case reflect.Map:if n%4!=0{v.Set(reflect.MakeMap(v.Type()));for j:=0;j<n%3;j++{k:=reflect.New(v.Type().Key()).Elem();value:=reflect.New(v.Type().Elem()).Elem();haloRustAssemblyFill(k,rng,n+j+1);haloRustAssemblyFill(value,rng,n+j+2);v.SetMapIndex(k,value)}}
+ case reflect.String:v.SetString([]string{"", "crouch", "sprint", "\x00\xff\xc0\x80", "跳跃"}[n%5])
+ case reflect.Pointer:if n%3!=0{v.Set(reflect.New(v.Type().Elem()));haloRustAssemblyFill(v.Elem(),rng,n)}
+ case reflect.Slice:if n%4!=0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3));for i:=0;i<v.Len();i++{haloRustAssemblyFill(v.Index(i),rng,n+i+1)}}
+ case reflect.Array:for i:=0;i<v.Len();i++{haloRustAssemblyFill(v.Index(i),rng,n+i)}
+ case reflect.Struct:for i:=0;i<v.NumField();i++{haloRustAssemblyFill(v.Field(i),rng,n+i)}
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:v.SetInt(int64(rng.Uint64()))
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:v.SetUint(rng.Uint64())
+ case reflect.Bool:v.SetBool(rng.Intn(2)==0)
+ case reflect.Float32:v.Set(reflect.ValueOf(math.Float32frombits(rng.Uint32())))
+ case reflect.Float64:v.SetFloat(math.Float64frombits(rng.Uint64()))
+ default:panic(v.Kind())}}
+func TestHaloRustFactsAssembly(t *testing.T){
+ rows:=[]any{};rng:=rand.New(rand.NewSource(4100255));entry:=profile.MapQuantEntry{Module:"map",AxisWidths:[3]uint{13,14,15},Min:[3]float32{-10,-30,-50},Max:[3]float32{100,300,500}}
+ add:=func(input []byte,entry profile.MapQuantEntry){g,err:=DecodeFilmFacts(input,entry);msg:="";normalized:="";world:=map[string]any{};if err!=nil{msg=err.Error()}else{encoded,e:=EncodeFilmFactsAvecErreur(g);if e!=nil{t.Fatal(e)};normalized=hex.EncodeToString(encoded);for _,name:=range []string{"Positions","Vehicles"}{v:=reflect.ValueOf(g.Positions);if name=="Vehicles"{v=reflect.ValueOf(g.Vehicles.Positions)};points:=[]any{};for i:=0;i<v.Len();i++{p:=v.Index(i);point:=map[string]any{};for _,field:=range []string{"Slot","TimestampUS","HasWorld","Q","X","Y","Z"}{point[field]=haloRustAssemblyValue(p.FieldByName(field))};points=append(points,point)};world[name]=points}};rows=append(rows,map[string]any{"input":hex.EncodeToString(input),"module":haloRustAssemblyValue(reflect.ValueOf(entry.Module)),"error":msg,"normalized":normalized,"world":world})}
+ for n:=0;n<24;n++{g:=&FilmFacts{Film:"fixture",MapModule:"map",AxisW:[3]uint{13,14,15}};version:=41;g.FilmMajorVersion=&version;g.FilmClockOriginUS=rng.Uint64();g.InventoryDeltaAmmoRefused=n%2==0
+ fields:=[]string{"Positions","BipedCreations","Fire","Loadouts","Grenades","Projectiles","WeaponChanges","Pickups","PickupStats","Inventory","InventoryDeltas","AbilityRanks","CamoStates","GrappleReads","Translocations","EquipmentChanges","EquipmentChangeStats","AbilityImpulses","AbilityImpulseStats","AbilityCharges","AbilityChargeStats","MovementStates","MovementStateStats","ZoomEvents","Placements","PlacementStats","SpawnEvents","SpawnStats","Pads","Deaths","PlayerIndices","FilmTable","PlayerTeams","TeamScan"}
+ if n>0{for _,field:=range fields{haloRustAssemblyFill(reflect.ValueOf(g).Elem().FieldByName(field),rng,n)};for _,field:=range []string{"Scanned","Keyframes","Creations","Stats","Positions","Events","Aims","Occupancy"}{haloRustAssemblyFill(reflect.ValueOf(&g.Vehicles).Elem().FieldByName(field),rng,n+1)}}
+ blob,err:=EncodeFilmFactsAvecErreur(g);if err!=nil{t.Fatal(err)};add(blob,entry);add(append(append([]byte{},blob...),0,255),entry)
+ if n==0{for end:=0;end<len(blob);end++{add(blob[:end],entry)}}else{for j:=0;j<48;j++{add(blob[:rng.Intn(len(blob)+1)],entry)}}
+ other:=entry;other.Module="other";add(blob,other)
+ }
+ failures:=[]any{};for _,bits:=range []uint32{0x7fc00000,0x7f800000,0xff800000}{g:=&FilmFacts{MapModule:"map",AxisW:[3]uint{13,14,15}};g.Vehicles.DeathStats.Config.Profil.Mouvement.DeltaQuantum=math.Float32frombits(bits);blob,err:=EncodeFilmFactsAvecErreur(g);failures=append(failures,map[string]any{"bits":bits,"encoded":hex.EncodeToString(blob),"error":err.Error()})}
+ raw,err:=json.Marshal(map[string]any{"cases":rows,"writer_failures":failures});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-assembly.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("assembly cases=%d\n",len(rows))
+}

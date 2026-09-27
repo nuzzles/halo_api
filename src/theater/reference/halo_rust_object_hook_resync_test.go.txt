@@ -1,0 +1,47 @@
+package grammar
+import("testing";"math";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"math/rand";"encoding/hex";"encoding/json";"os")
+func TestHaloRustObjectHookResync(t *testing.T){
+ rng:=rand.New(rand.NewSource(624041));rows:=[]any{}
+ for c:=0;c<512;c++{
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{haloRustObjectHookNames[c%len(haloRustObjectHookNames)],"biped-emp-timer-component","not-ported"},Levels:[]uint32{0,0,0}}}}
+  world:=NewWorld(reg);world.BindFull(50,0);world.BindSoft(51,0)
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();cfg.HasExtraFields=c%5==0;cfg.Profil.Mouvement.FullPrecision=c%11==0;cfg.Profil.Grammaire.GrammaireEcrivainI0=c%13==0;cfg.Profil.Mouvement.DeltaHasHandleTail=c%17==0;if c%9==0{cfg.Profil.Mouvement.WorldObject.IndexW=2;cfg.Profil.Mouvement.WorldObject.Region=1}
+  var bw bitWriter
+  prefix:=func(){if cfg.HasExtraFields{bw.bits(0,32)}}
+  for j:=0;j<c%8+1;j++{
+   prefix();slot:=50+j%3
+   if j==2 && c%3==0 { bw.bits(2,3);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bits(0,32);continue }
+   if j==3 && c%3==0 { bw.bits(1,3);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bits(0,6);bw.bit(0);bw.bits(0,4);continue }
+   bw.bit(1);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bit(0);bw.bits(1,4)
+   if j==1 {bw.bits(2,6);bw.bits(rng.Uint64(),11);continue}
+   if j%3==2 {bw.bits(1,6);bw.bits(rng.Uint64(),8);continue}
+   bw.bits(0,6)
+   switch (c+j)%7 {
+   case 0: bw.bits(0,2);bw.bit(0);bw.bit(0);bw.bits(0,int(cfg.Profil.Mouvement.WorldObject.IndexW));for _,w:=range cfg.Profil.Mouvement.WorldObject.AxisW {bw.bits(rng.Uint64(),int(w))};bw.bits(0,2)
+   case 1: bw.bits(1,2);bw.bit(0);bw.bit(0);bw.bit(1);bw.bits(rng.Uint64(),24)
+   case 2: bw.bits(1,2);bw.bit(0);bw.bit(0);bw.bit(0);for k:=0;k<3;k++{bw.bits(rng.Uint64(),int(cfg.Profil.Mouvement.DeltaAxisWidth))}
+   case 3: bw.bits(1,2);bw.bit(0);bw.bit(1);bw.bit(0);bw.bit(0);bw.bits(0,int(cfg.Profil.Mouvement.WorldObject.IndexW));for _,w:=range cfg.Profil.Mouvement.WorldObject.AxisW {bw.bits(rng.Uint64(),int(w))};bw.bits(0,2)
+   case 4: bw.bits(1,2);bw.bit(1);bw.bit(0);bw.bit(0);bw.bits(0,int(cfg.Profil.Mouvement.WorldObject.IndexW));for _,w:=range cfg.Profil.Mouvement.WorldObject.AxisW {bw.bits(rng.Uint64(),int(w))}
+   case 5: bw.bits(4,3);bw.bits(rng.Uint64(),64);bw.bits(rng.Uint64(),32)
+   case 6: bw.bits(0,2);bw.bit(1)
+   }
+  }
+  prefix();bw.end();if c%6==0{bw.buf=make([]byte,c%120);rng.Read(bw.buf)}
+  targets:=map[uint32]bool{50:true,51:true};calls:=[]any{}
+  accept:=func(slot uint32,pos [3]float32,has bool)bool{calls=append(calls,map[string]any{"slot":slot,"has":has,"pos":func()any{if has{return [3]uint32{math.Float32bits(pos[0]),math.Float32bits(pos[1]),math.Float32bits(pos[2])}};return nil}()});return c%4==0 || (c%4==1&&has) || (c%4==2&&!has) || (c%4==3&&has&&pos[0]>0)}
+  initialized:=c%2==0;if initialized{cfg.Obs.IndexAbsolus=map[int]int{}}
+  componentObservations:=haloRustComponentHooks(cfg.Obs);actions:=[][2]bool{};cfg.Obs.MobilityActionHook=func(a,b bool){actions=append(actions,[2]bool{a,b})};from:=c%19;landing:=scanForTargetDelta(bw.buf,from,world,cfg,targets,accept);scanCalls:=calls;scanVisible:=cfg.Obs.IndexAbsolus;scanActions:=actions;scanObservations:=*componentObservations
+  allCfg:=cfg;allCfg.Obs=NouvelleObservation();allCfg.Obs.IndexAbsolus=map[int]int{};scanForTargetDelta(bw.buf,from,world,allCfg,targets,accept);scanAll:=allCfg.Obs.IndexAbsolus
+  cfg.Obs=NouvelleObservation();componentObservations=haloRustComponentHooks(cfg.Obs);actions=[][2]bool{};cfg.Obs.MobilityActionHook=func(a,b bool){actions=append(actions,[2]bool{a,b})};if initialized{cfg.Obs.IndexAbsolus=map[int]int{}};calls=[]any{}
+  records:=DecodeFrameResync(bw.buf,world,cfg,targets,accept)
+  rr:=[]any{};for _,r:=range records{rr=append(rr,map[string]any{"kind":r.Type,"id":r.ID,"ti":r.TypeIndex,"mask":r.Trace.Mask,"components":len(r.Trace.Comps)})}
+  slots:=map[uint32]any{};for slot,state:=range world.slots{slots[slot]=map[string]any{"ti":state.TypeIndex,"id":state.FullID,"soft":state.Soft,"view":state.Vue}}
+  frameVisible:=cfg.Obs.IndexAbsolus;frameActions:=actions;frameObservations:=*componentObservations;frameCalls:=calls
+  allWorld:=NewWorld(reg);allWorld.BindFull(50,0);allWorld.BindSoft(51,0);allCfg.Obs=NouvelleObservation();allCfg.Obs.IndexAbsolus=map[int]int{};DecodeFrameResync(bw.buf,allWorld,allCfg,targets,accept);frameAll:=allCfg.Obs.IndexAbsolus
+  if scanVisible==nil{scanVisible=map[int]int{}};if frameVisible==nil{frameVisible=map[int]int{}}
+  p:=cfg.Profil;position:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+  lo,hi:=[3]float32{},[3]float32{};for i,r:=range p.Mouvement.Range{lo[i]=r.Min;hi[i]=r.Max}
+  rows=append(rows,map[string]any{"name":haloRustObjectHookNames[c%len(haloRustObjectHookNames)],"scan_observations":scanObservations,"frame_observations":frameObservations,"initialized":initialized,"scan_actions":scanActions,"frame_actions":frameActions,"scan_visible":scanVisible,"scan_all":scanAll,"frame_visible":frameVisible,"frame_all":frameAll,"hex":hex.EncodeToString(bw.buf),"position":position,"min":lo,"max":hi,"region":p.Mouvement.WorldObject.Region,"quantum":p.Mouvement.DeltaQuantum,"extra":cfg.HasExtraFields,"records":rr,"slots":slots,"from":from,"landing":landing,"scan_calls":scanCalls,"calls":frameCalls})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-object-hook-resync.json",b,0600);e!=nil{t.Fatal(e)}
+}

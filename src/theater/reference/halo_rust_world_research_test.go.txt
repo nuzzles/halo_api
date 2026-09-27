@@ -1,0 +1,128 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"sort"
+	"testing"
+)
+
+func TestHaloRustWorldResearch(t *testing.T) {
+	var prior struct {
+		Cases []struct {
+			Hex       string
+			Widths    [3]uint
+			IndexBits uint `json:"index_bits"`
+			Region    uint32
+		}
+	}
+	raw, e := os.ReadFile("/private/tmp/halo-world-tracks.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = json.Unmarshal(raw, &prior); e != nil {
+		t.Fatal(e)
+	}
+	rows := []any{}
+	for run := 0; run < 256; run++ {
+		c := prior.Cases[run*4]
+		pay, _ := hex.DecodeString(c.Hex)
+		lg := profile.PrecisionDescriptor{IndexW: c.IndexBits, AxisW: c.Widths, Region: c.Region}
+		wr := profile.Vec3Range{{Min: -100, Max: 300}, {Min: -200, Max: 400}, {Min: -300, Max: 500}}
+		band := map[uint32]bool{512: true, 513: true, 515: true}
+		if run%11 == 0 {
+			band = map[uint32]bool{}
+		}
+		header := make([]byte, 8)
+		binary.LittleEndian.PutUint32(header, 41)
+		binary.LittleEndian.PutUint32(header[4:], 27)
+		chunks := source.MemoryChunks{header}
+		meta := []types.ChunkMeta{{Index: 0, ChunkType: 1}}
+		inputs := []any{}
+		for k := 0; k < 3; k++ {
+			if run%13 == 0 {
+				break
+			}
+			data := []byte{}
+			for j := 0; j < 15; j++ {
+				h := make([]byte, 16)
+				kind := uint16(0)
+				if j%7 == 0 {
+					kind = 3
+				}
+				binary.LittleEndian.PutUint16(h, kind)
+				binary.LittleEndian.PutUint32(h[4:], uint32(len(pay)))
+				binary.LittleEndian.PutUint64(h[8:], uint64((14-j)%4)*1000)
+				data = append(data, h...)
+				data = append(data, pay...)
+			}
+			if run%17 == 0 {
+				data = data[:len(data)-3]
+			}
+			idx := k + 1
+			if run%7 == 0 && k == 1 {
+				idx = 1
+			}
+			if run%19 == 0 && k == 1 {
+				idx = 3
+			}
+			chunks = append(chunks, data)
+			meta = append(meta, types.ChunkMeta{Index: idx})
+			inputs = append(inputs, map[string]any{"index": idx, "hex": hex.EncodeToString(data)})
+		}
+		film, e := source.Load(chunks, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+		out := map[uint32][]WorldObjectSample{}
+		boundsOK := run%5 != 0
+		if boundsOK && len(band) > 0 {
+			for _, ci := range FilmChunkNumbers(film) {
+				data, pks, ok := FilmChunkAt(film, ci)
+				if !ok {
+					continue
+				}
+				for _, pk := range pks {
+					if pk.Type != PacketTypeDelta {
+						continue
+					}
+					for _, r := range scanProjectileRecords(pk.Payload(data), band, &wr, lg) {
+						out[r.slot] = append(out[r.slot], WorldObjectSample{TimestampUS: pk.TimestampUS, Gen: r.gen, X: r.X, Y: r.Y, Z: r.Z})
+					}
+				}
+			}
+		}
+		for slot, pts := range out {
+			sort.Slice(pts, func(i, j int) bool { return pts[i].TimestampUS < pts[j].TimestampUS })
+			out[slot] = pts
+		}
+		// Unsorted inputs, exact ties, empty sets and extreme timestamp distances.
+		pts := []WorldObjectSample{}
+		if run%9 != 0 {
+			pts = []WorldObjectSample{{TimestampUS: 2000, Gen: 2, X: 1}, {TimestampUS: 0, Gen: 3, X: 2}, {TimestampUS: 2000, Gen: 1, X: 3}, {TimestampUS: ^uint64(0), Gen: 0, X: 4}}
+		}
+		at := uint64(run%5) * 1000
+		if run%6 == 0 {
+			at = ^uint64(0)
+		}
+		nearest, gap, ok := NearestWorldObjectSample(pts, at)
+		bandList := []uint32{}
+		for s := range band {
+			bandList = append(bandList, s)
+		}
+		sort.Slice(bandList, func(i, j int) bool { return bandList[i] < bandList[j] })
+		rows = append(rows, map[string]any{"chunks": inputs, "widths": c.Widths, "index_bits": c.IndexBits, "region": c.Region, "band": bandList, "bounds_ok": boundsOK, "samples": out, "query_samples": pts, "at": at, "nearest": nearest, "gap": gap, "ok": ok})
+	}
+	raw, e = json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-world-research.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

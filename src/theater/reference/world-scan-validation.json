@@ -1,0 +1,50 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Complete loaded world scan phase",
+  "fixture": "world-scan-v41.json.zlib",
+  "generator": "halo_rust_world_scan_test.go.txt",
+  "sha256": "b2e2dac9c287137f8eecd9dd6e0ed2fc4819f762eccfccbe99f393a8e99cfa1c",
+  "cases": 144,
+  "native_panics": 0,
+  "counts": {
+    "zoom": 801,
+    "placements": 72,
+    "spawns": 1707,
+    "weapon_creations": 36,
+    "powerup_creations": 704,
+    "vehicle_creations": 48
+  },
+  "allocated_empty_placement_cases": [
+    15
+  ],
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-world-scan-host.log",
+    "tests": 7,
+    "expanded_fixture_log": "/private/tmp/halo-world-calibration-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-world-anticipated-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-world-anticipated-clippy.log"
+  },
+  "full_v41_parity_complete": false,
+  "limits": [
+    "No three-million-read radial cap case.",
+    "Native panic fixtures are covered separately; this composition fixture has no native panics.",
+    "Runtime diagnostics/counters delivered through embedding observer; pad and vehicle diagnostics retain tracing. End-to-end fresh entry wiring remains open.",
+    "Synthetic reference agreement does not replace independently annotated gameplay validation."
+  ],
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "conclusive_calibration_cases": [
+    134,
+    136,
+    137,
+    138,
+    142
+  ]
+}

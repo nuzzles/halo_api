@@ -1,0 +1,25 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os")
+func TestHaloRustNewTailPolicy(t *testing.T){
+ haloRustNewTailPolicy(t,false)
+}
+func TestHaloRustNewTailLarge(t *testing.T){haloRustNewTailPolicy(t,true)}
+func haloRustNewTailPolicy(t *testing.T,large bool){
+ rows:=[]any{}
+ tails:=[]int{-1<<63,-65,-1,0,1,5,63,130};if large{tails=[]int{4097,1<<32,(1<<32)+1,(1<<63)-1025,(1<<63)-1}}
+ for _,tail:=range tails{for mode:=0;mode<6;mode++{for start:=0;start<8;start++{
+  if large&&tail==(1<<63)-1&&mode<2{continue}
+  name:="biped-emp-timer-component";if mode==2{name="not-ported"}
+  reg:=&Registry{Archetypes:make([]Archetype,4)};reg.Archetypes[3]=Archetype{Index:3,Components:[]string{name},Levels:[]uint32{0}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.PacketPreambleBits=0;cfg.Profil.Grammaire.DeserEtatParArchetype=false;cfg.Profil.Grammaire.BitsDeQueueRecordNew=tail;cfg.Obs=NouvelleObservation()
+  events:=[]uint32{};cfg.Obs.EmpTimerHook=func(q uint32){events=append(events,q)}
+  var bw bitWriter;bw.bits(0,start)
+  if mode<3{bw.bits(1,3);bw.bits(1,5);bw.bits(0,2);bw.bits(3,6);bw.bit(0);if mode==0{bw.bits(0,4)}else{bw.bits(1,4);bw.bits(0,6);if mode==1{bw.bits(117,8)}};if mode<2&&tail>0{if large{bw.bits(0xdead,16)}else{bw.bits(0,tail)}}}
+  if mode==3{bw.bit(1);bw.bits(1,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(117,8)}
+  if mode==4{bw.bits(2,3);bw.bits(1,5);bw.bits(0,2);bw.bits(123,32)}
+  bw.end()
+  world:=NewWorld(reg);world.BindFull(1,3);br:=LecteurSur(bw.buf);br.SetBitPos(start);records,err:=DecodeFrameRecords(br,world,cfg);if records==nil{records=[]FrameRecord{}}
+  rows=append(rows,map[string]any{"tail":tail,"mode":mode,"start":start,"hex":hex.EncodeToString(bw.buf),"records":records,"complete":err==nil,"end":br.BitPos(),"events":events,"slots":world.slots})
+ }}}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};path:="/private/tmp/halo-new-tail-policy.json";if large{path="/private/tmp/halo-new-tail-large.json"};if e=os.WriteFile(path,b,0600);e!=nil{t.Fatal(e)}
+}

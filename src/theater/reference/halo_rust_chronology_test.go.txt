@@ -1,0 +1,92 @@
+package objectives
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"os"
+	"testing"
+)
+
+func TestHaloRustChronology(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	rows := []any{}
+	for run := 0; run < 128; run++ {
+		points := []types.ScorePoint{}
+		for j := 0; j < run%33; j++ {
+			ts := j*10 - 100
+			if run%3 != 0 && j%3 == 0 {
+				ts -= 300
+			}
+			if run%7 == 0 {
+				ts = 0
+			}
+			if run%11 == 0 && j == 0 {
+				ts = -9223372036854775808
+			}
+			if run%11 == 0 && j == 1 {
+				ts = 9223372036854775807
+			}
+			points = append(points, types.ScorePoint{TimeMS: ts, Slot: 10 + j%3, Value: int64(j * 17)})
+		}
+		h := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		direct := ChronologicalTotal(points)
+		if direct == nil {
+			direct = []types.ScorePoint{}
+		}
+		directLogs := h.records
+		h.records = []any{}
+		raw := map[int]map[int][]types.ScorePoint{}
+		for _, slot := range []int{10, 12, 14} {
+			raw[slot] = map[int][]types.ScorePoint{}
+			for round := -1; round < 3; round++ {
+				seq := []types.ScorePoint{}
+				for j := 0; j < run%13; j++ {
+					ts := j*10 - round*300
+					if run%4 == 0 {
+						ts = j*10 + round*300
+					}
+					if run%5 == 0 {
+						ts = 0
+					}
+					seq = append(seq, types.ScorePoint{TimeMS: ts, Slot: slot, Value: int64(j + slot)})
+				}
+				raw[slot][round] = seq
+			}
+		}
+		real := map[int]bool{-1: true, 0: true, 1: run%2 == 0, 2: false}
+		cumulative := cumulateRounds(raw, real)
+		cumulativeLogs := h.records
+		h.records = []any{}
+		recs := []types.StatRecord{}
+		for round := 0; round < 3; round++ {
+			for _, p := range raw[10][round] {
+				v := p.Value * 17
+				recs = append(recs, types.StatRecord{TimeMS: p.TimeMS, Slot: 10, Round: round, Comps: map[int]types.StatValue{0: {A: p.Value}, 2: {A: v, B: v}, 3: {A: v}, 12: {A: v, B: v}, 21: {A: v}}})
+			}
+		}
+		total := SeriesTotal(recs, KillsComponent, false)
+		totalLogs := h.records
+		h.records = []any{}
+		events := NamedEventsFrom(recs, "flag")
+		if events == nil {
+			events = []NamedEvent{}
+		}
+		eventLogs := h.records
+		h.records = []any{}
+		identity := SlotIdentityFrom(recs, nil)
+		identityLogs := h.records
+		h.records = []any{}
+		cross := crossCheckFrom(recs, "flag")
+		rows = append(rows, map[string]any{"points": points, "direct": direct, "direct_logs": directLogs, "raw": raw, "real": real, "cumulative": cumulative, "cumulative_logs": cumulativeLogs, "records": recs, "total": total, "total_logs": totalLogs, "events": events, "event_logs": eventLogs, "identity": identity, "identity_logs": identityLogs, "cross": cross, "cross_logs": h.records})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-chronology.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

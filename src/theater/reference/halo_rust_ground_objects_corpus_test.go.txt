@@ -1,0 +1,24 @@
+package replay
+import("testing";"os";"encoding/json";"path/filepath";"math";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustGroundObjectsCorpus(t *testing.T){
+ catalog,err:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if err!=nil{t.Fatal(err)}
+ rows:=[]any{}
+ for _,sample:=range []struct{Folder,Map string}{{"maps/01-bazaar-idle","bazaar"},{"maps/02-aquarius","aquarius"},{"bandit/01-evo","recharge"},{"ranked-arena/02-oddball","recharge"}} {
+  root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",sample.Folder)
+  manifest,err:=os.ReadFile(filepath.Join(root,"film.json"));if err!=nil{t.Fatal(err)}
+  var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}}
+  if err=json.Unmarshal(manifest,&meta);err!=nil{t.Fatal(err)}
+  var chunks source.MemoryChunks;var metadata []types.ChunkMeta
+  for _,c:=range meta.Chunks {d,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,d);metadata=append(metadata,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})}
+  film,err:=source.Load(chunks,metadata);if err!=nil{t.Fatal(err)}
+  entry,err:=catalog.Lookup(sample.Map);if err!=nil{t.Fatal(err)}
+  opt:=Options{MapQuant:&entry}
+  fc:=grammar.NewFilmContextForMap(film,&entry,nil)
+  installWorldObjectPrecision(fc,sample.Folder,opt.Fallbacks)
+  in,err:=scanFilmInputs(sample.Folder,film,fc,opt);if err!=nil{t.Fatal(err)}
+  sort.SliceStable(in.Positions,func(i,j int)bool{return in.Positions[i].TimestampUS<in.Positions[j].TimestampUS})
+  objects,rejected:=padObjects(in.Pads.Weapons,weaponPadRule(nil),equipmentLives(in.Positions),in.Positions);bits:=[]uint64{};for _,o:=range objects{bits=append(bits,math.Float64bits(o.Picker.DistM))};families:=map[uint32]string{};for id:=range loadoutFamilies(){families[id]=gwPadsWeaponFamily(id)}
+  rows=append(rows,map[string]any{"folder":sample.Folder,"families":families,"objects":objects,"distance_bits":bits,"rejected":map[string]any{"total":rejected.total,"objectives":rejected.objectives}})
+ }
+ d,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-ground-objects-corpus.json",d,0600);e!=nil{t.Fatal(e)}
+}

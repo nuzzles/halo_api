@@ -1,0 +1,2003 @@
+[
+  {
+    "Nom": "replay/equipement",
+    "Replis": [
+      {
+        "Nom": "repli_piece_engendree_sans_evenement",
+        "Fait": "l'origine d'une PIECE ENGENDREE (panneau de mur) qu'aucun evenement 103 ne designe",
+        "Mecanisme": "le manifeste du titre dit `kind = \"deployed\"` : l'objet n'existe QUE deploye, donc la pose sort `deployed` sans mesure",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/equipment_origin.go",
+            "Ancre": "fb.Declenche(fallback.NomPieceEngendreeSansEvenement)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-15",
+        "CibleRetrait": "lot 3.x (profil par build) : la lecture des evenements de liste sur les builds anciens",
+        "CritereRetrait": "0 declenchement sur les 8 builds, c'est-a-dire un evenement 103 lu pour chaque panneau publie",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_geste_dernier_occupant_du_match",
+        "Fait": "a quel joueur crediter un geste (traction, episode, pose) pose sur un slot",
+        "Mecanisme": "aucune vie du slot ne couvre l'image : le DERNIER occupant connu du slot sur tout le match est credite",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/usage_summary_owners.go",
+            "Ancre": "func (o usageOwners) repliDernierOccupant(slot uint32) string {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "retrait sec a M2 (D14 d) : le compte est DEJA nul sur les 8 builds, et le journal des passes le confirme ou l'infirme sur le parc",
+        "CritereRetrait": "poses hors fenetre publiee a 0 : sur les 8 builds (`replay/usage_summary_replis_test.go`) TENU le 2026-09-16 (0/8) ; sur le parc, ligne `replis de la passe` des deux producteurs a `aucun`",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_geste_premiere_vie_du_slot",
+        "Fait": "a quel joueur crediter un geste date AVANT la premiere vie publiee du slot",
+        "Mecanisme": "la PREMIERE vie du slot est creditee, faute de vie precedente",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/usage_summary_owners.go",
+            "Ancre": "func (o usageOwners) repliPremiereVieDuSlot(vies []usageVie) string {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "retrait sec a M2 (D14 d) : meme canal et meme mesure que repli_geste_dernier_occupant_du_match",
+        "CritereRetrait": "0 geste anterieur a la premiere vie du slot une fois les vies bornees aux apparitions ecrites : sur les 8 builds TENU le 2026-09-16 (0/8) ; sur le parc, ligne `replis de la passe` a `aucun`",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_garde_equipement_negatif_a_zero",
+        "Fait": "le nombre d'equipements GARDES par un joueur pour une famille",
+        "Mecanisme": "prises - utilises - laches, ecrase a 0 quand la soustraction est negative",
+        "Condition": "contradiction",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/usage_summary_outcomes.go",
+            "Ancre": "kept := taken - usageUsedOf(t, family) - t.DroppedByFamily[family]",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2 puis M3 (reconciliation des trois canaux prises / utilises / laches) ; PAS de retrait sec : le compte est MESURE NON NUL",
+        "CritereRetrait": "0 ecrasement : la somme des trois canaux est alors coherente et la garde peut tomber — NON TENU le 2026-09-16 (30 sur les 8 builds de `replay/usage_summary_replis_test.go`) ; sur le parc, ligne `replis de la passe`",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_traction_vie_du_tir",
+        "Fait": "a quelle vie rattacher une traction de grappin",
+        "Mecanisme": "aucune vie ne couvre l'ACCROCHE : la vie qui couvre le TIR decide",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/grapple_lines.go",
+            "Ancre": "track = lifeCovering(vies, t0)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2, pas 2 (les lecteurs recoivent le profil) : cabler le compteur au meme geste, puis retrait sec si le compte est nul",
+        "CritereRetrait": "0 traction dont l'accroche tombe hors de toute vie sur les 8 builds — NON MESURE (compteur non cable au 2026-09-16)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_traction_vie_la_plus_proche",
+        "Fait": "a quelle vie rattacher une traction dont ni l'accroche ni le tir ne sont couverts",
+        "Mecanisme": "la vie la plus proche en temps est retenue, la fenetre est ensuite bornee par la vie",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/grapple_lines.go",
+            "Ancre": "track = lifeNearest(vies, tAttach)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2, pas 2 : cabler le compteur puis retrait sec si le compte est nul",
+        "CritereRetrait": "0 traction sans vie couvrante sur les 8 builds — NON MESURE (compteur non cable au 2026-09-16)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_famille_arme_identifiant_brut",
+        "Fait": "le nom de la famille d'arme d'un socle",
+        "Mecanisme": "le catalogue ne nomme pas l'identifiant : la valeur brute 0x%08x sert de nom",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/ground_weapon_rules.go",
+            "Ancre": "return fmt.Sprintf(\"0x%08x\", w)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "aucune tant que le catalogue d'armes est incomplet ; retrait sec des que le compte est nul sur le parc",
+        "CritereRetrait": "0 famille rendue sous forme 0x%08x sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_lien_prise_arme_abandonne",
+        "Fait": "quel objet au sol une prise d'arme consomme",
+        "Mecanisme": "famille absente, ou aucune position d'acteur a +-250 ms : le lien est abandonne SANS distinguer les deux causes",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/document_ground_weapon_items.go",
+            "Ancre": "actor, ok := gwItemActorAt(bySlot, ch.Slot, ch.TimestampUS)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion du lien de prise (table C13 : trois hypotheses de lien natif REFUTEES — le repli restera, son COMPTE PAR CAUSE est ce qui manque)",
+        "CritereRetrait": "les deux causes comptees separement dans GroundWeaponItemsCoverage ; le repli lui-meme est legitime tant que le negatif tient",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_impulsion_fusionnee_dans_le_geste",
+        "Fait": "deux lectures d'impulsion de capacite sont-elles UN geste ou DEUX",
+        "Mecanisme": "ecart <= abilityImpulseEpisodeGapUS (1 s) depuis la DERNIERE lecture : la seconde est absorbee",
+        "Condition": "film_muet",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/document_ability_impulses.go",
+            "Ancre": "last[r.Slot] = r.TimestampUS",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "aucune tant que le film ne borne pas un geste ; le COMPTE des fusions est ce qui manque",
+        "CritereRetrait": "fusions comptees dans AbilityImpulseCoverage ; retrait si le film s'avere porter une borne de geste",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_rang_capacite_vie_elargie",
+        "Fait": "de quel equipement parle une impulsion ou une charge, quand l'instant tombe en bord de vie",
+        "Mecanisme": "les bornes de la vie sont elargies de lifeGapUS (5 s) des deux cotes avant de chercher le rang i48",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/document_ability_impulses.go",
+            "Ancre": "if int64(at)+lifeGapUS >= l.from && int64(at) <= l.to+lifeGapUS {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2, pas 2 : cabler le compteur, mesurer le residu, puis retrait sec s'il est nul",
+        "CritereRetrait": "0 elargissement necessaire sur les 8 builds — RESIDU NON MESURE (compteur non cable au 2026-09-16 ; le 1.9.13 a fait tomber les grandeurs voisines sans les annuler)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_porteur_anonyme_sans_fin_par_mort",
+        "Fait": "un portage d'objet tenu s'est-il termine par la mort de son porteur",
+        "Mecanisme": "porteur sans xuid : FinParMort est affirme FAUX, sans distinguer « pas de mort » de « porteur inconnu »",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/held_object_carry.go",
+            "Ancre": "if p.XUID == 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.5 (le porteur du crane lu au canal des armes tenues) et le registre d'identite 1.6",
+        "CritereRetrait": "0 porteur sans xuid sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_portage_ferme_a_la_prise_suivante",
+        "Fait": "quand se termine un portage d'objet tenu",
+        "Mecanisme": "aucune mort du porteur dans l'intervalle : la periode est fermee a la prise suivante, fut-elle d'un AUTRE slot",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/held_object_carry.go",
+            "Ancre": "func premiereMortDans(mortsDe map[uint64][]int, p HeldObjectPeriod, avant int) (int, bool) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.5",
+        "CritereRetrait": "question NE7 de la table (D) de l'audit instruite : combien de morts de porteur sont suivies d'une emission du canal ? Le repli tombe si le canal emet",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_plafond_grenade_par_defaut",
+        "Fait": "le plafond de grenades porte par un joueur, qui borne la lecture d'inventaire",
+        "Mecanisme": "appelant sans plafond : DefaultGrenadeMax (2) s'applique, quel que soit le mode et la carte",
+        "Condition": "inconditionnel",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/inventory_decode.go",
+            "Ancre": "grenMax = DefaultGrenadeMax",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (profil par build et par carte) : un plafond est une donnee de mode, pas une constante",
+        "CritereRetrait": "le plafond vient du manifeste de mode ; 0 recours au defaut sur les 8 builds",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_largeurs_axe_par_defaut_conservees",
+        "Fait": "les largeurs de dequantification des objets du monde pour CE film",
+        "Mecanisme": "entree de catalogue sans largeurs : les largeurs par defaut sont conservees — et ce sont celles de Cliffhanger",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/world_object_precision.go",
+            "Ancre": "if e.AxisWidths[0] == 0 || e.AxisWidths[1] == 0 || e.AxisWidths[2] == 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.4 (largeurs par carte et par build, donnees de profil)",
+        "CritereRetrait": "0 film cuit sur les largeurs par defaut ; le catalogue porte les largeurs de toutes les cartes du parc",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      }
+    ]
+  },
+  {
+    "Nom": "replay/identites",
+    "Replis": [
+      {
+        "Nom": "repli_identite_premier_occupant_du_siege",
+        "Fait": "quel joueur occupait un slot a un instant donne, pour un lecteur qui demande un xuid",
+        "Mecanisme": "aucune vie nommee ne couvre l'instant : le PREMIER occupant nomme du siege est servi (sauf slot ambigu, ou le registre se tait)",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/identity_registry_pont.go",
+            "Ancre": "if r.SlotAmbiguous[slot] {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "le lot qui donnera une vie nommee a tout instant d'un siege occupe (suite du registre d'identite, M2 ou M3)",
+        "CritereRetrait": "0 recours au premier occupant sur les 8 builds : toute demande tombe dans une vie couvrante",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_nom_piste_par_le_pont",
+        "Fait": "le xuid d'une piste publiee qui ne porte pas de nom lu",
+        "Mecanisme": "le pont slot -> joueur est interroge, et son verdict devient le nom de la piste",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/published_tracks.go",
+            "Ancre": "return strconv.FormatUint(x, 10)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 (le registre d'identite prend la table du film comme lien direct) : le compte doit tomber avec la couverture du lien direct",
+        "CritereRetrait": "coverage.identity.coverage.filmTable a 100 % et 0 piste nommee par le pont sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_identite_piste_meilleur_recouvrement",
+        "Fait": "a quelle vie nommee appartient une piste quand PLUSIEURS vies du meme slot la recouvrent",
+        "Mecanisme": "la vie dont le recouvrement temporel avec la piste est le plus grand gagne, sans aucun seuil minimal",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/identity.go",
+            "Ancre": "bestOverlap, bestXUID = ov, l.xuid",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2 : abstention explicite des deux candidats, puis retrait de l'entree (le compte est nul depuis le 2026-09-15)",
+        "CritereRetrait": "0 piste arbitree par recouvrement sur les 8 builds : TENU le 2026-09-16 (0/8, goldens d'assemblage) ; reste a confirmer au corpus gate",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_vie_coupee_au_trou_de_replication",
+        "Fait": "ou finit une vie de joueur",
+        "Mecanisme": "un trou de positions de plus de lifeGapUS (5 s) ferme la vie courante et en ouvre une neuve — pour le seul joueur dont le film n'ecrit AUCUNE mort (site 1), ou pour TOUTES les vies quand la table d'index des joueurs est vide (site 2)",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/lives_decoupe.go",
+            "Ancre": "in.fb.Declenche(fallback.NomVieCoupeeAuTrouDeReplication)",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/tracks_publication.go",
+            "Ancre": "in.fb.DeclencheN(fallback.NomVieCoupeeAuTrouDeReplication, coupuresDuSeuil(vies))",
+            "Condition": "section_absente"
+          }
+        ],
+        "DatePose": "2026-09-14",
+        "CibleRetrait": "lot M2 (retrait sec si le compte reste nul au corpus gate — D14 d)",
+        "CritereRetrait": "0 coupure decidee par le seuil au corpus gate ; `vies_un_echantillon_test.go` rend 0 orpheline sur les 8 builds",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_mort_ecartee_hors_equipe_de_base",
+        "Fait": "une mort entre-t-elle dans le contexte d'isolement publie",
+        "Mecanisme": "la victime n'est dans aucune equipe de la feuille de match : la mort est ecartee ENTIEREMENT",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/death_context.go",
+            "Ancre": "if !dansUneEquipe {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.7 (l'equipe vient du film, V4) porte jusqu'a ce calque",
+        "CritereRetrait": "l'equipe vient du film et non de la base ; 0 mort ecartee sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_coequipier_hors_de_vue_par_defaut",
+        "Fait": "l'etat d'un coequipier a l'instant d'une mort",
+        "Mecanisme": "ni visible ni en attente : « hors de vue » par defaut de fin de fonction — indistinct de « canal non lu »",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/death_context.go",
+            "Ancre": "return EtatHorsDeVue",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion du contexte d'isolement (hors famille 1.9 a ce jour)",
+        "CritereRetrait": "un quatrieme etat NOMME « non lu » separe l'ignorance de la mesure, et son compte tombe a 0",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_cap_vehicule_vitesse_insuffisante",
+        "Fait": "le cap publie d'un vehicule",
+        "Mecanisme": "le film ne rend pas de cap sur ce chemin (mode non publie ou roulis relatif) : le cap est DEDUIT de la velocite i1, et sous vehicleMinSpeedMPS (5 m/s) le dernier connu est reporte par l'appelant",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/vehicle_heading.go",
+            "Ancre": "return vehicleVelocityHeadingOf(p)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "le mode 0 d'i2 rendu publiable (sa direction lue n'est pas verticale sur les vieux builds : |z| median 0,585 contre 0,979 — a instruire avant tout elargissement), ou la reconstruction du chemin delta par registre d'etat par entite",
+        "CritereRetrait": "part de `capParVelocite` nulle au journal `rejeu : source du cap des vehicules` sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_episode_occupation_par_trou_de_position",
+        "Fait": "un joueur etait-il a bord d'un vehicule, de quand a quand, et duquel",
+        "Mecanisme": "aucun evenement d'embarquement ou de sortie n'explique le trou : l'episode est reconstruit du TROU de position (>= 3 s) et du vehicule le plus proche sous 1,5 m en plan",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/vehicle_rides.go",
+            "Ancre": "repli int",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/vehicle_rides_build.go",
+            "Ancre": "b.st.repli++",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 2.2 (M2, les lecteurs recoivent le profil : cablage des compteurs) puis le chantier vehicules — le lot 1.9.10 (2026-09-16) a lu la fin de vie au dead-state SANS convertir l episode d occupation par trou de position (cible reecrite a sa fusion)",
+        "CritereRetrait": "0 episode de provenance `proximity` sur les 8 builds une fois les montees a bord lues sur tous les sieges",
+        "CompteurBranche": false,
+        "CibleComptage": "PUBLIE depuis le schema 67 (`coverage.vehicles.ridesProximity`) ; son entree dans `coverage.fallbacks` viendra avec le cablage general des compteurs"
+      },
+      {
+        "Nom": "repli_chassis_vehicule_marqueur_neutre",
+        "Fait": "la famille de sprite d'un vehicule dont le chassis n'est pas dans la table",
+        "Mecanisme": "famille VIDE : le vehicule reste publie et le client dessine un marqueur neutre",
+        "Condition": "chassis_absent_de_la_table",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/vehicle_families.go",
+            "Ancre": "VALEUR INCONNUE = FAMILLE VIDE",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/document_vehicles_coverage.go",
+            "Ancre": "fb.Declenche(fallback.NomChassisVehiculeMarqueurNeutre)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 2.2 (M2) puis le chantier vehicules — 22 chassis restes sans piece ecrite au lot 1.9.9 (2026-09-16) : chaque chassis prouve entre en table sous sa famille, ce repli tombe quand il n en reste aucun (cible reecrite a la fusion, le lot 1.9.10 n en nommait aucun)",
+        "CritereRetrait": "coverage.vehicles.unknownChassis a 0 sur le parc ; tout chassis restant est nomme en table avec sa famille",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_chunk_de_replication_saute",
+        "Fait": "la table index de joueur -> xuid, lue dans les chunks de replication",
+        "Mecanisme": "un chunk illisible ou dont la resolution est vide est SAUTE, sans distinguer les deux cas",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/player_index.go",
+            "Ancre": "raw, _, ok := grammar.FilmChunkAt(film, c)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 (la table du film remplace cette voie) : le repli tombe quand la table de chunk_00 est le lien direct partout",
+        "CritereRetrait": "0 chunk saute sur les 8 builds, ou la voie entiere retiree avec ses tests",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_drapeau_seul_en_jeu",
+        "Fait": "quel drapeau une prise concerne",
+        "Mecanisme": "aucun drapeau au sol ne convient : s'il n'en reste qu'UN en jeu, c'est lui",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/flag_assign.go",
+            "Ancre": "if f := g.seulEnJeu(recevable); f >= 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.6 (le drapeau qui rentre pris dans ev.flag, deja nomme en amont)",
+        "CritereRetrait": "0 recours a la regle « seul en jeu » une fois ev.flag lu ; coverage.flagCarries.ambiguousReturns a 0",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 1.9.6"
+      },
+      {
+        "Nom": "repli_invariant_propre_drapeau_muet",
+        "Fait": "un portage designe-t-il le drapeau de l'equipe de son porteur (ce qu'aucune regle du mode n'autorise)",
+        "Mecanisme": "l'invariant rend FAUX des qu'une des deux equipes est inconnue : il se tait au lieu de refuser",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/flag_assign.go",
+            "Ancre": "func sonPropreDrapeau(spawns []FlagSpawn, f int, equipe int, connue bool) bool {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.7 (l'equipe vient du film) : l'equipe du porteur est desormais lue, donc le silence doit disparaitre",
+        "CritereRetrait": "0 portage dont l'equipe du porteur est inconnue sur les 8 builds (coverage.flagCarries.carrierTeamUnknown a 0)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_index_drapeau_zero_pour_tous",
+        "Fait": "l'index de drapeau de CHAQUE portage d'un film sans socle catalogue",
+        "Mecanisme": "aucun socle : tous les portages recoivent flagIndex = 0",
+        "Condition": "section_absente",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/flag_assign.go",
+            "Ancre": "raws[i].flagIndex = 0",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de completion du catalogue de socles (hors famille 1.9)",
+        "CritereRetrait": "0 film CTF sans socle catalogue sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_position_lacher_prend_la_prise",
+        "Fait": "ou un drapeau a ete lache",
+        "Mecanisme": "aucun point publie a la frame de fin : la position de LACHER prend celle de la PRISE",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/flag_carries.go",
+            "Ancre": "r.x1, r.y1 = p0.X, p0.Y",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2 : mesurer d'abord (le canal drapeau n'est exerce par AUCUN des 8 goldens), puis retrait sec si le compte est nul au corpus gate",
+        "CritereRetrait": "0 portage dont la fin n'a pas de point publie, mesure sur un corpus qui PORTE le calque drapeau (les 8 goldens ne l'exercent pas — verifie le 2026-09-16)",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_piste_drapeau_sans_pont_ecartee",
+        "Fait": "quelles pistes peuvent porter un drapeau",
+        "Mecanisme": "le pont ne nomme pas le slot : la piste est ecartee en silence, sans etre comptee comme le REFUS nomme voisin (AmbiguousSlot)",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/flag_carrier_tracks.go",
+            "Ancre": "continue // le pont ne nomme pas ce slot : aucun porteur a inventer",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 (lien direct par la table du film)",
+        "CritereRetrait": "0 piste ecartee faute de pont sur les 8 builds",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_zone_camp_sans_roster",
+        "Fait": "a quel camp crediter une capture de zone",
+        "Mecanisme": "roster vide : TOUTE valeur non neutre du canal compte comme une capture du camp",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/zone_states_owner.go",
+            "Ancre": "case len(teams) == 0 && v != zoneNeutralOwner:",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.7 (l'equipe vient du film) porte au calque des zones — cf. D3 (1.7), ZoneInput.TeamByXUID prend TOUJOURS l'equipe de la base",
+        "CritereRetrait": "le roster des zones vient du film ; 0 film a roster vide sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_zone_proprietaire_sans_roster",
+        "Fait": "quel camp possede une zone a un instant",
+        "Mecanisme": "roster vide : toute valeur <= 1 est tenue pour un camp",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/zone_states_owner.go",
+            "Ancre": "case len(teams) == 0 && v <= 1:",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "meme cible que repli_zone_camp_sans_roster",
+        "CritereRetrait": "0 film a roster vide sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_zone_camp_de_capture_deduit_de_l_issue",
+        "Fait": "quel CAMP pousse la jauge d'une zone, rampe par rampe",
+        "Mecanisme": "aucun canal POUSSEUR n'a ete elu pour cette zone : le camp est DEDUIT de l'issue — le proprietaire juste apres le sommet d'une rampe ABOUTIE. Une rampe avortee reste alors sans camp",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/zone_states_capturer.go",
+            "Ancre": "fb.Declenche(fallback.NomZoneCampDeCaptureDeduitDeLIssue)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-21",
+        "CibleRetrait": "un critere d'election qui n'exige pas deux rampes abouties — par exemple l'election du POUSSEUR une fois pour le film (les trois zones d'une carte partagent la meme structure de blocs) au lieu d'une election par zone",
+        "CritereRetrait": "0 declenchement sur les films a zones du parc",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_colline_votes_periode_entiere",
+        "Fait": "ou se trouve la colline designee d'une periode",
+        "Mecanisme": "aucune rampe de capture dans la periode : les votes sont repris sur TOUTE la periode, rampes comprises ou non",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/zone_states_hill.go",
+            "Ancre": "votes = hillVotes(zones, pts, p.t0, p.t1)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion du calque des collines (hors famille 1.9 a ce jour)",
+        "CritereRetrait": "0 periode sans rampe sur les films a collines du corpus",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_colline_dernier_intervalle_ouvert",
+        "Fait": "jusqu'a quand court la propriete d'une colline",
+        "Mecanisme": "le dernier groupe court jusqu'a l'infini (borne ouverte a droite), faute d'emission de fin",
+        "Condition": "film_muet",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/zone_states_hill_owners.go",
+            "Ancre": "t1 := int(^uint(0) >> 1)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "aucune tant que le canal reste un ETAT sans emission de fin ; le COMPTE est ce qui manque",
+        "CritereRetrait": "intervalles ouverts comptes dans ZonesCoverage ; retrait si une fin ecrite est etablie",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_crane_porteur_sans_vie_nommee",
+        "Fait": "un portage de crane est-il refuse faute de porteur present",
+        "Mecanisme": "le joueur n'a AUCUNE vie nommee : la porte laisse passer sans rien verifier",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/skull_carries.go",
+            "Ancre": "func (p carrierPresence) gate(xuid string, f0, f1 int) (int, int, bool) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.5 (le porteur du crane lu au canal des armes tenues)",
+        "CritereRetrait": "0 porteur sans vie nommee sur les films Oddball du corpus",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 1.9.5"
+      },
+      {
+        "Nom": "repli_armement_bombe_debut_a_zero",
+        "Fait": "l'instant de debut d'un armement de bombe commence avant la frame 0",
+        "Mecanisme": "la conversion en frame echoue : le debut est pose a 0",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/bomb_armings.go",
+            "Ancre": "startT, ok := c.frameOf(int(r.StartMS))",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion de l'origine du rejeu (coverage.originResolved)",
+        "CritereRetrait": "0 armement anterieur a la frame 0 sur les films d'Assaut du corpus",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_siege_du_remplacant_par_appariement_ordinal",
+        "Fait": "quelle fiche (siege) un joueur arrive en cours de partie occupe a l'ecran",
+        "Mecanisme": "le film ecrit un index NEUF au lieu de reprendre celui d'un partant : le k-ieme arrivant d'un camp est chaine sur le k-ieme siege que ce camp libere, a presences disjointes (modele des sieges du 2026-09-02, ramene au rang de repli)",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/sieges.go",
+            "Ancre": "roster[a].Seat, roster[a].SeatSource = roster[partants[k]].Seat, SeatSourceApparie",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-15",
+        "CibleRetrait": "le lot qui fermera la chaine `index -> xuid` d'un arrivant (D-remplacants du lot 1.7) ou M3 (divergences par build)",
+        "CritereRetrait": "coverage.seats.apparies a 0 et coverage.seats.reprisesEcrites egal au nombre de relais sur les temoins `e5adf7b2`, `bcb6d393`, `a521164d`, `11de8353` : le film publie alors lui-meme chaque reprise de siege",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      }
+    ]
+  },
+  {
+    "Nom": "killsource",
+    "Replis": [
+      {
+        "Nom": "repli_record_desynchronise_jete",
+        "Fait": "quels records d'un paquet entrent dans la marche des morts",
+        "Mecanisme": "un record dont la marche s'est desynchronisee est jete, et la marche du paquet s'arrete la",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/walk.go",
+            "Ancre": "if r.DesyncAt != -1 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (registre ECS par build) : une desynchronisation est une grammaire fausse, pas une donnee",
+        "CritereRetrait": "0 record desynchronise sur les 8 builds une fois le registre ECS resolu par build",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_deadstate_hors_bande_bipede",
+        "Fait": "un dead-state lu est-il credible",
+        "Mecanisme": "slot hors de la bande de slots bipede du film : le dead-state est rejete par un `continue` nu",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/walk.go",
+            "Ancre": "if d.slot < res.bipLo || d.slot > res.bipHi {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.5 (la bande de slots bipede par build)",
+        "CritereRetrait": "la bande vient du profil du build ; 0 rejet hors bande sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_deadstate_indice_hors_roster",
+        "Fait": "un dead-state lu designe-t-il un joueur du roster",
+        "Mecanisme": "indice de victime ou de tueur hors [0, nPlay) : rejete par un `continue` nu",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/walk.go",
+            "Ancre": "if d.dead.EnumA < 0 || int(d.dead.EnumA) >= r.nPlay {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 (le kill feed prend la table du film) porte jusqu'au rejet",
+        "CritereRetrait": "0 rejet pour indice hors roster sur les 8 builds ; un indice hors domaine est un defaut de largeur, pas une donnee",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_deadstate_categorie_hors_enum",
+        "Fait": "la categorie de mort d'un dead-state",
+        "Mecanisme": "valeur hors de l'enumeration connue (> 9) : le dead-state est rejete par un `continue` nu",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/walk.go",
+            "Ancre": "if d.dead.Val0c > 9 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (enumeration par build)",
+        "CritereRetrait": "0 categorie hors enumeration sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_localisation_largeur_libre",
+        "Fait": "ou commencent les records d'un paquet dont la signature de largeur a echoue",
+        "Mecanisme": "seconde passe a LARGEUR LIBRE, essayee seulement apres l'echec de la signature",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/walk.go",
+            "Ancre": "func locateFallback(pl []byte, w *grammar.World, cfg grammar.FrameConfig) int {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/object_deaths_march.go",
+            "Ancre": "func marchLocateFallback(pay []byte, w *World, cfg FrameConfig) int {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.4 (largeurs calibrees par la carte et le build)",
+        "CritereRetrait": "0 recours a la largeur libre sur les 8 builds une fois les largeurs prises au profil",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_roster_nom_invente",
+        "Fait": "la liste de noms sur laquelle la bijection indice -> joueur se resout",
+        "Mecanisme": "moins de noms que de sieges : des noms ?N sont fabriques pour rendre le probleme d'affectation carre",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/roster.go",
+            "Ancre": "r.names = append(r.names, fmt.Sprintf(\"?%d\", len(r.names)))",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 (la table du film donne le lien indice -> joueur) : un nom fabrique ne doit plus servir",
+        "CritereRetrait": "0 nom ?N fabrique sur les 8 builds quand la table du film est lue",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_roster_indice_hors_bijection",
+        "Fait": "le nom porte par un indice que la bijection ne resout pas",
+        "Mecanisme": "la chaine « ? » est rendue ; pour la victime et le tueur elle part en base telle quelle",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/roster.go",
+            "Ancre": "return \"?\"",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte jusqu'a l'ecriture en base",
+        "CritereRetrait": "0 ligne de mort ecrite avec un nom « ? » sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_bijection_hongroise_du_feed",
+        "Fait": "le lien indice de replication -> joueur, pour les indices que la table du film ne donne pas",
+        "Mecanisme": "affectation hongroise sur les votes du kill feed, puis raffinement local",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/bijection.go",
+            "Ancre": "r.table.Inferred = len(free)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-14",
+        "CibleRetrait": "cloture de M1 puis recuisson : la table du film (lot 1.8) doit couvrir 100 % des indices",
+        "CritereRetrait": "RosterTable.Inferred a 0 sur le parc apres la recuisson de cloture M1",
+        "CompteurBranche": false,
+        "CibleComptage": "cloture de M1, avec la recuisson (le compte existe deja sous RosterTable.Inferred ; il reste a le publier sous ce nom)"
+      },
+      {
+        "Nom": "repli_couple_recolle_sur_le_voisin",
+        "Fait": "la VICTIME d'un kill que le kill feed porte sans mort en face",
+        "Mecanisme": "la mort d'un instant VOISIN (deux instants au plus) est prise pour victime de ce kill",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/feed_couples.go",
+            "Ancre": "func (res *resolveurDeCouples) repliRecollageSurLeVoisin(i int) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-15",
+        "CibleRetrait": "cloture de M1 puis lot 3.6 : la table du film doit couvrir 100 % des indices, et la chaine d'evenements ne doit plus s'arreter",
+        "CritereRetrait": "CoupleStats.Recolles a 0 sur les 8 builds et sur le corpus gate",
+        "CompteurBranche": false,
+        "CibleComptage": "cloture M1 ou pas 2 de M2 : le compte EXISTE deja sous `CoupleStats.Recolles` et sort en `killsource_couple_recolle` ; il reste a le publier sous ce nom dans `coverage.fallbacks[]`, ce qui demande au compteur de traverser `replaybuild/kills.go`"
+      },
+      {
+        "Nom": "repli_gamertag_par_xuid_brut",
+        "Fait": "le nom affiche d'un joueur du kill feed dont le gamertag manque",
+        "Mecanisme": "la forme xuid:<N> remplace le nom",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/feed.go",
+            "Ancre": "name := gt[e.XUID]",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte : la table du film nomme les joueurs a zero mort",
+        "CritereRetrait": "0 nom sous la forme xuid:<N> sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_chunk_du_pied_par_argmax",
+        "Fait": "quel chunk d'un film est le PIED (kill feed, recompenses, evenements de mode)",
+        "Mecanisme": "chaque chunk est parse en evenements de highlight et celui qui porte le PLUS de kills gagne",
+        "Condition": "non_resolu",
+        "Ordre": "devant_la_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/feed.go",
+            "Ancre": "if nk > bestN {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.8 (le chunk du pied pris au type du manifeste)",
+        "CritereRetrait": "le type du manifeste decide ; l'argmax ne se declenche que sur un film sans manifeste, et son compte le dit",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 1.9.8"
+      },
+      {
+        "Nom": "repli_chaine_evenement_code_non_modelise",
+        "Fait": "la longueur du corps d'un evenement, donc la suite de la chaine",
+        "Mecanisme": "code hors des 28 modelises (95 codes sur 123) ou cfgIdx non resolu : la chaine s'arrete",
+        "Condition": "lecture_non_portee",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/eventbody.go",
+            "Ancre": "func evBody(r *curseurEv, code int, gate15 bool) bool {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/eventchain.go",
+            "Ancre": "if c < 0 || c >= len(presRange) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.6 (les composants manquants, archetype par archetype)",
+        "CritereRetrait": "les 95 codes non modelises portes, ou leur longueur lue chez l'ecrivain ; 0 arret de chaine sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_type_de_chunk_perdu_du_manifeste",
+        "Fait": "le type de chaque chunk, dans le vocabulaire du decodeur de morts",
+        "Mecanisme": "la traduction du film ne recopie PAS Meta() : le type du manifeste est perdu, et l'argmax le remplace en aval",
+        "Condition": "inconditionnel",
+        "Ordre": "devant_la_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/chunks.go",
+            "Ancre": "f := &film{src: src, packets: packetsOf(src)}",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.9.8 (cause racine de l'argmax du pied)",
+        "CritereRetrait": "Meta() voyage jusqu'au decodeur ; repli_chunk_du_pied_par_argmax se declenche alors seulement sans manifeste",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 1.9.8"
+      },
+      {
+        "Nom": "repli_mort_non_revendiquee_la_plus_proche",
+        "Fait": "a quel couple du kill feed rattacher une mort que personne ne revendique",
+        "Mecanisme": "aucune identite de paquet en face : le candidat le plus proche EN TEMPS dans la fenetre de 2,5 s gagne",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/hybrid.go",
+            "Ancre": "func (p *pass) choisirNonRevendiquee(e feedEvent) (sourcedCandidate, bool, bool) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/hybrid.go",
+            "Ancre": "if d := absMS(dt); d < bestDT {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.6 (composants manquants) : une mort non revendiquee n'aura de lecture que si le film nomme son instant autrement que par le kill feed",
+        "CritereRetrait": "ApparStats.NonRevendiqueeFenetre a 0 sur les 8 builds et sur le corpus gate",
+        "CompteurBranche": false,
+        "CibleComptage": "cloture M1 ou pas 2 de M2 : le compte EXISTE sous `ApparStats.NonRevendiqueeFenetre` et sort en `killsource_appariement_non_revendiquee_fenetre` ; il reste a le publier sous ce nom dans `coverage.fallbacks[]`, ce qui demande au compteur de traverser `replaybuild/kills.go`"
+      },
+      {
+        "Nom": "repli_mort_de_bot_premier_candidat",
+        "Fait": "quel dead-state correspond a la mort d'un bot, ou a une mort causee par un bot",
+        "Mecanisme": "aucune identite de paquet en face : le PREMIER candidat de la fenetre de 2,5 s gagne, l'unicite n'est pas verifiee",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/match.go",
+            "Ancre": "func (c *decodeCtx) resolveBotDeaths() []botMatch {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/match.go",
+            "Ancre": "func (c *decodeCtx) apparierMortDeBot(m *botMatch) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/match.go",
+            "Ancre": "func (c *decodeCtx) resolveBotKillerDeaths(all []sourcedCandidate) []botKillerMatch {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.6 (composants manquants) : la chaine d'evenements doit atteindre le kill-event 85 des morts de bot",
+        "CritereRetrait": "ApparStats.BotFenetre a 0 sur les 8 builds et sur le corpus gate",
+        "CompteurBranche": false,
+        "CibleComptage": "cloture M1 ou pas 2 de M2 : le compte EXISTE sous `ApparStats.BotFenetre` et sort en `killsource_appariement_bot_fenetre` ; il reste a le publier sous ce nom dans `coverage.fallbacks[]`, ce qui demande au compteur de traverser `replaybuild/kills.go`"
+      },
+      {
+        "Nom": "repli_appariement_par_fenetre_temporelle",
+        "Fait": "quel instant du kill feed un dead-state lu decrit",
+        "Mecanisme": "demi-fenetre de 2,5 s (`tolMS`) : le premier instant du feed portant le meme couple gagne, sans aucun lien ecrit",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/paquet_identite.go",
+            "Ancre": "func choisirParIdentitePuisFenetre(n int, identite, fenetre, couple func(int) bool) (int, bool) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/match.go",
+            "Ancre": "func (c *decodeCtx) matchExact(cd candidate) (*feedEvent, bool) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/match.go",
+            "Ancre": "func (c *decodeCtx) matchVictim(cd candidate) (*feedEvent, bool) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/assist.go",
+            "Ancre": "func (c *decodeCtx) killEventsFor(k *Kill, s *assistScan, used []bool) ([]int, bool) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-16",
+        "CibleRetrait": "cloture de M1 puis lot 3.6 : tout instant du kill feed doit porter un kill-event 85 aux deux indices EPINGLES",
+        "CritereRetrait": "ApparStats.Fenetre et AssistStats.ParLaFenetre a 0 sur les 8 builds et sur le corpus gate — le site de l'assistant y est DEJA a zero",
+        "CompteurBranche": false,
+        "CibleComptage": "cloture M1 ou pas 2 de M2 : le compte EXISTE sous `ApparStats.Fenetre` et `AssistStats.ParLaFenetre`, et sort en `killsource_appariement_fenetre` et `killsource_assistant_fenetre` ; il reste a le publier sous ces noms dans `coverage.fallbacks[]`, ce qui demande au compteur de traverser `replaybuild/kills.go`"
+      },
+      {
+        "Nom": "repli_sonde_non_lancee_porte_relachee",
+        "Fait": "le diagnostic de couverture publie avec le resultat du decodage",
+        "Mecanisme": "couverture jugee complete : la sonde a porte relachee n'est pas lancee et Probe reste nil — indiscernable d'une sonde a zero",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/decode.go",
+            "Ancre": "if cov.Covered < cov.RealPairs {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de cloture du diagnostic killsource (hors famille 1.9)",
+        "CritereRetrait": "Probe distingue « non lancee » de « lancee, zero trouve » ; le repli disparait avec l'ambiguite",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_libelle_de_source_autres",
+        "Fait": "le libelle publie d'une source de mort",
+        "Mecanisme": "nom vide ou non publiable : la chaine « Autres » est publiee a sa place",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/label.go",
+            "Ancre": "if l.Name != \"\" && l.Publishable() {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "completion du catalogue de sources (206 tags sur 468 concernes, audit 0.E)",
+        "CritereRetrait": "0 libelle « Autres » publie sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_xuid_vide_pour_nom_inconnu",
+        "Fait": "le xuid de la victime d'une mort ecrite en base",
+        "Mecanisme": "le nom ne se resout dans aucune table : un xuid VIDE est rendu et la mort est ecrite sans xuid de victime",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/identities.go",
+            "Ancre": "return \"\", nom",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte jusqu'a l'ecriture (la table du film nomme les joueurs a zero mort)",
+        "CritereRetrait": "0 ligne de `match_deaths` sans xuid de victime sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_homonymes_sans_xuid",
+        "Fait": "le xuid des participants qui portent le MEME gamertag dans un match",
+        "Mecanisme": "aucun des deux n'est retenu — ecrire les morts de l'un sous le xuid de l'autre serait pire",
+        "Condition": "contradiction",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/roster.go",
+            "Ancre": "ambigus := map[string]bool{}",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte : la table du film donne l'index, pas le nom, donc l'homonymie cesse d'etre un obstacle",
+        "CritereRetrait": "0 match a homonymes non resolus sur le parc ; le repli est SAIN, c'est son silence qui ne l'est pas",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_indice_en_collision_jete",
+        "Fait": "le joueur d'un indice de replication, pour les tirs et les touches",
+        "Mecanisme": "deux xuids sur le meme indice : les DEUX sont jetes",
+        "Condition": "contradiction",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/shots.go",
+            "Ancre": "out[pi] = \"\"",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte aux tirs et aux touches (D3 (1.8) : cette voie sert `match_weapon_shots` et `match_weapon_accuracy`)",
+        "CritereRetrait": "l'indice vient de la table du film ; 0 collision sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_premiere_occurrence_sans_concordance",
+        "Fait": "quel motif de xuid retenir quand un chunk en porte plusieurs",
+        "Mecanisme": "la PREMIERE occurrence gagne, sans exiger que les suivantes concordent",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/shots.go",
+            "Ancre": "continue // premiere occurrence gagnante",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte aux tirs et aux touches",
+        "CritereRetrait": "l'indice vient de la table du film ; la voie par motifs est retiree avec ses tests",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_precision_par_arme_passe_sautee",
+        "Fait": "la precision par arme d'un match",
+        "Mecanisme": "cache de films non configure : toute la passe est sautee, en best-effort silencieux",
+        "Condition": "section_absente",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/hits.go",
+            "Ancre": "numerateur non configure (chemin live sans cache disque)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "aucune (configuration d'exploitation) ; le COMPTE est ce qui manque",
+        "CritereRetrait": "un compteur expvar dit combien de matchs passent sans numerateur film ; retrait sans objet",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_identite_pont_par_morts",
+        "Fait": "le nom d'un corps de bipede, quand le lien direct n'a pas pu etre lu",
+        "Mecanisme": "les creations de bipede sont illisibles (TOUTE erreur, y compris transitoire) : le registre retombe sur le pont par le fil des morts",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/positions.go",
+            "Ancre": "creations de bipede illisibles",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 (le registre d'identite prend la table du film comme lien direct)",
+        "CritereRetrait": "0 degradation sur le pont par morts dans les journaux du parc ; le lien direct couvre 100 % des corps",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_coequipiers_partis_constante_nulle",
+        "Fait": "le nombre de coequipiers PARTIS a l'instant d'une mort (`teammates_left`)",
+        "Mecanisme": "la colonne est ecrite a 0 sur toutes les lignes depuis le retrait de son producteur, indiscernable d'une mesure",
+        "Condition": "inconditionnel",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/isolation_facts.go",
+            "Ancre": "TeammatesLeft:  0,",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "retrait de la colonne (append-only, ADR 0026 : la colonne reste, c'est son ECRITURE qui doit devenir nulle explicite)",
+        "CritereRetrait": "la colonne cesse d'etre ecrite, ou un producteur la remplit ; un zero constant ne se distingue d'une mesure par rien",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      }
+    ]
+  },
+  {
+    "Nom": "killsource/carte",
+    "Replis": [
+      {
+        "Nom": "repli_carte_absente_largeurs_par_defaut",
+        "Fait": "les largeurs d axe et la largeur d index de plage du chemin absolu de position, pour la marche des morts",
+        "Mecanisme": "aucune entree de catalogue n a ete passee a `killsource.Decode` : l invariant du profil est conserve, c est-a-dire les largeurs d UNE carte (`cliffhanger`, 13/13/14) appliquees a celle du match",
+        "Condition": "section_absente",
+        "Ordre": "devant_la_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/decode.go",
+            "Ancre": "if !c.calib.CarteLue {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-17",
+        "CibleRetrait": "lot qui rendra l entree de catalogue obligatoire a `killsource.Decode` (un film dont la carte est inconnue serait alors mis de cote plutot que decode aux largeurs d une autre — cf. D1 (cloture M2), question ouverte au pilote)",
+        "CritereRetrait": "0 appel de production sans `Options.Carte` ; la CLI et les instruments la resolvent eux aussi, ou disent pourquoi ils ne le peuvent pas",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_distances_de_touche_desactivees",
+        "Fait": "la distance tireur -> victime de chaque touche",
+        "Mecanisme": "carte hors catalogue, ou positions de bipedes indisponibles : les distances sont desactivees, les touches restent comptees",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/hits.go",
+            "Ancre": "carte hors catalogue de bornes, distances desactivees",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "le lot qui rallume la precision par arme : tant que la passe ne tourne pas, ses trois compteurs restent a zero par construction et ne prouvent rien",
+        "CritereRetrait": "passe rallumee, puis 0 match a distances desactivees sur le parc pour les trois causes",
+        "CompteurBranche": false,
+        "CibleComptage": "compteurs expvar deja cables (trois causes) ; `fallback.Compteur` au pas 2 de M2 si la passe rejoint une cuisson"
+      },
+      {
+        "Nom": "repli_carte_premier_nom_resolu",
+        "Fait": "quelle carte du catalogue decrit CE match",
+        "Mecanisme": "les identites candidates sont essayees dans l'ordre et la PREMIERE qui resout gagne, sans arbitrage",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/sync/killcollector/map_identity.go",
+            "Ancre": "if entry, err := c.mapBounds.Lookup(name); err == nil {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "un lot de qualite du registre des matchs (arbitrage entre `asset_translations` et `match_registry.map_name`), ou lot 3.x si le profil par carte rend l'identite sans la base",
+        "CritereRetrait": "0 match du parc ou deux noms candidats resolvent DES ENTREES DIFFERENTES du catalogue — mesure a faire avant tout arbitrage",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      }
+    ]
+  },
+  {
+    "Nom": "killsource/calibration",
+    "Replis": [
+      {
+        "Nom": "repli_largeur_mot_de_poignee_inferee",
+        "Fait": "la largeur du mot de poignee lu dans la queue de position d un record (`Traversal.IndexW`)",
+        "Mecanisme": "aucune source lue : les trois largeurs candidates sont scorees AU TRIPLET LU de la carte (le monde que la production decode) sur le nombre de records de bipede lus sans desynchronisation ; la meilleure n est retenue QUE si elle domine la mediane d un facteur 2, sinon l invariant 1 tient",
+        "Condition": "non_resolu",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/calibrate.go",
+            "Ancre": "res.Profil.Mouvement.Traversal.IndexW = retenu",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-17",
+        "CibleRetrait": "lot qui RELEVERA la largeur du mot de poignee CHEZ L ECRIVAIN — le bitlen du compte de poignees de `FUN_1406d3140` — et la fera entrer au profil par une cle que le film ecrit, comme la loi des largeurs d axe y est entree",
+        "CritereRetrait": "`calibration.PoigneeDiscriminee` cesse d etre le juge : la valeur vient d une lecture sur les 8 builds du corpus, le balayage devient ORACLE (il compte ses desaccords avec elle, il n ecrit plus), et `replay-equiv` ne bouge sur AUCUNE des trois etapes derriere i0 (`abilityImpulses`, `grappleReads.stats`, `pads`) sur les 20 films",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      }
+    ]
+  },
+  {
+    "Nom": "objectifs et construction",
+    "Replis": [
+      {
+        "Nom": "repli_enregistrement_statborg_abandonne",
+        "Fait": "quels enregistrements statborg d'une frame entrent dans la lecture",
+        "Mecanisme": "en-tete non reconnu, aucun composant decode, ou compteur hors domaine : l'enregistrement est abandonne par un `continue` muet",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/statborg.go",
+            "Ancre": "if len(comps) == 0 || !statCountersInDomain(comps) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "volet statborg du registre des reports (toujours ouvert) ; hors famille 1.9 a ce jour",
+        "CritereRetrait": "abandons comptes par cause et rapportes a la population lue ; retrait quand le compte est nul",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/), cf. note d'architecture"
+      },
+      {
+        "Nom": "repli_composants_statborg_arretes",
+        "Fait": "quels composants d'un enregistrement statborg sont lus",
+        "Mecanisme": "un composant non decodable arrete la boucle : les suivants du MEME enregistrement sont perdus sans trace",
+        "Condition": "lecture_non_portee",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/statborg.go",
+            "Ancre": "v, w, ok := decodeStatComponent(pay, q)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.6 (les composants manquants, archetype par archetype)",
+        "CritereRetrait": "0 arret en milieu d'enregistrement sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_manche_zero_decretee",
+        "Fait": "quelles manches d'un match sont REELLES",
+        "Mecanisme": "aucune manche n'est admise par les deux criteres : la manche 0 est DECRETEE reelle pour que le film reste lisible",
+        "Condition": "film_muet",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/statborg.go",
+            "Ancre": "out[0] = true",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/score_timeline.go",
+            "Ancre": "fb.Declenche(fallback.NomReplayMancheZeroDecretee)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "cloture de M2 (la revision a zero difference)",
+        "CritereRetrait": "0 film du corpus gate ou aucune manche n'est admise (le compteur publie en `coverage.fallbacks[]` le dit) ; retrait sec au jalon suivant si le compte reste nul",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_emission_hors_domaine_jetee",
+        "Fait": "quelles emissions d'un compteur nomme entrent dans la serie",
+        "Mecanisme": "valeur negative, ou canal B hors domaine du score de mode : l'emission est jetee par un `continue`",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/named_series.go",
+            "Ancre": "if val < 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion des series nommees (hors famille 1.9 a ce jour)",
+        "CritereRetrait": "emissions jetees comptees par cause ; une emission negative est un defaut d'alignement, pas une donnee a filtrer",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_manche_du_slot_sautee",
+        "Fait": "la serie cumulee d'un slot pour une manche",
+        "Mecanisme": "la plus longue sous-suite non decroissante est vide : la manche entiere du slot est sautee",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/named_series.go",
+            "Ancre": "kept := longestRun(pts, false)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "question NE17 de la table (D) de l'audit instruite (`longestRun` ecarte-t-il des points reels ?)",
+        "CritereRetrait": "0 manche de slot sautee sur les films multi-manches du corpus",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_table_identite_vide",
+        "Fait": "le pont slot statborg -> joueur, par les instants de mort",
+        "Mecanisme": "aucune mort fournie : une table VIDE est rendue, indiscernable d'un pont qui n'a rien pu resoudre",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_deaths.go",
+            "Ancre": "return map[int]string{}",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 porte a ce calque (la table du film donne le lien direct)",
+        "CritereRetrait": "0 pont vide faute de morts sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_mort_sans_xuid_ignoree",
+        "Fait": "quelles morts alimentent le fil par joueur",
+        "Mecanisme": "une mort sans xuid est ignoree par un `continue`",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_deaths.go",
+            "Ancre": "if d.XUID == \"\" {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte jusqu'a ce calque",
+        "CritereRetrait": "0 mort sans xuid sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_emission_du_compteur_de_morts_jetee",
+        "Fait": "la progression du compteur de morts d'un slot",
+        "Mecanisme": "valeur hors [0, maxDeathsPerSlot] : l'emission est jetee par un `continue`",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_deaths.go",
+            "Ancre": "if !ok || v.B < 0 || v.B > maxDeathsPerSlot {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion statborg",
+        "CritereRetrait": "0 emission hors domaine sur les 8 builds (une valeur hors domaine est un defaut d'alignement)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_debut_de_manche_au_minimum",
+        "Fait": "l'instant de debut d'une manche",
+        "Mecanisme": "hors consensus : le MINIMUM des instants observes fait office de debut",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_rounds.go",
+            "Ancre": "if cur, seen := min[r.Round]; !seen || r.TimeMS < cur {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "cloture de M2 (la revision a zero difference), avec la chaine des bornes de manche",
+        "CritereRetrait": "0 manche du corpus gate dont le debut vienne du minimum au lieu du consensus",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion des BORNES de manche (port cote analysis/, cf. note d architecture)"
+      },
+      {
+        "Nom": "repli_slot_abandonne_au_premier_arrive",
+        "Fait": "quel joueur occupe un slot statborg pour une manche, quand la feuille en propose plusieurs",
+        "Mecanisme": "premier arrive, premier servi : le slot deja attribue ou le joueur deja pris est abandonne",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_rounds.go",
+            "Ancre": "if _, deja := fusion[slot]; deja || pris[xuid] {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.6 porte a ce calque",
+        "CritereRetrait": "0 abandon par premier arrive sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion statborg (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_instant_sur_la_premiere_manche",
+        "Fait": "a quelle manche appartient un instant anterieur a toute manche connue",
+        "Mecanisme": "il retombe sur la PREMIERE manche",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/slotidentity_rounds.go",
+            "Ancre": "round := ri.starts[0].round",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "cloture de M2 (la revision a zero difference), avec la chaine des bornes de manche",
+        "CritereRetrait": "0 instant anterieur a la premiere manche une fois les bornes lues au consensus",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion des BORNES de manche (port cote analysis/, cf. note d architecture)"
+      },
+      {
+        "Nom": "repli_famille_objectif_vide",
+        "Fait": "la famille d'objectif d'un match, donc les actions nommees qu'il publiera",
+        "Mecanisme": "aucun mot-cle reconnu dans le nom de variante : famille vide, et le match ne publie AUCUNE action nommee",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/objectives/extract.go",
+            "Ancre": "return nil, ctl",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "question NE13 de la table (D) : le classement par `strings.Contains` sur le nom de variante est hors doctrine multi-titre (skill `halo-modes`)",
+        "CritereRetrait": "la famille vient du manifeste de titre ; 0 match a famille vide sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion des familles d'objectif (port cote analysis/)"
+      },
+      {
+        "Nom": "repli_assistant_non_resolu_abandonne",
+        "Fait": "l'assistant d'un frag publie dans les episodes d'equipement",
+        "Mecanisme": "le nom de l'assistant ne se resout pas en xuid : le champ reste vide et le frag est publie sans assistant",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/kills.go",
+            "Ancre": "ref.AssistXUID, ref.AssistKnown = aXUID, true",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte (la table du film nomme les indices)",
+        "CritereRetrait": "0 assistant non resolu sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_gamertag_premier_xuid_gagne",
+        "Fait": "le xuid porte par un gamertag, pour la resolution des frags",
+        "Mecanisme": "en cas de divergence, le PREMIER vu gagne",
+        "Condition": "contradiction",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/kills.go",
+            "Ancre": "if _, seen := out[d.Gamertag]; !seen {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte : un gamertag qui porte deux xuids est une contradiction a compter, pas a trancher",
+        "CritereRetrait": "0 divergence gamertag -> xuid sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_mort_neutre_sans_xuid_abandonnee",
+        "Fait": "quelles morts neutres entrent dans le fil publie",
+        "Mecanisme": "victime sans xuid : la mort est abandonnee (elle ne rencontrerait aucune piste)",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/replaybuild.go",
+            "Ancre": "if d.VictimXUID == 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.8 porte jusqu'au constructeur",
+        "CritereRetrait": "0 mort neutre sans xuid sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_repere_neutre_generique_conserve",
+        "Fait": "l'icone d'une mort neutre",
+        "Mecanisme": "nature non etablie par l'adaptateur d'assets : le fil garde son repere generique",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/replaybuild.go",
+            "Ancre": "kind, img, ok := adapter.NeutralDeathIcon(d.Source.Tag)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "completion de la table d'assets de morts neutres",
+        "CritereRetrait": "0 mort neutre sans icone nommee sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_relais_de_bot_abandonne",
+        "Fait": "quel remplacant herite des vies anonymes d'un siege",
+        "Mecanisme": "le xuid n'a pas la forme bid(N.0) : le relais est abandonne (un humain est nomme par le fil des morts)",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/replaybuild.go",
+            "Ancre": "if _, err := fmt.Sscanf(p.XUID, \"bid(%d.0)\", &id); err != nil {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "le lot qui fera nommer les vies d'un relais par le registre d'identite plutot que par la participation de la base",
+        "CritereRetrait": "0 vie anonyme restante sur un siege de bot relaye, sur les 8 builds, sans passer par `Succession`",
+        "CompteurBranche": false,
+        "CibleComptage": "le meme lot : le compteur n'a de sens qu'au site qui subsistera"
+      },
+      {
+        "Nom": "repli_participant_sans_xuid_retire",
+        "Fait": "quels joueurs de la feuille de match entrent dans le tableau des participants",
+        "Mecanisme": "un joueur sans xuid est retire du tableau par un `continue`",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/matchfacts.go",
+            "Ancre": "func participantsDuTableau(facts port.MatchFacts) []replay.Participant {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "M2 : le tableau des participants se derive du roster HORS LIGNE, deja complet, au lieu de la feuille de match",
+        "CritereRetrait": "0 joueur retire du tableau sur les 8 builds — NON MESURE (compteur non cable au 2026-09-16)",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_camp_inconnu_retire_de_la_table",
+        "Fait": "le camp de chaque joueur, pour le controle et les calques qui lisent encore la base",
+        "Mecanisme": "un camp inconnu (-1) n'entre PAS dans la table, ce qui le rend indistinct d'un joueur absent",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/matchfacts.go",
+            "Ancre": "if p.TeamID < 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 1.7 (V4) porte aux zones — cf. D3 (1.7) : ZoneInput.TeamByXUID prend TOUJOURS l'equipe de la base",
+        "CritereRetrait": "les calques prennent l'equipe du film ; la table de base ne sert plus que de controle",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_catalogue_de_zones_absent",
+        "Fait": "l'etat des zones d'un match",
+        "Mecanisme": "le titre n'a pas de table d'objectifs : le rejeu est publie SANS aucun etat de zone",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/zones.go",
+            "Ancre": "titre sans table d'objectifs",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "aucune (degradation gracieuse multi-titre, `ErrCapabilityNotSupported`) ; le COMPTE est ce qui manque",
+        "CritereRetrait": "coverage.zones distingue « titre sans table » de « carte hors catalogue » ; retrait sans objet",
+        "CompteurBranche": false,
+        "CibleComptage": "lot de conversion 1.9.x du fait, ou pas 2 de M2 (porteur du profil)"
+      },
+      {
+        "Nom": "repli_fraicheur_des_derivations_par_taille",
+        "Fait": "les derivations d'un artefact sont-elles a jour",
+        "Mecanisme": "comparaison de la REVISION et de la TAILLE en octets de l'artefact — compromis assume, pas une empreinte",
+        "Condition": "film_muet",
+        "Ordre": "sans_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/replaybuild/derivations_index.go",
+            "Ancre": "return m.Rev == DerivationsRev && int64(m.ArtifactBytes) == st.Size()",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 4.4 (la recuisson selective par couche) : une revision par calque remplace la taille",
+        "CritereRetrait": "la fraicheur se juge sur la revision de calque portee par le document, jamais sur une taille",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 4.4"
+      }
+    ]
+  },
+  {
+    "Nom": "filmdec",
+    "Replis": [
+      {
+        "Nom": "repli_cadre_de_marche_par_defaut_conserve",
+        "Fait": "la largeur du champ bas d identifiant de record (IDLowBits) sous laquelle la marche des morts d objet deroule CE film",
+        "Mecanisme": "profil de calibration PLAT (aucune largeur candidate ne domine son dauphin d un facteur 2 sur les paquets a evenements localises) : le cadre par defaut est conserve",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/object_deaths_calibrate.go",
+            "Ancre": "return base, true, meilleur, dauphin",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/vehicle_tracks.go",
+            "Ancre": "clock.fb.Declenche(fallback.NomCadreDeMarcheParDefautConserve)",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-16",
+        "CibleRetrait": "M3 (le cadre de la boucle de records devient une donnee de PROFIL par build, comme les largeurs du bloc MPP)",
+        "CritereRetrait": "0 film cuit au cadre par defaut ; les sept builds portent leur IDLowBits au profil",
+        "CompteurBranche": true,
+        "CibleComptage": ""
+      },
+      {
+        "Nom": "repli_largeurs_mpp_calibrees_sur_le_film",
+        "Fait": "les deux largeurs du bloc object-multiplayer-properties (FUN_14080cfe8), qui precede TOUS les composants dans l etat par defaut de ti=36, 37, 38, 39, 42 et 43",
+        "Mecanisme": "CalibrateMPPWidthsOf MESURE le decoupage sur le film et l INSTALLE, au lieu de le lire au profil de la version de format",
+        "Condition": "format_sans_profil_relu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/equipment_placements.go",
+            "Ancre": "cal, ok := CalibrateMPPWidthsOf(fc, wr, band, spans)",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/replay/build_ground_weapons.go",
+            "Ancre": "return calibrees",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-15",
+        "CibleRetrait": "l executable d un build <= HI_1_11_0, relu comme FUN_141fd72c0 l a ete pour HI_1_13_0 — ou un profil mesure par un oracle valide au-dessus du seuil de coincidence",
+        "CritereRetrait": "les formats du parc portent leur largeur MPP au profil ; 0 recours a la calibration sur le parc",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_i0_porte_et_region_par_defaut",
+        "Fait": "la largeur de la porte d'i0 et l'index de region attendu, quand AUCUNE entree de catalogue ne les impose",
+        "Mecanisme": "GateBits est force a DefaultI0GateBits (5) et Region a 0 : l'auto-detection ne sait pas voir un index de region de plus d'un bit",
+        "Condition": "carte_absente_du_catalogue",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/i0_layout.go",
+            "Ancre": "GateBits: profile.DefaultI0GateBits,",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (profil par carte) — la moitie `DetectI0Layout` est faite au lot 1.9.4, restent les deux appelants de `DetectI0LayoutOf`",
+        "CritereRetrait": "aucun chemin de production n'appelle DetectI0LayoutOf ; le decoupage vient du catalogue sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_bande_bipede_comblee",
+        "Fait": "quels slots de replication sont des bipedes de joueur",
+        "Mecanisme": "la bande observee est COMBLEE sur tout [min, max], jusqu'au domaine de 13 bits",
+        "Condition": "inconditionnel",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/offline_biped_band.go",
+            "Ancre": "func fillSlotBand(s map[uint32]bool) SlotBand { return NewSlotBand(filledSlotMap(s)) }",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.5 (la bande de slots bipede par build)",
+        "CritereRetrait": "la bande vient du profil du build ; 0 comblement sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 3.5"
+      },
+      {
+        "Nom": "repli_largeurs_monde_par_defaut_conservees",
+        "Fait": "les largeurs d'axe des objets du monde installees pour ce film",
+        "Mecanisme": "layout non detecte : le defaut est conserve plutot que d'installer des zeros",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/profil_balayage.go",
+            "Ancre": "if l.AxisW[0] == 0 || l.AxisW[1] == 0 || l.AxisW[2] == 0 {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.4 (les largeurs sont une donnee de la carte et du build)",
+        "CritereRetrait": "les largeurs viennent du profil ; 0 conservation du defaut sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_index_de_region_largeur_un",
+        "Fait": "la largeur de l'index de region dans i0",
+        "Mecanisme": "la porte est trop courte pour porter un index : la largeur 1 par defaut est conservee",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/profil_balayage.go",
+            "Ancre": "if l.GateBits > profile.I0SpineBits+profile.I0UseDefaultBits {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.4",
+        "CritereRetrait": "la largeur d'index vient du profil de la carte ; 0 recours au defaut",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_largeurs_mpp_par_defaut",
+        "Fait": "les largeurs du bloc de proprietes multijoueur (MPP), donc l'alignement de tout l'etat par defaut",
+        "Mecanisme": "9 et 5 bits par defaut, employes des que la calibration du film n'a rien pose",
+        "Condition": "inconditionnel",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/profile/mpp_widths.go",
+            "Ancre": "const mppLeadParDefaut = 9",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (profil par build : les largeurs MPP sont une donnee du build)",
+        "CritereRetrait": "les largeurs MPP viennent du profil du build ; 0 recours au defaut sur les 8 builds",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_chunks_apres_trou_abandonnes",
+        "Fait": "quels chunks de replication d'un film sont lus",
+        "Mecanisme": "un trou dans la numerotation arrete l'enumeration : les chunks 8..N d'un film dont le 7 manque sont ABANDONNES",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/film_chunks.go",
+            "Ancre": "break // trou de numerotation : meme arret que l'ancien CountFilmChunks",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot de conversion du manifeste (le manifeste dit quels chunks existent ; un trou est une donnee, pas une borne)",
+        "CritereRetrait": "0 film du parc dont l'enumeration s'arrete avant le dernier chunk du manifeste",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_ancre_sans_vie_delta_ecartee",
+        "Fait": "sur quelles ancres la calibration des largeurs de creation d'equipement s'appuie",
+        "Mecanisme": "une vie que les paquets delta n'ont pas vue est ecartee AVANT l'increment du denominateur : les ancres ecartees sont invisibles",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/equipment_creation_width.go",
+            "Ancre": "continue // une vie que les paquets delta n'ont pas vue ne peut rien arbitrer",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-13",
+        "CibleRetrait": "lot 3.x (largeurs de creation par build, la calibration disparait)",
+        "CritereRetrait": "les largeurs viennent du profil ; la calibration est retiree avec ses tests",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_registre_inconnu_sans_lecteur_de_troncature",
+        "Fait": "la cause annoncee quand le registre d'un chunk_00 ne correspond a aucun build connu",
+        "Mecanisme": "un seul signal sort (« registre inconnu »), alors que Registry.Truncated et TruncatedBytes nomment une AUTRE cause — un tampon coupe — que personne ne lit",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/registry_fingerprint.go",
+            "Ancre": "func warnUnknownRegistry(fp uint64, blocks, slots int) {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-14",
+        "CibleRetrait": "lot 3.1 (build inconnu actif, profil comme donnee fabriquee) : un build inconnu devient une erreur typee, une troncature en est une autre",
+        "CritereRetrait": "les deux causes sont distinguees a la sortie (erreur typee `build_inconnu` contre `tronque`) et comptees separement",
+        "CompteurBranche": false,
+        "CibleComptage": "lot 3.1"
+      },
+      {
+        "Nom": "repli_amorce_grenade_profil_de_reference",
+        "Fait": "l amorce du record de creation de projectile — sa largeur, sa valeur et la position du champ d index de l auteur — sous laquelle les lancers de grenade de CE film se lisent",
+        "Mecanisme": "la clef du film (build de la section 2, ou version majeure pour les films sans section) n a pas de ligne dans la table du profil : la grammaire du build de REFERENCE s applique (24 bits, 0x40C00, index a +103)",
+        "Condition": "non_resolu",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/profile/grenade.go",
+            "Ancre": "func AmorceGrenadeDeReference() AmorceGrenade {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/grenade_events.go",
+            "Ancre": "g := grammaireDeReference()",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-17",
+        "CibleRetrait": "retrait sec des que la table du profil couvre toutes les clefs du parc : le prochain patch du jeu ajoute sa clef d amorce en meme temps que son empreinte de registre",
+        "CritereRetrait": "0 film cuit sous le profil de reference ; chaque clef du parc porte sa ligne d amorce",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      },
+      {
+        "Nom": "repli_controle_corruption_section_absente",
+        "Fait": "le CONTROLE DE CORRUPTION PAR COMPOSANT — le bit de `chunk_00 + 0x0CB45C` qui decide si chaque composant present d un corps est suivi d un R(1) de garde et, si ce bit vaut 1, d un R(32) sentinelle 0x0bcddcba",
+        "Mecanisme": "le film ne porte PAS de section d identification, donc pas ce bit : la grammaire garde son invariant (faux — la valeur du singleton du jeu a la construction, `FUN_140eff23c`)",
+        "Condition": "section_absente",
+        "Ordre": "apres_lecture",
+        "Sites": [
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/profil_balayage.go",
+            "Ancre": "func grammaireSousFilm(g GrammaireBalayage, p profile.Profile) (GrammaireBalayage, bool) {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/grammar/controle_corruption_du_film.go",
+            "Ancre": "func (c *FilmContext) ControleDeCorruptionRepli() bool {",
+            "Condition": ""
+          },
+          {
+            "Fichier": "internal/games/halo_infinite/film/internal/facts/killsource/decode.go",
+            "Ancre": "if !c.calib.ControleDeCorruptionLu {",
+            "Condition": ""
+          }
+        ],
+        "DatePose": "2026-09-22",
+        "CibleRetrait": "lot qui donnera un profil aux films de format 20 (section d identification absente) : le bit se lira alors a une position derivee de la version de format plutot que de l ancre de la chaine de build",
+        "CritereRetrait": "0 film cuit sans declaration de ce bit ; les cinq films de format 20 portent leur position au profil",
+        "CompteurBranche": false,
+        "CibleComptage": "pas 2 de M2 (les lecteurs recoivent le profil via FilmContext : le seul porteur par film sans variable de paquet, cf. S1)"
+      }
+    ]
+  }
+]

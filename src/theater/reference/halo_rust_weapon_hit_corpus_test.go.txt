@@ -1,0 +1,19 @@
+package grammar
+import("testing";"encoding/json";"os";"path/filepath";"fmt";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustWeaponHitCorpus(t *testing.T){
+ rows:=[]any{}
+ catalog,e:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if e!=nil{t.Fatal(e)}
+ maps:=map[string]string{"maps/01-bazaar-idle":"bazaar","maps/02-aquarius":"aquarius","bandit/01-evo":"recharge","ranked-arena/02-oddball":"recharge","appearance/01-cadet-blue":"high ground","appearance/02-cadet-brick":"high ground"}
+ for _,folder:=range []string{"maps/01-bazaar-idle","maps/02-aquarius","bandit/01-evo","ranked-arena/02-oddball","appearance/01-cadet-blue","appearance/02-cadet-brick"}{
+ root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);boot,e:=os.ReadFile(filepath.Join(root,"chunk-000-type-1.bin"));if e!=nil{t.Fatal(e)};reg,e:=ParseRegistryChunk(boot);if e!=nil{t.Fatal(e)}
+ var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;File string `json:"file"`}};b,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)};if e=json.Unmarshal(b,&meta);e!=nil{t.Fatal(e)}
+ dir:=t.TempDir();n:=0;if e=os.WriteFile(filepath.Join(dir,"chunk_00.bin"),boot,0600);e!=nil{t.Fatal(e)}
+ for _,c:=range meta.Chunks {if c.Kind!=2{continue};d,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};if e=os.WriteFile(filepath.Join(dir,fmt.Sprintf("chunk_%02d.bin",c.Index)),d,0600);e!=nil{t.Fatal(e)};n++}
+ shots,e:=ScanFilmWeaponShots(dir,n);if e!=nil{t.Fatal(e)};damages,base,e:=ScanFilmWeaponDamages(dir,reg,n);if e!=nil{t.Fatal(e)};if shots==nil{shots=[]WeaponShot{}};if damages==nil{damages=[]WeaponDamage{}}
+ entry,e:=catalog.Lookup(maps[folder]);if e!=nil{t.Fatal(e)};tracks,trackErr:=BuildBipedTracks(dir,entry,n);wire:=map[uint32][]any{};for slot,ss:=range tracks{for _,p:=range ss{wire[slot]=append(wire[slot],map[string]any{"timestamp_us":p.ts,"position":[3]float32{p.x,p.y,p.z}})}};trackError:=trackErr!=nil
+ distanceBase:=ResolveHitDistanceBase(damages,tracks);stats:=PairWeaponHits(shots,damages,WeaponHitPairWindowUS,NewWeaponHitDistanceFunc(tracks,distanceBase));without:=PairWeaponHits(shots,damages,WeaponHitPairWindowUS,nil)
+ prefix,pe:=BuildBipedTracks(dir,entry,1);prefixWire:=map[uint32][]any{};for slot,ss:=range prefix{for _,p:=range ss{prefixWire[slot]=append(prefixWire[slot],map[string]any{"timestamp_us":p.ts,"position":[3]float32{p.x,p.y,p.z}})}}
+ rows=append(rows,map[string]any{"distance_base":distanceBase,"stats":stats,"without":without,"prefix_tracks":prefixWire,"prefix_error":pe!=nil,"map":entry,"tracks":wire,"track_error":trackError,"folder":folder,"n":n,"shots":shots,"damages":damages,"base":base});t.Log(folder,len(shots),len(damages),base)
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-weapon-hit-corpus.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,31 @@
+package grammar
+
+import (
+ "compress/zlib"
+ "encoding/hex"
+ "encoding/json"
+ "os"
+ "testing"
+)
+
+func TestHaloRustNativeEntryProfileD61443e(t *testing.T) {
+ f,e:=os.Open("/Users/simbleau/git/halo_api/src/theater/fixtures/action-control-d61443e-v41.json.zlib"); if e!=nil {t.Fatal(e)}; defer f.Close()
+ z,e:=zlib.NewReader(f);if e!=nil {t.Fatal(e)};defer z.Close()
+ var inputs []struct { Control string; Start int; End int `json:"control_end"`; Encoding struct { Index uint `json:"index_bits"`; Axes [3]uint `json:"world_axis_bits"`; Full bool `json:"full_precision"`; Baseline bool `json:"baseline_scope"` } }
+ if e=json.NewDecoder(z).Decode(&inputs);e!=nil {t.Fatal(e)}
+ rows:=[]any{}
+ for _,input:=range inputs {
+  control,e:=hex.DecodeString(input.Control);if e!=nil {t.Fatal(e)}
+  var w bitWriter;w.bit(1);w.bit(0);w.bits(0,3)
+  for bit:=input.Start;bit<input.End;bit++ {w.bit(uint64(control[bit/8]>>uint(7-bit%8)))}
+  p:=ProfilDeBalayageParDefaut();p.Mouvement.WorldObject.IndexW=input.Encoding.Index;p.Mouvement.WorldObject.AxisW=input.Encoding.Axes;p.Mouvement.FullPrecision=input.Encoding.Full;p.Grammaire.PorteeBaseline=input.Encoding.Baseline
+  cfg:=DefaultFrameConfig();cfg.Profil=p
+  obs:=NouvelleObservation();var calls []LectureVueC;obs.VueControleHook=func(v LectureVueC){calls=append(calls,v)};cfg.Obs=obs
+  _,views,end:=DecodeFrameViewsCurseur(w.buf,NewWorld(&Registry{}),cfg,3,2)
+  if views!=3||len(calls)!=1||!calls[0].Fermee {t.Fatalf("frame not closed: views=%d end=%d calls=%+v",views,end,calls)}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(w.buf),"index":input.Encoding.Index,"axes":input.Encoding.Axes,"full":input.Encoding.Full,"baseline":input.Encoding.Baseline,"views":views,"end":end,"verdict":calls[0]})
+ }
+ out,e:=os.Create("/private/tmp/halo-native-entry-profile-d61443e.json.zlib");if e!=nil {t.Fatal(e)}
+ zw:=zlib.NewWriter(out);if e=json.NewEncoder(zw).Encode(rows);e!=nil {t.Fatal(e)};if e=zw.Close();e!=nil {t.Fatal(e)};if e=out.Close();e!=nil {t.Fatal(e)}
+ if len(rows)!=768 {t.Fatal(len(rows))}
+}

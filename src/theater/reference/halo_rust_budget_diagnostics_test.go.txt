@@ -1,0 +1,76 @@
+package objectives
+
+import (
+	"context"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"os"
+	"testing"
+)
+
+type rustBudgetHandler struct{ records []any }
+
+func (h *rustBudgetHandler) Enabled(context.Context, slog.Level) bool { return true }
+func (h *rustBudgetHandler) WithAttrs([]slog.Attr) slog.Handler       { panic("unexpected WithAttrs") }
+func (h *rustBudgetHandler) WithGroup(string) slog.Handler            { panic("unexpected WithGroup") }
+func (h *rustBudgetHandler) Handle(_ context.Context, r slog.Record) error {
+	attrs := []any{}
+	r.Attrs(func(a slog.Attr) bool { attrs = append(attrs, []any{a.Key, a.Value.Any()}); return true })
+	h.records = append(h.records, map[string]any{"level": r.Level.String(), "message": r.Message, "attributes": attrs})
+	return nil
+}
+func TestHaloRustBudgetDiagnostics(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	rows := []any{}
+	for run := 0; run < 64; run++ {
+		h := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		b := newEventBudget("rust-budget")
+		initial := run % 19
+		if run%4 == 0 {
+			initial = maxNamedEventsPerFilm
+		}
+		b.reste = initial
+		calls := []any{}
+		b.resume() // clean summary is silent
+		for call := 0; call < 4; call++ {
+			pts := []types.ScorePoint{}
+			value := int64(0)
+			for j := 0; j < 24; j++ {
+				delta := int64(1)
+				if run%3 == 0 || j%3 == 0 {
+					delta = 17
+				}
+				if run%7 == 0 {
+					delta = 0
+				}
+				if j == 20 {
+					delta = -1
+				}
+				value += delta
+				pts = append(pts, types.ScorePoint{TimeMS: call*1000 + j, Slot: 10 + call*2, Value: value})
+			}
+			key := statSlotKey{Comp: call + run, Side: sideA}
+			if call%2 == 1 {
+				key.Side = sideB
+			}
+			times := incrementTimes(pts, key, b)
+			if times == nil {
+				times = []int{}
+			}
+			calls = append(calls, map[string]any{"points": pts, "key": map[string]any{"component": key.Comp, "side": key.Side}, "times": times})
+			b.resume()
+		}
+		b.resume()
+		rows = append(rows, map[string]any{"initial": initial, "calls": calls, "remaining": b.reste, "rejected": b.rejetes, "truncated": b.tronque, "records": h.records})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-budget-diagnostics.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

@@ -1,0 +1,44 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Native equipment default-state and creation-body readers needed by loaded calibration",
+  "default_state": {
+    "fixture": "equipment-default-native-v41.json.zlib",
+    "generator": "halo_rust_equipment_default_native_test.go.txt",
+    "cases": 384,
+    "hooks": 2304,
+    "padded_attempts": 110,
+    "sha256": "0f98d82388901cba67d4d2cc92e90d24ba073129b0153472401604a756cbc203"
+  },
+  "creation_body": {
+    "fixture": "equipment-creation-probe-v41.json.zlib",
+    "generator": "halo_rust_equipment_creation_probe_test.go.txt",
+    "cases": 160,
+    "attempts": 488,
+    "accepted": 178,
+    "default_overflow": 54,
+    "mask_refusals": 239,
+    "position_refusals": 17,
+    "sha256": "4eb1e97365f4013bcf7790198e0fbcc20a205f1008ea56fccedb211d15894b20"
+  },
+  "host": {
+    "status": "passed",
+    "tests": 17,
+    "log": "/private/tmp/halo-equipment-creation-native-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-equipment-creation-native-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Loaded calibration, creation scan and placement integration remain open.",
+    "Position admission still uses the selective world precision decoder; arbitrary-width and overflow semantics remain part of the domain audit.",
+    "Synthetic native-oracle agreement is not independently annotated gameplay validation."
+  ],
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-equipment-creation-native-clippy.log"
+  }
+}

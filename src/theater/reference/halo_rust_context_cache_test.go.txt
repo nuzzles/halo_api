@@ -1,0 +1,50 @@
+package grammar
+
+import (
+ "encoding/binary"
+ "encoding/hex"
+ "encoding/json"
+ "errors"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+ "os"
+ "reflect"
+ "testing"
+)
+func TestHaloRustContextCache(t *testing.T) {
+ raw,e:=os.ReadFile("/private/tmp/halo-i0-loaded.json");if e!=nil {t.Fatal(e)}
+ var seeds []struct {Chunks []struct {Index int `json:"index"`;Hex string `json:"hex"`} `json:"chunks"`}
+ if e=json.Unmarshal(raw,&seeds);e!=nil {t.Fatal(e)}
+ rows:=[]any{}
+ for i,seed:=range seeds {
+  buffers:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};inputs:=[]any{}
+  add:=func(index int,data []byte){buffers=append(buffers,data);meta=append(meta,types.ChunkMeta{Index:index});inputs=append(inputs,map[string]any{"index":index,"hex":hex.EncodeToString(data)})}
+  if i%4!=0 {
+   reg:=make([]byte,8+2*64*260);binary.LittleEndian.PutUint32(reg,41);binary.LittleEndian.PutUint32(reg[4:],27);copy(reg[8:],[]byte("object-parent-state-component"));binary.LittleEndian.PutUint32(reg[264:],3);reg[8+64*260]=255
+   if i%4==2 {reg=reg[:5]};if i%4==3 {reg=[]byte{0x78,0x9c,0xff}}
+   add(0,reg)
+  }
+  for _,c:=range seed.Chunks {b,e:=hex.DecodeString(c.Hex);if e!=nil {t.Fatal(e)};add(c.Index,b)}
+  var film *source.Film
+  if len(buffers)>0 {film,e=source.Load(buffers,meta);if e!=nil {t.Fatal(e)}}
+  fc:=NewFilmContext(film)
+  var imposed *profile.I0Layout
+  if i%5==0 {imposed=&profile.I0Layout{GateBits:-1,AxisW:[3]uint{0,99,2},Region:7};fc.impose=imposed}
+  if fc.chunksLus || fc.regLu || fc.slotsLus || fc.layLu {t.Fatal("eager")}
+  nums:=fc.ChunkNumbers();band:=fc.BipedSlots();slots:=[]uint32{};for slot:=uint32(0);slot<8192;slot++ {if band.Has(slot){slots=append(slots,slot)}}
+  reg,err:=fc.Registry();again,err2:=fc.Registry();if reg!=again || err!=err2 {t.Fatal("registry cache")}
+  errKind:="";if errors.Is(err,ErrNoRegistryChunk){errKind="missing"} else if errors.Is(err,ErrRegistryStillCompressed){errKind="compressed"} else if err!=nil {t.Fatal(err)}
+  var before,after any
+  var fp uint64;var named int
+  if reg!=nil {
+   b,_:=json.Marshal(reg);json.Unmarshal(b,&before);fp=RegistryFingerprint(reg);named=RegistryNamedSlots(reg)
+   if len(reg.Archetypes)>0 {reg.Archetypes[0].Components[0]="mutation";reg.Archetypes[0].Levels[0]=99}
+   r,_:=fc.Registry();after=r
+   if RegistryFingerprint(r)!=fp || RegistryNamedSlots(r)!=named {t.Fatal("identity not cached")}
+  }
+  lay,le:=fc.I0Layout();lay2,le2:=fc.I0Layout();if !reflect.DeepEqual(lay,lay2)||le!=le2 {t.Fatal("layout cache")}
+  rows=append(rows,map[string]any{"inputs":inputs,"numbers":nums,"slots":slots,"imposed":imposed,"registry_error":errKind,"before":before,"after":after,"fingerprint":fp,"named":named,"layout":lay,"layout_error":le!=nil,"layout_cached":fc.layLu})
+ }
+ out,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-cache.json",out,0600);e!=nil {t.Fatal(e)}
+}

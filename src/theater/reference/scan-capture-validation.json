@@ -1,0 +1,41 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "entry": "replay.faitsDuBalayage",
+  "generator": "halo_rust_scan_capture_test.go.txt",
+  "native_log": "/private/tmp/halo-scan-capture-go.log",
+  "cases": 24,
+  "successful": 12,
+  "imposed_successful": 8,
+  "detected_successful": 4,
+  "layout_refusals": 12,
+  "fixture": {
+    "path": "scan-capture-v41.json.zlib",
+    "sha256": "dbc4c97213cb352555006aeae482e1edcb280b619bf9bdfbce7034044ee4255d"
+  },
+  "comparison": "Complete native encoded FilmFactsFile bytes before and after later identity/fallback mutations",
+  "host": {
+    "status": "passed",
+    "tests_passed": 3,
+    "tests_failed": 0,
+    "scope": "Capture boundary, entry provenance/raw fallbacks, and caller precedence",
+    "log": "/private/tmp/halo-scan-capture-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Selected native_scan_capture prefix, not full suite",
+    "log": "/private/tmp/halo-scan-capture-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-scan-capture-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Capture boundary takes already-scanned exact DTOs; full fresh scanner wiring and its pass/error order remain open",
+    "Layout comes from controlled source-context fixtures; supplied player inputs come from a separate native cache fixture, not the same film scan",
+    "No claim of complete runtime diagnostic or captured-film parity",
+    "Rust owns cloned inputs and identity; this does not claim Go pointer/slice alias semantics for arbitrary later mutation"
+  ]
+}

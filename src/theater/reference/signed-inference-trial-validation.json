@@ -1,0 +1,27 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native_trials": 72,
+  "negative_trial_endpoints": 40,
+  "single_step_cases": 72,
+  "single_step_panics": 16,
+  "chain_cases": 72,
+  "chain_panics": 32,
+  "confirmed_negative_endpoints_per_mode": 2,
+  "complete_frames": 4,
+  "focused_host": "passed; direct trials, both contextual inference APIs and all four complete frames; 0.03s",
+  "full_suite": "605 passed, zero failed, 49 ignored; 102.08s",
+  "clippy": "passed; 24.81s",
+  "wasm": "passed actual runtime; 56 single-step calls, 40 chain calls and four complete frames; 21.31s build",
+  "pinned_source_hashes": 485,
+  "remaining": [
+    "Raw resync/harvest/repair signed-domain acceptance",
+    "Full runtime and nested type contracts",
+    "All-data v41 corpus acceptance"
+  ],
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "format": "passed",
+  "diff_check": "passed",
+  "captured_march": "passed; four films; 82.27s release",
+  "complete_documents": "passed; six films; 105.64s release",
+  "native_regeneration_byte_identical": true
+}

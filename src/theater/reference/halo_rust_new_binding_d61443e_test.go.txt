@@ -1,0 +1,10 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex")
+func TestHaloRustNewBindingD61443e(t *testing.T){rows:=[]any{};for mode:=0;mode<5;mode++{for gen:=1;gen<=3;gen++{
+ var w bitWriter;w.bit(1);w.bit(0);w.bits(1,3);w.bits(1,5);w.bits(uint64(gen),2);w.bits(3,6);w.bits(0,3);w.bit(1);w.bits(42,8);w.bit(1);w.bit(0);w.bits(1,3);w.bits(0,6);w.bits(77,8);w.bits(0,3);w.bit(0)
+ reg:=&Registry{Archetypes:make([]Archetype,4)};for i:=range reg.Archetypes{reg.Archetypes[i].Index=i};reg.Archetypes[3]=Archetype{Index:3,Components:[]string{"high-frequency"},Levels:[]uint32{1}}
+ world:=NewWorld(reg);switch mode{case 1:world.BindFull(1<<30|1,2);case 2:world.BindFull(1<<30|1,3);case 3:world.BindSoft(1<<30|1,2);case 4:world.BindFull(1<<30|1,2);world.Unbind(1)}
+ cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.Profil.Grammaire.DeserEtatParArchetype=true;cfg.Profil.Grammaire.GenerationStricte=true;cfg.Obs=NouvelleObservation()
+ recs,views,end:=DecodeFrameViewsCurseur(w.buf,world,cfg,3,2);ti,present:=world.ArchetypeForSlot(1)
+ rows=append(rows,map[string]any{"mode":mode,"hex":hex.EncodeToString(w.buf),"records":recs,"views":views,"end":end,"archetype":ti,"present":present,"rejected":cfg.Obs.NeufsContreUnVivant})
+ }};b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-new-binding-d61443e.json",b,0600);e!=nil{t.Fatal(e)}}

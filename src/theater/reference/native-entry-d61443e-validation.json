@@ -1,0 +1,93 @@
+{
+  "reference_commit": "d61443ef59268ad734355db8e9974f68db5ca6d0",
+  "branch": "simbleau/theater-experiments",
+  "full_native_parity": false,
+  "films": 32,
+  "baseline_packets_compared": 403465,
+  "baseline_comparison": [
+    "per-packet source identity",
+    "completed view count",
+    "ending bit cursor"
+  ],
+  "baseline_views": {
+    "0": 58997,
+    "1": 901,
+    "2": 1558,
+    "3": 342009
+  },
+  "integrated_views": {
+    "0": 58997,
+    "1": 16061,
+    "2": 24631,
+    "3": 303776
+  },
+  "keyframe_comparisons": 134657,
+  "keyframe_complete": 114357,
+  "captured_fire_reads": 19075,
+  "ordered_fire_fields": 465337,
+  "accepted_fire_aims": 11542,
+  "event_continuations": 30887,
+  "isolated_damage_continuations": 2335,
+  "decoded_summaries": 3667,
+  "corpus_and_focused_tests": {
+    "passed": 4,
+    "failed": 0,
+    "seconds": 37.62
+  },
+  "broader_native_tests": {
+    "passed": 42,
+    "ignored": 1,
+    "seconds": 3.25
+  },
+  "checks": {
+    "clippy": true,
+    "wasm": true,
+    "format": true,
+    "diff": true,
+    "original_pin_files": 485
+  },
+  "remaining": [
+    "upstream tacmap component gap",
+    "unknown/runtime-width message bodies",
+    "contradictory code0 damage grammar",
+    "remaining native reference-difference audit"
+  ],
+  "source_retention_verified": true,
+  "bounded_event_reference_validation": {
+    "reference_cases": 36864,
+    "head_cases": 12288,
+    "native_entry_samples": 192,
+    "passed": true,
+    "refusal_marker": "source_bits + 1; not consumed bits"
+  },
+  "latest_corpus_and_head_tests": {
+    "passed": 6,
+    "failed": 0,
+    "seconds": 37.41
+  },
+  "actor_action_context_validation": {
+    "passed": true,
+    "go_action_fixture_cases": 768,
+    "view_fixture_cases": 2048,
+    "missing_context": "unsupported with retained prefix; not truncated source",
+    "native_corpus_passed": true,
+    "tests_passed": 4,
+    "tests_failed": 0,
+    "test_seconds": 37.27,
+    "clippy_seconds": 33.32,
+    "wasm_seconds": 20.21
+  },
+  "explicit_frame_profile_validation": {
+    "go_frames": 768,
+    "passed": true,
+    "source_fields_verified": true,
+    "default_profile_negative_control": true,
+    "options_and_result_roundtrip": true,
+    "full_corpus_passed": true,
+    "tests_passed": 3,
+    "test_seconds": 36.8,
+    "clippy_seconds": 33.29,
+    "wasm_seconds": 20.23,
+    "captured_simulation_gaps_resolved": false
+  }
+}

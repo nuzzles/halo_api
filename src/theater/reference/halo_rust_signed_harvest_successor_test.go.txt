@@ -1,0 +1,14 @@
+package grammar
+import("encoding/hex";"encoding/json";"math";"os";"testing")
+func TestHaloRustSignedHarvestSuccessor(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []int{0,-20}{for _,size:=range []int{0,16}{for _,extra:=range []bool{false,true}{for _,hard:=range []bool{false,true}{for _,pos:=range []int{math.MinInt64,-65,-33,-32,-31,-1,0,7,8,104,113,128,129,math.MaxInt64}{
+  data:=make([]byte,size);if size>0{data[0]=0x80;data[1]=0x08}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"signed-harvest"},Levels:[]uint32{0}}}};world:=NewWorld(reg);if hard{world.BindFull(0,0)}else{world.BindSoft(0,0)}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=extra;cfg.Obs=NouvelleObservation();cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{"signed-harvest":width}
+  confirmed,panicked:=false,false
+  func(){defer func(){panicked=recover()!=nil}();confirmed=harvestNextBoundClean(data,pos,world,cfg)}()
+  rows=append(rows,map[string]any{"width":width,"hex":hex.EncodeToString(data),"extra":extra,"hard":hard,"position":pos,"confirmed":confirmed,"panic":panicked})
+ }}}}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-harvest-successor.json",raw,0600);e!=nil{t.Fatal(e)}
+}

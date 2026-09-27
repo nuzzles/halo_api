@@ -1,0 +1,22 @@
+package objectives
+import("testing";"os";"encoding/json";"math/rand";"fmt";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustStatborgNamed(t *testing.T){
+ rng:=rand.New(rand.NewSource(41902));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  recs:=[]types.StatRecord{};mode:=[]string{"flag","zone","vip","bomb","hill","ball",""}[run%7]
+  for round:=0;round<1+run%4;round++{for slot:=6;slot<=26;slot+=2{for j:=0;j<8;j++{
+   comps:=map[int]types.StatValue{}
+   for _,c:=range []int{0,2,3,12,20,21,22,23,24}{if rng.Intn(5)==0{continue};a,b:=int64(j),int64(j/2);if run%3!=0{a+=int64(rng.Intn(5));b+=int64(rng.Intn(4))};if rng.Intn(25)==0{a=1001};if rng.Intn(25)==0{b=-1};comps[c]=types.StatValue{A:a,B:b}}
+   recs=append(recs,types.StatRecord{Slot:slot,Round:round,TimeMS:round*30000+j*1000+slot%4*100,Comps:comps})
+  }}}
+  if run%9==0{rng.Shuffle(len(recs),func(i,j int){recs[i],recs[j]=recs[j],recs[i]})};if run%37==0{recs=[]types.StatRecord{}}
+  events:=NamedEventsFrom(recs,mode);if events==nil{events=[]NamedEvent{}}
+  flat:=map[int]string{};for slot:=10;slot<=26;slot+=2{if rng.Intn(3)!=0{flat[slot]=fmt.Sprint(slot%6)};if slot==10&&run%2==0{flat[slot]=""}}
+  ri:=ResolveRoundIdentity(recs,nil);for r:=range ri.byRound{ri.byRound[r]=map[int]string{};for s,x:=range flat{if rng.Intn(4)!=0{ri.byRound[r][s]=x}}}
+  byRound,dropped:=IdentifyNamedEventsByRound(events,ri)
+  starts:=[]any{};for _,s:=range ri.starts{starts=append(starts,map[string]any{"round":s.round,"start_ms":s.startMS})}
+  cross:=crossCheckFrom(recs,mode);if cross==nil{cross=map[int]map[string][2]int{}}
+  rows=append(rows,map[string]any{"records":recs,"mode":mode,"events":events,"known":KnownStats(mode),"counts":CountsBySlot(events),"cross":cross,"flat":flat,"identified":IdentifyNamedEvents(events,flat),"identity":map[string]any{"publication":map[string]any{"by_round":ri.byRound,"origins":ri.origins},"starts":starts},"by_round":byRound,"dropped":dropped})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-statborg-named.json",raw,0600);e!=nil{t.Fatal(e)}
+}

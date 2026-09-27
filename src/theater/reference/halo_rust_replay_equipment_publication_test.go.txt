@@ -1,0 +1,17 @@
+package replay
+import("bytes";"log/slog";"testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustReplayEquipmentPublication(t *testing.T) {
+ previous:=slog.Default();defer slog.SetDefault(previous)
+ rng:=rand.New(rand.NewSource(934287));rows:=[]any{}
+ for run:=0;run<1024;run++ {
+  raw:=[]types.EquipmentChange{};origin:=uint64(run%7)*1000000;step:=uint64(run%5)*100000
+  st:=types.EquipmentChangeStats{Lives:run%7,MissedEstimate:run%11,CounterJumps:run%5,LivesFirstOffSpec:run%3,Repeats:run%2,Recovered:run%13}
+  for j:=0;j<run%47;j++ {c:=types.EquipmentChange{Slot:uint32(rng.Intn(6)),TimestampUS:uint64(rng.Intn(20))*1000000,Rank:rng.Intn(29)-1,Previous:rng.Intn(29)-1,Kind:[]types.EquipmentChangeKind{types.EquipmentTaken,types.EquipmentSpent,types.EquipmentSpawned}[rng.Intn(3)],Recovered:rng.Intn(2)==0,Gap:rng.Intn(8)};if j%23==22 {c.TimestampUS=^uint64(0)};raw=append(raw,c)}
+  tracks:=[]Track{};slots:=[]uint32{};for j:=uint32(0);j<6;j++ {if (int(j)+run)%3!=0 {tracks=append(tracks,Track{Slot:j});slots=append(slots,j)}}
+  built,cov:=buildEquipmentChanges(raw,st,origin,step);pub:=keepEquipmentChangesOfPublishedTracks(built,tracks);if pub==nil {pub=[]EquipmentChange{}}
+  var log bytes.Buffer;slog.SetDefault(slog.New(slog.NewJSONHandler(&log,nil)));logEquipmentChangeCoverage(cov)
+  observation:=map[string]any{};if err:=json.Unmarshal(log.Bytes(),&observation);err!=nil {t.Fatal(err)};delete(observation,"time")
+  rows=append(rows,map[string]any{"log":observation,"raw":raw,"stats":st,"origin":origin,"step":step,"slots":slots,"output":map[string]any{"changes":pub,"coverage":cov}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-equipment-publication.json",b,0600);e!=nil {t.Fatal(e)}
+}

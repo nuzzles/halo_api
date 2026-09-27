@@ -1,0 +1,7 @@
+{
+  "commit": "d61443ef59268ad734355db8e9974f68db5ca6d0",
+  "scope": "Original 225-name selection regenerated against new reference. Six additional M4b names are independently covered by m4b-components fixture; this manifest is not full corpus validation.",
+  "component_names": 225,
+  "component_cases": 18144,
+  "component_json_sha256": "ef1d8590ce4bbad65786d85e9bf42e51aad222ab2c0d96b9cf14234aa3f8801f"
+}

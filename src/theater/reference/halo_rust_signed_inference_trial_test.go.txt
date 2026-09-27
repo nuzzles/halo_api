@@ -1,0 +1,29 @@
+package grammar
+import("encoding/hex";"encoding/json";"math";"os";"testing")
+func TestHaloRustSignedInferenceTrial(t *testing.T){
+ rows:=[]any{}
+ for _,bodyStart:=range []int{0,32}{for mode:=0;mode<2;mode++{for _,width:=range []int{-43,-42,-11,-10,-9,0,1,math.MaxInt64,math.MinInt64}{for _,extra:=range []bool{false,true}{
+  var bw bitWriter;if bodyStart==32{bw.bits(0x80000000,32)};bw.bits(1,4);bw.bits(0,6);bw.bits(0,64)
+  arch:=Archetype{Index:0,Components:[]string{"signed-trial"},Levels:[]uint32{0}};reg:=&Registry{Archetypes:[]Archetype{arch}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=extra;cfg.Obs=NouvelleObservation();if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{"signed-trial":width-bodyStart}}else{cfg.Profil.Grammaire.LargeursBouchon=map[string]int{"signed-trial":width-bodyStart}}
+  end,comps:=0,0;ok,panicked:=false,false
+  func(){defer func(){panicked=recover()!=nil}();end,comps,ok=deltaBodyTrial(bw.buf,bodyStart,arch,0,len(bw.buf)*8,cfg.contexte())}()
+  world:=NewWorld(reg);world.BindFull(0,0);ti,inferEnd:=uint32(0),0;inferOK,inferPanic:=false,false
+  func(){defer func(){inferPanic=recover()!=nil}();ti,inferEnd,inferOK=inferUnboundArchetype(bw.buf,bodyStart,world,cfg)}()
+  cfg.Obs=NouvelleObservation();chainTi,chainEnd:=uint32(0),0;chainUnique,chainOK,chainPanic:=false,false,false
+  func(){defer func(){chainPanic=recover()!=nil}();chainTi,chainEnd,chainUnique,chainOK=inferChainArchetype(bw.buf,bodyStart,world,cfg)}()
+  counts:=map[string]int{"Immediate":cfg.Obs.ChaineImmediat,"Deep":cfg.Obs.ChaineProfond,"NoConfirmation":cfg.Obs.ChaineAucun,"Ambiguous":cfg.Obs.ChaineAmbigu,"BudgetExhausted":cfg.Obs.ChaineBudget}
+  frames:=[]any{}
+  if bodyStart==32 && width==-42 && extra {
+   frameData:=append([]byte(nil),bw.buf...);frameData[3]=0x84
+   for _,chain:=range []bool{false,true}{
+    frameCfg:=cfg;frameCfg.Profil.Grammaire.InferenceChaine=chain;frameCfg.Profil.Grammaire.TablesParVue=false;frameCfg.Obs=NouvelleObservation()
+    frameWorld:=NewWorld(reg);frameWorld.BindFull(0,0);br:=LecteurSur(frameData);br.poserCadre(frameCfg);br.SetBitPos(-8)
+    records,inferred,hit:=decodeInferLoop(br,frameData,frameWorld,frameCfg)
+    frames=append(frames,map[string]any{"hex":hex.EncodeToString(frameData),"start":-8,"chain":chain,"end":br.BitPos(),"inferred":inferred,"hit":hit,"records":records,"slots":frameWorld.slots})
+   }
+  }
+  rows=append(rows,map[string]any{"mode":mode,"bodyStart":bodyStart,"width":width-bodyStart,"extra":extra,"hex":hex.EncodeToString(bw.buf),"end":end,"comps":comps,"ok":ok,"panic":panicked,"inferTi":ti,"inferEnd":inferEnd,"inferOK":inferOK,"inferPanic":inferPanic,"chainTi":chainTi,"chainEnd":chainEnd,"chainUnique":chainUnique,"chainOK":chainOK,"chainPanic":chainPanic,"chainCounts":counts,"frames":frames})
+ }}}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-inference-trial.json",raw,0600);e!=nil{t.Fatal(e)}
+}

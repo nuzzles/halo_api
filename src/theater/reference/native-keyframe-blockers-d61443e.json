@@ -1,0 +1,346 @@
+{
+  "reference_commit": "d61443ef59268ad734355db8e9974f68db5ca6d0",
+  "provenance": {
+    "keyframe-table-corpus-d61443e-v41.json.zlib": "86a16e303d3596f807660b419861df876f440c41dcad54665e2db9b481d84b31",
+    "keyframe-anchor-bodies-d61443e-v41.jsonl.zlib": "f9d331bfc9ffeac7ed4acaa35c71cfc527c2e1ff8523fb8f1b4da90cd3a628b6"
+  },
+  "interpretation": "Pinned Go reader outcomes, not full v41 grammar coverage. Candidate reads may overlap and are not canonical records. Complete means the reader returned without a desynchronization, not independently proven boundaries or fully interpreted fields.",
+  "sequential": {
+    "tables": 451,
+    "record_attempts": 902,
+    "terminal_components": {
+      "tacmap-mapdismissallock": 451
+    },
+    "unwalked_suffix_bits": 532470389,
+    "reference_commit": "d61443ef59268ad734355db8e9974f68db5ca6d0"
+  },
+  "candidates": {
+    "reads": 134657,
+    "complete": 114357,
+    "stopped": 20300,
+    "stopping_components": [
+      {
+        "name": "device-position-animation-name-component",
+        "reason": "reader_declined",
+        "attempts": 6713,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 181026,
+          "anchor": {
+            "Slot": 1334,
+            "TI": 43,
+            "Gen": 1,
+            "Bit": 291403
+          },
+          "component_index": 19,
+          "component_start_bit": 292648,
+          "reader_end_bit": 292648
+        }
+      },
+      {
+        "name": "managed-object-navpoint-component",
+        "reason": "reader_declined",
+        "attempts": 6338,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 1678,
+            "TI": 10,
+            "Gen": 1,
+            "Bit": 763962
+          },
+          "component_index": 2,
+          "component_start_bit": 764215,
+          "reader_end_bit": 764215
+        }
+      },
+      {
+        "name": "simulation-state-component",
+        "reason": "simulation_width_policy_refusal",
+        "attempts": 2047,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 135618,
+          "anchor": {
+            "Slot": 512,
+            "TI": 35,
+            "Gen": 1,
+            "Bit": 182908
+          },
+          "component_index": 60,
+          "component_start_bit": 184785,
+          "reader_end_bit": 184786
+        }
+      },
+      {
+        "name": "managed-navpoint-top-progress",
+        "reason": "reader_declined",
+        "attempts": 848,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 1674,
+            "TI": 12,
+            "Gen": 1,
+            "Bit": 761838
+          },
+          "component_index": 13,
+          "component_start_bit": 762252,
+          "reader_end_bit": 762252
+        }
+      },
+      {
+        "name": "vehicle-auto-turret-triggers-component",
+        "reason": "reader_declined",
+        "attempts": 656,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 181026,
+          "anchor": {
+            "Slot": 768,
+            "TI": 40,
+            "Gen": 1,
+            "Bit": 209728
+          },
+          "component_index": 30,
+          "component_start_bit": 212687,
+          "reader_end_bit": 212687
+        }
+      },
+      {
+        "name": "game-engine-soft-ceilings-component",
+        "reason": "reader_declined",
+        "attempts": 460,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 2,
+            "TI": 2,
+            "Gen": 1,
+            "Bit": 4773
+          },
+          "component_index": 11,
+          "component_start_bit": 5266,
+          "reader_end_bit": 5266
+        }
+      },
+      {
+        "name": "sound-placement-state-data-component",
+        "reason": "reader_declined",
+        "attempts": 456,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 118,
+            "TI": 19,
+            "Gen": 1,
+            "Bit": 136878
+          },
+          "component_index": 0,
+          "component_start_bit": 137050,
+          "reader_end_bit": 137050
+        }
+      },
+      {
+        "name": "matchflow-sequence-data-component",
+        "reason": "reader_declined",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 122,
+            "TI": 45,
+            "Gen": 1,
+            "Bit": 139754
+          },
+          "component_index": 0,
+          "component_start_bit": 139926,
+          "reader_end_bit": 139926
+        }
+      },
+      {
+        "name": "powerframe-player-selection-data-component",
+        "reason": "reader_declined",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 119,
+            "TI": 25,
+            "Gen": 1,
+            "Bit": 137114
+          },
+          "component_index": 0,
+          "component_start_bit": 137286,
+          "reader_end_bit": 137286
+        }
+      },
+      {
+        "name": "supply-lines-blocked-status-component",
+        "reason": "reader_declined",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 120,
+            "TI": 26,
+            "Gen": 1,
+            "Bit": 137292
+          },
+          "component_index": 0,
+          "component_start_bit": 137464,
+          "reader_end_bit": 137464
+        }
+      },
+      {
+        "name": "supply-lines-item-unlocked-component",
+        "reason": "reader_declined",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 121,
+            "TI": 27,
+            "Gen": 1,
+            "Bit": 137534
+          },
+          "component_index": 0,
+          "component_start_bit": 137706,
+          "reader_end_bit": 137706
+        }
+      },
+      {
+        "name": "tacmap-mapdismissallock",
+        "reason": "reader_declined",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 1,
+            "TI": 34,
+            "Gen": 1,
+            "Bit": 206
+          },
+          "component_index": 10,
+          "component_start_bit": 2279,
+          "reader_end_bit": 2279
+        }
+      },
+      {
+        "name": "managed-objective-interaction-filter-component",
+        "reason": "reader_declined",
+        "attempts": 312,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 135618,
+          "anchor": {
+            "Slot": 1377,
+            "TI": 11,
+            "Gen": 1,
+            "Bit": 348174
+          },
+          "component_index": 4,
+          "component_start_bit": 348461,
+          "reader_end_bit": 348461
+        }
+      },
+      {
+        "name": "biped-spartan-ability-non-predicted-state",
+        "reason": "reader_declined",
+        "attempts": 161,
+        "first_example": {
+          "file": "bandit/01-evo/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 145671,
+          "anchor": {
+            "Slot": 513,
+            "TI": 35,
+            "Gen": 1,
+            "Bit": 186487
+          },
+          "component_index": 59,
+          "component_start_bit": 189316,
+          "reader_end_bit": 189324
+        }
+      },
+      {
+        "name": "low-frequency",
+        "reason": "reader_declined",
+        "attempts": 32,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 134,
+            "TI": 3,
+            "Gen": 1,
+            "Bit": 145098
+          },
+          "component_index": 0,
+          "component_start_bit": 145297,
+          "reader_end_bit": 145297
+        }
+      },
+      {
+        "name": "effect-state-data-component",
+        "reason": "reader_declined",
+        "attempts": 22,
+        "first_example": {
+          "file": "raids/01-hour-long-raid/chunk-180-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 155529,
+          "anchor": {
+            "Slot": 2054,
+            "TI": 18,
+            "Gen": 1,
+            "Bit": 237193
+          },
+          "component_index": 3,
+          "component_start_bit": 237502,
+          "reader_end_bit": 237504
+        }
+      }
+    ],
+    "reference_commit": "d61443ef59268ad734355db8e9974f68db5ca6d0",
+    "selection_reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81"
+  }
+}

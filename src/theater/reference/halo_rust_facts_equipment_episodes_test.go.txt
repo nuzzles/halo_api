@@ -1,0 +1,21 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustFactsEquipmentEpisodes(t *testing.T) {
+ rng:=rand.New(rand.NewSource(934351));rows:=[]any{}
+ for run:=0;run<1024;run++ {
+  camo:=[]types.CamoRead{};positions:=[]grammar.BipedPosition{};origin:=uint64(run%5)*1000000;step:=uint64(run%5)*100000
+  for j:=0;j<run%61;j++ {camo=append(camo,types.CamoRead{Slot:uint32(rng.Intn(5)),TimestampUS:uint64(rng.Intn(150))*100000,Q:[]uint16{0,4095,47,65535,4096,4095,0}[rng.Intn(7)]});p:=grammar.BipedPosition{Slot:uint32(rng.Intn(5)),TimestampUS:uint64(rng.Intn(150))*100000};p.HasShield=rng.Intn(3)!=0;p.Shield.Q=uint8(rng.Intn(256));positions=append(positions,p)}
+  positionRows:=[]any{};for _,p:=range positions {positionRows=append(positionRows,map[string]any{"time":p.TimestampUS,"slot":p.Slot,"has_shield":p.HasShield,"quantum":p.Shield.Q})}
+  sort.SliceStable(positions,func(i,j int)bool{return positions[i].TimestampUS<positions[j].TimestampUS})
+  shields:=[]any{};for _,p:=range positions{if p.HasShield {shields=append(shields,map[string]any{"slot":p.Slot,"timestamp_us":p.TimestampUS,"quantum":p.Shield.Q})}}
+  tracks:=[]Track{};deaths:=map[int]bool{};deathRows:=[]int{};for j:=0;j<run%79;j++ {tracks=append(tracks,Track{Points:[]Point{},Slot:uint32(rng.Intn(5)),StartFrame:rng.Intn(70)-10,EndFrame:rng.Intn(160)});if rng.Intn(3)==0 {deaths[j]=true;deathRows=append(deathRows,j)}}
+  eps,nonBinary:=buildEquipmentEpisodes(positions,camo,origin,step,tracks,deaths);if eps==nil {eps=[]EquipmentEpisode{}}
+  cov:=equipmentCoverage(eps,tracks,deaths)
+  kills:=[]EquipmentKillRef{};for j:=0;j<run%37;j++ {kills=append(kills,EquipmentKillRef{XUID:uint64(rng.Intn(5)),TimeMS:rng.Intn(16000)-2000,AssistXUID:uint64(rng.Intn(5)),AssistKnown:rng.Intn(2)==0})}
+  credited:=append([]EquipmentEpisode{},eps...);originMS:=int64(run%7)*1000;var originPtr *int64;if run%5!=0 {originPtr=&originMS};interval:=run%5*100-100;read:=run%3!=0
+  var occupant func(uint32,int)uint64;if run%7!=0 {occupant=func(slot uint32,frame int)uint64 {if frame<0{return 0};return (uint64(slot)+uint64(frame/10))%5}}
+  measured:=attachAllEquipmentKills(credited,KillsInput{Read:read,Kills:kills},occupant,originPtr,interval)
+  rows=append(rows,map[string]any{"kills":kills,"kill_origin":originPtr,"kill_interval":interval,"kill_read":read,"has_occupant":occupant!=nil,"kill_measured":measured,"credited":credited,"camo":camo,"positions":positionRows,"shields":shields,"origin":origin,"step":step,"tracks":tracks,"deaths":deathRows,"output":map[string]any{"episodes":eps,"non_binary":nonBinary,"coverage":cov}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-equipment-episodes.json",b,0600);e!=nil {t.Fatal(e)}
+}

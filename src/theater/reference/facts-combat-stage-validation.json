@@ -1,0 +1,38 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native": {
+    "generator": "halo_rust_facts_combat_stage_test.go.txt",
+    "cases": 1024,
+    "shots": 3417,
+    "loadouts": 21541,
+    "projectiles": 9209,
+    "grenades": 4483,
+    "truncated_projectiles": 1042,
+    "scope": "Native initial combat pass, full typed document comparison, returned coverage and original cache orphan projections; cache inputs remain unchanged"
+  },
+  "host": {
+    "passed": 5,
+    "failed": 0,
+    "seconds": 3.6,
+    "log": "/private/tmp/halo-facts-combat-stage-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "One selected combined-combat-stage oracle call, not full suite",
+    "log": "/private/tmp/halo-facts-combat-stage-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "This is initial combat publication, not full BuildFromFacts",
+    "Coverage is returned for later envelope creation; vehicle-shot recovery remains a later separate pass",
+    "Runtime warning and truncation logs are source-matched, not independently captured",
+    "Synthetic published player tracks use empty point arrays and do not close native null-points DTO fidelity",
+    "Captured full-film document validation and remaining legacy domain audit are pending"
+  ],
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-combat-stage-clippy.log"
+  }
+}

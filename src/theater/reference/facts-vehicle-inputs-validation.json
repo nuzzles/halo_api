@@ -1,0 +1,88 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "host_and_selected_wasm_validated",
+  "native": {
+    "census_death_cases": 1024,
+    "bounds_and_end_probes": 50644,
+    "heading_grouping_sample_cases": 1024,
+    "generated_fixtures_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-facts-vehicle-lives-native.log",
+      "/private/tmp/halo-facts-vehicle-samples-native.log",
+      "/private/tmp/halo-facts-vehicle-tracks-native.log",
+      "/private/tmp/halo-facts-vehicle-aim-native.log",
+      "/private/tmp/halo-facts-vehicle-written-rides-native.log",
+      "/private/tmp/halo-facts-vehicle-rides-native.log",
+      "/private/tmp/halo-facts-vehicle-publication-native.log"
+    ],
+    "spawn_drawable_track_cases": 1024,
+    "rider_aim_grouping_cases": 1024,
+    "rider_aim_sampling_probes": 12288,
+    "written_ride_cases": 1024,
+    "written_rides_published": 1715,
+    "contradiction_probes": {
+      "true": 684,
+      "false": 19796
+    },
+    "written_ride_closures": {
+      "life": 1306,
+      "reading": 340,
+      "world_position_return": 69
+    },
+    "combined_ride_cases": 1024,
+    "combined_ride_counts": {
+      "by_event": 44,
+      "by_nearest_event": 75,
+      "by_geometry": 188,
+      "gap_fallbacks": 568,
+      "contradiction_rejections": 100,
+      "seat_assignments": 1030
+    },
+    "full_cache_vehicle_publication_cases": 1024,
+    "publication_counts": {
+      "published": 3315,
+      "merged": 156,
+      "cycles": 5,
+      "cycle_gaps": 76,
+      "rides": 3208,
+      "family_unknown": 829,
+      "early_gated_cases": 366,
+      "cases_with_fallbacks": 558
+    },
+    "heading_provenance_cases": 1024
+  },
+  "host": {
+    "vehicle_checks": {
+      "passed": 27,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 10.1,
+      "log": "/private/tmp/halo-facts-vehicle-heading-sources-host.log"
+    },
+    "chassis_orientation": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 0.55,
+      "log": "/private/tmp/halo-facts-vehicle-orientation-host.log"
+    }
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Eight selected cache vehicle oracle calls including heading provenance; not full suite",
+    "log": "/private/tmp/halo-facts-vehicle-heading-sources-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-objectives-clippy.log"
+  },
+  "format_and_diff_checks": "passed",
+  "source_hashes": 485,
+  "build_recovery": {
+    "issue": "Disk full while writing Rust build caches",
+    "action": "cargo clean --package halo_api --profile dev after all failed build handles were terminal",
+    "regenerable_artifacts_removed_gib": 89.1,
+    "retry_environment": "CARGO_INCREMENTAL=0"
+  },
+  "full_v41_parity_complete": false,
+  "remaining": "Document vehicle-shot attachment; objectives; full document composition; scan capture/fallback restoration; legacy domain reconciliation; final all-data audit."
+}

@@ -1,0 +1,50 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_cached_keyframe_section",
+  "native": {
+    "source_maps": 128,
+    "codec_cases": 11792,
+    "trailing_guard_cases": 64,
+    "guard_refusals": 54,
+    "guard_successes": 10,
+    "native_slice_panic_safely_refused": 1,
+    "fixture_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-facts-keyframe-codec-native.log",
+      "/private/tmp/halo-facts-keyframes-native.log"
+    ]
+  },
+  "focused": {
+    "passed": 5,
+    "failed": 0,
+    "seconds": 3.17,
+    "log": "/private/tmp/halo-facts-keyframe-focused.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 25.49,
+    "log": "/private/tmp/halo-facts-keyframes-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 29.81,
+    "log": "/private/tmp/halo-facts-keyframes-wasm.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "host_suite_baseline": {
+    "passed": 646,
+    "ignored": 49,
+    "note": "Earlier complete suite; additive facts codecs have no native-film parser callers. Focused host and actual WASM include all five facts-cache tests."
+  },
+  "format_diff_scripts": "passed",
+  "remaining": "Creation records/statistics,world composition,positions and full facts-cache container/versioning/assembly remain unported. Full v41 parity incomplete; architecture deferred.",
+  "sha256": {
+    "facts_keyframes.rs": "77404995ec167206b5d9ed1c8afe63f5c8b11f7f5356d2cfb731ae784f452653",
+    "facts_keyframes_tests.rs": "4b47c0ba375ea9d95bc0e33da2c0a52871adc0ca99a231936c4f15a93e118ba4",
+    "fixtures/facts-keyframe-codec-v41.json.zlib": "4d3dfd558c53994c7ef1ca2896a4ea20248b130609fa5e03ed3ea2f8c44885f4",
+    "fixtures/facts-keyframe-count-v41.json.zlib": "25416187bc24226fafa9830ec3c9c2f722a0cbca69083a9e2d3947ddabe7fff6"
+  }
+}

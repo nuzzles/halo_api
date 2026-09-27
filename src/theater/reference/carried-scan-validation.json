@@ -1,0 +1,39 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Native carried-inventory phase composition: weapons, pickups, keyframe inventory, deltas, observation order, fallback timing, logs and complete encoded facts",
+  "fixture": {
+    "path": "carried-scan-v41.json.zlib",
+    "sha256": "a4f20b801e0e223c9cb8624f1b047e0350c5c0fbbcce8b77b0853ddc3f3e9b6b",
+    "generator": "halo_rust_carried_scan_test.go.txt",
+    "cases": 32,
+    "weapon_changes": 35,
+    "pickups": 21,
+    "keyframe_inventory": 128,
+    "inventory_deltas": 1365,
+    "ordered_logs": 128,
+    "observation_boundaries": 256
+  },
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-carried-scan-host.log",
+    "tests_passed": 1
+  },
+  "wasm": {
+    "status": "passed",
+    "prefix": "native_carried_scan::",
+    "log": "/private/tmp/halo-carried-scan-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-carried-scan-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Controlled native-generated mixed-source fixtures and synthetic registry, not independently annotated gameplay",
+    "Complete facts bytes validate this phase boundary only; final capture must follow remaining scan phases",
+    "Position phase is validated separately; complete scanFilmInputs and fresh document assembly remain open",
+    "Layout-detection and profile/registry corruption refusal messages need additional integrated coverage"
+  ]
+}

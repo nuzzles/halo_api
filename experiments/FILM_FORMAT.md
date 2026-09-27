@@ -1,5 +1,18 @@
 # Halo Infinite Theater format: current status and research notes
 
+**2026-09-22 registry correction:** the LevelUp v41 port independently confirms
+50 registry blocks with 1,067 named slots in all 32 local films. Earlier statements
+of 118 archetypes counted later bootstrap sections. Entries begin after the two
+u32 version words; each entry contains a 256-byte name and a precision-level u32.
+See [port status](../src/theater/reference/PORT_STATUS.md). Other historical claims
+below remain subject to verification against the pinned reference and captured bytes.
+
+Type-1 replication packets now decode as datum tables: 79 bits per slot, then
+256 component-bitmap bits per slot, five u32 tail words and byte alignment.
+The historical “not an entity table” conclusion below is superseded. The current
+Rust decoder preserves allocation flags, generation values and view/component
+masks, with an independent LevelUp comparison for all 8,191 captured slots.
+
 The footer-only summary decoder now resolves named medals and their stats API
 identities: all 3,667 declared events and 722 awards across 32 films decode.
 See [FILM_EVENTS.md](FILM_EVENTS.md) for the layout, validation, and remaining limits.

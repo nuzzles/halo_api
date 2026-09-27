@@ -1,0 +1,42 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "complete_facts_file_codec_validated",
+  "native": {
+    "statborg_writer_cases": 256,
+    "statborg_read_sequences": 767,
+    "kills_writer_cases": 163,
+    "kills_read_sequences": 9685,
+    "file_cases": 2919,
+    "file_writer_failure_controls": 6,
+    "file_safe_panic_controls": 1,
+    "fixtures_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-facts-statborg-json-native.log",
+      "/private/tmp/halo-facts-kills-json-native.log",
+      "/private/tmp/halo-facts-file-native.log"
+    ]
+  },
+  "host": {
+    "passed": 26,
+    "failed": 0,
+    "seconds": 9.21,
+    "build_seconds": 41.12,
+    "scope": "All shared native_facts_ tests",
+    "log": "/private/tmp/halo-facts-file-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 29.39,
+    "log": "/private/tmp/halo-facts-file-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "harness_build_seconds": 35.03,
+    "scope": "Actual wasm32 runtime including statborg/kills/file oracles",
+    "log": "/private/tmp/halo-facts-file-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "Scan/cache DTO conversions, BuildFromFacts and capture integration; final source/field/runtime/export/captured-film reconciliation. Architecture deferred."
+}

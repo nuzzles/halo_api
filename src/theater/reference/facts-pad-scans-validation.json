@@ -1,0 +1,43 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "host_and_selected_wasm_validated",
+  "native": {
+    "pad_scan_cases": 1024,
+    "ground_item_cases": 1024,
+    "ground_item_publications": 5120,
+    "powerup_only_publications": 111,
+    "both_pad_streams": 127,
+    "weapon_objects_without_pads": 59,
+    "generated_fixtures_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-facts-pad-scans-native.log",
+      "/private/tmp/halo-facts-ground-items-native.log"
+    ]
+  },
+  "host": {
+    "ground_checks": {
+      "passed": 23,
+      "failed": 0,
+      "seconds": 8.22,
+      "log": "/private/tmp/halo-facts-pad-scans-host.log"
+    },
+    "pad_dating": {
+      "passed": 1,
+      "failed": 0,
+      "log": "/private/tmp/halo-facts-pad-dating-regression.log"
+    }
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Five selected ground cache/lifetime/clock/pad/item oracle calls only, not full suite",
+    "log": "/private/tmp/halo-facts-pad-scans-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-pad-scans-clippy.log"
+  },
+  "format_and_diff_checks": "passed",
+  "source_hashes": 485,
+  "full_v41_parity_complete": false,
+  "remaining": "Vehicle/objective cache adapters, full document composition including pad dating and ground-item attachment, scan capture and fallback restoration, legacy domain reconciliation and final all-data audit."
+}

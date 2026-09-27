@@ -1,0 +1,43 @@
+package replay
+
+import (
+ "encoding/hex"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "hash/fnv"
+ "math"
+ "math/rand"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+)
+func haloRustHeaderBytes(s string) []uint64 { out:=[]uint64{};for _,b:=range []byte(s){out=append(out,uint64(b))};return out }
+func haloRustHeaderProject(g *FilmFacts) any { if g==nil{return nil};return map[string]any{"film":haloRustHeaderBytes(g.Film),"map_module":haloRustHeaderBytes(g.MapModule),"axis_widths":g.AxisW,"layout_detected":g.LayoutDetected,"inventory_delta_ammo_refused":g.InventoryDeltaAmmoRefused,"film_major_version":g.FilmMajorVersion,"film_clock_origin_us":g.FilmClockOriginUS} }
+func TestHaloRustFactsHeader(t *testing.T) {
+ rng:=rand.New(rand.NewSource(410025));rows:=[]any{}
+ entries:=[]profile.MapQuantEntry{
+  {Module:"map",AxisWidths:[3]uint{13,14,15}},
+  {Module:"map",AxisWidths:[3]uint{8,26,16},Region:0xffffffff,RegionIndexBits:2},
+  {Module:"",AxisWidths:[3]uint{}},
+  {Module:"\x00\xff\xc0\x80\n\"跳跃",AxisWidths:[3]uint{7,14,15}},
+  {Module:"map",AxisWidths:[3]uint{13,14,15},RegionIndexBits:1<<63},
+  {Module:"map",AxisWidths:[3]uint{13,14,15},RegionIndexBits:^uint(0)},
+  {Module:"map",AxisWidths:[3]uint{13,14,15},RegionIndexBits:1<<32},
+ }
+ for k:=range entries {for a:=0;a<3;a++{entries[k].Min[a]=math.Float32frombits(rng.Uint32());entries[k].Max[a]=math.Float32frombits(rng.Uint32())}}
+ add:=func(g *FilmFacts,entry profile.MapQuantEntry,encoded,input []byte){
+  got,r,lay,world,err:=decodeEntete(input,entry);kind,msg,transport:="","","";off:=-1
+  if err!=nil{msg=err.Error();kind="magic";if errors.Is(err,ErrFilmFactsCarte){kind="map"};if errors.Is(err,ErrFilmFactsDecoupage){kind="layout"}}
+  if r!=nil{off=r.off;if r.err!=nil{transport=r.err.Error()}}
+  bounds:=[3][2]uint32{};entryBounds:=[3][2]uint32{};for a:=0;a<3;a++{bounds[a]=[2]uint32{math.Float32bits(world[a].Min),math.Float32bits(world[a].Max)};entryBounds[a]=[2]uint32{math.Float32bits(entry.Min[a]),math.Float32bits(entry.Max[a])}}
+  rows=append(rows,map[string]any{"source":haloRustHeaderProject(g),"encoded":hex.EncodeToString(encoded),"input":hex.EncodeToString(input),"entry":map[string]any{"module":haloRustHeaderBytes(entry.Module),"widths":entry.AxisWidths,"region":entry.Region,"index":entry.RegionIndexBits,"bounds":entryBounds},"header":haloRustHeaderProject(got),"kind":kind,"error":msg,"transport":transport,"offset":off,"layout":lay,"bounds":bounds})
+ }
+ for n:=0;n<84;n++{entry:=entries[n%len(entries)];g:=&FilmFacts{Film:string([]byte{0,255,byte(n)}),MapModule:entry.Module,AxisW:entry.AxisWidths,LayoutDetected:n%2==0};g.InventoryDeltaAmmoRefused=n%3==0;g.FilmClockOriginUS=rng.Uint64();if n%4!=0{v:=int(rng.Uint64());g.FilmMajorVersion=&v};if n%5==0{g.AxisW=[3]uint{uint(rng.Uint64()),uint(rng.Uint64()),uint(rng.Uint64())}};if n%11==0{g.MapModule+="other"};w:=gwriter{b:[]byte(filmFactsMagic)};encodeEntete(&w,g);for end:=0;end<=len(w.b);end++{add(g,entry,w.b,w.b[:end])};add(g,entry,w.b,append(append([]byte{},w.b...),0,255)) }
+ // Exercise every bool byte independently, with an invalid catalogue allowing detection.
+ for field:=0;field<3;field++{for b:=0;b<256;b++{g:=&FilmFacts{LayoutDetected:true};w:=gwriter{b:[]byte(filmFactsMagic)};encodeEntete(&w,g);input:=append([]byte{},w.b...);input[len(filmFactsMagic)+5+field]=byte(b);add(g,entries[2],w.b,input)}}
+ // Raw strings and every Unicode scalar: pin %q independently of Rust's Unicode version.
+ quotes:=[]any{};for b:=0;b<256;b++{s:=string([]byte{byte(b)});quotes=append(quotes,map[string]any{"bytes":haloRustHeaderBytes(s),"error":verifierCleDeCuisson(s,[3]uint{},false,profile.MapQuantEntry{}).Error()})}
+ hash:=fnv.New64a();for c:=rune(1);c<=0x10ffff;c++{if c>=0xd800&&c<=0xdfff{continue};err:=verifierCleDeCuisson(string(c),[3]uint{},false,profile.MapQuantEntry{});hash.Write([]byte(err.Error()));hash.Write([]byte{0})}
+ raw,err:=json.Marshal(map[string]any{"cases":rows,"quotes":quotes,"unicode_hash":hash.Sum64()});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-header.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("header cases=%d quotes=%d unicode_hash=%d\n",len(rows),len(quotes),hash.Sum64())
+}

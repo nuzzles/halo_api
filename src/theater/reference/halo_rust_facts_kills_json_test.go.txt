@@ -1,0 +1,51 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/killsource")
+func haloRustKillsValue(v reflect.Value)any{
+ switch v.Kind(){
+ case reflect.String:out:=[]uint64{};for _,b:=range []byte(v.String()){out=append(out,uint64(b))};return out
+ case reflect.Pointer:if v.IsNil(){return nil};return haloRustKillsValue(v.Elem())
+ case reflect.Slice:if v.IsNil(){return nil};fallthrough
+ case reflect.Array:out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustKillsValue(v.Index(i)))};return out
+ case reflect.Map:if v.IsNil(){return nil};out:=map[string]any{};it:=v.MapRange();for it.Next(){out[fmt.Sprint(it.Key().Interface())]=haloRustKillsValue(it.Value())};return out
+ case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{if !v.Type().Field(i).IsExported(){continue};out[v.Type().Field(i).Name]=haloRustKillsValue(v.Field(i))};return out
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:return v.Int()
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:return v.Uint()
+ case reflect.Bool:return v.Bool()
+ case reflect.Float32:return math.Float32bits(v.Interface().(float32))
+ case reflect.Float64:return math.Float64bits(v.Float())
+ };panic(v.Kind())
+}
+func haloRustKillsFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){
+ case reflect.String:v.SetString([]string{"", "crouch", "sprint", "\x00\xff\xc0\x80", "跳跃"}[n%5])
+ case reflect.Pointer:if n%3!=0{v.Set(reflect.New(v.Type().Elem()));haloRustKillsFill(v.Elem(),rng,n)}
+ case reflect.Slice:if n%4!=0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3));for i:=0;i<v.Len();i++{haloRustKillsFill(v.Index(i),rng,n+i+1)}}
+ case reflect.Array:for i:=0;i<v.Len();i++{haloRustKillsFill(v.Index(i),rng,n+i)}
+ case reflect.Map:if n%3!=0{v.Set(reflect.MakeMap(v.Type()));for i:=0;i<n%3;i++{key:=reflect.New(v.Type().Key()).Elem();key.SetString(fmt.Sprintf("key%d",i));val:=reflect.New(v.Type().Elem()).Elem();haloRustKillsFill(val,rng,n+i);v.SetMapIndex(key,val)}}
+ case reflect.Struct:for i:=0;i<v.NumField();i++{if !v.Type().Field(i).IsExported(){continue};haloRustKillsFill(v.Field(i),rng,n+i)}
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:v.SetInt(int64(rng.Uint64()))
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:v.SetUint(rng.Uint64())
+ case reflect.Bool:v.SetBool(rng.Intn(2)==0)
+ case reflect.Float32:v.SetFloat(float64(math.Float32frombits(rng.Uint32() & 0xff7fffff)))
+ case reflect.Float64:v.SetFloat(math.Float64frombits(rng.Uint64()))
+ default:panic(v.Kind())}}
+func TestHaloRustFactsKillsJSON(t *testing.T){
+ rng:=rand.New(rand.NewSource(4100259));writers:=[]any{};reads:=[]any{}
+ for n:=0;n<160;n++{var v *killsource.Result;if n>0{v=&killsource.Result{};haloRustKillsFill(reflect.ValueOf(v).Elem(),rng,n)};raw,err:=json.Marshal(v);msg:="";if err!=nil{msg=err.Error()};writers=append(writers,map[string]any{"source":haloRustKillsValue(reflect.ValueOf(v)),"encoded":hex.EncodeToString(raw),"error":msg})}
+ for _,bits:=range []uint32{0x7fc00000,0x7f800000,0xff800000}{v:=&killsource.Result{};v.ProfilCalibre.Mouvement.DeltaQuantum=math.Float32frombits(bits);raw,err:=json.Marshal(v);writers=append(writers,map[string]any{"source":haloRustKillsValue(reflect.ValueOf(v)),"encoded":hex.EncodeToString(raw),"error":err.Error()})}
+ add:=func(charges ...string){var v *killsource.Result;steps:=[]any{};for _,c:=range charges{err:=json.Unmarshal([]byte(c),&v);msg:="";if err!=nil{msg=err.Error()};steps=append(steps,map[string]any{"input":hex.EncodeToString([]byte(c)),"decoded":haloRustKillsValue(reflect.ValueOf(v)),"error":msg});if err!=nil{break}};reads=append(reads,map[string]any{"steps":steps})}
+ for _,s:=range []string{`null`,`{}`,`[]`,`true`,`1`,`"x"`,`{"Kills":[null,{}],"Roster":{"Names":["a","\ud800"],"IndexSource":["\udc00"]},"Probe":{"Tags":[1,2,3]}}`}{for end:=0;end<=len(s);end++{add(s[:end])}}
+ var visit func(reflect.Type,func(string)string)
+ visit=func(t reflect.Type,wrap func(string)string){
+  for _,sample:=range []string{`null`,`{}`,`[]`,`true`,`"x"`,`1`,`-1`,`1.0`,`9223372036854775808`,`18446744073709551616`}{add(wrap(sample))}
+  switch t.Kind(){
+  case reflect.Pointer:visit(t.Elem(),wrap)
+  case reflect.Struct:for i:=0;i<t.NumField();i++{f:=t.Field(i);if !f.IsExported(){continue};key,_:=json.Marshal(f.Name);visit(f.Type,func(s string)string{return wrap(`{`+string(key)+`:`+s+`}`)})}
+  case reflect.Slice,reflect.Array:visit(t.Elem(),func(s string)string{return wrap(`[`+s+`]`)})
+  case reflect.Map:visit(t.Elem(),func(s string)string{return wrap(`{"key":`+s+`}`)})
+  case reflect.String:for b:=0;b<256;b++{add(wrap("\""+string([]byte{byte(b)})+"\""))}
+  }
+ }
+ visit(reflect.TypeFor[killsource.Result](),func(s string)string{return s})
+ add(`{"Kills":[{"TimeMS":4,"Victim":"a","Source":{"Tag":8}},{"Victim":"b"}],"Probe":{"Tags":[1,2,3]},"Roster":{"Names":["a","b"]}}`,`{"Kills":[{}],"Probe":{"Tags":[9]},"Roster":{"Names":["x"]}}`,`{"Kills":[null,{}],"Probe":{"Tags":[null,null,null]},"Roster":{"Names":[null,null]}}`,`{"Probe":null}`,`{"Probe":{}}`,`null`,`{}`)
+ raw,err:=json.Marshal(map[string]any{"writers":writers,"reads":reads});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-kills-json.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("kills writers=%d reads=%d\n",len(writers),len(reads))
+}

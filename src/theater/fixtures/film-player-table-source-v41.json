@@ -1,0 +1,685 @@
+[
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "sans_registre",
+        "err": null,
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 0,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "sans_registre"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "blocs": 0,
+        "empreinte": 14695981039346656037,
+        "empreinte_connue": 3948122217672317832,
+        "level": "WARN",
+        "msg": "empreinte du registre ECS du film INCONNUE — grammaire des composants suspecte (mise a jour du jeu ?) ; le film reste decode",
+        "slots_non_vides": 0
+      },
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 1,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 4,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 2,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 8,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 3,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 832532,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 4,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 832564,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 5,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 845452,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 6,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 845453,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 7,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 845454,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 8,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": true,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "sans_section",
+        "err": "filmdec: chunk_00 sans section d'identification (aucune chaine de build apres le registre)",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 9,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "sans_section"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {
+      "filmdec_unknown_build_hi_unknown": 1
+    },
+    "observations": [
+      {
+        "build": "HI_UNKNOWN",
+        "cause": "build_inconnu",
+        "err": "filmdec: build absent de la table de profil : \"HI_UNKNOWN\"",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 10,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "HI_UNKNOWN",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "build_inconnu"
+    },
+    "unknown": true
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 986560,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "cause": "table_introuvable",
+        "err": "filmdec: aucune table de 32 slots dans le corps de chunk_00",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 11,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "HI_1_13_0",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "table_introuvable"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 1973119,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "level": "INFO",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film lue",
+        "sieges": 1,
+        "vacantIntercale": false,
+        "vacants": 31
+      }
+    ],
+    "read": true,
+    "run": 12,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [
+        {
+          "FilmIndex": 0,
+          "XUID": 2535472547643888,
+          "Gamertag": "Nuzzles"
+        }
+      ],
+      "Build": "HI_1_13_0",
+      "Occupied": 1,
+      "Vacant": 31,
+      "InterleavedVacant": false,
+      "Refusal": ""
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 845553,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 13,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": 855453,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "cause": "table_introuvable",
+        "err": "filmdec: aucune table de 32 slots dans le corps de chunk_00",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 14,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "HI_1_13_0",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "table_introuvable"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "level": "INFO",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film lue",
+        "sieges": 1,
+        "vacantIntercale": false,
+        "vacants": 31
+      }
+    ],
+    "read": true,
+    "run": 15,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [
+        {
+          "FilmIndex": 0,
+          "XUID": 2535472547643888,
+          "Gamertag": "Nuzzles"
+        }
+      ],
+      "Build": "HI_1_13_0",
+      "Occupied": 1,
+      "Vacant": 31,
+      "InterleavedVacant": false,
+      "Refusal": ""
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "sans_registre",
+        "err": null,
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 16,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "sans_registre"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "level": "INFO",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film lue",
+        "sieges": 1,
+        "vacantIntercale": false,
+        "vacants": 31
+      }
+    ],
+    "read": true,
+    "run": 17,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [
+        {
+          "FilmIndex": 0,
+          "XUID": 2535472547643888,
+          "Gamertag": "Nuzzles"
+        }
+      ],
+      "Build": "HI_1_13_0",
+      "Occupied": 1,
+      "Vacant": 31,
+      "InterleavedVacant": false,
+      "Refusal": ""
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 tronque avant la fin de la section d'identification",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 18,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "",
+        "cause": "tronque",
+        "err": "filmdec: chunk_00 (registre) encore compresse — decompresser avant ParseRegistryChunk",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film NON LUE — le registre d'identite retombe sur la lecture des chunks de replication"
+      }
+    ],
+    "read": false,
+    "run": 19,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [],
+      "Build": "",
+      "Occupied": 0,
+      "Vacant": 0,
+      "InterleavedVacant": false,
+      "Refusal": "tronque"
+    },
+    "unknown": false
+  },
+  {
+    "body_bit": 6763617,
+    "build_offset": 832532,
+    "cut": -1,
+    "erase": false,
+    "metric_increments": {},
+    "observations": [
+      {
+        "build": "HI_1_13_0",
+        "level": "INFO",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : table des joueurs du film lue",
+        "sieges": 7,
+        "vacantIntercale": true,
+        "vacants": 25
+      },
+      {
+        "build": "HI_1_13_0",
+        "level": "WARN",
+        "match_id": "rust-source-oracle",
+        "msg": "rejeu : siege VACANT INTERCALE dans la table du film — le rang absolu et l'index parmi les occupes divergent, le lien direct n'est PAS affirme"
+      }
+    ],
+    "read": false,
+    "run": 20,
+    "synthetic_row": 33,
+    "table": {
+      "Seats": [
+        {
+          "FilmIndex": 1,
+          "XUID": 2533274790395906,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 3,
+          "XUID": 2533274790395908,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 4,
+          "XUID": 2533274790395909,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 5,
+          "XUID": 2533274790395910,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 6,
+          "XUID": 2533274790395911,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 9,
+          "XUID": 2533274790395914,
+          "Gamertag": "SixteenCharsName"
+        },
+        {
+          "FilmIndex": 10,
+          "XUID": 2533274790395915,
+          "Gamertag": "SixteenCharsName"
+        }
+      ],
+      "Build": "HI_1_13_0",
+      "Occupied": 7,
+      "Vacant": 25,
+      "InterleavedVacant": true,
+      "Refusal": ""
+    },
+    "unknown": false
+  }
+]

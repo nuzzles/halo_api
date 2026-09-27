@@ -1,0 +1,58 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing";"sort";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func haloRustTailValue(v reflect.Value)any{
+ switch v.Kind(){
+ case reflect.Map:if v.IsNil(){return nil};out:=map[string]any{};iter:=v.MapRange();for iter.Next(){out[fmt.Sprint(iter.Key().Interface())]=haloRustTailValue(iter.Value())};return out
+ case reflect.String:out:=[]uint64{};for _,b:=range []byte(v.String()){out=append(out,uint64(b))};return out
+ case reflect.Pointer:if v.IsNil(){return nil};return haloRustTailValue(v.Elem())
+ case reflect.Slice:if v.IsNil(){return nil};fallthrough
+ case reflect.Array:out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustTailValue(v.Index(i)))};return out
+ case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustTailValue(v.Field(i))};return out
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:return v.Int()
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:return v.Uint()
+ case reflect.Bool:return v.Bool()
+ case reflect.Float32:return math.Float32bits(v.Interface().(float32))
+ case reflect.Float64:return math.Float64bits(v.Float())
+ };panic(v.Kind())
+}
+func haloRustTailFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){
+ case reflect.Map:if n%4!=0{v.Set(reflect.MakeMap(v.Type()));for j:=0;j<n%3;j++{k:=reflect.New(v.Type().Key()).Elem();value:=reflect.New(v.Type().Elem()).Elem();haloRustTailFill(k,rng,n+j+1);haloRustTailFill(value,rng,n+j+2);v.SetMapIndex(k,value)}}
+ case reflect.String:v.SetString([]string{"", "crouch", "sprint", "\x00\xff\xc0\x80", "跳跃"}[n%5])
+ case reflect.Pointer:if n%3!=0{v.Set(reflect.New(v.Type().Elem()));haloRustTailFill(v.Elem(),rng,n)}
+ case reflect.Slice:if n%4!=0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3));for i:=0;i<v.Len();i++{haloRustTailFill(v.Index(i),rng,n+i+1)}}
+ case reflect.Array:for i:=0;i<v.Len();i++{haloRustTailFill(v.Index(i),rng,n+i)}
+ case reflect.Struct:for i:=0;i<v.NumField();i++{haloRustTailFill(v.Field(i),rng,n+i)}
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:v.SetInt(int64(rng.Uint64()))
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:v.SetUint(rng.Uint64())
+ case reflect.Bool:v.SetBool(rng.Intn(2)==0)
+ case reflect.Float32:v.Set(reflect.ValueOf(math.Float32frombits(rng.Uint32())))
+ case reflect.Float64:v.SetFloat(math.Float64frombits(rng.Uint64()))
+ default:panic(v.Kind())}}
+func haloRustTailSharedCreationValue(v reflect.Value)any{switch v.Kind(){case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustTailSharedCreationValue(v.Field(i))};return out;case reflect.Array,reflect.Slice:if v.Kind()==reflect.Slice&&v.IsNil(){return nil};out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustTailSharedCreationValue(v.Index(i)))};return out;case reflect.Float32:return math.Float32bits(v.Interface().(float32));case reflect.Int:return v.Int();case reflect.Uint32,reflect.Uint64:return v.Uint();case reflect.Bool:return v.Bool()};panic(v.Kind())}
+func haloRustTailSharedWorldDump(s WorldObjectScan)any{creations:=[]any{};for _,c:=range s.Creations{creations=append(creations,haloRustTailSharedCreationValue(reflect.ValueOf(c)))};return map[string]any{"scanned":s.Scanned,"creations":creations,"stats":haloRustTailSharedCreationValue(reflect.ValueOf(s.Stats)),"keyframes":haloRustTailSharedWorldKeyframes(s),"tracks":haloRustTailSharedWorldTracks(s)}}
+func haloRustTailSharedWorldKeyframes(s WorldObjectScan)any{times:=s.Keyframes.TimesUS;if times==nil{times=[]uint64{}};keys:=[]types.EquipmentLifeKey{};for k:=range s.Keyframes.SeenUS{keys=append(keys,k)};sort.Slice(keys,func(i,j int)bool{if keys[i].Slot!=keys[j].Slot{return keys[i].Slot<keys[j].Slot};return keys[i].Gen<keys[j].Gen});seen:=[]any{};for _,k:=range keys{ts:=s.Keyframes.SeenUS[k];if ts==nil{ts=[]uint64{}};seen=append(seen,map[string]any{"slot":k.Slot,"generation":k.Gen,"times":ts})};return map[string]any{"times":times,"seen":seen}}
+func haloRustTailSharedWorldTracks(s WorldObjectScan)any{tracks:=[]any{};for _,tr:=range s.Tracks{var points any;if tr.Pts!=nil{pts:=[]any{};for _,p:=range tr.Pts{pts=append(pts,map[string]any{"timestamp_us":p.TimestampUS,"chunk":p.Chunk,"bits":[]uint32{math.Float32bits(p.X),math.Float32bits(p.Y),math.Float32bits(p.Z)},"at_rest":p.AtRest})};points=pts};tracks=append(tracks,map[string]any{"slot":tr.Slot,"generation":tr.Gen,"points":points})};return tracks}
+func haloRustTailSharedPlacementStatsDump(s grammar.EquipmentPlacementStats)any{c:=s.Calibration;var widths any;if c.ByWidths!=nil{keys:=[]profile.MPPWidths{};for k:=range c.ByWidths{keys=append(keys,k)};sort.Slice(keys,func(i,j int)bool{if keys[i].Lead!=keys[j].Lead{return keys[i].Lead<keys[j].Lead};return keys[i].Index<keys[j].Index});pairs:=[][3]int{};for _,k:=range keys{pairs=append(pairs,[3]int{k.Lead,k.Index,c.ByWidths[k]})};widths=pairs};return map[string]any{"scanned":s.Scanned,"calibration":[]int{c.Widths.Lead,c.Widths.Index,c.Agree,c.Runner.Lead,c.Runner.Index,c.RunnerAgree,c.Anchors,c.Chunks,c.Lives},"widths":widths,"counts":[]int{s.Lives,s.Slots,s.Anchors,s.Accepted,s.Confirmed,s.Placements},"ids":s.ByID,"version":s.FormatVersion,"sans_profil":s.FormatSansProfil}}
+func TestHaloRustFactsTail(t *testing.T){
+ rows:=[]any{};rng:=rand.New(rand.NewSource(4100254));inventory:=map[string]any{}
+ for _,kind:=range []string{"world","spawns","queue","table","teams"}{
+  encode:=func(w *gwriter,g *FilmFacts){switch kind{case "world":encodeMonde(w,g);case "spawns":encodeSpawnEvents(w,g);case "queue":encodeQueue(w,g);case "table":encodeFilmTable(w,g.FilmTable);case "teams":encodePlayerTeams(w,g.PlayerTeams,g.TeamScan)}}
+  decode:=func(r *greader,g *FilmFacts){switch kind{case "world":decodeMonde(r,g);case "spawns":decodeSpawnEvents(r,g);case "queue":decodeQueue(r,g);case "table":g.FilmTable=decodeFilmTable(r);case "teams":g.PlayerTeams,g.TeamScan=decodePlayerTeams(r)}}
+  fields:=map[string][]string{"world":{"Placements","PlacementStats","SpawnEvents","SpawnStats","Pads"},"spawns":{"SpawnEvents","SpawnStats"},"queue":{"Deaths","PlayerIndices","FilmTable","PlayerTeams","TeamScan"},"table":{"FilmTable"},"teams":{"PlayerTeams","TeamScan"}}[kind]
+  project:=func(g *FilmFacts)any{out:=map[string]any{};for _,f:=range fields{switch f{case "Pads":out[f]=map[string]any{"Weapons":haloRustTailSharedWorldDump(g.Pads.Weapons),"Powerups":haloRustTailSharedWorldDump(g.Pads.Powerups)};case "PlacementStats":out[f]=haloRustTailSharedPlacementStatsDump(g.PlacementStats);default:v:=reflect.ValueOf(g).Elem().FieldByName(f);a:=haloRustTailValue(v);if v.Kind()==reflect.Slice&&v.IsNil(){a=[]any{}};out[f]=a}};if p,ok:=out["PlayerIndices"].(map[string]any);ok&&p["ByXUID"]==nil{p["ByXUID"]=map[string]any{}};return out}
+  add:=func(g *FilmFacts,encoded,input []byte){r:=greader{b:input};got:=&FilmFacts{};panicked:=false;func(){defer func(){if recover()!=nil{panicked=true}}();decode(&r,got)}();err:="";if r.err!=nil{err=r.err.Error()};rows=append(rows,map[string]any{"kind":kind,"source":project(g),"encoded":hex.EncodeToString(encoded),"input":hex.EncodeToString(input),"decoded":project(got),"offset":r.off,"error":err,"panic":panicked})}
+  inv:=map[string]any{};for _,f:=range fields{typ:=reflect.ValueOf(&FilmFacts{}).Elem().FieldByName(f).Type();if typ.Kind()==reflect.Slice{typ=typ.Elem()};if typ.Kind()!=reflect.Struct{continue};keys:=[]string{};for i:=0;i<typ.NumField();i++{keys=append(keys,typ.Field(i).Name)};inv[f]=keys};inventory[kind]=inv
+  states:=48;if kind=="world"{states=24};for n:=0;n<states;n++{g:=&FilmFacts{};for _,f:=range fields{haloRustTailFill(reflect.ValueOf(g).Elem().FieldByName(f),rng,n)};w:=gwriter{};encode(&w,g)
+   if kind!="world"||n<3{for end:=0;end<=len(w.b);end++{add(g,w.b,w.b[:end])}}else{add(g,w.b,w.b);for j:=0;j<32;j++{end:=rng.Intn(len(w.b)+1);add(g,w.b,w.b[:end])}}
+   add(g,w.b,append(append([]byte{},w.b...),0,255))
+  }
+  g:=&FilmFacts{};w:=gwriter{};encode(&w,g)
+  for _,count:=range []uint64{1<<63,^uint64(0)}{bad:=gwriter{};if kind=="table"{bad.b=[]byte{0,0,0,0,0}};bad.u(count);add(g,w.b,bad.b)
+   if kind=="queue"{bad=gwriter{b:[]byte{0,0,0}};bad.u(count);bad.b=append(bad.b,make([]byte,21)...);add(g,w.b,bad.b)}
+   if kind=="table"{bad=gwriter{};bad.u(count);add(g,w.b,bad.b)}
+  }
+  if kind=="teams"{for n:=0;n<8;n++{bad:=gwriter{};bad.u(4);for k:=0;k<4;k++{bad.i(int64(k%2)-1);bad.i(int64(n+k))};bad.b=append(bad.b,make([]byte,14)...);for end:=0;end<=len(bad.b);end++{add(g,w.b,bad.b[:end])}}}
+  if kind=="queue"{bad:=gwriter{b:[]byte{0,0,0,4}};for k:=0;k<4;k++{bad.u(uint64(k%2));bad.i(int64(k)-2)};bad.b=append(bad.b,make([]byte,21)...);for end:=0;end<=len(bad.b);end++{add(g,w.b,bad.b[:end])}}
+ }
+ raw,err:=json.Marshal(map[string]any{"cases":rows,"inventory":inventory});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-tail.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("tail cases=%d\n",len(rows))
+}

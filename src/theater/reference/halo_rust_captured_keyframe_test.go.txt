@@ -1,0 +1,23 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/binary")
+
+func TestHaloRustCapturedKeyframeParity(t *testing.T) {
+ root:="/Users/simbleau/git/halo_api/experiments/films/natural-end/01-do-nothing/"
+ bootstrap,err:=os.ReadFile(root+"chunk-000-type-1.bin");if err!=nil{t.Fatal(err)}
+ reg,err:=ParseRegistryChunk(bootstrap);if err!=nil{t.Fatal(err)}
+ identity,err:=ReadFilmIdentity(bootstrap);if err!=nil{t.Fatal(err)}
+ data,err:=os.ReadFile(root+"chunk-001-type-2.bin");if err!=nil{t.Fatal(err)}
+ for offset:=0;offset<len(data); {
+  n:=int(binary.LittleEndian.Uint32(data[offset+4:]));pay:=data[offset+16:offset+16+n]
+  if binary.LittleEndian.Uint16(data[offset:])==2 {
+   ctx:=ContexteParDefaut();ctx.Profil.Grammaire.ControleDeCorruption=identity.ControleDeCorruption
+   records,stop:=WalkKeyframeRecords(pay,reg,ctx)
+   output,err:=json.Marshal(map[string]any{"records":records,"stop":stop.String(),"check":identity.ControleDeCorruption,"anchors":WalkKeyframeWorld(pay)});if err!=nil{t.Fatal(err)}
+   if err=os.WriteFile("/private/tmp/halo-levelup-captured-keyframe.json",output,0600);err!=nil{t.Fatal(err)}
+   if err=os.WriteFile("/private/tmp/halo-levelup-captured-keyframe.bin",pay,0600);err!=nil{t.Fatal(err)}
+   return
+  }
+  offset+=16+n
+ }
+ t.Fatal("no keyframe")
+}

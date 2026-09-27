@@ -1,0 +1,14 @@
+package replay
+import("testing";"os";"encoding/json";"encoding/binary";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustMPPResolution(t *testing.T){
+ rows:=[]any{};formats:=[]uint32{0,20,21,24,25,27,28,0xffffffff};widths:=[]profile.MPPWidths{{},{9,5},{8,3},{6,2},{0,5},{9,0}}
+ for i:=0;i<512;i++{
+  format:=formats[i%len(formats)];cal:=widths[(i/8)%len(widths)];base:=widths[1+(i/48)%3]
+  raw:=make([]byte,8);binary.LittleEndian.PutUint32(raw,41);binary.LittleEndian.PutUint32(raw[4:],format)
+  film,e:=source.Load(source.MemoryChunks{raw},[]types.ChunkMeta{{Index:0,ChunkType:1}});if e!=nil{t.Fatal(e)}
+  res:=grammar.MPPWidthsForFilm(film);fc:=grammar.NewFilmContext(film);fc.PoserMPP(base)
+  chosen:=gwWidthsForFilm(fc,cal);restore:=gwInstallMPPWidths(fc,chosen);effective:=fc.ProfilDeBalayage().MPP;restore();if fc.ProfilDeBalayage().MPP!=base{t.Fatal("restore changed baseline")}
+  rows=append(rows,map[string]any{"format":format,"calibrated":[2]int{cal.Lead,cal.Index},"inherited":[2]int{base.Lead,base.Index},"widths":[2]int{res.Widths.Lead,res.Widths.Index},"read":res.Relue(),"unknown":res.FormatInconnu,"effective":[2]int{effective.Lead,effective.Index}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-mpp-resolution.json",b,0600);e!=nil{t.Fatal(e)}
+}

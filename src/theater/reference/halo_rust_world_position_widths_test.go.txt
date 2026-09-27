@@ -1,0 +1,25 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os")
+func TestHaloRustWorldPositionWidths(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []uint{0,1,6,32,65,1<<32,(1<<32)+1,^uint(0)} {
+  for mode:=0;mode<3;mode++ {if width>65 && mode!=2 {continue}
+   for start:=0;start<8;start++ {
+    cfg:=DefaultFrameConfig();cfg.IDLowBits=5
+    axes:=[3]uint{width,width,width};if width<=65 {axes=[3]uint{width,width+1,width+2}}
+    cfg.Profil.Mouvement.WorldObject.IndexW=width;cfg.Profil.Mouvement.WorldObject.AxisW=axes
+    data:=make([]byte,64);for i:=range data {data[i]=byte(i*37+113)}
+    set:=func(at int,on bool){data[at/8]&= ^(byte(1)<<uint(7-at%8));if on{data[at/8]|=byte(1)<<uint(7-at%8)}}
+    set(start,mode==2);set(start+1,mode==1)
+    br:=LecteurSur(data);br.poserCadre(cfg);br.SetBitPos(start);_,_,ok:=consumeByName(br,compObjectPosition,3,0);end:=br.BitPos();tail:=br.ReadBits(7)
+    values:=[]uint64{};probe:=LecteurSur(data);probe.SetBitPos(start);if !probe.ReadBit(){if !probe.ReadBit(){probe.ReadBits(width)};for _,w:=range axes{values=append(values,probe.ReadBits(w))}}
+    reg:=&Registry{Archetypes:make([]Archetype,4)};reg.Archetypes[3]=Archetype{Index:3,Components:[]string{compObjectPosition},Levels:[]uint32{0}}
+    var bw bitWriter;bw.bits(0,2);bw.bit(1);bw.bits(1,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6)
+    for j:=start;j<end;j++{bw.bit(uint64(data[j/8]>>uint(7-j%8)))};bw.end()
+    world:=NewWorld(reg);world.BindFull(1,3);fr:=LecteurSur(bw.buf);records,err:=DecodeFrameRecords(fr,world,cfg)
+    rows=append(rows,map[string]any{"width":width,"axes":axes,"mode":mode,"start":start,"hex":hex.EncodeToString(data),"ok":ok,"end":end,"tail":tail,"values":values,"frame_hex":hex.EncodeToString(bw.buf),"frame_end":fr.BitPos(),"complete":err==nil,"records":records})
+   }
+  }
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-world-position-widths.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,7 @@
+package objectives
+import("testing";"encoding/json";"os";"math/rand";"time";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustFlagGrabsNet(t *testing.T){
+ rng:=rand.New(rand.NewSource(411));rows:=[]any{};states:=[]string{"carried","carried_open","dropped","home","unknown"};names:=[]string{"","1","2","10","é"};windows:=[]int64{-1,0,1,999999,1000000,2500000000,5000000000}
+ for i:=0;i<2048;i++{tracks:=[]types.FlagTrack{};for t:=0;t<i%4;t++{tr:=types.FlagTrack{Team:t-1,Spans:[]types.FlagSpan{}};for j:=0;j<i%31;j++{s:=rng.Intn(20)*500;tr.Spans=append(tr.Spans,types.FlagSpan{State:states[rng.Intn(len(states))],StartMS:s,EndMS:s+rng.Intn(4)*500,XUID:names[rng.Intn(len(names))]})};tracks=append(tracks,tr)};w:=windows[i%len(windows)];r:=NetFlagGrabs(tracks,time.Duration(w));if r.Players==nil{r.Players=[]types.FlagGrabsNetPlayer{}};rows=append(rows,map[string]any{"tracks":tracks,"window_ns":w,"expected":r})}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-flag-grabs-net.json",b,0600);e!=nil{t.Fatal(e)}
+}

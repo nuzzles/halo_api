@@ -1,0 +1,18 @@
+package grammar
+import("testing";"math/rand";"encoding/json";"encoding/hex";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustProbeTraceValues(t *testing.T){
+ rng:=rand.New(rand.NewSource(74144));rows:=[]any{};names:=[]string{"object-dead-state-component","weapon-state-type-info","object-dead-state-component","weapon-state-type-info","simulation-state-component","not-ported"}
+ for run:=0;run<1024;run++{
+  data:=make([]byte,1024);rng.Read(data);start:=run%17;ti:=uint32([]int{0,5,35,40}[run%4]);ctx:=ContexteParDefaut();ctx.Obs=NouvelleObservation();ctx.Obs.ObjectParentStateHook=func(ObjectParentState){};ctx.Profil.Grammaire.ControleDeCorruption=run%2==0;ctx.Profil.Grammaire.SimStateComplet=run%3==0
+  levels:=[]uint32{};for range names{levels=append(levels,uint32(run%6))};reg:=&Registry{Archetypes:make([]Archetype,41)};reg.Archetypes[ti]=Archetype{Index:int(ti),Components:names,Levels:levels}
+  calibration:=map[string]int{};if run%7==0{calibration[names[(run/7)%len(names)]]=17};ctx.Profil.Grammaire.LargeursCalibrees=calibration;stubs:=map[string]int{};if run%3==0{stubs["not-ported"]=19};ctx.Profil.Grammaire.LargeursBouchon=stubs
+  br:=LecteurSur(data);br.PoserContexte(ctx);br.SetBitPos(start);if ti==35{consumeBipedDefaultState(br);consumeBipedDefaultStateTail(br)}
+  at:=br.BitPos();put:=func(n int,v uint64){for b:=n-1;b>=0;b--{mask:=byte(1<<uint(7-at%8));data[at/8]&=^mask;if v>>uint(b)&1!=0{data[at/8]|=mask};at++}}
+  put(1,1);put(1,0);put(3,uint64(len(names)));for i:=range names{put(6,uint64(i))}
+  if run%5==0{data=data[:(at+7)/8+run%13]}
+  tr,end:=TraverseKeyframeBipedAt(data,start,reg,ti,ctx);components:=[]any{};for _,c:=range tr.Comps{components=append(components,map[string]any{"start":c.StartBit,"index":c.Index,"name":c.Name,"variant":c.Variant,"ported":c.Ported})}
+  p:=ctx.Profil;encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  rows=append(rows,map[string]any{"encoding":encoding,"simulation":ctx.Profil.Grammaire.SimStateComplet,"hex":hex.EncodeToString(data),"start":start,"ti":ti,"level":run%6,"corruption":ctx.Profil.Grammaire.ControleDeCorruption,"calibrated":calibration,"stubs":stubs,"components":components,"end":end,"dead":tr.Dead,"mask":tr.Mask,"desync":tr.DesyncAt,"trace_end":tr.EndBit})
+ }
+ b,e:=json.Marshal(map[string]any{"names":names,"rows":rows});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-probe-trace-values.json",b,0600);e!=nil{t.Fatal(e)}
+}

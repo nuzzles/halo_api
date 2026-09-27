@@ -6,13 +6,14 @@ use super::FilmRegistry;
 /// Input contract for a versioned, partial decode. Chunk data must be decompressed.
 #[derive(Debug, Clone)]
 pub struct DecodeOptions {
-    /// Film major version from the manifest. Only version 41 is supported.
+    /// LegacyFilm major version from the manifest. Only version 41 is supported.
     pub major_version: i32,
     /// Optional match identity retained in portable exports.
     pub match_id: Option<String>,
     /// Manifest duration, in microseconds; otherwise uses the last packet time.
     pub duration_us: Option<u64>,
-    /// Retain packet indexes and accepted bit ranges, for unknown-data inspection.
+    /// Retain complete input chunks, packet indexes and accepted bit ranges.
+    /// Disabling this creates a compact observation export without opaque source data.
     pub retain_coverage: bool,
 }
 impl DecodeOptions {
@@ -47,6 +48,15 @@ pub enum DecodeError {
     /// Required metadata or replication data is absent.
     #[error("missing {0}")]
     Missing(&'static str),
+    /// Native kill-source input refusal, preserving its distinct error category.
+    #[error(transparent)]
+    KillSource(#[from] super::KillSourceFilmError),
+    /// A native signed option cannot be represented by this target's indexes.
+    #[error(transparent)]
+    KillOption(#[from] super::KillDecodeOptionError),
+    /// A framed type-1 datum body failed native size validation.
+    #[error(transparent)]
+    Datums(#[from] super::DatumTableError),
     /// A supported capture's independent guards disagree.
     #[error("inconsistent Theater data: {0}")]
     Inconsistent(String),
@@ -386,7 +396,7 @@ pub struct SummaryEvent {
     pub player: Option<u8>,
     /// Recorded gamertag.
     pub name: String,
-    /// Film-relative time in microseconds.
+    /// LegacyFilm-relative time in microseconds.
     pub time_us: u64,
     /// Summary kind, including unrecognized numeric codes.
     pub kind: SummaryKind,
@@ -439,7 +449,7 @@ impl SummaryKind {
 /// A checked clock observation. Round signature changes are retained explicitly.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ClockSample {
-    /// Film-relative time.
+    /// LegacyFilm-relative time.
     pub time_us: u64,
     /// Raw 26-bit signature after three uninterpreted leading bits.
     pub signature: u32,
@@ -501,25 +511,283 @@ pub struct DecodeDiagnostics {
 }
 /// Typed, serializable partial Theater film, independent of filesystem and network.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Film {
+#[allow(dead_code)]
+pub(crate) struct LegacyFilm {
+    /// Complete decompressed inputs in caller order, including chunks and bytes
+    /// no reader recognized. Present by default; absent in compact/older exports.
+    /// Offsets remain relative to these bytes. This preserves source information,
+    /// not a claim that all bytes were decoded or that compressed re-encoding exists.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_chunks: Option<Vec<FilmSourceChunk>>,
+
+    /// Direct weapon-hit events, pairing, and optional distance evidence.
+    /// Constructors retain direct reads; map-aware decoding adds distance evidence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapon_hits: Option<super::FilmWeaponHits>,
+    /// Failure of the latest weapon-hit scan. Older exports have no result or
+    /// failure; a failed explicit refresh preserves any previous successful result.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapon_hits_error: Option<String>,
+    /// Recovered anchor spans, including gaps across skipped records.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyframe_record_spans: Option<Vec<super::KeyframeRecordSpan>>,
+    /// Native extra-block measurements; not evidence of occupant identity.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vehicle_keyframe_states: Option<Vec<super::VehicleKeyframeState>>,
+    /// Resolved sampling and world-object precision, with native fallback evidence.
+    #[serde(default)]
+    pub scan_precision: Option<super::ReplayPrecisionContext>,
     /// Portable JSON schema version, separate from the Halo film major version.
     pub schema_version: u32,
     /// Halo film major version.
     pub major_version: i32,
     /// Optional manifest match identity.
     pub match_id: Option<String>,
-    /// Film duration in microseconds.
+    /// LegacyFilm duration in microseconds.
     pub duration_us: u64,
     /// Raw origin timestamp; sample times are relative to this value.
     pub origin_timestamp_us: u64,
+    /// Native chunk-one origin, independent of the earliest nonzero timestamp
+    /// used by legacy samples. None means unavailable in an older export.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_clock_origin: Option<super::ReplayClockOriginRead>,
     /// Component names; runtime registry bytes are not treated as stable IDs.
     pub registry: FilmRegistry,
+    /// Native registry truncation and bootstrap source identity. Missing in older
+    /// exports means unavailable, not a measured zero-byte tail.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub registry_diagnostics: Option<super::FilmRegistrySourceDiagnostics>,
+    /// Build and type versions read from the bootstrap, when present.
+    #[serde(default)]
+    pub identity: Option<super::FilmIdentity>,
+    /// Bootstrap player slots and calibration diagnostics, independent of legacy roster recovery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_table: Option<super::PlayerTable>,
+    /// Source player-table refusal and per-call native metric increments. Absent
+    /// in older exports means unavailable, not a successful read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_table_diagnostics: Option<super::ReplayFilmPlayerTableDiagnostics>,
+    /// Type-8 session populations; None means no supported build identity.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub roster_updates: Option<Vec<super::FilmRosterUpdate>>,
+    /// Native long fire records; shooter indices are film indices, not identities.
+    #[serde(default)]
+    pub fire_events: Vec<super::FilmFireEvent>,
+    /// Native grenade throws with explicit grammar fallbacks and scan diagnostics.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grenade_throws: Option<super::GrenadeThrowStream>,
+    /// Entity allocation/generation tables and component masks from type-1 packets.
+    #[serde(default)]
+    pub datum_tables: Vec<super::DatumSnapshot>,
+    /// Rejected type-1 payloads, retained in packet order alongside successful tables.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub datum_failures: Vec<super::DatumDecodeFailure>,
+    /// Sequential records decoded with an explicitly supplied film/map encoding.
+    /// None for legacy exports and when no encoding context was supplied.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub replication: Option<super::ReplicationStream>,
+    /// Build, format and map context used by the map-aware replication decoder.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile: Option<super::V41FilmProfile>,
+    /// Native recorded-key verdict, independent of precision availability.
+    #[serde(default)]
+    pub key: Option<super::FilmKey>,
+    /// Native credit/fatal-source decode, retained by the integrated map decoder.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kill_sources: Option<super::FilmKillSourceResult>,
+    /// A failed kill-source pass is distinct from an unrequested pass or empty kills.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kill_sources_error: Option<String>,
+    /// Native first-event reads, including unknown types and explicit truncation.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub head_events: Vec<super::FilmHeadEvent>,
+    #[serde(default)]
+    pub pickups: super::BipedPickupStream,
+    /// Native pickup attempts and counters, with explicit zero-tail provenance.
+    #[serde(default)]
+    pub native_pickups: super::NativePickupStream,
+    /// Native BOT_METADATA declarations, retaining IDs and original name locations.
+    #[serde(default)]
+    pub bot_metadata: super::FilmBotMetadata,
+    /// Native statborg records with all four channels and explicit cap status.
+    #[serde(default)]
+    pub statborg: super::FilmStatborgStream,
+    /// Ordered native source-scan diagnostics, including record-cap truncation.
+    /// Does not include later named-event, identity or score-pass diagnostics.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub statborg_diagnostics: Vec<super::StatborgDiagnostic>,
+    /// Team designators and refusal counts from managed-player keyframes.
+    /// Absent when bootstrap identity cannot establish the corruption-check layout.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_teams: Option<super::FilmPlayerTeams>,
+    /// Native bit-scanned highlights and the source for the replay death feed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_highlights: Option<super::FilmHighlightStream>,
+    /// Native death feed and unfiltered replication index table for the death roster.
+    /// None marks older exports; read failures and skipped reads are retained inside.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_identity_inputs: Option<super::FilmIdentityInputs>,
+    /// Native chronological death/occupancy scan, including calibration and coverage.
+    /// Available after map-aware decoding; absent from older exports.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_march_facts: Option<super::FilmMarchFacts>,
+    /// Vehicle census, creation, position, boarding/exit and occupant-aim reads.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_vehicles: Option<super::FilmVehicleFacts>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub zoom_events: Vec<super::BipedZoomEvent>,
+    /// Native zoom outcomes, with zero-padding provenance. Padded slot/level values
+    /// are decoder output, not fully recorded gameplay observations.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub native_zoom_events: Vec<super::FilmNativeZoomEvent>,
+    #[serde(default)]
+    pub equipment_spawns: super::EquipmentSpawnStream,
+    /// Failed native source scan, distinct from a successful scan with no spawns.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_spawns_error: Option<String>,
+    /// Type-117 teleports; position failures retain the dated unit reference.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub translocations: Vec<super::FilmTranslocatorEvent>,
+    /// Native type-117 outcomes, including explicitly labeled zero-padded references.
+    /// These are decoder observations, not proof of a fully recorded actor/action.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub native_translocations: Vec<super::FilmNativeTranslocatorEvent>,
+    /// Distinguishes an empty native scan from older exports containing only legacy reads.
+    #[serde(default)]
+    pub native_translocations_scanned: bool,
+    /// Reference position-scan candidates and rejection reasons, when a map is supplied.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biped_positions: Option<super::BipedPositionStream>,
+    /// Native comb-pattern probe; inferred team labels are spatial heuristics.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub keyframe_position_probes: Vec<super::KeyframePositionProbe>,
+    /// Legacy weapon-pattern observations and heuristic frame-marker timing.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub weapon_patterns: Vec<super::WeaponPatternChunk>,
+    /// Registry-driven ability and camouflage reads, with complete component fields.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biped_channels: Option<super::BipedChannels>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biped_channels_error: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inventory_deltas: Option<super::InventoryDeltaStream>,
+    /// Independent inventory-scan failure; other LegacyFilm observations remain available.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inventory_deltas_error: Option<String>,
+    /// Equipment transitions, including counter-gated recovery and diagnostic windows.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_changes: Option<super::EquipmentChangeStream>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_changes_error: Option<String>,
+    /// Predicted/non-predicted ability bodies, thruster impulses and grapple anchors.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_states: Option<super::BipedAbilityStates>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_states_error: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_charges: Option<super::AbilityChargeStream>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ability_charges_error: Option<String>,
+    /// Native i26 reference lists, including explicit empty lists and closed entries.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_equipment: Option<super::UnitEquipmentStream>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_equipment_error: Option<String>,
+    /// Native crouch, slide, clamber, sprint and derived-jump observations.
+    /// Encoding/map constructors retain the report even on setup failure; inspect
+    /// movement_states_error and stats.scanned. None means the pass was not run.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub movement_states: Option<super::MovementStateStream>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub movement_states_error: Option<String>,
+    /// Raw scanner counters returned on failure, before replay resets its inputs.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub movement_states_error_stats: Option<super::MovementStateStats>,
+    /// Native projectile mobile lifetimes, available with map quantization and a slot band.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_projectiles: Option<super::WorldObjectTrackStream>,
+    /// Equipment placements confirmed against mobile lifetimes, with calibration diagnostics.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_placements: Option<super::EquipmentPlacementStream>,
+    /// Recorded equipment-object state and scan denominators; not inferred uses.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_state: Option<super::EquipmentStateStream>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_state_error: Option<String>,
+    /// Native managed-objective diagnostic scan, including partial attempt evidence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_scan: Option<super::ObjectiveScan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub objective_scan_error: Option<String>,
+    /// Independent power-up creation scan for pads, even without confirmed placement widths.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_pad_creations: Option<super::EquipmentCreationStream>,
+    /// Raw ground-weapon creations and ammunition; these are not confirmed drops.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ground_weapon_creations: Option<super::EquipmentCreationStream>,
+    /// Complete motion scans for the weapon and power-up pad archetypes.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub ground_object_tracks: std::collections::BTreeMap<u32, super::WorldObjectTrackStream>,
+    /// Presence census for reference world-object archetypes 37, 38, 41 and 42.
+    #[serde(default)]
+    pub world_object_keyframes: std::collections::BTreeMap<u32, super::WorldObjectKeyframes>,
+    /// Catalog-family signatures in recovered biped keyframe records, in bit order.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub keyframe_loadouts: Vec<super::KeyframeLoadout>,
+    /// Carrier-marker evidence with keyframe and record denominators.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carrier_marks: Option<super::CarrierMarkScan>,
+    /// Map-profiled radial progress with raw readings and scan diagnostics.
+    /// Partial census remains available with `navpoint_radial_error` on setup failure.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub navpoint_radial: Option<super::NavpointRadialScan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub navpoint_radial_error: Option<String>,
+    /// Raw scalar and per-player managed-property observations from ti=13.
+    /// A partial slot census is retained alongside `managed_properties_error`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub managed_properties: Option<super::ManagedPropertyScan>,
+    /// A scan that could not run is distinct from a successfully read empty channel.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub managed_properties_error: Option<String>,
+    /// Independent six-tier capture bursts, dated with gameplay-chunk metadata.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capture_bursts_ms: Vec<i64>,
+    /// Raw objective footer interactions, retaining film teams and participant XUIDs.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub objective_footer: Vec<super::ObjectiveFooterEvent>,
+    /// Ground-weapon family observations, retaining slot generations.
+    #[serde(default)]
+    pub keyframe_ground_weapons: Vec<super::KeyframeGroundWeapon>,
+    /// Inferred ammo, grenades and ability ranks, with ambiguity and fallback diagnostics.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyframe_inventory: Option<super::KeyframeInventoryStream>,
+    /// Independent inventory source failure; any scan counts/fallback remain retained.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keyframe_inventory_error: Option<String>,
+    /// Requires a map and a recovered biped slot band; unavailable otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapon_changes: Option<super::HeldWeaponChangeStream>,
+    /// Independent held-weapon scan failure, distinct from an empty change stream.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapon_changes_error: Option<String>,
+    /// Native creation-to-participant links and signature rejection diagnostics.
+    #[serde(default)]
+    pub biped_creations: super::BipedCreationStream,
+    /// Independent native creation scan failure, distinct from zero creations.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biped_creations_error: Option<String>,
     /// Strictly indexed replication packets, optionally omitted for compact export.
     pub packets: Vec<FilmPacket>,
     /// Roster/lives and all accepted player observations.
     pub players: Vec<PlayerTrack>,
     /// Independent summary events.
     pub summary_events: Vec<SummaryEvent>,
+    /// Declared/decoded footer counts and unsupported footer packet types.
+    /// None means unavailable in an older export; Some with no packets means
+    /// the decoder inspected the supplied chunks and found no summary packets.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary_diagnostics: Option<super::SummaryDecodeDiagnostics>,
     /// Checked clocks, including changes between rounds.
     pub clocks: Vec<ClockSample>,
     /// Supported identity-bound projectile paths; coverage is partial.
@@ -546,4 +814,31 @@ pub struct FilmEventCounts {
     pub kills: usize,
     pub deaths: usize,
     pub medals: usize,
+}
+
+/// A verbatim decompressed input chunk and its supplied manifest metadata.
+/// Kept independently of packet discovery so unknown regions remain accessible.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FilmSourceChunk {
+    pub index: i32,
+    pub chunk_type: i32,
+    pub start_time_offset_ms: i64,
+    pub duration_ms: i64,
+    pub declared_size: i64,
+    pub file_relative_path: String,
+    pub data: Vec<u8>,
+}
+impl From<&crate::clients::hi::models::FilmChunkData> for FilmSourceChunk {
+    fn from(chunk: &crate::clients::hi::models::FilmChunkData) -> Self {
+        let m = &chunk.metadata;
+        Self {
+            index: m.index,
+            chunk_type: m.chunk_type,
+            start_time_offset_ms: m.start_time_offset_ms,
+            duration_ms: m.duration_ms,
+            declared_size: m.size,
+            file_relative_path: m.file_relative_path.clone(),
+            data: chunk.data.clone(),
+        }
+    }
 }

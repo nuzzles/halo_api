@@ -1,0 +1,67 @@
+package grammar
+
+import (
+ "encoding/json"
+ "encoding/hex"
+ "os"
+ "testing"
+)
+
+// Exercise real context factories and hook replacement across a sequence of reads.
+func TestHaloRustContextReaderSequence(t *testing.T) {
+ names := []string{"biped-emp-timer-component", "weapon-state-rounds-inventory", "biped-desired-weapon-set", "biped-mobility-action-component", "unit-crouch-component", "simulation-state-component", "biped-control-context-component"}
+ rows := []any{}
+ for i:=0;i<256;i++ {
+  pay:=make([]byte,i%25); for j:=range pay {pay[j]=byte(i*71+j*37)}
+  fc:=NewFilmContext(nil); p:=fc.ProfilDeBalayage()
+  p.Mouvement.FullPrecision=i%2==0; p.Mouvement.MobilityActionExtraBits=5
+  p.Grammaire.CorpsActionMobilite=i%3!=0; p.Grammaire.SimStateComplet=i%4==0
+  fc.PoserProfilDeBalayage(p)
+  events:=[]any{}; obs:=fc.Observation()
+  obs.EmpTimerHook=func(v uint32){events=append(events,[]any{"emp",v})}
+  obs.WeaponRoundsHook=func(v uint32){events=append(events,[]any{"rounds",v})}
+  obs.DesiredWeaponSetHook=func(v uint32){events=append(events,[]any{"desired",v})}
+  obs.MobilityActionHook=func(a,b bool){events=append(events,[]any{"mobility",a,b})}
+  obs.EtatMouvementHook=func(c EtatMouvementComposant,s uint32,v []uint64){events=append(events,[]any{"movement",c.String(),s,v})}
+  br:=fc.NouveauLecteur(pay); cfg:=fc.CadreDeBalayage(); fr:=LecteurSur(pay); fr.poserCadre(cfg)
+  replacement:=p; replacement.Grammaire.SimStateComplet=!p.Grammaire.SimStateComplet; replacement.Mouvement.FullPrecision=!p.Mouvement.FullPrecision;fc.PoserProfilDeBalayage(replacement)
+  br.Skip(i%8);fr.Skip(i%8);primitive:=br.ReadBits(3);fr.ReadBits(3)
+  steps:=[]any{}
+  for k:=0;k<len(names)+1;k++ {
+   name:=names[(i+k)%len(names)];if k==len(names){name=names[0]}
+   if k==3 {obs.EmpTimerHook=func(v uint32){events=append(events,[]any{"emp-replaced",v})}}
+   _,_,ok:=consumeByName(br,name,35,uint32(i%4));_,_,frameOK:=consumeByName(fr,name,35,uint32(i%4))
+   snapshot:=append([]any{},events...)
+   steps=append(steps,map[string]any{"name":name,"ok":ok,"end":br.BitPos(),"frame_ok":frameOK,"frame_end":fr.BitPos(),"events":snapshot})
+  }
+  rows=append(rows,map[string]any{"case":i,"profile":p,"primitive":primitive,"frame_observer_nil":fr.obs==nil,"steps":steps})
+ }
+ out,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-reader-sequence.json",out,0600);e!=nil{t.Fatal(e)}
+}
+
+// Actual grammar reader, including partial byte prefixes and successive reads.
+func TestHaloRustSignedVariableReader(t *testing.T) {
+ rows := []any{}
+ values := []uint64{0, 1, 0x7f, 0x80, 0x7fff, 0x8000, 0x7fffffff, 0x80000000, 0xffffffff, 0x0123456789abcdef, ^uint64(0)}
+ for sel:=0;sel<4;sel++ {
+  for start:=0;start<8;start++ {
+   for _,value:=range values {
+    data:=make([]byte,32); at:=start
+    put:=func(v uint64,w int){for k:=w-1;k>=0;k--{data[at/8]|=byte((v>>k)&1)<<uint(7-at%8);at++}}
+    put(uint64(sel),2);put(value,8<<sel)
+    put(uint64((sel+1)%4),2);put(^value,8<<((sel+1)%4))
+    put(0x5a,7)
+    data=data[:(at+7)/8]
+    for prefix:=0;prefix<=len(data);prefix++ {
+     raw:=data[:prefix];br:=LecteurSur(raw);br.SetBitPos(start)
+     steps:=[]any{}
+     for n:=0;n<3;n++ {v:=br.ReadSignedVarWidth();steps=append(steps,map[string]any{"value":v,"end":br.BitPos()})}
+     tail:=br.ReadBits(7)
+     rows=append(rows,map[string]any{"selector":sel,"start":start,"hex":hex.EncodeToString(raw),"steps":steps,"tail":tail,"end":br.BitPos()})
+    }
+   }
+  }
+ }
+ out,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-signed-variable-reader.json",out,0600);e!=nil{t.Fatal(e)}
+}

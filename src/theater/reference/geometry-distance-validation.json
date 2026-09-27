@@ -1,0 +1,69 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_correction",
+  "change": "Use the native scaled, explicitly fused planar distance formula at all four planDist callers instead of target-specific std hypot.",
+  "native": {
+    "distance_cases": 4661,
+    "distance_seconds": 0.427,
+    "grenade_cases": 4,
+    "grenade_seconds": 0.458,
+    "fixtures_byte_identical": true,
+    "logs": [
+      "/private/tmp/halo-geometry-distance-native.log",
+      "/private/tmp/halo-geometry-distance-grenades-native.log"
+    ]
+  },
+  "reproduction": {
+    "kind": "standalone probe of original caller arithmetic against native results",
+    "finite_cases": 4096,
+    "std_hypot_mismatches": 1509,
+    "scaled_unfused_mismatches": 26,
+    "scaled_fused_mismatches": 0,
+    "log": "/private/tmp/halo-geometry-distance-probe.log"
+  },
+  "focused": {
+    "passed": 6,
+    "failed": 0,
+    "seconds": 2.73,
+    "log": "/private/tmp/halo-geometry-distance-final-focused.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 18.85,
+    "log": "/private/tmp/halo-geometry-distance-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 19.88,
+    "log": "/private/tmp/halo-geometry-distance-wasm.log"
+  },
+  "suite": {
+    "status": "passed",
+    "passed": 636,
+    "failed": 0,
+    "ignored": 49,
+    "seconds": 118.48,
+    "log": "/private/tmp/halo-geometry-distance-suite.log"
+  },
+  "documents": {
+    "status": "passed",
+    "films": 6,
+    "build_seconds": 226,
+    "seconds": 108.36,
+    "log": "/private/tmp/halo-geometry-distance-documents.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "format_diff_scripts": "passed",
+  "scope": "Planar distance correction only. dist3 NaN-result audit and full v41 parity remain open. Deferred architecture unchanged.",
+  "rust_source_sha256": {
+    "replay_geometry_distance.rs": "61d4b347e191b7abac351893d57fecf1eb3ecc1ff3868812ad47a784d0c9d6db",
+    "replay_grenades.rs": "87a689a9c7bb944560f9bdf6acd8460b52f8fe31931ca70b147645ef6409b89f",
+    "replay_projectiles.rs": "a73674719faca1794f2ab57681bc5cefdabac65f7b666e879438f30b8f168aeb",
+    "replay_vehicle_rides.rs": "f02ea4f1ab368763a8cb82695e3b6f4fd4887db06f7801457c9f46f9d33c13ec",
+    "replay_vehicle_relays.rs": "f3cca751f52c92bb4a43abc46c741c218482a641a9cce918683979a52720a40e"
+  },
+  "follow_up": "geometry-optimization-audit.json resolves the reported dist3 NaN gap as compiler-dependent derived payload bits: the same pinned Go source produces both patterns. All classifications and non-NaN results agree; recorded source bits remain unchanged."
+}

@@ -1,0 +1,135 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "comparison": "Complete parsed JSON equality, including array order; retained fixtures were not overwritten",
+  "results": [
+    {
+      "test": "TestHaloRustContextConstructor",
+      "fixture": "context-constructor-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_context_constructor_test.go.txt",
+      "package": "internal/grammar",
+      "fixture_sha256": "91d11f344597da567ee6c0d1331b5d1e59f8073e25702c4994f355d02795798a",
+      "harness_sha256": "9a336cae795b421b3bf4ea42599516b5287e63a866e343f0214a4995d8d66575"
+    },
+    {
+      "test": "TestHaloRustVehicleCoverageLogs",
+      "fixture": "replay-vehicle-coverage-logs-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_vehicle_coverage_logs_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "e363eef60da8f8d5bc5abecd8e3a82918da1641a72c3843a7f89dd3b7217841f",
+      "harness_sha256": "ff80da16a322f86e07839f3a085fd6ae0f16ea6c13b27a81e1e15eeb871f6898"
+    },
+    {
+      "test": "TestHaloRustVehicleSourceLogs",
+      "fixture": "vehicle-source-logs-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_vehicle_source_logs_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "4ab2fb1bb864535f23b75885f18ee4c5be2749a32cc5df5404bafaf13d151c86",
+      "harness_sha256": "418a53dd802b86f88f774ffbae1c47a41a8559323422468b90bb3fef60b476e8"
+    },
+    {
+      "test": "TestHaloRustProfileWarning",
+      "fixture": "profile-warning-v41.json",
+      "unchanged": true,
+      "harness": "halo_rust_profile_warning_test.go.txt",
+      "package": "internal/grammar",
+      "fixture_sha256": "d4b6ff38b558d1c291d0a33a1b29564b284fa52c733d42c5dc140e83208aed3e",
+      "harness_sha256": "a8cc5617c027c6c8e79263fb796d674a68c344f1ee80ccf3aabfeb4b1d295394"
+    },
+    {
+      "test": "TestHaloRustNamedLifeExport",
+      "fixture": "named-life-export-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_named_life_export_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "9d57fd1e64801eb6e9685ef8ff7f0aeb0f6ce016399eb61dbbf3626ef2739288",
+      "harness_sha256": "202b71550bb22b96f9b36542515aa6303f441cd2519b474456eb83c93c4275a9"
+    },
+    {
+      "test": "TestHaloRustVehicleDeathLogs",
+      "fixture": "vehicle-death-logs-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_vehicle_death_logs_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "08bf881a89494433aa6120d5598104db2512d3483dbc9fdf427cbbdbb63298f1",
+      "harness_sha256": "21a389e98eab409791e20a021d4c3df01cf92c0a3bcc9f7765d55a9137b2b50a"
+    },
+    {
+      "test": "TestHaloRustRosterStrings",
+      "fixture": "roster-strings-v41.json",
+      "unchanged": true,
+      "harness": "halo_rust_roster_strings_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "3f29069b5fc3f39ecf7d1baca7689a08ea7c6b89836d9a5f6116c334b38c951e",
+      "harness_sha256": "fd13435297b662d36286265961cbc334d5b5b7e7587c3a8f98e390a4a18a5b29"
+    },
+    {
+      "test": "TestHaloRustNavpointSource",
+      "fixture": "navpoint-source-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_navpoint_source_test.go.txt",
+      "package": "internal/grammar",
+      "fixture_sha256": "3941988692644355d4f53d9cb4a279b50d6f500a0f1fcd43f9525f3c772c8f02",
+      "harness_sha256": "45834371a34a91aa0e6564b915b64b6937c5a12a2c8e9be8ce959c7d777f7e07"
+    },
+    {
+      "test": "TestHaloRustBridgeWarning",
+      "fixture": "bridge-warning-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_bridge_warning_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "475929b92402bde970749c97bc7986ddb4d3b20859f4c5ac8c9b2421c2e3849a",
+      "harness_sha256": "a47389fe92e02dd4659507535c91432e42fa1022daa53427c5cbf83725c1f4fc"
+    },
+    {
+      "test": "TestHaloRustDeathContext",
+      "fixture": "death-context-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_death_context_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "ec2f136c14cd348692362471bcda2566de52e3ead8c0fc53bc73a69b83fd5556",
+      "harness_sha256": "38c587397f946551431ecb8e0048c0707fd0c1a29d6c1da9c756b5e42dc02e02"
+    },
+    {
+      "test": "TestHaloRustRoundIdentityQueries",
+      "fixture": "round-identity-queries-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_round_identity_queries_test.go.txt",
+      "package": "internal/facts/objectives",
+      "fixture_sha256": "ce5a7b6562c1f9fb9d3481df6bf68680e4744fb5ba1cb415d689fcfa0f32497f",
+      "harness_sha256": "ffaf2b01c19ef710630231ada03b322f8f7f28aed874ea21c8b31b6da4945e76"
+    },
+    {
+      "test": "TestHaloRustKillPositions",
+      "fixture": "kill-positions-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_kill_positions_test.go.txt",
+      "package": "replay",
+      "fixture_sha256": "0f01c46438ff23821f0b93c0fd6981ab4e36b4dee51db80cf16224f91b9c20a6",
+      "harness_sha256": "a5ca87c2918e7525258e1d4d782c4549a58e9328504adf7d1fe847da6e14f887"
+    },
+    {
+      "test": "TestHaloRustMapEntry",
+      "fixture": "map-entry-v41.json.zlib",
+      "unchanged": true,
+      "harness": "halo_rust_map_entry_test.go.txt",
+      "package": "internal/grammar",
+      "fixture_sha256": "7fdd27c56fcc333769e645b2d672b3b38f77d133539ea6fefe415c8fd4a42d77",
+      "harness_sha256": "d091d1355ca3834c478fbf906cad49dd39223e1cf64a45d1b5df3a06c05efa41"
+    },
+    {
+      "test": "TestHaloRustStartingProfile",
+      "fixture": "starting-profile-v41.json",
+      "unchanged": true,
+      "harness": "halo_rust_starting_profile_test.go.txt",
+      "package": "internal/facts/killsource",
+      "fixture_sha256": "f7a79d60cddb242c0c982409654029203c76f7eb3b5cd1a7a19a4a35bcbed342",
+      "harness_sha256": "ddd5b04442e404f7298ef0bd9c49cfa516c4d87b8713faf5a1d65fe7e1eced3b"
+    }
+  ],
+  "intentional_diagnostic_only": [
+    "TestHaloRustMovementTrace"
+  ]
+}

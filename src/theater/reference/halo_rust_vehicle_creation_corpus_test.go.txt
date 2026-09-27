@@ -1,0 +1,92 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestHaloRustVehicleCreationCorpus(t *testing.T) {
+	catalog, err := profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := []any{}
+	for _, sample := range []struct{ Folder, Map string }{{"maps/01-bazaar-idle", "bazaar"}, {"maps/02-aquarius", "aquarius"}, {"bandit/01-evo", "recharge"}, {"ranked-arena/02-oddball", "recharge"}, {"raids/01-hour-long-raid", ""}} {
+		root := filepath.Join("/Users/simbleau/git/halo_api/experiments/films", sample.Folder)
+		manifest, err := os.ReadFile(filepath.Join(root, "film.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var meta struct {
+			Chunks []struct {
+				Index int    `json:"index"`
+				Kind  int    `json:"chunk_type"`
+				Start int    `json:"start_time_offset_ms"`
+				File  string `json:"file"`
+			}
+		}
+		if err = json.Unmarshal(manifest, &meta); err != nil {
+			t.Fatal(err)
+		}
+		var chunks source.MemoryChunks
+		var metadata []types.ChunkMeta
+		for _, c := range meta.Chunks {
+			d, e := os.ReadFile(filepath.Join(root, c.File))
+			if e != nil {
+				t.Fatal(e)
+			}
+			chunks = append(chunks, d)
+			metadata = append(metadata, types.ChunkMeta{Index: c.Index, ChunkType: c.Kind, StartMS: c.Start})
+		}
+		film, err := source.Load(chunks, metadata)
+		if err != nil {
+			t.Fatal(err)
+		}
+		entry := profile.MapQuantEntry{Module: "normalized-coordinate-probe-not-map-bounds", Max: [3]float32{1, 1, 1}}
+		if sample.Map != "" {
+			entry, err = catalog.Lookup(sample.Map)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		modes := []bool{false, true}
+		if sample.Map == "" {
+			modes = []bool{true}
+		}
+		for _, automatic := range modes {
+			var fc *FilmContext
+			if automatic {
+				fc = contexteDeBobine(film)
+			} else {
+				fc = NewFilmContextForMap(film, &entry, nil)
+				fc.PoserLargeursObjetDuMondeDepuisDecoupage(entry.Layout())
+			}
+			wr := entry.Range()
+			records, stats, scanErr := ScanVehicleCreations(fc, &wr)
+			if records == nil {
+				records = []types.EquipmentCreation{}
+			}
+			lay, layoutErr := fc.I0Layout()
+			p := fc.ProfilDeBalayage()
+			reg, regErr := fc.Registry()
+			if regErr != nil {
+				t.Fatal(regErr)
+			}
+			position := map[string]any{"index_bits": p.Mouvement.WorldObject.IndexW, "world_axis_bits": p.Mouvement.WorldObject.AxisW, "handle_bits": p.Mouvement.Traversal.IndexW, "traversal_axis_bits": p.Mouvement.Traversal.AxisW, "default_axis_bits": profile.LargeursAxeParDefautDuBuild(16), "region_axis_bits": map[uint32][3]uint{p.Mouvement.WorldObject.Region: p.Mouvement.WorldObject.AxisW}, "delta_axis_bits": [3]uint{p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth}, "full_precision": p.Mouvement.FullPrecision, "writer_absolute": p.Grammaire.GrammaireEcrivainI0, "delta_handle_tail": p.Mouvement.DeltaHasHandleTail}
+			rows = append(rows, map[string]any{"folder": sample.Folder, "map": entry, "automatic": automatic, "records": records, "stats": stats, "error": scanErr != nil, "layout_error": layoutErr != nil, "layout": map[string]any{"gate_bits": lay.GateBits, "axis_widths": lay.AxisW, "region": lay.Region}, "position": position, "mpp": [2]int{p.MPP.Lead, p.MPP.Index}, "archetypes": len(reg.Archetypes)})
+			t.Log(sample.Folder, "auto", automatic, "records", len(records), "slots", stats.Slots, "error", scanErr)
+		}
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-vehicle-creation-corpus.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

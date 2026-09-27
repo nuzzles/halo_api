@@ -1,0 +1,40 @@
+package grammar
+
+import (
+ "encoding/hex"
+ "encoding/json"
+ "os"
+ "testing"
+)
+
+func TestHaloRustLazyWidths(t *testing.T) {
+ rows:=[]any{}
+ names:=[]string{"biped-emp-timer-component","weapon-state-rounds-inventory","unit-crouch-component","object-position-dynamic-precision-component","object-position-dynamic-precision-component","object-position-dynamic-precision-component","object-position-dynamic-precision-component","biped-spartan-ability-non-predicted-state","biped-spartan-ability-non-predicted-state"}
+ for _,width:=range []uint{1<<32,(1<<32)+1,^uint(0)} {
+  for mode,name:=range names {
+   for start:=0;start<8;start++ {
+    for _,length:=range []int{2,16,64} {
+     data:=make([]byte,length);for i:=range data {data[i]=byte(i*37+113)}
+     prefix:=""
+     switch mode {case 3:prefix="100";case 4:prefix="001";case 5:prefix="0001";case 6:prefix="000";case 7:prefix="00";case 8:prefix="11000001"}
+     for k,b:=range prefix {at:=start+k;data[at/8]&= ^(byte(1)<<uint(7-at%8));if b=='1' {data[at/8]|=byte(1)<<uint(7-at%8)}}
+     cfg:=DefaultFrameConfig()
+     cfg.Profil.Mouvement.WorldObject.IndexW=width
+     cfg.Profil.Mouvement.WorldObject.AxisW=[3]uint{width,width,width}
+     cfg.Profil.Mouvement.Traversal.IndexW=width
+     cfg.Profil.Mouvement.Traversal.AxisW=[3]uint{width,width,width}
+     cfg.Profil.Mouvement.DeltaAxisWidth=width
+     cfg.Profil.Mouvement.FullPrecision=mode==6
+     cfg.Profil.Grammaire.PorteeBaseline=false
+     cfg.Profil.Grammaire.GrammaireEcrivainI0=false
+     br:=LecteurSur(data);br.poserCadre(cfg);br.SetBitPos(start)
+     _,_,ok:=consumeByName(br,name,35,0)
+     end:=br.BitPos();tail:=br.ReadBits(7)
+     rows=append(rows,map[string]any{"width":width,"mode":mode,"name":name,"start":start,"hex":hex.EncodeToString(data),"ok":ok,"end":end,"tail":tail,"tail_end":br.BitPos()})
+    }
+   }
+  }
+ }
+ data,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-lazy-widths.json",data,0600);e!=nil {t.Fatal(e)}
+}

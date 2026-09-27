@@ -1,0 +1,11 @@
+package positions
+import("testing";"encoding/json";"os";"path/filepath";"levelup/go-api/internal/domain/playerposition")
+func TestHaloRustKeyframePositionCorpus(t *testing.T){
+ rows:=[]any{}
+ for _,folder:=range []string{"maps/01-bazaar-idle","maps/02-aquarius","bandit/01-evo","ranked-arena/02-oddball","appearance/01-cadet-blue","appearance/02-cadet-brick"}{
+  root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);b,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)}
+  var meta struct{Chunks []struct{File string `json:"file"`;Type int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`}};if e=json.Unmarshal(b,&meta);e!=nil{t.Fatal(e)}
+  chunks:=[]ChunkInput{};for _,c:=range meta.Chunks{d,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,ChunkInput{Data:d,StartMS:c.Start,ChunkType:c.Type})};out:=DecodeKeyframePositions(chunks);if out==nil{out=[]playerposition.PlayerPosition{}};rows=append(rows,map[string]any{"folder":folder,"out":out});t.Log(folder,len(out))
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-keyframe-position-corpus.json",b,0600);e!=nil{t.Fatal(e)}
+}

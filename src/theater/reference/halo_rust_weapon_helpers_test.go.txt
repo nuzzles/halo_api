@@ -1,0 +1,16 @@
+package weaponv3
+import("testing";"encoding/json";"encoding/hex";"encoding/binary";"math/rand";"os";"sort")
+func TestHaloRustWeaponHelpers(t *testing.T){
+ rng:=rand.New(rand.NewSource(41075));rows:=[]any{}
+ families:=[]uint32{};for high:=range KnownWeaponHigh32{families=append(families,high)};sort.Slice(families,func(i,j int)bool{return families[i]<families[j]})
+ for c:=0;c<512;c++{
+ roster:=[]uint64{0,1,^uint64(0),rng.Uint64()};strings:=[]string{"0"," 1 ","01","18446744073709551615","18446744073709551616","bid17","+1","１２","\u0085 0 \u00a0","00001",""};chunks:=[][]byte{};hexes:=[]string{}
+ for j:=0;j<3;j++ {data:=make([]byte,64);rng.Read(data);x:=roster[(c+j)%4];pos:=(c*13+j*19)%320;word:=xuidTargetPattern(x);for k:=0;k<64;k++{bit:=pos+k;mask:=byte(1<<uint(7-bit%8));data[bit/8]&=^mask;if word&(uint64(1)<<uint(63-k))!=0{data[bit/8]|=mask}};chunks=append(chunks,data);hexes=append(hexes,hex.EncodeToString(data))}
+ data:=[]byte{};for j:=0;j<c%12;j++{kind:=uint16(j%3);if c%13==0&&j==3{kind=7};size:=1+(c+j)%21;if c%11==0&&j==2{size=0};h:=make([]byte,16);binary.LittleEndian.PutUint16(h,kind);binary.LittleEndian.PutUint32(h[4:],uint32(size));binary.LittleEndian.PutUint64(h[8:],rng.Uint64());data=append(data,h...);data=append(data,make([]byte,size)...)};if c%7==0&&len(data)>0{data=data[:len(data)-1]};start:=c*71-900;est:=USEstimator(data,start);queries:=[]any{};for _,p:=range []int{-10,0,15,16,17,31,32,49,65,100,200,10000}{queries=append(queries,map[string]any{"byte":p,"ms":est(p)})};frames:=[]any{};for _,f:=range frameIndex(data){frames=append(frames,map[string]any{"start_byte":f.start,"end_byte":f.end,"timestamp_us":f.us})}
+ canon:=[]any{};for _,id:=range []uint64{uint64(families[c%len(families)])<<32|uint64(c),uint64(c)<<32|0x42c9679f,uint64(c)<<32|uint64(c),^uint64(0)}{high,ok:=CanonWeaponID(id);canon=append(canon,map[string]any{"id":id,"high":high,"known":ok,"name":WeaponName(high)})}
+ priority:=[][]byte{};priorityHex:=[]string{};x:=roster[3]|1
+ for j:=0;j<3;j++{b:=make([]byte,16);b[0]=byte((c+j)%32);binary.LittleEndian.PutUint64(b[1:],x);priority=append(priority,b);priorityHex=append(priorityHex,hex.EncodeToString(b))}
+ rows=append(rows,map[string]any{"families":KnownWeaponHigh32,"pi_bits":PIBits,"priority_xuid":x,"priority_chunks":priorityHex,"priority_resolved":ResolveBest([]uint64{x,x},priority),"canon":canon,"roster":roster,"strings":strings,"chunks":hexes,"resolved":ResolveXuidToPI(roster,chunks[0]),"string_resolved":ResolveXuidToPIStrings(strings,chunks[0]),"best":ResolveBest(roster,chunks),"packet_hex":hex.EncodeToString(data),"start":start,"queries":queries,"frames":frames})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-weapon-helpers.json",b,0600);e!=nil{t.Fatal(e)}
+}

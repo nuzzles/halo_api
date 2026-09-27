@@ -1,0 +1,37 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustMovementComponents(t *testing.T) {
+ rng:=rand.New(rand.NewSource(536));rows:=[]any{}
+ for _,name:=range []string{"unit-crouch-component","unit-crouch","biped-slide-component","biped-slide","biped-posture-physics-component","biped-posture-physics"} {
+  for sample:=0;sample<1024;sample++ {
+   data:=make([]byte,128);rng.Read(data);start:=sample%8;level:=uint32(sample%4)
+   cfg:=DefaultFrameConfig();cfg.Profil.Mouvement.FullPrecision=sample&8!=0
+   obs:=NouvelleObservation();cfg.Obs=obs;var values []uint64
+   obs.EtatMouvementHook=func(comp EtatMouvementComposant,slot uint32,v []uint64){values=append([]uint64{},v...)}
+   br:=LecteurSur(data);br.poserCadre(cfg);br.SetBitPos(start)
+   _,_,ported:=consumeByName(br,name,35,level);p:=cfg.Profil
+   encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(profile.NiveauPositionDObjet),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"world_axis_bits":p.Mouvement.WorldObject.AxisW,"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+   rows=append(rows,map[string]any{"name":name,"level":level,"start":start,"end":br.BitPos(),"ported":ported,"values":values,"encoding":encoding,"hex":hex.EncodeToString(data[:(br.BitPos()+7)/8])})
+  }
+ }
+ data,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-levelup-movement-components.json",data,0600);err!=nil{t.Fatal(err)}
+}
+
+func TestHaloRustJumpDerivation(t *testing.T) {
+ rng:=rand.New(rand.NewSource(594));runs:=[]any{};velocities:=[]any{}
+ for i:=0;i<4096;i++ {dir:=uint64(rng.Intn(1<<19));scale:=uint64(i%1024);velocities=append(velocities,map[string]any{"dir":dir,"scale":scale,"vector":DecodeVelocity(dir,scale)})}
+ for run:=0;run<1024;run++ {
+  sc:=&movementStateScanner{st:&types.MovementStateStats{},vit:map[uint32][]jumpVelSample{},vues:map[movementStateKey]types.MovementStateRead{}}
+  input:=[]any{}
+  for slot:=uint32(512);slot<515;slot++ {
+   ts:=uint64(0)
+   for i:=0;i<32;i++ {ts+=uint64(rng.Intn(400000));vz:=float64(rng.Intn(31)-10)/4;v:=jumpVelSample{ts:ts,vz:vz,chunk:run%7,paquet:i};sc.vit[slot]=append(sc.vit[slot],v);input=append(input,map[string]any{"slot":slot,"ts":ts,"vz":vz,"chunk":v.chunk,"packet":i});if i%7==0{sc.vit[slot]=append(sc.vit[slot],v);input=append(input,map[string]any{"slot":slot,"ts":ts,"vz":vz,"chunk":v.chunk,"packet":i})}}
+   rng.Shuffle(len(sc.vit[slot]),func(i,j int){sc.vit[slot][i],sc.vit[slot][j]=sc.vit[slot][j],sc.vit[slot][i]})
+  }
+  input=[]any{};for slot:=uint32(512);slot<515;slot++{for _,v:=range sc.vit[slot]{input=append(input,map[string]any{"slot":slot,"ts":v.ts,"vz":v.vz,"chunk":v.chunk,"packet":v.paquet})}}
+  sc.deriverLesSauts();sc.publier();runs=append(runs,map[string]any{"input":input,"records":sc.out,"stats":sc.st})
+ }
+ data,err:=json.Marshal(map[string]any{"velocities":velocities,"runs":runs});if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-levelup-jump-derivation.json",data,0600);err!=nil{t.Fatal(err)}
+}

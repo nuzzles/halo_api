@@ -1,0 +1,108 @@
+{
+  "counts": {
+    "damage_accepted": 1873,
+    "different_body_ends": 811,
+    "different_body_ends_with_generic_terminator": 714,
+    "matching_body_ends": 1062
+  },
+  "examples": [
+    {
+      "damage_end": 208,
+      "file": "bandit/01-evo/chunk-004-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 118
+    },
+    {
+      "damage_end": 225,
+      "file": "bandit/01-evo/chunk-007-type-2.bin",
+      "generic_body_end": 207,
+      "generic_list_end": 208,
+      "generic_terminated": true,
+      "packet": 634
+    },
+    {
+      "damage_end": 198,
+      "file": "bandit/01-evo/chunk-009-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 329,
+      "generic_terminated": true,
+      "packet": 1472
+    },
+    {
+      "damage_end": 193,
+      "file": "bandit/01-evo/chunk-010-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 1824
+    },
+    {
+      "damage_end": 183,
+      "file": "bandit/01-evo/chunk-018-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 1642
+    },
+    {
+      "damage_end": 194,
+      "file": "bandit/01-evo/chunk-019-type-2.bin",
+      "generic_body_end": 253,
+      "generic_list_end": 254,
+      "generic_terminated": true,
+      "packet": 1340
+    },
+    {
+      "damage_end": 216,
+      "file": "bandit/01-evo/chunk-019-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 2158
+    },
+    {
+      "damage_end": 247,
+      "file": "bandit/01-evo/chunk-023-type-2.bin",
+      "generic_body_end": 207,
+      "generic_list_end": 230,
+      "generic_terminated": false,
+      "packet": 1756
+    },
+    {
+      "damage_end": 215,
+      "file": "bandit/01-evo/chunk-023-type-2.bin",
+      "generic_body_end": 207,
+      "generic_list_end": 208,
+      "generic_terminated": true,
+      "packet": 1758
+    },
+    {
+      "damage_end": 191,
+      "file": "bandit/01-evo/chunk-024-type-2.bin",
+      "generic_body_end": 199,
+      "generic_list_end": 200,
+      "generic_terminated": true,
+      "packet": 1044
+    },
+    {
+      "damage_end": 225,
+      "file": "bandit/01-evo/chunk-024-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 1332
+    },
+    {
+      "damage_end": 225,
+      "file": "bandit/01-evo/chunk-026-type-2.bin",
+      "generic_body_end": 157,
+      "generic_list_end": 158,
+      "generic_terminated": true,
+      "packet": 2066
+    }
+  ],
+  "interpretation": "The pinned direct damage and generic event-body readers use opposite polarity for the optional five-bit field. Endpoint disagreement is evidence of incompatible reader grammars, not a choice of which grammar is correct. The generic terminator does not reconcile an earlier disagreement.",
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81"
+}

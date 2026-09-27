@@ -1,0 +1,195 @@
+package replay
+
+import (
+	"context"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/facts/objectives"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/grammar"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"path/filepath"
+	"strconv"
+ "reflect"
+ "sort"
+ "strings"
+	"testing"
+)
+
+func TestHaloRustFullDocument(t *testing.T) {
+	haloRustFullDocument(t, []struct{ Folder, Map string }{{"maps/01-bazaar-idle", "bazaar"}, {"maps/02-aquarius", "aquarius"}, {"bandit/01-evo", "recharge"}, {"ranked-arena/02-oddball", "recharge"}, {"appearance/01-cadet-blue", "high ground"}, {"appearance/02-cadet-brick", "high ground"}}, "/private/tmp/halo-full-document.json")
+}
+
+func haloRustFullDocument(t *testing.T, samples []struct{ Folder, Map string }, output string) {
+	haloRustFullDocumentRoot(t, samples, output, "/Users/simbleau/git/halo_api/experiments/films")
+}
+
+func haloRustFullDocumentRoot(t *testing.T, samples []struct{ Folder, Map string }, output, corpusRoot string) {
+	catalog, err := profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var abilityCatalog struct {
+		Palettes        []AbilityPalette
+		ImpulseFamilies []string `json:"impulse_families"`
+		ChargeFamilies  []string `json:"charge_families"`
+	}
+	catalogBytes, err := os.ReadFile("/private/tmp/halo-replay-ability-catalog.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(catalogBytes, &abilityCatalog); err != nil {
+		t.Fatal(err)
+	}
+	var equipmentCatalog struct {
+		Families          map[uint32]string
+		WeaponKeys        map[uint32]string `json:"weapon_keys"`
+		ObjectiveLabels   map[uint32]Label  `json:"objective_labels"`
+		ObjectiveFamilies map[uint32]string `json:"objective_families"`
+	}
+	equipmentBytes, err := os.ReadFile("/private/tmp/halo-replay-equipment-catalog.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(equipmentBytes, &equipmentCatalog); err != nil {
+		t.Fatal(err)
+	}
+	rows := []any{}
+	for _, sample := range samples {
+		root := filepath.Join(corpusRoot, sample.Folder)
+		manifest, err := os.ReadFile(filepath.Join(root, "film.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var meta struct {
+			CTF    bool               `json:"ctf"`
+			Lines  []types.PlayerLine `json:"lines"`
+			Chunks []struct {
+				Index int    `json:"index"`
+				Kind  int    `json:"chunk_type"`
+				Start int    `json:"start_time_offset_ms"`
+				File  string `json:"file"`
+			}
+		}
+		if err = json.Unmarshal(manifest, &meta); err != nil {
+			t.Fatal(err)
+		}
+		var chunks source.MemoryChunks
+		var metadata []types.ChunkMeta
+		for _, c := range meta.Chunks {
+			d, e := os.ReadFile(filepath.Join(root, c.File))
+			if e != nil {
+				t.Fatal(e)
+			}
+			chunks = append(chunks, d)
+			metadata = append(metadata, types.ChunkMeta{Index: c.Index, ChunkType: c.Kind, StartMS: c.Start})
+		}
+		film, err := source.Load(chunks, metadata)
+		if err != nil {
+			t.Fatal(err)
+		}
+		entry, err := catalog.Lookup(sample.Map)
+		if err != nil {
+			t.Fatal(err)
+		}
+		opt := Options{Fallbacks: fallback.NouveauCompteur(), MapQuant: &entry}
+		if meta.CTF {
+			flagRecords, _ := objectives.StatRecordsCtx(context.Background(), film, "")
+			opt.Flag = FlagInput{Scanned: true, Records: flagRecords, Bursts: objectives.CaptureBurstTimes(film)}
+		}
+		fc := grammar.NewFilmContextForMap(film, &entry, nil)
+		installWorldObjectPrecision(fc, sample.Folder, opt.Fallbacks)
+        if output == "/private/tmp/halo-objective-inputs.json" {
+            clocks := map[int]int{}
+            for _, c := range meta.Chunks { clocks[c.Index] = c.Start }
+            variants := []any{}
+            for _, enabled := range []bool{false,true} {
+                shared := ti13Partage{fc:fc,matchID:sample.Folder}
+                marks := grammar.CarrierMarkScan{}
+                if enabled { var e error; marks,e = grammar.ScanCarrierMarks(film);if e != nil {marks=grammar.CarrierMarkScan{}} }
+                variants=append(variants,map[string]any{"enabled":enabled,"inputs":map[string]any{
+                    "FlagMarks":marks,"FlagGauge":decodeFilmFlagReturnGauge(&shared,enabled),"FlagGaugeScanned":enabled,
+                    "ZoneReads":decodeFilmZoneReads(&shared,enabled),"ZoneScanned":enabled,
+                    "BombReads":decodeFilmBombReads(fc,sample.Folder,BombInput{Scanned:enabled,ChunkStartMS:clocks}),
+                }})
+            }
+            rows=append(rows,map[string]any{"folder":sample.Folder,"variants":variants})
+            continue
+        }
+		in, err := scanFilmInputs(sample.Folder, film, fc, opt)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n := opt.Fallbacks.Compte(fallback.NomPlafondGrenadeParDefaut); n != 1 {
+			t.Fatalf("%s: scan grenade fallback = %d, want 1", sample.Folder, n)
+		}
+        if output == "/private/tmp/halo-raid-vehicle-inputs.json" {
+            rows = append(rows, map[string]any{"folder":sample.Folder,"map":sample.Map,"Vehicles":haloRustScanInputValue(reflect.ValueOf(in.Vehicles))})
+            continue
+        }
+		in.applyTo(&opt)
+		records, truncated := objectives.StatRecordsCtx(context.Background(), film, "")
+		instants := []types.DeathInstant{}
+		for _, d := range in.Deaths {
+			instants = append(instants, types.DeathInstant{XUID: strconv.FormatUint(d.XUID, 10), TimeMS: int(d.TimeMS)})
+		}
+		opt.StatborgIdentity = objectives.ResolveRoundIdentity(records, instants).CompletedByLines(records, meta.Lines).CompletedByElimination(records, meta.Lines).CompletedByRoundResidue(records, meta.Lines)
+		opt.Score = &ScoreInput{Records: records, Truncated: truncated, Lines: meta.Lines}
+		if meta.CTF {
+			opt.Flag.Identity = opt.StatborgIdentity
+		}
+		opt.FilmIdentity = identiteDuFilm(fc)
+		opt.Labels = LabelCatalog{Abilities: abilityCatalog.Palettes, AbilityImpulseFamilies: abilityCatalog.ImpulseFamilies, AbilityChargeFamilies: abilityCatalog.ChargeFamilies, EquipmentFamilies: equipmentCatalog.Families, Keys: equipmentCatalog.WeaponKeys, ObjectiveObjects: equipmentCatalog.ObjectiveLabels, ObjectiveFamilies: equipmentCatalog.ObjectiveFamilies}
+		doc := BuildFromPositions(sample.Folder, "halo-infinite", in.Positions, in.Fire, opt)
+		row := map[string]any{"folder": sample.Folder, "map": sample.Map, "document": doc, "flag": meta.CTF, "lines": meta.Lines}
+        if output == "/private/tmp/halo-full-document.json" { row["inputs"] = haloRustScanInputValue(reflect.ValueOf(in)) }
+        rows = append(rows, row)
+	}
+	b, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(output, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Facility Aetheria records fo11_blank; Corpo supplies that module's shared
+// quantization bounds, not a claim that this Forge map is Corpo.
+func TestHaloRustFullRaidDocument(t *testing.T) {
+	haloRustFullDocument(t, []struct{ Folder, Map string }{{"raids/01-hour-long-raid", "corpo"}}, "/private/tmp/halo-full-raid-document.json")
+}
+
+// FilmInputs contains calibration maps keyed by structs, which encoding/json
+// cannot encode. Preserve all exported fields; only such maps become sorted
+// key/value entries. Ordinary JSON-compatible values keep their native encoding.
+func haloRustScanInputValue(v reflect.Value) any {
+ if !v.IsValid() { return nil }
+ if _,err:=json.Marshal(v.Interface());err==nil { return v.Interface() }
+ switch v.Kind() {
+ case reflect.Pointer,reflect.Interface:
+  if v.IsNil(){return nil};return haloRustScanInputValue(v.Elem())
+ case reflect.Struct:
+  out:=map[string]any{};typ:=v.Type()
+  for i:=0;i<v.NumField();i++ {f:=typ.Field(i);if !f.IsExported(){continue};name:=strings.Split(f.Tag.Get("json"),",")[0];if name=="-"{continue};if name==""{name=f.Name};out[name]=haloRustScanInputValue(v.Field(i))}
+  return out
+ case reflect.Map:
+  if v.IsNil(){return nil}
+  keys:=v.MapKeys();sort.Slice(keys,func(i,j int)bool{a,_:=json.Marshal(keys[i].Interface());b,_:=json.Marshal(keys[j].Interface());return string(a)<string(b)})
+  out:=[]any{};for _,key:=range keys {out=append(out,map[string]any{"key":haloRustScanInputValue(key),"value":haloRustScanInputValue(v.MapIndex(key))})};return out
+ case reflect.Slice,reflect.Array:
+  out:=[]any{};for i:=0;i<v.Len();i++ {out=append(out,haloRustScanInputValue(v.Index(i)))};return out
+ default: panic("unprojected native FilmInputs type: "+v.Type().String())
+ }
+}
+
+func TestHaloRustRaidVehicleInputs(t *testing.T) {
+    haloRustFullDocument(t, []struct{ Folder, Map string }{{"raids/01-hour-long-raid", "corpo"}}, "/private/tmp/halo-raid-vehicle-inputs.json")
+}
+
+// Exercise resolved consumer guards on real bytes, not an assertion of game mode.
+func TestHaloRustObjectiveInputs(t *testing.T) {
+    haloRustFullDocument(t, []struct{ Folder, Map string }{{"maps/01-bazaar-idle", "bazaar"}, {"maps/02-aquarius", "aquarius"}, {"bandit/01-evo", "recharge"}, {"ranked-arena/02-oddball", "recharge"}, {"appearance/01-cadet-blue", "high ground"}, {"appearance/02-cadet-brick", "high ground"}}, "/private/tmp/halo-objective-inputs.json")
+}

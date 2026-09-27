@@ -1,0 +1,15 @@
+package replaybuild
+import("testing";"encoding/json";"encoding/hex";"os";"sort";"levelup/go-api/internal/games/halo_infinite/film/replay")
+func TestHaloRustRawNames(t *testing.T) {
+ names:=[]string{"","A","\xff","\xfe","\xc0\xaf","\x00\n","é","xuid:0","xuid:0012","xuid:18446744073709551615","xuid:18446744073709551616","xuid:+1","xuid:\xff"}
+ rows:=[]any{}
+ for i:=0;i<169;i++ {
+  deaths:=[]replay.Death{{Gamertag:names[i%len(names)],XUID:uint64(i%5)},{Gamertag:names[i/len(names)],XUID:101},{Gamertag:names[i%len(names)],XUID:102}}
+  ds:=[]any{};for _,d:=range deaths {ds=append(ds,[]any{d.XUID,hex.EncodeToString([]byte(d.Gamertag))})}
+  index:=gamertagXUIDIndex(deaths);keys:=[]string{};for k:=range index {keys=append(keys,k)};sort.Strings(keys)
+  ix:=[]any{};for _,k:=range keys {ix=append(ix,[]any{hex.EncodeToString([]byte(k)),index[k]})}
+  qs:=[]any{};for _,n:=range names {x,ok:=resolveKillIdentity(n,index);var v any;if ok {v=x};qs=append(qs,[]any{hex.EncodeToString([]byte(n)),v})}
+  rows=append(rows,map[string]any{"deaths":ds,"index":ix,"queries":qs})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-raw-names.json",raw,0600);e!=nil{t.Fatal(e)}
+}

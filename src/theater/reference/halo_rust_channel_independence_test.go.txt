@@ -1,0 +1,85 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustChannelIndependence(t *testing.T) {
+	rng := rand.New(rand.NewSource(42014))
+	rows := []any{}
+	for c := 0; c < 1024; c++ {
+		present := c%4 == 1 || c%4 == 2
+		names := make([]string, 49)
+		names[48] = "biped-desired-ability-set-component"
+		if present {
+			names[28] = camoComponentName
+		}
+		arch := Archetype{Index: 35, Components: names, Levels: make([]uint32, 49)}
+		ids := []int{0, 48}
+		if c%4 >= 2 {
+			ids = []int{0, 28, 48}
+		}
+		w := &bitWriter{}
+		w.bits(0, c%8)
+		w.bits(1, 1)
+		w.bits(512, 13)
+		w.bits(1, 2)
+		w.bits(0, 2)
+		w.bits(uint64(len(ids)), 3)
+		for _, id := range ids {
+			w.bits(uint64(id), 6)
+		}
+		w.bits(0, cliffLayout.GateBits)
+		for _, width := range cliffLayout.AxisW {
+			w.bits(1, int(width))
+		}
+		w.bits(0, 2)
+		tail := make([]byte, 64)
+		if c%8 >= 4 {
+			rng.Read(tail)
+		}
+		for _, b := range tail {
+			w.bits(uint64(b), 8)
+		}
+		raw := make([]byte, 16)
+		binary.LittleEndian.PutUint16(raw, uint16(PacketTypeDelta))
+		binary.LittleEndian.PutUint32(raw[4:], uint32(len(w.buf)))
+		binary.LittleEndian.PutUint64(raw[8:], uint64(1000+c))
+		raw = append(raw, w.buf...)
+		film, e := source.Load(source.MemoryChunks{nil, raw}, nil)
+		if e != nil {
+			t.Fatal(e)
+		}
+		arches := make([]Archetype, 36)
+		arches[35] = arch
+		fc := &FilmContext{film: film, chunks: []int{1}, chunksLus: true, slots: NewSlotBand(map[uint32]bool{512: true}), slotsLus: true, lay: cliffLayout, layLu: true, reg: &Registry{Archetypes: arches}, regLu: true, bal: ProfilDeBalayageParDefaut(), corrLu: true}
+		anchors := []any{}
+		walkDeltaBipedRecords(fc, fc.ChunkNumbers(), fc.BipedSlots(), cliffLayout, func(r deltaBipedRecord) {
+			anchors = append(anchors, map[string]any{"i0": r.I0, "mask": r.Mask, "slot": r.Slot})
+		})
+		requested := [][]int{{1}, {1, 99}, {99}, {99, 1}}[c/256]
+		fc.chunks = requested
+		ranks, ast, ae := ScanAbilityRanks(fc)
+		camo, cst, ce := ScanCamoStates(fc)
+		em := []abilityEmission{}
+		_, ee := walkAbilityEmissions(fc, func(e abilityEmission) { em = append(em, e) })
+		if ae != nil || ee != nil {
+			t.Fatalf("ability: %v %v", ae, ee)
+		}
+
+		rows = append(rows, map[string]any{"requested": requested, "hex": hex.EncodeToString(raw), "names": names, "anchors": anchors, "ranks": ranks, "emissions": em, "abilityStats": ast, "camo": camo, "camoStats": cst, "camoError": ce != nil})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-channel-independence.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

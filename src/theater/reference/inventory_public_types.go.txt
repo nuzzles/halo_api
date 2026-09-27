@@ -1,0 +1,52 @@
+// Inventory the defining declarations and method sets behind decfilm type aliases.
+// Run with: go run helper.go FILM_ROOT decfilm-export-inventory.json OUTPUT.json
+package main
+import (
+ "bytes"
+ "encoding/json"
+ "fmt"
+ "go/ast"
+ "go/parser"
+ "go/printer"
+ "go/token"
+ "os"
+ "path/filepath"
+ "sort"
+ "strings"
+)
+type Export struct {Kind, Name, Target string}
+type Inventory struct {ReferenceCommit string `json:"reference_commit"`; Exports []Export `json:"exports"`}
+type Package struct {Files []*ast.File; Paths map[*ast.File]string}
+var fs = token.NewFileSet()
+var root string
+var cache = map[string]*Package{}
+func render(n ast.Node) string {var b bytes.Buffer; if err:=printer.Fprint(&b,fs,n);err!=nil{panic(err)};return b.String()}
+func load(dir string) *Package {
+ if p:=cache[dir];p!=nil{return p}
+ p:=&Package{Paths:map[*ast.File]string{}}
+ entries,err:=os.ReadDir(dir);if err!=nil{panic(err)}
+ for _,e:=range entries {if e.IsDir()||!strings.HasSuffix(e.Name(),".go")||strings.HasSuffix(e.Name(),"_test.go"){continue};path:=filepath.Join(dir,e.Name());f,err:=parser.ParseFile(fs,path,nil,0);if err!=nil{panic(err)};p.Files=append(p.Files,f);p.Paths[f]=path}
+ cache[dir]=p;return p
+}
+func importDir(f *ast.File, name string) string {
+ for _,i:=range f.Imports {path:=strings.Trim(i.Path.Value,"\"");n:=filepath.Base(path);if i.Name!=nil{n=i.Name.Name};if n!=name{continue};marker:="/games/halo_infinite/film";at:=strings.Index(path,marker);if at<0{if strings.HasPrefix(path,"levelup/go-api/"){return filepath.Join(root,"../../../..",strings.TrimPrefix(path,"levelup/go-api/"))};panic("outside native module: "+path)};return filepath.Join(root,strings.TrimPrefix(path[at+len(marker):],"/"))}
+ panic("missing import "+name)
+}
+func receiverName(e ast.Expr) string {switch x:=e.(type){case *ast.Ident:return x.Name;case *ast.StarExpr:return receiverName(x.X)};return ""}
+func fields(s *ast.StructType) []any {
+ out:=[]any{};for _,f:=range s.Fields.List {names:=[]string{};for _,n:=range f.Names{names=append(names,n.Name)};r:=map[string]any{"names":names,"type":render(f.Type),"embedded":len(names)==0};if f.Tag!=nil{r["tag"]=f.Tag.Value};out=append(out,r)};return out
+}
+func describe(dir,name string, seen map[string]bool) map[string]any {
+ key:=dir+":"+name;if seen[key]{panic("alias cycle "+key)};seen[key]=true
+ p:=load(dir)
+ for _,f:=range p.Files {for _,d:=range f.Decls {g,ok:=d.(*ast.GenDecl);if !ok||g.Tok!=token.TYPE{continue};for _,sp:=range g.Specs {t:=sp.(*ast.TypeSpec);if t.Name.Name!=name{continue}
+  rel,_:=filepath.Rel(root,p.Paths[f]);r:=map[string]any{"name":name,"file":filepath.ToSlash(rel),"line":fs.Position(t.Pos()).Line,"alias":t.Assign.IsValid(),"definition":render(t.Type)}
+  if st,ok:=t.Type.(*ast.StructType);ok{r["fields"]=fields(st)}
+  methods:=[]any{};for _,mf:=range p.Files{for _,md:=range mf.Decls{fn,ok:=md.(*ast.FuncDecl);if !ok||fn.Recv==nil||receiverName(fn.Recv.List[0].Type)!=name{continue};mr,_:=filepath.Rel(root,p.Paths[mf]);methods=append(methods,map[string]any{"name":fn.Name.Name,"exported":fn.Name.IsExported(),"signature":render(fn.Type),"receiver":render(fn.Recv.List[0].Type),"file":filepath.ToSlash(mr),"line":fs.Position(fn.Pos()).Line})}}
+  sort.Slice(methods,func(i,j int)bool{return methods[i].(map[string]any)["name"].(string)<methods[j].(map[string]any)["name"].(string)});r["methods"]=methods
+  if t.Assign.IsValid(){switch a:=t.Type.(type){case *ast.SelectorExpr:qual:=a.X.(*ast.Ident).Name;r["resolved"]=describe(importDir(f,qual),a.Sel.Name,seen);case *ast.Ident:if a.Name!="int"&&a.Name!="string"{r["resolved"]=describe(dir,a.Name,seen)}}}
+  return r
+ }}}
+ panic("missing type "+key)
+}
+func main(){if len(os.Args)!=4{panic("FILM_ROOT INVENTORY OUTPUT")};root=os.Args[1];raw,err:=os.ReadFile(os.Args[2]);if err!=nil{panic(err)};var inv Inventory;if err=json.Unmarshal(raw,&inv);err!=nil{panic(err)};facade,err:=parser.ParseFile(fs,filepath.Join(root,"decfilm/decfilm.go"),nil,0);if err!=nil{panic(err)};rows:=[]any{};for _,e:=range inv.Exports{if e.Kind!="type"{continue};parts:=strings.Split(e.Target,".");rows=append(rows,map[string]any{"export":e.Name,"target":e.Target,"declaration":describe(importDir(facade,parts[0]),parts[1],map[string]bool{})})};if len(rows)==0{panic(fmt.Sprintf("no type declarations in %s",os.Args[2]))};out,err:=json.MarshalIndent(map[string]any{"reference_commit":inv.ReferenceCommit,"scope":"Native declarations and methods, including private fields; this inventory does not assert Rust parity.","types":rows},"","  ");if err!=nil{panic(err)};if err=os.WriteFile(os.Args[3],append(out,'\n'),0600);err!=nil{panic(err)}}

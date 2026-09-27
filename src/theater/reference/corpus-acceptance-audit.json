@@ -1,0 +1,387 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "completed_with_one_failure_corrected_in_focused_rerun",
+  "asserting_tests_current_run": 44,
+  "tests": [
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_keyframe_frontiers",
+      "reason": "diagnostic frontier report over downloaded v41 keyframes; not a parity assertion",
+      "current_run": false
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_v41_corpus_preserves_existing_observations",
+      "reason": "requires downloaded experiments/films and pre-existing decoded-film.json files",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "biped_position_scan_matches_production_films",
+      "reason": "requires four downloaded films; compares actual reference positions and companion fields",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "movement_scan_matches_production_films",
+      "reason": "requires four captured films; production movement transition and counter parity",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_native_highlights_and_deaths",
+      "reason": "requires downloaded v41 film footer chunks",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_film_player_assembly",
+      "reason": "requires six downloaded films; compares native player, combat and vehicle assembly from film bytes",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_film_raid_assembly",
+      "reason": "requires the hour-long raid and its generated native oracle",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_radial_scan",
+      "reason": "requires six downloaded films; compares all raw native radial readings and scan counters",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_managed_property_scan",
+      "reason": "requires six downloaded films; compares native managed-property reads and counters",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "local_source_roundtrip",
+      "reason": "requires the downloaded Bazaar v41 film",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/corpus_tests.rs",
+      "test": "inventory_scan_matches_production_films",
+      "reason": "requires four downloaded films; focused native inventory fields and exported ordinals",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/march_scan.rs",
+      "test": "local_native_march_corpus",
+      "reason": "requires downloaded v41 films",
+      "current_run": false
+    },
+    {
+      "file": "src/theater/recovery.rs",
+      "test": "corpus_anchor_recovery_matches_reference",
+      "reason": "requires downloaded 32-film corpus; compares all 451 captured keyframes",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/statborg_source.rs",
+      "test": "local_loaded_statborg_corpus",
+      "reason": "requires the 32 local v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/player_table.rs",
+      "test": "native_player_table_corpus",
+      "reason": "requires the local v41 film corpus",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_complete_film_documents",
+      "reason": "requires six downloaded films; compares complete native documents",
+      "current_run": false
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "complete_ctf_document",
+      "reason": "complete embedded v41 CTF film; takes several minutes",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "complete_ctf_decoded_kill_document",
+      "reason": "complete embedded v41 CTF film with decoded kills; takes several minutes",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "complete_ctf_geometry_document",
+      "reason": "complete embedded v41 CTF film with catalog flag geometry",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_decoded_kill_documents",
+      "reason": "requires six downloaded films; integrated kill decoder and positive Oddball mode",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_zero_axis_document",
+      "reason": "requires captured Bazaar film; native zero-axis fallback document",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_missing_identity_document",
+      "reason": "requires captured Bazaar film; native missing-identification document",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_unknown_format_documents",
+      "reason": "requires captured Bazaar film; native unknown-format documents",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/replay_document_film.rs",
+      "test": "local_complete_raid_document",
+      "reason": "requires the hour-long raid and full-document oracle; generate with --include-raid",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_corpus",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_tracks",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_aggregate",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_prefix_tracks",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_film_retention",
+      "reason": "requires six downloaded v41 films; verifies automatic Film weapon-hit retention",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_hit_scan.rs",
+      "test": "local_weapon_hit_film_map_retention",
+      "reason": "requires six downloaded v41 films; verifies automatic map Film weapon-hit retention",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/i0_layout.rs",
+      "test": "local_i0_layout_corpus",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/keyframe_position_probe.rs",
+      "test": "local_keyframe_position_corpus",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/unit_equipment.rs",
+      "test": "local_unit_equipment_corpus",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/unit_equipment.rs",
+      "test": "local_unit_equipment_film_export",
+      "reason": "requires captured Cadet Blue v41 film; verifies positive Film export",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/objective_extract.rs",
+      "test": "local_objective_corpus",
+      "reason": "requires the local decompressed film corpus",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/kill_film_evidence.rs",
+      "test": "local_kill_film_evidence",
+      "reason": "requires the downloaded v41 corpus",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/weapon_patterns.rs",
+      "test": "local_weapon_patterns_corpus",
+      "reason": "requires six downloaded v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/kill_decode.rs",
+      "test": "local_kill_source_decode",
+      "reason": "requires downloaded v41 captures; complete native kill-source decoder",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/kill_decode.rs",
+      "test": "local_kill_source_decode_nonpositive_options",
+      "reason": "requires downloaded v41 captures; native nonpositive-option defaults",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/equipment_state.rs",
+      "test": "local_equipment_state_corpus",
+      "reason": "requires four captured v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/native_keyframe_corpus_tests.rs",
+      "test": "native_keyframe_anchor_bodies_corpus",
+      "reason": "requires 32 local films; compares native full-state reads at all 134657 anchors",
+      "current_run": false
+    },
+    {
+      "file": "src/theater/world_object_research.rs",
+      "test": "local_research_directory_detected_and_fallback_precision",
+      "reason": "requires local v41 film corpus",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/kill_walk.rs",
+      "test": "local_kill_record_walk",
+      "reason": "requires downloaded v41 captures; calibration and full record walks",
+      "current_run": true,
+      "result": "FAILED",
+      "followup_result": "ok",
+      "followup_log": "/private/tmp/halo-kill-walk-refresh-rust.log"
+    },
+    {
+      "file": "src/theater/equipment_creations.rs",
+      "test": "local_vehicle_creation_corpus",
+      "reason": "requires five captured v41 films, including the hour-long raid",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/equipment_spawn_source_tests.rs",
+      "test": "local_equipment_spawn_source_matches_native",
+      "reason": "requires four downloaded v41 films; compares captured spawn events and counters",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/keyframe_loadouts.rs",
+      "test": "local_loadout_sources_match_native_corpus",
+      "reason": "requires four local v41 films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/native_march.rs",
+      "test": "native_context_march_corpus",
+      "reason": "requires four captured films; complete native-context march facts and configuration",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/keyframe_diagnostics.rs",
+      "test": "local_keyframe_queue_corpus",
+      "reason": "requires four local v41 captured films",
+      "current_run": true,
+      "result": "ok"
+    },
+    {
+      "file": "src/theater/components/keyframes.rs",
+      "test": "captured_keyframe_tables_match_native_corpus",
+      "reason": "requires all 32 local films; compares 451 native sequential keyframe walks",
+      "current_run": false
+    }
+  ],
+  "log": "/private/tmp/halo-complete-corpus-acceptance.log",
+  "prior_current_code_evidence": "component-mask-wrap-validation.json",
+  "passed_so_far": 2,
+  "failures_so_far": [],
+  "reported_passed": 43,
+  "reported_failed": 1,
+  "raid_assembly_optional_layer_audit": {
+    "present": [
+      "ability_layer",
+      "pickup_layer",
+      "placement_layer",
+      "episode_layer",
+      "grapple_layer",
+      "equipment_layer",
+      "inventory_layer"
+    ],
+    "absent_and_skipped": [
+      "skull_layer",
+      "carrier_marks",
+      "objective_object_layer",
+      "score_layer",
+      "ground_layer"
+    ],
+    "limitation": "The legacy raid assembly test conditionally skips absent layers; a pass is not complete layer parity. The separate complete raid document test compares its document fixture."
+  },
+  "kill_walk_followup": {
+    "cause": "The Rust calibration export gained native_profile; the legacy captured oracle lacked it. All other fields in both rows matched.",
+    "change": "Native Go generator now publishes c.Profil; Rust compares the full profile and calibration JSON roundtrip before comparing all prior fields.",
+    "native_result": "passed; two profiles added with every prior expectation unchanged",
+    "rust_result": "passed: both captured rows, full native profile and calibration JSON roundtrip; 5.31s",
+    "native_log": "/private/tmp/halo-kill-walk-refresh-native.log",
+    "rust_log": "/private/tmp/halo-kill-walk-refresh-rust.log",
+    "clippy_result": "passed; 10.24s",
+    "clippy_log": "/private/tmp/halo-kill-walk-refresh-clippy.log",
+    "production_code_changed": false,
+    "fixture_matches_native_output": true
+  },
+  "original_run_seconds": 733.63,
+  "asserting_tests_with_passing_evidence": 44,
+  "scope": "All 44 selected asserting tests have passing evidence across the original run and focused correction. This is not a single green broad run and does not establish complete v41 parity."
+}

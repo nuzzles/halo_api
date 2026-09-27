@@ -1,0 +1,8 @@
+package replay
+import("testing";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustLayers(t *testing.T){
+ type Row struct{ Mask int `json:"mask"`;Frames int `json:"frames"`;Layers map[string]string `json:"layers"` }
+ rows:=[]Row{};add:=func(mask,frames int){opt:=Options{};doc:=ReplayDocument{FrameCount:frames};if mask&1!=0{v:=int64(0);doc.OriginMs=&v};if mask&2!=0{opt.MapQuant=&profile.MapQuantEntry{}};if mask&4!=0{opt.Inventory=[]KeyframeInventory{}};opt.AbilityImpulseStats.Scanned=mask&8!=0;opt.AbilityChargeStats.Scanned=mask&16!=0;if mask&32!=0{opt.Score=&ScoreInput{}};opt.Flag.Scanned=mask&64!=0;opt.Vip.Scanned=mask&128!=0;opt.Skull.Scanned=mask&256!=0;opt.Bomb.Scanned=mask&512!=0;opt.Bomb.CarryScanned=mask&1024!=0;opt.Zone.Scanned=mask&2048!=0;opt.Vehicles.Scanned=mask&4096!=0;rows=append(rows,Row{mask,frames,calquesProduits(&doc,opt)})}
+ for mask:=0;mask<8192;mask++{add(mask,1)};for _,frames:=range []int{-1,0}{add(0,frames);add(8191,frames)}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-layers.json",b,0600);e!=nil{t.Fatal(e)}
+}

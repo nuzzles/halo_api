@@ -1,0 +1,32 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "identity_fallback_json_validated",
+  "native": {
+    "writer_cases": 512,
+    "read_sequences": 1457,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-facts-identity-json-native.log"
+  },
+  "host": {
+    "passed": 23,
+    "failed": 0,
+    "seconds": 9.15,
+    "scope": "All shared native_facts_ tests",
+    "log": "/private/tmp/halo-facts-identity-json-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 30.02,
+    "log": "/private/tmp/halo-facts-identity-json-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 35.33,
+    "scope": "Actual wasm32 runtime including identity/fallback sequences",
+    "log": "/private/tmp/halo-facts-identity-json-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "Statborg and killsource JSON; full-file framing; scan/cache conversion and BuildFromFacts; final reconciliation."
+}

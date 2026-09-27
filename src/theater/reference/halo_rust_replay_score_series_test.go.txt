@@ -1,0 +1,66 @@
+package replay
+
+import (
+	"context"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+type rustScoreSeriesHandler struct{ records []any }
+
+func (h *rustScoreSeriesHandler) Enabled(context.Context, slog.Level) bool { return true }
+func (h *rustScoreSeriesHandler) WithAttrs([]slog.Attr) slog.Handler       { panic("unexpected attrs") }
+func (h *rustScoreSeriesHandler) WithGroup(string) slog.Handler            { panic("unexpected group") }
+func (h *rustScoreSeriesHandler) Handle(_ context.Context, r slog.Record) error {
+	attrs := []any{}
+	r.Attrs(func(a slog.Attr) bool { attrs = append(attrs, []any{a.Key, a.Value.Any()}); return true })
+	h.records = append(h.records, map[string]any{"level": r.Level.String(), "message": r.Message, "attributes": attrs})
+	return nil
+}
+func TestHaloRustReplayScoreSeries(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+
+	rng := rand.New(rand.NewSource(412709))
+	rows := []any{}
+	for i := 0; i < 1024; i++ {
+		clock := scoreClock{originMS: rng.Intn(10000) - 5000, intervalMS: rng.Intn(202) - 1, frames: rng.Intn(130) - 2}
+		rounds := map[int][]types.ScorePoint{}
+		points := []types.ScorePoint{}
+		for r := 0; r < rng.Intn(8)+1; r++ {
+			seq := []types.ScorePoint{}
+			at := rng.Intn(20000) - 10000
+			v := 0
+			for j := 0; j < rng.Intn(80)+1; j++ {
+				at += rng.Intn(180)
+				v += rng.Intn(3)
+				if j%7 == 0 {
+					at -= 400
+				}
+				p := types.ScorePoint{TimeMS: at, Slot: rng.Intn(32), Value: int64(v)}
+				seq = append(seq, p)
+				points = append(points, p)
+			}
+			rounds[r-1] = seq
+		}
+		ticks := scoreTicksOf(points, clock)
+		if ticks == nil {
+			ticks = []ScoreTick{}
+		}
+		h := &rustScoreSeriesHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		series := seriesOfRounds(rounds, clock)
+		rows = append(rows, map[string]any{"clock": map[string]int{"origin_ms": clock.originMS, "interval_ms": clock.intervalMS, "frames": clock.frames}, "points": points, "rounds": rounds, "ticks": ticks, "series": series, "diagnostics": h.records})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-replay-score-series.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

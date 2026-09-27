@@ -1,0 +1,43 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing")
+func TestHaloRustContextViews(t *testing.T){haloRustContextViewsWidths(t,false)}
+func TestHaloRustContextViewsLazyWidths(t *testing.T){haloRustContextViewsWidths(t,true)}
+func haloRustContextViewsWidths(t *testing.T,lazy bool){
+ rows:=[]any{}
+ for c:=0;c<128;c++ {
+  names:=[]string{"biped-emp-timer-component","weapon-state-rounds-inventory","unit-crouch-component"}
+  reg:=&Registry{Archetypes:make([]Archetype,4)};reg.Archetypes[3]=Archetype{Index:3,Components:names,Levels:[]uint32{0,0,0}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=c%2!=0;cfg.PacketPreambleBits=2+c%4
+  var unusedWidth uint
+  if lazy {
+   unusedWidth=[]uint{0,65,1<<32,(1<<32)+1,^uint(0)}[c%5]
+   cfg.Profil.Mouvement.WorldObject.IndexW=unusedWidth;cfg.Profil.Mouvement.WorldObject.AxisW=[3]uint{unusedWidth,unusedWidth,unusedWidth}
+   cfg.Profil.Mouvement.Traversal.IndexW=unusedWidth;cfg.Profil.Mouvement.Traversal.AxisW=[3]uint{unusedWidth,unusedWidth,unusedWidth}
+   cfg.Profil.Mouvement.DeltaAxisWidth=unusedWidth
+  }
+  cfg.Profil.Grammaire.GenerationStricte=c%3!=0;cfg.Profil.Grammaire.SimStateComplet=c%16==0;cfg.Profil.Grammaire.ControleDeCorruption=c%4==0
+  cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{names[1]:47};cfg.Obs=NouvelleObservation()
+  thirdBits:=11;if c%8==0{names[2]="simulation-state-component";probe:=LecteurSur(make([]byte,128));probe.poserCadre(cfg);consumeByName(probe,names[2],3,0);thirdBits=probe.BitPos()}
+  events:=[]any{};cfg.Obs.EmpTimerHook=func(v uint32){events=append(events,[]any{"emp",v});cfg.Profil.Grammaire.LargeursCalibrees[names[1]]=int(v%11)}
+  cfg.Obs.WeaponRoundsHook=func(v uint32){events=append(events,[]any{"unexpected-rounds",v})}
+  cfg.Obs.EtatMouvementHook=func(k EtatMouvementComposant,slot uint32,v []uint64){events=append(events,[]any{"movement",k.String(),slot,v})}
+  var bw bitWriter;start:=0;if c%7==0{start=13};lead:=cfg.PacketPreambleBits;if start!=0{lead=start};bw.bits(0,lead)
+  prefix:=func(){if cfg.HasExtraFields{bw.bits(0x12345678,32)}}
+  check:=func(){if cfg.Profil.Grammaire.ControleDeCorruption{bw.bit(0)}}
+  components:=func(){bw.bits(3,4);bw.bits(0,6);bw.bits(1,6);bw.bits(2,6);bw.bits(uint64(c),8);check();bw.bits(0,c%11);check();if c%8==0{bw.bits(0,thirdBits)}else{bw.bits(uint64(c),11)};check()}
+  create:=func(gen uint64){prefix();bw.bits(1,3);bw.bits(1,5);bw.bits(gen,2);bw.bits(3,6);bw.bits(0,3);bw.bit(1);bw.bits(42,8);bw.bit(1);components()}
+  delta:=func(slot,gen uint64){prefix();bw.bit(1);bw.bits(slot,5);bw.bits(gen,2);bw.bit(0);components()}
+  create(1);delta(1,1);prefix();bw.bits(2,3);bw.bits(1,5);bw.bits(1,2);bw.bits(0x91827364,32);create(2);if c%4==2{delta(31,2)}else if c%4==3{delta(8,2)}else{delta(1,1)};prefix();bw.end()
+  data:=bw.buf;if c%5==0{data=data[:c%len(data)]}
+  world:=NewWorld(reg);world.PoserVueCourante(2);world.BindFull(8,3);world.SetPos(8,[3]float32{1,2,3})
+  skip:=cfg.PacketPreambleBits;if start!=0{skip=start}
+  if start==0 && c%11==0 && len(data)*8>=cfg.PacketPreambleBits{pos:=cfg.PacketPreambleBits-1;data[pos/8]|=1<<uint(7-pos%8)}
+  passes:=[]any{}
+  for pass:=0;pass<2;pass++{
+   recs,views,end:=DecodeFrameViewsCurseur(data,world,cfg,3,skip);if recs==nil{recs=[]FrameRecord{}}
+   passes=append(passes,map[string]any{"records":recs,"views":views,"end":end,"events":append([]any{},events...),"slots":world.cloneSlots(),"width":cfg.Profil.Grammaire.LargeursCalibrees[names[1]],"unbound":cfg.Obs.RejetsHorsDatum,"other_view":cfg.Obs.RejetsDeVue})
+  }
+  rows=append(rows,map[string]any{"unused_position_width":unusedWidth,"lazy":lazy,"case":c,"hex":hex.EncodeToString(data),"start":skip,"passes":passes})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};path:="/private/tmp/halo-context-views.json";if lazy{path="/private/tmp/halo-context-views-lazy-widths.json"};if e=os.WriteFile(path,b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,16 @@
+package killsource
+import("testing";"context";"encoding/json";"os";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustKillDecode(t *testing.T){
+ rows:=[]any{};catalog,e:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if e!=nil{t.Fatal(e)}
+ for _,folder:=range []string{"bandit/01-evo","ranked-arena/02-oddball"} {
+  root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);raw,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)}
+  var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}};if e=json.Unmarshal(raw,&meta);e!=nil{t.Fatal(e)}
+  chunks:=source.MemoryChunks{};metadata:=[]types.ChunkMeta{};for _,c:=range meta.Chunks{b,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,b);metadata=append(metadata,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})}
+  src,e:=source.Load(chunks,metadata);if e!=nil{t.Fatal(e)}
+  entry,e:=catalog.Lookup("recharge");if e!=nil{t.Fatal(e)};opts:=DefaultOptions();opts.Carte=&entry
+  result,e:=Decode(context.Background(),folder,src,&opts);if e!=nil{t.Fatal(e)}
+  rows=append(rows,map[string]any{"folder":folder,"result":result,"publishable":result.LineByLinePublishable()})
+  t.Logf("%s: kills=%d unclaimed=%d coverage=%d/%d publishable=%v",folder,len(result.Kills),len(result.UnclaimedDeaths),result.Coverage.Covered,result.Coverage.RealPairs,result.LineByLinePublishable())
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-decode.json",b,0600);e!=nil{t.Fatal(e)}
+}

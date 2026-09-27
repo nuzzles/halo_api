@@ -1,0 +1,14 @@
+package killsource
+
+import (
+ "encoding/json"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/grammar"
+)
+
+func TestHaloRustStartingProfile(t *testing.T) {
+ raw, err := json.Marshal(map[string]any{"default": grammar.ProfilDeBalayageParDefaut(), "starting": ProfilDeDepart()})
+ if err != nil { t.Fatal(err) }
+ if err = os.WriteFile("/private/tmp/halo-starting-profile.json", raw, 0600); err != nil { t.Fatal(err) }
+}

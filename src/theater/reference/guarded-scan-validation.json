@@ -1,0 +1,53 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Native guarded world phase composition",
+  "fixture": "guarded-scan-v41.json.zlib",
+  "generator": "halo_rust_guarded_scan_test.go.txt",
+  "sha256": "ed379e103f2856c7e784460261c18938b95509d838a4ef8b9f5c5167dc281227",
+  "cases": 224,
+  "carrier_marks": 696,
+  "channel_reads": {
+    "ZoneReads": 1113,
+    "FlagGauge": 1094,
+    "BombReads": 208
+  },
+  "both_managed_guards": 76,
+  "allocated_empty_bomb_lists": 6,
+  "closure_counters": [
+    16,
+    51
+  ],
+  "logs": {
+    "rejeu : aucune zone au catalogue \u2014 proprietes ti=13 non consommees par les zones": 64,
+    "armement : film armable sans horloge de manifeste \u2014 calque non construit": 11,
+    "rejeu : proprietes ti=13 balayees": 30,
+    "armement : anneau ti=12 balaye": 62,
+    "rejeu : proprietes ti=13 illisibles \u2014 rejeu sans etat de zone ni jauge de retour": 163,
+    "armement : anneau ti=12 illisible \u2014 rejeu sans compte a rebours": 55,
+    "drapeau : marqueur de portage illisible \u2014 calque publie sans son controle": 34,
+    "objectives: deroulage aberrant rejete (dernier rempart memoire)": 228,
+    "objectives: bornes de deroulage appliquees sur ce film": 32,
+    "objectives: serie cumulee NON CHRONOLOGIQUE \u2014 points ecartes": 48
+  },
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-guarded-scan-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-guarded-scan-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-guarded-scan-clippy.log"
+  },
+  "full_v41_parity_complete": false,
+  "limits": [
+    "No three-million-read truncation case in composed fixture.",
+    "Default and simulation-completion profiles; arbitrary raw width domains remain covered separately, not by this composition fixture.",
+    "Diagnostics and counter additions are delivered to an embedding sink; full world runtime sink integration remains open.",
+    "Synthetic reference agreement does not replace independently annotated gameplay validation."
+  ],
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed"
+}

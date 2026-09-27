@@ -1,0 +1,17 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustEquipmentCreations(t *testing.T){
+ rng:=rand.New(rand.NewSource(4137));cases:=[]any{}
+ for run:=0;run<512;run++{
+  prof:=ProfilDeBalayageParDefaut();lg:=profile.PrecisionDescriptor{IndexW:1,AxisW:[3]uint{16,17,18},Region:0};prof.PoserLargeursObjetDuMonde(lg)
+  wr:=profile.Vec3Range{{Min:-100,Max:300},{Min:-200,Max:400},{Min:-300,Max:500}};band:=map[uint32]bool{512:true,513:true,515:true};w:=&translocWriter{}
+  for i:=0;i<8;i++{w.put(rng.Intn(8),0);w.put(3,1);w.put(13,uint64(512+rng.Intn(4)));w.put(2,uint64(rng.Intn(4)));w.put(6,37)
+   w.put(1,0);w.put(1,0);w.put(9,uint64(rng.Intn(512)));w.put(32,uint64(rng.Uint32()));w.put(1,1);w.put(1,0);w.put(1,0);w.put(2,0);w.put(5,0);w.put(3,0);w.put(1,0);w.put(1,0)
+   if i%2==0{w.put(1,0);w.put(5,uint64(rng.Intn(32)));w.put(1,1);w.put(32,uint64(rng.Uint32()))}else{w.put(1,1);w.put(1,0)}
+   w.put(1,uint64(i%2));if i%3==0{w.put(1,1);w.put(64,uint64(1)<<uint(i))}else{w.put(1,0);w.put(3,1);w.put(6,uint64(i%2))}
+   w.put(2,0);w.put(1,0);for _,n:=range lg.AxisW{w.put(int(n),uint64(1+rng.Intn((1<<n)-2)))};w.put(2,0)
+  }
+  for cut:=0;cut<5;cut++{pay:=append([]byte{},w.pay...);if cut==1{rng.Read(pay)};if cut>=2{pay=pay[:rng.Intn(len(pay))]};var cur equipCreationRead;walk:=equipCreationWalk{obs:installCreationHooks(&cur),prof:prof,comps:31,wr:&wr,band:band,cur:&cur};st:=types.EquipmentCreationStats{Slots:len(band)};records:=walk.scanPayload(pay,&st,FilmPacket{},0);if records==nil{records=[]types.EquipmentCreation{}};cases=append(cases,map[string]any{"hex":hex.EncodeToString(pay),"records":records,"stats":st})}
+ }
+ d,e:=json.Marshal(cases);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-equipment-creations.json",d,0600);e!=nil{t.Fatal(e)}
+}

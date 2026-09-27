@@ -1,0 +1,25 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native_direct_cases": 272,
+  "native_direct_panics": 212,
+  "native_wide_frames": 2,
+  "frame_width": 4294967296,
+  "native_regeneration_byte_identical": true,
+  "before": "native_mpp_signed_domain failed: Rust refused instead of reproducing native panic",
+  "focused_host": "four tests passed; direct MPP cursor/events/recovery and both wide frames including retained source prefix and JSON",
+  "full_suite": "602 passed, zero failed, 49 ignored; 86.75s",
+  "clippy": "passed; 16.06s",
+  "wasm": "passed actual runtime, including two public 2^32-bit MPP frames; 22.46s build",
+  "analytical_controls": "Ordinary-start u64::MAX MPP widths use separate analytical overflow controls; native per-bit execution is impractical.",
+  "remaining": [
+    "Raw position/profile widths still use address-sized adapters",
+    "Higher-level recovery/source-address projections",
+    "Complete all-data v41 acceptance beyond these contracts"
+  ],
+  "pinned_source_hashes": 485,
+  "format": "passed",
+  "diff_check": "passed",
+  "captured_march": "passed; four films; 79.74s release",
+  "complete_documents": "passed; six films; 101.75s release",
+  "status": "checkpoint_passed_full_parity_incomplete"
+}

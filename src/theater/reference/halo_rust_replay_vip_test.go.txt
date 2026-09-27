@@ -1,0 +1,22 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/objectives")
+func TestHaloRustReplayVip(t *testing.T){
+ rng:=rand.New(rand.NewSource(4122));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  recs:=[]types.StatRecord{};deaths:=[]Death{}
+  for round:=0;round<1+run%3;round++{for p:=0;p<4;p++{for j:=0;j<=p+3;j++{
+   at:=round*30000+j*1000+p*220;recs=append(recs,types.StatRecord{Slot:10+p*2,Round:round,TimeMS:at,Comps:map[int]types.StatValue{2:{A:int64(j),B:int64(j)}}})
+   if j>0{deaths=append(deaths,Death{XUID:uint64(100+(p+round)%4),TimeMS:int64(at)})}
+  }}}
+  sort.SliceStable(recs,func(i,j int)bool{return recs[i].TimeMS<recs[j].TimeMS})
+  if run%13==0{deaths=[]Death{}}
+  ri:=objectives.ResolveRoundIdentity(recs,deathInstantsOf(deaths));events:=[]objectives.NamedEvent{}
+  for j:=0;j<run%41;j++{stat:=objectives.StatVipSelected;if j%7==0{stat="other"};events=append(events,objectives.NamedEvent{TimeMS:rng.Intn(105)*1000-5000,Slot:10+rng.Intn(6)*2,Stat:stat,Comp:22,Side:"A"})}
+  raw:=vipReconstructPeriods(events,ri,deaths,100000);rawRows:=[]any{};for _,p:=range raw{rawRows=append(rawRows,map[string]any{"slot":p.slot,"xuid":p.xuid,"t0_ms":p.t0MS,"t1_ms":p.t1MS,"closed":p.closed,"cause":p.cause})}
+  clock:=matchClock{origin:uint64(run%11)*1000000,step:[]uint64{0,100000,16667,1000}[run%4],frames:[]int{-1,0,100,10000}[run%4],deathOffsetMS:int64(run%19-9)*1000}
+  periods,cov:=buildVipCrown(VipCrownScan{Scanned:run%17!=0,Events:events,Identity:ri,Deaths:deaths},clock);if periods==nil{periods=[]VipPeriod{}}
+  probes:=[]any{};for _,v:=range []int64{-9223372036854775808,-1000,-1,0,1,1000,100000,9223372036854775807}{probes=append(probes,[]any{v,clock.frameOfMatchMS(v),clock.matchMSOfFrame(int(v)),clock.slackFrames(int(v))})}
+  rows=append(rows,map[string]any{"records":recs,"deaths":deaths,"events":events,"raw":rawRows,"clock":map[string]any{"origin_us":clock.origin,"step_us":clock.step,"frames":clock.frames,"death_offset_ms":clock.deathOffsetMS},"probes":probes,"scanned":run%17!=0,"output":map[string]any{"periods":periods,"coverage":cov}})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-vip.json",raw,0600);e!=nil{t.Fatal(e)}
+}

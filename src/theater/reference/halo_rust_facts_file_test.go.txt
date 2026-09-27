@@ -1,0 +1,27 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/killsource")
+func TestHaloRustFactsFile(t *testing.T){
+ entry:=profile.MapQuantEntry{Module:"map",AxisWidths:[3]uint{13,14,15},Min:[3]float32{-10,-30,-50},Max:[3]float32{100,300,500}}
+ f:=&FilmFactsFile{Facts:FilmFacts{MapModule:"map",AxisW:[3]uint{13,14,15}}};version:=41;f.Facts.FilmMajorVersion=&version
+ base,err:=EncodeFilmFactsFile(f);if err!=nil{t.Fatal(err)};header,err:=DecodeFilmFactsEntete(base);if err!=nil{t.Fatal(err)};prefix:=base[:header.corps]
+ rows:=[]any{}
+ add:=func(input []byte,entry profile.MapQuantEntry){msg:="";normalized:="";panicked:=false;func(){defer func(){if recover()!=nil{panicked=true}}();out,e:=DecodeFilmFactsFile(input,entry);if e!=nil{msg=e.Error();return};raw,e:=EncodeFilmFactsFile(out);if e!=nil{t.Fatal(e)};normalized=hex.EncodeToString(raw)}();rows=append(rows,map[string]any{"input":hex.EncodeToString(input),"module":entry.Module,"error":msg,"normalized":normalized,"panic":panicked})}
+ add(base,entry);for end:=0;end<len(base);end++{add(base[:end],entry)}
+ other:=entry;other.Module="other";add(base,other)
+ section:=func(ids []int,charges [][]byte)[]byte{w:=&gwriter{b:append([]byte{},prefix...)};for i,id:=range ids{ecrireSection(w,id,charges[i])};return w.b}
+ add(prefix,entry)
+ for _,id:=range []int{0,2,3,4,5,6,-1}{for _,s:=range []string{"",`null`,`{}`,`[]`,`true`,`1`,`"x"`,`{"unknown":[{}]}`}{add(section([]int{id},[][]byte{[]byte(s)}),entry)}}
+ add(section([]int{2,2,2},[][]byte{[]byte(`{"Build":"first","TypeVersions":[1,2,3]}`),[]byte(`{"TypeVersions":[9]}`),[]byte(`{"TypeVersions":[null,null,null]}`)}),entry)
+ add(section([]int{3,3,3},[][]byte{[]byte(`[{"Nom":"first","Declenchements":2},{"Nom":"tail"}]`),[]byte(`[{}]`),[]byte(`[null,{}]`)}),entry)
+ add(section([]int{4,4,4},[][]byte{[]byte(`{"Records":[{"TimeMS":1},{"Slot":3}],"ChunkStartMS":{"1":2}}`),[]byte(`{"Records":[{}],"ChunkStartMS":{"2":3}}`),[]byte(`{"Records":[null,{}]}`)}),entry)
+ add(section([]int{5,5,5,5},[][]byte{[]byte(`{"Kills":[{"Victim":"a"},{"Victim":"b"}],"Probe":{"Tags":[1,2,3]}}`),[]byte(`{"Kills":[{}],"Probe":{"Tags":[9]}}`),[]byte(`{"Kills":[null,{}],"Probe":{"Tags":[null,null,null]}}`),[]byte(`{"Probe":null}`)}),entry)
+ r:=&greader{b:base,off:header.corps};_ = r.u();charge:=r.tranche(int(r.u()))
+ for end:=0;end<=len(charge);end++{add(section([]int{1},[][]byte{charge[:end]}),entry)}
+ add(section([]int{1,1},[][]byte{charge,charge}),entry)
+ add(section([]int{1,99,2},[][]byte{append(append([]byte{},charge...),255,0),[]byte{0,255,12},[]byte(`{"Version":"v41"}`)}),entry)
+ for _,n:=range []uint64{0,1,127,128,16384,1<<63,^uint64(0)} {w:=&gwriter{b:append([]byte{},prefix...)};w.u(99);w.u(n);add(w.b,entry)}
+ // Header offset overflow must become a safe refusal in Rust, not a slice panic.
+ for _,n:=range []uint64{0,1,^uint64(0),1<<63} {w:=&gwriter{b:[]byte(magieFaitsDeFilm)};w.u(1);w.u(3);w.u(n);w.b=append(w.b,base[len(magieFaitsDeFilm)+3:header.corps]...);add(w.b,entry)}
+ failures:=[]any{};for _,bits:=range []uint32{0x7fc00000,0x7f800000,0xff800000}{for _,kind:=range []string{"blob","kills"}{v:=&FilmFactsFile{Facts:FilmFacts{MapModule:"map",AxisW:[3]uint{13,14,15}}};if kind=="blob"{v.Facts.Vehicles.DeathStats.Config.Profil.Mouvement.DeltaQuantum=math.Float32frombits(bits)}else{v.Kills=&killsource.Result{};v.Kills.ProfilCalibre.Mouvement.DeltaQuantum=math.Float32frombits(bits)};raw,e:=EncodeFilmFactsFile(v);if e==nil{t.Fatal("missing error")};failures=append(failures,map[string]any{"kind":kind,"bits":bits,"nil_bytes":raw==nil,"error":e.Error()})}}
+ raw,err:=json.Marshal(map[string]any{"cases":rows,"writer_failures":failures});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-file.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("full file cases=%d\n",len(rows))
+}

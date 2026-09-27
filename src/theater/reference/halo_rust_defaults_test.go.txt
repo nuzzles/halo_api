@@ -1,0 +1,31 @@
+package grammar
+
+import (
+ "encoding/hex"
+ "encoding/json"
+ "math/rand"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+)
+
+func TestHaloRustDefaultsParity(t *testing.T) {
+ rng := rand.New(rand.NewSource(4104)); rows := []any{}
+ for ti := uint32(0); ti < 50; ti++ {
+  // Unresolved defaults are not equivalent to verified zero-bit stubs.
+  if ti == 23 || ti == 41 || ti == 44 { continue }
+  for sample := 0; sample < 64; sample++ {
+   data := make([]byte, 4096)
+   if sample > 0 { if _, err := rng.Read(data); err != nil { t.Fatal(err) } }
+   start := sample % 8
+   br := LecteurSur(data); br.SetBitPos(start)
+   p := br.Profil(); p.Mouvement.FullPrecision = sample % 2 == 1; br.PoserProfil(p)
+   encoding := map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(profile.NiveauPositionDObjet),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+   if ti == 35 { consumeBipedDefaultState(br) } else if consume := defaultStateDeserByTI[ti]; consume != nil { consume(br) }
+   end := br.BitPos()
+   rows = append(rows, map[string]any{"archetype":ti,"start_bit":start,"end_bit":end,"mpp_widths":[]int{p.MPP.Lead,p.MPP.Index},"position_encoding":encoding,"hex":hex.EncodeToString(data[:(end+7)/8])})
+  }
+ }
+ data, err := json.Marshal(rows); if err != nil { t.Fatal(err) }
+ if err = os.WriteFile("/private/tmp/halo-levelup-defaults-oracle.json", data, 0600); err != nil { t.Fatal(err) }
+}

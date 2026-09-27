@@ -1,0 +1,16 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing")
+func TestHaloRustMobilityExtraLarge(t *testing.T){
+ rows:=[]any{}
+ widths:=[]int{-9223372036854775808,-2147483649,-1,0,1,31,4096,4097,2147483648,1099511627776,9223372036854775804,9223372036854775805,9223372036854775807}
+ for _,width:=range widths {for _,body:=range []bool{false,true}{
+  for _,name:=range []string{"biped-mobility-action-component","simulation-state-component"}{for mode:=0;mode<4;mode++{
+   cfg:=DefaultFrameConfig();cfg.Profil.Mouvement.MobilityActionExtraBits=width;cfg.Profil.Grammaire.CorpsActionMobilite=body;cfg.Profil.Grammaire.SimStateComplet=true;cfg.Obs=NouvelleObservation()
+   data:=make([]byte,128);data[0]=byte(mode<<6);data[4]=0xde;data[5]=0xad;data[6]=0xbe;data[7]=0xef;events:=haloRustComponentHooks(cfg.Obs)
+   cfg.Obs.EtatMouvementHook=func(k EtatMouvementComposant,slot uint32,v []uint64){*events=append(*events,map[string]any{"kind":"movement_state","component":k.String(),"slot":slot,"values":v})}
+   br:=LecteurSur(data);br.poserCadre(cfg);br.poserSlotDeCapture(51);_,_,ported:=consumeByName(br,name,35,0)
+   rows=append(rows,map[string]any{"width":width,"body":body,"hex":hex.EncodeToString(data),"name":name,"end":br.BitPos(),"ported":ported,"observations":*events})
+  }}
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-mobility-extra-large.json",raw,0600);e!=nil{t.Fatal(e)}
+}

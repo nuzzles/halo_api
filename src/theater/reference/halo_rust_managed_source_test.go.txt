@@ -1,0 +1,128 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"reflect"
+	"testing"
+)
+
+func TestHaloRustManagedSource(t *testing.T) {
+	raw, err := os.ReadFile("/private/tmp/halo-managed-primitive.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var seeds []struct {
+		Names  []string
+		Inputs []struct {
+			Hex       string
+			Timestamp uint64 `json:"timestamp_us"`
+		}
+	}
+	if err = json.Unmarshal(raw, &seeds); err != nil {
+		t.Fatal(err)
+	}
+	rows := []any{}
+	for i, seed := range seeds[:64] {
+        // In-memory holes followed by named components cannot be encoded in a native registry block.
+        if i%7 == 0 { continue }
+		bootstrap := make([]byte, 8+15*64*260)
+		binary.LittleEndian.PutUint32(bootstrap, 41)
+		binary.LittleEndian.PutUint32(bootstrap[4:], 27)
+		for j, name := range seed.Names {
+			copy(bootstrap[8+(13*64+j)*260:], []byte(name))
+		}
+		bootstrap[8+14*64*260] = 0xff
+		reg, e := ParseRegistryChunk(bootstrap)
+		if e != nil {
+			t.Fatal(e)
+		}
+		arch, ok := reg.Archetype(13)
+		if !ok {
+			t.Fatal("archetype")
+		}
+		packet := func(kind uint16, ts uint64, pay []byte) []byte {
+			p := make([]byte, 16)
+			binary.LittleEndian.PutUint16(p, kind)
+			binary.LittleEndian.PutUint32(p[4:], uint32(len(pay)))
+			binary.LittleEndian.PutUint64(p[8:], ts)
+			return append(p, pay...)
+		}
+		var key bitWriter
+		key.bits(0, 1)
+		for _, slot := range []uint64{512, 514} {
+			key.bits((1<<30)|slot, 32)
+			key.bits(13, 32)
+			key.bits(0, 44)
+			key.bits(0, 32)
+			key.bits(0, 32)
+			key.bits(0, 64)
+		}
+		data := packet(PacketTypeKeyframe, 4000000, key.buf)
+		data = append(data, packet(6, 4100000, []byte{0, 0})...)
+		for _, input := range seed.Inputs {
+			pay, e := hex.DecodeString(input.Hex)
+			if e != nil {
+				t.Fatal(e)
+			}
+			data = append(data, packet(PacketTypeDelta, input.Timestamp+5000000, pay)...)
+		}
+		film, e := source.Load(source.MemoryChunks{data}, []types.ChunkMeta{{Index: 1}})
+		if e != nil {
+			t.Fatal(e)
+		}
+		fc := NewFilmContext(film)
+		fc.reg = reg
+		fc.regLu = true
+		fc.bal = ProfilDeBalayageParDefaut()
+		fc.corrLu = true
+		scan, e := ScanManagedProperties(fc)
+		if e != nil {
+			t.Fatal(e)
+		}
+		band := observedSlotBand(fc.Film(), ManagedPropertyTypeIndex)
+		observed := ManagedPropertyScan{Slots: len(band)}
+		w := managedPropertyWalk{prof: fc.ProfilDeBalayage(), arch: arch}
+		w.obs = w.install()
+		original := w.obs.ManagedPropertyHook
+		emissions := []any{}
+		ordinal := 0
+		ts := uint64(0)
+		w.obs.ManagedPropertyHook = func(f ManagedPropertyField, values []uint64) {
+			emissions = append(emissions, map[string]any{"packet": ordinal, "timestamp_us": ts, "field": f, "values": append([]uint64{}, values...)})
+			original(f, values)
+		}
+		for _, c := range fc.ChunkNumbers() {
+			d, pks, ok := fc.ChunkAt(c)
+			if !ok {
+				continue
+			}
+			for pi, pk := range pks {
+				if pk.Type != PacketTypeDelta {
+					continue
+				}
+				ordinal = pi
+				ts = pk.TimestampUS
+				w.scanPayload(pk.Payload(d), band, ts, &observed)
+			}
+		}
+		if !reflect.DeepEqual(scan, observed) {
+			t.Fatal("observer differs")
+		}
+		if scan.Reads == nil {
+			scan.Reads = []ManagedPropertyRead{}
+		}
+		rows = append(rows, map[string]any{"case": i, "bootstrap": hex.EncodeToString(bootstrap), "hex": hex.EncodeToString(data), "output": scan, "emissions": emissions})
+	}
+	raw, err = json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-managed-source.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

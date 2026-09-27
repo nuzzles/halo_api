@@ -1,0 +1,17 @@
+package source
+import("testing";"errors";"encoding/json";"encoding/hex";"encoding/binary";"compress/zlib";"bytes";"os";"levelup/go-api/internal/games/halo_infinite/film/types")
+var haloProviderError=errors.New("provider read rejected")
+type haloProvider struct {n,fail int;chunks [][]byte;calls []int}
+func(p *haloProvider)NumChunks()int{p.calls=append(p.calls,-1);return p.n}
+func(p *haloProvider)Chunk(i int)([]byte,error){p.calls=append(p.calls,i);if i==p.fail{return nil,haloProviderError};return p.chunks[i],nil}
+func TestHaloRustSourceProvider(t *testing.T){rows:=[]any{};for c:=0;c<256;c++{
+ p:=&haloProvider{n:c%9-2,fail:(c/9)%9-1,calls:[]int{}};raw:=[]string{}
+ for j:=0;j<p.n;j++{data:=make([]byte,16+j);binary.LittleEndian.PutUint16(data,uint16(j+1));binary.LittleEndian.PutUint32(data[4:],uint32(j));binary.LittleEndian.PutUint64(data[8:],uint64(c*100+j));for k:=16;k<len(data);k++{data[k]=byte(k+c)}
+  switch (c+j)%4{case 0:var b bytes.Buffer;w:=zlib.NewWriter(&b);w.Write(data);w.Close();data=b.Bytes();case 1:data=[]byte{};case 2:data=[]byte{0x78,0x9c,0xff}}
+  p.chunks=append(p.chunks,data);raw=append(raw,hex.EncodeToString(data))
+ }
+ meta:=[]types.ChunkMeta{};for j:=0;j<c%11;j++{meta=append(meta,types.ChunkMeta{Index:j*3-2,ChunkType:j%4,StartMS:c-j})}
+ f,err:=Load(p,meta);message:="";if err!=nil{message=err.Error()};loaded:=[]string{};packets:=[]any{};var copied []types.ChunkMeta
+ if f!=nil{copied=f.Meta();for j:=0;j<f.NumChunks();j++{loaded=append(loaded,hex.EncodeToString(f.Chunk(j)));for _,packet:=range f.Packets(j){packets=append(packets,map[string]any{"chunk":packet.Chunk,"index":packet.Index,"type":packet.Type,"timestamp":packet.TS,"hex":hex.EncodeToString(packet.Payload)})}}}
+ rows=append(rows,map[string]any{"count":p.n,"fail":p.fail,"raw":raw,"meta":meta,"calls":p.calls,"error":message,"cause":errors.Is(err,haloProviderError),"loaded":loaded,"packets":packets,"copied":copied})
+ };b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-source-provider.json",b,0600);e!=nil{t.Fatal(e)}}

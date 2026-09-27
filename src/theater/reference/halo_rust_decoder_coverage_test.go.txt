@@ -1,0 +1,9 @@
+package replay
+import("testing";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustDecoderCoverage(t *testing.T){
+ type Input struct{ Format uint32 `json:"format_version"`;Build string `json:"build"`;Fingerprint uint64 `json:"registry_fingerprint"`;Blocks int `json:"registry_blocks"`;Named int `json:"registry_named_slots"` }
+ type Row struct{ Identity *Input `json:"identity"`; Coverage *DecoderCoverage `json:"coverage"` }
+ rows:=[]Row{{Coverage:couvertureDuDecodeur(nil)}}
+ for _,format:=range []int{0,20,21,24,25,26,27,28}{for _,build:=range []string{"","HI_1_13_0","HI_1_12_0","HI_1_11_0","HI_1_10_0","HI_1_9_0","HI_1_8_0","HI_1_4_1","NEW"}{for _,fp:=range []uint64{0,1,0x36ca8c3d2a2f9b88,0x8879e2b6746ba047,0x9b6397b3ad58e258,0x33c7e724716d8cc5,0x40531a0d86ce90ce,0xba34fa35f781d1a7}{id:=Input{uint32(format),build,fp,len(rows)%51,len(rows)%1068};native:=profile.FilmIdentity{FormatVersion:format,Build:build,RegistryFingerprint:fp,RegistryBlocks:id.Blocks,RegistryNamedSlots:id.Named};rows=append(rows,Row{&id,couvertureDuDecodeur(&native)})}}}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-decoder-coverage.json",b,0600);e!=nil{t.Fatal(e)}
+}

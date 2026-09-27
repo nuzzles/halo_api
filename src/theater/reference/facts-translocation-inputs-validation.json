@@ -1,0 +1,28 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "host_and_selected_wasm_validated",
+  "native": {
+    "fixture": "replay-translocations-v41.json.zlib",
+    "cases": 1024,
+    "scope": "Existing pinned native input/output fixture consumed directly by cache adapter"
+  },
+  "host": {
+    "passed": 2,
+    "failed": 0,
+    "seconds": 0.22,
+    "log": "/private/tmp/halo-facts-translocation-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-translocation-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Selected cache translocation comparison only",
+    "log": "/private/tmp/halo-facts-translocation-wasm.log"
+  },
+  "full_v41_parity_complete": false,
+  "remaining": "Active-state, impulse/charge, placement and other cache adapters; full document integration, capture/fallback handling and final parity audit.",
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed"
+}

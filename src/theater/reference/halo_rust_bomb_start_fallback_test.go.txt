@@ -1,0 +1,11 @@
+package replay
+import("encoding/json";"os";"testing";"math";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustBombStartFallback(t *testing.T){
+ rows:=[]any{}
+ for _,origin:=range []int{-1,0,1,300,899,900,901,2000}{for _,interval:=range []int{0,100,300}{for _,frames:=range []int{0,1,20}{for _,bad:=range []bool{false,true}{for _,mirror:=range []bool{false,true}{
+  reads:=[]types.NavpointRadialRead{};n:=1;if mirror{n=2};for j:=0;j<n;j++{for k,q:=range []uint8{130,160,200,254}{reads=append(reads,types.NavpointRadialRead{Slot:uint32(100+j*12),TMS:int32(k*300),Q:q})}}
+  det:=[]int{};if bad{det=[]int{1}};c:=scoreClock{originMS:origin,intervalMS:interval,frames:frames};fb:=fallback.NouveauCompteur();a,cov,v:=buildBombArmings(reads,det,c,fb);if a==nil{a=[]BombArming{}}
+  rows=append(rows,map[string]any{"reads":reads,"detonations":det,"clock":map[string]any{"origin_ms":origin,"interval_ms":interval,"frames":frames},"cv_bits":math.Float64bits(v.CV),"output":map[string]any{"armings":a,"coverage":cov,"verdict":v,"start_zero_fallbacks":fb.Compte(fallback.NomArmementBombeDebutAZero)}})
+ }}}}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-bomb-start-fallback.json",raw,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,28 @@
+package grammar
+import("testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustMarchFacts(t *testing.T){
+ rng:=rand.New(rand.NewSource(612189));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  reg:=&Registry{Archetypes:make([]Archetype,50)}
+  names:=[]string{"object-parent-state-component","object-dead-state-component","not-ported"}
+  if run%3==0{names=[]string{"not-ported","object-parent-state-component","object-dead-state-component"}}
+  if run%3==1{names=[]string{"object-dead-state-component","object-parent-state-component","not-ported"}}
+  for ti:=0;ti<50;ti++{reg.Archetypes[ti]=Archetype{Index:ti,Components:names,Levels:[]uint32{uint32(run%5),uint32(run%5),uint32(run%5)}}}
+  st:=newObjectDeathStats();h:=&objectDeathHarvest{reg:reg,idx:map[uint32]int{},st:&st};inputs:=[]any{}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=13;cfg.Profil.Grammaire.ControleDeCorruption=false
+  for i:=0;i<12;i++{
+   ti:=[]uint32{35,40,3}[i%3];slot:=uint32(512+rng.Intn(3));gen:=uint32(rng.Intn(4));stamp:=uint64(rng.Intn(4))*1000
+   w:=&translocWriter{};w.put(1,1);w.put(13,uint64(slot));w.put(2,uint64(gen));w.put(1,0);w.put(1,1)
+   mask:=uint64(rng.Intn(8));w.put(64,mask)
+   for j:=0;j<12;j++{w.put(64,rng.Uint64())};pay:=w.pay
+   if i%4==0{pay=pay[:12+rng.Intn(len(pay)-11)]}
+   world:=NewWorld(reg);world.BindFull(gen<<30|slot,ti);rec,_,_:=TryDeltaAt(pay,0,world,cfg)
+   h.harvest([]FrameRecord{rec,rec},stamp)
+   data:=[]int{};for _,b:=range pay{data=append(data,int(b))};inputs=append(inputs,map[string]any{"payload":data,"ti":ti,"id":gen<<30|slot,"time":stamp})
+  }
+  deaths:=dedupObjectDeaths(h.out);if deaths==nil{deaths=[]types.ObjectDeath{}}
+  occ:=dedupOccupancy(h.rides);if occ==nil{occ=[]types.VehicleOccupancy{}}
+  rows=append(rows,map[string]any{"names":names,"level":run%5,"inputs":inputs,"deaths":deaths,"occupancy":occ,"records":st.Records,"clean":st.CleanRecords,"declared":st.MaskDeclared,"desync":st.MaskDeclaredDesync})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-march-facts.json",b,0600);e!=nil{t.Fatal(e)}
+}

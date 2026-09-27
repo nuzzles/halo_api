@@ -1,0 +1,23 @@
+package grammar
+import("testing";"reflect";"math";"math/rand";"encoding/hex";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustPositionHookSequence(t *testing.T){
+ rng:=rand.New(rand.NewSource(91241));rows:=[]any{}
+ names:=[]string{"simulation-state-component","object-position-dynamic-precision-component","biped-mobility-action-component","biped-posture-physics-component","biped-control-context-component","unit-control-component"}
+ for c:=0;c<1024;c++{
+  cfg:=DefaultFrameConfig();cfg.Obs=NouvelleObservation();p:=cfg.Profil;p.Grammaire.SimStateComplet=true;p.Mouvement.FullPrecision=c%5==0;p.Grammaire.GrammaireEcrivainI0=c%3==0;p.Mouvement.DeltaHasHandleTail=c%7==0;p.Mouvement.WorldObject.IndexW=2;p.Mouvement.WorldObject.Region=uint32(c%3);p.Mouvement.WorldObject.AxisW=[3]uint{13,14,15};p.Mouvement.DeltaAxisWidth=uint(6+c%12);p.Mouvement.DeltaQuantum=float32(c%9+1)*0.0138;for a:=0;a<3;a++{p.Mouvement.Range[a].Min=float32(-c-a*20-1);p.Mouvement.Range[a].Max=float32(c+a*10+50)};cfg.Profil=p
+  world:=NewWorld(&Registry{});for slot:=uint32(50);slot<53;slot++{world.BindFull(slot,0);world.SetPos(slot,[3]float32{float32(slot),2,3})}
+  data:=make([]byte,2048);rng.Read(data);br:=LecteurSur(data);br.poserCadre(cfg);if c%2==0{br.cap.accum=world};steps:=[]any{}
+  for j:=0;j<16;j++{
+   name:=names[(c+j)%len(names)];start:=j*512+j%8;slot:=uint32(50+j%3);emit:=j%3!=1;br.SetBitPos(start);br.poserSlotDeCapture(slot)
+   out:=haloRustComponentHooks(cfg.Obs);cfg.Obs.PosCaptureHook=nil;if emit{cfg.Obs.PosCaptureHook=func(s PositionSample){*out=append(*out,map[string]any{"kind":"position","position_kind":[]string{"None","Baseline","Absolute","AbsoluteFallback","Delta8","DeltaAxis"}[int(s.Kind)],"slot":s.Slot,"bit":s.BitPos,"vector_bits":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}}
+   if c>=512{saved:=br.cap;q:=p;if j%2==0{q.Mouvement.DeltaQuantum*=2};br.PoserProfil(q);if !reflect.DeepEqual(saved,br.cap){t.Fatal("profile replacement changed capture state")}}
+   _,_,ported:=consumeByName(br,name,35,2)
+   positions:=map[uint32]any{};for slot,state:=range world.slots{var pos any;if state.PosValid{pos=[3]uint32{math.Float32bits(state.Pos[0]),math.Float32bits(state.Pos[1]),math.Float32bits(state.Pos[2])}};positions[slot]=pos}
+   step:=map[string]any{"name":name,"start":start,"slot":slot,"emit":emit,"ported":ported,"end":br.BitPos(),"observations":*out,"positions":positions};if c>=512{step["quantum"]=br.Profil().Mouvement.DeltaQuantum};steps=append(steps,step)
+  }
+  encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+  lo,hi:=[3]float32{},[3]float32{};for i,r:=range p.Mouvement.Range{lo[i]=r.Min;hi[i]=r.Max}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"encoding":encoding,"min":lo,"max":hi,"region":p.Mouvement.WorldObject.Region,"quantum":p.Mouvement.DeltaQuantum,"accumulate":c%2==0,"steps":steps})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-position-hook-sequence.json",b,0600);e!=nil{t.Fatal(e)}
+}

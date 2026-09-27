@@ -1,0 +1,20 @@
+package replay
+import("encoding/json";"os";"path/filepath";"testing";"fmt";"unicode";"strings";"encoding/hex")
+func TestHaloRustBackgroundIndex(t *testing.T){
+ var table strings.Builder
+ fmt.Fprintf(&table,"//! Generated from Go unicode %s simple lowercase mappings.\n//! Regenerate with TestHaloRustBackgroundIndex at the pinned reference runtime.\npub(super) static LOWER: &[(u32,u32)] = &[\n",unicode.Version)
+ for r:=rune(0);r<=0x10ffff;r++{if v:=unicode.ToLower(r);v!=r{fmt.Fprintf(&table,"    (0x%x, 0x%x),\n",r,v)}}
+ table.WriteString("];\n")
+ if e:=os.WriteFile("/private/tmp/halo-map-identity-unicode.rs",[]byte(table.String()),0600);e!=nil{t.Fatal(e)}
+ norms:=map[string]string{};for r:=rune(0);r<=0x10ffff;r++{if r>=0xd800&&r<=0xdfff{continue};s:=string(r);n:=NormalizeMapIdentity(s);if n!=s{norms[s]=n}}
+ names:=[]string{"","map"," MAP_map ","Oasis","Oasis_map","Oasis Heavies","Oasis Heavies Firefight","Oasis - Ranked","Oasis Firefight","Oasis Sentry Defense","Origin","Origin - Ranked","İ Σ","\u00a0Oasis\u2003 Map\u202f","_map","x_map_map"}
+ rows:=[]any{}
+ for n:=0;n<256;n++{dir:=t.TempDir();inputs:=map[string]any{};for k:=0;k<4;k++{key:=fmt.Sprintf("key%d",k);if n&(1<<k)==0{continue};module:=[]string{"Oasis","Oasis Heavies","Origin","map"}[k];aliases:=[]string{module+"_map",names[(n+k)%len(names)]};if n&16!=0{aliases=append(aliases,"Shared")};if n&32!=0{aliases=append(aliases,"Oasis")};b:=MapBackground{SchemaVersion:1,Module:module,MapNames:aliases};raw,_:=json.Marshal(b);os.WriteFile(filepath.Join(dir,key+".json"),raw,0600);inputs[key]=json.RawMessage(raw)}
+ idx,e:=BuildMapBackgroundIndex(dir);if e!=nil{t.Fatal(e)};queries:=append(append([]string{},names...),"Shared","key0","key1","key2","key3","shared firefight");lookups:=map[string]any{};for _,q:=range queries{key,ok:=idx.Lookup(q);if ok{lookups[q]=key}else{lookups[q]=nil}};rows=append(rows,map[string]any{"inputs":inputs,"identities":idx.Identites(),"keys":idx.Cles(),"ambiguous":idx.Ambigues(),"lookups":lookups})}
+ cwd,_:=os.Getwd();root:="";for d:=cwd;;d=filepath.Dir(d){p:=filepath.Join(d,"data/titles/halo_infinite/reference/map_backgrounds");if st,e:=os.Stat(p);e==nil&&st.IsDir(){root=p;break};if filepath.Dir(d)==d{t.Fatal("catalog missing")}}
+ idx,e:=BuildMapBackgroundIndex(root);if e!=nil{t.Fatal(e)};inputs:=map[string]any{};lookups:=map[string]any{};entries,_:=os.ReadDir(root);for _,e:=range entries{key,ok:=cleDeSidecar(e);if !ok{continue};raw,_:=os.ReadFile(filepath.Join(root,e.Name()));inputs[key]=json.RawMessage(raw);b,_:=LoadMapBackground(filepath.Join(root,e.Name()));for _,s:=range append(append([]string{key,b.Module},b.MapNames...),names...){for _,suffix:=range []string{""," Heavies"," - Ranked"," Firefight"," Heavies Firefight"}{q:=s+suffix;k,ok:=idx.Lookup(q);if ok{lookups[q]=k}else{lookups[q]=nil}}}}
+ rows=append(rows,map[string]any{"inputs":inputs,"identities":idx.Identites(),"keys":idx.Cles(),"ambiguous":idx.Ambigues(),"lookups":lookups})
+ rawCases:=[]any{}
+ for n:=1;n<=4;n++{claims:=map[string]map[string]bool{};keys:=[]string{"ff","fe","e282","efbfbd"};for _,h:=range keys[:n]{b,_:=hex.DecodeString(h);key:=string(b);ajouteIdentite(claims,key,key);ajouteIdentite(claims,"Bytes",key)};idx:=trancheAmbiguites(claims,n);lookups:=map[string]any{};for _,q:=range []string{"Bytes","\ufffd","\ufffd\ufffd"}{key,ok:=idx.Lookup(q);if ok{lookups[q]=hex.EncodeToString([]byte(key))}else{lookups[q]=nil}};ambiguous:=map[string][]string{};for name,ks:=range idx.Ambigues(){for _,k:=range ks{ambiguous[name]=append(ambiguous[name],hex.EncodeToString([]byte(k)))}};rawCases=append(rawCases,map[string]any{"keys":keys[:n],"lookups":lookups,"ambiguous_hex":ambiguous,"identities":idx.Identites()})}
+ raw,e:=json.Marshal(map[string]any{"normalizations":norms,"cases":rows,"raw_cases":rawCases});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-background-index.json",raw,0600);e!=nil{t.Fatal(e)};fmt.Printf("index cases=%d scalar exceptions=%d\n",len(rows),len(norms))
+}

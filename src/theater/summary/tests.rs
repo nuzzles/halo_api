@@ -20,7 +20,9 @@ fn write_bits(data: &mut [u8], offset: usize, width: usize, value: u64) {
     for i in 0..width {
         let bit = offset + i;
         let mask = 1 << (7 - bit % 8);
-        data[bit / 8] = (data[bit / 8] & !mask) | (((value >> (width - i - 1)) as u8 & 1) * mask);
+        data[crate::theater::bits::native_address(bit / 8)] =
+            (data[crate::theater::bits::native_address(bit / 8)] & !mask)
+                | (((value >> (width - i - 1)) as u8 & 1) * mask);
     }
 }
 

@@ -19,7 +19,7 @@ fn num(v: &Value) -> usize {
     v.as_u64().unwrap() as usize
 }
 fn flip(data: &mut [u8], bit: usize) {
-    data[bit / 8] ^= 1 << (7 - bit % 8);
+    data[crate::theater::bits::native_address(bit / 8)] ^= 1 << (7 - bit % 8);
 }
 fn put_bytes(data: &mut [u8], bit: usize, value: &[u8]) {
     for (i, &byte) in value.iter().enumerate() {
@@ -73,7 +73,7 @@ fn bounded_reads_and_rolling_windows_agree_at_every_alignment() {
 #[test]
 fn version_duplicates_and_packet_truncation_are_typed() {
     assert!(matches!(
-        Film::try_from_chunks(
+        LegacyFilm::try_from_chunks(
             &[],
             DecodeOptions {
                 major_version: 40,
@@ -888,7 +888,10 @@ fn all_record_readers_tolerate_short_arbitrary_payloads() {
 #[test]
 fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     // Synthetic envelope around captured record forms isolates orchestration.
-    let mut registry = vec![0; 36 * 16640];
+    let mut registry = vec![0; 8 + 37 * 16640];
+    registry[..4].copy_from_slice(&41u32.to_le_bytes());
+    registry[4..8].copy_from_slice(&27u32.to_le_bytes());
+    registry[8 + 36 * 16640] = 0xff; // next bootstrap section
     for i in 0..43 {
         let name = match i {
             0 => "object-position-dynamic-precision-component",
@@ -974,6 +977,14 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     put_bytes(&mut payload, tail_bit + 480, &[0, 0, 0x2e, 0xe0]);
     let mut summary = frame(0, &payload);
     summary[0] = 9;
+    let mut unknown_footer = frame(0, &[1, 2, 3]);
+    unknown_footer[..2].copy_from_slice(&60000u16.to_le_bytes());
+    let second_summary_payload = summary.len() + unknown_footer.len() + 16;
+    summary.extend_from_slice(&unknown_footer);
+    let mut missing_events = frame(0, &2u32.to_be_bytes());
+    missing_events[0] = 9;
+    summary.extend(missing_events);
+    summary.extend(unknown_footer);
     let mut chunks = vec![
         chunk(3, 3, summary),
         chunk(2, 2, data),
@@ -983,7 +994,163 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
         duration_us: Some(6_000_000),
         ..DecodeOptions::v41()
     };
-    let film = Film::try_from_chunks(&chunks, options.clone()).unwrap();
+    let film = LegacyFilm::try_from_chunks(&chunks, options.clone()).unwrap();
+    let source_chunks = film.source_chunks.as_ref().unwrap();
+    assert_eq!(source_chunks.len(), chunks.len());
+    for (retained, original) in source_chunks.iter().zip(&chunks) {
+        assert_eq!(retained.data, original.data);
+        assert_eq!(retained.index, original.metadata.index);
+        assert_eq!(retained.declared_size, original.metadata.size);
+        assert_eq!(retained.chunk_type, original.metadata.chunk_type);
+    }
+    // An unrecognized chunk must survive without becoming a decoded observation.
+    let mut opaque_chunks = chunks.clone();
+    let mut opaque = chunk(77, 99, vec![0xa5, 0x3c, 0x91]);
+    opaque.metadata.start_time_offset_ms = -7;
+    opaque.metadata.duration_ms = 42;
+    opaque.metadata.size = 900; // declared size is independent of decompressed length
+    opaque.metadata.file_relative_path = "opaque.bin".into();
+    opaque_chunks.insert(1, opaque);
+    let opaque_film = LegacyFilm::try_from_chunks(&opaque_chunks, options.clone()).unwrap();
+    let opaque_export = serde_json::to_value(&opaque_film).unwrap();
+    let opaque_restored: LegacyFilm = serde_json::from_value(opaque_export).unwrap();
+    let retained = &opaque_restored.source_chunks.as_ref().unwrap()[1];
+    assert_eq!(retained.index, 77);
+    assert_eq!(retained.chunk_type, 99);
+    assert_eq!(retained.start_time_offset_ms, -7);
+    assert_eq!(retained.duration_ms, 42);
+    assert_eq!(retained.declared_size, 900);
+    assert_eq!(retained.file_relative_path, "opaque.bin");
+    assert_eq!(retained.data, [0xa5, 0x3c, 0x91]);
+
+    assert!(film.native_highlights.is_none());
+    assert!(film.equipment_spawns_error.is_some());
+    assert_eq!(film.equipment_spawns, EquipmentSpawnStream::default());
+    let mut contiguous_chunks = chunks.clone();
+    contiguous_chunks.push(chunk(1, 3, vec![]));
+    contiguous_chunks.sort_by_key(|chunk| chunk.metadata.index);
+    let contiguous_film = LegacyFilm::try_from_chunks(&contiguous_chunks, options.clone()).unwrap();
+    assert!(contiguous_film.equipment_spawns_error.is_none());
+    let highlights = contiguous_film.native_highlights.as_ref().unwrap();
+    assert_eq!(highlights.profile.as_ref().unwrap().major_version, Some(41));
+    assert!(
+        scan_film_highlights(&contiguous_chunks, 41)
+            .unwrap()
+            .profile
+            .is_none()
+    );
+    let mut portable_highlights = serde_json::to_value(highlights).unwrap();
+    assert_eq!(
+        serde_json::from_value::<FilmHighlightStream>(portable_highlights.clone()).unwrap(),
+        *highlights
+    );
+    portable_highlights
+        .as_object_mut()
+        .unwrap()
+        .remove("profile");
+    assert!(
+        serde_json::from_value::<FilmHighlightStream>(portable_highlights)
+            .unwrap()
+            .profile
+            .is_none()
+    );
+    let expected_summary = SummaryDecodeDiagnostics {
+        packets: vec![
+            SummaryPacketDiagnostics {
+                chunk: 3,
+                payload_byte: 16,
+                declared_events: 1,
+                decoded_events: 1,
+            },
+            SummaryPacketDiagnostics {
+                chunk: 3,
+                payload_byte: second_summary_payload,
+                declared_events: 2,
+                decoded_events: 0,
+            },
+        ],
+        unparsed_packet_types: std::collections::BTreeMap::from([(60000, 2)]),
+    };
+    assert_eq!(film.summary_diagnostics.as_ref(), Some(&expected_summary));
+    assert!(
+        film.diagnostics
+            .limitations
+            .iter()
+            .any(|s| s.contains("Summary footer missing or decoded event count differs"))
+    );
+    let without_footer: Vec<_> = chunks
+        .iter()
+        .filter(|c| c.metadata.chunk_type != 3)
+        .cloned()
+        .collect();
+    let no_summary = LegacyFilm::try_from_chunks(&without_footer, options.clone()).unwrap();
+    assert_eq!(
+        no_summary.summary_diagnostics,
+        Some(SummaryDecodeDiagnostics::default())
+    );
+
+    let diagnostics = film.registry_diagnostics.as_ref().unwrap();
+    assert_eq!(diagnostics.chunk_index, 0);
+    assert_eq!(diagnostics.source_byte_len, 8 + 37 * 16640);
+    assert_eq!(diagnostics.truncated_bytes, 0);
+    let exported = serde_json::to_value(&film).unwrap();
+    let restored: LegacyFilm = serde_json::from_value(exported.clone()).unwrap();
+    assert_eq!(restored.source_chunks, film.source_chunks);
+    let mut legacy = exported.clone();
+    legacy.as_object_mut().unwrap().remove("source_chunks");
+    assert!(
+        serde_json::from_value::<LegacyFilm>(legacy)
+            .unwrap()
+            .source_chunks
+            .is_none()
+    );
+    assert_eq!(restored.registry_diagnostics, film.registry_diagnostics);
+    assert_eq!(restored.summary_diagnostics, film.summary_diagnostics);
+    let mut old_summary = exported.clone();
+    old_summary
+        .as_object_mut()
+        .unwrap()
+        .remove("summary_diagnostics");
+    assert!(
+        serde_json::from_value::<LegacyFilm>(old_summary)
+            .unwrap()
+            .summary_diagnostics
+            .is_none()
+    );
+    let mut older = exported;
+    older
+        .as_object_mut()
+        .unwrap()
+        .remove("registry_diagnostics");
+    assert!(
+        serde_json::from_value::<LegacyFilm>(older)
+            .unwrap()
+            .registry_diagnostics
+            .is_none()
+    );
+    let mut cut_chunks = chunks.clone();
+    let boot = cut_chunks
+        .iter_mut()
+        .find(|c| c.metadata.chunk_type == 1)
+        .unwrap();
+    boot.metadata.index = 7; // Source identity is the selected type-1 chunk, not fixed zero.
+    let relabeled = LegacyFilm::try_from_chunks(&cut_chunks, options.clone()).unwrap();
+    assert_eq!(
+        relabeled.registry_diagnostics.as_ref().unwrap().chunk_index,
+        7
+    );
+    let boot = cut_chunks
+        .iter_mut()
+        .find(|c| c.metadata.chunk_type == 1)
+        .unwrap();
+    boot.data.truncate(8 + 36 * 16640 + 3);
+    let read = parse_registry_chunk(&boot.data).unwrap();
+    assert!(read.registry.truncated);
+    assert_eq!(read.truncated_bytes, 3);
+    assert!(
+        matches!(LegacyFilm::try_from_chunks(&cut_chunks,options.clone()),Err(DecodeError::Inconsistent(message)) if message=="truncated bootstrap registry")
+    );
+
     assert_eq!(film.origin_timestamp_us, 1_000_000);
     assert_eq!(film.players.len(), 1);
     let p = &film.players[0];
@@ -1031,7 +1198,7 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     );
     assert!(!film.diagnostics.checked_regions.is_empty());
     let json = serde_json::to_vec(&film).unwrap();
-    assert_eq!(serde_json::from_slice::<Film>(&json).unwrap(), film);
+    assert_eq!(serde_json::from_slice::<LegacyFilm>(&json).unwrap(), film);
 
     // Terminal commands name roster slots even after the pawn wire changes.
     // Use a synthetic envelope around captured commands to isolate life binding.
@@ -1078,7 +1245,7 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     let mut no_clock = held.clone();
     flip(&mut no_clock, 8);
     data.extend(frame(5_500_000, &no_clock));
-    let rebound = Film::try_from_chunks(&respawn_chunks, options.clone()).unwrap();
+    let rebound = LegacyFilm::try_from_chunks(&respawn_chunks, options.clone()).unwrap();
     assert_eq!(
         rebound.players[0]
             .crouch_input
@@ -1102,8 +1269,37 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
         vec![(4_400_000, 1, true)]
     );
 
+    // A registry outside the legacy layout must keep native data available,
+    // without accepting these otherwise valid captured signature observations.
+    let mut incompatible = chunks.clone();
+    let bootstrap = incompatible
+        .iter_mut()
+        .find(|chunk| chunk.metadata.chunk_type == 1)
+        .unwrap();
+    bootstrap.data[8 + (35 * 64 + 30) * 260] = b'X';
+    let native_only = LegacyFilm::try_from_chunks(&incompatible, options.clone()).unwrap();
+    assert_eq!(native_only.packets, film.packets);
+    assert_eq!(native_only.summary_events, film.summary_events);
+    assert_eq!(native_only.native_highlights, film.native_highlights);
+    assert_eq!(native_only.players.len(), film.players.len());
+    assert_eq!(native_only.players[0].name, p.name);
+    assert!(native_only.players[0].lives.is_empty());
+    assert!(native_only.players[0].positions.is_empty());
+    assert!(native_only.players[0].firing.is_empty());
+    assert!(native_only.players[0].appearance.is_empty());
+    assert!(native_only.players[0].crouch_input.is_empty());
+    assert!(native_only.diagnostics.checked_regions.is_empty());
+    assert!(native_only.diagnostics.limitations.iter().any(|message| {
+        message.contains("Legacy signature observations unavailable:")
+            && message.contains("unsupported pawn component 30")
+    }));
+    assert_eq!(
+        native_only.registry.archetype(35).unwrap().components[30],
+        "Xeapon-state-ammo"
+    );
+
     chunks.reverse();
-    let compact = Film::try_from_chunks(
+    let compact = LegacyFilm::try_from_chunks(
         &chunks,
         DecodeOptions {
             retain_coverage: false,
@@ -1112,6 +1308,8 @@ fn film_pipeline_binds_lives_excludes_death_deduplicates_and_round_trips() {
     )
     .unwrap();
     assert_eq!(compact.players, film.players);
+    assert_eq!(compact.summary_diagnostics, film.summary_diagnostics);
+    assert!(compact.source_chunks.is_none());
     assert!(compact.packets.is_empty() && compact.diagnostics.checked_regions.is_empty());
 }
 

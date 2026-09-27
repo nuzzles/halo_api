@@ -1,0 +1,38 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"os"
+	"testing"
+)
+
+func TestHaloRustTranslocatorPadding(t *testing.T) {
+	rows := []any{}
+	for i := 0; i < 256; i++ {
+		for length := 0; length < 8; length++ {
+			pay := []byte{0xfa, byte(i), byte(i * 7), byte(i * 13), byte(i * 23), byte(i * 37), byte(i * 53)}[:length]
+			var entry *profile.MapQuantEntry
+			if i%2 != 0 {
+				entry = &profile.MapQuantEntry{Min: [3]float32{-1, -2, -3}, Max: [3]float32{1, 2, 3}, AxisWidths: [3]uint{13, 14, 15}, RegionIndexBits: 1}
+			}
+			ev, ok := decodeTranslocHead(pay, 123, entry)
+			br := LecteurSur(pay)
+			h := readPacketHead(br)
+			if h.More && h.Type == translocEventType && br.ReadBit() {
+				br.ReadBits(refDomWidth(translocRefDomain))
+				br.Skip(translocGenBits)
+				decodeTranslocJump(br, entry)
+			}
+			rows = append(rows, map[string]any{"hex": hex.EncodeToString(pay), "map": entry, "event": ev, "ok": ok, "end": br.BitPos()})
+		}
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-translocator-padding.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

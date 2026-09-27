@@ -1,0 +1,30 @@
+package grammar
+import("testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"math/rand";"encoding/hex";"encoding/json";"os")
+func TestHaloRustFrameDiagnostics(t *testing.T){
+ rng:=rand.New(rand.NewSource(819241));rows:=[]any{}
+ for c:=0;c<1024;c++{
+  names:=[][]string{{},{}};if c%3==0{names=[][]string{{"object-dead-state-component"},{"biped-emp-timer-component"},{"not-ported"}}};if c%7==0{names=names[:1]}
+  if c%13==0{names=[][]string{{"object-position-dynamic-precision-component"},{"object-position-dynamic-precision-component","not-ported"},{"simulation-state-component"}}}
+  reg:=&Registry{};for ti,ns:=range names{reg.Archetypes=append(reg.Archetypes,Archetype{Index:ti,Components:ns,Levels:make([]uint32,len(ns))})}
+  world:=NewWorld(reg);world.BindFull(50,0);world.BindSoft(51,0);world.PoserVueCourante(1);world.BindFull(52,0);world.PoserVueCourante(0)
+  anticipated:=c%8==0;if anticipated{tab:=NouvelleTableAnticipee();for _,slot:=range []uint32{53,54,100}{tab.entrees[cleAnticipee{slot:slot,tete:0}]=[]declarationAnticipee{{chunk:2,ti:0}}};world.PoserTableAnticipee(tab);world.PoserChunkCourant(1)}
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();cfg.Profil.Grammaire.InferenceChaine=c%2==0;cfg.Profil.Grammaire.TablesParVue=c%4==0;cfg.HasExtraFields=c%5==0
+  var bw bitWriter
+  prefix:=func(){if cfg.HasExtraFields{bw.bits(0,32)}}
+  for j:=0;j<c%12+1;j++{
+   prefix();slot:=uint32(50+j%5);if j==0&&c%3==1{slot=100};if j==0&&c%16==0{slot=52}
+   if j%7==3{bw.bits(2,3);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bits(0,32);continue}
+   if j%7==4{bw.bits(1,3);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bits(0,6);bw.bits(0,1);bw.bits(0,4);continue}
+   if j==0&&c%13==0{bw.bit(1);bw.bits(uint64(slot),11);bw.bits(0,2);bw.bits(1,4);bw.bits(0,6);bw.bits(0,3);bw.bit(1);for _,width:=range profile.LargeursAxeParDefautDuBuild(16){bw.bits(rng.Uint64(),int(width))};bw.bits(0,2)}else{bw.deltaEmpty(slot)}
+  }
+  prefix();bw.end();if c%3==1{bw.bits(rng.Uint64(),32)}
+  if c%6==0{bw.buf=make([]byte,1+c%80);rng.Read(bw.buf)}
+  componentObservations:=haloRustComponentHooks(cfg.Obs);br:=LecteurSur(bw.buf);br.poserCadre(cfg);records,inferred,hit:=decodeInferLoop(br,bw.buf,world,cfg)
+  rr:=[]any{};for _,r:=range records{rr=append(rr,map[string]any{"kind":r.Type,"id":r.ID,"ti":r.TypeIndex,"desync":r.DesyncAt,"mask":r.Trace.Mask,"components":len(r.Trace.Comps)})}
+  slots:=map[uint32]any{};for slot,state:=range world.slots{slots[slot]=map[string]any{"ti":state.TypeIndex,"id":state.FullID,"soft":state.Soft,"view":state.Vue}}
+  p:=cfg.Profil;position:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  counts:=map[string]int{};for k,v:=range map[string]int{"Immediate":cfg.Obs.ChaineImmediat,"Deep":cfg.Obs.ChaineProfond,"Ambiguous":cfg.Obs.ChaineAmbigu,"NoConfirmation":cfg.Obs.ChaineAucun,"BudgetExhausted":cfg.Obs.ChaineBudget}{if v!=0{counts[k]=v}};ant:=map[uint32]int{};for k,v:=range cfg.Obs.LiaisonsParAnticipation{ant[k]=v};diag:=map[string]any{"component_observations":*componentObservations,"absolute_indices":cfg.Obs.prendreIndexAbsolus(),"chain_outcomes":counts,"rejected_unbound":cfg.Obs.RejetsHorsDatum,"rejected_other_view":cfg.Obs.RejetsDeVue,"anticipated_bindings":ant}
+  rows=append(rows,map[string]any{"diagnostics":diag,"anticipated":anticipated,"hex":hex.EncodeToString(bw.buf),"position":position,"names":names,"chain":cfg.Profil.Grammaire.InferenceChaine,"tables":cfg.Profil.Grammaire.TablesParVue,"extra":cfg.HasExtraFields,"records":rr,"inferred":inferred,"hit":hit,"end":br.BitPos(),"slots":slots})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-frame-diagnostics.json",b,0600);e!=nil{t.Fatal(e)}
+}

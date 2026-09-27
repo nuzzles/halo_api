@@ -1,0 +1,33 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing")
+func haloRustDeathDecodeDump(v reflect.Value)any{switch v.Kind(){case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustDeathDecodeDump(v.Field(i))};return out;case reflect.Array,reflect.Slice:if v.Kind()==reflect.Slice&&v.IsNil(){return nil};out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustDeathDecodeDump(v.Index(i)))};return out;case reflect.Map:if v.IsNil(){return nil};out:=map[string]any{};it:=v.MapRange();for it.Next(){k:=it.Key();key:="";if k.Kind()==reflect.String{key=hex.EncodeToString([]byte(k.String()))}else{key=fmt.Sprint(k.Interface())};out[key]=haloRustDeathDecodeDump(it.Value())};return out;case reflect.Float32:return math.Float32bits(v.Interface().(float32));case reflect.Int,reflect.Int8,reflect.Int32:return v.Int();case reflect.Uint,reflect.Uint8,reflect.Uint32,reflect.Uint64:return v.Uint();case reflect.Bool:return v.Bool()};panic(v.Kind())}
+func haloRustDeathDecodeFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){case reflect.Struct:for i:=0;i<v.NumField();i++{haloRustDeathDecodeFill(v.Field(i),rng,n)};case reflect.Array:for i:=0;i<v.Len();i++{haloRustDeathDecodeFill(v.Index(i),rng,n)};case reflect.Slice:if n%3==0{return};v.Set(reflect.MakeSlice(v.Type(),n%3-1,n%3-1));for i:=0;i<v.Len();i++{haloRustDeathDecodeFill(v.Index(i),rng,n)};case reflect.Map:if n%3==0{return};v.Set(reflect.MakeMap(v.Type()));if n%3==1{return};for i:=0;i<6;i++{k:=reflect.New(v.Type().Key()).Elem();if k.Kind()==reflect.String{k.SetString([]string{"<>&\u2028\u2029\n\x00","plain","\xff","\xfe","\xe2\x82","\ufffd"}[i])}else{k.SetUint([]uint64{2,10,0,4294967295,101,11}[i])};val:=reflect.New(v.Type().Elem()).Elem();haloRustDeathDecodeFill(val,rng,n);v.SetMapIndex(k,val)};case reflect.Float32:bits:=rng.Uint32();if bits&0x7f800000==0x7f800000{bits=0};v.Set(reflect.ValueOf(math.Float32frombits(bits)));case reflect.Int,reflect.Int8,reflect.Int32:v.SetInt(int64(rng.Uint64()));case reflect.Uint,reflect.Uint8,reflect.Uint32,reflect.Uint64:v.SetUint(rng.Uint64());case reflect.Bool:v.SetBool(rng.Intn(2)==0);default:panic(v.Kind())}}
+
+func TestHaloRustFactsObjectDeathDecode(t *testing.T){rows:=[]any{};charges:=[]string{
+`null`,`{}`,`[]`,`true`,`123`,`"text"`,``,`{`,`{} trailing`,`{"Morts":null}`,`{"Morts":[]}`,`{"Morts":[{}]}`,`{"Morts":[null]}`,
+`{"Morts":[{"Slot":2,"Dead":{"EnumA":3,"Mort":true}}],"morts":[{"Gen":5,"Dead":null}]}`,
+`{"Morts":[{"Slot":2},{"Slot":3}],"Morts":[{}],"Morts":[{},{}]}`,
+`{"Morts":[{"Slot":2}],"Morts":[],"Morts":[{}]}`,
+`{"Stats":{"Records":{}},"Cadre":{"Profil":{"Grammaire":{"LargeursCalibrees":{}}}}}`,
+`{"Stats":{"Records":{"01":1,"1":2,"4294967295":-3},"CleanRecords":null}}`,
+`{"Stats":{"Records":{"+1":2}}}`,`{"Stats":{"Records":{"-0":2}}}`,`{"Stats":{"Records":{"4294967296":2}}}`,
+`{"Stats":{"Records":{"1":2}},"stats":{"Records":{"2":3}}}`,
+`{"Stats":{"Records":{"1":2}},"stats":{"Records":null}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"Traversal":{"AxisW":[1,2,3,4]},"Range":[{"Min":1}]}}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"Traversal":{"AxisW":[1,2,3]}}}},"Cadre":{"Profil":{"Mouvement":{"Traversal":{"AxisW":[4]}}}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"DeltaQuantum":-0,"Range":[{"Min":-0,"Max":1e-99}]}}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"DeltaQuantum":1e99}}}}`,
+`{"Morts":[{"Unknown":[true,{},null],"Dead":{"SrcTag0":4294967295,"Val18":-128,"Val0c":255}}]}`,
+`{"ſtats":{"Packets":3},"Cadre":{"Profil":{"Grammaire":{"LargeursCalibrees":{"\ud800":1,"\ufffd":2}}}}}`,
+"{\"Cadre\":{\"Profil\":{\"Grammaire\":{\"LargeursCalibrees\":{\"\xff\xfe\":1}}}}}",
+};for _,field:=range []string{"TimestampUS","Slot","Gen","TypeIndex"}{for _,value:=range []string{"-0","0.0","1e0","null","-1","18446744073709551615","18446744073709551616","true","[]"}{charges=append(charges,fmt.Sprintf(`{"Morts":[{"%s":%s}]}`,field,value))}};for _,field:=range []string{"EnumA","EnumB","Val0c","Val0e","Val18","Val14","GlobalID","SrcTag0","SrcTag4c","Mort"}{for _,value:=range []string{"-0","null","-129","256","2147483648","1.0","true","\"x\""}{charges=append(charges,fmt.Sprintf(`{"Morts":[{"Dead":{"%s":%s}}]}`,field,value))}};charges=append(charges,
+`{"Stats":{"Records":{"bad":true}}}`,`{"Stats":{"Packets":3},"Stats":{"Packets":null}}`,
+`{"Stats":{"Records":{"1":4}},"Stats":{"Records":{"1":null}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"Traversal":{"IndexW":-1}}}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"Traversal":{"AxisW":[0,0,0,true]}}}}}`,
+`{"Cadre":{"Profil":{"Mouvement":{"Range":[{"Min":2},{"Min":3}]}}},"Cadre":{"Profil":{"Mouvement":{"Range":[null]}}}}`,
+`{"unknown":1e999999999999999999999999999999999999}`,
+`{"Cadre":{"Profil":{"Mouvement":{"DeltaQuantum":-1e-999999999999999999999999999999}}}}`,
+`{"Stats":{"Records":{"0000000000000000000000000000000000000001":2}}}`)
+synthetic:=len(charges);rng:=rand.New(rand.NewSource(419982));for n:=0;n<64;n++{var charge chargeDesMortsDObjet;haloRustDeathDecodeFill(reflect.ValueOf(&charge).Elem(),rng,n);body,err:=json.Marshal(charge);if err!=nil{t.Fatal(err)};charges=append(charges,string(body))}
+for index,charge:=range charges{w:=gwriter{};w.str(charge);ends:=[]int{};if index<synthetic{for end:=0;end<=len(w.b);end++{ends=append(ends,end)}}else{ends=[]int{0,1,len(w.b)/2,len(w.b)-1,len(w.b)}};for _,end:=range ends{r:=greader{b:w.b[:end]};deaths,stats:=decodeMortsDObjet(&r);out:=chargeDesMortsDObjet{Morts:deaths,Stats:versStatsSansCadre(stats),Cadre:cadreSerialisable{HasExtraFields:stats.Config.HasExtraFields,IDLowBits:stats.Config.IDLowBits,IDBase:stats.Config.IDBase,NewDefaultStateBits:stats.Config.NewDefaultStateBits,PacketPreambleBits:stats.Config.PacketPreambleBits,Profil:stats.Config.Profil}};err:="";if r.err!=nil{err=r.err.Error()};rows=append(rows,map[string]any{"charge_hex":hex.EncodeToString([]byte(charge)),"input_hex":hex.EncodeToString(r.b),"decoded":haloRustDeathDecodeDump(reflect.ValueOf(out)),"offset":r.off,"error":err})}};raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-object-death-decode.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("object death decode cases=%d charges=%d\n",len(rows),len(charges))}

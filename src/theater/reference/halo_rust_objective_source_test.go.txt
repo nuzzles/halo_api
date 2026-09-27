@@ -1,0 +1,179 @@
+package objectives
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/domain"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"strconv"
+	"testing"
+)
+
+type rustSourceRoster struct{ calls []string }
+
+func (r *rustSourceRoster) TeamOf(xuid string) (int, bool) {
+	r.calls = append(r.calls, xuid)
+	return len(r.calls) % 4, len(r.calls)%3 != 0
+}
+
+func TestHaloRustObjectiveSource(t *testing.T) {
+	rows := []any{}
+	tiers, _ := hex.DecodeString("a4000000034800000106900000020d200000051a4000000a3480000015")
+	for run := 0; run < 128; run++ {
+		chunks := source.MemoryChunks{}
+		input := []string{}
+		count := run % 6
+		for c := 0; c < count; c++ {
+			var data []byte
+			if c%2 == 0 {
+				data = make([]byte, 10)
+				binary.LittleEndian.PutUint64(data, uint64(2500000000000000+run*10+c))
+				data[8] = 0x2d
+				data[9] = 0xc0
+				block := make([]byte, 60)
+				block[36] = byte(c)
+				block[37] = byte(run % 4)
+				block[47] = 10
+				binary.BigEndian.PutUint32(block[48:], uint32(run*1000+c))
+				data = append(data, block...)
+				data = append(data, 0, 0, 0x2e, 0xe0)
+				if run == 1 && c == 0 && len(scanTh10Events(data)) != 1 {
+					t.Fatal("invalid positive footer")
+				}
+			} else {
+				for j := 0; j < 5; j++ {
+					ts := uint64(5000 - j*1000)
+					if j == 4 {
+						ts = ^uint64(0)
+					}
+					data = append(data, rustSourceStatPacket(0, ts, tiers)...)
+				}
+			}
+			if run%13 == 0 {
+				data = []byte{}
+			}
+			chunks = append(chunks, data)
+			input = append(input, hex.EncodeToString(data))
+		}
+		meta := []types.ChunkMeta{}
+		metadata := []any{}
+		n := count
+		if run%4 == 0 {
+			n = 0
+		}
+		if run%4 == 1 {
+			n += 2
+		}
+		if run%4 == 2 && n > 0 {
+			n--
+		}
+		for c := 0; c < n; c++ {
+			kind := 3
+			if c%2 != 0 {
+				kind = 2
+			}
+			if run%11 == 0 {
+				kind = 0
+			}
+			if run%17 == 0 {
+				kind = 99
+			}
+			index := c
+			if run%3 == 0 {
+				index = 4
+			}
+			if run%3 == 1 {
+				index = c - 2
+			}
+			start := run*100 - c*1000
+			if run%7 == 0 {
+				start = 9223372036854775807
+			}
+			meta = append(meta, types.ChunkMeta{Index: index, ChunkType: kind, StartMS: start})
+			metadata = append(metadata, map[string]any{"index": index, "chunk_type": kind, "start_ms": start})
+		}
+		var film *source.Film
+		if len(chunks) > 0 {
+			var e error
+			film, e = source.Load(chunks, meta)
+			if e != nil {
+				t.Fatal(e)
+			}
+		}
+		manifest := []any{}
+		for _, c := range manifestChunks(film) {
+			manifest = append(manifest, map[string]any{"position": c.pos, "metadata": map[string]any{"index": c.meta.Index, "chunk_type": c.meta.ChunkType, "start_ms": c.meta.StartMS}})
+		}
+		data, found := footerData(film)
+		footer := FooterEvents(film)
+		if footer == nil {
+			footer = []FooterEvent{}
+		}
+		bursts := []int{}
+		for _, b := range collectCaptureBursts(film) {
+			bursts = append(bursts, b.matchMS)
+		}
+		extractions := []any{}
+		for _, variant := range []string{"CTF", "Strongholds", "King of the Hill", "Oddball", "One Bomb", "VIP", "Slayer", "CTF Oddball"} {
+			for policy := 0; policy < 3; policy++ {
+				roster := MapRoster{}
+				for _, f := range footer {
+					if policy != 0 {
+						roster[strconv.FormatUint(f.XUID, 10)] = int(f.Team) + policy - 1
+					}
+				}
+				events, control := Extract("source-fixture", variant, film, roster)
+				if events == nil {
+					events = []domain.ObjectiveEvent{}
+				}
+				for i := range events {
+					if events[i].Players == nil {
+						events[i].Players = []domain.ObjectiveEventPlayer{}
+					}
+				}
+				extractions = append(extractions, map[string]any{"variant": variant, "roster": roster, "expected": map[string]any{"events": events, "teams": control}})
+			}
+		}
+		callbackData := []byte{}
+		for c := len(chunks) - 1; c >= 0; c-- {
+			if c%2 == 0 {
+				callbackData = append(callbackData, chunks[c]...)
+			}
+		}
+		// Repeat identities to ensure callback calls are not cached per player.
+		callbackData = append(callbackData, callbackData...)
+		callbackPackets := []byte{}
+		for j := 0; j < 4; j++ {
+			callbackPackets = append(callbackPackets, rustSourceStatPacket(0, uint64(1000000+j*1000000), tiers)...)
+		}
+		callbackFilm, err := source.Load(source.MemoryChunks{callbackData, callbackPackets}, []types.ChunkMeta{{Index: 0, ChunkType: 3}, {Index: 1, ChunkType: 2, StartMS: run * 1000}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		callbacks := []any{}
+		for _, variant := range []string{"CTF", "Strongholds", "King of the Hill", "Oddball", "One Bomb", "VIP", "Slayer"} {
+			roster := &rustSourceRoster{calls: []string{}}
+			events, control := Extract("callback-fixture", variant, callbackFilm, roster)
+			if events == nil {
+				events = []domain.ObjectiveEvent{}
+			}
+			for i := range events {
+				if events[i].Players == nil {
+					events[i].Players = []domain.ObjectiveEventPlayer{}
+				}
+			}
+			callbacks = append(callbacks, map[string]any{"variant": variant, "calls": roster.calls, "expected": map[string]any{"events": events, "teams": control}})
+		}
+		rows = append(rows, map[string]any{"callback_packets": hex.EncodeToString(callbackPackets), "callback_start": run * 1000, "callback_hex": hex.EncodeToString(callbackData), "callbacks": callbacks, "extractions": extractions, "chunks": input, "metadata": metadata, "manifest": manifest, "footer_found": found, "footer_nil": data == nil, "footer_hex": hex.EncodeToString(data), "footer": footer, "bursts": bursts})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-objective-source.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

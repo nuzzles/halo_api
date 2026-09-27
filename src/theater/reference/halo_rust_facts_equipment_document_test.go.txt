@@ -1,0 +1,32 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"sort";"log/slog";"encoding/hex";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustFactsEquipmentDocument(t *testing.T) {
+ old:=slog.Default();defer slog.SetDefault(old);h:=&rustScoreSeriesHandler{};slog.SetDefault(slog.New(h));rng:=rand.New(rand.NewSource(934351));rows:=[]any{}
+ for run:=0;run<1024;run++ {
+  camo:=[]types.CamoRead{};positions:=[]grammar.BipedPosition{};origin:=uint64(run%5)*1000000;step:=uint64(run%5)*100000
+  for j:=0;j<run%61;j++ {camo=append(camo,types.CamoRead{Slot:uint32(rng.Intn(5)),TimestampUS:uint64(rng.Intn(150))*100000,Q:[]uint16{0,4095,47,65535,4096,4095,0}[rng.Intn(7)]});p:=grammar.BipedPosition{Slot:uint32(rng.Intn(5)),TimestampUS:uint64(rng.Intn(150))*100000};p.HasShield=rng.Intn(3)!=0;p.Shield.Q=uint8(rng.Intn(256));positions=append(positions,p)}
+  positionRows:=[]any{};for _,p:=range positions {positionRows=append(positionRows,map[string]any{"time":p.TimestampUS,"slot":p.Slot,"has_shield":p.HasShield,"quantum":p.Shield.Q})}
+  sort.SliceStable(positions,func(i,j int)bool{return positions[i].TimestampUS<positions[j].TimestampUS})
+  shields:=[]any{};for _,p:=range positions{if p.HasShield {shields=append(shields,map[string]any{"slot":p.Slot,"timestamp_us":p.TimestampUS,"quantum":p.Shield.Q})}}
+  tracks:=[]Track{};deaths:=map[int]bool{};deathRows:=[]int{};for j:=0;j<run%79;j++ {tracks=append(tracks,Track{Points:[]Point{},Slot:uint32(rng.Intn(5)),StartFrame:rng.Intn(70)-10,EndFrame:rng.Intn(160)});if rng.Intn(3)==0 {deaths[j]=true;deathRows=append(deathRows,j)}}
+
+  lives:=[]lifeSpan{};lifeRows:=[]any{}
+  for j,tr:=range tracks {l:=lifeSpan{slot:tr.Slot,from:int64(origin)+int64(tr.StartFrame)*int64(step),to:int64(origin)+int64(tr.EndFrame)*int64(step),xuid:uint64(j%4+1)};if deaths[j] {l.cause=CauseVieMort};lives=append(lives,l);lifeRows=append(lifeRows,map[string]any{"slot":l.slot,"from":l.from,"to":l.to,"xuid":l.xuid,"bid":"","cause":l.cause,"named_by":""})}
+  moves:=[]types.MovementStateRead{};moveRows:=[]any{};kinds:=[]string{"crouch","slide","",string([]byte{0xff}),string([]byte{0xfe}),string([]byte{0xe2,0x82}),"�"}
+  for j,p:=range positions {k:=kinds[j%len(kinds)];moves=append(moves,types.MovementStateRead{Slot:p.Slot,TimestampUS:p.TimestampUS,Kind:k,On:j%3!=0});moveRows=append(moveRows,map[string]any{"slot":p.Slot,"timestamp":p.TimestampUS,"kindHex":hex.EncodeToString([]byte(k)),"on":j%3!=0})}
+  domain:=[]int{-9223372036854775808,-1,0,1,4294967296,9223372036854775807}
+  stats:=types.MovementStateStats{Scanned:run%3!=0,Absent:run%11==0,Records:domain[run%6],Desyncs:domain[(run+1)%6],SlotUnbound:domain[(run+2)%6],EventPacketsUnlocated:domain[(run+3)%6],MapWidths:[3]uint{^uint(0),1<<32,18}}
+  kills:=[]EquipmentKillRef{};for j:=0;j<run%37;j++ {kills=append(kills,EquipmentKillRef{XUID:uint64(rng.Intn(5)),TimeMS:rng.Intn(16000)-2000,AssistXUID:uint64(rng.Intn(5)),AssistKnown:rng.Intn(2)==0})}
+  originMS:=int64(run%7)*1000;var originPtr *int64;if run%5!=0 {originPtr=&originMS};interval:=run%5*100-100;read:=run%3!=0
+  doc:=ReplayDocument{MatchID:"fixture",Tracks:tracks,OriginMs:originPtr,FrameIntervalMS:999,EquipmentEpisodes:[]EquipmentEpisode{{Fam:"seed"}},Stances:[]Stance{{Kind:"seed"}}};if run%2==0{doc.Coverage=&Coverage{Shots:LayerCoverage{Available:999}}};before,_:=json.Marshal(doc)
+  a:=assemblage{doc:doc,sorted:positions,origin:origin,step:step,interval:interval,reg:IdentityRegistry{own:OwnerReport{lives:lives}},opt:Options{CamoStates:camo,MovementStates:moves,MovementStateStats:stats,Kills:KillsInput{Read:read,Kills:kills}}}
+  h.records=[]any{};a.poserEpisodesDEquipement()
+  closed:=[]int{};for i,b:=range a.clotureesParMort{if b {closed=append(closed,i)}};sort.Ints(closed)
+  outRaw:=[]any{};for _,v:=range a.doc.Stances{outRaw=append(outRaw,map[string]any{"slot":v.Slot,"kindHex":hex.EncodeToString([]byte(v.Kind)),"t0":v.T0,"t1":v.T1})};keys:=[]string{};for k:=range a.stanceCov.ByKind {keys=append(keys,k)};sort.Strings(keys);counts:=[]any{};for _,k:=range keys {counts=append(counts,[]any{hex.EncodeToString([]byte(k)),a.stanceCov.ByKind[k]})}
+  coverageInput:=append([]EquipmentEpisode{},a.doc.EquipmentEpisodes...)
+  coverageInput=append(coverageInput,EquipmentEpisode{Slot:999,Fam:"unknown"},EquipmentEpisode{Slot:999,Fam:EquipFamilyCamo},EquipmentEpisode{Slot:998,Fam:EquipFamilyOvershield,T0:run%3,T1:run%7})
+  coverageExpected:=equipmentCoverage(coverageInput,a.doc.Tracks,a.clotureesParMort)
+  rows=append(rows,map[string]any{"coverage_input":coverageInput,"coverage_expected":coverageExpected,"before":json.RawMessage(before),"after":a.doc,"closed":closed,"stance_cov":a.stanceCov,"stance_raw":outRaw,"counts":counts,"diagnostics":h.records,"moves":moveRows,"stats":stats,"lives":lifeRows,"kills":kills,"kill_read":read,"kills_read":a.killsRead,"interval":interval,"camo":camo,"positions":positionRows,"origin":origin,"step":step})
+ }
+ b,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-equipment-document.json",b,0600);e!=nil {t.Fatal(e)}
+}

@@ -1,0 +1,20 @@
+package grammar
+import("bytes";"encoding/json";"log/slog";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustProfileWarning(t *testing.T){
+ previous:=slog.Default();defer slog.SetDefault(previous)
+ rows:=[]any{}
+ for run:=0;run<128;run++{
+  format:=[]int{20,21,24,25,26,27,28,99}[run%8]
+  build:=[]string{"HI_1_12_0","HI_1_13_0","HI_9_99_0",""}[(run/8)%4]
+  present:=run<64;read:=build!=""
+  p:=profile.Resoudre(profile.ClesDuFilm{RegistrePresent:true,Format:format,Majeure:41,MajeureLue:true,Identite:profile.FilmIdentity{Build:build},IdentiteLue:read},nil)
+  chunks:=source.MemoryChunks{};meta:=[]types.ChunkMeta{}
+  if present{chunks=append(chunks,make([]byte,8));meta=append(meta,types.ChunkMeta{Index:0,ChunkType:1})}else{chunks=append(chunks,[]byte{0});meta=append(meta,types.ChunkMeta{Index:1})}
+  film,err:=source.Load(chunks,meta);if err!=nil{t.Fatal(err)}
+  var journal bytes.Buffer;slog.SetDefault(slog.New(slog.NewJSONHandler(&journal,nil)))
+  journaliserProfilIncomplet(film,p)
+  logs:=[]map[string]any{};dec:=json.NewDecoder(&journal);for dec.More(){v:=map[string]any{};if err:=dec.Decode(&v);err!=nil{t.Fatal(err)};delete(v,"time");logs=append(logs,v)}
+  rows=append(rows,map[string]any{"format":format,"build":build,"present":present,"logs":logs})
+ }
+ raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-profile-warning.json",raw,0600);err!=nil{t.Fatal(err)}
+}

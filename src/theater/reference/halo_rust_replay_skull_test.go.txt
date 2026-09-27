@@ -1,0 +1,26 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/objectives")
+func TestHaloRustReplaySkull(t *testing.T){
+ rng:=rand.New(rand.NewSource(4100));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  recs:=[]types.StatRecord{};deaths:=[]Death{}
+  for round:=0;round<1+run%3;round++{for p:=0;p<4;p++{for j:=0;j<=p+3;j++{
+   at:=round*30000+j*1000+p*220;recs=append(recs,types.StatRecord{Slot:10+p*2,Round:round,TimeMS:at,Comps:map[int]types.StatValue{2:{A:int64(j),B:int64(j)}}})
+   if j>0{deaths=append(deaths,Death{XUID:uint64(100+(p+round)%4),TimeMS:int64(at)})}
+  }}
+  for p:=0;p<6;p++{value:=int64(0);at:=round*30000;for j:=0;j<15;j++{at+=[]int{0,500,1000,3000,3001}[rng.Intn(5)];value+=int64(rng.Intn(4));v:=value;if j%9==0{v-=5};recs=append(recs,types.StatRecord{Slot:10+p*2,Round:round,TimeMS:at,Comps:map[int]types.StatValue{0:{A:v,B:0},21:{A:0,B:int64(j/4)}}})}}
+  }
+  sort.SliceStable(recs,func(i,j int)bool{return recs[i].TimeMS<recs[j].TimeMS})
+  if run%13==0{deaths=[]Death{}}
+  ri:=objectives.ResolveRoundIdentity(recs,deathInstantsOf(deaths));tracks:=[]Track{};deduced:=map[int]bool{}
+  for j:=0;j<run%13;j++{xuid:=[]string{"100","101","102","103",""}[rng.Intn(5)];bot:="";if j%7==0{bot="bot"};a:=rng.Intn(900);tracks=append(tracks,Track{Points:[]Point{},XUID:xuid,Bot:bot,StartFrame:a,EndFrame:a+rng.Intn(500)});if j%3==0{deduced[j]=true}}
+  presence:=carrierPresenceOf(tracks,deduced)
+  clock:=matchClock{origin:uint64(run%11)*1000000,step:[]uint64{100000,1000000,16667,0}[run%4],frames:[]int{1000,10000,100,-1,0}[run%5],deathOffsetMS:int64(run%9-4)*1000}
+  raw:=skullCarryIntervals(recs,ri);rawRows:=[]any{};for _,p:=range raw{rawRows=append(rawRows,map[string]any{"xuid":p.xuid,"round":p.round,"t0_ms":p.t0MS,"t1_ms":p.t1MS})}
+  carries,cov:=buildSkullCarries(SkullCarryScan{Scanned:run%17!=0,Records:recs,Identity:ri},clock,presence);if carries==nil{carries=[]SkullCarry{}}
+  named:=map[string]any{};for x,spans:=range presence.named{ss:=[]any{};for _,s:=range spans{ss=append(ss,map[string]int{"t0":s.f0,"t1":s.f1})};named[x]=ss};unnamed:=[]any{};for _,s:=range presence.unnamed{unnamed=append(unnamed,map[string]int{"t0":s.f0,"t1":s.f1})}
+  gates:=[]any{};for j:=0;j<15;j++{x:=[]string{"100","101","102","103","missing"}[j%5];a:=rng.Intn(1000);b:=a+rng.Intn(600);lo,hi,ok:=presence.gate(x,a,b);var result any;if ok{result=map[string]int{"t0":lo,"t1":hi}};gates=append(gates,map[string]any{"xuid":x,"t0":a,"t1":b,"result":result})}
+  rows=append(rows,map[string]any{"records":recs,"deaths":deaths,"tracks":tracks,"deduced":deduced,"presence":map[string]any{"named":named,"unnamed":unnamed},"gates":gates,"raw":rawRows,"width":skullTickWidthFrames(recs,clock),"clock":map[string]any{"origin_us":clock.origin,"step_us":clock.step,"frames":clock.frames,"death_offset_ms":clock.deathOffsetMS},"scanned":run%17!=0,"output":map[string]any{"carries":carries,"coverage":cov}})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-skull.json",raw,0600);e!=nil{t.Fatal(e)}
+}

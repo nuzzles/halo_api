@@ -1,0 +1,14 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing")
+func TestHaloRustSignedWidth(t *testing.T){
+ rows:=[]any{}
+ for mode:=0;mode<3;mode++{for _,width:=range []int{-26,-25,-8,-1,0,1,7,64}{
+  name:="biped-emp-timer-component";if mode==1{name="unknown"}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{name},Levels:[]uint32{0}}}};w:=NewWorld(reg);w.BindFull(50,0)
+  var bw bitWriter;bw.bit(1);bw.bits(50,11);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(0,32)
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{name:width}}else{cfg.Profil.Grammaire.LargeursBouchon=map[string]int{name:width}}
+  rec,end,ok:=TryDeltaAt(bw.buf,0,w,cfg)
+  rows=append(rows,map[string]any{"mode":mode,"width":width,"name":name,"hex":hex.EncodeToString(bw.buf),"record":rec,"end":end,"ok":ok})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-width.json",raw,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,13 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustFactsGrenadeReads(t *testing.T){
+ rng:=rand.New(rand.NewSource(42023));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  kf:=[]KeyframeInventory{};ds:=[]types.InventoryDelta{};input:=[]any{};slots:=[]uint32{};tracks:=[]Track{}
+  for s:=uint32(0);s<6;s++{if rng.Intn(3)!=0{slots=append(slots,s);tracks=append(tracks,Track{Slot:s})}}
+  for i:=0;i<run%40;i++{r:=KeyframeInventory{TimestampUS:uint64(rng.Intn(10))*100000,Slot:uint32(rng.Intn(6)),GrenadesRead:i%3!=0,SelectedGrenadeRank:[]int{-9223372036854775808,-2,-1,0,1,2147483648,4294967296,9223372036854775807}[i%8]};for j:=0;j<4;j++{r.Grenades[j]=uint32(rng.Intn(4))};kf=append(kf,r)}
+  for i:=0;i<run%50;i++{d:=types.InventoryDelta{TimestampUS:uint64(rng.Intn(10))*100000,Slot:uint32(rng.Intn(6)),SelRead:i%3!=0,Sel:[]int{-9223372036854775808,-2,-1,0,1,2147483648,4294967296,9223372036854775807}[i%8]};if i%4!=0{d.Grenades=[]uint32{};for j:=0;j<i%6;j++{d.Grenades=append(d.Grenades,uint32(i+j))}};ds=append(ds,d);input=append(input,map[string]any{"time":d.TimestampUS,"slot":d.Slot,"counts":d.Grenades,"selection_read":d.SelRead,"selection":d.Sel})}
+  origin:=uint64(run%4)*100000;step:=uint64(run%4+1)*100000;built:=buildGrenadeReads(kf,ds,origin,step);before:=append([]GrenadeRead{},built...);pub:=keepGrenadeReadsOfPublishedTracks(built,tracks);if pub==nil{pub=[]GrenadeRead{}};doc:=ReplayDocument{Coverage:&Coverage{},GrenadeReads:pub};attachGrenadeReadCoverage(&doc,before,run%2==0);rows=append(rows,map[string]any{"kf":kf,"deltas":input,"origin":origin,"step":step,"slots":slots,"refused":run%2==0,"built":before,"output":map[string]any{"reads":pub,"coverage":doc.Coverage.GrenadeReads}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-grenade-reads.json",b,0600);e!=nil{t.Fatal(e)}
+}

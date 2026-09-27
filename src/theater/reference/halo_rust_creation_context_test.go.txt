@@ -1,0 +1,116 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"testing"
+)
+
+func TestHaloRustCreationContext(t *testing.T) {
+	rows := []any{}
+	orders := [][]int{{0, 1, 2}, {0, 1, 3}, {0, 2, 1}, {1, 2}, {0}, {0, 1, 1}, {0, 1, 2, 4}, {-1, 1, 2}}
+	bands := [][]uint32{{512, 513, 514}, {512, 514}, {513}, {}}
+	for c := 0; c < 512; c++ {
+		slots := bands[(c/32)%4]
+		flags := map[uint32]bool{}
+		for _, s := range slots {
+			flags[s] = true
+		}
+		raw := source.MemoryChunks{}
+		meta := []types.ChunkMeta{}
+		inputs := []any{}
+		packet := func(kind uint16, body []byte) []byte {
+			p := make([]byte, 16)
+			binary.LittleEndian.PutUint16(p, kind)
+			binary.LittleEndian.PutUint32(p[4:], uint32(len(body)))
+			binary.LittleEndian.PutUint64(p[8:], uint64(1000+c))
+			return append(p, body...)
+		}
+		for _, num := range orders[c%8] {
+			var w bitWriter
+			for i := 0; i < 3; i++ {
+				w.bits(1, 3)
+				w.bits(uint64(512+i), 13)
+				w.bits(uint64(i%4), 2)
+				w.bits(35, 6)
+				w.bits(1, 1)
+				w.bits(13, 8)
+				w.bits(1, 1)
+				word := uint64(BipedRepresentationName)
+				if c/128 == 1 && i == 1 {
+					word++
+				}
+				w.bits(word, 32)
+				gate := uint64(0)
+				if c/128 == 2 && i == 1 {
+					gate = 1
+				}
+				w.bits(gate, 1)
+				w.bits(uint64(i+3), 5)
+			}
+			body := w.buf
+			if c/128 == 3 {
+				body = body[:len(body)-1]
+			}
+			var k bitWriter
+			k.bits(0, 1)
+			k.bits(uint64((1<<30)|512), 32)
+			ti := uint64(35)
+			if c%2 == 1 {
+				ti = 37
+			}
+			k.bits(ti, 32)
+			k.bits(0, 44)
+			k.bits(0, 32)
+			k.bits(0, 32)
+			k.bits(0, 64)
+			data := packet(2, k.buf)
+			data = append(data, packet(0, body)...)
+			switch (c / 8) % 4 {
+			case 1:
+				data = append(data, 1, 2, 3)
+			case 2:
+				p := packet(0, body)
+				binary.LittleEndian.PutUint32(p[4:], 10000)
+				data = append(data, p...)
+			case 3:
+				data = append(data, packet(0, body)...)
+			}
+			if num == 0 { data = []byte{41,0,0,0,27,0,0,0} }
+			raw = append(raw, data)
+			meta = append(meta, types.ChunkMeta{Index: num})
+			inputs = append(inputs, map[string]any{"index": num, "hex": hex.EncodeToString(data)})
+		}
+		film, e := source.Load(raw, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+		fc := NewFilmContext(film)
+		records, stats, err := ScanBipedCreationsForBand(fc, NewSlotBand(flags))
+		kind := ""
+		if err == ErrNoFilmChunk {
+			kind = "source"
+		} else if err != nil {
+			kind = "band"
+		}
+		autoRecords, autoStats, autoErr := ScanBipedCreations(fc)
+		autoKind := ""
+		if autoErr == ErrNoFilmChunk {
+			autoKind = "source"
+		} else if autoErr != nil {
+			autoKind = "band"
+		}
+		rows = append(rows, map[string]any{"inputs": inputs, "slots": slots, "records": records, "stats": stats, "error": kind, "automatic": map[string]any{"records": autoRecords, "stats": autoStats, "error": autoKind, "slots": fc.BipedSlots().Slots()}})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-creation-context.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

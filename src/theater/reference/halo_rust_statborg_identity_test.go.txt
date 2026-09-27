@@ -1,0 +1,126 @@
+package objectives
+
+import (
+	"encoding/json"
+	"fmt"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"math/rand"
+	"os"
+	"sort"
+	"testing"
+)
+
+func rustRoundIdentity(r RoundIdentity) any {
+	starts := []any{}
+	for _, s := range r.starts {
+		starts = append(starts, map[string]any{"round": s.round, "start_ms": s.startMS})
+	}
+	return map[string]any{"publication": map[string]any{"by_round": r.byRound, "origins": r.origins}, "starts": starts}
+}
+func TestHaloRustStatborgIdentity(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	h := &rustBudgetHandler{records: []any{}}
+	slog.SetDefault(slog.New(h))
+	rng := rand.New(rand.NewSource(7661))
+	rows := []any{}
+	for run := 0; run < 1024; run++ {
+		recs := []types.StatRecord{}
+		deaths := []types.DeathInstant{}
+		lines := []types.PlayerLine{}
+		for round := 0; round < 1+run%4; round++ {
+			for player := 0; player < 1+run%6; player++ {
+				slot := 10 + player*2
+				n := 3 + player
+				for j := 0; j <= n; j++ {
+					time := round*30000 + j*1000 + player*300
+					v := int64(j)
+					if run%17 == 0 && j == 2 {
+						v = 1001
+					}
+					if run%19 == 0 && j == 1 {
+						v = -1
+					}
+					recs = append(recs, types.StatRecord{Slot: slot, Round: round, TimeMS: time, Comps: map[int]types.StatValue{0: {A: int64(j), B: 0}, 2: {A: int64(j + player), B: v}, 3: {A: int64(player)}}})
+					if j > 0 {
+						delta := []int{-151, -150, 0, 150, 151}[run%5]
+						x := fmt.Sprint(100 + player)
+						if run%7 == 0 && player == 1 {
+							x = "100"
+						}
+						deaths = append(deaths, types.DeathInstant{XUID: x, TimeMS: time + delta})
+					}
+				}
+			}
+		}
+		if run%11 == 0 {
+			rng.Shuffle(len(recs), func(i, j int) { recs[i], recs[j] = recs[j], recs[i] })
+		} else {
+			sort.SliceStable(recs, func(i, j int) bool { return recs[i].TimeMS < recs[j].TimeMS })
+		}
+		if run%13 == 0 {
+			deaths = []types.DeathInstant{}
+		}
+		if run%23 == 0 {
+			deaths = append(deaths, types.DeathInstant{XUID: "", TimeMS: 0})
+		}
+		b := newEventBudget("identity")
+		kills := countsOf(recs, statSlotKey{2, sideA}, b)
+		ds := countsOf(recs, statSlotKey{2, sideB}, b)
+		assists := countsOf(recs, statSlotKey{3, sideA}, b)
+		slots := []int{}
+		for s := range kills {
+			slots = append(slots, s)
+		}
+		sort.Ints(slots)
+		for _, s := range slots {
+			if run%3 == 0 || s%4 == 0 {
+				continue
+			}
+			x := fmt.Sprint(100 + (s-10)/2)
+			if run%2 == 0 {
+				x = "wrong" + x
+			}
+			lines = append(lines, types.PlayerLine{XUID: x, Kills: kills[s], Deaths: ds[s], Assists: assists[s]})
+		}
+		prog := deathProgressions(recs)
+		for s, v := range prog {
+			if v == nil {
+				prog[s] = []int{}
+			}
+		}
+		round := run % 5
+		pr := deathProgressionsForRound(recs, round)
+		for s, v := range pr {
+			if v == nil {
+				pr[s] = []int{}
+			}
+		}
+		h.records = []any{}
+		identity, stats := slotIdentityResolvedFrom(recs, lines, deaths)
+		resolvedLogs := h.records
+		a := []int{}
+		bb := []int{}
+		for i := 0; i < run%20; i++ {
+			a = append(a, rng.Intn(1000)-500)
+			bb = append(bb, rng.Intn(1000)-500)
+		}
+		ri := ResolveRoundIdentity(recs, deaths)
+		completed := ri.CompletedByLines(recs, lines)
+		lookups := []any{}
+		for slot := 8; slot <= 24; slot += 2 {
+			for _, time := range []int{-1000, 0, 30000, 60000, 999999} {
+				lookups = append(lookups, []any{slot, time, completed.At(slot, time)})
+			}
+		}
+		rows = append(rows, map[string]any{"resolved_logs": resolvedLogs, "round_identity": rustRoundIdentity(ri), "completed": rustRoundIdentity(completed), "lookups": lookups, "records": recs, "deaths": deaths, "lines": lines, "progressions": prog, "round": round, "round_progressions": pr, "by_deaths": slotIdentityFromDeaths(recs, deaths), "by_round": SlotIdentityByRound(recs, deaths), "resolved": map[string]any{"by_slot": identity, "stats": stats}, "a": a, "b": bb, "coincidences": coincidences(a, bb)})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-statborg-identity.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

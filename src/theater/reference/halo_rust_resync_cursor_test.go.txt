@@ -1,0 +1,31 @@
+package grammar
+import("bytes";"encoding/json";"encoding/hex";"os";"testing")
+func TestHaloRustResyncCursor(t *testing.T){
+ rows:=[]any{}
+ for c:=0;c<70;c++{
+  extra:=c%2==1;stub:=c&2!=0;remove:=c&4!=0;accepts:=c&8!=0;bound:=c&32!=0
+  count:=0;var bw bitWriter;prefix:=func(){if extra{bw.bits(0,32)}}
+  if c>=64{
+   count=4095+(c-64)%3;bound=true;remove=false;stub=false;accepts=true
+   for i:=0;i<count;i++{prefix();bw.bit(1);bw.bits(uint64(50+i%2),11);bw.bits(0,2);bw.bit(0);bw.bits(0,4)};prefix();bw.end()
+  }else{
+   prefix();bw.bit(1);bw.bits(100,11);bw.bits(0,2);if c%3==0{bw.bit(1);bw.bits(uint64(c),7)}else{bw.bit(0)};bw.bits(0,16)
+   prefix();bw.bit(1);bw.bits(50,11);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(uint64(192+c),8);prefix();bw.end();bw.bits(0,32)
+  }
+  data:=bw.buf;if c<64&&c&16!=0{data=data[:(c/2)%len(data)]}
+  run:=func(instrumented bool)(map[string]any,int){
+   reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"not-ported"},Levels:[]uint32{0}}}}
+   cfg:=DefaultFrameConfig();cfg.IDLowBits=11;cfg.HasExtraFields=extra;cfg.Obs=NouvelleObservation()
+   widths:=map[string]int{"not-ported":8};if stub{cfg.Profil.Grammaire.LargeursBouchon=widths}else{cfg.Profil.Grammaire.LargeursCalibrees=widths}
+   world:=NewWorld(reg);if bound{world.BindFull(50,0);world.BindFull(51,0)}
+   calls:=[]any{};accept:=func(slot uint32,_ [3]float32,has bool)bool{calls=append(calls,[]any{slot,has});if remove{delete(widths,"not-ported")};return accepts}
+   var records []FrameRecord;end:=0
+   if instrumented{records,end=haloRustDecodeFrameResyncCursor(data,world,cfg,map[uint32]bool{50:true,51:true},accept)}else{records=DecodeFrameResync(data,world,cfg,map[uint32]bool{50:true,51:true},accept)}
+   if records==nil{records=[]FrameRecord{}}
+   return map[string]any{"records":records,"calls":calls,"widths":widths,"slots":world.cloneSlots()},end
+  }
+  original,_:=run(false);observed,end:=run(true);a,_:=json.Marshal(original);b,_:=json.Marshal(observed);if !bytes.Equal(a,b){t.Fatalf("instrumentation changed case %d",c)}
+  rows=append(rows,map[string]any{"case":c,"extra":extra,"stub":stub,"remove":remove,"accept":accepts,"bound":bound,"count":count,"hex":hex.EncodeToString(data),"state":original,"end":end})
+ }
+ raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-resync-cursor.json",raw,0600);err!=nil{t.Fatal(err)}
+}

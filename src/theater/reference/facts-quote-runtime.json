@@ -1,0 +1,8 @@
+{
+  "go_version": "go1.26.5",
+  "source": "https://go.googlesource.com/go/+/refs/tags/go1.26.5/src/strconv/",
+  "files": {
+    "quote.go": "6602960ec8777de9926c1d02fbf5cb0828d4aefa38083865f4af17b6892c09a2",
+    "isprint.go": "24114557c2b3cad7b80c8e71683831bfbe1c72eb99e8fd28a3a48eaf77705fb4"
+  }
+}

@@ -1,0 +1,55 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"math"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustQuantize(t *testing.T) {
+	rng := rand.New(rand.NewSource(410315))
+	rows := []any{}
+	for i := 0; i < 4096; i++ {
+		data := make([]byte, i%33)
+		rng.Read(data)
+		start := i % 19
+		width := uint(i % 129)
+		var bounds profile.Vec3Range
+		for ax := range bounds {
+			bounds[ax].Min = float32(rng.Intn(10000)-5000) * 0.37
+			bounds[ax].Max = float32(rng.Intn(10000)-5000) * 1.71
+		}
+		r := LecteurSur(data)
+		r.SetBitPos(start)
+		v := r.ReadQuantizedVec3(width, bounds)
+		values := [3]uint32{}
+		bb := [3][2]uint32{}
+		for ax := range v {
+			values[ax] = math.Float32bits(v[ax])
+			bb[ax] = [2]uint32{math.Float32bits(bounds[ax].Min), math.Float32bits(bounds[ax].Max)}
+		}
+		category := i%16 - 3
+		q := LecteurSur(data)
+		q.SetBitPos(start)
+		stat := q.readQuantStat(category)
+		n := rng.Uint32()
+		if i%4 == 0 {
+			n = uint32(1) << uint(i%32)
+		}
+		if i == 0 {
+			n = 0
+		}
+		rows = append(rows, map[string]any{"data": hex.EncodeToString(data), "start": start, "width": width, "bounds": bb, "vector": values, "end": r.BitPos(), "category": category, "stat": stat, "stat_end": q.BitPos(), "n": n, "bit_len": bitLen(n)})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-quantize.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

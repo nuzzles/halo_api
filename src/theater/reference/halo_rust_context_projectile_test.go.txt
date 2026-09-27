@@ -1,0 +1,41 @@
+package grammar
+
+import (
+ "encoding/binary"
+ "encoding/hex"
+ "encoding/json"
+ "math"
+ "os"
+ "sort"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+)
+func haloProjectileSample(s types.ProjectileSample) any { return map[string]any{"time":s.TimestampUS,"chunk":s.Chunk,"xyz":[3]uint32{math.Float32bits(s.X),math.Float32bits(s.Y),math.Float32bits(s.Z)},"rest":s.AtRest} }
+func haloProjectileTracks(tracks []types.ProjectileTrack) any {if tracks==nil{return nil};out:=[]any{};for _,tr:=range tracks{pts:=[]any{};for _,p:=range tr.Pts{pts=append(pts,haloProjectileSample(p))};out=append(out,map[string]any{"slot":tr.Slot,"generation":tr.Gen,"points":pts})};return out}
+func TestHaloRustContextProjectile(t *testing.T) {
+ packet:=func(kind uint16,ts uint64,pay []byte)[]byte{h:=make([]byte,16);binary.LittleEndian.PutUint16(h,kind);binary.LittleEndian.PutUint32(h[4:],uint32(len(pay)));binary.LittleEndian.PutUint64(h[8:],ts);return append(h,pay...)}
+ rows:=[]any{};primitives:=[]any{}
+ widths:=[]uint{0,1,6,32,33,63,64,65,^uint(0)}
+ for n:=0;n<180;n++ {
+  lg:=profile.PrecisionDescriptor{IndexW:[]uint{0,1,33,64,65,^uint(0)}[n%6],AxisW:[3]uint{widths[n%len(widths)],7,8},Region:0}
+  wr:=&profile.Vec3Range{{Min:-100,Max:300},{Min:-200,Max:400},{Min:-300,Max:500}}
+  if n%17==0{wr[0].Max=wr[0].Min} // includes native NaN when a wide axis divides 0/0
+  var w translocWriter
+  for j:=0;j<8;j++ {w.put(1,1);w.put(13,uint64(512+j%4));w.put(2,uint64(j%4));w.put(2,0);w.put(3,2);w.put(6,0);if j==7{w.put(6,18)}else{w.put(6,1)};w.put(2,0);iw:=int(lg.IndexW);if iw<0{iw=0};if iw>=33 && n%2==0 {w.put(iw,1<<32)} else {w.put(iw,0)};for _,v:=range lg.AxisW{bits:=int(v);if bits<0{bits=6};q:=uint64(3+j);if n%5==0&&j==2{q=0};if n%7==0&&j==3{q=(uint64(1)<<v)-1};w.put(bits,q)};w.put(2,0)}
+  var k translocWriter;k.put(1,0);for _,slot:=range []int{512,513,515}{ti:=41;if slot==513{ti=42};if n%11==0{ti=37};k.put(32,uint64(1<<30|slot));k.put(32,uint64(ti));k.put(44,0);k.put(64,0)}
+  raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};inputs:=[]any{}
+  orders:=[][]int{{1,2},{2,1},{1,3,2},{1,1,2},{-1,1,2},{2},{}}
+  for ci,id:=range orders[n%len(orders)] {data:=packet(2,100,k.pay);for j:=0;j<8;j++{kind:=uint16(0);if j==3{kind=6};if n%13==0&&j==6{kind=7};ts:=uint64(ci*200000+j*50000);if n%4==0{ts=1000};data=append(data,packet(kind,ts,w.pay)...)};raw=append(raw,data);meta=append(meta,types.ChunkMeta{Index:id});inputs=append(inputs,map[string]any{"index":id,"hex":hex.EncodeToString(data)})}
+  var film *source.Film;var err error;if len(raw)>0{film,err=source.Load(raw,meta);if err!=nil{t.Fatal(err)}}
+  fc:=NewFilmContext(film);fc.PoserLargeursObjetDuMonde(lg);bounds:=wr;if n%9==0{bounds=nil}
+  tracks,err:=ScanProjectiles(fc,bounds);msg:="";if err!=nil{msg=err.Error()};band:=worldObjectSlotBand(film,41);slots:=[]uint32{};for s:=range band{slots=append(slots,s)};sort.Slice(slots,func(i,j int)bool{return slots[i]<slots[j]})
+  records:=[]any{};if err==nil{for _,c:=range fc.ChunkNumbers(){d,pks,ok:=fc.ChunkAt(c);if !ok{continue};for _,pk:=range pks{if pk.Type!=0{continue};pay:=pk.Payload(d);starts:=[]int{};pads:=[]int{};for p:=0;p<=len(pay)*8-27-projPosBits(lg);p++{r,ok:=matchWorldObjectRecord(pay,p,band);if !ok||r.Idx[0]!=0{continue};if _,ok=decodeWorldObjectPos(pay,r.After,bounds,lg);!ok{continue};off:=r.After+2+int(lg.IndexW)+int(lg.AxisW[0])+int(lg.AxisW[1])+int(lg.AxisW[2]);pad:=off-len(pay)*8;if pad<0{pad=0};starts=append(starts,p);pads=append(pads,pad);p+=projPosBits(lg)};rs:=scanProjectileRecords(pay,band,bounds,lg);if len(rs)!=len(starts){t.Fatal("boundary count")};for ri,r:=range rs{r.TimestampUS=pk.TimestampUS;r.Chunk=c;records=append(records,map[string]any{"slot":r.slot,"generation":r.gen,"sample":haloProjectileSample(r.ProjectileSample),"packet":pk.Index,"start":pk.Start,"bit":starts[ri],"padded_bits":pads[ri]})}}}}
+  rows=append(rows,map[string]any{"inputs":inputs,"index_bits":lg.IndexW,"axis_bits":lg.AxisW,"region":lg.Region,"zero_range":n%17==0,"no_bounds":bounds==nil,"error":msg,"band":slots,"tracks":haloProjectileTracks(tracks),"records":records})
+ }
+ // Direct primitives exercise signed casts and arithmetic without running a
+ // native scan loop whose overflowed limit would demand billions of probes.
+ for n:=0;n<128;n++{lg:=profile.PrecisionDescriptor{IndexW:[]uint{0,1,32,33,63,64,65,^uint(0),^uint(0)-1,1<<63}[n%10],AxisW:[3]uint{widths[n%len(widths)],7,8},Region:0};w:=translocWriter{};w.put(2,0);iw:=int(lg.IndexW);if iw>=0&&iw<=65{w.put(iw,0)};for _,v:=range lg.AxisW{bits:=int(v);if bits<0{bits=6};w.put(bits,5)};w.put(2,0);wr:=&profile.Vec3Range{{Min:-100,Max:300},{Min:-200,Max:400},{Min:-300,Max:500}};at:=0;if n%11==0{at=-2};v,ok:=decodeWorldObjectPos(w.pay,at,wr,lg);primitives=append(primitives,map[string]any{"hex":hex.EncodeToString(w.pay),"at":at,"index_bits":lg.IndexW,"axis_bits":lg.AxisW,"region":lg.Region,"ok":ok,"end":at+2+int(lg.IndexW)+int(lg.AxisW[0])+int(lg.AxisW[1])+int(lg.AxisW[2]),"xyz":[3]uint32{math.Float32bits(v[0]),math.Float32bits(v[1]),math.Float32bits(v[2])}})}
+ b,e:=json.Marshal(map[string]any{"cases":rows,"primitives":primitives});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-projectile.json",b,0600);e!=nil{t.Fatal(e)}
+}

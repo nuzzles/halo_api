@@ -1,0 +1,13 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing")
+func TestHaloRustSignedMarchEntry(t *testing.T){
+ rows:=[]any{}
+ for _,data:=range [][]byte{{},{0x80},make([]byte,16)}{for _,extra:=range []bool{false,true}{for _,start:=range []int{-1<<63,-33,-32,-31,-1,0,1,2,7,8,128,129,1<<32,1<<63-1}{
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0}}};cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=extra;cfg.Obs=NouvelleObservation()
+  w:=NewWorld(reg);w.BindFull(0,0);records:=[]FrameRecord{};panicked:=false
+  func(){defer func(){panicked=recover()!=nil}();records=marchRecordsOf(data,w,cfg,start)}()
+  if records==nil{records=[]FrameRecord{}}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"extra":extra,"start":start,"panic":panicked,"records":records})
+ }}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-march-entry.json",raw,0600);e!=nil{t.Fatal(e)}
+}

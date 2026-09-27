@@ -1,0 +1,17 @@
+package grammar
+import("encoding/json";"encoding/hex";"fmt";"os";"testing")
+func TestHaloRustLiveChainBudget(t *testing.T){
+ rows:=[]any{}
+ for _,count:=range []int{1,4,16,50}{for _,periods:=range []int{16,128}{
+  reg:=&Registry{};widths:=map[string]int{};names:=[][]string{}
+  for i:=0;i<count;i++{name:=fmt.Sprintf("budget-width-%d",i);names=append(names,[]string{name});reg.Archetypes=append(reg.Archetypes,Archetype{Index:i,Components:[]string{name},Levels:[]uint32{0}});widths[name]=8+32*i}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=11;cfg.Profil.Grammaire.InferenceChaine=true;cfg.Profil.Grammaire.TablesParVue=false;cfg.Profil.Grammaire.LargeursCalibrees=widths;cfg.Obs=NouvelleObservation()
+  var bw bitWriter
+  for j:=0;j<periods;j++{bw.bit(1);bw.bits(100,11);bw.bits(0,2);bw.bits(1,4);bw.bits(0,6);bw.bits(0,8)}
+  world:=NewWorld(reg);br:=LecteurSur(bw.buf);br.poserCadre(cfg);records,inferred,hit:=decodeInferLoop(br,bw.buf,world,cfg);if records==nil{records=[]FrameRecord{}}
+  o:=cfg.Obs
+  rows=append(rows,map[string]any{"count":count,"periods":periods,"names":names,"widths":widths,"hex":hex.EncodeToString(bw.buf),"records":records,"inferred":inferred,"hit":hit,"end":br.BitPos(),"counts":map[string]int{"Immediate":o.ChaineImmediat,"Deep":o.ChaineProfond,"NoConfirmation":o.ChaineAucun,"Ambiguous":o.ChaineAmbigu,"BudgetExhausted":o.ChaineBudget}})
+ }
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-live-chain-budget.json",raw,0600);e!=nil{t.Fatal(e)}
+}

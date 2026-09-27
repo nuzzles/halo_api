@@ -1,0 +1,20 @@
+package killsource
+import("testing";"encoding/json";"os";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustKillFilmEvidence(t *testing.T){
+ rows:=[]any{}
+ ev:=func(e feedEvent)any{var p any;if e.paquet.ok{p=map[string]int{"chunk":e.paquet.chunk,"packet":e.paquet.pidx}};return map[string]any{"time_ms":e.timeMS,"killer":e.killer,"victim":e.victim,"victim_xuid":e.victimXUID,"packet":p}}
+ evs:=func(es []feedEvent)[]any{out:=[]any{};for _,e:=range es{out=append(out,ev(e))};return out}
+ for _,folder:=range []string{"maps/01-bazaar-idle","maps/02-aquarius","bandit/01-evo","ranked-arena/02-oddball"} {
+  root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);raw,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)}
+  var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}};if e=json.Unmarshal(raw,&meta);e!=nil{t.Fatal(e)}
+  chunks:=source.MemoryChunks{};metadata:=[]types.ChunkMeta{};for _,c:=range meta.Chunks{b,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,b);metadata=append(metadata,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})}
+  src,e:=source.Load(chunks,metadata);if e!=nil{t.Fatal(e)};f,e:=loadFilm(src);if e!=nil{rows=append(rows,map[string]any{"folder":folder,"error":true});continue};kf,e:=loadKillFeed(f);if e!=nil{rows=append(rows,map[string]any{"folder":folder,"error":true});continue}
+  table:=readFilmTable(f);m:=lireIndexParMotif(f,table.slots,kf);r:=buildRoster(kf,loadBotMeta(f),true,table,m);scan:=scanKillEvents(f);st:=kf.resoudreCouples(scan.recs,r);cs:=scanFilm(f,r.nPlay);perm,score:=solveBijection(r,kf.pairs,cs,40);r.perm=perm;margin:=bijectionMargin(r,kf.pairs,cs,score)
+  recs:=[]any{};for _,c:=range cs{recs=append(recs,map[string]any{"time_ms":c.ms,"packet":map[string]int{"chunk":c.chunk,"packet":c.pidx},"bit":c.bit,"tag":c.tag,"victim":c.victim,"killer":c.killer,"category":c.cat})}
+  events:=[]any{};for _,r:=range scan.recs{f:=r.fields;events=append(events,map[string]any{"time_ms":r.ms,"packet":map[string]int{"chunk":r.chunk,"packet":r.pidx},"bit":r.bit,"chain":r.chain,"fields":map[string]any{"killer":f.killer,"victim":f.victim,"assist":f.assist,"killer_pct":f.killerPct,"assist_pct":f.assistPct,"flag":f.flag,"end":f.end}})}
+  stats:=map[string]any{"same_instant":st.MemeInstant,"read":st.Lus,"neighboring_fallback":st.Recolles,"lost":st.Perdus,"bot_victims_read":st.VictimesBotLues,"silent":st.Muet,"ambiguous":st.Ambigu,"agree":st.Accord,"contradict":st.Contradiction}
+  rows=append(rows,map[string]any{"folder":folder,"error":false,"table":map[string]any{"seats":table.Seats,"build":table.Build,"occupied":table.Occupied,"vacant":table.Vacant,"interleaved_vacant":table.InterleavedVacant,"refusal":table.Refusal},"motif":map[string]any{"names":m.nomParIndex,"readings":m.lectures,"disagreements":m.desaccords,"absent":m.absents},"roster_names":r.names,"pins":r.pin,"permutation":perm,"score":score,"margin":margin,"candidates":recs,"events":events,"gate":scan.gate15,"packets_with_events":scan.packetsWithEvents,"packets_with_kill":scan.packetsWithKill,"feed_events":evs(kf.events),"pairs":evs(kf.pairs),"stats":stats})
+  t.Logf("%s: events=%d candidates=%d pairs=%d score=%d margin=%d",folder,len(events),len(cs),len(kf.pairs),score,margin)
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-film-evidence.json",b,0600);e!=nil{t.Fatal(e)}
+}

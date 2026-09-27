@@ -1,0 +1,45 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded-source position scans to native facts DTOs",
+  "generator": "halo_rust_record_mask_hook_test.go.txt",
+  "fixture": {
+    "path": "record-mask-hook-v41.json.zlib",
+    "sha256": "1619e40b17674c9cc92c1756755cfa89e8cab699625cc06dfc4000b13ba89334"
+  },
+  "configurations": 256,
+  "quantized_observations": 19484,
+  "world_observations": 16914,
+  "positive_world_branches": {
+    "forward": 2262,
+    "velocity": 612,
+    "primary_aim": 6678,
+    "secondary_aim": 4044,
+    "roll": 422,
+    "default_direction": 188,
+    "body": 1738,
+    "shield": 1738
+  },
+  "comparison": "All destination DTO fields in native scan order; additional cache omission checks",
+  "host": {
+    "status": "passed",
+    "tests_passed": 1,
+    "log": "/private/tmp/halo-scanned-positions-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Selected native_scanned_positions prefix, not full suite",
+    "log": "/private/tmp/halo-scanned-positions-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-scanned-positions-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Source-to-facts position projection only; full fresh scanner entry remains open",
+    "Native cache omits source boundaries, full vitality flags, MaskBits and quanta-only coordinates",
+    "Controlled source payloads, not independently annotated gameplay films"
+  ]
+}

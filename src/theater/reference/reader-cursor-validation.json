@@ -1,0 +1,51 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "change": "NativeFilmReader delegates direct cursor operations to NativeFilmBits; full u64 width API and signed cursor accessors. Component/frame address-domain restrictions remain.",
+  "native_oracle": {
+    "test": "TestHaloRustReaderCursor",
+    "fixture": "reader-cursor-v41.json.zlib",
+    "cases": 78,
+    "panic_cases": 50,
+    "recovery_reads": 78
+  },
+  "host_sequences": {
+    "sequences": 1512,
+    "operations": 13608
+  },
+  "validation": {
+    "theater_passed": 587,
+    "theater_failed": 0,
+    "theater_ignored": 49,
+    "theater_seconds": 75.79,
+    "clippy": "passed",
+    "clippy_seconds": 14.1,
+    "format": "passed",
+    "reference_hashes": 485,
+    "wasm": {
+      "status": "passed",
+      "new_sequence_prefix_operations": 4896,
+      "new_overflow_cases": 28,
+      "panic_recovery": "Not exercised on wasm32 because panic=abort.",
+      "existing_harness": "Existing frame/context/width and supplemental kill controls also passed."
+    },
+    "captured_march": {
+      "status": "passed",
+      "films": [
+        "maps/01-bazaar-idle",
+        "maps/02-aquarius",
+        "bandit/01-evo",
+        "ranked-arena/02-oddball"
+      ],
+      "seconds": 1896.42,
+      "profile": "debug",
+      "log": "/private/tmp/halo-reader-cursor-captured.log",
+      "scope": "Earlier signed-reader binary; predates the final unbound-Delta baseline correction. Current-code release regression tracked separately."
+    }
+  },
+  "limits": [
+    "Component/frame starting positions still require usize.",
+    "Internal traversal width adjustments still refuse negative/overflow endpoints.",
+    "Large successful reads above u32 use the proven low-64-bit rule; native billion-iteration successful loops are not included in the new fixture.",
+    "Full parity and the deferred architecture remain incomplete."
+  ]
+}

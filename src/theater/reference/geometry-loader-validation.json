@@ -1,0 +1,42 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_loader",
+  "native": {
+    "float_cases": 2009,
+    "csv_cases": 658,
+    "load_cases": 4046,
+    "seconds": 1.428,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-geometry-loader-native.log"
+  },
+  "focused": {
+    "passed": 4,
+    "failed": 0,
+    "seconds": 2.5,
+    "log": "/private/tmp/halo-geometry-loader-final-focused.log"
+  },
+  "suite": {
+    "passed": 634,
+    "failed": 0,
+    "ignored": 49,
+    "seconds": 102.86,
+    "log": "/private/tmp/halo-geometry-loader-suite.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 49.91,
+    "log": "/private/tmp/halo-geometry-loader-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 57.11,
+    "public_in_memory_load_cases": 4042,
+    "log": "/private/tmp/halo-geometry-loader-wasm.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "format_diff_scripts": "passed",
+  "scope": "Native external geometry ingestion port. All-data film parity remains incomplete. Existing captured marches/documents were not repeated for the additive loader. Deferred architecture unchanged. A subsequent distance audit found a separate planar arithmetic mismatch; this artifact validates the loader checkpoint, not a correction to distance callers."
+}

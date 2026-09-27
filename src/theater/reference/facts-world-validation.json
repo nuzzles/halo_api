@@ -1,0 +1,43 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_creation_stats_and_composed_world_cache",
+  "native": {
+    "source_scans": 64,
+    "cases": 18945,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-facts-world-native.log"
+  },
+  "focused": {
+    "passed": 6,
+    "failed": 0,
+    "seconds": 4.32,
+    "log": "/private/tmp/halo-facts-world-focused.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 27.8,
+    "log": "/private/tmp/halo-facts-world-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 27.11,
+    "log": "/private/tmp/halo-facts-world-wasm.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "host_suite_baseline": {
+    "passed": 646,
+    "ignored": 49,
+    "note": "Earlier full suite; facts-cache additions have no existing film-parser callers. Focused host and actual WASM include all six cache tests."
+  },
+  "format_diff_scripts": "passed",
+  "remaining": "Position shared section,other channel codecs,full cache containers/version checks and assembly integration. Full v41 parity incomplete; architecture deferred.",
+  "sha256": {
+    "facts_creations.rs": "550352bd09699da687cc82afa03307f914837a297db41231ea161658035cf6f4",
+    "facts_world.rs": "3519d769adccd426c228fc6051c7f0fb7d946ef82bd55717484ce34795c0bf42",
+    "facts_creations_tests.rs": "1ede4fcb788c858760c134a0fed188b5ef77f7723633724956b6f0cce9b0e348",
+    "fixtures/facts-world-v41.json.zlib": "bde14d4bd8f8f75a8ba6f5df1013b842f4fb31f94efa0c45d70f82d12c7e1952"
+  }
+}

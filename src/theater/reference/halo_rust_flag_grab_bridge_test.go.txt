@@ -1,0 +1,13 @@
+package replay
+import("testing";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustFlagGrabBridge(t *testing.T){
+ rows:=[]any{}
+ for i:=0;i<512;i++ {
+  carries:=[]any{};for j:=0;j<i%7;j++{spans:=[]any{};for k:=0;k<i%11;k++{var x any;if k%3==0{x=""}else if k%3==1{x="player"};spans=append(spans,map[string]any{"state":[]string{"home","carried","carried_open","dropped"}[k%4],"t0":k*31-20,"t1":k*31+5,"xuid":x})};carries=append(carries,map[string]any{"team":j-2,"spans":spans})}
+  input:=map[string]any{"frameIntervalMs":[]int{0,-1,100,9223372036854775807}[i%4],"flagCarries":carries}
+  if i%5!=0 {coverage:=map[string]any{};if i%7!=0{coverage["flagCarries"]=map[string]any{"flagFilm":i%3!=0,"openings":i}};input["coverage"]=coverage}
+  raw,_:=json.Marshal(input);var doc ReplayDocument;if e:=json.Unmarshal(raw,&doc);e!=nil{t.Fatal(e)};tracks,openings,ok:=FlagTracksOf(&doc);if tracks==nil{tracks=[]types.FlagTrack{}}
+  rows=append(rows,map[string]any{"doc":doc,"tracks":tracks,"openings":openings,"ok":ok})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-flag-grab-bridge.json",b,0600);e!=nil{t.Fatal(e)}
+}

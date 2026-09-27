@@ -1,0 +1,10 @@
+package replay
+import("testing";"encoding/json";"os";"sort";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/replay/mapvar")
+func TestHaloRustMapWeaponPads(t *testing.T){
+ type Row struct{ Entry MapWeaponPadsEntry `json:"entry"`; Pads [][3]float32 `json:"pads"`; Output *MapWeaponPads `json:"output"` }
+ rows:=[]Row{};add:=func(e MapWeaponPadsEntry,p [][3]float32){if e.Pads==nil{e.Pads=[]MapWeaponPadSpot{}};if p==nil{p=[][3]float32{}};pads:=[]WeaponPad{};for _,v:=range p{pads=append(pads,WeaponPad{X:v[0],Y:v[1],Z:v[2]})};rows=append(rows,Row{e,p,BuildMapWeaponPads(e,pads)})}
+ c,e:=LoadMapWeaponPads("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_weapon_pads.json");if e!=nil{t.Fatal(e)};ids:=[]string{};for id:=range c.Maps{ids=append(ids,id)};sort.Strings(ids)
+ for _,id:=range ids {e:=c.Maps[id];for _,offset:=range []float32{0,0.5,1,2}{p:=[][3]float32{};for _,s:=range e.Pads{p=append(p,[3]float32{float32(s.Pos.X)+offset,float32(s.Pos.Y),float32(s.Pos.Z)})};add(e,p)}}
+ rng:=rand.New(rand.NewSource(410069));for n:=0;n<1024;n++{e:=MapWeaponPadsEntry{};p:=[][3]float32{};for j:=0;j<n%19;j++{s:=MapWeaponPadSpot{Pos:mapvar.Vec3{X:float64(rng.Intn(15))/4,Y:float64(rng.Intn(5))/4,Z:float64(rng.Intn(3))/4},Family:[]string{"rack","power","powerup"}[j%3]};e.Pads=append(e.Pads,s)};for j:=0;j<n%23;j++{p=append(p,[3]float32{float32(rng.Intn(15))/4,float32(rng.Intn(5))/4,float32(rng.Intn(3))/4})};add(e,p)}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-map-weapon-pads.json",b,0600);e!=nil{t.Fatal(e)}
+}

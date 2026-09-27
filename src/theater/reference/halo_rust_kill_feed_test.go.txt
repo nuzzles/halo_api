@@ -1,0 +1,10 @@
+package killsource
+import("testing";"encoding/json";"os";"math/rand";"levelup/go-api/internal/domain/highlightevent")
+func TestHaloRustKillFeed(t *testing.T){
+ rng:=rand.New(rand.NewSource(2341));rows:=[]any{}
+ for i:=0;i<512;i++ {evs:=[]highlightevent.HighlightEvent{};for j:=0;j<i%75;j++ {evs=append(evs,highlightevent.HighlightEvent{XUID:uint64(2000000000000000+rng.Intn(8)),Gamertag:[]string{"","A","B","Z","é","Player"}[rng.Intn(6)],TimeMS:rng.Intn(10)*1000,EventType:[]string{"kill","death","medal","mode"}[rng.Intn(4)]})}
+  k:=buildFeed(evs);events:=[]any{};for _,e:=range k.events{events=append(events,map[string]any{"time_ms":e.timeMS,"killer":e.killer,"victim":e.victim,"victim_xuid":e.victimXUID,"packet":nil})}
+  rows=append(rows,map[string]any{"highlights":evs,"expected":map[string]any{"events":events,"names":rosterNames(k.events),"xuid_by_name":k.xuidDe,"kill_count":k.nKills,"death_count":k.nDeaths}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-feed.json",b,0600);e!=nil{t.Fatal(e)}
+}

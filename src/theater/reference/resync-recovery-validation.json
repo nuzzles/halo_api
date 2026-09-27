@@ -1,0 +1,46 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "change": "Expose NativeSharedWidths::remove for external callbacks; validate existing raw-resync reread and loop-guard behavior without altering traversal logic.",
+  "mutation_cases": {
+    "total": 16,
+    "failed_rereads_retained": 8,
+    "clean_controls": 8,
+    "coverage": "Calibrated/stub maps, retained/deleted override, optional record prefix, distinct payload values."
+  },
+  "guard_cases": {
+    "total": 6,
+    "requested_records": [
+      4095,
+      4096,
+      4097
+    ],
+    "with_and_without_record_prefix": true,
+    "ordered_returned_records_compared": 24574
+  },
+  "validation": {
+    "focused_resync_tests_passed": 3,
+    "focused_seconds": 0.25,
+    "wasm": "Passed both new comparisons and all previous harness controls.",
+    "clippy": "passed",
+    "clippy_seconds": 9.34,
+    "format": "passed",
+    "diff_check": "passed",
+    "reference_hashes": 485,
+    "native_fixture_equality": true,
+    "full_suite": "Last full baseline 589 passed/49 ignored before these two additive tests; not rerun because traversal logic is unchanged."
+  },
+  "captured_march": {
+    "status": "passed",
+    "films": [
+      "maps/01-bazaar-idle",
+      "maps/02-aquarius",
+      "bandit/01-evo",
+      "ranked-arena/02-oddball"
+    ],
+    "seconds": 1896.42,
+    "profile": "debug",
+    "log": "/private/tmp/halo-reader-cursor-captured.log",
+    "scope": "Earlier signed-reader binary; predates the final unbound-Delta baseline correction. Current-code release regression tracked separately."
+  },
+  "remaining": "Final-loop cursor is now independently checked by resync-cursor-validation.json. Arbitrary mutation and broader cursor/source/corpus parity gates remain open. Architecture stays deferred."
+}

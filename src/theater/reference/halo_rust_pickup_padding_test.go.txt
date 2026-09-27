@@ -1,0 +1,73 @@
+package grammar
+
+import (
+ "encoding/binary"
+ "encoding/hex"
+ "encoding/json"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+ "os"
+ "reflect"
+ "testing"
+)
+
+// The production decoder supplies acceptance, values and counters. The second
+// walk measures its logical endpoint using the same native reference readers.
+func TestHaloRustPickupPadding(t *testing.T) {
+ rows := []any{}
+ payloads := [][]byte{}
+ for i:=0;i<256;i++ {
+  for n:=0;n<=12;n++ {
+   pay:=[]byte{0xc4,byte(i),byte(i*7),byte(i*13),byte(i*23),byte(i*37),byte(i*53),byte(i*71),byte(i*79),byte(i*83),byte(i*89),byte(i*97)}[:n]
+   if i%7==0 && n>0 {pay[0]=0x44}
+   if i%11==0 && n>0 {pay[0]=byte(i)}
+   var st types.BipedPickupStats
+   ev,ok:=decodeBipedPickup(pay,&st)
+   br:=LecteurSur(pay); h:=readPacketHead(br)
+   if h.More && h.Type==9 {
+    if _,present:=bipedPickupReadRef(br,8);present {
+     bipedPickupReadRef(br,13);bipedPickupReadRef(br,13);br.ReadBits(3)
+     if br.ReadBit() {br.ReadBits(32);br.ReadBit()}
+    }
+   }
+   rows=append(rows,map[string]any{"hex":hex.EncodeToString(pay),"event":ev,"ok":ok,"stats":st,"end":br.BitPos()})
+   if n>0 {payloads=append(payloads,pay)}
+  }
+ }
+ sources:=[]any{}
+ packet:=func(kind uint16, ts uint64,pay []byte) []byte {
+  p:=make([]byte,16);binary.LittleEndian.PutUint16(p,kind);binary.LittleEndian.PutUint32(p[4:],uint32(len(pay)));binary.LittleEndian.PutUint64(p[8:],ts);return append(p,pay...)
+ }
+ for mode:=0;mode<3;mode++ {
+  data:=[]byte{}
+  if mode==1 {
+   var key bitWriter;key.bits(0,1)
+   for _,slot:=range []uint64{520,523} {key.bits((1<<30)|slot,32);key.bits(35,32);key.bits(0,44);key.bits(0,32);key.bits(0,32);key.bits(0,64)}
+   data=append(data,packet(2,99,key.buf)...)
+  }
+  for i,pay:=range payloads {kind:=uint16(0);if i%5==0 {kind=6};data=append(data,packet(kind,uint64(i%7),pay)...)}
+  index:=1;if mode==2 {index=2}
+  film,err:=source.Load(source.MemoryChunks{data},[]types.ChunkMeta{{Index:index}});if err!=nil {t.Fatal(err)}
+  fc:=NewFilmContext(film)
+  expected,stats,scanErr:=ScanBipedPickups(fc)
+  var st types.BipedPickupStats
+  var projected []types.BipedPickup
+  attempts:=[]any{}
+  for _,c:=range fc.ChunkNumbers() {
+   d,pks,_:=fc.ChunkAt(c)
+   for pi,pk:=range pks {
+    if pk.Type!=0 || pk.Size<2 {continue};pay:=pk.Payload(d);if pay[0]!=0xc4 {continue}
+    st.Packets++;ev,ok:=decodeBipedPickup(pay,&st)
+    published:=ok
+    if ok && fc.BipedSlots().Count()>0 && !fc.BipedSlots().Has(ev.Slot) {published=false;st.RefusedOffBand++}
+    if published {ev.TimestampUS=pk.TimestampUS;ev.Chunk=c;projected=append(projected,ev);st.Published++}
+    attempts=append(attempts,map[string]any{"packet":pi,"start":pk.Start,"size":pk.Size,"time":pk.TimestampUS,"published":published})
+   }
+  }
+  if !reflect.DeepEqual(expected,projected) || stats!=st {t.Fatal("wrapper differs")}
+  if mode==1 && stats.RefusedOffBand==0 {t.Fatal("missing band refusals")}
+  sources=append(sources,map[string]any{"hex":hex.EncodeToString(data),"index":index,"stats":stats,"attempts":attempts,"no_chunks":scanErr==ErrNoFilmChunk})
+ }
+ raw,err:=json.Marshal(map[string]any{"rows":rows,"sources":sources});if err!=nil {t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-pickup-padding.json",raw,0600);err!=nil {t.Fatal(err)}
+}

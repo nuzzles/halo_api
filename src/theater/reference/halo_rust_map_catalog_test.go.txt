@@ -1,0 +1,99 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestHaloRustMapCatalog(t *testing.T) {
+	inputs := []string{
+		`{"schemaVersion":1,"maps":{"a":{"min":[1e40],"min":[0]}}}`,
+		`{"schemaVersion":1,"source":"\ud800"}`,
+		`{"schemaVersion":1,"source":"\udc00"}`,
+		`{"schemaVersion":1,"source":"\ud800\udc00"}`,
+		`{"schemaVersion":1,"source":"literal \\ud800"}`,
+		"{\"schemaVersion\":1,\"source\":\"" + string([]byte{0xff, 0xfe}) + "\"}",
+
+		`null`, `{}`, `[]`, `true`, ``, `{"schemaVersion":0}`, `{"schemaVersion":-1}`, `{"schemaVersion":2}`, `{"schemaVersion":1.0}`, `{"schemaVersion":1e0}`,
+		`{"schemaVersion":1}`, `{"schemaVersion":1,"maps":null}`, `{"schemaVersion":1,"maps":{}}`,
+		`{"SCHEMAVERSION":1,"ſOURCE":"unicode field","MAPS":{"a":null}}`,
+		`{"schemaVersion":1,"source":"first","source":null,"maps":{"a":{"module":"x","module":null,"min":[1,2,3],"min":[null,4],"max":[1,2,3,{},null],"axisWidths":[13,12,11]}}}`,
+		`{"schemaVersion":1,"maps":{"a":{"module":"old"}},"maps":{"b":{},"a":{"region":1}}}`,
+		`{"schemaVersion":1,"maps":{"a":{}},"maps":null,"maps":{"b":{}}}`,
+		`{"schemaVersion":1,"maps":{"a":{"module":"old"},"a":null}}`,
+		`{"schemaVersion":1,"maps":{"a":{"min":[1,2,3],"min":null,"max":[1,2,3],"max":[],"axisWidths":[1,null,3]}}}`,
+		`{"schemaVersion":1,"maps":{"live fire":{"module":"fixture","min":[-1.25],"max":[1e-40,2,3],"axisWidths":[26,13,12],"region":1,"regionIndexBits":2}}}`,
+		`{"schemaVersion":1,"maps":{"a":{"axisWidths":[18446744073709551615,4294967296,26],"regionIndexBits":18446744073709551615,"region":4294967295}}}`,
+		`{"schemaVersion":1,"ignored":1e999}`, `{"schemaVersion":1} {}`,
+	}
+	for _, field := range []string{"module", "min", "max", "axisWidths", "region", "regionIndexBits"} {
+		for _, value := range []string{`true`, `"bad"`, `-1`, `1.0`, `[1e40]`, `[1,2]`, `null`} {
+			inputs = append(inputs, `{"schemaVersion":1,"maps":{"a":{"`+field+`":`+value+`}}}`)
+		}
+	}
+	for b := 0; b < 256; b++ {
+		inputs = append(inputs, "{\"schemaVersion\":1,\"source\":\""+string([]byte{byte(b)})+"\"}")
+	}
+	inputs = append(inputs, "{\"schemaVersion\":1,\"source\":\""+string([]byte{0xf0, 0x90})+"\"}")
+	rows := []any{}
+	for _, input := range inputs {
+		path := filepath.Join(t.TempDir(), "catalog.json")
+		if err := os.WriteFile(path, []byte(input), 0600); err != nil {
+			t.Fatal(err)
+		}
+		c, err := profile.LoadMapQuantCatalog(path)
+		category := ""
+		if err != nil {
+			category = "json"
+			if strings.Contains(err.Error(), "en version") {
+				category = "schema"
+			}
+		}
+		lookups := []any{}
+		if c != nil {
+			for _, name := range []string{"a", "b", " LIVE Fire - RANKED ", "absent"} {
+				e, err := c.Lookup(name)
+				lookups = append(lookups, map[string]any{"name": name, "found": err == nil, "entry": e})
+			}
+		}
+		contextLookups := []any{}
+		for _, present := range []bool{false, true} {
+			receiver := c
+			if !present {
+				receiver = nil
+			}
+			for _, name := range []string{"a", "b", " LIVE Fire - RANKED ", "absent", ""} {
+				entry, lookupErr := receiver.Lookup(name)
+				contextLookups = append(contextLookups, map[string]any{
+					"present": present, "name": name, "entry": entry,
+					"found":          lookupErr == nil,
+					"unknown_bounds": errors.Is(lookupErr, profile.ErrUnknownMapBounds),
+					"bare_sentinel":  lookupErr == profile.ErrUnknownMapBounds,
+				})
+				// Lookup returns an independent entry, including array fields.
+				if lookupErr == nil {
+					entry.Module += "changed"
+					entry.Min[0] = 123
+					again, e := receiver.Lookup(name)
+					if e != nil || again == entry {
+						t.Fatal("lookup aliases catalog")
+					}
+				}
+			}
+		}
+		rows = append(rows, map[string]any{"input": input, "hex": hex.EncodeToString([]byte(input)), "category": category, "catalog": c, "lookups": lookups, "context_lookups": contextLookups})
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-map-catalog.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

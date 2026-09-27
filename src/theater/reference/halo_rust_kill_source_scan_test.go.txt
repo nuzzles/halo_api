@@ -1,0 +1,19 @@
+package killsource
+import("testing";"encoding/json";"encoding/hex";"os";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/damagetag")
+func TestHaloRustKillSourceScan(t *testing.T){
+ ids:=damagetag.IDs();tags:=append(append([]uint32{},ids...),0,0xffff,0x10000,0xffffffff);labels:=[]any{}
+ for _,tag:=range tags {for cat:=-2;cat<=11;cat++ {s:=sourceTruthOf(tag,cat);labels=append(labels,map[string]any{"truth":map[string]any{"tag":s.Tag,"display":s.Display,"named":s.Named,"class":s.Class,"status":s.Status,"detail":s.Detail,"reserve":s.Reserve,"category":cat},"category_name":Category(cat).Name(),"strong":damagetag.Strong(tag),"catalogued":isCatalogued(tag)})}}
+ candidates:=func(cs []candidate,packet bool)[]any{out:=[]any{};for _,c:=range cs {var p any;if packet {p=map[string]int{"chunk":c.chunk,"packet":c.pidx}};out=append(out,map[string]any{"packet":p,"time_ms":c.ms,"bit":c.bit,"tag":c.tag,"victim":c.victim,"killer":c.killer,"category":c.cat})};return out}
+ rng:=rand.New(rand.NewSource(999));rows:=[]any{};all:=[]candidate{}
+ for i:=0;i<2048;i++ {
+  data:=make([]byte,i%96);rng.Read(data);n:=[]int{0,1,4,8,32,64}[i%6]
+  if len(data)>=9 {p:=i%8;write:=func(at,w int,v uint64){for j:=0;j<w;j++ {bit:=byte((v>>uint(w-j-1))&1);atj:=at+j;data[atj/8]=(data[atj/8]&^(1<<uint(7-atj%8)))|(bit<<uint(7-atj%8))}}
+   write(p,2,3);write(p+2,32,uint64(tags[i%len(tags)]));write(p+42,1,uint64(i%7/6));write(p+43,5,uint64(i%32));write(p+48,1,uint64(i%11/10));write(p+49,5,uint64((i+1)%32));write(p+54,4,uint64(i%16))
+  }
+  strict:=scanPayload(data,n);relaxed:=scanRelaxedPayload(data,n)
+  rows=append(rows,map[string]any{"data":hex.EncodeToString(data),"participants":n,"strict":candidates(strict,false),"relaxed":candidates(relaxed,false)})
+  for j,c:=range relaxed {c.chunk=i%3;c.pidx=i%9;c.ms=i*100;c.bit=int(j%4);all=append(all,c,c)}
+ }
+ mult:=multiplicity(all);keys:=[]multKey{};for k:=range mult{keys=append(keys,k)};sort.Slice(keys,func(i,j int)bool{a,b:=keys[i],keys[j];if a.bit!=b.bit{return a.bit<b.bit};if a.tag!=b.tag{return a.tag<b.tag};return a.victim<b.victim});counts:=[]any{};for _,k:=range keys {counts=append(counts,map[string]any{"bit":k.bit,"tag":k.tag,"victim":k.victim,"count":mult[k]})}
+ source:=damagetag.Source();b,e:=json.Marshal(map[string]any{"rows":rows,"labels":labels,"ids":ids,"provenance":map[string]any{"ids_date":source.IDsDate,"ids_count":source.IDsCount,"labels_date":source.LabelsDate,"label_count":source.LabelCount},"candidates":candidates(all,true),"dedup":candidates(dedup(all),true),"multiplicity":counts});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-source-scan.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,70 @@
+package grammar
+
+// This observer records the production callbacks, not reconstructed component fields.
+func haloRustComponentHooks(o *Observation) *[]any {
+ out:=[]any{}
+ push:=func(kind string,fields map[string]any){fields["kind"]=kind;out=append(out,fields)}
+ o.UnitRefHook=func(r UnitRefRead){k:="VariableWidth";if r.Kind==1{k="GatedWord32"};if r.Kind==2{k="Word32"};push("unit_reference",map[string]any{"reference":map[string]any{"kind":k,"start_bit":r.StartBit,"end_bit":r.EndBit,"present":r.Present,"value":r.Val,"tail":r.Tail,"probe":r.Probe}})}
+ o.MppHook=func(f MPPField,v uint64,p bool){push("mpp",map[string]any{"field":f.String(),"value":v,"present":p})}
+ o.EquipmentCreationHook=func(f EquipmentCreationField,v uint64,p bool){push("equipment_creation",map[string]any{"field":f.String(),"value":v,"present":p})}
+ o.EquipmentStateHook=func(f EquipmentField,v uint64,p bool){push("equipment_state",map[string]any{"field":f.String(),"value":v,"present":p})}
+ o.ProbeHook=func(ti uint32,c ProbeComponent,v []uint64){push("probe",map[string]any{"archetype":ti,"component":c.String(),"values":v})}
+ o.PlayerStateHook=func(f PlayerStateField,v []uint64,p bool){if v==nil{v=[]uint64{}};push("player_state",map[string]any{"field":f.String(),"values":v,"present":p})}
+ o.GameEngineHook=func(f GameEngineField,v []uint64,p bool){if v==nil{v=[]uint64{}};push("game_engine",map[string]any{"field":f.String(),"values":v,"present":p})}
+ o.ManagedObjectHook=func(f ManagedObjectField,v []uint64){push("managed_object",map[string]any{"field":f.String(),"values":v})}
+ o.NavpointHook=func(f NavpointField,v []uint64){push("navpoint",map[string]any{"field":f.String(),"values":v})}
+ o.ObjectiveHook=func(f ObjectiveField,v []uint64){push("objective",map[string]any{"field":f.String(),"values":v})}
+ o.ManagedPropertyHook=func(f ManagedPropertyField,v []uint64){push("managed_property",map[string]any{"field":f.String(),"values":v})}
+ opt:=func(present bool,value any)any{if present{return value};return nil}
+ o.HeldWeaponHook=func(high,low uint32){push("held_weapon",map[string]any{"id_high":high,"id_low":low})}
+ o.UnitEquipmentHook=func(s UnitEquipmentRead){entries:=[]any{};for _,e:=range s.Entries{entries=append(entries,map[string]any{"value":e.Val,"tail":e.Tail,"present":e.Present})};push("unit_equipment",map[string]any{"state":map[string]any{"head":s.Head,"entries":entries}})}
+ o.ObjectParentStateHook=func(s ObjectParentState){push("object_parent",map[string]any{"state":map[string]any{
+  "archetype":s.TypeIndex,"parameter":s.Param,"start_bit":s.StartBit,"end_bit":s.EndBit,"attached":s.Attached,
+  "quantized_word":s.Quant16,"word":s.Word16,"optional_word":opt(s.HasOpt16,s.Opt16),"flags":[2]bool{s.FlagA,s.FlagB},"matrix":s.Mtx,
+  "velocity":opt(s.HasVel,s.Vel),"byte":s.Byte8,"flag_c":s.FlagC,"free_read":s.FreeRead,"free_bits":s.FreeBits,"free_id":opt(s.HasFreeID,s.FreeID),"alternate":opt(s.HasAlt11,s.Alt11),
+  "tail_sign":s.TailSign,"tail6":opt(s.HasTail6,s.Tail6),"tail_bit":s.TailBit,"tail3":opt(s.HasTail3,s.Tail3)}})}
+ o.CamoStateHook=func(s CamoState){
+  var flag1,frac any;if s.Flag1Read{flag1=s.Flag1};if s.HasFrac{frac=s.FracQ}
+  sub:=[6]any{};for i:=range sub{if s.SubPresent[i]{sub[i]=s.SubQ[i]}}
+  push("camo_state",map[string]any{"state":map[string]any{"state":s.C3,"flag0":s.Flag0,"flag1":flag1,"fraction":frac,"sub":sub}})
+ }
+ o.SpartanAbilityHook=func(tag,sub,ref uint64,has bool){push("spartan_ability",map[string]any{"tag":tag,"sub":sub,"reference":ref,"has_reference":has})}
+ o.AbilityNonPredictedHook=func(s AbilityNonPredictedState){
+  var inner,r8 any;if s.Inner>=0{inner=s.Inner};if s.HasR8{r8=s.R8}
+  vec:=[3]any{};for i,v:=range s.Vec{if v.Present{vec[i]=[2]uint32{v.DirQ,v.MagQ}}}
+  push("ability_non_predicted",map[string]any{"state":map[string]any{"tag":s.Tag,"body_walked":s.BodyWalked,"body_ok":s.BodyOK,"inner":inner,"flags":s.Zero3,"position":s.PosQ,"mid":s.Mid7,"value8":r8,"vectors":vec,"packed":s.Packed24,"tail":s.Tail9}})
+ }
+ o.AbilityEnergyHook=func(mask uint32,ch [3]int){push("ability_energy",map[string]any{"mask":mask,"charges":ch})}
+ o.GrenadeSetHook=func(mask uint32,sel int){push("grenade_set",map[string]any{"mask":mask,"selection":sel})}
+ o.AbilitySetHook=func(counter uint64,rank,width int){push("ability_set",map[string]any{"counter":counter,"rank":rank,"width":width})}
+ o.EmpTimerHook=func(q uint32){push("emp_timer",map[string]any{"quantum":q})}
+ o.GrenadeCountsHook=func(count uint64,values []uint64){if values==nil{values=[]uint64{}};push("grenade_counts",map[string]any{"count":count,"values":values})}
+ o.WeaponAmmoHook=func(hm bool,m uint32,hf bool,f uint32){var mag,frac any;if hm{mag=m};if hf{frac=f};push("weapon_ammo",map[string]any{"magazine":mag,"fraction":frac})}
+ o.WeaponRoundsHook=func(r uint32){push("weapon_rounds",map[string]any{"rounds":r})}
+ o.DesiredWeaponSetHook=func(s uint32){push("desired_weapon_set",map[string]any{"selection":s})}
+ o.GroundWeaponAmmoHook=func(a,b,c uint32){push("ground_weapon_ammo",map[string]any{"a":a,"b":b,"c":c})}
+ return &out
+}
+var haloRustHookNames=[]string{"biped-spartan-ability-energy-component","biped-desired-grenade-set-component","biped-desired-ability-set-component","biped-emp-timer-component","unit-grenade-counts-component","weapon-state-ammo","weapon-state-rounds-inventory","biped-desired-weapon-set","weapon-ammo-component"}
+var haloRustAbilityHookNames=[]string{"unit-active-camo-state-component","biped-spartan-ability-component","biped-spartan-ability-non-predicted-state-component"}
+var haloRustObjectHookNames=[]string{"weapon-state-type-info","object-parent-state-component","unit-equipment-component"}
+var haloRustManagedHookNames=[]string{
+ "managed-object-boundary-visibility-component","managed-object-boundary-color-component","managed-object-rtpc-component",
+ "managed-navpoint-radial-progress","managed-navpoint-manual-timer-initial-duration-component","managed-navpoint-manual-timer-current-duration-component",
+ "managed-objective-timers-component","managed-objective-object-reference-component","managed-objective-type-component","managed-objective-progress-component","managed-objective-required-progress-component","managed-objective-state-component",
+ "managed-object-property-component","managed-object-player-masked-property-component",
+ // The navpoint timer reader delegates to the objective timer publisher.
+ "managed-navpoint-timers-component",
+ // These have raw data but do not publish through the four managed hooks.
+ // Property-name has a separate ProbeHook, tracked independently.
+ "managed-objective-color-component","managed-navpoint-sub-type-component","managed-object-property-name-component",
+ "managed-objective-parent-objective-component","managed-objective-sub-objective-entities-component","managed-objective-enabled-component","managed-objective-priority-component",
+}
+
+var haloRustEngineHookNames=[]string{"game-engine-current-state-component","game-engine-current-round-component","game-engine-sudden-death-time-left-component","game-engine-grace-period-time-left-component","game-engine-round-condition-flags-component","game-engine-round-timer-component"}
+
+var haloRustPlayerHookNames=[]string{"player-soft-kill-timer-component","player-target-tracking-detection-component","player-desired-respawn-player-component","player-engine-loadout-component","player-desired-respawn-location-component","player-lives-remaining-component","player-last-betrayer-component","player-control-aiming-component","player-active-in-game-component","player-pending-join-in-progress-spawn-component","player-malleable-properties-simulation-component","player-respawn-timer-component","player-fade-properties-component","player-allowed-to-quit-component"}
+
+var haloRustProbeHookNames=[]string{"managed-object-networked-splash-message-static-component","managed-object-networked-splash-message-dynamic-component","high-frequency","managed-object-property-name-component","branch-script-results-component"}
+
+var haloRustEquipmentHookNames=[]string{"equipment-deployed-component","equipment-activated-component","equipment-creator-component","equipment-energy-component","equipment-energy-delay-ticks-left-component","equipment-charges-remaining-component","equipment-has-infinite-uses-component"}

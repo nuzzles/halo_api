@@ -1,0 +1,383 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "provenance": {
+    "keyframe-table-corpus-v41.json.zlib": "86a16e303d3596f807660b419861df876f440c41dcad54665e2db9b481d84b31",
+    "keyframe-anchor-bodies-v41.jsonl.zlib": "6f01c32627889efb8dc94b5ee144b0a1c8aef5fcfe98d4f3e467353a735b2125"
+  },
+  "interpretation": "Pinned Go reader outcomes, not full v41 grammar coverage. Candidate reads may overlap and are not canonical records. Complete means the reader returned without a desynchronization, not independently proven boundaries or fully interpreted fields.",
+  "sequential": {
+    "tables": 451,
+    "record_attempts": 902,
+    "terminal_components": {
+      "tacmap-mapdismissallock": 451
+    },
+    "unwalked_suffix_bits": 532470389
+  },
+  "candidates": {
+    "reads": 134657,
+    "complete": 95532,
+    "stopped": 39125,
+    "stopping_components": [
+      {
+        "name": "player-aim-assist-component",
+        "reason": "missing_reader",
+        "attempts": 14432,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 52,
+            "TI": 5,
+            "Gen": 1,
+            "Bit": 107753
+          },
+          "component_index": 22,
+          "component_start_bit": 108239,
+          "reader_end_bit": 108239
+        }
+      },
+      {
+        "name": "device-position-animation-name-component",
+        "reason": "missing_reader",
+        "attempts": 6713,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 181026,
+          "anchor": {
+            "Slot": 1334,
+            "TI": 43,
+            "Gen": 1,
+            "Bit": 291403
+          },
+          "component_index": 19,
+          "component_start_bit": 292648,
+          "reader_end_bit": 292648
+        }
+      },
+      {
+        "name": "managed-object-navpoint-component",
+        "reason": "missing_reader",
+        "attempts": 6338,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 1678,
+            "TI": 10,
+            "Gen": 1,
+            "Bit": 763962
+          },
+          "component_index": 2,
+          "component_start_bit": 764215,
+          "reader_end_bit": 764215
+        }
+      },
+      {
+        "name": "personal-ai-data-component",
+        "reason": "missing_reader",
+        "attempts": 4393,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 135618,
+          "anchor": {
+            "Slot": 1298,
+            "TI": 47,
+            "Gen": 1,
+            "Bit": 282979
+          },
+          "component_index": 2,
+          "component_start_bit": 283207,
+          "reader_end_bit": 283207
+        }
+      },
+      {
+        "name": "simulation-state-component",
+        "reason": "missing_reader",
+        "attempts": 1988,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 135618,
+          "anchor": {
+            "Slot": 512,
+            "TI": 35,
+            "Gen": 1,
+            "Bit": 182908
+          },
+          "component_index": 60,
+          "component_start_bit": 184704,
+          "reader_end_bit": 184919
+        }
+      },
+      {
+        "name": "managed-navpoint-top-progress",
+        "reason": "missing_reader",
+        "attempts": 848,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 1674,
+            "TI": 12,
+            "Gen": 1,
+            "Bit": 761838
+          },
+          "component_index": 13,
+          "component_start_bit": 762252,
+          "reader_end_bit": 762252
+        }
+      },
+      {
+        "name": "vehicle-auto-turret-triggers-component",
+        "reason": "missing_reader",
+        "attempts": 656,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 181026,
+          "anchor": {
+            "Slot": 768,
+            "TI": 40,
+            "Gen": 1,
+            "Bit": 209728
+          },
+          "component_index": 30,
+          "component_start_bit": 211227,
+          "reader_end_bit": 211227
+        }
+      },
+      {
+        "name": "game-engine-soft-ceilings-component",
+        "reason": "missing_reader",
+        "attempts": 460,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 2,
+            "TI": 2,
+            "Gen": 1,
+            "Bit": 4773
+          },
+          "component_index": 11,
+          "component_start_bit": 5266,
+          "reader_end_bit": 5266
+        }
+      },
+      {
+        "name": "sound-placement-state-data-component",
+        "reason": "missing_reader",
+        "attempts": 456,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 118,
+            "TI": 19,
+            "Gen": 1,
+            "Bit": 136878
+          },
+          "component_index": 0,
+          "component_start_bit": 137050,
+          "reader_end_bit": 137050
+        }
+      },
+      {
+        "name": "matchflow-sequence-data-component",
+        "reason": "missing_reader",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 122,
+            "TI": 45,
+            "Gen": 1,
+            "Bit": 139754
+          },
+          "component_index": 0,
+          "component_start_bit": 139926,
+          "reader_end_bit": 139926
+        }
+      },
+      {
+        "name": "powerframe-player-selection-data-component",
+        "reason": "missing_reader",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 119,
+            "TI": 25,
+            "Gen": 1,
+            "Bit": 137114
+          },
+          "component_index": 0,
+          "component_start_bit": 137286,
+          "reader_end_bit": 137286
+        }
+      },
+      {
+        "name": "supply-lines-blocked-status-component",
+        "reason": "missing_reader",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 120,
+            "TI": 26,
+            "Gen": 1,
+            "Bit": 137292
+          },
+          "component_index": 0,
+          "component_start_bit": 137464,
+          "reader_end_bit": 137464
+        }
+      },
+      {
+        "name": "supply-lines-item-unlocked-component",
+        "reason": "missing_reader",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 121,
+            "TI": 27,
+            "Gen": 1,
+            "Bit": 137534
+          },
+          "component_index": 0,
+          "component_start_bit": 137706,
+          "reader_end_bit": 137706
+        }
+      },
+      {
+        "name": "tacmap-mapdismissallock",
+        "reason": "missing_reader",
+        "attempts": 451,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-001-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 133641,
+          "anchor": {
+            "Slot": 1,
+            "TI": 34,
+            "Gen": 1,
+            "Bit": 206
+          },
+          "component_index": 10,
+          "component_start_bit": 2279,
+          "reader_end_bit": 2279
+        }
+      },
+      {
+        "name": "managed-objective-interaction-filter-component",
+        "reason": "missing_reader",
+        "attempts": 312,
+        "first_example": {
+          "file": "aim/01-pitch-up/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 135618,
+          "anchor": {
+            "Slot": 1377,
+            "TI": 11,
+            "Gen": 1,
+            "Bit": 348174
+          },
+          "component_index": 4,
+          "component_start_bit": 348461,
+          "reader_end_bit": 348461
+        }
+      },
+      {
+        "name": "biped-spartan-ability-non-predicted-state",
+        "reason": "missing_reader",
+        "attempts": 220,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 512,
+            "TI": 35,
+            "Gen": 1,
+            "Bit": 192210
+          },
+          "component_index": 59,
+          "component_start_bit": 194123,
+          "reader_end_bit": 194131
+        }
+      },
+      {
+        "name": "low-frequency",
+        "reason": "missing_reader",
+        "attempts": 32,
+        "first_example": {
+          "file": "appearance/01-cadet-blue/chunk-002-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 202914,
+          "anchor": {
+            "Slot": 134,
+            "TI": 3,
+            "Gen": 1,
+            "Bit": 145098
+          },
+          "component_index": 0,
+          "component_start_bit": 145297,
+          "reader_end_bit": 145297
+        }
+      },
+      {
+        "name": "effect-state-data-component",
+        "reason": "missing_reader",
+        "attempts": 22,
+        "first_example": {
+          "file": "raids/01-hour-long-raid/chunk-180-type-2.bin",
+          "packet": 1,
+          "payload_offset_byte": 343051,
+          "payload_size_byte": 155529,
+          "anchor": {
+            "Slot": 2054,
+            "TI": 18,
+            "Gen": 1,
+            "Bit": 237193
+          },
+          "component_index": 3,
+          "component_start_bit": 237502,
+          "reader_end_bit": 237504
+        }
+      }
+    ]
+  }
+}

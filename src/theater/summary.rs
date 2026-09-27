@@ -24,6 +24,15 @@ pub struct SummaryPacketDiagnostics {
     pub decoded_events: usize,
 }
 
+/// Footer coverage retained separately from the decoded event list.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SummaryDecodeDiagnostics {
+    /// Source packet order, including packets with no accepted events.
+    pub packets: Vec<SummaryPacketDiagnostics>,
+    /// Counts of unsupported packet types in footer chunks.
+    pub unparsed_packet_types: BTreeMap<u16, usize>,
+}
+
 /// Footer-only decode, independent of the bootstrap registry or motion decoder.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SummaryEventReport {
@@ -285,23 +294,15 @@ pub fn decode_summary_events(
             let payload = chunk.data.get(payload_byte..end).ok_or_else(bad)?;
             match kind {
                 9 => {
-                    let count = payload.get(..4).ok_or_else(bad)?;
-                    let declared_events = u32::from_be_bytes(count.try_into().unwrap());
-                    let before = report.events.len();
-                    let bits = Bits(payload);
-                    for (bit, word) in bits.windows() {
-                        if bit < 32 + 64 || !matches!(word >> 48, 0x2dc0 | 0x25c0) {
-                            continue;
-                        }
-                        if let Some(event) = read_event(bits, bit, id, payload_byte) {
-                            report.events.push(event);
-                        }
-                    }
+                    let (declared_events, events) =
+                        read_summary_packet(payload, id, payload_byte).ok_or_else(bad)?;
+                    let decoded_events = events.len();
+                    report.events.extend(events);
                     report.packets.push(SummaryPacketDiagnostics {
                         chunk: id,
                         payload_byte,
                         declared_events,
-                        decoded_events: report.events.len() - before,
+                        decoded_events,
                     });
                 }
                 7 if size == 0 => {}
@@ -319,6 +320,27 @@ pub fn decode_summary_events(
         )
     });
     Ok(report)
+}
+
+/// Guarded summary records in source order, without timestamp sorting. Kept
+/// separate so recording-only callers do not need fabricated chunk metadata.
+pub(super) fn read_summary_packet(
+    payload: &[u8],
+    chunk: i32,
+    payload_byte: usize,
+) -> Option<(u32, Vec<SummaryEvent>)> {
+    let declared = u32::from_be_bytes(payload.get(..4)?.try_into().ok()?);
+    let bits = Bits(payload);
+    let mut events = Vec::new();
+    for (bit, word) in bits.windows() {
+        if bit < 32 + 64 || !matches!(word >> 48, 0x2dc0 | 0x25c0) {
+            continue;
+        }
+        if let Some(event) = read_event(bits, bit, chunk, payload_byte) {
+            events.push(event);
+        }
+    }
+    Some((declared, events))
 }
 
 #[cfg(test)]

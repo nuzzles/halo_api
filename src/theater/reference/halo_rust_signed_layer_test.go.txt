@@ -1,0 +1,37 @@
+package replay
+import("encoding/json";"encoding/hex";"os";"testing";"log/slog";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/objectives")
+func TestHaloRustSignedLayer(t *testing.T) {
+ old:=slog.Default();defer slog.SetDefault(old)
+ data,e:=os.ReadFile("/private/tmp/halo-facts-players.json");if e!=nil{t.Fatal(e)}
+ var base []struct{Input string};if e=json.Unmarshal(data,&base);e!=nil{t.Fatal(e)}
+ encoded,e:=hex.DecodeString(base[10].Input);if e!=nil{t.Fatal(e)}
+ entry:=profile.MapQuantEntry{Module:"map",AxisWidths:[3]uint{13,14,15},Min:[3]float32{-10,-30,-50},Max:[3]float32{100,300,500}}
+ file,e:=DecodeFilmFactsFile(encoded,entry);if e!=nil{t.Fatal(e)}
+ values:=[]int{0,1,-1,2,-2,1<<32,-1<<32,1<<62,-1<<62,int(^uint(0)>>1),-int(^uint(0)>>1)-1}
+ evs:=[]objectives.IdentifiedEvent{{NamedEvent:objectives.NamedEvent{TimeMS:100,Stat:"flag_grabs",Side:"A"},XUID:"100"},{NamedEvent:objectives.NamedEvent{TimeMS:200,Stat:"flag_captures",Side:"A"}},{NamedEvent:objectives.NamedEvent{TimeMS:5000,Stat:"bomb_detonations",Side:"A"},XUID:"100"},{NamedEvent:objectives.NamedEvent{TimeMS:300,Stat:"kills",Side:"A"},XUID:"100"}}
+ rows:=[]any{}
+ for n:=0;n<1024;n++ {
+  at:=func(k int)int{return values[(n*(k+1)+k)%len(values)]}
+  cov:=LayerCoverage{Available:at(0),Attached:at(1),NoSlot:at(2),Ambiguous:at(3),OutOfWindow:at(4),Unpublished:at(5),RefusedByRoster:at(6)}
+  if n%3==0{cov.Available=cov.Attached+cov.NoSlot+cov.Ambiguous+cov.OutOfWindow+cov.Unpublished+cov.RefusedByRoster}
+  unnamed,refused:=at(7),at(8);if n%2==0{refused=0}
+  clock:=scoreClock{intervalMS:100,frames:10};if n%5==0{clock.frames=0}
+  file.Facts.PlayerIndices.Readings=values[n%len(values)];file.Facts.PlayerIndices.Disagreements=values[(n/len(values))%len(values)]
+  file.Facts.FilmTable.Occupied=at(0);file.Facts.FilmTable.Vacant=at(1)
+  file.Facts.TeamScan.Packets=values[(n+0)%len(values)];file.Facts.TeamScan.Records=values[(n+1)%len(values)];file.Facts.TeamScan.Read=values[(n+2)%len(values)];file.Facts.TeamScan.Unreached=values[(n+3)%len(values)];file.Facts.TeamScan.OutOfDomainIndex=values[(n+4)%len(values)];file.Facts.TeamScan.OutOfDomainValue=values[(n+5)%len(values)];file.Facts.TeamScan.Entities=values[(n+6)%len(values)];file.Facts.TeamScan.EntityDivergences=values[(n+7)%len(values)];file.Facts.TeamScan.IndexDivergences=values[(n+8)%len(values)];file.Facts.TeamScan.Indices=values[(n+9)%len(values)];file.Facts.TeamScan.NoTeam=values[(n+10)%len(values)]
+  thresholds:=[]int{0,1,-1,2,9,10,11,1<<32,-1<<32,1<<62,-1<<62,int(^uint(0)>>1),-int(^uint(0)>>1)-1};minPoints:=thresholds[n%len(thresholds)]
+  strings:=[]string{"","recorded","\xff","\xc0\xaf","\xed\xa0\x80","\x00line\n","é","\xe2\x82"}
+  file.Facts.FilmTable.Build=strings[n%len(strings)];file.Facts.FilmTable.Refusal=FilmTableRefusal(strings[(n/len(strings))%len(strings)]);file.Facts.TeamScan.Component=strings[(n/3)%len(strings)]
+  seatNames:=[]string{};for j:=range file.Facts.FilmTable.Seats {name:=strings[(n+j+1)%len(strings)];file.Facts.FilmTable.Seats[j].Gamertag=name;seatNames=append(seatNames,hex.EncodeToString([]byte(name)))}
+  file.Facts.Deaths=[]Death{{XUID:100,Gamertag:strings[(n+3)%len(strings)],TimeMS:10000},{XUID:101,Gamertag:strings[(n+4)%len(strings)],TimeMS:10000}}
+  deathNames:=[]string{};for _,d:=range file.Facts.Deaths {deathNames=append(deathNames,hex.EncodeToString([]byte(d.Gamertag)))}
+  actions,ac:=buildObjectiveActions(evs,unnamed,refused,clock)
+  h:=&rustScoreSeriesHandler{records:[]any{}};slog.SetDefault(slog.New(h))
+  doc:=BuildFromFacts("signed-layer","halo_infinite",file,Options{MinPoints:minPoints,Objectives:evs,ObjectivesUnnamed:unnamed,ObjectivesRefused:refused})
+  rosterNames:=[]any{};for _,p:=range doc.Roster {rosterNames=append(rosterNames,[]any{p.XUID,hex.EncodeToString([]byte(p.Name))})}
+  identityNames:=[]any{};if doc.Identity!=nil {for _,p:=range doc.Identity.Players {identityNames=append(identityNames,[]any{p.XUID,hex.EncodeToString([]byte(p.Name))})}}
+  rows=append(rows,map[string]any{"seat_names_hex":seatNames,"death_names_hex":deathNames,"deaths":file.Facts.Deaths,"roster_names_hex":rosterNames,"identity_names_hex":identityNames,"build_hex":hex.EncodeToString([]byte(file.Facts.FilmTable.Build)),"refusal_hex":hex.EncodeToString([]byte(file.Facts.FilmTable.Refusal)),"component_hex":hex.EncodeToString([]byte(file.Facts.TeamScan.Component)),"min_points":minPoints,"occupied":file.Facts.FilmTable.Occupied,"vacant":file.Facts.FilmTable.Vacant,"team_scan":file.Facts.TeamScan,"index_readings":file.Facts.PlayerIndices.Readings,"index_disagreements":file.Facts.PlayerIndices.Disagreements,"coverage":cov,"balanced":cov.Balanced(),"verdict":verdictOf(cov),"unnamed":unnamed,"refused":refused,"events":evs,"clock":map[string]any{"origin_ms":0,"interval_ms":100,"frames":clock.frames},"actions":actions,"action_coverage":ac,"document":doc,"logs":h.records})
+ }
+ data,e=json.Marshal(map[string]any{"input":base[10].Input,"cases":rows});if e!=nil{t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-signed-layer.json",data,0600);e!=nil{t.Fatal(e)}
+}

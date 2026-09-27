@@ -1,0 +1,441 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "All 50 public decfilm aliases. Representation and evidence pointers, not a full semantic or input-domain parity claim. Native definitions/method sets are in public-type-declarations.json; named pointer existence does not prove coverage.",
+  "types": [
+    {
+      "export": "Compteur",
+      "target": "fallback.Compteur",
+      "mapping": "FallbackCounter",
+      "rust_file": "../fallback.rs",
+      "test_pointer": "native_fallback_registry_and_counter",
+      "test_pointer_found": true,
+      "notes": "Counts, ordered unknown-name diagnostics and reports; a Rust receiver is non-null."
+    },
+    {
+      "export": "Declenchement",
+      "target": "fallback.Declenchement",
+      "mapping": "FallbackTrigger",
+      "rust_file": "../fallback.rs",
+      "test_pointer": "native_fallback_registry_and_counter",
+      "test_pointer_found": true,
+      "notes": "Name and signed count; native PascalCase JSON aliases."
+    },
+    {
+      "export": "Nom",
+      "target": "fallback.Nom",
+      "mapping": "String / &str fallback identifiers",
+      "rust_file": "../fallback.rs",
+      "test_pointer": "native_fallback_registry_and_counter",
+      "test_pointer_found": true,
+      "notes": "Identifiers remain strings, including unknown names."
+    },
+    {
+      "export": "Site",
+      "target": "fallback.Site",
+      "mapping": "FallbackSite",
+      "rust_file": "../fallback.rs",
+      "test_pointer": "native_fallback_registry_and_counter",
+      "test_pointer_found": true,
+      "notes": "File, anchor, condition; native JSON aliases."
+    },
+    {
+      "export": "BipedCreation",
+      "target": "grammar.BipedCreation",
+      "mapping": "FilmBipedCreation + BipedCreation",
+      "rust_file": "../biped_creation.rs",
+      "test_pointer": "native_creation_source_and_sparse_bands",
+      "test_pointer_found": true,
+      "notes": "Chunk/packet/time are in source. HasIndex is implied true by native readCreation acceptance; missing indexes are rejected. LifeKey maps to life_key."
+    },
+    {
+      "export": "BipedPosition",
+      "target": "grammar.BipedPosition",
+      "mapping": "SourceQuantizedPosition / SourceWorldPosition + BipedCompanions",
+      "rust_file": "../quantized_source.rs",
+      "test_pointer": "native_loaded_quantized_positions",
+      "test_pointer_found": true,
+      "notes": "HasWorld is represented by the selected world/quantized result type. Raw Q, source and companion data survive. BipedCompanions and NativeChassisOrientation provide direction projections; display vitality fractions can be computed without replacing raw values."
+    },
+    {
+      "export": "FilmContext",
+      "target": "grammar.FilmContext",
+      "mapping": "NativeFilmContext",
+      "rust_file": "../native_context.rs",
+      "test_pointer": "native_source_context_caches_and_registry_identity",
+      "test_pointer_found": true,
+      "notes": "Source, cached reads/errors/identity, imposed layout, scan profile, observer and corruption state. EquipmentArchetype is composition of registry().registry.archetype(37); profile issues are returned on the resolved profile."
+    },
+    {
+      "export": "FireEvent",
+      "target": "grammar.FireEvent",
+      "mapping": "FilmFireEvent",
+      "rust_file": "../fire_events.rs",
+      "test_pointer": "native_fire_heads_and_aim",
+      "test_pointer_found": true,
+      "notes": "All emitted fields and AimHeadingDeg -> aim_heading_degrees."
+    },
+    {
+      "export": "FrameConfig",
+      "target": "grammar.FrameConfig",
+      "mapping": "NativeFrameConfig + NativeReaderContext",
+      "rust_file": "../native_reader.rs",
+      "test_pointer": "native_context_frame_records_world_and_live_widths",
+      "test_pointer_found": true,
+      "notes": "Raw signed header/default/preamble policies plus profile/observer context; independent of bounded legacy FrameEncoding."
+    },
+    {
+      "export": "KillSourceHealth",
+      "target": "grammar.KillSourceHealth",
+      "mapping": "KillSourceHealth",
+      "rust_file": "../kill_health.rs",
+      "test_pointer": "native_kill_health_methods",
+      "test_pointer_found": true,
+      "notes": "All seven methods, full ordered metrics/diagnostics, native publication gate and threshold controls; full decoder fields additionally covered by captured comparisons."
+    },
+    {
+      "export": "ProfilDeBalayage",
+      "target": "grammar.ProfilDeBalayage",
+      "mapping": "NativeScanProfile",
+      "rust_file": "../native_scan_profile.rs",
+      "test_pointer": "native_scan_profile_replacement_restoration_and_map_aliases",
+      "test_pointer_found": true,
+      "notes": "Movement, keyframe, MPP and grammar fields including raw shared width maps."
+    },
+    {
+      "export": "Registry",
+      "target": "grammar.Registry",
+      "mapping": "FilmRegistryRead + FilmRegistry; NativeFilmContext registry identity",
+      "rust_file": "../registry.rs",
+      "test_pointer": "native_registry_parse_outcomes",
+      "test_pointer_found": true,
+      "notes": "Ordered archetypes, levels, truncation and trailing-byte count. Context identity retains parse-time fingerprint/named count; standalone FilmRegistry::fingerprint recomputes current fields."
+    },
+    {
+      "export": "ScanFilmOptions",
+      "target": "grammar.ScanFilmOptions",
+      "mapping": "BipedScanOptions + SourceWorldScanOptions + explicit chunk/layout/bounds arguments",
+      "rust_file": "../quantized_source.rs",
+      "test_pointer": "native_loaded_quantized_positions",
+      "test_pointer_found": true,
+      "notes": "native_defaults supplies native scalar defaults. QuantaOnly selects the quantized entry point; dynamic grammar/exemptions are explicit. Isolation units differ (Rust unsigned microseconds vs native signed milliseconds)."
+    },
+    {
+      "export": "WeaponDamage",
+      "target": "grammar.WeaponDamage",
+      "mapping": "WeaponDamage",
+      "rust_file": "../weapon_hits.rs",
+      "test_pointer": "native_weapon_hit_pairing_and_distance",
+      "test_pointer_found": true,
+      "notes": "All eight native fields, with optional raw/source-retaining WeaponDamageRead wrapper."
+    },
+    {
+      "export": "WeaponHitDistanceFunc",
+      "target": "grammar.WeaponHitDistanceFunc",
+      "mapping": "WeaponHitDistanceFn",
+      "rust_file": "../weapon_hits.rs",
+      "test_pointer": "native_weapon_hit_pairing_and_distance",
+      "test_pointer_found": true,
+      "notes": "Borrowed closure returns Option distance; absence retains native false validity."
+    },
+    {
+      "export": "WeaponHitStats",
+      "target": "grammar.WeaponHitStats",
+      "mapping": "WeaponHitStats",
+      "rust_file": "../weapon_hits.rs",
+      "test_pointer": "native_weapon_hit_pairing_and_distance",
+      "test_pointer_found": true,
+      "notes": "Player/weapon IDs, paired shots, hits, ordered distance buckets."
+    },
+    {
+      "export": "World",
+      "target": "grammar.World",
+      "mapping": "FilmWorld + FilmWorldSnapshot; registry supplied separately",
+      "rust_file": "../world.rs",
+      "test_pointer": "mutations_generation_views_positions_and_rollback_match_go",
+      "test_pointer_found": true,
+      "notes": "Slot generation/view/position state and anticipated bindings; registry pointer ownership differs. Native one-time logging latch is not part of FilmWorld storage."
+    },
+    {
+      "export": "ApparStats",
+      "target": "types.ApparStats",
+      "mapping": "KillMatchingStats",
+      "rust_file": "../kill_hybrid.rs",
+      "evidence": "native_kill_matching_oracle (complete hybrid field); complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Assist",
+      "target": "types.Assist",
+      "mapping": "KillAssist",
+      "rust_file": "../kill_assists.rs",
+      "evidence": "native_kill_assists_oracle; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Category",
+      "target": "killsource.Category",
+      "mapping": "KillSourceTruth.category; kill_damage_category_name",
+      "rust_file": "../kill_damage_tags.rs",
+      "evidence": "native_kill_source_scan_oracle category_name comparison",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "CoupleStats",
+      "target": "types.CoupleStats",
+      "mapping": "KillPairStats",
+      "rust_file": "../kill_feed_pairs.rs",
+      "evidence": "native_kill_feed_pairs_oracle; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Coverage",
+      "target": "killsource.Coverage",
+      "mapping": "KillSourceCoverage",
+      "rust_file": "../kill_health.rs",
+      "evidence": "complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "DamageShare",
+      "target": "killsource.DamageShare",
+      "mapping": "KillDamageShare",
+      "rust_file": "../kill_assists.rs",
+      "evidence": "native_kill_assists_oracle; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Options",
+      "target": "killsource.Options",
+      "mapping": "KillDecodeOptions",
+      "rust_file": "../kill_decode.rs",
+      "evidence": "native_kill_option_normalization; public execution-domain control",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "FeedTruth",
+      "target": "killsource.FeedTruth",
+      "mapping": "AttributedFilmKill.killer + feed_present",
+      "rust_file": "../kill_hybrid.rs",
+      "evidence": "complete kill result reconstructs native Feed object",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "FilmTablePinning",
+      "target": "killsource.FilmTablePinning",
+      "mapping": "KillTablePinning",
+      "rust_file": "../kill_roster.rs",
+      "evidence": "native_kill_roster_oracle; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Kill",
+      "target": "killsource.Kill",
+      "mapping": "AttributedFilmKill",
+      "rust_file": "../kill_hybrid.rs",
+      "evidence": "complete kill result including source, assist, damage, provenance",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Origin",
+      "target": "killsource.Origin",
+      "mapping": "KillSourceProvenance.origin",
+      "rust_file": "../kill_hybrid.rs",
+      "evidence": "native hybrid/source fixtures; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Path",
+      "target": "killsource.Path",
+      "mapping": "KillReadPath",
+      "rust_file": "../kill_matching.rs",
+      "evidence": "native matching/hybrid fixtures; complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "PathStats",
+      "target": "killsource.PathStats",
+      "mapping": "KillPathStats",
+      "rust_file": "../kill_hybrid.rs",
+      "evidence": "native_kill_health_methods (native PathStats.Ratio); native_kill_matching_oracle (full hybrid stats); complete kill result",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Result",
+      "target": "killsource.Result",
+      "mapping": "FilmKillSourceResult",
+      "rust_file": "../kill_decode.rs",
+      "evidence": "assert_native_result compares full native object and calibrated profile; native_kill_health_methods compares Result.LineByLinePublishable on 16800 controls",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "Stats",
+      "target": "killsource.Stats",
+      "mapping": "KillHybridResult + FilmKillSourceResult.assist_stats/pair_stats/packets_with_events/packets_located",
+      "rust_file": "../kill_decode.rs",
+      "evidence": "assert_native_result reconstructs every native Stats field",
+      "detail_record": "public-kill-types.json"
+    },
+    {
+      "export": "DeathInstant",
+      "target": "types.DeathInstant",
+      "mapping": "StatborgDeathInstant",
+      "rust_file": "../statborg_identity.rs",
+      "test_pointer": "native_statborg_death_identity",
+      "test_pointer_found": true,
+      "notes": "XUID and signed timestamp."
+    },
+    {
+      "export": "FlagGrabsNetPlayer",
+      "target": "types.FlagGrabsNetPlayer",
+      "mapping": "FlagGrabCounts",
+      "rust_file": "../flag_grabs_net.rs",
+      "test_pointer": "native_net_flag_grabs_oracle",
+      "test_pointer_found": true,
+      "notes": "XUID, raw and net counts."
+    },
+    {
+      "export": "IdentifiedEvent",
+      "target": "objectives.IdentifiedEvent",
+      "mapping": "StatborgIdentifiedEvent",
+      "rust_file": "../statborg_named.rs",
+      "test_pointer": "native_named_objectives",
+      "test_pointer_found": true,
+      "notes": "Flattened named event and XUID."
+    },
+    {
+      "export": "MapRoster",
+      "target": "objectives.MapRoster",
+      "mapping": "BTreeMap<String, i64>; roster callback",
+      "rust_file": "../objective_source.rs",
+      "test_pointer": "native_objective_source_selection",
+      "test_pointer_found": true,
+      "notes": "Team lookup returns Option; explicit mapping and live callback paths."
+    },
+    {
+      "export": "NamedEvent",
+      "target": "objectives.NamedEvent",
+      "mapping": "StatborgNamedEvent + ObjectiveStatName",
+      "rust_file": "../statborg_named.rs",
+      "test_pointer": "native_named_objectives",
+      "test_pointer_found": true,
+      "notes": "Timestamp, slot, stat, component, side; StatName -> stat_name."
+    },
+    {
+      "export": "PlayerLine",
+      "target": "types.PlayerLine",
+      "mapping": "StatborgPlayerLine",
+      "rust_file": "../statborg_series.rs",
+      "test_pointer": "native_statborg_death_identity",
+      "test_pointer_found": true,
+      "notes": "XUID and kills/deaths/assists."
+    },
+    {
+      "export": "RoundIdentity",
+      "target": "objectives.RoundIdentity",
+      "mapping": "StatborgRoundIdentity + IdentityStatborgPublication",
+      "rust_file": "../statborg_identity.rs",
+      "test_pointer": "native_round_identity_queries",
+      "test_pointer_found": true,
+      "notes": "Round/slot identity and origin maps, ordered starts; completion methods in statborg_residue.rs."
+    },
+    {
+      "export": "ScorePoint",
+      "target": "types.ScorePoint",
+      "mapping": "StatborgScorePoint",
+      "rust_file": "../statborg_series.rs",
+      "test_pointer": "native_score_components_and_queries",
+      "test_pointer_found": true,
+      "notes": "Signed time, slot and value."
+    },
+    {
+      "export": "StatComponent",
+      "target": "objectives.StatComponent",
+      "mapping": "StatborgComponent",
+      "rust_file": "../statborg_component.rs",
+      "test_pointer": "native_score_components_and_queries",
+      "test_pointer_found": true,
+      "notes": "Component, side, strict and unitary policies."
+    },
+    {
+      "export": "StatRecord",
+      "target": "types.StatRecord",
+      "mapping": "StatborgRecord",
+      "rust_file": "../statborg_rounds.rs",
+      "test_pointer": "native_score_components_and_queries",
+      "test_pointer_found": true,
+      "notes": "Time, slot, round and component-value map."
+    },
+    {
+      "export": "StatValue",
+      "target": "types.StatValue",
+      "mapping": "StatborgValue",
+      "rust_file": "../statborg_rounds.rs",
+      "test_pointer": "native_score_components_and_queries",
+      "test_pointer_found": true,
+      "notes": "A/B/C/D and HasC/HasD remain distinct."
+    },
+    {
+      "export": "ChunkInput",
+      "target": "positions.ChunkInput",
+      "mapping": "FilmChunkData data + metadata.start_time_offset_ms/chunk_type",
+      "rust_file": "../keyframe_position_probe.rs",
+      "test_pointer": "native_keyframe_position_probe",
+      "test_pointer_found": true,
+      "notes": "Keyframe probe uses chunk start time and type; original packet timestamp remains in source."
+    },
+    {
+      "export": "I0Layout",
+      "target": "profile.I0Layout",
+      "mapping": "I0Layout",
+      "rust_file": "../i0_layout.rs",
+      "test_pointer": "native_i0_layout_values",
+      "test_pointer_found": true,
+      "notes": "Gate, axis widths, region and native validity/offset/total/string queries."
+    },
+    {
+      "export": "MapQuantCatalog",
+      "target": "profile.MapQuantCatalog",
+      "mapping": "LoadedFilmMapCatalog",
+      "rust_file": "../map_catalog.rs",
+      "test_pointer": "native_map_catalog_loading",
+      "test_pointer_found": true,
+      "notes": "Schema, source, optional map table and normalized-name lookup."
+    },
+    {
+      "export": "MapQuantEntry",
+      "target": "profile.MapQuantEntry",
+      "mapping": "LoadedFilmMapEntry; checked projection to FilmMapBounds",
+      "rust_file": "../map_catalog.rs",
+      "test_pointer": "native_map_entry_projections",
+      "test_pointer_found": true,
+      "notes": "Module, min/max, raw uint64 widths, region. Query projections live on FilmMapBounds; unrepresentable target widths explicitly refuse."
+    },
+    {
+      "export": "ChunkMeta",
+      "target": "types.ChunkMeta",
+      "mapping": "FilmSourceMetadata",
+      "rust_file": "../source.rs",
+      "test_pointer": "native_source_loading",
+      "test_pointer_found": true,
+      "notes": "Native signed index/type/start fields preserved independently of source position."
+    },
+    {
+      "export": "Film",
+      "target": "source.Film",
+      "mapping": "FilmSource",
+      "rust_file": "../source.rs",
+      "test_pointer": "native_source_loading",
+      "test_pointer_found": true,
+      "notes": "Loaded bytes, packet ranges and positional metadata; original compressed archive and Go slice aliasing are not promised."
+    },
+    {
+      "export": "MemoryChunks",
+      "target": "source.MemoryChunks",
+      "mapping": "FilmChunkProvider for slices; FilmSource::load",
+      "rust_file": "../source.rs",
+      "test_pointer": "native_fallible_source_provider",
+      "test_pointer_found": true,
+      "notes": "Borrowed or owned per-position bytes. Rust indexing does not admit negative indices."
+    }
+  ]
+}

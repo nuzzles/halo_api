@@ -1,0 +1,16 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os";"math/rand")
+func TestHaloRustGroundAmmoProfile(t *testing.T){
+ rng:=rand.New(rand.NewSource(4212041));rows:=[]any{}
+ for c:=0;c<512;c++{
+  data:=make([]byte,128);rng.Read(data);if c%7==0{data=data[:c%11]};start:=c%13
+  ctx:=ContexteParDefaut();ctx.Profil.Grammaire.SimStateComplet=c%3!=0;ctx.Profil.Grammaire.ControleDeCorruption=c%2==0
+  ctx.Profil.Grammaire.LargeursCalibrees=map[string]int{};ctx.Profil.Grammaire.LargeursBouchon=map[string]int{}
+  arch:=Archetype{Index:42,Components:make([]string,24),Levels:make([]uint32,24)};arch.Components[0]="biped-emp-timer-component";arch.Components[1]="simulation-state-component";arch.Components[2]="not-ported";arch.Components[9]="object-multiplayer-properties-component";arch.Components[20]="weapon-ammo-component"
+  mask:=[]int{20};switch c%8{case 0:mask=append(mask,0);case 1:mask=append(mask,1);case 2:mask=append(mask,2);case 3:mask=append(mask,0,1,2);case 4:mask=append(mask,64);case 5:mask=[]int{0,84};case 6:arch.Components[9]="wrong";case 7:arch.Components[20]="wrong"}
+  width:=[]int{0,1,17,65}[(c/8)%4];switch (c/32)%4{case 0:case 1:ctx.Profil.Grammaire.LargeursCalibrees[arch.Components[0]]=width;ctx.Profil.Grammaire.LargeursCalibrees[arch.Components[1]]=width;case 2:ctx.Profil.Grammaire.LargeursBouchon[arch.Components[2]]=width;ctx.Profil.Grammaire.LargeursBouchon[arch.Components[1]]=width;case 3:ctx.Profil.Grammaire.LargeursCalibrees[arch.Components[0]]=width;ctx.Profil.Grammaire.LargeursBouchon[arch.Components[2]]=width}
+  ammo,ok:=readGroundWeaponAmmo(data,start,mask,arch,ctx)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"start":start,"mask":mask,"names":arch.Components,"widths":map[string]any{"calibrated":ctx.Profil.Grammaire.LargeursCalibrees,"stubs":ctx.Profil.Grammaire.LargeursBouchon},"simulation":ctx.Profil.Grammaire.SimStateComplet,"corruption":ctx.Profil.Grammaire.ControleDeCorruption,"ok":ok,"ammo":ammo})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-ground-ammo-profile.json",b,0600);e!=nil{t.Fatal(e)}
+}

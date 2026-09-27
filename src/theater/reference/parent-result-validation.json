@@ -1,0 +1,57 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_correction",
+  "change": "Select the first decoded parent value instead of stopping at a successful calibrated skip with no parent payload. Preserve native first-value ordering and free-parent transitions.",
+  "native": {
+    "cases": 16,
+    "seconds": 0.382,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-parent-result-native.log"
+  },
+  "reproduction": {
+    "status": "failed as expected; skipped first parent suppressed native free-parent transition",
+    "log": "/private/tmp/halo-parent-result-before.log"
+  },
+  "focused": {
+    "status": "passed",
+    "seconds": 0.01,
+    "log": "/private/tmp/halo-parent-result-focused.log"
+  },
+  "checks": {
+    "suite": {
+      "status": "passed",
+      "log": "/private/tmp/halo-parent-result-suite.log",
+      "passed": 629,
+      "failed": 0,
+      "ignored": 49,
+      "seconds": 122.29
+    },
+    "clippy": {
+      "status": "passed",
+      "log": "/private/tmp/halo-parent-result-clippy.log",
+      "seconds": 18.02
+    },
+    "wasm": {
+      "status": "passed",
+      "log": "/private/tmp/halo-parent-result-wasm.log",
+      "build_seconds": 18.48
+    },
+    "march": {
+      "status": "passed",
+      "log": "/private/tmp/halo-parent-result-march.log",
+      "seconds": 83.94
+    },
+    "documents": {
+      "status": "passed",
+      "log": "/private/tmp/halo-parent-result-documents.log",
+      "seconds": 112.53
+    }
+  },
+  "scope": "v41 parity correction; no deferred architecture changes. Full parity remains incomplete.",
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "format_and_diff": "passed",
+  "reference_scripts": "syntax passed"
+}

@@ -1,0 +1,334 @@
+package objectives
+
+import (
+	"context"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"os"
+	"strconv"
+	"testing"
+)
+
+func rustSourceStatPayload(slot, value int) []byte {
+	b := rustStatBits{}
+	b.put(1, 1)
+	b.put(uint64(slot), 14)
+	b.put(2, 2)
+	b.put(0, 1)
+	b.put(1, 3)
+	b.put(2, 6)
+	b.put(0, 5)
+	b.put(0, 5)
+	b.put(0, 2)
+	b.put(uint64(value), 8)
+	b.put(0, 2)
+	b.put(0, 8)
+	b.put(0, 2)
+	b.put(0, 69)
+	return b.data
+}
+func rustSourceStatPacket(kind uint16, ts uint64, payload []byte) []byte {
+	h := make([]byte, 16)
+	binary.LittleEndian.PutUint16(h, kind)
+	binary.LittleEndian.PutUint32(h[4:], uint32(len(payload)))
+	binary.LittleEndian.PutUint64(h[8:], ts)
+	return append(h, payload...)
+}
+func TestHaloRustStatborgSource(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	rows := []any{}
+	for run := 0; run < 128; run++ {
+		chunks := source.MemoryChunks{}
+		inputs := []string{}
+		meta := []types.ChunkMeta{}
+		metadata := []any{}
+		count := 1 + run%6
+		if run%13 == 0 {
+			count = 0
+		}
+		for c := 0; c < count; c++ {
+			data := []byte{}
+			for j := 0; j < 8; j++ {
+				kind := uint16(0)
+				if j%3 == 0 {
+					kind = 2
+				}
+				if j == 4 && run%5 == 0 {
+					kind = 7
+				}
+				ts := uint64(8000 - j*1000 + c*100)
+				if j == 7 && run%2 == 0 {
+					ts = ^uint64(0)
+				}
+				payload := rustSourceStatPayload(10+c%4*2, j+1)
+				if j == 1 {
+					payload = make([]byte, 8)
+					if run%7 == 0 {
+						payload = nil
+					}
+				}
+				data = append(data, rustSourceStatPacket(kind, ts, payload)...)
+			}
+			if run%7 == 0 {
+				data = data[:len(data)-3]
+			}
+			chunks = append(chunks, data)
+			inputs = append(inputs, hex.EncodeToString(data))
+		}
+		n := count
+		if run%4 == 0 {
+			n = 0
+		}
+		if run%4 == 1 {
+			n++
+		}
+		if run%4 == 2 && n > 0 {
+			n--
+		}
+		for i := 0; i < n; i++ {
+			kind := []int{0, 1, 2, 3, -1, 99}[(run+i)%6]
+			if run%9 == 0 {
+				kind = 0
+			}
+			start := int64(run*100 - i*1000)
+			if run%11 == 0 {
+				start = 9223372036854775807
+			}
+			index := i*3 - 2
+			if run%3 == 0 {
+				index = 7
+			}
+			m := types.ChunkMeta{Index: index, ChunkType: kind, StartMS: int(start)}
+			meta = append(meta, m)
+			metadata = append(metadata, map[string]any{"index": index, "chunk_type": kind, "start_ms": start})
+		}
+		var film *source.Film
+		if len(chunks) > 0 {
+			var e error
+			film, e = source.Load(chunks, meta)
+			if e != nil {
+				t.Fatal(e)
+			}
+		}
+		h := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		records, truncated := StatRecordsCtx(context.Background(), film, "source-oracle")
+		if records == nil {
+			records = []types.StatRecord{}
+		}
+		scanLogs := h.records
+		h.records = []any{}
+		mode := []string{"flag", "zone", "vip", "bomb", "hill", "ball", ""}[run%7]
+		lines := []types.PlayerLine{}
+		for k := 0; k <= 8; k++ {
+			lines = append(lines, types.PlayerLine{XUID: "score-" + strconv.Itoa(k), Kills: k})
+		}
+		if run%10 == 0 {
+			lines = append(lines, types.PlayerLine{XUID: "duplicate", Kills: 8})
+		}
+		named := NamedEvents(film, mode)
+		if named == nil {
+			named = []NamedEvent{}
+		}
+		namedLogs := h.records
+		h.records = []any{}
+		cross := CrossCheckNamedEvents(film, mode)
+		if cross == nil {
+			cross = map[int]map[string][2]int{}
+		}
+		crossLogs := h.records
+		h.records = []any{}
+		identity := SlotIdentity(film, lines)
+		identityLogs := h.records
+		h.records = []any{}
+		resolved, resolvedStats := SlotIdentityResolved(film, lines, nil)
+		resolvedLogs := h.records
+		rows = append(rows, map[string]any{"chunks": inputs, "metadata": metadata, "stream": map[string]any{"records": records, "truncated": truncated}, "diagnostics": scanLogs, "mode": mode, "lines": lines, "named": named, "named_logs": namedLogs, "cross": cross, "cross_logs": crossLogs, "identity": identity, "identity_logs": identityLogs, "resolved": map[string]any{"by_slot": resolved, "stats": resolvedStats}, "resolved_logs": resolvedLogs})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-statborg-source.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestHaloRustStatborgSourceLimit(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	payload := []byte{}
+	for _, slot := range []int{10, 12, 14} {
+		payload = append(payload, rustSourceStatPayload(slot, 17)...)
+	}
+	if n := len(scanFrameForRecords(payload, 0)); n != 3 {
+		t.Fatalf("stress payload has %d records", n)
+	}
+	// First chunk emits three records, second crosses the cap by a whole frame;
+	// the third must never be scanned. The warning names the metadata index.
+	one := rustSourceStatPacket(0, 1000, payload)
+	many := []byte{}
+	for j := 0; j < 11026; j++ {
+		many = append(many, rustSourceStatPacket(0, uint64(j*1000), payload)...)
+	}
+	film, e := source.Load(source.MemoryChunks{one, many, one}, []types.ChunkMeta{{Index: 18, ChunkType: 2, StartMS: 400}, {Index: -7, ChunkType: 3, StartMS: -200}, {Index: 99, ChunkType: 2, StartMS: 90000}})
+	if e != nil {
+		t.Fatal(e)
+	}
+	h := &rustBudgetHandler{records: []any{}}
+	slog.SetDefault(slog.New(h))
+	recs, truncated := StatRecordsCtx(context.Background(), film, "limit-oracle")
+	if !truncated || len(recs) != 33078 {
+		t.Fatalf("expected whole-frame overshoot, got %d/%v", len(recs), truncated)
+	}
+	scanLogs := h.records
+	h.records = []any{}
+	named := NamedEvents(film, "flag")
+	if named == nil {
+		named = []NamedEvent{}
+	}
+	namedLogs := h.records
+	h.records = []any{}
+	cross := CrossCheckNamedEvents(film, "flag")
+	crossLogs := h.records
+	h.records = []any{}
+	lines := []types.PlayerLine{{XUID: "zero"}}
+	identity := SlotIdentity(film, lines)
+	identityLogs := h.records
+	h.records = []any{}
+	resolved, resolvedStats := SlotIdentityResolved(film, lines, nil)
+	resolvedLogs := h.records
+	raw, e := json.Marshal(map[string]any{"payload": hex.EncodeToString(payload), "stream": map[string]any{"records": recs, "truncated": truncated}, "diagnostics": scanLogs, "named": named, "named_logs": namedLogs, "cross": cross, "cross_logs": crossLogs, "identity": identity, "identity_logs": identityLogs, "resolved": map[string]any{"by_slot": resolved, "stats": resolvedStats}, "resolved_logs": resolvedLogs, "lines": lines})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-statborg-source-limit.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestHaloRustStatborgSourceNamedPositive(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	chunk := []byte{}
+	for n := 0; n < 2; n++ {
+		b := rustStatBits{}
+		b.put(1, 1)
+		b.put(10, 14)
+		b.put(2, 2)
+		b.put(0, 1)
+		b.put(5, 3)
+		for _, c := range []int{0, 2, 3, 12, 21} {
+			b.put(uint64(c), 6)
+		}
+		for _, v := range [][2]int{{1, 0}, {3, 1}, {2, 0}, {1, 1}, {1, 0}} {
+			b.put(0, 5)
+			b.put(0, 5)
+			b.put(0, 2)
+			b.put(uint64(v[0]*n), 8)
+			b.put(0, 2)
+			b.put(uint64(v[1]*n), 8)
+			b.put(0, 2)
+		}
+		b.put(0, 64)
+		chunk = append(chunk, rustSourceStatPacket(0, uint64(n*1000000), b.data)...)
+	}
+	metadata := []types.ChunkMeta{{Index: 44, ChunkType: 2, StartMS: 500}}
+	film, e := source.Load(source.MemoryChunks{chunk}, metadata)
+	if e != nil {
+		t.Fatal(e)
+	}
+	records, truncated := StatRecordsCtx(context.Background(), film, "")
+	if len(records) != 2 {
+		t.Fatalf("positive fixture has %d records", len(records))
+	}
+	lines := []types.PlayerLine{{XUID: "named-player", Kills: 3, Deaths: 1, Assists: 2}}
+	h := &rustBudgetHandler{records: []any{}}
+	slog.SetDefault(slog.New(h))
+	named := NamedEvents(film, "flag")
+	namedLogs := h.records
+	h.records = []any{}
+	cross := CrossCheckNamedEvents(film, "flag")
+	crossLogs := h.records
+	h.records = []any{}
+	identity := SlotIdentity(film, lines)
+	identityLogs := h.records
+	h.records = []any{}
+	resolved, resolvedStats := SlotIdentityResolved(film, lines, nil)
+	resolvedLogs := h.records
+	if len(named) != 6 || identity[10] != "named-player" || cross[10]["kills"] != [2]int{3, 1} || cross[10]["assists"] != [2]int{2, 1} {
+		t.Fatal("positive control did not produce its intended actions, actor and disagreements")
+	}
+	raw, e := json.Marshal([]any{map[string]any{"chunks": []string{hex.EncodeToString(chunk)}, "metadata": []any{map[string]any{"index": 44, "chunk_type": 2, "start_ms": 500}}, "mode": "flag", "lines": lines, "stream": map[string]any{"records": records, "truncated": truncated}, "named": named, "named_logs": namedLogs, "cross": cross, "cross_logs": crossLogs, "identity": identity, "identity_logs": identityLogs, "resolved": map[string]any{"by_slot": resolved, "stats": resolvedStats}, "resolved_logs": resolvedLogs}})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-statborg-source-positive.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestHaloRustStatborgSourceResolved(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	chunk := []byte{}
+	for j := 1; j <= 3; j++ {
+		b := rustStatBits{}
+		b.put(1, 1)
+		b.put(10, 14)
+		b.put(2, 2)
+		b.put(0, 1)
+		b.put(1, 3)
+		b.put(2, 6)
+		b.put(0, 5)
+		b.put(0, 5)
+		b.put(0, 2)
+		b.put(0, 8)
+		b.put(0, 2)
+		b.put(uint64(j), 8)
+		b.put(0, 2)
+		b.put(0, 69)
+		chunk = append(chunk, rustSourceStatPacket(0, uint64(j*1000000), b.data)...)
+	}
+	meta := []types.ChunkMeta{{Index: 44, ChunkType: 2, StartMS: 500}}
+	film, err := source.Load(source.MemoryChunks{chunk}, meta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := []any{}
+	for mode := 0; mode < 4; mode++ {
+		deaths := []types.DeathInstant{}
+		if mode > 0 {
+			for j := 0; j < 3; j++ {
+				at := 500 + j*1000
+				if mode == 2 {
+					at += 151
+				}
+				deaths = append(deaths, types.DeathInstant{XUID: "death-player", TimeMS: at})
+			}
+		}
+		lines := []types.PlayerLine{}
+		if mode == 3 {
+			lines = append(lines, types.PlayerLine{XUID: "totals-player", Deaths: 3})
+		}
+		h := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		ids, stats := SlotIdentityResolved(film, lines, deaths)
+		deathHandler := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(deathHandler))
+		deathOnly := SlotIdentityFromDeaths(film, deaths)
+		rows = append(rows, map[string]any{"chunk": hex.EncodeToString(chunk), "lines": lines, "deaths": deaths, "resolved": map[string]any{"by_slot": ids, "stats": stats}, "logs": h.records, "death_only": deathOnly, "death_logs": deathHandler.records})
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-statborg-source-resolved.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

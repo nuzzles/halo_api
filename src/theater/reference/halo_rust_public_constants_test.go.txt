@@ -1,0 +1,53 @@
+package decfilm
+import ("encoding/json";"os";"testing")
+func TestHaloRustPublicConstants(t *testing.T) {
+ out:=map[string]any{
+"Rev":Rev,
+"NomGardeEquipementNegatifAZero":NomGardeEquipementNegatifAZero,
+"NomGestePremiereVieDuSlot":NomGestePremiereVieDuSlot,
+"CoverageWarnRatio":CoverageWarnRatio,
+"FilmMajorVersionUnknown":FilmMajorVersionUnknown,
+"KnownRegistryFingerprint":KnownRegistryFingerprint,
+"UnexplainedAlertRatio":UnexplainedAlertRatio,
+"UnexplainedWarnRatio":UnexplainedWarnRatio,
+"WeaponHitPairWindowUS":WeaponHitPairWindowUS,
+"BotSuffix":BotSuffix,
+"CategoryAttachedDamage":CategoryAttachedDamage,
+"CategoryCollisionDamage":CategoryCollisionDamage,
+"CategoryHeadshot":CategoryHeadshot,
+"CategoryHeadshotMultiplier":CategoryHeadshotMultiplier,
+"CategoryNone":CategoryNone,
+"CategorySilentMelee":CategorySilentMelee,
+"FilmTableNoSection":FilmTableNoSection,
+"FilmTableRead":FilmTableRead,
+"FilmTableUnknownBuild":FilmTableUnknownBuild,
+"OriginBot":OriginBot,
+"OriginBotKiller":OriginBotKiller,
+"OriginCredit":OriginCredit,
+"OriginSelfSource":OriginSelfSource,
+"PathScan":PathScan,
+"PathWalk":PathWalk,
+"XUIDNamePrefix":XUIDNamePrefix,
+"EventTypeCapture":EventTypeCapture,
+"IdentitySourceTotals":IdentitySourceTotals,
+"ObjectiveTypeBomb":ObjectiveTypeBomb,
+"ObjectiveTypeFlag":ObjectiveTypeFlag,
+"ObjectiveTypeHill":ObjectiveTypeHill,
+"ObjectiveTypeSkull":ObjectiveTypeSkull,
+"ObjectiveTypeZone":ObjectiveTypeZone,
+"OriginRoundResidue":OriginRoundResidue,
+"RoleScorer":RoleScorer,
+"StatFlagCaptures":StatFlagCaptures,
+"StatPlayerSlots":StatPlayerSlots,
+"StatZoneCaptures":StatZoneCaptures,
+"StatZoneSecures":StatZoneSecures,
+"MapQuantSchemaVersion":MapQuantSchemaVersion,
+"PIBits":PIBits,
+
+ "ErrNoKillFeed":ErrNoKillFeed.Error(),
+ "ErrUnknownMapBounds":ErrUnknownMapBounds.Error(),
+ "KnownWeaponHigh32":KnownWeaponHigh32,
+ }
+ raw,err:=json.Marshal(out);if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-public-constants.json",raw,0600);err!=nil{t.Fatal(err)}
+}

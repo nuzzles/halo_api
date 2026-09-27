@@ -1,9 +1,9 @@
-//! Prints recorded lives and positions from the current typed Theater decoder.
+//! Inspects native entity state through Film::parse and Film::resolve.
 
 mod common;
 
 use halo_api::clients::hi::models::{FilmChunk, FilmChunkData};
-use halo_api::theater::{DecodeOptions, Film};
+use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
@@ -20,41 +20,35 @@ async fn main() -> Result<(), common::ExampleError> {
         let version = film.custom_data.film_major_version;
         (halo.film_chunks(&film).await?, version)
     };
-    let film = Film::try_from_chunks(
-        &chunks,
-        DecodeOptions {
-            major_version: film_major_version,
-            ..DecodeOptions::v41()
-        },
-    )?;
+    if film_major_version != 41 {
+        return Err("only v41 films are supported".into());
+    }
+    let metadata: Vec<_> = chunks
+        .iter()
+        .map(|c| FilmSourceMetadata {
+            index: i64::from(c.metadata.index),
+            chunk_type: i64::from(c.metadata.chunk_type),
+            start_ms: c.metadata.start_time_offset_ms,
+        })
+        .collect();
+    let bytes: Vec<_> = chunks.iter().map(|c| c.data.as_slice()).collect();
+    let source = FilmSource::load(&bytes, &metadata)?;
+    let film = Film::parse(&source, ParseOptions::default())?;
+    let mut resolved = film.resolve();
     println!(
-        "{} packets, {} players, {} summary events",
-        film.packets.len(),
-        film.players.len(),
-        film.summary_events.len()
+        "{} chunks, {} indexed records",
+        film.chunks.len(),
+        resolved.events().len()
     );
-    for player in &film.players {
-        println!(
-            "player {:<16} xuid {:?} -> roster {}: {} lives, {} positions",
-            player.name,
-            player.xuid,
-            player.id,
-            player.lives.len(),
-            player.positions.len()
-        );
-        for life in player.lives.iter().take(25) {
-            let position = player.positions.iter().find(|p| p.life == life.id);
+    if let Some(end) = resolved.events().last().map(|e| e.timestamp_us) {
+        for (key, entity) in &resolved.advance_to(end).entities {
             println!(
-                "  life {} spawn {:.3}s, death {:?}s, first position {:?}",
-                life.id,
-                life.start_us as f64 / 1_000_000.,
-                life.death_us.map(|t| t as f64 / 1_000_000.),
-                position.map(|p| &p.value)
+                "{key:?}: id {:?}, archetype {}, {} known component updates",
+                entity.id,
+                entity.archetype,
+                entity.components.len()
             );
         }
-    }
-    for limitation in &film.diagnostics.limitations {
-        eprintln!("Limit: {limitation}");
     }
     Ok(())
 }

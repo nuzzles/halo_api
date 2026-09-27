@@ -1,0 +1,22 @@
+package grammar
+import("encoding/binary";"encoding/hex";"encoding/json";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustEquipmentRecoverySource(t *testing.T){
+ rows:=[]any{};names:=make([]string,64);names[6]="simulation-state";names[48]="biped-desired-ability-set-component"
+ e:=profile.MapQuantEntry{Min:[3]float32{-1,-1,-1},Max:[3]float32{1,1,1},AxisWidths:[3]uint{6,7,8},RegionIndexBits:2}
+ p:=ProfilDeBalayageParDefaut();p.PoserLargeursObjetDuMondeDepuisDecoupage(e.Layout());p.Grammaire.SimStateComplet=true
+ arch:=Archetype{Index:35,Components:names,Levels:make([]uint32,64)}
+ var w translocWriter;w.put(1,1);w.put(13,512);w.put(2,1);w.put(1,0);w.put(1,0);w.put(3,2);w.put(6,6);w.put(6,48);w.put(1,0);w.put(3,6);w.put(1,0);w.put(6,2)
+ packet:=func(kind uint16,pay []byte)[]byte{b:=make([]byte,16);binary.LittleEndian.PutUint16(b,kind);binary.LittleEndian.PutUint32(b[4:],uint32(len(pay)));binary.LittleEndian.PutUint64(b[8:],200);return append(b,pay...)}
+ for mode:=0;mode<6;mode++{for _,order:=range [][]int{{1},{3},{3,1},{1,1}}{
+  raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};inputs:=[]any{}
+  for i,index:=range order {data:=packet(0,w.pay);switch mode{case 1:data=append(packet(7,nil),data...);case 2:data=append(data,1,2,3);case 3:bad:=packet(0,nil);binary.LittleEndian.PutUint32(bad[4:],9999);data=append(bad,data...);case 4:data=append(packet(0,nil),data...);case 5:data=append(packet(3,[]byte{1}),data...)};if i>0{data=packet(7,nil)}
+   raw=append(raw,data);meta=append(meta,types.ChunkMeta{Index:index});inputs=append(inputs,map[string]any{"index":index,"chunk_type":1+mode%3,"hex":hex.EncodeToString(data)})
+  }
+  film,err:=source.Load(raw,meta);if err!=nil{t.Fatal(err)}
+  setup:=abilityScanSetup{fc:NewFilmContext(film),gram:grammaireRecord{lay:e.Layout(),arch:arch,prof:p}}
+  wins:=[]equipRecoveryWindow{{slot:512,fromC:5,toC:7,miss:1,tsMin:100,tsMax:300,chunkMin:1,chunkMax:3}}
+  got:=scanEquipmentRecovery(setup,wins);out:=[]any{};for _,r:=range got{out=append(out,map[string]any{"slot":r.Slot,"chunk":r.Chunk,"packet":r.PacketIndex,"time":r.TimestampUS,"counter":r.Counter,"rank":r.Rank,"bit":r.off,"dense":r.dense,"head":r.head})}
+  rows=append(rows,map[string]any{"mode":mode,"inputs":inputs,"names":names,"output":out})
+ }}
+ b,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-equipment-recovery-source.json",b,0600);err!=nil{t.Fatal(err)}
+}

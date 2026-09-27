@@ -1,0 +1,13 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing")
+func TestHaloRustSignedWrapperContinuation(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []int{-84,-52,-20,0,1<<32}{for mode:=0;mode<2;mode++{
+  var bw bitWriter;bw.bit(0);bw.bits(0,32);bw.bit(1);bw.bits(0,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(0,64)
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"wrapper-tail"},Levels:[]uint32{0}}}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=true;cfg.Obs=NouvelleObservation();widths:=map[string]int{"wrapper-tail":width};if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=widths}else{cfg.Profil.Grammaire.LargeursBouchon=widths}
+  w:=NewWorld(reg);w.BindFull(0,0);recs:=marchRecordsOf(bw.buf,w,cfg,1)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"width":width,"mode":mode,"records":recs,"slots":w.slots})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-wrapper-continuation.json",raw,0600);e!=nil{t.Fatal(e)}
+}

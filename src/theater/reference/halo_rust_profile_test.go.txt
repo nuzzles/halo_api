@@ -1,0 +1,41 @@
+package grammar
+
+import (
+ "encoding/json"
+ "math"
+ "os"
+ "sort"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+)
+
+func TestHaloRustProfileParity(t *testing.T) {
+ catalog, err := profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json")
+ if err != nil { t.Fatal(err) }
+ rows := []any{}
+ names := make([]string,0,len(catalog.Maps))
+ for name := range catalog.Maps { names = append(names,name) }; sort.Strings(names)
+ for _, name := range names {
+  entry := catalog.Maps[name]
+  for _, build := range []string{"HI_1_12_0", "HI_1_13_0", ""} {
+   p := profile.Resoudre(profile.ClesDuFilm{RegistrePresent:true, Format:27, Majeure:41, MajeureLue:true, Identite:profile.FilmIdentity{Build:build}, IdentiteLue:build!=""}, &entry)
+   if (p.Err() != nil) != (build == "") { t.Fatalf("unexpected profile error for %q: %v", build, p.Err()) }
+   absolute := entry.PrecisionAbsolue()
+   bal := ProfilDeBalayageParDefaut(); bal.PoserLargeursObjetDuMondeDepuisDecoupage(entry.Layout())
+   movement := p.Movement()
+   capture := bal.Mouvement
+   lo,hi := [3]uint32{},[3]uint32{}
+   for i,r := range capture.Range { lo[i]=math.Float32bits(r.Min); hi[i]=math.Float32bits(r.Max) }
+   rows = append(rows, map[string]any{"map":name, "build":build, "identity_read":p.IdentityRead(), "personalization_known":p.Slots().Connu,
+    "mpp":[]int{p.MPP().Lead,p.MPP().Index}, "personalization":p.Slots().PersoBytes,
+    "personalization_delta":p.Slots().DeltaBits, "region":absolute.Region,
+    "index_bits":absolute.IndexW, "axes":absolute.AxisW,
+    "traversal_axes":movement.Traversal.AxisW,"handle_bits":movement.Traversal.IndexW,
+    "capture":map[string]any{"min_bits":lo,"max_bits":hi,"quantum_bits":math.Float32bits(capture.DeltaQuantum),"region":capture.WorldObject.Region,"axis_widths":capture.WorldObject.AxisW,"region_index_bits":capture.WorldObject.IndexW},
+    "delta_quantum":movement.DeltaQuantum,"delta_axis":movement.DeltaAxisWidth,
+    "full_precision":movement.FullPrecision,"delta_handle_tail":movement.DeltaHasHandleTail})
+  }
+ }
+ output, err := json.Marshal(rows); if err != nil { t.Fatal(err) }
+ if err = os.WriteFile("/private/tmp/halo-levelup-profile-oracle.json",output,0600); err != nil { t.Fatal(err) }
+}

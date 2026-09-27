@@ -1,0 +1,54 @@
+package grammar
+
+import (
+ "encoding/binary"
+ "encoding/hex"
+ "encoding/json"
+ "os"
+ "reflect"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+)
+
+// Reuse wire inputs, but obtain expectations from the actual source scanner:
+// its discovered band differs from the primitive fixture's explicit band.
+func TestHaloRustNavpointSource(t *testing.T) {
+ raw, err := os.ReadFile("/private/tmp/halo-navpoint-primitive.json"); if err != nil { t.Fatal(err) }
+ var seeds []struct { Names []string; Check bool; Inputs []struct { Key bool; Chunk bool; Ms int; Hex string } }
+ if err = json.Unmarshal(raw,&seeds); err != nil { t.Fatal(err) }
+ rows := []any{}
+ for i, seed := range seeds[:96] {
+  if seed.Check { continue }
+  data := []byte{}
+  for _, input := range seed.Inputs {
+   if input.Chunk { continue }
+   payload,e := hex.DecodeString(input.Hex); if e != nil { t.Fatal(e) }
+   p := make([]byte,16); kind := uint16(PacketTypeDelta); if input.Key { kind = PacketTypeKeyframe }
+   binary.LittleEndian.PutUint16(p,kind)
+   binary.LittleEndian.PutUint32(p[4:],uint32(len(payload)))
+   binary.LittleEndian.PutUint64(p[8:],uint64(input.Ms+5000)*1000)
+   data = append(data,append(p,payload...)...)
+  }
+  film,e := source.Load(source.MemoryChunks{data},[]types.ChunkMeta{{Index:1}}); if e != nil { t.Fatal(e) }
+  bootstrap:=make([]byte,8+14*64*260)
+  binary.LittleEndian.PutUint32(bootstrap,41);binary.LittleEndian.PutUint32(bootstrap[4:],27)
+  for j,name:=range seed.Names {copy(bootstrap[8+(12*64+j)*260:],[]byte(name))}
+  bootstrap[8+13*64*260]=0xff
+  reg,e:=ParseRegistryChunk(bootstrap);if e!=nil {t.Fatal(e)}
+  arch,ok:=reg.Archetype(12);if !ok {t.Fatal("missing synthetic archetype")}
+  fc := NewFilmContext(film); fc.reg=reg; fc.regLu=true; fc.bal=ProfilDeBalayageParDefaut(); fc.bal.Grammaire.ControleDeCorruption=false; fc.corrLu=true
+  start := map[int]int{1:10000+i*100}
+  scan,e := ScanNavpointRadial(fc,start); if e != nil { t.Fatal(e) }
+  kf := ScanWorldObjectKeyframes(fc.Film(),12); band := bandeObserveeKeyframes(kf)
+  observed := &NavpointRadialScan{Blocked:map[int]int{},KeyCensus:len(kf.SeenUS),SlotsBand:len(kf.Band),SlotsObserved:len(band)}
+  w := navpointRadialWalk{prof:fc.ProfilDeBalayage(),arch:arch,reg:reg,sc:observed}
+  w.obs=w.install(); original:=w.obs.NavpointHook; emissions:=[]any{}
+  w.obs.NavpointHook=func(f NavpointField,values []uint64) { emissions=append(emissions,map[string]any{"keyframe":w.key,"field":f,"values":append([]uint64{},values...)}); original(f,values) }
+  for _,c := range fc.ChunkNumbers() { d,p,ok:=fc.ChunkAt(c); if ok { w.scanChunk(d,p,band,start,c) } }
+  if !reflect.DeepEqual(scan,observed) { t.Fatalf("observer scan differs case %d",i) }
+  if scan.Reads==nil { scan.Reads=[]types.NavpointRadialRead{} }
+  rows=append(rows,map[string]any{"case":i,"names":seed.Names,"hex":hex.EncodeToString(data),"start":start[1],"output":scan,"emissions":emissions})
+ }
+ raw,err=json.Marshal(rows); if err != nil { t.Fatal(err) }; if err=os.WriteFile("/private/tmp/halo-navpoint-source.json",raw,0600);err!=nil {t.Fatal(err)}
+}
