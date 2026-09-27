@@ -12,6 +12,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+## [0.3.1] - 2026-09-27
+
+This release has an [MSRV][] of 1.96.
+
+### Fixed
+
+- Models are now `Serialize`.
+
 ## [0.3.0] - 2026-08-03
 
 This release has an [MSRV][] of 1.96.
@@ -73,7 +81,8 @@ This release has an [MSRV][] of 1.96.
 
 [MSRV]: README.md#msrv
 
-[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/nuzzles/halo_api/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/nuzzles/halo_api/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/nuzzles/halo_api/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/nuzzles/halo_api/compare/v0.1.0...v0.1.1
