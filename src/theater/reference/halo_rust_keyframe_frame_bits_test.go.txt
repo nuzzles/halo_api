@@ -1,7 +1,0 @@
-package grammar
-import("encoding/json";"os";"testing")
-func TestHaloRustKeyframeFrameBits(t *testing.T){
- rows:=[]any{};values:=[]int{-1<<63,-1<<62,-1,0,1,32,108,1<<62,1<<63-1}
- for _,header:=range values{for _,word:=range values{ctx:=ContexteParDefaut();ctx.Profil.Cadre.EnTeteBits=header;ctx.Profil.Cadre.MotDeTailleBits=word;rows=append(rows,map[string]any{"header":header,"word":word,"frame_bits":ctx.Profil.Cadre.CadreBits()})}}
- raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-keyframe-frame-bits.json",raw,0600);e!=nil{t.Fatal(e)}
-}

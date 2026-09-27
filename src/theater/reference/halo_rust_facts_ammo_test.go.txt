@@ -1,8 +1,0 @@
-package replay
-import("encoding/hex";"encoding/json";"math";"math/rand";"os";"testing";"fmt")
-func haloRustAmmoDump(a SlotAmmo)any{var gauge any;if a.Gauge!=nil{gauge=math.Float64bits(*a.Gauge)};return map[string]any{"mag":a.Mag,"res":a.Res,"gauge_bits":gauge,"overheat":a.Overheat,"flags":a.Flags}}
-func TestHaloRustFactsAmmo(t *testing.T){rng:=rand.New(rand.NewSource(74114));rows:=[]any{};special:=[]uint64{0,1,0x8000000000000000,0x7ff0000000000000,0xfff0000000000000,0x7ff0000000000001,0x7ff8000000000000,^uint64(0),0x7fefffffffffffff}
- for n:=0;n<256;n++{a:=SlotAmmo{Overheat:rng.Uint32(),Flags:rng.Uint32()};if n&1!=0{v:=rng.Uint32();if n%9==0{v=0};a.Mag=&v};if n&2!=0{v:=rng.Uint32();if n%11==0{v=0};a.Res=&v};if n&4!=0{bits:=rng.Uint64();if n<128{bits=special[(n/8)%len(special)]};v:=math.Float64frombits(bits);a.Gauge=&v};w:=gwriter{};encodeAmmo(&w,a)
- inputs:=[][]byte{append([]byte{},w.b...)};for end:=0;end<len(w.b);end++{inputs=append(inputs,append([]byte{},w.b[:end]...))};for at:=0;at<len(w.b);at++{b:=append([]byte{},w.b...);b[at]^=0xff;inputs=append(inputs,b)}
- for _,input:=range inputs{r:=greader{b:input};decoded:=decodeAmmo(&r);firstOffset:=r.off;err:="";if r.err!=nil{err=r.err.Error()};again:=decodeAmmo(&r);after:="";if r.err!=nil{after=r.err.Error()};rows=append(rows,map[string]any{"source":haloRustAmmoDump(a),"encoded_hex":hex.EncodeToString(w.b),"input_hex":hex.EncodeToString(input),"decoded":haloRustAmmoDump(decoded),"first_offset":firstOffset,"error":err,"again":haloRustAmmoDump(again),"after_error":after,"offset":r.off})}}
- raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-ammo.json",raw,0600);e!=nil{t.Fatal(e)};fmt.Printf("ammo cases=%d\n",len(rows))}

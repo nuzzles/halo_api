@@ -1,7 +1,0 @@
-package grammar
-// Retain the shared callback order while enabling native movement capture.
-func haloRustMovementRecoveryHooks(obs *Observation) *[]any {
- observations:=haloRustComponentHooks(obs)
- obs.EtatMouvementHook=func(comp EtatMouvementComposant,slot uint32,v []uint64){*observations=append(*observations,map[string]any{"kind":"movement_state","component":comp.String(),"slot":slot,"values":v})}
- return observations
-}

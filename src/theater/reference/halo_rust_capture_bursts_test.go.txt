@@ -1,7 +1,0 @@
-package objectives
-import("testing";"encoding/json";"encoding/hex";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
-func TestHaloRustCaptureBursts(t *testing.T){
- rng:=rand.New(rand.NewSource(416));rows:=[]any{}
- for run:=0;run<1024;run++{frames:=[]types.Packet{};inputs:=[]any{};base:=rng.Uint64();for j:=0;j<run%25;j++{pay:=make([]byte,rng.Intn(50));rng.Read(pay);for k,tier:=range ladderTiers{if j%3!=0||k!=run%6{pay=append(pay,tier...);if j%7==0{pay=append(pay,tier...)}}};ts:=base+uint64(j)*1000000;if j%5==0{ts=base-uint64(j)*1000};frames=append(frames,types.Packet{TS:ts,Payload:pay});inputs=append(inputs,map[string]any{"ts":ts,"hex":hex.EncodeToString(pay),"tiers":countDistinctTiers(pay)})};start:=run*1000-500000;bursts:=scanCaptureBursts(frames,start);out:=[]int{};for _,b:=range bursts{out=append(out,b.matchMS)};rows=append(rows,map[string]any{"frames":inputs,"start":start,"bursts":out})}
- b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-capture-bursts.json",b,0600);e!=nil{t.Fatal(e)}
-}

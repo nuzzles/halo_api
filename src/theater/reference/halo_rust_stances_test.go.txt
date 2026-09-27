@@ -1,8 +1,0 @@
-package replay
-import("testing";"encoding/json";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
-func TestHaloRustStances(t *testing.T){rng:=rand.New(rand.NewSource(41900));rows:=[]any{}
-for i:=0;i<1024;i++{tracks:=[]Track{};deaths:=[]int{};closed:=map[int]bool{};for j:=0;j<i%15;j++{start:=rng.Intn(100)-5;tracks=append(tracks,Track{Slot:uint32(j%5),StartFrame:start,EndFrame:start+rng.Intn(30),Points:[]Point{}});if j%3==0{deaths=append(deaths,j);closed[j]=true}}
-reads:=[]types.MovementStateRead{};for j:=0;j<i%201;j++{reads=append(reads,types.MovementStateRead{Slot:uint32(rng.Intn(8)),Kind:[]string{"crouch","sprint","jump","slide"}[j%4],TimestampUS:uint64(rng.Intn(120000)),On:rng.Intn(2)==0})}
-stats:=types.MovementStateStats{Scanned:i%3!=0,Absent:i%11==0,Records:i,Desyncs:i%13,SlotUnbound:i%7,EventPacketsUnlocated:i%5,MapWidths:[3]uint{16,17,18},JumpEpisodes:i%17,JumpsDerived:i%19};origin:=uint64(10000);step:=uint64(1000);if i%23==0{step=0};out,cov:=buildStances(stanceInputs{reads:reads,stats:stats,origin:origin,step:step,tracks:tracks,closedByDeath:closed});if out==nil{out=[]Stance{}}
-rows=append(rows,map[string]any{"reads":reads,"stats":stats,"origin":origin,"step":step,"tracks":tracks,"deaths":deaths,"stances":out,"coverage":cov})}
-b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-stances.json",b,0600);e!=nil{t.Fatal(e)}}

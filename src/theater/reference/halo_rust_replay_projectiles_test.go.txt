@@ -1,7 +1,0 @@
-package replay
-import("testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/types")
-func TestHaloRustReplayProjectiles(t *testing.T){
- rng:=rand.New(rand.NewSource(42011));rows:=[]any{}
- for run:=0;run<1024;run++{tracks:=[]types.ProjectileTrack{};for i:=0;i<run%40;i++{tr:=types.ProjectileTrack{Slot:uint32(i%8),Gen:uint32(i/8),Pts:[]types.ProjectileSample{}};stamp:=uint64(rng.Intn(5))*100000;x,y:=float32(rng.Intn(10)),float32(rng.Intn(10));for j:=0;j<(run+i)%20;j++{stamp+=uint64(rng.Intn(4))*50000;if run%7==0&&j%3==0&&stamp>100000{stamp-=100000};x+=float32(rng.Intn(30))/10;if run%5==0&&j==3{x+=10};if run%11==0&&j==2{x+=10.004};if run%13==0&&j==4{x-=30};tr.Pts=append(tr.Pts,types.ProjectileSample{TimestampUS:stamp,X:x,Y:y,AtRest:j%2==0})};tracks=append(tracks,tr)};origin:=uint64(run%3)*100000;step:=[]uint64{1,50000,100000,1000000}[run%4];projectiles,links,truncated:=buildProjectiles(tracks,origin,step);if projectiles==nil{projectiles=[]Projectile{}};if links==nil{links=map[int]int{}};rows=append(rows,map[string]any{"tracks":tracks,"origin":origin,"step":step,"output":map[string]any{"projectiles":projectiles,"published_by_raw":links,"coverage":ProjectileCoverage{Tracks:len(tracks),Published:len(projectiles),Truncated:truncated}}})}
- b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-projectiles.json",b,0600);e!=nil{t.Fatal(e)}
-}

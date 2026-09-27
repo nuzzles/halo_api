@@ -1,9 +1,0 @@
-package replay
-import("testing";"encoding/json";"os";"fmt")
-func TestHaloRustWeaponFamily(t *testing.T){
- type Row struct{ID string `json:"id"`;Family *uint32 `json:"family"`};rows:=[]Row{}
- add:=func(id string){v,ok:=FamilyOfWeaponID(id);r:=Row{ID:id};if ok{r.Family=&v};rows=append(rows,r)}
- for _,p:=range []string{"","0x","0X"," ","\t","\n","\u00a0","+","-"," 0x"}{for _,v:=range []string{"","0","1","aBcD","12345678","123456789","123456789abcdef0","ffffffffffffffff","10000000000000000","_ff","ff_aa","g12"}{for _,s:=range []string{""," trailing","xyz","\n","_","0x"}{add(p+v+s)}}}
- for i:=uint64(0);i<512;i++{add(fmt.Sprintf("0x%016X",i*0x123456789abc));add(fmt.Sprintf("0x%08X",i*0x12345))}
- b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-weapon-family.json",b,0600);e!=nil{t.Fatal(e)}
-}

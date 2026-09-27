@@ -1,7 +1,0 @@
-package replay
-import("testing";"os";"encoding/json";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/types")
-func TestHaloRustFactsLoadouts(t *testing.T){
- rng:=rand.New(rand.NewSource(42007));rows:=[]any{};families:=[]uint32{0,1,0xffffffff};for f:=range loadoutFamilies(){families=append(families,f)};sort.Slice(families,func(i,j int)bool{return families[i]<families[j]})
- for run:=0;run<1024;run++{raw:=[]types.KeyframeLoadout{};tracks:=[]Track{};slots:=[]uint32{};for slot:=uint32(0);slot<8;slot++{if rng.Intn(3)!=0{tracks=append(tracks,Track{Slot:slot});slots=append(slots,slot)}};for i:=0;i<run%70;i++{l:=types.KeyframeLoadout{TimestampUS:uint64(rng.Intn(8))*1000000,Slot:uint32(rng.Intn(8))};for j:=0;j<i%20;j++{l.Families=append(l.Families,families[rng.Intn(len(families))])};raw=append(raw,l)};origin:=uint64(run%4)*1000000;step:=uint64(run%7+1)*100000;built:=buildLoadouts(raw,origin,step);if built==nil{built=[]Loadout{}};before:=append([]Loadout{},built...);pub:=keepLoadoutsOfPublishedTracks(built,tracks);if pub==nil{pub=[]Loadout{}};rows=append(rows,map[string]any{"raw":raw,"origin":origin,"step":step,"slots":slots,"built":before,"published":pub})}
- data,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-loadouts.json",data,0600);e!=nil{t.Fatal(e)}
-}

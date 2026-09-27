@@ -1,8 +1,0 @@
-package grammar
-import("testing";"os";"encoding/json";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
-func TestHaloRustPlayerTeamsCorpus(t *testing.T){
- rows:=map[string]any{};paths,e:=filepath.Glob("/Users/simbleau/git/halo_api/experiments/films/*/*/film.json");if e!=nil{t.Fatal(e)};if len(paths)!=32{t.Fatalf("corpus size %d",len(paths))}
- for _,p:=range paths{raw,e:=os.ReadFile(p);if e!=nil{t.Fatal(e)};var m struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}};if e=json.Unmarshal(raw,&m);e!=nil{t.Fatal(e)};var chunks source.MemoryChunks;meta:=[]types.ChunkMeta{};for _,c:=range m.Chunks{d,e:=os.ReadFile(filepath.Join(filepath.Dir(p),c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,d);meta=append(meta,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})};f,e:=source.Load(chunks,meta);if e!=nil{t.Fatal(e)};teams,rep:=ScanPlayerTeams(NewFilmContext(f));if teams==nil{teams=map[int]int{}};folder:=filepath.Join(filepath.Base(filepath.Dir(filepath.Dir(p))),filepath.Base(filepath.Dir(p)));rows[folder]=map[string]any{"by_index":teams,"report":rep}
- }
- raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-player-teams-corpus.json",raw,0600);e!=nil{t.Fatal(e)}
-}

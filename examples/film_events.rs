@@ -1,60 +1,42 @@
-//! Downloads only the version-41 footer and prints the recorded event timeline.
+//! Download a v41 film and print its recorded summaries through the new API.
 mod common;
 
-use halo_api::theater::SummaryKind;
+use halo_api::theater::resolved::{EventFilter, EventKind, Record};
+use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
-    let report = halo.match_summary_events_with_validation(&match_id).await?;
-    println!("Timeline:");
-    for event in &report.summary.events {
-        let seconds = event.time_us as f64 / 1_000_000.;
-        match &event.medal {
-            Some(medal) => println!(
-                "  {seconds:>8.3}s  {:<16} {} (film code {}, NameId {:?})",
-                event.name,
-                medal.name.as_deref().unwrap_or("Unknown medal"),
-                medal.film_id,
-                medal.name_id,
-            ),
-            None => println!(
-                "  {seconds:>8.3}s  {:<16} {:?} (type {:?}, metadata {})",
-                event.name, event.kind, event.type_code, event.metadata,
-            ),
-        }
+    let manifest = halo.match_film(&match_id).await?;
+    if manifest.custom_data.film_major_version != 41 {
+        return Err("only v41 films are supported".into());
     }
-    let count = |kind| {
-        report
-            .summary
-            .events
-            .iter()
-            .filter(|e| e.kind == kind)
-            .count()
-    };
-    println!(
-        "Kills: {}, deaths: {}, medals: {}, mode events: {}",
-        count(SummaryKind::Kill),
-        count(SummaryKind::Death),
-        count(SummaryKind::Medal),
-        count(SummaryKind::Mode)
-    );
-    println!(
-        "Matches declared footer count: {}",
-        report.summary.matches_declared_counts()
-    );
-    println!(
-        "Matches per-player stats and medal identities: {}",
-        report.validation.matches_stats()
-    );
-    for player in report
-        .validation
-        .players
+    let chunks = halo.film_chunks(&manifest).await?;
+    let metadata: Vec<_> = chunks
         .iter()
-        .filter(|p| !p.matches_stats())
-    {
-        println!("Mismatch: {player:?}");
+        .map(|chunk| FilmSourceMetadata {
+            index: i64::from(chunk.metadata.index),
+            chunk_type: i64::from(chunk.metadata.chunk_type),
+            start_ms: chunk.metadata.start_time_offset_ms,
+        })
+        .collect();
+    let bytes: Vec<_> = chunks.iter().map(|chunk| chunk.data.as_slice()).collect();
+    let source = FilmSource::load(&bytes, &metadata)?;
+    let film = Film::parse(&source, ParseOptions::default())?;
+    let resolved = film.resolve();
+    for event in resolved.query(EventFilter {
+        kind: Some(EventKind::Summary),
+        ..Default::default()
+    }) {
+        if let Some(Record::Summary(summary)) = resolved.record(event.source) {
+            println!(
+                "{:.3}s {} {:?}",
+                event.timestamp_us as f64 / 1_000_000.0,
+                summary.name,
+                summary.kind
+            );
+        }
     }
     Ok(())
 }

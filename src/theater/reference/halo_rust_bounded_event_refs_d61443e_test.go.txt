@@ -1,9 +1,0 @@
-package grammar
-import("testing";"encoding/json";"encoding/hex";"os";"compress/zlib";"math/rand")
-func TestHaloRustBoundedEventRefsD61443e(t *testing.T){rng:=rand.New(rand.NewSource(410923));refs:=[]any{};heads:=[]any{}
- read:=func(pay []byte,at,domain int)guardedRef{if domain==1{return readDom1Ref(pay,at)};return readPlainRef(pay,at,int(refDomWidth(domain)))}
- for n:=0;n<4096;n++{pay:=make([]byte,n%24);rng.Read(pay);for domain:=0;domain<9;domain++{start:=(n*7+domain)%((len(pay)+1)*8);refs=append(refs,map[string]any{"hex":hex.EncodeToString(pay),"start":start,"domain":domain,"ref":read(pay,start,domain)})}
-  for _,kind:=range []int{8,22,103}{pay:=make([]byte,2+n%25);rng.Read(pay);pay[0]=0xc0|byte(kind>>1);pay[1]=(pay[1]&0x7f)|byte(kind&1)<<7;domains:=[]int{2,3,7};if kind==22{domains=[]int{1,1,7}};if kind==103{domains=[]int{0,0,7}};at:=9;rs:=[]guardedRef{};for _,dom:=range domains{r:=read(pay,at,dom);rs=append(rs,r);at=r.EndBit};heads=append(heads,map[string]any{"hex":hex.EncodeToString(pay),"refs":rs})}
- }
- f,e:=os.Create("/private/tmp/halo-bounded-event-refs-d61443e.json.zlib");if e!=nil{t.Fatal(e)};defer f.Close();z:=zlib.NewWriter(f);if e=json.NewEncoder(z).Encode(map[string]any{"refs":refs,"heads":heads});e!=nil{t.Fatal(e)};if e=z.Close();e!=nil{t.Fatal(e)}
-}

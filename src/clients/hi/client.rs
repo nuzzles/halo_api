@@ -8,7 +8,6 @@ use xbox::util::wrap_xuid;
 
 use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
-use super::film::{FilmEvent, FilmEventReport};
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CareerRanks, CareerRewardTrack, CsrRecords,
     CsrSeason, CsrSeasonCalendar, CurrentUser, CustomizationItemMetadata, EmblemMapping,
@@ -513,85 +512,6 @@ impl HaloInfiniteClient {
             chunks.push(self.film_chunk(film, chunk).await?);
         }
         Ok(chunks)
-    }
-
-    /// Downloads only the summary chunks and decodes the version-41 highlight timeline.
-    ///
-    /// Includes named medals, raw event codes, recorded identities and source spans.
-    /// A missing footer or count mismatch remains explicit in the returned report.
-    pub async fn match_summary_events(
-        &self,
-        match_id: &str,
-    ) -> Result<crate::theater::SummaryEventReport, InfiniteClientError> {
-        let film = self.match_film(match_id).await?;
-        self.summary_events_for_film(&film).await
-    }
-
-    /// Downloads version-41 highlights and checks counts and individual medal identities.
-    /// Mismatches are returned as diagnostics, not discarded or replaced with stats API data.
-    pub async fn match_summary_events_with_validation(
-        &self,
-        match_id: &str,
-    ) -> Result<crate::theater::ValidatedSummaryEventReport, InfiniteClientError> {
-        let (summary, stats) = tokio::try_join!(
-            self.match_summary_events(match_id),
-            self.match_stats(match_id)
-        )?;
-        let validation = crate::theater::validate_summary_events(&summary, &stats);
-        Ok(crate::theater::ValidatedSummaryEventReport {
-            summary,
-            validation,
-        })
-    }
-
-    async fn summary_events_for_film(
-        &self,
-        film: &FilmManifest,
-    ) -> Result<crate::theater::SummaryEventReport, InfiniteClientError> {
-        if film.custom_data.film_major_version != 41 {
-            return Err(InfiniteClientError::FilmDecode(Arc::new(
-                crate::theater::DecodeError::UnsupportedVersion(
-                    film.custom_data.film_major_version,
-                ),
-            )));
-        }
-        let mut chunks = Vec::new();
-        for chunk in film.custom_data.chunks.iter().filter(|c| c.chunk_type == 3) {
-            chunks.push(self.film_chunk(film, chunk).await?);
-        }
-        crate::theater::decode_summary_events(&chunks, film.custom_data.film_major_version)
-            .map_err(|e| InfiniteClientError::FilmDecode(Arc::new(e)))
-    }
-
-    /// Downloads version-41 footer chunks and returns recorded human-player highlights.
-    ///
-    /// This is a view of [`Self::match_summary_events`] in the established highlight
-    /// types. Use that richer API for source spans, medal NameIds and declared counts.
-    /// Unsupported film versions return a decode error.
-    pub async fn match_highlight_events(
-        &self,
-        match_id: &str,
-    ) -> Result<Vec<FilmEvent>, InfiniteClientError> {
-        self.match_summary_events(match_id)
-            .await?
-            .events
-            .into_iter()
-            .map(FilmEvent::try_from)
-            .collect::<Result<_, _>>()
-            .map_err(|e| InfiniteClientError::FilmDecode(Arc::new(e)))
-    }
-
-    /// Returns version-41 highlights with per-player aggregate count comparisons.
-    ///
-    /// Uses the current summary decoder and stats validation. For declared-count
-    /// and individual medal-identity diagnostics, use
-    /// [`Self::match_summary_events_with_validation`].
-    pub async fn match_highlight_events_with_validation(
-        &self,
-        match_id: &str,
-    ) -> Result<FilmEventReport, InfiniteClientError> {
-        FilmEventReport::try_from(self.match_summary_events_with_validation(match_id).await?)
-            .map_err(|e| InfiniteClientError::FilmDecode(Arc::new(e)))
     }
 
     /// Gets per-player CSR and MMR skill results for a completed match.

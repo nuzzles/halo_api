@@ -12,7 +12,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 ## What this crate does
 
-- Decodes supported v41 Theater films into typed, serializable player/life/event streams with `theater::Film`.
+- Parses v41 Theater recordings with `theater::Film` and indexes them with `ResolvedFilm`.
 - Separates authentication (`HaloAuthClient`) from Halo API operations (`HaloInfiniteClient`).
 - Acquires and caches both the Spartan token and Waypoint flight clearance.
 - Covers stats, skill, profile, UGC, progression, career rank, reward tracks, ban, and privacy endpoints.
@@ -61,26 +61,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Theater films
 
-`halo_api::theater::Film::try_from_chunks(&chunks, options)` decodes decompressed
-Theater chunks without network or filesystem access. It consolidates the motion,
-aim, input, roster/lives, recorded armor appearance, combat, vitality, weapons,
-scope, velocity, projectile motion, and named summary-event experiments. This remains a partial v41 decoder;
-unknown data is not guessed.
-`clients::hi::film` reexports the current theater API. The highlight client methods
-remain available as adapters over the v41 summary decoder.
+Parse v41 recordings once, then borrow an indexed view for queries and playback:
 
-For kills, deaths, mode highlights, and medal awards alone, use
-`theater::decode_summary_events(&chunks, 41)` or
-`halo.match_summary_events(match_id).await`: only footer chunks are needed.
-`match_summary_events_with_validation` additionally compares each player's
-kills, deaths, and individual medal `NameId` counts against match stats.
-The catalog covers 155 published film codes, including all 151 current CMS
-medals. Unknown codes stay inspectable; assists and objective subtypes remain
-unresolved. See [event format, evidence, and examples](experiments/FILM_EVENTS.md).
+```rust,no_run
+use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
+# fn example(chunks: &[Vec<u8>], metadata: &[FilmSourceMetadata]) -> Result<(), Box<dyn std::error::Error>> {
+let source = FilmSource::load(chunks, metadata)?;
+let film = Film::parse(&source, ParseOptions::default())?;
+let mut resolved = film.resolve();
+let world = resolved.seek(10_000_000); // microseconds
+# Ok(())
+# }
+```
 
-See the [decoder API, folder example, JSON replay export, and measurements](experiments/THEATER_DECODER.md).
-The library is checked on `wasm32-unknown-unknown`; file loading and replay export
-live in the experiment example.
+`Film` retains the original input and ordered native reads, including unknown
+regions and partial decoding. `ResolvedFilm` indexes those reads and accumulates
+entity state without reparsing. See the [Theater format and API documentation](src/theater/docs/README.md)
+for the fidelity contract, supported scope, and validation.
 
 ## MSRV
 

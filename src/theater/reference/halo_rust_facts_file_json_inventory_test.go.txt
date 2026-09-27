@@ -1,9 +1,0 @@
-package replay
-import("encoding/json";"encoding";"fmt";"os";"reflect";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/killsource")
-func TestHaloRustFactsFileJSONInventory(t *testing.T){
- inventory:=map[string]any{};var walk func(reflect.Type)
- walk=func(typ reflect.Type){name:=typ.String();if _,ok:=inventory[name];ok{return};row:=map[string]any{"kind":typ.Kind().String(),"json_marshaler":typ.Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()),"text_marshaler":typ.Implements(reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem())};inventory[name]=row
- switch typ.Kind(){case reflect.Pointer,reflect.Slice,reflect.Array:row["element"]=typ.Elem().String();if typ.Kind()==reflect.Array{row["length"]=typ.Len()};walk(typ.Elem());case reflect.Map:row["key"]=typ.Key().String();row["element"]=typ.Elem().String();walk(typ.Key());walk(typ.Elem());case reflect.Struct:fields:=[]any{};for i:=0;i<typ.NumField();i++{f:=typ.Field(i);fields=append(fields,map[string]any{"name":f.Name,"type":f.Type.String(),"exported":f.PkgPath=="","json_tag":f.Tag.Get("json"),"anonymous":f.Anonymous});if f.PkgPath==""{walk(f.Type)}};row["fields"]=fields}
- }
- for _,v:=range []any{(*profile.FilmIdentity)(nil),[]fallback.Declenchement(nil),FilmStatborg{},(*killsource.Result)(nil)}{walk(reflect.TypeOf(v))};raw,err:=json.MarshalIndent(inventory,"","  ");if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-file-json-inventory.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("JSON inventory types=%d\n",len(inventory))
-}

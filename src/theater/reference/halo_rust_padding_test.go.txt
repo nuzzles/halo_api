@@ -1,7 +1,0 @@
-package grammar
-import("testing";"os";"encoding/json";"encoding/hex";"math/rand")
-func TestHaloRustPadding(t *testing.T) {
- rng:=rand.New(rand.NewSource(641));rows:=[]any{}
- for size:=0;size<17;size++ {data:=make([]byte,size);rng.Read(data);for start:=0;start<size*8+17;start++ {reads:=[]any{};for width:=uint(0);width<=64;width++ {br:=LecteurSur(data);br.SetBitPos(start);value:=br.ReadBits(width);reads=append(reads,map[string]any{"width":width,"value":value,"end":br.BitPos()})};rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"start":start,"reads":reads})}}
- data,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-native-padding.json",data,0600);err!=nil{t.Fatal(err)}
-}

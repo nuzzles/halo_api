@@ -1,9 +1,0 @@
-{
-  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
-  "fixture": "lazy-widths-v41.json.zlib",
-  "sha256": "00ebf823689ccc7737e92468b11728e8b6700d6eab6ac859de66fa2696020dfd",
-  "native_cases": 648,
-  "host_and_simulated_32_bit": "passed",
-  "wasm32_node_runtime": "passed",
-  "scope": "direct component reads; frame eager validation and unsupported address arithmetic remain open"
-}

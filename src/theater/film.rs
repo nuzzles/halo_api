@@ -1,4 +1,87 @@
 //! Recording-only entry. Parsing stops are data, not discarded packets.
+pub use super::parser::anticipated_bindings::AnticipatedDeclaration;
+pub use super::parser::bootstrap::FilmIdentity;
+pub use super::parser::bot_metadata::{FilmBotEntry, NativeBotCandidate, NativeBotMetadataRead};
+pub use super::parser::chain_inference::ChainInferenceOutcome;
+pub use super::parser::components::{
+    BindingOrigin, ComponentField, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan,
+    EntityRecord, EntityViewStop, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop,
+    KeyframeComponentSpan, KeyframeRecord, KeyframeStop, NativeActionBlock, NativeControlEntry,
+    NativeKeyframeTable,
+};
+pub use super::parser::datums::{DatumEntry, DatumTable};
+pub use super::parser::event_heads::{
+    DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
+};
+pub use super::parser::fire_events::{
+    FilmFireEvent, FireUnitReference, NativeFireAimAttempt, NativeFireAimMethod, NativeFireAimStop,
+    NativeFireField, NativeFireHeaderStop, NativeFireRead,
+};
+pub use super::parser::highlight_events::{
+    NativeHighlightEvent, NativeHighlightIdentityRead, NativeHighlightScan, NativeHighlightTailRead,
+};
+pub use super::parser::kill_event_chain::{
+    KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
+    NativeEventListRead, NativeEventListStop, NativeEventRecord,
+};
+pub use super::parser::medals::MedalAward;
+pub use super::parser::native_context::NativeContextRegistryError;
+pub use super::parser::native_event_gate::{NativeEventGate15Policy, NativeEventGate15Selection};
+pub use super::parser::native_identity::{
+    NativeIdentityField, NativeIdentityRead, NativeIdentityValue,
+};
+pub use super::parser::native_march::NativeFrameMetadata;
+pub use super::parser::native_packet_heads::NativePacketHeadRead;
+pub use super::parser::native_pickups::{NativePickupOutcome, NativePickupRead};
+pub use super::parser::native_profile::{
+    NativeMovementProfile, NativePrecisionDescriptor, NativeProfileResolveError,
+};
+pub use super::parser::native_scan_profile::{
+    NativeKeyframeLayout, NativeScanGrammar, NativeScanProfile, NativeSharedWidths,
+};
+pub use super::parser::native_weapon_damage::{NativeWeaponDamageField, NativeWeaponDamageRead};
+pub use super::parser::native_zoom::NativeZoomRead;
+pub use super::parser::objective_extract::ObjectiveFooterEvent;
+pub use super::parser::player_table::{
+    NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTable, PlayerTableError,
+    PlayerTableReport, PlayerTableShorts, PlayerTableSlot,
+};
+pub use super::parser::position_capture::NativePositionKind;
+pub use super::parser::production_frame::{
+    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
+};
+pub use super::parser::profile::FilmMapBounds;
+pub use super::parser::profile_values::{FilmMppWidths, FilmQuantizationRange};
+pub use super::parser::read_diagnostics::{
+    FilmComponentObservation, FilmReadDiagnostics, NativeAbilityNonPredictedState, NativeCamoState,
+    NativeEquipmentCreationField, NativeEquipmentField, NativeGameEngineField,
+    NativeManagedObjectField, NativeManagedPropertyField, NativeMovementComponent, NativeMppField,
+    NativeNavpointField, NativeObjectParentState, NativeObjectiveField, NativePlayerStateField,
+    NativeProbeComponent, NativeReadOperation, NativeReadRefusal, NativeWidthAdjustment,
+    NativeWidthPurpose, NativeWidthRefusal,
+};
+pub use super::parser::records::{RecordHeader, RecordKind};
+pub use super::parser::recovery::{AnchorRecovery, RecoveredKeyframeAnchor};
+pub use super::parser::registry::{
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
+    NativeRegistrySlotRead,
+};
+pub use super::parser::replication::KeyframeRecoveryPolicy;
+pub use super::parser::roster_updates::{
+    NativeRosterRead, RosterEntry, RosterReport, RosterUpdate,
+};
+pub use super::parser::source::{
+    FilmChunkProvider, FilmInflateError, FilmSource, FilmSourceError, FilmSourceMetadata,
+};
+pub use super::parser::translocator::{
+    NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
+};
+pub use super::parser::types::{FilmPacket, SourceSpan, SummaryEvent, SummaryKind};
+pub use super::parser::unit_equipment::{UnitEquipmentEntry, UnitEquipmentRead};
+pub use super::parser::unit_references::{NativeUnitReference, NativeUnitReferenceKind};
+pub use super::parser::weapon_hit_scan::WeaponDamageRead;
+pub use super::parser::weapon_hits::WeaponDamage;
+pub use super::parser::world::{FilmViewAdmission, NativeNewBindingRefusal};
 use super::*;
 use serde::{Deserialize, Serialize};
 
@@ -209,7 +292,7 @@ pub enum NativeFilmPacketBody {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum NativeFilmDataError {
+pub enum ParseError {
     #[error(transparent)]
     Registry(#[from] NativeContextRegistryError),
     #[error("native film entry requires a recorded v41 header, got {0:?}")]
@@ -219,7 +302,7 @@ pub enum NativeFilmDataError {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct NativeFilmDataOptions {
+pub struct ParseOptions {
     /// Explicit caller precision/grammar context for native frame and keyframe
     /// reads. No automatic map inference is performed. Effective settings are
     /// retained in `Film::frame_config`, separately from recorded data.
@@ -233,7 +316,7 @@ pub struct NativeFilmDataOptions {
     #[serde(default)]
     pub translocator_map: Option<FilmMapBounds>,
 }
-impl Default for NativeFilmDataOptions {
+impl Default for ParseOptions {
     fn default() -> Self {
         Self {
             frame_profile: None,
@@ -244,12 +327,9 @@ impl Default for NativeFilmDataOptions {
     }
 }
 
-/// Options for the single recording parser entry point.
-pub type ParseOptions = NativeFilmDataOptions;
-
 impl Film {
     /// Parse a complete v41 recording source, preserving native order and gaps.
-    pub fn parse(source: &FilmSource, options: ParseOptions) -> Result<Self, NativeFilmDataError> {
+    pub fn parse(source: &FilmSource, options: ParseOptions) -> Result<Self, ParseError> {
         Self::parse_v41_with_options(source, options)
     }
 
@@ -264,7 +344,7 @@ impl Film {
     /// Only sequential keyframe declarations seed the private grammar state;
     /// this entry does not promote scanned candidates to canonical records.
     #[cfg(test)]
-    pub(crate) fn parse_v41(source: &FilmSource) -> Result<Self, NativeFilmDataError> {
+    pub(crate) fn parse_v41(source: &FilmSource) -> Result<Self, ParseError> {
         Self::parse_v41_with_recovery(source, KeyframeRecoveryPolicy::LevelUp)
     }
 
@@ -274,10 +354,10 @@ impl Film {
     pub(crate) fn parse_v41_with_recovery(
         source: &FilmSource,
         recovery_policy: KeyframeRecoveryPolicy,
-    ) -> Result<Self, NativeFilmDataError> {
+    ) -> Result<Self, ParseError> {
         Self::parse_v41_with_options(
             source,
-            NativeFilmDataOptions {
+            ParseOptions {
                 recovery_policy,
                 ..Default::default()
             },
@@ -286,13 +366,13 @@ impl Film {
 
     pub(crate) fn parse_v41_with_options(
         source: &FilmSource,
-        options: NativeFilmDataOptions,
-    ) -> Result<Self, NativeFilmDataError> {
+        options: ParseOptions,
+    ) -> Result<Self, ParseError> {
         let recovery_policy = options.recovery_policy;
         let mut context = NativeFilmContext::new(Some(source));
         let registry = context.registry().map_err(|e| *e)?.clone();
         if registry.header.is_none() || registry.registry.major_version != 41 {
-            return Err(NativeFilmDataError::Version(registry.header));
+            return Err(ParseError::Version(registry.header));
         }
         let registry_chunk_position = source
             .chunk_position(0)
@@ -521,7 +601,7 @@ impl Film {
 }
 
 #[cfg(test)]
-#[path = "native_event_continuation_tests.rs"]
+#[path = "parser/native_event_continuation_tests.rs"]
 mod continuation_tests;
 
 #[cfg(test)]
@@ -566,7 +646,7 @@ mod tests {
             },
         ];
         let source = FilmSource::load(&chunks, &metadata).unwrap();
-        let parsed = NativeFilmData::parse_v41(&source).unwrap();
+        let parsed = Film::parse_v41(&source).unwrap();
         let packets = &parsed.chunks[1].packets;
         assert_eq!(
             packets[0].bot_metadata_read.as_ref().unwrap().declared_bots,
@@ -624,7 +704,7 @@ mod tests {
             },
         ];
         let source = FilmSource::load(&chunks, &metadata).unwrap();
-        let parsed = NativeFilmData::parse_v41(&source).unwrap();
+        let parsed = Film::parse_v41(&source).unwrap();
         let NativeFilmPacketBody::Frame(frame) = &parsed.chunks[1].packets[0].body else {
             panic!()
         };
@@ -679,12 +759,9 @@ mod tests {
             },
         ];
         let source = FilmSource::load(&chunks, &metadata).unwrap();
-        let parsed = NativeFilmData::parse_v41(&source).unwrap();
-        let sequential = NativeFilmData::parse_v41_with_recovery(
-            &source,
-            KeyframeRecoveryPolicy::SequentialOnly,
-        )
-        .unwrap();
+        let parsed = Film::parse_v41(&source).unwrap();
+        let sequential =
+            Film::parse_v41_with_recovery(&source, KeyframeRecoveryPolicy::SequentialOnly).unwrap();
         assert_eq!(
             parsed.chunks[0].packets[0].body,
             sequential.chunks[0].packets[0].body
@@ -725,10 +802,7 @@ mod tests {
         assert!(parsed.chunks[1].packets.is_empty());
         assert!(parsed.chunks[2].packets.is_empty());
         let json = serde_json::to_vec(&parsed).unwrap();
-        assert_eq!(
-            serde_json::from_slice::<NativeFilmData>(&json).unwrap(),
-            parsed
-        );
+        assert_eq!(serde_json::from_slice::<Film>(&json).unwrap(), parsed);
     }
 
     #[test]
@@ -736,8 +810,8 @@ mod tests {
         for bytes in [vec![], [40u32.to_le_bytes(), 27u32.to_le_bytes()].concat()] {
             let source = FilmSource::load(&[bytes], &[]).unwrap();
             assert!(matches!(
-                NativeFilmData::parse_v41(&source),
-                Err(NativeFilmDataError::Version(_))
+                Film::parse_v41(&source),
+                Err(ParseError::Version(_))
             ));
         }
     }
@@ -760,11 +834,8 @@ mod tests {
             packet(0, &payload),
         ];
         let source = FilmSource::load(&chunks, &[]).unwrap();
-        let parsed = NativeFilmData::parse_v41_with_recovery(
-            &source,
-            KeyframeRecoveryPolicy::SequentialOnly,
-        )
-        .unwrap();
+        let parsed =
+            Film::parse_v41_with_recovery(&source, KeyframeRecoveryPolicy::SequentialOnly).unwrap();
         let events = parsed.chunks[1].packets[0].event_list.as_ref().unwrap();
         assert_eq!(events.stop, NativeEventListStop::Terminator);
         assert_eq!(events.records.len(), 65);
@@ -806,9 +877,9 @@ mod tests {
                 NativeEventListStop::MissingRuntimeGate15,
             ),
         ] {
-            let parsed = NativeFilmData::parse_v41_with_options(
+            let parsed = Film::parse_v41_with_options(
                 &source,
-                NativeFilmDataOptions {
+                ParseOptions {
                     recovery_policy: KeyframeRecoveryPolicy::SequentialOnly,
                     event_gate15: policy,
                     ..Default::default()
@@ -827,8 +898,7 @@ mod tests {
             assert_eq!(events.end_bit, end);
             assert_eq!(events.stop, stop);
             assert_eq!(
-                serde_json::from_value::<NativeFilmData>(serde_json::to_value(&parsed).unwrap())
-                    .unwrap(),
+                serde_json::from_value::<Film>(serde_json::to_value(&parsed).unwrap()).unwrap(),
                 parsed
             );
         }
@@ -845,11 +915,8 @@ mod tests {
         data.extend(packet(0, &[0xd2]));
         let chunks = [[41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(), data];
         let source = FilmSource::load(&chunks, &[]).unwrap();
-        let parsed = NativeFilmData::parse_v41_with_recovery(
-            &source,
-            KeyframeRecoveryPolicy::SequentialOnly,
-        )
-        .unwrap();
+        let parsed =
+            Film::parse_v41_with_recovery(&source, KeyframeRecoveryPolicy::SequentialOnly).unwrap();
         let packets = &parsed.chunks[1].packets;
         let fire = packets[0]
             .fire_read
@@ -868,70 +935,9 @@ mod tests {
         assert!(truncated.event.is_none());
         assert_eq!(truncated.source_bits, 8);
         assert_eq!(
-            serde_json::from_value::<NativeFilmData>(serde_json::to_value(&parsed).unwrap())
-                .unwrap(),
+            serde_json::from_value::<Film>(serde_json::to_value(&parsed).unwrap()).unwrap(),
             parsed
         );
-    }
-
-    #[test]
-    #[ignore = "requires retained bandit film; reproduces pinned baseline divergence"]
-    fn native_baseline_first_difference_d61443e() {
-        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("experiments/films/bandit/01-evo");
-        let manifest: serde_json::Value =
-            serde_json::from_slice(&std::fs::read(root.join("film.json")).unwrap()).unwrap();
-        let mut chunks = Vec::new();
-        let mut metadata = Vec::new();
-        for c in manifest["chunks"].as_array().unwrap() {
-            chunks.push(std::fs::read(root.join(c["file"].as_str().unwrap())).unwrap());
-            metadata.push(FilmSourceMetadata {
-                index: c["index"].as_i64().unwrap(),
-                chunk_type: c["chunk_type"].as_i64().unwrap(),
-                start_ms: c["start_time_offset_ms"].as_i64().unwrap(),
-            });
-        }
-        let source = FilmSource::load(&chunks, &metadata).unwrap();
-        let config = NativeFilmContext::new(Some(&source)).scan_frame().unwrap();
-        let registry = parse_registry(&chunks[0]).unwrap();
-        let expected: serde_json::Value = serde_json::from_slice(include_bytes!(
-            "reference/native-baseline-first-diff-d61443e.json"
-        ))
-        .unwrap();
-        let mut world = FilmWorld {
-            current_chunk: 3,
-            ..Default::default()
-        };
-        for (slot, state) in expected["before"].as_object().unwrap() {
-            world.slots.insert(
-                slot.parse().unwrap(),
-                FilmWorldSlot {
-                    archetype: state["TypeIndex"].as_u64().unwrap() as u32,
-                    full_id: state["FullID"].as_u64().unwrap() as u32,
-                    soft: state["Soft"].as_bool().unwrap(),
-                    generation_any: state["GenAny"].as_bool().unwrap(),
-                    position: None,
-                    view: Some(state["Vue"].as_i64().unwrap() as i8),
-                },
-            );
-        }
-        let data = std::fs::read(root.join("chunk-003-type-2.bin")).unwrap();
-        let size = u32::from_le_bytes(data[603637..603641].try_into().unwrap()) as usize;
-        let frame = config
-            .decode_production_views(&data[603649..603649 + size], 2, &registry, &mut world)
-            .unwrap();
-        std::fs::write(
-            "/private/tmp/halo-rust-baseline-first-diff.json",
-            serde_json::to_vec_pretty(&frame).unwrap(),
-        )
-        .unwrap();
-        for r in &frame.records {
-            eprintln!(
-                "RECORD {:?} {:?} {:?} end {}",
-                r.header.kind, r.header.id, r.archetype, r.end_bit
-            );
-        }
-        assert_eq!((frame.views_completed, frame.end_bit), (3, 535));
     }
 
     #[test]
@@ -1087,7 +1093,11 @@ mod tests {
                 }
             }
         }
-        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("experiments/films");
+        let root = std::env::var_os("HALO_FILM_CORPUS")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|| {
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("experiments/films")
+            });
         let mut paths = Vec::new();
         manifests(&root, &mut paths);
         paths.sort();
@@ -1121,7 +1131,7 @@ mod tests {
                 });
             }
             let source = FilmSource::load(&bytes, &metadata).unwrap();
-            let parsed = NativeFilmData::parse_v41(&source).unwrap();
+            let parsed = Film::parse_v41(&source).unwrap();
             let registry_reads = parsed.registry.block_reads.as_ref().unwrap();
             assert_eq!(
                 registry_reads.iter().filter(|block| block.accepted).count(),
@@ -1578,5 +1588,5 @@ mod tests {
 }
 
 #[cfg(test)]
-#[path = "native_data_profile_tests.rs"]
+#[path = "parser/native_data_profile_tests.rs"]
 mod profile_tests;

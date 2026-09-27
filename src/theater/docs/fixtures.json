@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "reference_repository": "https://github.com/JGtm/LevelUp",
+  "baseline_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "selected_reader_commit": "d61443ef59268ad734355db8e9974f68db5ca6d0",
+  "fixtures": [
+    {
+      "file": "event-continuation-v41.json.zlib",
+      "bytes": 33243,
+      "sha256": "7f369d313189f5ee33c35eea72f13fce8ffc1f45908491a4c7647682aacde75b"
+    },
+    {
+      "file": "fire-d61443e-v41.json.zlib",
+      "bytes": 9779126,
+      "sha256": "1f66cf1d40c7eb316a956df2af42d2d3c5555b6c2037996c70d0748726ca9895"
+    },
+    {
+      "file": "frames-levelup-v41.json.zlib",
+      "bytes": 19522,
+      "sha256": "7741486bd474f7e1f0bbaad77cda40e17bf3e900cc11b1df16122370d5f72cec"
+    },
+    {
+      "file": "highlights-corpus-v41.json.zlib",
+      "bytes": 32093,
+      "sha256": "7d46364b26f26991dfa6194aeb31f3b6e0f92c41b042079cd17404f4a49d7680"
+    },
+    {
+      "file": "keyframe-anchor-bodies-d61443e-v41.jsonl.zlib",
+      "bytes": 22692792,
+      "sha256": "f9d331bfc9ffeac7ed4acaa35c71cfc527c2e1ff8523fb8f1b4da90cd3a628b6"
+    },
+    {
+      "file": "native-baseline-d61443e-v41.jsonl.zlib",
+      "bytes": 1851110,
+      "sha256": "ba4c2d3060378a27c4324ee9813e822400f8e90a617dc03610f4aa19ef16c4e7"
+    },
+    {
+      "file": "native-damage-v41.json.zlib",
+      "bytes": 61222,
+      "sha256": "375ac63a64104346899ade0ce8ad24c25840e9d785ebff6ef71a47c8b3287566"
+    },
+    {
+      "file": "native-entry-profile-d61443e-v41.json.zlib",
+      "bytes": 15562,
+      "sha256": "56e6c6a31e02445566fd904b6d659085195a392ee8e74f1992e7b2ac53f66e1b"
+    },
+    {
+      "file": "native-packet-heads-v41.json.zlib",
+      "bytes": 290639,
+      "sha256": "931d53472890b4baf24d3cd7ccb8c932e3ade3872e14ed48ce886c54d52b157a"
+    },
+    {
+      "file": "pickup-padding-v41.json.zlib",
+      "bytes": 90397,
+      "sha256": "4e353675333c44adc65af6f60dd1c48ec726742e71fe053be68312d06390f3da"
+    },
+    {
+      "file": "translocator-levelup-v41.json.zlib",
+      "bytes": 31444,
+      "sha256": "819fd1b5a123747c716b01b00487de90b9882438a0af170be9299a1424614535"
+    },
+    {
+      "file": "translocator-padding-v41.json.zlib",
+      "bytes": 6807,
+      "sha256": "ea7a18485f2da0b875ada8ee0987a46a977faa0a92509c641f81b7f0b3d8483c"
+    },
+    {
+      "file": "weapon-hit-scan-v41.json.zlib",
+      "bytes": 278409,
+      "sha256": "3d9dcbe3190684ed0dfcf06a8625dd0226fbd736d50864444e34afae76f13bda"
+    },
+    {
+      "file": "zoom-padding-v41.json.zlib",
+      "bytes": 18786,
+      "sha256": "a31c718814e0efc2dc4c69ee278dfcd03d6bd2735e15406fa7aa93173c3c9217"
+    }
+  ]
+}

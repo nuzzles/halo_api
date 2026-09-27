@@ -1,7 +1,6 @@
 use super::*;
 use crate::theater::{
-    EntityComponentAttempt, EntityComponentSpan, FilmSource, NativeFilmData, RecordHeader,
-    film::ParseOptions,
+    EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader, film::ParseOptions,
 };
 
 fn recording() -> Film {
@@ -104,7 +103,7 @@ fn resolved_native_entry_preserves_source_and_decoder_output() {
         &[],
     )
     .unwrap();
-    let native = NativeFilmData::parse_v41(&source).unwrap();
+    let native = Film::parse_v41(&source).unwrap();
     let film = Film::parse(&source, Default::default()).unwrap();
     assert_eq!(film, native);
     assert_eq!(film.original_chunks[0], compressed);
