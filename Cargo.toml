@@ -13,11 +13,6 @@ categories = ["api-bindings"]
 [package.metadata.docs.rs]
 all-features = true
 
-[features]
-default = []
-# Serialization for public Halo response models. Deserialization is always enabled.
-serde = []
-
 [dependencies]
 xbox = { version = "0.2", default-features = false }
 reqwest = { version = "0.13.4", features = ["json", "query"] }

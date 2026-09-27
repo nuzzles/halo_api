@@ -58,22 +58,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## Serializing responses
-
-Enable the optional `serde` feature to serialize public Halo response models:
-
-```toml
-halo_api = { version = "0.3", features = ["serde"] }
-```
-
-Deserialization is always available because the client needs it to read Halo
-responses. The feature adds `serde::Serialize`, retaining Halo's field names,
-nested structures, RFC 3339 timestamps, and numeric match-outcome codes (including
-unknown codes). It does not add serialization to credentials or authentication
-clients. Fields defaulted during deserialization are included when serialized;
-this is a typed representation, not a byte-for-byte copy of the original JSON.
-
-
 ## MSRV
 
 This crate has a [Minimum Supported Rust Version (MSRV)][MSRV] of 1.96.
