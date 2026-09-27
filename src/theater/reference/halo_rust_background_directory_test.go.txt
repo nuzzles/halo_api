@@ -1,0 +1,31 @@
+package replay
+import("encoding/json";"os";"path/filepath";"testing";"time";"fmt";"encoding/hex";"strings")
+func TestHaloRustBackgroundDirectory(t *testing.T){
+ actions:=[]map[string]any{
+ {"op":"load"},
+ {"op":"write","name":"a.json","raw":`{"schemaVersion":1,"module":"Alpha"}`,"time":int64(1000000001)},
+ {"op":"load"},
+ {"op":"write","name":"ignored.JSON","raw":"invalid","time":int64(1000000002)},
+ {"op":"mkdir","name":"directory.json"},
+ {"op":"write","name":"bad.json","raw":"invalid","time":int64(1000000003)},
+ {"op":"write","name":"schema.json","raw":`{"schemaVersion":2}`,"time":int64(1000000004)},
+ {"op":"write","name":"b.json","raw":`{"schemaVersion":1,"module":"Beta","mapNames":["Alpha"]}`,"time":int64(1000000005)},
+ {"op":"remove","name":"b.json"},
+ {"op":"write","name":"a.json","raw":`{"schemaVersion":1,"module":"Omega"}`,"time":int64(1000000001)},
+ {"op":"load"},
+ {"op":"write","name":"a.json","raw":`{"schemaVersion":1,"module":"Omega"}`,"time":int64(1000000006)},
+ {"op":"write","name":"target.data","raw":`{"schemaVersion":1,"module":"Linked"}`,"time":int64(1000000007)},
+ {"op":"symlink","name":"link.json","target":"target.data"},
+ {"op":"write","name":"target.data","raw":`{"schemaVersion":1,"module":"Changed"}`,"time":int64(1000000008)},
+ {"op":"symlink","name":"missing.json","target":"absent.data"},
+ {"op":"symlink","name":"directory-link.json","target":"directory.json"},
+ {"op":"remove","name":"a.json"},
+ {"op":"load"},
+ }
+ dir:=t.TempDir();var previous *MapBackgroundIndex;rows:=[]any{}
+ snapshot:=func(i *MapBackgroundIndex) any {lookups:=map[string]any{};keyHex:=map[string]any{};for _,s:=range []string{"Alpha","Beta","Omega","Linked","Changed","a","b","link","map","unknown","Bytes","\ufffd"}{k,ok:=i.Lookup(s);if ok{lookups[s]=k;keyHex[s]=hex.EncodeToString([]byte(k))}else{lookups[s]=nil;keyHex[s]=nil}};return map[string]any{"keys":i.Cles(),"identities":i.Identites(),"ambiguous":i.Ambigues(),"lookups":lookups,"key_hex":keyHex}}
+ for _,a:=range actions{var e error;name,_:=a["name"].(string);if h,ok:=a["name_hex"].(string);ok{b,_:=hex.DecodeString(h);name=string(b)};p:=filepath.Join(dir,name);switch a["op"]{case "write":e=os.WriteFile(p,[]byte(a["raw"].(string)),0600);if e==nil{ts:=time.Unix(0,a["time"].(int64));e=os.Chtimes(p,ts,ts)};case "mkdir":e=os.Mkdir(p,0700);case "remove":e=os.Remove(p);case "symlink":e=os.Symlink(a["target"].(string),p)};if e!=nil{t.Fatal(e)};cached,e:=MapBackgroundIndexFor(dir);if e!=nil{t.Fatal(e)};fresh,e:=BuildMapBackgroundIndex(dir);if e!=nil{t.Fatal(e)};rows=append(rows,map[string]any{"action":a,"reused":cached==previous,"cached":snapshot(cached),"fresh":snapshot(fresh)});previous=cached}
+ vanished:=t.TempDir();file:=filepath.Join(vanished,"a.json");if e:=os.WriteFile(file,[]byte(`{"schemaVersion":1}`),0600);e!=nil{t.Fatal(e)};listed,e:=os.ReadDir(vanished);if e!=nil{t.Fatal(e)};if e=os.Remove(file);e!=nil{t.Fatal(e)};s1,s2:=signatureDossier(listed),signatureDossier(listed);if s1==s2||!strings.HasPrefix(s1,"a.json:indatable-"){t.Fatal("undatable signature reused")};if indexDepuisEntrees(vanished,listed).Cles()!=0{t.Fatal("vanished sidecar indexed")}
+ alias,e:=MapBackgroundIndexFor(dir+string(os.PathSeparator)+".");if e!=nil{t.Fatal(e)};if alias==previous{t.Fatal("lexically distinct cache keys merged")}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-background-directory.json",raw,0600);e!=nil{t.Fatal(e)};fmt.Printf("directory actions=%d\n",len(rows))
+}

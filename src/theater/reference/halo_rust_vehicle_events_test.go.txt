@@ -1,0 +1,37 @@
+package grammar
+
+import (
+ "testing"
+ "os"
+ "encoding/json"
+ "math/rand"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+)
+
+func TestHaloRustVehicleEvents(t *testing.T) {
+ rng := rand.New(rand.NewSource(88219))
+ rows := []any{}
+ for run:=0;run<4096;run++ {
+  base:=uint32(512);if run%3==0 {base=0};if run%7==0 {base=0xfffffff0}
+  slots:=[]uint32{0,1,512,514,515,520,8191};bandMap:=map[uint32]bool{};for _,v:=range slots{bandMap[v]=true};band:=NewSlotBand(bandMap)
+  w:=&translocWriter{}
+  kind:=8;if run%2==0{kind=22};if run%13==0{kind=53};if run%17==0{kind=rng.Intn(128)}
+  w.put(1,uint64(rng.Intn(2)));w.put(1,1);w.put(7,uint64(kind))
+  for ref:=0;ref<3;ref++ {
+   present:=rng.Intn(2);w.put(1,uint64(present));if present==0{continue}
+   width:=13
+   if kind==22&&ref<2{sonde:=rng.Intn(2);w.put(1,uint64(sonde));if sonde==1{width=9}} else if kind!=22 {if ref==0{width=8};if ref==1{width=7}}
+   w.put(width,uint64(rng.Uint32()));w.put(2,uint64(rng.Intn(4)))
+  }
+  if run%3!=0{w.put(6,uint64(rng.Intn(64)))}
+  pay:=append([]byte{},w.pay...)
+  if run%4==0 {pay=pay[:rng.Intn(len(pay)+1)]}
+  if run%11==0 {rng.Read(pay)}
+  var event *types.VehicleEvent
+  panicked:=false
+  func(){defer func(){if recover()!=nil{panicked=true}}();ev,ok:=decodeVehicleEvent(pay,base,band);if ok{event=&ev}}()
+  data:=[]int{};for _,b:=range pay{data=append(data,int(b))}
+  rows=append(rows,map[string]any{"payload":data,"base":base,"band":slots,"event":event,"panicked":panicked})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-vehicle-events.json",b,0600);e!=nil{t.Fatal(e)}
+}

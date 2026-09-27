@@ -1,0 +1,46 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_pure_identity_index",
+  "native": {
+    "catalogs": 257,
+    "queries": 7408,
+    "published_backgrounds": 109,
+    "published_identities": 236,
+    "unicode_scalars": 1112064,
+    "unicode_nonidentity_results": 1458,
+    "log": "/private/tmp/halo-background-index-native.log"
+  },
+  "focused": {
+    "passed": 2,
+    "failed": 0,
+    "seconds": 1.61,
+    "log": "/private/tmp/halo-background-index-fixed.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 16.91,
+    "log": "/private/tmp/halo-background-index-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 19.33,
+    "log": "/private/tmp/halo-background-index-wasm.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "host_suite_baseline": {
+    "passed": 641,
+    "ignored": 49,
+    "note": "Prior sidecar checkpoint. Full suite not repeated for this additive pure index; focused native tests and actual WASM exercised new APIs."
+  },
+  "remaining": "Directory loading, diagnostics, metadata signature and cache compatibility remain unimplemented. Full v41 parity incomplete; architecture deferred.",
+  "sha256": {
+    "map_background_index.rs": "6d3304919a800b14371b3f203ab566db9b6a0ba76f311fc036568b613d6dbc7c",
+    "map_identity_unicode.rs": "41811ed95e264b6c1da306672d6f8cd1f3d2bd227e08fc299bb17d3cefe8e98a",
+    "map_background_index_tests.rs": "f847bc73404945f9458b4c9d51e196443356b218545894d698c23becde880fc3",
+    "fixtures/background-index-v41.json.zlib": "edb565191939bc49c2b0bbe7ed85c94a2ef7d4f21a5a9813e0047ec42fb4a996"
+  },
+  "go_unicode_tables_sha256": "6a88d48746c4b2c471cc04ae40559694b734770212e6f5ea5f1962adb0c0bdb1"
+}

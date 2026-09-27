@@ -1,0 +1,16 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustMobilityChain(t *testing.T){
+ rng:=rand.New(rand.NewSource(643141));rows:=[]any{}
+ for c:=0;c<512;c++{
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();p:=cfg.Profil;p.Grammaire.SimStateComplet=true;p.Mouvement.FullPrecision=c%5==0;p.Grammaire.GrammaireEcrivainI0=c%3==0;p.Mouvement.DeltaHasHandleTail=c%7==0;p.Mouvement.WorldObject.IndexW=uint(1+c%3);p.Mouvement.WorldObject.AxisW=[3]uint{14,15,16};cfg.Profil=p
+  names:=[][]string{{"biped-mobility-action-component"},{"simulation-state-component"},{"biped-mobility-action-component","not-ported"},{"biped-emp-timer-component"},{}}
+  reg:=&Registry{};for ti,ns:=range names{reg.Archetypes=append(reg.Archetypes,Archetype{Index:ti,Components:ns,Levels:make([]uint32,len(ns))})};world:=NewWorld(reg);world.BindFull(50,0);world.BindSoft(51,1)
+  payload:=make([]byte,512);rng.Read(payload);br:=LecteurSur(payload);br.poserCadre(cfg);consumeBipedMobilityAction(br)
+  var bw bitWriter;bw.bits(1,4);bw.bits(0,6);for bit:=0;bit<br.BitPos();bit++{bw.bit(uint64(payload[bit/8]>>uint(7-bit%8)))};if c%2==0{bw.deltaEmpty(50);bw.end()}else{for j:=0;j<40;j++{bw.bit(1)}};if c%7==0{bw.buf=bw.buf[:rng.Intn(len(bw.buf))]};cfg.Obs=NouvelleObservation()
+  actions:=[][2]bool{};cfg.Obs.MobilityActionHook=func(a,b bool){actions=append(actions,[2]bool{a,b})};ti,end,unique,ok:=inferChainArchetype(bw.buf,0,world,cfg);hist:=cfg.Obs.prendreIndexAbsolus();outcome:="NoConfirmation";if cfg.Obs.ChaineImmediat>0{outcome="Immediate"};if cfg.Obs.ChaineProfond>0{outcome="Deep"};if cfg.Obs.ChaineAmbigu>0{outcome="Ambiguous"};if cfg.Obs.ChaineBudget>0{outcome="BudgetExhausted"}
+  encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"names":names,"encoding":encoding,"hist":hist,"actions":actions,"ti":ti,"end":end,"unique":unique,"ok":ok,"outcome":outcome})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-mobility-chain.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,24 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "cases_per_api": 126,
+  "panics_per_api": 44,
+  "positive_landings_per_api": 6,
+  "wasm_cases_per_api": 82,
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "remaining": [
+    "Native signed isolation-gap option and wrapped zero threshold; 64-case native oracle ready",
+    "Other native runtime contracts and source projections",
+    "Complete all-data v41 corpus acceptance"
+  ],
+  "focused_host": "passed: three tests; 0.64s",
+  "full_suite": "passed: 622 tests, zero failures, 49 ignored; 106.02s",
+  "clippy": "passed; 20.06s including lock wait",
+  "wasm": "actual runtime passed: 82 nonpanicking cases per API; 18.87s build",
+  "captured_march": "passed: four films; 86.06s release",
+  "complete_documents": "passed: six films; 113.69s release",
+  "pinned_source_hashes": 485,
+  "format": "passed",
+  "diff_check": "passed",
+  "native_regeneration": "fixture matches native generator output byte-for-byte",
+  "release_retry": "Initial rust-objcopy failed with no space left on device, leaving a corrupt nonexecutable test artifact. Cleaned regenerable halo_api dev/release products and rebuilt successfully; both release comparisons then passed."
+}

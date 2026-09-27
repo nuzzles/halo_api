@@ -1,0 +1,121 @@
+package weaponscan
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/weapons/filmshell"
+	"math/rand"
+	"os"
+	"sort"
+	"testing"
+)
+
+func TestHaloRustWeaponPatterns(t *testing.T) {
+	catalog := map[uint64]string{}
+	ids := []uint64{}
+	for id, name := range filmshell.WeaponIDToName {
+		catalog[id] = name
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	b, _ := json.MarshalIndent(catalog, "", "  ")
+	if e := os.WriteFile("/private/tmp/halo-filmshell-catalog.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+	rng := rand.New(rand.NewSource(54141))
+	rows := []any{}
+	put := func(d []byte, at, n int, v uint64) {
+		for j := 0; j < n; j++ {
+			b := at + j
+			if b >= 0 && b < len(d)*8 {
+				m := byte(1 << uint(7-b%8))
+				d[b/8] &= ^m
+				if (v>>uint(n-1-j))&1 != 0 {
+					d[b/8] |= m
+				}
+			}
+		}
+	}
+	for c := 0; c < 1024; c++ {
+		d := make([]byte, 512+c%16)
+		rng.Read(d)
+		for j := 0; j < 8; j++ {
+			at := j*512 + c%8
+			id := ids[(c+j)%len(ids)]
+			if c%3 == 0 {
+				id = uint64(rng.Uint32())<<32 | 0x42c9679f
+			}
+			if c%7 == 0 {
+				id = uint64(rng.Uint32())<<32 | 0x12345678
+			}
+			put(d, at, 11, universalMarkerBits)
+			put(d, at+11, 8, rng.Uint64())
+			put(d, at+27, 8, rng.Uint64())
+			put(d, at+34, 5, uint64((c+j)%32))
+			put(d, at+39, 4, uint64(j))
+			put(d, at+43, 64, id)
+		}
+		for j := 0; j < 4; j++ {
+			at := 32 + j*128
+			copy(d[at:], FormulaAPattern)
+			d[at+3] = byte(c*7 + j)
+			wb := filmshell.BytesFromID(ids[(c+j)%len(ids)])
+			copy(d[at+8:], wb[:])
+			if c%5 == 0 {
+				copy(d[at+4:], wb[4:])
+			}
+			at += 40
+			put(d, at*8+4, 64, ids[(c+j+7)%len(ids)])
+			if c%11 == 0 {
+				put(d, (at-5)*8+4, 8, 0x26)
+			}
+		}
+		if c%4 != 0 {
+			for j := 0; j < 3; j++ {
+				copy(d[100+j*120:], FrameMarker)
+			}
+		}
+		if c%9 == 0 {
+			d = d[:rng.Intn(len(d))]
+		}
+		start := c*71 - 400
+		duration := 20000
+		if c%13 == 0 {
+			duration = -20000
+		}
+		estimate := TimestampEstimator(d, start, duration)
+		queries := []any{}
+		for _, pos := range []int{-1, 0, 99, 100, 219, 220, len(d), len(d) + 100} {
+			queries = append(queries, map[string]any{"pos": pos, "ms": estimate(pos)})
+		}
+		a := ScanFormulaA(d)
+		ns := ScanFormulaANS(d)
+		fire := ScanFireEventsB5(d, estimate)
+		frames := FindFramePositions(d)
+		if a == nil {
+			a = []FormulaAResult{}
+		}
+		if ns == nil {
+			ns = []FormulaAResult{}
+		}
+		if fire == nil {
+			fire = []FireEvent{}
+		}
+		if frames == nil {
+			frames = []int{}
+		}
+		calls := []int{}
+		custom := ScanFireEventsB5(d, func(pos int) float64 { calls = append(calls, pos); return float64((len(calls)*17+pos)%7 - 3) })
+		if custom == nil {
+			custom = []FireEvent{}
+		}
+		rows = append(rows, map[string]any{"custom_calls": calls, "custom_fire": custom, "hex": hex.EncodeToString(d), "start": start, "duration": duration, "queries": queries, "frames": frames, "formula": a, "nibble": ns, "fire": fire})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-weapon-patterns.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

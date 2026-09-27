@@ -1,0 +1,20 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"sort";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustIdentityOwners(t *testing.T){
+ rng:=rand.New(rand.NewSource(7631));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  pos:=[]grammar.BipedPosition{};cs:=[]grammar.BipedCreation{};ds:=[]Death{};fs:=[]FireEventRef{};bis:=[]int{};bots:=[]BotIdentity{};idx:=PlayerIndexTable{ByXUID:map[uint64]int{},Readings:run%7,Disagreements:run%3}
+  for i:=0;i<8;i++{if rng.Intn(4)!=0{idx.ByXUID[uint64(100+i)]=i};if rng.Intn(6)==0{bis=append(bis,i);bots=append(bots,BotIdentity{FilmIndex:i})}}
+  for i:=0;i<run%80;i++{slot:=uint32(rng.Intn(8));ts:=uint64(rng.Intn(60))*1000000;pos=append(pos,grammar.BipedPosition{Slot:slot,TimestampUS:ts,HasWorld:i%3!=0});if i%3==0&&run%4!=0{cs=append(cs,grammar.BipedCreation{Slot:slot,TimestampUS:ts,Generation:uint32(rng.Intn(4)),ParticipantIndex:uint32(rng.Intn(10)),HasIndex:i%7!=0})};if i%2==0&&run%5!=0{ds=append(ds,Death{XUID:uint64(100+rng.Intn(10)),TimeMS:int64(rng.Intn(60))*1000})};fs=append(fs,FireEventRef{FilmIndex:rng.Intn(8),TimestampUS:ts})}
+  if run%13==0{idx.ByXUID=map[uint64]int{}}
+  records:=[]types.StatRecord{};if run%2==0{for round:=0;round<3;round++{for slot:=10;slot<=24;slot+=2{for tick:=0;tick<10;tick++{records=append(records,types.StatRecord{TimeMS:round*20000+tick*1000,Slot:slot,Round:round})}}}}
+  starts:=[]int64{};for _,us:=range manchesEnFilmUS(records,0){starts=append(starts,us/1000)}
+  fb:=fallback.NouveauCompteur();in:=IdentityInput{Positions:pos,BipedCreations:cs,Deaths:ds,Fire:fs,PlayerIndices:idx,Bots:bots,Fallbacks:fb,Statborg:StatborgIdentityInput{Records:records}};r,c,v:=buildOwners(in)
+  ls:=[]any{};for _,l:=range r.lives{ls=append(ls,map[string]any{"slot":l.slot,"from":l.from,"to":l.to,"xuid":l.xuid,"bid":l.bid,"cause":l.cause,"named_by":l.nomPar})};amb:=[]uint32{};for s,b:=range r.SlotAmbiguous{if b{amb=append(amb,s)}};sort.Slice(amb,func(i,j int)bool{return amb[i]<amb[j]})
+  causes:=map[int]any{};for k,v:=range c.causes{causes[k]=v};if c.indexLu==nil{c.indexLu=map[int]uint32{}};if r.Closures.closedLife==nil{r.Closures.closedLife=map[uint32]int{}}
+  state:=map[string]any{"lives":ls,"owner":r.Owner,"slot_xuid":r.SlotXUID,"ambiguous":amb,"deduced_lives":[]int{},"eliminated":0,"eliminated_slot":0,"eliminated_xuid":0,"excluded":0,"excluded_contradictions":0}
+  output:=map[string]any{"state":state,"creation":map[string]any{"records":c.Records,"slots":c.Slots,"direct":c.Direct,"propagated":c.Propagated,"index_bot":c.IndexBot,"recycled":c.Recycled,"causes":causes,"read_indices":c.indexLu},"verification":v,"clock":map[string]any{"offset_ms":r.DeathOffsetMS,"matched":r.DeathOffsetMatches,"runner_up":r.DeathOffsetRunnerUp},"closures":map[string]any{"by_shot":r.Closures.byShot,"by_respawn":r.Closures.byRespawn,"contested":r.Closures.contested,"refused":r.Closures.refused,"closed_life":r.Closures.closedLife},"from_deaths":r.FromDeaths,"deaths_named":r.DeathsNamed,"lives_total":r.LivesTotal,"index_readings":r.IndexReadings,"index_disagreements":r.IndexDisagreements,"replication_gap_fallbacks":fb.Compte(fallback.Nom("repli_vie_coupee_au_trou_de_replication"))}
+  rows=append(rows,map[string]any{"round_starts_ms":starts,"positions":pos,"creations":cs,"deaths":ds,"fire":fs,"bot_indices":bis,"indices":idx,"output":output})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-identity-owners.json",raw,0600);e!=nil{t.Fatal(e)}
+}

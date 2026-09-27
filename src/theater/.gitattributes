@@ -1,0 +1,5 @@
+# Compressed reference fixtures must remain byte-identical.
+fixtures/*.zlib binary
+# Empty final TSV columns and generated oracle EOF spacing are intentional.
+reference/*.tsv whitespace=-blank-at-eol
+reference/*.go.txt whitespace=-blank-at-eof

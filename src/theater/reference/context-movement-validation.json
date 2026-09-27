@@ -1,0 +1,67 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "context-movement-v41.json.zlib",
+  "sha256": "2eb40947b5bf47cc96ae5fbff25d0e97e1d51b179f34f155146987f48f0240bb",
+  "generator": "halo_rust_context_movement_test.go.txt",
+  "cases": 224,
+  "counts": {
+    "Records": 919,
+    "Read": 138,
+    "Packets": 752,
+    "EventPackets": 24,
+    "EventPacketsLocated": 4,
+    "EventPacketsUnlocated": 20,
+    "Desyncs": 92,
+    "SlotUnbound": 13,
+    "DatumBindings": 284,
+    "DatumAmbiguous": 1284,
+    "Duplicates": 161,
+    "VelocityReads": 330,
+    "JumpEpisodes": 42,
+    "JumpsDerived": 8
+  },
+  "observations": 803,
+  "kinds": {
+    "crouch": 69,
+    "clamber": 24,
+    "sprint": 12,
+    "slide": 17
+  },
+  "absent_cases": 24,
+  "failed_cases": 59,
+  "allocated_empty_cases": 24,
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-host.log",
+    "tests": 2
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-wasm.log",
+    "selected_calls": 2
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-movement-jumps-clippy.log"
+  },
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Extreme width domains exercise absent/error admission, not reads consuming those widths.",
+    "Final runtime wiring remains outstanding; replay composition is checked separately.",
+    "Reference-generated synthetic expectations are not independent gameplay annotations.",
+    "No native panic cases in this fixture."
+  ],
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "generic_view_regression": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-movement-generic.log",
+    "tests": 9
+  },
+  "jump_scenarios": {
+    "cases": 64,
+    "positive": 8,
+    "negative": 56,
+    "recorded_corruption_true_cases": 32
+  }
+}

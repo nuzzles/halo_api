@@ -1,0 +1,50 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native": {
+    "generator": "halo_rust_facts_ground_vehicle_document_test.go.txt",
+    "input_dependency": "facts-ground-items-v41.json.zlib (native-generated input corpus)",
+    "entry": "assemblage.poserArmesAuSolEtVehicules",
+    "cases": 1024,
+    "ground_items": 8860,
+    "ground_pickup_links": 848,
+    "vehicles": 3315,
+    "cycles": 5,
+    "recovered_shots": 1446,
+    "ordered_runtime_logs": 7389,
+    "fallbacks": 1049,
+    "zero_step_cases": 256,
+    "unscanned_vehicle_cases": 147,
+    "unpublished_recovered_shots": 84,
+    "ambiguous_shot_attempts": 898,
+    "out_of_episode_shot_attempts": 9220
+  },
+  "fixture": {
+    "path": "facts-ground-vehicle-document-v41.json.zlib",
+    "sha256": "06eb729521cc966d8ce48050973759be2617d93a9be47a139fa841e09e6d4c85"
+  },
+  "host": {
+    "passed": 4,
+    "failed": 0,
+    "seconds": 9.99,
+    "log": "/private/tmp/halo-facts-ground-vehicle-document-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "One selected whole-stage oracle including runtime logs; not full suite",
+    "log": "/private/tmp/halo-facts-ground-vehicle-document-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-ground-vehicle-document-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Synthetic whole-stage oracle, not complete BuildFromFacts or captured full-film composition",
+    "Coverage required; frame count taken from document",
+    "General UTF-8 APIs and raw-string/counter/null audit remain open",
+    "Imported ground changes passed through native JSON; not raw invalid-byte retention evidence",
+    "Other stages still require runtime sink integration; metadata/fallback restoration and fresh capture remain pending"
+  ]
+}

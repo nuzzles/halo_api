@@ -1,0 +1,23 @@
+package grammar
+
+import("encoding/hex";"encoding/json";"os";"testing")
+
+func TestHaloRustComponentResultContract(t *testing.T) {
+ rows:=[]any{}
+ for _,full:=range []bool{false,true}{for mode:=0;mode<5;mode++{
+  name:="biped-emp-timer-component";if mode==2||mode==3{name="rust-oracle-unsupported-component"};if mode==4{name="weapon-state-type-info"}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.PacketPreambleBits=0
+  if mode==1{cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{name:0}}
+  if mode==3{cfg.Profil.Grammaire.LargeursBouchon=map[string]int{name:0}}
+  arch:=Archetype{Index:0,Components:[]string{name},Levels:[]uint32{0}};reg:=&Registry{Archetypes:[]Archetype{arch}}
+  var bw bitWriter
+  if full{bw.bits(0,64);bw.bits(0,44);bw.bits(0,32);bw.bits(1,32)}else{bw.bit(1);bw.bits(0,5);bw.bits(0,2);bw.bit(0);bw.bit(1);bw.bits(1,64)}
+  if mode==0{bw.bits(137,8)}
+  if mode==4{var payload bitWriter;payload.bit(1);payload.bits(0x12345678,32);payload.bits(0x89abcdef,32);payload.bits(0,64);payload.bits(0,64);br:=LecteurSur(payload.buf);v:=consumeWeaponStateTypeInfoVariant(br);if v!=0x89abcdef{t.Fatal("weapon fixture")};for bit:=0;bit<br.BitPos();bit++{bw.bits(kfReadBits(payload.buf,bit,1),1)}}
+  bw.end()
+  var trace EntityTrace;end:=0
+  if full{trace=WalkKeyframeFullState(bw.buf,0,reg,ContexteDeLecture{Profil:cfg.Profil});end=trace.EndBit}else{w:=NewWorld(reg);w.BindFull(0,0);br:=LecteurSur(bw.buf);records,_:=DecodeFrameRecords(br,w,cfg);if len(records)!=1 && mode==2{t.Fatalf("expected refused record: %d",len(records))};if len(records)==0{t.Fatal("missing record")};trace=records[0].Trace;end=br.BitPos()}
+  rows=append(rows,map[string]any{"full":full,"mode":mode,"name":name,"hex":hex.EncodeToString(bw.buf),"profile":cfg.Profil,"trace":trace,"end":end})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-component-result-contract.json",raw,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,21 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"compress/zlib")
+func TestHaloRustControlClosureD61443e(t *testing.T){
+ rows:=[]any{}
+ add:=func(pay []byte,start int){br:=LecteurSur(pay);br.SetBitPos(start);c:=consumeVueC(br,len(pay)*8);l:=LectureVueC{Atteinte:true,Arret:c.Arret,Fermee:c.Porte&&vueCFermee(pay,br.BitPos())};if l.Fermee{l.Entrees=c.Entrees};rows=append(rows,map[string]any{"hex":hex.EncodeToString(pay),"start":start,"end":br.BitPos(),"verdict":l})}
+ for align:=0;align<8;align++ {for index:=0;index<32;index++ {
+  var w bitWriter;w.bits(0,align);w.bit(1);w.bits(0,2);w.bit(0);w.bits(uint64(index),5);w.bit(0);w.bit(0);w.bit(0)
+  add(w.buf,align)
+  tail:=append([]byte(nil),w.buf...);tail[len(tail)-1]|=1;add(tail,align)
+  add(append(append([]byte(nil),w.buf...),0),align)
+  for n:=0;n<len(w.buf);n++{add(w.buf[:n],align)}
+ }}
+ seed:=uint64(0xc1041);for n:=0;n<2048;n++{pay:=make([]byte,n%48);for i:=range pay{seed^=seed<<13;seed^=seed>>7;seed^=seed<<17;pay[i]=byte(seed)};add(pay,n%8)}
+ for _,kind:=range []uint64{1,2,3}{var w bitWriter;for n:=0;n<64;n++{w.bit(1);w.bits(kind,2)};add(w.buf,0)}
+ frames:=[]any{}
+ for index:=0;index<32;index++ {var w bitWriter;w.bit(1);w.bit(0);w.bits(0,3);w.bit(1);w.bits(0,2);w.bit(0);w.bits(uint64(index),5);w.bit(0);w.bit(0);w.bit(0)
+  inputs:=[][]byte{w.buf,append(append([]byte(nil),w.buf...),0),{}, {0xc0}, {0x88}}
+  for _,pay:=range inputs {obs:=NouvelleObservation();calls:=[]LectureVueC{};obs.VueControleHook=func(l LectureVueC){calls=append(calls,l)};cfg:=DefaultFrameConfig();cfg.Obs=obs;_,views,end:=DecodeFrameViewsCurseur(pay,NewWorld(&Registry{}),cfg,3,2);frames=append(frames,map[string]any{"hex":hex.EncodeToString(pay),"calls":calls,"views":views,"end":end})}
+ }
+ f,e:=os.Create("/private/tmp/halo-control-closure-d61443e.json.zlib");if e!=nil{t.Fatal(e)};z:=zlib.NewWriter(f);if e=json.NewEncoder(z).Encode(map[string]any{"direct":rows,"frames":frames});e!=nil{t.Fatal(e)};if e=z.Close();e!=nil{t.Fatal(e)};if e=f.Close();e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,16 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing")
+func TestHaloRustMarchRollback(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []int{-160,0}{for mode:=0;mode<2;mode++{
+  var bw bitWriter;bw.bit(0);bw.bits(0,32);bw.bits(2,3);bw.bits(0,5);bw.bits(0,2);bw.bit(0);bw.bits(0,32)
+  bw.bits(0,32);bw.bit(1);bw.bits(1,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(0,64)
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"rollback-tail"},Levels:[]uint32{0}}}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=true;cfg.Obs=NouvelleObservation();widths:=map[string]int{"rollback-tail":width};if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=widths}else{cfg.Profil.Grammaire.LargeursBouchon=widths}
+  w:=NewWorld(reg);w.BindFull(0,0);w.BindFull(1,0);panicked:=false;records:=[]FrameRecord{}
+  func(){defer func(){panicked=recover()!=nil}();records=marchRecordsOf(bw.buf,w,cfg,1)}()
+  _,zero:=w.slots[0];_,one:=w.slots[1];if records==nil{records=[]FrameRecord{}}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"width":width,"mode":mode,"panic":panicked,"slot0":zero,"slot1":one,"records":records})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-march-rollback.json",raw,0600);e!=nil{t.Fatal(e)}
+}

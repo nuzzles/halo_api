@@ -1,0 +1,46 @@
+{
+  "source": "https://github.com/JGtm/LevelUp/blob/cf333a3889771c6462dfce9e1bc287a897043a47/data/titles/halo_infinite/reference/map_quant_bounds.json",
+  "scope": "External BSP quantization bounds, not extracted from films. Exact level identities independently retrieved from match history and map asset revisions. Do not apply these by matching bit widths alone.",
+  "maps": {
+    "bazaar": {
+      "module": "ctf_bazaar",
+      "min": [
+        -973.866,
+        -361.43918,
+        -86.55155
+      ],
+      "max": [
+        179.37695,
+        1047.0077,
+        489.09164
+      ],
+      "axisWidths": [
+        17,
+        17,
+        16
+      ],
+      "match_id": "79bce30e-0d61-4c57-93dd-92d61124e80c",
+      "level_id": "1ddfa173-a544-46e6-9dae-671e7e369a0c"
+    },
+    "aquarius": {
+      "module": "ctf_aquarius",
+      "min": [
+        -39.014282,
+        -27.861597,
+        -2.8262208
+      ],
+      "max": [
+        38.79729,
+        18.353075,
+        15.290748
+      ],
+      "axisWidths": [
+        13,
+        12,
+        11
+      ],
+      "match_id": "16d67b8c-09c2-4ab8-8b94-892f7edb6212",
+      "level_id": "fc878857-e778-4daf-b0ef-5d826b922f3f"
+    }
+  }
+}

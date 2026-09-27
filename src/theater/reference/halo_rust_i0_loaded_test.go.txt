@@ -1,0 +1,153 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+ "strings"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+ "math/rand"
+	"testing"
+)
+
+func TestHaloRustI0Loaded(t *testing.T) {
+	rows := []any{}
+ rng:=rand.New(rand.NewSource(419241))
+	packet := func(kind uint16, stamp uint64, pay []byte) []byte {
+		h := make([]byte, 16)
+		binary.LittleEndian.PutUint16(h, kind)
+		binary.LittleEndian.PutUint32(h[4:], uint32(len(pay)))
+		binary.LittleEndian.PutUint64(h[8:], stamp)
+		return append(h, pay...)
+	}
+	for run := 0; run < 144; run++ {
+		header := make([]byte, 8)
+		binary.LittleEndian.PutUint32(header, 41)
+		binary.LittleEndian.PutUint32(header[4:], 27)
+		chunks := source.MemoryChunks{header}
+		meta := []types.ChunkMeta{{Index: 0, ChunkType: 1}}
+		inputs := []any{}
+		for c := 0; c < 8; c++ {
+			if run%17 == 0 {
+				break
+			}
+			index := c + 1
+			if run%4 == 0 && c == 3 {
+				index = 2
+			}
+			if run%4 == 1 && c == 2 {
+				index = 1
+			}
+			if run%4 == 2 && c == 0 {
+				index = 2
+			}
+			data := []byte{}
+			w := &translocWriter{}
+			w.put(1, 0)
+			slot := uint32(512 + c*5)
+			if index != c+1 {
+				slot = 900
+			}
+			w.put(32, uint64(1<<30|slot))
+			ti := uint64(35)
+			if run%11 == 0 {
+				ti = 40
+			}
+			w.put(32, ti)
+			w.put(44, 0)
+			w.put(32, 0)
+			w.put(32, 0)
+			w.put(64, 0)
+			data = append(data, packet(2, 9000, w.pay)...)
+			for j := 0; j < 80; j++ {
+				w := &translocWriter{}
+				w.put(1, 1)
+				w.put(13, uint64(512+(j/2)%40))
+				w.put(2, 1)
+				w.put(2, 0)
+				w.put(3, 2)
+				w.put(6, 0)
+				w.put(6, 1)
+				w.put(4, 0)
+                if run>=128 {
+                    w.put(1,0)
+                    w.put(14,uint64(rng.Intn(64)))
+                    w.put(13,uint64(rng.Intn(64)))
+                    w.put(13,uint64(rng.Intn(64)))
+                    w.put(27,0)
+                } else {
+				w.put(1, uint64(j%2))
+				w.put(19, uint64(j*97))
+				w.put(18, uint64(j*53))
+				w.put(20, uint64(j*13))
+				w.put(20, 0)
+                }
+				kind := uint16(0)
+				if j%9 == 0 {
+					kind = 3
+				}
+				data = append(data, packet(kind, uint64(j%4), w.pay)...)
+			}
+			if run%7 == 0 {
+				data = data[:len(data)-9]
+			}
+			chunks = append(chunks, data)
+			meta = append(meta, types.ChunkMeta{Index: index})
+			inputs = append(inputs, map[string]any{"index": index, "hex": hex.EncodeToString(data)})
+		}
+		film, e := source.Load(chunks, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+        scans := []any{}
+        for _, selection := range [][]int{{}, {1}, {2,1,2}, {7}, {99}, {0}, {3,1}, {-1}} {
+            for _, explicitBand := range []bool{false,true} {
+                for _, forced := range []bool{false,true} {
+                    opt:=DefaultScanFilmOptions();opt.QuantaOnly=true;opt.Chunks=selection
+                    opt.IsolationGapMS=0;opt.DropSaturated=false
+                    layout:=profile.I0Layout{GateBits:5,AxisW:[3]uint{19,18,20}}
+                    if forced {opt.Layout=&layout}
+                    fc:=NewFilmContext(film)
+                    var got []BipedPosition;var err error
+                    if explicitBand {got,err=ScanBipedPositionsForBand(fc,NewSlotBand(map[uint32]bool{512:true,513:true}),opt)} else {got,err=ScanBipedPositions(fc,opt)}
+                    category:=""
+                    if err!=nil {switch {case err==ErrNoFilmChunk:category="film chunks";case err==ErrNoReadableFilmChunk:category="readable film chunks";case strings.Contains(err.Error(),"découpage i0 illisible"):category="i0 layout";case strings.Contains(err.Error(),"aucun slot biped"):category="biped slots";default:t.Fatal(err)}}
+                    if got==nil{got=[]BipedPosition{}}
+                    worldRange:=profile.Vec3Range{{-100,300},{-500,700},{20,700}}
+                    wo:=opt;wo.WorldRange=&worldRange;wo.MaxSpeedMPS=float64([]int{0,1,100}[run%3])
+                    exemptions:=TeleportExemptions{}
+                    if run%2==0 {exemptions[512]=[]uint64{0,2}}
+                    wo.TeleportExemptions=exemptions
+                    var world []BipedPosition;var we error
+                    if explicitBand {world,we=ScanBipedPositionsForBand(NewFilmContext(film),NewSlotBand(map[uint32]bool{512:true,513:true}),wo)} else {world,we=ScanBipedPositions(NewFilmContext(film),wo)}
+                    if (we==nil)!=(err==nil) {t.Fatal("world setup error differs",we,err)}
+                    if world==nil {world=[]BipedPosition{}}
+                    scans=append(scans,map[string]any{"chunks":selection,"explicit_band":explicitBand,"forced":forced,"error":category,"records":got,"world_records":world,"world_speed":wo.MaxSpeedMPS,"world_exemptions":exemptions})
+                }
+            }
+        }
+        bands := []any{}
+        for _, selection := range [][]int{{1}, {2,1,2}, {7}, {99}, {0}, {3,1}, {-1}} {
+            band := bipedSlotBand(film, selection)
+            bands = append(bands, map[string]any{"chunks":selection,"slots":band.Slots()})
+        }
+		lay, rep, err := DetectI0LayoutOf(film)
+		if rep.FlipRate == nil {
+			rep.FlipRate = []float64{}
+		}
+		if rep.Boundaries == nil {
+			rep.Boundaries = []int{}
+		}
+		rows = append(rows, map[string]any{"scans":scans,"bands":bands,"chunks": inputs, "layout": map[string]any{"gate_bits": lay.GateBits, "axis_widths": lay.AxisW, "region": lay.Region}, "records": rep.Records, "pairs": rep.Pairs, "rates": rep.FlipRate, "boundaries": rep.Boundaries, "ones": rep.IndexBitOnes, "error": err != nil})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-i0-loaded.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

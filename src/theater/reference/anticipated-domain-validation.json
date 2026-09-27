@@ -1,0 +1,28 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "anticipated-domain-v41.json.zlib",
+  "sha256": "d30850db0673544989fb5792015ba0424ba6e1fa796e82bf3138cac0c95b4c01",
+  "generator": "halo_rust_anticipated_domain_test.go.txt",
+  "cases": 160,
+  "table_cases": 128,
+  "loaded_cases": 32,
+  "host": {
+    "status": "passed",
+    "tests": 4,
+    "log": "/private/tmp/halo-anticipated-domain-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-world-anticipated-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-world-anticipated-clippy.log"
+  },
+  "source_hashes": 485,
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Loaded cases exercise captured numbered traversal; extreme signed chunk numbers and conflicting ties are exercised by independent native table cases.",
+    "Synthetic parser agreement is not independent gameplay annotation."
+  ]
+}

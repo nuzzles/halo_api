@@ -1,0 +1,35 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "host_and_wasm_validated",
+  "native": {
+    "cases": 1024,
+    "fixtures_byte_identical": true,
+    "negative_published_candidates": 7004,
+    "wide_published_candidates": 5239,
+    "wide_published_selections": 5254,
+    "wide_published_drawn_slots": 5308,
+    "log": "/private/tmp/halo-facts-inventory-native.log"
+  },
+  "host": {
+    "passed": 9,
+    "failed": 0,
+    "ignored": 1,
+    "scope": "cache inventory publication, recording inventory, scanner/source and cache-codec tests",
+    "seconds": 3.52,
+    "log": "/private/tmp/halo-facts-inventory-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 32.06,
+    "log": "/private/tmp/halo-facts-inventory-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "harness_build_seconds": 21.8,
+    "log": "/private/tmp/halo-facts-inventory-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "Subsequent cache/player wrapper results are in facts-ability-inputs-validation.json. Other cache document adapters, capture/fallback handling, complete document composition and final parity reconciliation remain."
+}

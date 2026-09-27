@@ -1,0 +1,20 @@
+package grammar
+import("testing";"math/rand";"encoding/hex";"encoding/json";"sort";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustProbeHookRepair(t *testing.T){
+ rng:=rand.New(rand.NewSource(64041));rows:=[]any{}
+ for c:=0;c<512;c++{
+  names:=[]string{"not-ported"};if c%3==1{names=[]string{"biped-emp-timer-component","not-ported"}};if c%3==2{names=[]string{"not-ported","biped-emp-timer-component"}}
+  if c%4==0{names=append([]string{haloRustProbeHookNames[c%len(haloRustProbeHookNames)]},names...)}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:names,Levels:make([]uint32,len(names))},{Index:1}}};world:=NewWorld(reg);world.BindFull(50,0);world.BindFull(60,1)
+  var bw bitWriter;bw.bit(1);bw.bits(50,11);bw.bits(0,2);body:=bw.n;bw.bit(0);bw.bit(0);bw.bits(uint64(len(names)),3);for i:=range names{bw.bits(uint64(i),6)}
+  for _,name:=range names{if name==haloRustProbeHookNames[c%len(haloRustProbeHookNames)]{payload:=make([]byte,128);rng.Read(payload);r:=LecteurSur(payload);r.poserCadre(emptyCfg);consumeByName(r,haloRustProbeHookNames[c%len(haloRustProbeHookNames)],35,0);for b:=0;b<r.BitPos();b++{bw.bit(uint64(payload[b/8]>>uint(7-b%8)))};continue};width:=8;if name=="not-ported"{width=c%97};for j:=0;j<width;j++{bw.bit(rng.Uint64())}}
+  bw.deltaEmpty(60);if c%2==0{bw.end()}else{for j:=0;j<40;j++{bw.bit(1)}}
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();preset:=c%11==0;if preset{cfg.Profil.Grammaire.LargeursBouchon=map[string]int{"not-ported":3}}
+  br:=LecteurSur(bw.buf);br.poserCadre(emptyCfg);br.Skip(body);tr:=decodeDelta(br,world,50)
+  actions:=[][2]bool{};cfg.Obs.MobilityActionHook=func(a,b bool){actions=append(actions,[2]bool{a,b})};componentObservations:=haloRustComponentHooks(cfg.Obs);got,end,ok:=repairUnportedComponent(bw.buf,body,recDelta,50,tr,world,cfg);widths:=[]int{};for w:=range cfg.Obs.CompWidths["not-ported"]{widths=append(widths,w)};sort.Ints(widths)
+  p:=cfg.Profil;position:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  counts:=map[string]int{};for k,v:=range map[string]int{"Immediate":cfg.Obs.ChaineImmediat,"Deep":cfg.Obs.ChaineProfond,"Ambiguous":cfg.Obs.ChaineAmbigu,"NoConfirmation":cfg.Obs.ChaineAucun,"BudgetExhausted":cfg.Obs.ChaineBudget}{if v!=0{counts[k]=v}};diag:=map[string]any{"mobility_actions":actions,"component_observations":*componentObservations,"absolute_indices":cfg.Obs.prendreIndexAbsolus(),"chain_outcomes":counts,"component_widths":cfg.Obs.CompWidths,"repaired_records":cfg.Obs.ChaineReparees}
+  rows=append(rows,map[string]any{"diagnostics":diag,"position":position,"hex":hex.EncodeToString(bw.buf),"names":names,"preset":preset,"ok":ok,"end":end,"trace_end":got.EndBit,"widths":widths})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-probe-hook-repair.json",b,0600);e!=nil{t.Fatal(e)}
+}

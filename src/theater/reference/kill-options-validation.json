@@ -1,0 +1,43 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "../fixtures/kill-options-v41.json.zlib",
+  "native_normalization_cases": 512,
+  "native_generation_seconds": 0.331,
+  "focused": {
+    "passed": 1,
+    "seconds": 0.02
+  },
+  "suite": {
+    "passed": 583,
+    "failed": 0,
+    "ignored": 49,
+    "seconds": 72.72
+  },
+  "clippy": {
+    "passed": true,
+    "seconds": 26.17
+  },
+  "wasm32": {
+    "passed": true,
+    "existing_native_comparisons": 14474,
+    "existing_address_domain_refusals": 80,
+    "additional_kill_option_cases": 512,
+    "public_execution_domain_control": true,
+    "build_seconds": 26.3
+  },
+  "captured_nonpositive_options": {
+    "passed": true,
+    "films": 2,
+    "kills": 369,
+    "seconds": 175.96,
+    "profile": "debug",
+    "native_expectations": "complete native default-option results"
+  },
+  "pinned_files_verified": 485,
+  "public_type_mapping": "public-kill-types.json",
+  "open": [
+    "remaining public and transitive type/function audit",
+    "source warning and cancellation contracts",
+    "remaining captured corpus acceptance"
+  ]
+}

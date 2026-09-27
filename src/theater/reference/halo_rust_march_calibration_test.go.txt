@@ -1,0 +1,23 @@
+package grammar
+import("testing";"os";"encoding/json";"math/rand";"sort")
+func TestHaloRustMarchCalibration(t *testing.T){
+ rng:=rand.New(rand.NewSource(95134));rows:=[]any{}
+ reg:=&Registry{Archetypes:make([]Archetype,4)};reg.Archetypes[3]=Archetype{Index:3,Components:[]string{"high-frequency"},Levels:[]uint32{1}}
+ for run:=0;run<128;run++{
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=10+run%6;cfg.Profil.Grammaire.GenerationStricte=run%2==0
+  kfs:=[]marchKeyframe{{200,[]KeyframeRec{{Slot:123,Gen:2,TI:3}}},{100,[]KeyframeRec{{Slot:123,Gen:1,TI:3},{Slot:124,Gen:1,TI:3}}},{200,[]KeyframeRec{{Slot:125,Gen:3,TI:3},{Slot:123,Gen:3,TI:3}}}}
+  deltas:=[]marchDelta{};n:=20;if run==0{n=3020};if run==1{n=170}
+  for i:=0;i<n;i++{
+   w:=&translocWriter{};event:=run!=0 && (run==1||rng.Intn(5)!=0);start:=2;if event{start=12};w.put(1,1);if event{w.put(1,1)}else{w.put(1,0)};w.put(start-2,0)
+   low:=10+(run+1)%6;if run%7==0{low=10+rng.Intn(6)};w.put(1,1);w.put(low,123);w.put(2,uint64(1+rng.Intn(3)));w.put(1,0);w.put(1,0);w.put(3,1);w.put(6,0);w.put(8,uint64(rng.Intn(256)));w.put(64,0)
+   deltas=append(deltas,marchDelta{uint64(i*10),w.pay})
+  }
+  chosen,def,best,second:=calibrateFrameConfig(reg,kfs,deltas,cfg)
+  inputs:=[]any{};for _,d:=range deltas{b:=[]int{};for _,v:=range d.payload{b=append(b,int(v))};inputs=append(inputs,map[string]any{"time":d.timestampUS,"payload":b})}
+  keys:=[]any{};for _,k:=range kfs{bindings:=[][2]uint32{};for _,r:=range k.recs{bindings=append(bindings,[2]uint32{uint32(r.Gen<<30|r.Slot),uint32(r.TI)})};keys=append(keys,map[string]any{"timestamp_us":k.timestampUS,"bindings":bindings})}
+  tl:=newMarchTimeline(reg,kfs);states:=[]any{};for _,at:=range []uint64{0,99,100,199,200,500}{w:=tl.advanceTo(at);ids:=[]uint32{};for slot:=range w.slots{ids=append(ids,slot)};sort.Slice(ids,func(i,j int)bool{return ids[i]<ids[j]});bs:=[][2]uint32{};for _,slot:=range ids{s:=w.slots[slot];bs=append(bs,[2]uint32{s.FullID,s.TypeIndex})};states=append(states,map[string]any{"time":at,"bindings":bs})}
+  score:=func(s frameConfigScore)any{return map[string]any{"id_low_bits":s.cfg.IDLowBits,"located":s.located,"events":s.events,"packets":s.packets}}
+  rows=append(rows,map[string]any{"base":cfg.IDLowBits,"strict":cfg.Profil.Grammaire.GenerationStricte,"keyframes":keys,"deltas":inputs,"states":states,"low":chosen.IDLowBits,"default":def,"best":score(best),"second":score(second)})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-march-calibration.json",b,0600);e!=nil{t.Fatal(e)}
+}

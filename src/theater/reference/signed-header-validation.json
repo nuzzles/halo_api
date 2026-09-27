@@ -1,0 +1,24 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native_cases": 411,
+  "native_panics": 136,
+  "native_success": 275,
+  "native_regeneration_byte_identical": true,
+  "host_direct_header": "passed all 411",
+  "host_generic_frame_entries": "passed 361 cases through each of NativeFilmReader and NativeFilmBits frame adapter",
+  "wasm": "passed actual runtime: 275 direct and 225 frame cases; 33.42s build; panic outcomes checked on host",
+  "analytical_controls": "i64::MAX active widths are separate from the executable native oracle",
+  "full_suite": "600 passed, zero failed, 49 ignored; 105.04s",
+  "clippy": "passed; 10.09s",
+  "limitations": [
+    "MPP/raw component width limits remain",
+    "Higher-level inference/resync/recovery source-address projections remain to audit",
+    "No complete all-data v41 parity or architectural refactor claimed"
+  ],
+  "format": "passed",
+  "diff_check": "passed",
+  "pinned_source_hashes": 485,
+  "captured_march": "passed; four films; 82.31s release",
+  "complete_documents": "passed; six films; 104.44s release",
+  "status": "checkpoint_passed_full_parity_incomplete"
+}

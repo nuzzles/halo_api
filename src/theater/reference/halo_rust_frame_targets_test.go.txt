@@ -1,0 +1,17 @@
+package grammar
+import("testing";"math/rand";"encoding/hex";"encoding/json";"os")
+func TestHaloRustFrameTargets(t *testing.T){
+ rng:=rand.New(rand.NewSource(24041));rows:=[]any{}
+ for c:=0;c<512;c++{
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"biped-emp-timer-component"},Levels:[]uint32{0}}}};world:=NewWorld(reg);world.BindFull(50,0);world.BindSoft(51,0)
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();cfg.HasExtraFields=c%5==0
+  var bw bitWriter;bw.bits(rng.Uint64(),c%17)
+  for j:=0;j<c%8+1;j++{if cfg.HasExtraFields{bw.bits(0,32)};bw.bit(1);bw.bits(uint64(50+j%2),11);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(rng.Uint64(),8)}
+  if cfg.HasExtraFields{bw.bits(0,32)};bw.end();if c%3==0{bw.bits(rng.Uint64(),32)}
+  if c%7==0{bw.buf=make([]byte,c%90);rng.Read(bw.buf)}
+  targets:=map[uint32]bool{50:true,51:true};mode:=HarvestConfirm(c%2);records:=ScanFrameTargets(bw.buf,world,cfg,targets,mode)
+  rr:=[]any{};for _,r:=range records{rr=append(rr,map[string]any{"id":r.ID,"ti":r.TypeIndex,"mask":r.Trace.Mask,"components":len(r.Trace.Comps),"end":r.Trace.EndBit})}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"extra":cfg.HasExtraFields,"chain":mode==HarvestChainWalk,"records":rr})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-frame-targets.json",b,0600);e!=nil{t.Fatal(e)}
+}

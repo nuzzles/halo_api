@@ -1,0 +1,22 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"sort";"fmt";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustZoneOwnerLayer(t *testing.T){
+ rng:=rand.New(rand.NewSource(41700));rows:=[]any{}
+ convert:=func(m map[uint32][]zoneSample)map[uint32][]any{out:=map[uint32][]any{};for k,ss:=range m{out[k]=[]any{};for _,s:=range ss{out[k]=append(out[k],map[string]any{"t":s.t,"v":s.v})}};return out}
+ for i:=0;i<1024;i++{
+  ser:=zoneSeries{gauge:map[uint32][]zoneSample{},owner:map[uint32][]zoneSample{},keys:map[uint32]uint32{},desig:map[uint32][]zoneSample{},ownerChained:map[uint32][]zoneSample{}}
+  pairs:=[]zonePair{};pairRows:=[]any{};count:=i%4+1
+  for z:=0;z<count;z++{gs:=uint32(10+z);oslot:=uint32(20+z);cs:=uint32(30+z);ser.keys[gs]=uint32(z*123);ser.owner[oslot]=[]zoneSample{{t:0,v:0xffffffff}}
+   for k:=0;k<8;k++{t0:=10+z*20+k*100;team:=uint64(k%2);top:=uint64(8472493);if (i+k)%5==0{top=8420000};ser.gauge[gs]=append(ser.gauge[gs],zoneSample{t:t0,v:8388607},zoneSample{t:t0+2,v:8400000},zoneSample{t:t0+4,v:top},zoneSample{t:t0+5,v:8388607});ov:=team;if (i+k)%13==0{ov=8};ser.owner[oslot]=append(ser.owner[oslot],zoneSample{t:t0+4,v:ov});cv:=team;if i%7==0{cv=0xffffffff};if i%11==0{cv=8};if i%3!=0{ser.ownerChained[cs]=append(ser.ownerChained[cs],zoneSample{t:t0+2,v:cv})};p:=zonePair{t:t0+4,ref:z,xuid:fmt.Sprint(team)};pairs=append(pairs,p)
+   }
+  }
+  // Noise with out-of-range camps can never be a capturing-team channel.
+  ser.ownerChained[99]=[]zoneSample{{t:10,v:999}};if i%9==0{pairs=nil}
+  for _,p:=range pairs{pairRows=append(pairRows,map[string]any{"t":p.t,"zone_ref":p.ref,"xuid":p.xuid})}
+  for _,m:=range []map[uint32][]zoneSample{ser.gauge,ser.owner,ser.ownerChained}{for s:=range m{sort.SliceStable(m[s],func(a,b int)bool{return m[s][a].t<m[s][b].t})}}
+  teams:=map[string]int{"0":0,"1":1};if i%4==0{teams=map[string]int{}};frames:=900;if i%17==0{frames=0};interval:=[]int{100,500,1000,2000}[i%4];catalog:=count;if i%6==0{catalog+=rng.Intn(3)};hill:=i%8==0
+  cov:=&ZonesCoverage{};fb:=fallback.NouveauCompteur();states:=zoneOwnerStates(ZoneInput{TeamByXUID:teams,Zones:make([]Zone,catalog),Hill:hill},ser,pairs,zoneCtx{frames:frames,intervalMS:interval,fb:fb},cov);tallyZoneStates(states,cov)
+  rows=append(rows,map[string]any{"series":map[string]any{"gauge":convert(ser.gauge),"owner":convert(ser.owner),"keys":ser.keys,"desig":convert(ser.desig),"owner_chained":convert(ser.ownerChained),"slots":0},"pairs":pairRows,"teams":teams,"frames":frames,"interval":interval,"catalog":catalog,"hill":hill,"states":states,"coverage":cov,"inferred":fb.Compte(fallback.NomZoneCampDeCaptureDeduitDeLIssue)})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-zone-owner-layer.json",b,0600);e!=nil{t.Fatal(e)}
+}

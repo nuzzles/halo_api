@@ -1,0 +1,39 @@
+package grammar
+
+import (
+ "bytes"
+ "compress/zlib"
+ "encoding/json"
+ "io"
+ "math"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+ "levelup/go-api/internal/games/halo_infinite/film/types"
+)
+
+func TestHaloRustCorruptionSource(t *testing.T) {
+ raw,e:=os.ReadFile("@BOOTSTRAP_FIXTURE@");if e!=nil{t.Fatal(e)}
+ zr,e:=zlib.NewReader(bytes.NewReader(raw));if e!=nil{t.Fatal(e)}
+ bootstrap,e:=io.ReadAll(zr);if e!=nil{t.Fatal(e)};zr.Close()
+ id,e:=ReadFilmIdentity(bootstrap);if e!=nil{t.Fatal(e)}
+ rows:=[]any{}
+ orders:=[][]int{{0},{1},{1,0},{0,1},{0,0},{1,0,0},{-1,0},{2,1,0}}
+ for _,order:=range orders {for pattern:=0;pattern<27;pattern++ {
+  raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};variants:=[]int{};v:=pattern
+  for _,num:=range order {
+   variant:=v%3;v/=3;variants=append(variants,variant)
+   b:=append([]byte(nil),bootstrap...);b[id.BuildOffset+0x48]&=0x7f
+   if variant==1{b[id.BuildOffset+0x48]|=0x80}
+   if variant==2{copy(b[id.BuildOffset:id.BuildOffset+3],[]byte{0,0,0})}
+   raw=append(raw,b);meta=append(meta,types.ChunkMeta{Index:num})
+  }
+  film,e:=source.Load(raw,meta);if e!=nil{t.Fatal(e)}
+  p,read:=GrammaireSousFilm(ProfilDeBalayageParDefaut(),film)
+  m:=p.Mouvement;var lo,hi [3]uint32;for i:=0;i<3;i++{lo[i]=math.Float32bits(m.Range[i].Min);hi[i]=math.Float32bits(m.Range[i].Max)}
+  capture:=map[string]any{"min_bits":lo,"max_bits":hi,"quantum_bits":math.Float32bits(m.DeltaQuantum),"region":m.WorldObject.Region,"axis_widths":m.WorldObject.AxisW,"region_index_bits":m.WorldObject.IndexW}
+  rows=append(rows,map[string]any{"capture":capture,"order":order,"variants":variants,"enabled":p.Grammaire.ControleDeCorruption,"read":read})
+ }}
+ data,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-corruption-source.json",data,0600);e!=nil{t.Fatal(e)}
+}

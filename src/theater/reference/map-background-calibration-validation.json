@@ -1,0 +1,39 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_calibration_contract",
+  "native": {
+    "cases": 3465,
+    "json_refusals": 1647,
+    "seconds": 0.363,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-map-background-calibration-native.log"
+  },
+  "focused": {
+    "passed": 1,
+    "failed": 0,
+    "seconds": 0.08,
+    "log": "/private/tmp/halo-map-background-calibration-final.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 27.93,
+    "log": "/private/tmp/halo-map-background-calibration-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 25.37,
+    "log": "/private/tmp/halo-map-background-calibration-wasm.log"
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "format_diff_scripts": "passed",
+  "host_suite_baseline": {
+    "passed": 638,
+    "ignored": 49,
+    "note": "Previous callout checkpoint; not repeated for this additive calibration API with no existing parser callers."
+  },
+  "scope": "Six calibration fields, world-to-pixel conversion and JSON publication/refusal only. Full background metadata/loader and time.Time remain open. Full v41 parity remains incomplete; architecture deferred.",
+  "rust_source_sha256": "95142981345908f3cc2948d01b001e0a1fcd6bc9d52a2cf90602cf4946aa6bd3"
+}

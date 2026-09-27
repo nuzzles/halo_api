@@ -1,0 +1,3387 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Native declarations and methods, including private fields; this inventory does not assert Rust parity.",
+  "types": [
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tmu\tsync.Mutex\n\tn\tmap[Nom]int\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "mu"
+            ],
+            "type": "sync.Mutex"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "n"
+            ],
+            "type": "map[Nom]int"
+          }
+        ],
+        "file": "internal/facts/fallback/compteur.go",
+        "line": 40,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/fallback/compteur.go",
+            "line": 77,
+            "name": "Compte",
+            "receiver": "*Compteur",
+            "signature": "func(nom Nom) int"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/fallback/compteur.go",
+            "line": 135,
+            "name": "Cumuler",
+            "receiver": "*Compteur",
+            "signature": "func(rapport []Declenchement)"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/fallback/compteur.go",
+            "line": 55,
+            "name": "Declenche",
+            "receiver": "*Compteur",
+            "signature": "func(nom Nom)"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/fallback/compteur.go",
+            "line": 59,
+            "name": "DeclencheN",
+            "receiver": "*Compteur",
+            "signature": "func(nom Nom, k int)"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/fallback/compteur.go",
+            "line": 100,
+            "name": "Rapport",
+            "receiver": "*Compteur",
+            "signature": "func() []Declenchement"
+          }
+        ],
+        "name": "Compteur"
+      },
+      "export": "Compteur",
+      "target": "fallback.Compteur"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tNom\tNom\n\n\tDeclenchements\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Nom"
+            ],
+            "type": "Nom"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Declenchements"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/facts/fallback/compteur.go",
+        "line": 87,
+        "methods": [],
+        "name": "Declenchement"
+      },
+      "export": "Declenchement",
+      "target": "fallback.Declenchement"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "string",
+        "file": "internal/facts/fallback/repli.go",
+        "line": 79,
+        "methods": [],
+        "name": "Nom"
+      },
+      "export": "Nom",
+      "target": "fallback.Nom"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tFichier\tstring\n\n\tAncre\tstring\n\n\tCondition\tCondition\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Fichier"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Ancre"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Condition"
+            ],
+            "type": "Condition"
+          }
+        ],
+        "file": "internal/facts/fallback/repli.go",
+        "line": 173,
+        "methods": [],
+        "name": "Site"
+      },
+      "export": "Site",
+      "target": "fallback.Site"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tSlot, Generation\tuint32\n\n\tParticipantIndex\tuint32\n\n\tHasIndex\tbool\n\n\tChunk, PacketIndex\tint\n\tTimestampUS\t\tuint64\n\n\tBitPos\tint\n\n\tVersion\t\tuint32\n\tRepresentation\tuint32\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Slot",
+              "Generation"
+            ],
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ParticipantIndex"
+            ],
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "HasIndex"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Chunk",
+              "PacketIndex"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TimestampUS"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BitPos"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Version"
+            ],
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Representation"
+            ],
+            "type": "uint32"
+          }
+        ],
+        "file": "internal/grammar/biped_creation.go",
+        "line": 92,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/biped_creation.go",
+            "line": 117,
+            "name": "LifeKey",
+            "receiver": "BipedCreation",
+            "signature": "func() uint32"
+          }
+        ],
+        "name": "BipedCreation"
+      },
+      "export": "BipedCreation",
+      "target": "grammar.BipedCreation"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tSlot\tuint32\n\n\tChunk, PacketIndex\tint\n\n\tTimestampUS\tuint64\n\n\tX, Y, Z\tfloat32\n\n\tHasWorld\tbool\n\n\tQ\t[3]uint32\n\n\tcomponentDirs\n\n\tcomponentVitals\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Slot"
+            ],
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Chunk",
+              "PacketIndex"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TimestampUS"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "X",
+              "Y",
+              "Z"
+            ],
+            "type": "float32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "HasWorld"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Q"
+            ],
+            "type": "[3]uint32"
+          },
+          {
+            "embedded": true,
+            "names": [],
+            "type": "componentDirs"
+          },
+          {
+            "embedded": true,
+            "names": [],
+            "type": "componentVitals"
+          }
+        ],
+        "file": "internal/grammar/offline_biped.go",
+        "line": 65,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/offline_aim.go",
+            "line": 138,
+            "name": "AimHeadingDeg",
+            "receiver": "BipedPosition",
+            "signature": "func() (float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/offline_aim.go",
+            "line": 179,
+            "name": "AimPitchDeg",
+            "receiver": "BipedPosition",
+            "signature": "func() (float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/orientation_frame.go",
+            "line": 120,
+            "name": "AimVector",
+            "receiver": "BipedPosition",
+            "signature": "func() ([3]float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/orientation_frame.go",
+            "line": 134,
+            "name": "ChassisForwardVector",
+            "receiver": "BipedPosition",
+            "signature": "func() ([3]float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/offline_biped.go",
+            "line": 94,
+            "name": "HealthAt",
+            "receiver": "BipedPosition",
+            "signature": "func() (float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/offline_biped.go",
+            "line": 102,
+            "name": "ShieldAt",
+            "receiver": "BipedPosition",
+            "signature": "func() (float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/offline_aim.go",
+            "line": 197,
+            "name": "VelocityVector",
+            "receiver": "BipedPosition",
+            "signature": "func() ([3]float32, bool)"
+          }
+        ],
+        "name": "BipedPosition"
+      },
+      "export": "BipedPosition",
+      "target": "grammar.BipedPosition"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tfilm\t*source.Film\n\n\tchunks\t\t[]int\n\tchunksLus\tbool\n\n\tslots\t\tSlotBand\n\tslotsLus\tbool\n\n\timpose\t*profile.I0Layout\n\n\tlay\tprofile.I0Layout\n\tlayErr\terror\n\tlayLu\tbool\n\n\treg\t*Registry\n\tregErr\terror\n\tregLu\tbool\n\n\tprof\tprofile.Profile\n\tprofLu\tbool\n\n\tbal\tProfilDeBalayage\n\n\tcorr, corrLue, corrLu\tbool\n\n\tobs\t*Observation\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "film"
+            ],
+            "type": "*source.Film"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "chunks"
+            ],
+            "type": "[]int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "chunksLus"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "slots"
+            ],
+            "type": "SlotBand"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "slotsLus"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "impose"
+            ],
+            "type": "*profile.I0Layout"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "lay"
+            ],
+            "type": "profile.I0Layout"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "layErr"
+            ],
+            "type": "error"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "layLu"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "reg"
+            ],
+            "type": "*Registry"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "regErr"
+            ],
+            "type": "error"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "regLu"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "prof"
+            ],
+            "type": "profile.Profile"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "profLu"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "bal"
+            ],
+            "type": "ProfilDeBalayage"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "corr",
+              "corrLue",
+              "corrLu"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "obs"
+            ],
+            "type": "*Observation"
+          }
+        ],
+        "file": "internal/grammar/film_context.go",
+        "line": 109,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 387,
+            "name": "BipedSlots",
+            "receiver": "*FilmContext",
+            "signature": "func() SlotBand"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 221,
+            "name": "CadreDeBalayage",
+            "receiver": "*FilmContext",
+            "signature": "func() FrameConfig"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 370,
+            "name": "ChunkAt",
+            "receiver": "*FilmContext",
+            "signature": "func(num int) ([]byte, []FilmPacket, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 358,
+            "name": "ChunkNumbers",
+            "receiver": "*FilmContext",
+            "signature": "func() []int"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 208,
+            "name": "ContexteDeLecture",
+            "receiver": "*FilmContext",
+            "signature": "func() ContexteDeLecture"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/controle_corruption_du_film.go",
+            "line": 32,
+            "name": "ControleDeCorruptionRepli",
+            "receiver": "*FilmContext",
+            "signature": "func() bool"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/equipment_state.go",
+            "line": 214,
+            "name": "EquipmentArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, error)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 349,
+            "name": "Film",
+            "receiver": "*FilmContext",
+            "signature": "func() *source.Film"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 405,
+            "name": "I0Layout",
+            "receiver": "*FilmContext",
+            "signature": "func() (profile.I0Layout, error)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 319,
+            "name": "ImposedLayout",
+            "receiver": "*FilmContext",
+            "signature": "func() *profile.I0Layout"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 191,
+            "name": "LargeursObjetDuMonde",
+            "receiver": "*FilmContext",
+            "signature": "func() profile.PrecisionDescriptor"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 230,
+            "name": "NouveauLecteur",
+            "receiver": "*FilmContext",
+            "signature": "func(buf []byte) *Lecteur"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 155,
+            "name": "Observation",
+            "receiver": "*FilmContext",
+            "signature": "func() *Observation"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 196,
+            "name": "PoserLargeursObjetDuMonde",
+            "receiver": "*FilmContext",
+            "signature": "func(d profile.PrecisionDescriptor)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 202,
+            "name": "PoserLargeursObjetDuMondeDepuisDecoupage",
+            "receiver": "*FilmContext",
+            "signature": "func(l profile.I0Layout)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 184,
+            "name": "PoserMPP",
+            "receiver": "*FilmContext",
+            "signature": "func(w profile.MPPWidths) profile.MPPWidths"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 177,
+            "name": "PoserProfilDeBalayage",
+            "receiver": "*FilmContext",
+            "signature": "func(p ProfilDeBalayage) ProfilDeBalayage"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 165,
+            "name": "ProfilDeBalayage",
+            "receiver": "*FilmContext",
+            "signature": "func() ProfilDeBalayage"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 333,
+            "name": "Profile",
+            "receiver": "*FilmContext",
+            "signature": "func() profile.Profile"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 346,
+            "name": "ProfileErr",
+            "receiver": "*FilmContext",
+            "signature": "func() error"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/film_context.go",
+            "line": 430,
+            "name": "Registry",
+            "receiver": "*FilmContext",
+            "signature": "func() (*Registry, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/film_context.go",
+            "line": 449,
+            "name": "archetype",
+            "receiver": "*FilmContext",
+            "signature": "func(ti int) (Archetype, *Registry, bool, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/ability_rank.go",
+            "line": 195,
+            "name": "bipedArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/controle_corruption_du_film.go",
+            "line": 18,
+            "name": "controleDeCorruptionDuFilm",
+            "receiver": "*FilmContext",
+            "signature": "func() bool"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/navpoint_radial_scan.go",
+            "line": 165,
+            "name": "filmArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func(ti int) (Archetype, *Registry, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/ground_weapon_creation.go",
+            "line": 116,
+            "name": "groundWeaponArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/zone_state_scan.go",
+            "line": 197,
+            "name": "managedPropertyArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/objective_scan.go",
+            "line": 227,
+            "name": "objectiveArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, *Registry, error)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/vehicle_creation.go",
+            "line": 171,
+            "name": "vehicleArchetype",
+            "receiver": "*FilmContext",
+            "signature": "func() (Archetype, error)"
+          }
+        ],
+        "name": "FilmContext"
+      },
+      "export": "FilmContext",
+      "target": "grammar.FilmContext"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tChunk, PacketIndex\tint\n\n\tTimestampUS\tuint64\n\n\tVariant\tint\n\n\tFilmIndex\tint\n\n\tShooterIndex5\tint\n\n\tWeaponID\tuint64\n\n\tFlags\t[fireFlagsCount]uint8\n\n\tHasAim\tbool\n\n\tAim\t[3]float32\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Chunk",
+              "PacketIndex"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TimestampUS"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Variant"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "FilmIndex"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ShooterIndex5"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "WeaponID"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Flags"
+            ],
+            "type": "[fireFlagsCount]uint8"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "HasAim"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Aim"
+            ],
+            "type": "[3]float32"
+          }
+        ],
+        "file": "internal/grammar/fire_events.go",
+        "line": 94,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/fire_events.go",
+            "line": 260,
+            "name": "AimHeadingDeg",
+            "receiver": "FireEvent",
+            "signature": "func() (float64, bool)"
+          }
+        ],
+        "name": "FireEvent"
+      },
+      "export": "FireEvent",
+      "target": "grammar.FireEvent"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tHasExtraFields\tbool\n\n\tIDLowBits\t\tint\n\tIDBase\t\t\tuint32\n\tNewDefaultStateBits\tint\n\n\tPacketPreambleBits\tint\n\n\tProfil\tProfilDeBalayage\n\n\tObs\t*Observation\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "HasExtraFields"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "IDLowBits"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "IDBase"
+            ],
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "NewDefaultStateBits"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "PacketPreambleBits"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Profil"
+            ],
+            "type": "ProfilDeBalayage"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Obs"
+            ],
+            "type": "*Observation"
+          }
+        ],
+        "file": "internal/grammar/frame_records.go",
+        "line": 37,
+        "methods": [
+          {
+            "exported": false,
+            "file": "internal/grammar/frame_records.go",
+            "line": 77,
+            "name": "contexte",
+            "receiver": "FrameConfig",
+            "signature": "func() ContexteDeLecture"
+          }
+        ],
+        "name": "FrameConfig"
+      },
+      "export": "FrameConfig",
+      "target": "grammar.FrameConfig"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tFilm\tstring\n\n\tCandidates\tint\n\tPublished\tint\n\n\tUnexplainedPair\t\tint\n\tUnexplainedSelf\t\tint\n\tUnexplainedBotIdx\tint\n\n\tOutOfRoster\tint\n\n\tTagOutOfCatalogueWalk\tint\n\n\tTagOutOfCatalogueScan\tint\n\n\tDeathsReal\tint\n\tDeathsCovered\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Film"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Candidates"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Published"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "UnexplainedPair"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "UnexplainedSelf"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "UnexplainedBotIdx"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "OutOfRoster"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TagOutOfCatalogueWalk"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TagOutOfCatalogueScan"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DeathsReal"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DeathsCovered"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/grammar/killhealth.go",
+        "line": 27,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 265,
+            "name": "Alerts",
+            "receiver": "KillSourceHealth",
+            "signature": "func() []string"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 99,
+            "name": "CoverageRatio",
+            "receiver": "KillSourceHealth",
+            "signature": "func() float64"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 240,
+            "name": "Degradations",
+            "receiver": "KillSourceHealth",
+            "signature": "func() []string"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 292,
+            "name": "ExpvarPairs",
+            "receiver": "KillSourceHealth",
+            "signature": "func() []ExpvarPair"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 88,
+            "name": "UnexplainedRatio",
+            "receiver": "KillSourceHealth",
+            "signature": "func() float64"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 80,
+            "name": "UnexplainedTotal",
+            "receiver": "KillSourceHealth",
+            "signature": "func() int"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/killhealth.go",
+            "line": 204,
+            "name": "Verdict",
+            "receiver": "KillSourceHealth",
+            "signature": "func() string"
+          }
+        ],
+        "name": "KillSourceHealth"
+      },
+      "export": "KillSourceHealth",
+      "target": "grammar.KillSourceHealth"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tMouvement\tprofile.MovementProfile\n\n\tCadre\tprofile.KeyframeProfile\n\n\tMPP\tprofile.MPPWidths\n\n\tGrammaire\tGrammaireBalayage\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Mouvement"
+            ],
+            "type": "profile.MovementProfile"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Cadre"
+            ],
+            "type": "profile.KeyframeProfile"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MPP"
+            ],
+            "type": "profile.MPPWidths"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Grammaire"
+            ],
+            "type": "GrammaireBalayage"
+          }
+        ],
+        "file": "internal/grammar/profil_balayage.go",
+        "line": 39,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/profil_balayage.go",
+            "line": 62,
+            "name": "LargeursObjetDuMonde",
+            "receiver": "ProfilDeBalayage",
+            "signature": "func() profile.PrecisionDescriptor"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/profil_balayage.go",
+            "line": 68,
+            "name": "PoserLargeursObjetDuMonde",
+            "receiver": "*ProfilDeBalayage",
+            "signature": "func(d profile.PrecisionDescriptor)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/profil_balayage.go",
+            "line": 80,
+            "name": "PoserLargeursObjetDuMondeDepuisDecoupage",
+            "receiver": "*ProfilDeBalayage",
+            "signature": "func(l profile.I0Layout)"
+          }
+        ],
+        "name": "ProfilDeBalayage"
+      },
+      "export": "ProfilDeBalayage",
+      "target": "grammar.ProfilDeBalayage"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tArchetypes\t[]Archetype\n\n\tfingerprint\tuint64\n\n\tnamedSlots\tint\n\n\tTruncated\tbool\n\n\tTruncatedBytes\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Archetypes"
+            ],
+            "type": "[]Archetype"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "fingerprint"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "namedSlots"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Truncated"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TruncatedBytes"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/grammar/registry.go",
+        "line": 133,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/registry.go",
+            "line": 167,
+            "name": "Archetype",
+            "receiver": "*Registry",
+            "signature": "func(idx int) (Archetype, bool)"
+          }
+        ],
+        "name": "Registry"
+      },
+      "export": "Registry",
+      "target": "grammar.Registry"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tChunks\t[]int\n\n\tRequireTag1\tbool\n\n\tDropSaturated\tbool\n\n\tMaxSpeedMPS\tfloat64\n\n\tIsolationGapMS\tint\n\n\tTeleportExemptions\tTeleportExemptions\n\n\tCaptureDirs\tbool\n\n\tLayout\t*profile.I0Layout\n\n\tWorldRange\t*profile.Vec3Range\n\n\tDynPrecOrientation\tbool\n\n\tQuantaOnly\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Chunks"
+            ],
+            "type": "[]int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "RequireTag1"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DropSaturated"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MaxSpeedMPS"
+            ],
+            "type": "float64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "IsolationGapMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TeleportExemptions"
+            ],
+            "type": "TeleportExemptions"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "CaptureDirs"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Layout"
+            ],
+            "type": "*profile.I0Layout"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "WorldRange"
+            ],
+            "type": "*profile.Vec3Range"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DynPrecOrientation"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "QuantaOnly"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "internal/grammar/offline_biped.go",
+        "line": 110,
+        "methods": [],
+        "name": "ScanFilmOptions"
+      },
+      "export": "ScanFilmOptions",
+      "target": "grammar.ScanFilmOptions"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tTimestampUS\tuint64\n\n\tVictimIdx\tint\n\tResponsibleIdx\tint\n\tSource\t\tuint64\n\tHasSource\tbool\n\tNegative\tbool\n\tMagClear\tfloat64\n\tMagRaw\t\tuint64\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "TimestampUS"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "VictimIdx"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ResponsibleIdx"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Source"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "HasSource"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Negative"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MagClear"
+            ],
+            "type": "float64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MagRaw"
+            ],
+            "type": "uint64"
+          }
+        ],
+        "file": "internal/grammar/weapon_hits.go",
+        "line": 66,
+        "methods": [],
+        "name": "WeaponDamage"
+      },
+      "export": "WeaponDamage",
+      "target": "grammar.WeaponDamage"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "func(d WeaponDamage) (meters float64, ok bool)",
+        "file": "internal/grammar/weapon_hits.go",
+        "line": 92,
+        "methods": [],
+        "name": "WeaponHitDistanceFunc"
+      },
+      "export": "WeaponHitDistanceFunc",
+      "target": "grammar.WeaponHitDistanceFunc"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tFilmIndex\tint\n\tWeaponID\tuint64\n\tShotsPaired\tint\n\tHits\t\tint\n\tDistBuckets\t[]int\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "FilmIndex"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "WeaponID"
+            ],
+            "type": "uint64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ShotsPaired"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Hits"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DistBuckets"
+            ],
+            "type": "[]int"
+          }
+        ],
+        "file": "internal/grammar/weapon_hits.go",
+        "line": 81,
+        "methods": [],
+        "name": "WeaponHitStats"
+      },
+      "export": "WeaponHitStats",
+      "target": "grammar.WeaponHitStats"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tReg\t*Registry\n\tslots\tmap[uint32]slotState\n\n\tvueCourante\tint8\n\n\tnsImageCle\tint8\n\n\tanticipee\t*TableAnticipee\n\tchunkCourant\tint\n\tanticipations\tmap[uint32]int\n\n\tanticipationDite\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Reg"
+            ],
+            "type": "*Registry"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "slots"
+            ],
+            "type": "map[uint32]slotState"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "vueCourante"
+            ],
+            "type": "int8"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "nsImageCle"
+            ],
+            "type": "int8"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "anticipee"
+            ],
+            "type": "*TableAnticipee"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "chunkCourant"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "anticipations"
+            ],
+            "type": "map[uint32]int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "anticipationDite"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "internal/grammar/world.go",
+        "line": 27,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 144,
+            "name": "AnticipationsParArchetype",
+            "receiver": "*World",
+            "signature": "func() map[uint32]int"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 340,
+            "name": "ArchetypeForSlot",
+            "receiver": "*World",
+            "signature": "func(slot uint32) (uint32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 313,
+            "name": "BindDatum",
+            "receiver": "*World",
+            "signature": "func(slot, typeIndex uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 183,
+            "name": "BindFull",
+            "receiver": "*World",
+            "signature": "func(id, typeIndex uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 270,
+            "name": "BindImageCle",
+            "receiver": "*World",
+            "signature": "func(ns, slot, typeIndex uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 323,
+            "name": "BindSoft",
+            "receiver": "*World",
+            "signature": "func(id, typeIndex uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 213,
+            "name": "BindWildcard",
+            "receiver": "*World",
+            "signature": "func(slot, typeIndex uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 363,
+            "name": "Bound",
+            "receiver": "*World",
+            "signature": "func() int"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 199,
+            "name": "GenerationMatches",
+            "receiver": "*World",
+            "signature": "func(id uint32, strict bool) bool"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 331,
+            "name": "HardBound",
+            "receiver": "*World",
+            "signature": "func(slot uint32) bool"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 114,
+            "name": "LierParAnticipation",
+            "receiver": "*World",
+            "signature": "func(id uint32) (uint32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 355,
+            "name": "PosOf",
+            "receiver": "*World",
+            "signature": "func(slot uint32) ([3]float32, bool)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 109,
+            "name": "PoserChunkCourant",
+            "receiver": "*World",
+            "signature": "func(n int)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 105,
+            "name": "PoserTableAnticipee",
+            "receiver": "*World",
+            "signature": "func(t *TableAnticipee)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 147,
+            "name": "PoserVueCourante",
+            "receiver": "*World",
+            "signature": "func(v int)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 389,
+            "name": "Restore",
+            "receiver": "*World",
+            "signature": "func(s WorldSnapshot)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 347,
+            "name": "SetPos",
+            "receiver": "*World",
+            "signature": "func(slot uint32, v [3]float32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 385,
+            "name": "Snapshot",
+            "receiver": "*World",
+            "signature": "func() WorldSnapshot"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 337,
+            "name": "Unbind",
+            "receiver": "*World",
+            "signature": "func(slot uint32)"
+          },
+          {
+            "exported": true,
+            "file": "internal/grammar/world.go",
+            "line": 170,
+            "name": "VuePossede",
+            "receiver": "*World",
+            "signature": "func(slot uint32) bool"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/world.go",
+            "line": 366,
+            "name": "cloneSlots",
+            "receiver": "*World",
+            "signature": "func() map[uint32]slotState"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/world.go",
+            "line": 376,
+            "name": "restoreSlots",
+            "receiver": "*World",
+            "signature": "func(m map[uint32]slotState)"
+          },
+          {
+            "exported": false,
+            "file": "internal/grammar/world.go",
+            "line": 286,
+            "name": "vueDeLEspaceDeNoms",
+            "receiver": "*World",
+            "signature": "func(ns uint32) int8"
+          }
+        ],
+        "name": "World"
+      },
+      "export": "World",
+      "target": "grammar.World"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tIdentite\tint\n\n\tFenetre\tint\n\n\tBotFenetre\tint\n\n\tNonRevendiqueeFenetre\tint\n\n\tCouplesSansIdentite\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Identite"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Fenetre"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BotFenetre"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "NonRevendiqueeFenetre"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "CouplesSansIdentite"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/killsource.go",
+        "line": 17,
+        "methods": [],
+        "name": "ApparStats"
+      },
+      "export": "ApparStats",
+      "target": "types.ApparStats"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tName\tstring\n\n\tIndex\tint\n\n\tRejected\tstring\n\n\tKnown\tbool\n\n\tExtra\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Name"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Index"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Rejected"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Known"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Extra"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/killsource.go",
+        "line": 47,
+        "methods": [],
+        "name": "Assist"
+      },
+      "export": "Assist",
+      "target": "types.Assist"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "int",
+        "file": "internal/facts/killsource/kill.go",
+        "line": 193,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/killsource/kill.go",
+            "line": 222,
+            "name": "Name",
+            "receiver": "Category",
+            "signature": "func() string"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/killsource/kill.go",
+            "line": 229,
+            "name": "String",
+            "receiver": "Category",
+            "signature": "func() string"
+          }
+        ],
+        "name": "Category"
+      },
+      "export": "Category",
+      "target": "killsource.Category"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tMemeInstant\tint\n\n\tLus\tint\n\n\tRecolles\tint\n\n\tPerdus\tint\n\n\tVictimesBotLues\tint\n\n\tMuet\tint\n\n\tAmbigu\tint\n\n\tAccord, Contradiction\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "MemeInstant"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Lus"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Recolles"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Perdus"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "VictimesBotLues"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Muet"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Ambigu"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Accord",
+              "Contradiction"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/killsource.go",
+        "line": 81,
+        "methods": [],
+        "name": "CoupleStats"
+      },
+      "export": "CoupleStats",
+      "target": "types.CoupleStats"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tCovered\tint\n\n\tRealPairs\tint\n\n\tReconstructedPairs\tint\n\n\tGhostPairs\tint\n\n\tSameInstantPairs\tint\n\n\tFeedKills\tint\n\tFeedDeaths\tint\n\n\tBotDeaths\tint\n\n\tBotKillerDeaths\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Covered"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "RealPairs"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ReconstructedPairs"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "GhostPairs"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "SameInstantPairs"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "FeedKills"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "FeedDeaths"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BotDeaths"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BotKillerDeaths"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 233,
+        "methods": [],
+        "name": "Coverage"
+      },
+      "export": "Coverage",
+      "target": "killsource.Coverage"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tPct\tint\n\n\tKnown\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Pct"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Known"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "internal/facts/killsource/assist.go",
+        "line": 73,
+        "methods": [],
+        "name": "DamageShare"
+      },
+      "export": "DamageShare",
+      "target": "killsource.DamageShare"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tBots\tbool\n\n\tSelfSource\tbool\n\n\tMultiplicityMax\tint\n\n\tStrongTagRequired\tbool\n\n\tBijectionRestarts\tint\n\n\tViews\tint\n\n\tCarte\t*profile.MapQuantEntry\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Bots"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "SelfSource"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MultiplicityMax"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "StrongTagRequired"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BijectionRestarts"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Views"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Carte"
+            ],
+            "type": "*profile.MapQuantEntry"
+          }
+        ],
+        "file": "internal/facts/killsource/options.go",
+        "line": 22,
+        "methods": [
+          {
+            "exported": false,
+            "file": "internal/facts/killsource/options.go",
+            "line": 127,
+            "name": "normalize",
+            "receiver": "*Options",
+            "signature": "func()"
+          }
+        ],
+        "name": "Options"
+      },
+      "export": "Options",
+      "target": "killsource.Options"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tKiller\tstring\n\n\tPresent\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Killer"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Present"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 76,
+        "methods": [],
+        "name": "FeedTruth"
+      },
+      "export": "FeedTruth",
+      "target": "killsource.FeedTruth"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tRefusal\tFilmTableRefusal\n\n\tBuild\tstring\n\n\tSeats\tint\n\n\tPinned\tint\n\n\tAddedNames\tint\n\n\tBotConflict\tint\n\n\tDuplicateName\tint\n\n\tOutOfRange\tint\n\n\tInferred\tint\n\n\tFreeNames\tint\n\n\tMotifPinned, MotifAgree, MotifContradict, MotifDuplicate\tint\n\n\tMotifReadings, MotifDisagreements, MotifAbsent\tint\n\n\tAgree, Contradict, Silent\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Refusal"
+            ],
+            "type": "FilmTableRefusal"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Build"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Seats"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Pinned"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "AddedNames"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BotConflict"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "DuplicateName"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "OutOfRange"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Inferred"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "FreeNames"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MotifPinned",
+              "MotifAgree",
+              "MotifContradict",
+              "MotifDuplicate"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MotifReadings",
+              "MotifDisagreements",
+              "MotifAbsent"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Agree",
+              "Contradict",
+              "Silent"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/facts/killsource/roster.go",
+        "line": 79,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/killsource/roster.go",
+            "line": 145,
+            "name": "AffectationUnique",
+            "receiver": "FilmTablePinning",
+            "signature": "func() bool"
+          }
+        ],
+        "name": "FilmTablePinning"
+      },
+      "export": "FilmTablePinning",
+      "target": "killsource.FilmTablePinning"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tTimeMS\tint\n\n\tVictim\tstring\n\n\tFeed\tFeedTruth\n\n\tSource\tSourceTruth\n\n\tDiverges\tbool\n\n\tRead\tProvenance\n\n\tAssist\ttypes.Assist\n\n\tKillerDamage\tDamageShare\n\n\tAssistDamage\tDamageShare\n\n\tpaquet\tpaquetID\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "TimeMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Victim"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Feed"
+            ],
+            "type": "FeedTruth"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Source"
+            ],
+            "type": "SourceTruth"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Diverges"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Read"
+            ],
+            "type": "Provenance"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Assist"
+            ],
+            "type": "types.Assist"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "KillerDamage"
+            ],
+            "type": "DamageShare"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "AssistDamage"
+            ],
+            "type": "DamageShare"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "paquet"
+            ],
+            "type": "paquetID"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 20,
+        "methods": [],
+        "name": "Kill"
+      },
+      "export": "Kill",
+      "target": "killsource.Kill"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "string",
+        "file": "internal/facts/killsource/kill.go",
+        "line": 144,
+        "methods": [],
+        "name": "Origin"
+      },
+      "export": "Origin",
+      "target": "killsource.Origin"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "string",
+        "file": "internal/facts/killsource/kill.go",
+        "line": 129,
+        "methods": [],
+        "name": "Path"
+      },
+      "export": "Path",
+      "target": "killsource.Path"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct{ Population, Matched, Published int }",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Population",
+              "Matched",
+              "Published"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 456,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/killsource/kill.go",
+            "line": 459,
+            "name": "Ratio",
+            "receiver": "PathStats",
+            "signature": "func() float64"
+          }
+        ],
+        "name": "PathStats"
+      },
+      "export": "PathStats",
+      "target": "killsource.PathStats"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tKills\t[]Kill\n\n\tUnclaimedDeaths\t[]UnclaimedDeath\n\n\tCoverage\tCoverage\n\n\tHealth\tgrammar.KillSourceHealth\n\n\tStats\tStats\n\n\tRoster\tRoster\n\n\tCalibration\tstring\n\n\tProfilCalibre\tgrammar.ProfilDeBalayage\n\n\tBijectionMargin\tint\n\n\tBijectionDetermined\tbool\n\n\tProbe\t*RelaxedProbe\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Kills"
+            ],
+            "type": "[]Kill"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "UnclaimedDeaths"
+            ],
+            "type": "[]UnclaimedDeath"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Coverage"
+            ],
+            "type": "Coverage"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Health"
+            ],
+            "type": "grammar.KillSourceHealth"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Stats"
+            ],
+            "type": "Stats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Roster"
+            ],
+            "type": "Roster"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Calibration"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ProfilCalibre"
+            ],
+            "type": "grammar.ProfilDeBalayage"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BijectionMargin"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BijectionDetermined"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Probe"
+            ],
+            "type": "*RelaxedProbe"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 310,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/killsource/kill.go",
+            "line": 399,
+            "name": "LineByLinePublishable",
+            "receiver": "*Result",
+            "signature": "func() bool"
+          }
+        ],
+        "name": "Result"
+      },
+      "export": "Result",
+      "target": "killsource.Result"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tWalk, Scan\tPathStats\n\n\tSelfWalk, SelfScan\tPathStats\n\n\tBot\tPathStats\n\n\tBotKiller\tPathStats\n\n\tUnclaimed\tPathStats\n\n\tRedundant\tint\n\n\tNoBit\tint\n\n\tAgree, Disagree\tint\n\n\tMultiCandidate\tint\n\n\tPacketsWithEvents, PacketsLocated\tint\n\n\tAssist\tAssistStats\n\n\tCouples\ttypes.CoupleStats\n\n\tAppariement\ttypes.ApparStats\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Walk",
+              "Scan"
+            ],
+            "type": "PathStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "SelfWalk",
+              "SelfScan"
+            ],
+            "type": "PathStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Bot"
+            ],
+            "type": "PathStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "BotKiller"
+            ],
+            "type": "PathStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Unclaimed"
+            ],
+            "type": "PathStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Redundant"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "NoBit"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Agree",
+              "Disagree"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "MultiCandidate"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "PacketsWithEvents",
+              "PacketsLocated"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Assist"
+            ],
+            "type": "AssistStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Couples"
+            ],
+            "type": "types.CoupleStats"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Appariement"
+            ],
+            "type": "types.ApparStats"
+          }
+        ],
+        "file": "internal/facts/killsource/kill.go",
+        "line": 408,
+        "methods": [],
+        "name": "Stats"
+      },
+      "export": "Stats",
+      "target": "killsource.Stats"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tXUID\tstring\n\n\tTimeMS\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "XUID"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "TimeMS"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 15,
+        "methods": [],
+        "name": "DeathInstant"
+      },
+      "export": "DeathInstant",
+      "target": "types.DeathInstant"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tXUID\tstring\n\n\tRaw\tint\n\n\tNet\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "XUID"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Raw"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Net"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 48,
+        "methods": [],
+        "name": "FlagGrabsNetPlayer"
+      },
+      "export": "FlagGrabsNetPlayer",
+      "target": "types.FlagGrabsNetPlayer"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tNamedEvent\n\n\tXUID\tstring\n}",
+        "fields": [
+          {
+            "embedded": true,
+            "names": [],
+            "type": "NamedEvent"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "XUID"
+            ],
+            "type": "string"
+          }
+        ],
+        "file": "internal/facts/objectives/slotidentity.go",
+        "line": 116,
+        "methods": [],
+        "name": "IdentifiedEvent"
+      },
+      "export": "IdentifiedEvent",
+      "target": "objectives.IdentifiedEvent"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "map[string]int",
+        "file": "internal/facts/objectives/extract.go",
+        "line": 79,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/extract.go",
+            "line": 82,
+            "name": "TeamOf",
+            "receiver": "MapRoster",
+            "signature": "func(xuid string) (int, bool)"
+          }
+        ],
+        "name": "MapRoster"
+      },
+      "export": "MapRoster",
+      "target": "objectives.MapRoster"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tTimeMS\tint\n\n\tSlot\tint\n\n\tStat\tstring\n\n\tComp\tint\n\tSide\tstring\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "TimeMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Slot"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Stat"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Comp"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Side"
+            ],
+            "type": "string"
+          }
+        ],
+        "file": "internal/facts/objectives/named.go",
+        "line": 199,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/families.go",
+            "line": 61,
+            "name": "StatName",
+            "receiver": "NamedEvent",
+            "signature": "func() string"
+          }
+        ],
+        "name": "NamedEvent"
+      },
+      "export": "NamedEvent",
+      "target": "objectives.NamedEvent"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tXUID\tstring\n\n\tKills, Deaths, Assists\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "XUID"
+            ],
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Kills",
+              "Deaths",
+              "Assists"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 59,
+        "methods": [],
+        "name": "PlayerLine"
+      },
+      "export": "PlayerLine",
+      "target": "types.PlayerLine"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tbyRound\tmap[int]map[int]string\n\n\torigins\tmap[int]map[int]string\n\n\tstarts\t[]roundStart\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "byRound"
+            ],
+            "type": "map[int]map[int]string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "origins"
+            ],
+            "type": "map[int]map[int]string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "starts"
+            ],
+            "type": "[]roundStart"
+          }
+        ],
+        "file": "internal/facts/objectives/slotidentity_rounds.go",
+        "line": 114,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 215,
+            "name": "At",
+            "receiver": "RoundIdentity",
+            "signature": "func(slot, timeMS int) string"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 302,
+            "name": "AtRound",
+            "receiver": "RoundIdentity",
+            "signature": "func(round, slot int) string"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_elimination.go",
+            "line": 85,
+            "name": "CompletedByElimination",
+            "receiver": "RoundIdentity",
+            "signature": "func(recs []types.StatRecord, lines []types.PlayerLine) RoundIdentity"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 260,
+            "name": "CompletedByLines",
+            "receiver": "RoundIdentity",
+            "signature": "func(recs []types.StatRecord, lines []types.PlayerLine) RoundIdentity"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_residue.go",
+            "line": 57,
+            "name": "CompletedByRoundResidue",
+            "receiver": "RoundIdentity",
+            "signature": "func(recs []types.StatRecord, lines []types.PlayerLine) RoundIdentity"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 332,
+            "name": "NamedCount",
+            "receiver": "RoundIdentity",
+            "signature": "func() int"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_elimination.go",
+            "line": 53,
+            "name": "Origin",
+            "receiver": "RoundIdentity",
+            "signature": "func(round, slot int) string"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 318,
+            "name": "Resolved",
+            "receiver": "RoundIdentity",
+            "signature": "func() bool"
+          },
+          {
+            "exported": true,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 321,
+            "name": "Rounds",
+            "receiver": "RoundIdentity",
+            "signature": "func() []int"
+          },
+          {
+            "exported": false,
+            "file": "internal/facts/objectives/slotidentity_elimination.go",
+            "line": 192,
+            "name": "copieProfonde",
+            "receiver": "RoundIdentity",
+            "signature": "func() RoundIdentity"
+          },
+          {
+            "exported": false,
+            "file": "internal/facts/objectives/slotidentity_rounds.go",
+            "line": 343,
+            "name": "roundOfTime",
+            "receiver": "RoundIdentity",
+            "signature": "func(timeMS int) int"
+          }
+        ],
+        "name": "RoundIdentity"
+      },
+      "export": "RoundIdentity",
+      "target": "objectives.RoundIdentity"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tTimeMS\tint\n\n\tSlot\tint\n\n\tValue\tint64\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "TimeMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Slot"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Value"
+            ],
+            "type": "int64"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 67,
+        "methods": [],
+        "name": "ScorePoint"
+      },
+      "export": "ScorePoint",
+      "target": "types.ScorePoint"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tComp\tint\n\n\tSideB\tbool\n\n\tStrict\tbool\n\n\tUnitary\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Comp"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "SideB"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Strict"
+            ],
+            "type": "bool"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Unitary"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "internal/facts/objectives/score.go",
+        "line": 40,
+        "methods": [
+          {
+            "exported": false,
+            "file": "internal/facts/objectives/score.go",
+            "line": 109,
+            "name": "key",
+            "receiver": "StatComponent",
+            "signature": "func() statSlotKey"
+          }
+        ],
+        "name": "StatComponent"
+      },
+      "export": "StatComponent",
+      "target": "objectives.StatComponent"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tTimeMS\tint\n\n\tSlot\tint\n\n\tRound\tint\n\n\tComps\tmap[int]StatValue\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "TimeMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Slot"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Round"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Comps"
+            ],
+            "type": "map[int]StatValue"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 98,
+        "methods": [],
+        "name": "StatRecord"
+      },
+      "export": "StatRecord",
+      "target": "types.StatRecord"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tA, B\t\tint64\n\tC, D\t\tint64\n\tHasC, HasD\tbool\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "A",
+              "B"
+            ],
+            "type": "int64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "C",
+              "D"
+            ],
+            "type": "int64"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "HasC",
+              "HasD"
+            ],
+            "type": "bool"
+          }
+        ],
+        "file": "types/objectives.go",
+        "line": 91,
+        "methods": [],
+        "name": "StatValue"
+      },
+      "export": "StatValue",
+      "target": "types.StatValue"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tData\t\t[]byte\n\tStartMS\t\tint\n\tChunkType\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Data"
+            ],
+            "type": "[]byte"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "StartMS"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ChunkType"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "internal/grammar/positions/positions.go",
+        "line": 53,
+        "methods": [],
+        "name": "ChunkInput"
+      },
+      "export": "ChunkInput",
+      "target": "positions.ChunkInput"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tGateBits\tint\n\n\tAxisW\t[3]uint\n\n\tRegion\tuint32\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "GateBits"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "AxisW"
+            ],
+            "type": "[3]uint"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Region"
+            ],
+            "type": "uint32"
+          }
+        ],
+        "file": "internal/profile/i0_layout.go",
+        "line": 53,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/profile/i0_layout.go",
+            "line": 76,
+            "name": "AxisOffset",
+            "receiver": "I0Layout",
+            "signature": "func(ax int) int"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/i0_layout.go",
+            "line": 97,
+            "name": "String",
+            "receiver": "I0Layout",
+            "signature": "func() string"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/i0_layout.go",
+            "line": 71,
+            "name": "TotalBits",
+            "receiver": "I0Layout",
+            "signature": "func() int"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/i0_layout.go",
+            "line": 85,
+            "name": "Valid",
+            "receiver": "I0Layout",
+            "signature": "func() bool"
+          }
+        ],
+        "name": "I0Layout"
+      },
+      "export": "I0Layout",
+      "target": "profile.I0Layout"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tSchemaVersion\tint\t`json:\"schemaVersion\"`\n\n\tSource\tstring\t`json:\"source\"`\n\n\tMaps\tmap[string]MapQuantEntry\t`json:\"maps\"`\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "SchemaVersion"
+            ],
+            "tag": "`json:\"schemaVersion\"`",
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Source"
+            ],
+            "tag": "`json:\"source\"`",
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Maps"
+            ],
+            "tag": "`json:\"maps\"`",
+            "type": "map[string]MapQuantEntry"
+          }
+        ],
+        "file": "internal/profile/map_bounds.go",
+        "line": 128,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/profile/map_bounds.go",
+            "line": 154,
+            "name": "Lookup",
+            "receiver": "*MapQuantCatalog",
+            "signature": "func(mapName string) (MapQuantEntry, error)"
+          }
+        ],
+        "name": "MapQuantCatalog"
+      },
+      "export": "MapQuantCatalog",
+      "target": "profile.MapQuantCatalog"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tModule\tstring\t`json:\"module\"`\n\n\tMin\t[3]float32\t`json:\"min\"`\n\tMax\t[3]float32\t`json:\"max\"`\n\n\tAxisWidths\t[3]uint\t`json:\"axisWidths\"`\n\n\tRegion\tuint32\t`json:\"region,omitempty\"`\n\n\tRegionIndexBits\tuint\t`json:\"regionIndexBits,omitempty\"`\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Module"
+            ],
+            "tag": "`json:\"module\"`",
+            "type": "string"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Min"
+            ],
+            "tag": "`json:\"min\"`",
+            "type": "[3]float32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Max"
+            ],
+            "tag": "`json:\"max\"`",
+            "type": "[3]float32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "AxisWidths"
+            ],
+            "tag": "`json:\"axisWidths\"`",
+            "type": "[3]uint"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "Region"
+            ],
+            "tag": "`json:\"region,omitempty\"`",
+            "type": "uint32"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "RegionIndexBits"
+            ],
+            "tag": "`json:\"regionIndexBits,omitempty\"`",
+            "type": "uint"
+          }
+        ],
+        "file": "internal/profile/map_bounds.go",
+        "line": 38,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/profile/map_bounds.go",
+            "line": 69,
+            "name": "EffectiveRegionIndexBits",
+            "receiver": "MapQuantEntry",
+            "signature": "func() uint"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/map_bounds.go",
+            "line": 109,
+            "name": "Layout",
+            "receiver": "MapQuantEntry",
+            "signature": "func() I0Layout"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/map_bounds.go",
+            "line": 91,
+            "name": "PrecisionAbsolue",
+            "receiver": "MapQuantEntry",
+            "signature": "func() PrecisionDescriptor"
+          },
+          {
+            "exported": true,
+            "file": "internal/profile/map_bounds.go",
+            "line": 119,
+            "name": "Range",
+            "receiver": "MapQuantEntry",
+            "signature": "func() Vec3Range"
+          }
+        ],
+        "name": "MapQuantEntry"
+      },
+      "export": "MapQuantEntry",
+      "target": "profile.MapQuantEntry"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tIndex\t\tint\n\tChunkType\tint\n\tStartMS\t\tint\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "Index"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "ChunkType"
+            ],
+            "type": "int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "StartMS"
+            ],
+            "type": "int"
+          }
+        ],
+        "file": "types/source.go",
+        "line": 11,
+        "methods": [],
+        "name": "ChunkMeta"
+      },
+      "export": "ChunkMeta",
+      "target": "types.ChunkMeta"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "struct {\n\tchunks\t[][]byte\n\tall\t[]types.Packet\n\tbounds\t[][2]int\n\tmeta\t[]types.ChunkMeta\n}",
+        "fields": [
+          {
+            "embedded": false,
+            "names": [
+              "chunks"
+            ],
+            "type": "[][]byte"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "all"
+            ],
+            "type": "[]types.Packet"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "bounds"
+            ],
+            "type": "[][2]int"
+          },
+          {
+            "embedded": false,
+            "names": [
+              "meta"
+            ],
+            "type": "[]types.ChunkMeta"
+          }
+        ],
+        "file": "internal/source/film.go",
+        "line": 42,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/source/film.go",
+            "line": 75,
+            "name": "AllPackets",
+            "receiver": "*Film",
+            "signature": "func() []types.Packet"
+          },
+          {
+            "exported": true,
+            "file": "internal/source/film.go",
+            "line": 53,
+            "name": "Chunk",
+            "receiver": "*Film",
+            "signature": "func(i int) []byte"
+          },
+          {
+            "exported": true,
+            "file": "internal/source/film.go",
+            "line": 87,
+            "name": "Meta",
+            "receiver": "*Film",
+            "signature": "func() []types.ChunkMeta"
+          },
+          {
+            "exported": true,
+            "file": "internal/source/film.go",
+            "line": 50,
+            "name": "NumChunks",
+            "receiver": "*Film",
+            "signature": "func() int"
+          },
+          {
+            "exported": true,
+            "file": "internal/source/film.go",
+            "line": 63,
+            "name": "Packets",
+            "receiver": "*Film",
+            "signature": "func(i int) []types.Packet"
+          }
+        ],
+        "name": "Film"
+      },
+      "export": "Film",
+      "target": "source.Film"
+    },
+    {
+      "declaration": {
+        "alias": false,
+        "definition": "[][]byte",
+        "file": "internal/source/source.go",
+        "line": 40,
+        "methods": [
+          {
+            "exported": true,
+            "file": "internal/source/source.go",
+            "line": 46,
+            "name": "Chunk",
+            "receiver": "MemoryChunks",
+            "signature": "func(i int) ([]byte, error)"
+          },
+          {
+            "exported": true,
+            "file": "internal/source/source.go",
+            "line": 43,
+            "name": "NumChunks",
+            "receiver": "MemoryChunks",
+            "signature": "func() int"
+          }
+        ],
+        "name": "MemoryChunks"
+      },
+      "export": "MemoryChunks",
+      "target": "source.MemoryChunks"
+    }
+  ]
+}

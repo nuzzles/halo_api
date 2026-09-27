@@ -1,0 +1,210 @@
+{
+  "match_id": "79bce30e-0d61-4c57-93dd-92d61124e80c",
+  "map": "Bazaar",
+  "note": "Captured bytes; 50-bit total checked by spawn suffix and command ticks. Per-axis 17/17/16 split inferred from continuity and unit-resolution changes; world bounds/scales remain unknown.",
+  "spawn": {
+    "hex": "088018e1b1876bda000019d0120430002012653d7f5bd71cc10cbf01b0f9b891c1bb37419113ef0752e702",
+    "length": 343,
+    "source": {
+      "chunk": 1,
+      "payload_byte": 539664,
+      "timestamp_us": 7281233564,
+      "spawn_bit": 4138
+    },
+    "expected": [
+      113463,
+      33570,
+      10206
+    ]
+  },
+  "deltas": [
+    {
+      "hex": "a07b4202344008c005906ecd906444fbc13b49452a32513420831cd18806d4d800",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 538172,
+        "timestamp_us": 7314246252
+      },
+      "ids": [
+        0,
+        1,
+        25
+      ],
+      "tick": 70,
+      "end": 174,
+      "end_input": false,
+      "expected": [
+        113462,
+        33570,
+        10206
+      ],
+      "aim": null
+    },
+    {
+      "hex": "a07b4202444008c005906eccd06464fbc12e1445aa404037e740",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 538312,
+        "timestamp_us": 7314279773
+      },
+      "ids": [
+        0,
+        1,
+        25
+      ],
+      "tick": 72,
+      "end": 174,
+      "end_input": true,
+      "expected": [
+        113459,
+        33571,
+        10206
+      ],
+      "aim": null
+    },
+    {
+      "hex": "a07b42024c400900055641bb32419193ef04a71719b071001490806fcf00",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 538375,
+        "timestamp_us": 7314296676
+      },
+      "ids": [
+        0,
+        1,
+        21,
+        25
+      ],
+      "tick": 73,
+      "end": 205,
+      "end_input": true,
+      "expected": [
+        113458,
+        33571,
+        10206
+      ],
+      "aim": [
+        2104,
+        1024
+      ]
+    },
+    {
+      "hex": "a07b4202c44008c055906ebf106484fbc6075ceab0100df9e000",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 539399,
+        "timestamp_us": 7314546444
+      },
+      "ids": [
+        0,
+        21,
+        25
+      ],
+      "tick": 88,
+      "end": 168,
+      "end_input": true,
+      "expected": [
+        113404,
+        33572,
+        10206
+      ],
+      "aim": [
+        2077,
+        925
+      ]
+    },
+    {
+      "hex": "a07b4202d4400880641baf2419213ef15a0806fcf000",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 539525,
+        "timestamp_us": 7314579709
+      },
+      "ids": [
+        0,
+        25
+      ],
+      "tick": 90,
+      "end": 137,
+      "end_input": true,
+      "expected": [
+        113394,
+        33572,
+        10206
+      ],
+      "aim": null
+    },
+    {
+      "hex": "a07b420354400880641baa3419093ef16a4800900042146e9e5062c502a251ba38cf5291b40000000100df9f00",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 540559,
+        "timestamp_us": 7314846660
+      },
+      "ids": [
+        0,
+        25
+      ],
+      "tick": 106,
+      "end": 137,
+      "end_input": false,
+      "expected": [
+        113315,
+        33569,
+        10206
+      ],
+      "aim": null
+    },
+    {
+      "hex": "a07b4203b44008c055906e9a1063c4fbc6075ceaec900118008437334831127ec128ed9735000311100dfa0000",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 541503,
+        "timestamp_us": 7315046971
+      },
+      "ids": [
+        0,
+        21,
+        25
+      ],
+      "tick": 118,
+      "end": 168,
+      "end_input": false,
+      "expected": [
+        113256,
+        33566,
+        10206
+      ],
+      "aim": [
+        2077,
+        925
+      ]
+    },
+    {
+      "hex": "a07b4203cc400900055641ba5a418e13ef04939137b03ae757948008c00421b970418813f8094764b9a897c168806fd100",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 541749,
+        "timestamp_us": 7315097435
+      },
+      "ids": [
+        0,
+        1,
+        21,
+        25
+      ],
+      "tick": 121,
+      "end": 205,
+      "end_input": false,
+      "expected": [
+        113242,
+        33564,
+        10206
+      ],
+      "aim": [
+        2077,
+        925
+      ]
+    }
+  ]
+}

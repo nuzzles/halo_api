@@ -1,0 +1,37 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native": {
+    "generator": "halo_rust_facts_provenance_test.go.txt",
+    "cases": 1024,
+    "entry_diagnostics": 6109,
+    "published_fallbacks": 3332,
+    "counts_above_u32": 1907,
+    "absent_identities": 147
+  },
+  "fixture": {
+    "path": "facts-provenance-v41.json.zlib",
+    "sha256": "86b920c24cea1a6a3315ec183919d7f666ac159552dfad9dce2e4efa1719c544"
+  },
+  "host": {
+    "passed": 4,
+    "failed": 0,
+    "log": "/private/tmp/halo-facts-provenance-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "Selected provenance and finalization tests, not full suite",
+    "log": "/private/tmp/halo-facts-provenance-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-provenance-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Empty-position cache entry provenance, not complete nonempty BuildFromFacts",
+    "Only four known zero bounds normalize integer versus floating JSON spelling",
+    "Fresh capture, caller precedence and broader domain audit remain open"
+  ]
+}

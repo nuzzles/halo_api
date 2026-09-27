@@ -1,0 +1,16 @@
+package grammar
+import("testing";"os";"encoding/json";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustCorruptionContext(t *testing.T) {
+ rows:=[]any{}
+ for c:=0;c<256;c++ {
+  read:=c%3!=0;declared:=c%2==0;inherited:=c%5==0
+  p:=profile.Resoudre(profile.ClesDuFilm{RegistrePresent:true,Format:27,Majeure:41,MajeureLue:true,IdentiteLue:read,Identite:profile.FilmIdentity{ControleDeCorruption:declared}},nil)
+  g:=grammaireDuProfil();g.ControleDeCorruption=inherited;g,lue:=grammaireSousFilm(g,p)
+  ctx:=&FilmContext{bal:ProfilDeBalayageParDefaut(),prof:p,profLu:true}
+  states:=[]bool{};previous:=[]bool{}
+  for j:=0;j<4;j++{bal:=ProfilDeBalayageParDefaut();bal.Grammaire.ControleDeCorruption=(c+j)%2==0;prev:=ctx.PoserProfilDeBalayage(bal);previous=append(previous,prev.Grammaire.ControleDeCorruption);states=append(states,ctx.ProfilDeBalayage().Grammaire.ControleDeCorruption);if ctx.CadreDeBalayage().Profil.Grammaire.ControleDeCorruption!=states[j]||ctx.NouveauLecteur(nil).p.Grammaire.ControleDeCorruption!=states[j]{t.Fatal("reader/frame lost film corruption flag")}}
+  rows=append(rows,map[string]any{"read":read,"declared":declared,"inherited":inherited,"direct":g.ControleDeCorruption,"direct_read":lue,"states":states,"previous":previous,"fallback":ctx.ControleDeCorruptionRepli()})
+ }
+ var nilContext *FilmContext;if !nilContext.ControleDeCorruptionRepli()||nilContext.ProfilDeBalayage().Grammaire.ControleDeCorruption {t.Fatal("nil context invariant")}
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-corruption-context.json",b,0600);e!=nil{t.Fatal(e)}
+}

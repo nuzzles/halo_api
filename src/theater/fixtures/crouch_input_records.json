@@ -1,0 +1,125 @@
+{
+  "note": "Original command tails after independently parsed input axes. Held crouch, explicit empty tail, and unsupported jump/multiplayer tails. No physical stance or slide inference.",
+  "records": [
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 1,
+      "payload_byte": 502639,
+      "time_us": 3851092,
+      "input_end": 65,
+      "expected": false,
+      "hex": "a07b420698806bef80"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 488186,
+      "time_us": 22119031,
+      "input_end": 65,
+      "expected": true,
+      "hex": "a07b4200d0806bef9080"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 503208,
+      "time_us": 27507939,
+      "input_end": 199,
+      "expected": true,
+      "hex": "a07b4202ec4008c005903eb58035ad2709f38e04d74201aec04200"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 503272,
+      "time_us": 27524516,
+      "input_end": 278,
+      "expected": true,
+      "hex": "a07b4202f44008c005903eb58035ad2709b58a07d7929aa1003eb58035ad2704035c808400"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 503346,
+      "time_us": 27541074,
+      "input_end": 162,
+      "expected": true,
+      "hex": "a07b4202fc400880640fad600d6b49caf84035c80840"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 533320,
+      "time_us": 37567950,
+      "input_end": 309,
+      "expected": true,
+      "hex": "a07b4205c4400900055640fdaa00beb49c05a701cf0007fadc253542007ed5005f5a4e0806fd1108"
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "match_id": "ff4eb2e4-a2ba-4b95-a892-d8a413ac3a32",
+      "chunk": 2,
+      "payload_byte": 534483,
+      "time_us": 37835440,
+      "input_end": 272,
+      "expected": true,
+      "hex": "a07b4206444008c055903fa88039ad272000fedc84a6a8400fea200e6b49c100dfa32100"
+    },
+    {
+      "film": "natural-end/08-crouch",
+      "match_id": "d6418abd-6bf0-4231-830a-d85a510e32cb",
+      "chunk": 2,
+      "payload_byte": 494967,
+      "time_us": 26439412,
+      "input_end": 65,
+      "expected": true,
+      "hex": "a07b420148806bef9080"
+    },
+    {
+      "film": "natural-end/02-jump",
+      "match_id": "dad793c7-0894-49c7-91ed-75c2c1074dad",
+      "chunk": 2,
+      "payload_byte": 493817,
+      "time_us": 26037007,
+      "input_end": 199,
+      "expected": null,
+      "hex": "a07b4200844008c005903fe98035ad2b06a5d079440201afbe4800"
+    },
+    {
+      "film": "octagon/01-idle",
+      "match_id": "10cb8ac3-f0c7-4d71-ae4a-103e4fa5d2b8",
+      "chunk": 1,
+      "payload_byte": 508039,
+      "time_us": 4035818,
+      "input_end": 110,
+      "expected": null,
+      "hex": "a07b42068c40088165e884035f7c1019f7c0"
+    },
+    {
+      "film": "octagon/01-idle",
+      "match_id": "10cb8ac3-f0c7-4d71-ae4a-103e4fa5d2b8",
+      "chunk": 1,
+      "payload_byte": 508216,
+      "time_us": 4085744,
+      "input_end": 65,
+      "expected": null,
+      "hex": "a07b4206a0806bef8203afbe00"
+    },
+    {
+      "film": "octagon/01-idle",
+      "match_id": "10cb8ac3-f0c7-4d71-ae4a-103e4fa5d2b8",
+      "chunk": 4,
+      "payload_byte": 538261,
+      "time_us": 77377112,
+      "input_end": 167,
+      "expected": null,
+      "hex": "a07b4207eca24841044445945108208888a201afbe080ebef800"
+    }
+  ]
+}

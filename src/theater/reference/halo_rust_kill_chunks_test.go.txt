@@ -1,0 +1,117 @@
+package killsource
+
+import (
+ "context"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"testing"
+)
+
+func TestHaloRustKillChunks(t *testing.T) {
+	rows := []any{}
+	for run := 0; run < 128; run++ {
+		inputs := []any{}
+		chunks := source.MemoryChunks{}
+		meta := []types.ChunkMeta{}
+		count := 3
+		if run%17 == 0 {
+			count = 66
+		}
+		if run%13 == 0 {
+			count = 0
+		}
+		for c := 0; c < count; c++ {
+			d := []byte{}
+			if c == 0 {
+				d = []byte{41, 0, 0, 0, 27, 0, 0, 0}
+				if run%7 == 0 {
+					d = d[:3]
+				}
+			} else {
+				for i := 0; i < 18; i++ {
+					kind := []uint16{2, 0, 12, 0, 8, 0}[i%6]
+					if run%5 == 0 {
+						kind = 2
+					}
+					if i == 9 && run%3 == 0 {
+						kind = 7
+					}
+					payload := []byte{byte(i*17 + run), byte(c), byte(run)}
+					if kind == 7 {
+						payload = nil
+					}
+					h := make([]byte, 16)
+					binary.LittleEndian.PutUint16(h, kind)
+					binary.LittleEndian.PutUint32(h[4:], uint32(len(payload)))
+					ts := uint64((17-i)%4)*1000 + uint64(c%2)
+					if kind == 0 {
+						ts += 5000
+					}
+					if i == 15 && run%2 == 0 {
+						ts = ^uint64(0)
+					}
+					binary.LittleEndian.PutUint64(h[8:], ts)
+					d = append(d, h...)
+					d = append(d, payload...)
+				}
+				if run%11 == 0 {
+					d = d[:len(d)-2]
+				}
+			}
+			index := c * 3
+			if run%4 == 1 {
+				index = c + 1
+			}
+			if run%4 == 2 {
+				index = 0
+			}
+			chunks = append(chunks, d)
+			meta = append(meta, types.ChunkMeta{Index: index})
+			inputs = append(inputs, map[string]any{"hex": hex.EncodeToString(d), "index": index})
+		}
+		if run%4 == 3 {
+			meta = nil
+		}
+		var src *source.Film
+		if len(chunks) > 0 {
+			var err error
+			src, err = source.Load(chunks, meta)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		f, err := loadFilm(src)
+		row := map[string]any{"chunks": inputs, "metadata": run%4 != 3, "error": ""}
+        _, decodeErr := Decode(context.Background(), "error-oracle", src, nil)
+        if decodeErr == nil {t.Fatal("expected no usable kill feed in source fixture")}
+        row["decode_error"] = decodeErr.Error()
+		if err != nil {
+			row["error"] = err.Error()
+		} else {
+			encode := func(p packet) any {
+				return map[string]any{"chunk": p.chunk, "index": p.idx, "kind": p.typ, "ts": p.ts, "hex": hex.EncodeToString(p.payload), "events": hasEvents(&p), "ms": f.ms(&p)}
+			}
+			ps := []any{}
+			ds := []any{}
+			for _, p := range f.packets {
+				ps = append(ps, encode(p))
+			}
+			for _, p := range f.t0 {
+				ds = append(ds, encode(p))
+			}
+			row["packets"], row["deltas"], row["base"], row["major"], row["major_read"] = ps, ds, f.tsBase, f.majorVersion, f.versionLue
+		}
+		rows = append(rows, row)
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-kill-chunks.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

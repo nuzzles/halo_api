@@ -1,0 +1,32 @@
+package grammar
+import("encoding/hex";"encoding/json";"math";"os";"testing")
+func haloPositionDomainObserver()(*Observation,*[]any){
+ o:=NouvelleObservation();events:=[]any{}
+ o.PosCaptureHook=func(s PositionSample){events=append(events,map[string]any{"kind":"position","position_kind":[]string{"None","Baseline","Absolute","AbsoluteFallback","Delta8","DeltaAxis"}[int(s.Kind)],"slot":s.Slot,"bit":s.BitPos,"vector_bits":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}
+ o.AbilityNonPredictedHook=func(s AbilityNonPredictedState){var inner,r8 any;if s.Inner>=0{inner=s.Inner};if s.HasR8{r8=s.R8};vec:=[3]any{};for i,v:=range s.Vec{if v.Present{vec[i]=[2]uint32{v.DirQ,v.MagQ}}};events=append(events,map[string]any{"kind":"ability_non_predicted","state":map[string]any{"tag":s.Tag,"body_walked":s.BodyWalked,"body_ok":s.BodyOK,"inner":inner,"flags":s.Zero3,"position":s.PosQ,"mid":s.Mid7,"value8":r8,"vectors":vec,"packed":s.Packed24,"tail":s.Tail9}})}
+ return o,&events
+}
+func TestHaloRustPositionDomain(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []uint{65,1<<32}{for mode:=0;mode<9;mode++{
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.PacketPreambleBits=0;cfg.Profil.Mouvement.WorldObject.IndexW=1;cfg.Profil.Mouvement.WorldObject.AxisW=[3]uint{6,7,8};cfg.Profil.Mouvement.WorldObject.Region=0;cfg.Profil.Mouvement.Traversal.IndexW=1;cfg.Profil.Mouvement.Traversal.AxisW=[3]uint{6,7,8};cfg.Profil.Mouvement.DeltaAxisWidth=0;cfg.Profil.Mouvement.DeltaQuantum=0.25;cfg.Profil.Mouvement.FullPrecision=false;cfg.Profil.Grammaire.PorteeBaseline=false;cfg.Profil.Mouvement.DeltaHasHandleTail=false
+  for i:=range cfg.Profil.Mouvement.Range{cfg.Profil.Mouvement.Range[i].Min=0;cfg.Profil.Mouvement.Range[i].Max=1}
+  data:=make([]byte,32);name:="object-position-component"
+  switch mode {case 0:cfg.Profil.Mouvement.WorldObject.IndexW=width
+  case 1:cfg.Profil.Mouvement.WorldObject.AxisW[1]=width
+  case 2:name="tacmap-areaofinterest";cfg.Profil.Mouvement.Traversal.IndexW=width
+  case 3:name="tacmap-areaofinterest";cfg.Profil.Mouvement.Traversal.AxisW[1]=width
+  case 4:name="object-position-dynamic-precision-component";data[0]=0x40;cfg.Profil.Mouvement.DeltaAxisWidth=width
+  case 5:name="object-position-dynamic-precision-component";data[0]=0x40;cfg.Profil.Mouvement.Traversal.AxisW[1]=width
+  case 6:name="object-position-dynamic-precision-component";cfg.Profil.Mouvement.WorldObject.AxisW[1]=width
+  case 8:name="object-position-dynamic-precision-component";data[0]=0xa0;data[12]=0x18;cfg.Profil.Mouvement.Traversal.IndexW=width
+  case 7:name="biped-spartan-ability-non-predicted-state-component";data[0]=0xc8;cfg.Profil.Mouvement.WorldObject.AxisW[1]=width}
+  var events *[]any;cfg.Obs,events=haloPositionDomainObserver();br:=LecteurSur(data);br.poserCadre(cfg);br.poserSlotDeCapture(42);_,_,ported:=consumeByName(br,name,35,0);end:=br.BitPos();tail:=br.ReadBits(7)
+  direct:=map[string]any{"end":end,"ported":ported,"events":*events,"tail":tail,"tailEnd":br.BitPos()}
+  var bw bitWriter;bw.bit(1);bw.bits(1,5);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);for _,b:=range data{bw.bits(uint64(b),8)}
+  reg:=&Registry{Archetypes:make([]Archetype,36)};for i:=range reg.Archetypes{reg.Archetypes[i].Index=i};reg.Archetypes[35].Components=[]string{name};reg.Archetypes[35].Levels=[]uint32{0}
+  world:=NewWorld(reg);world.BindFull(1,35);cfg.Obs,events=haloPositionDomainObserver();fr:=LecteurSur(bw.buf);records,err:=DecodeFrameRecords(fr,world,cfg)
+  rows=append(rows,map[string]any{"mode":mode,"width":width,"name":name,"hex":hex.EncodeToString(data),"direct":direct,"frameHex":hex.EncodeToString(bw.buf),"frameEnd":fr.BitPos(),"complete":err==nil,"records":records,"events":*events})
+ }}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-position-domain.json",raw,0600);e!=nil{t.Fatal(e)}
+}

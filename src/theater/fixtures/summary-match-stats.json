@@ -1,0 +1,77 @@
+{
+  "MatchId": "2b4e00fe-69c9-452e-b1b2-df3a9a0a6b3a",
+  "MatchInfo": {
+    "ClearanceId": "ebac914d-495b-4019-a76a-e02ed1d356a7",
+    "Duration": "PT1M18.3919015S",
+    "EndTime": "2026-09-10T03:06:47.956Z",
+    "GameVariantCategory": 6,
+    "GameplayInteraction": 1,
+    "LevelId": "1216247c-bf6d-4740-8270-e800a114f231",
+    "LifecycleMode": 1,
+    "MapVariant": {
+      "AssetId": "05d946c8-0ba1-4720-b8a0-2ebca0576f8e",
+      "AssetKind": 2,
+      "VersionId": "c2ff7421-6876-4528-8ee6-73f9ff477644"
+    },
+    "PlayableDuration": "PT1M18.39S",
+    "Playlist": null,
+    "PlaylistExperience": null,
+    "PlaylistMapModePair": null,
+    "SeasonId": null,
+    "StartTime": "2026-09-10T03:05:13.675Z",
+    "TeamScoringEnabled": true,
+    "TeamsEnabled": true,
+    "UgcGameVariant": {
+      "AssetId": "1e8cd10b-1496-423b-8699-f98f6f5db67e",
+      "AssetKind": 6,
+      "VersionId": "ae66f4aa-a6fc-464a-ae9f-e2db13c1342d"
+    }
+  },
+  "Players": [
+    {
+      "LastTeamId": 0,
+      "Outcome": 2,
+      "PlayerId": "xuid(2535472547643888)",
+      "PlayerTeamStats": [
+        {
+          "TeamId": 0,
+          "Stats": {
+            "CoreStats": {
+              "Kills": 1,
+              "Deaths": 0,
+              "Medals": [
+                {
+                  "Count": 1,
+                  "NameId": 1169390319,
+                  "TotalPersonalScoreAwarded": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "PlayerType": 1,
+      "Rank": 1
+    },
+    {
+      "LastTeamId": 1,
+      "Outcome": 3,
+      "PlayerId": "xuid(2535443507298499)",
+      "PlayerTeamStats": [
+        {
+          "TeamId": 1,
+          "Stats": {
+            "CoreStats": {
+              "Kills": 0,
+              "Deaths": 1,
+              "Medals": []
+            }
+          }
+        }
+      ],
+      "PlayerType": 1,
+      "Rank": 2
+    }
+  ],
+  "Teams": []
+}

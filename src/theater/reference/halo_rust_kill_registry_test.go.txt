@@ -1,0 +1,40 @@
+package killsource
+
+import (
+ "encoding/binary"
+ "encoding/hex"
+ "encoding/json"
+ "os"
+ "testing"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/source"
+)
+
+// Calls the native timeline constructor, including its registry error wrapper.
+func TestHaloRustKillRegistry(t *testing.T) {
+ rows := []any{}
+ inputs := [][]byte{nil, {0x78, 0x9c}, {0x28, 0x15}, {0x78, 0x20}}
+ for _, n := range []int{1, 3, 7, 8, 9, 267, 16647, 16648, 16649, 33287, 33288, 33289, 49928} {
+  d := make([]byte, n)
+  if n >= 8 {binary.LittleEndian.PutUint32(d, 41); binary.LittleEndian.PutUint32(d[4:], 27)}
+  if n >= 16648 {copy(d[8:], "object-dead-state-component"); binary.LittleEndian.PutUint32(d[264:], 3)}
+  inputs = append(inputs, d)
+  if n >= 33288 {e := append([]byte(nil), d...); e[16648] = 255; inputs = append(inputs, e)}
+ }
+ for _, d := range inputs {
+  src, err := source.Load(source.MemoryChunks{d}, nil)
+  if err != nil {t.Fatal(err)}
+  tl, err := newTimeline(&film{src:src})
+  row := map[string]any{"hex":hex.EncodeToString(src.Chunk(0)), "error":""}
+  if err != nil {row["error"] = err.Error()} else {
+   row["truncated"] = tl.w.Reg.Truncated
+   row["truncated_bytes"] = tl.w.Reg.TruncatedBytes
+   arch := []any{}
+   for _, a := range tl.w.Reg.Archetypes {arch = append(arch, map[string]any{"index":a.Index, "components":a.Components, "levels":a.Levels})}
+   row["archetypes"] = arch
+   row["events"] = len(tl.events)
+  }
+  rows = append(rows, row)
+ }
+ raw, err := json.Marshal(rows); if err != nil {t.Fatal(err)}
+ if err = os.WriteFile("/private/tmp/halo-kill-registry.json", raw, 0600); err != nil {t.Fatal(err)}
+}

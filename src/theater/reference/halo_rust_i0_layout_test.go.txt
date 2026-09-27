@@ -1,0 +1,36 @@
+package grammar
+import("testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"encoding/json";"encoding/hex";"math/rand";"os";"path/filepath";"fmt";"levelup/go-api/internal/games/halo_infinite/film/internal/source")
+func TestHaloRustI0Layout(t *testing.T){
+ rows:=[]any{};rng:=rand.New(rand.NewSource(72041))
+ wire:=func(s i0Sample)any{return map[string]any{"slot":s.slot,"chunk":s.chunk,"packet":s.pkt,"bits":s.bits,"index_bit":s.indexBit}}
+ for c:=0;c<512;c++{
+ samples:=[]i0Sample{};input:=[]any{};for j:=0;j<c%200;j++{s:=i0Sample{slot:uint32(j%3),chunk:1+j/80,pkt:j/2,indexBit:uint8(j%3)};if c%3==0{s.chunk=1;s.pkt=j;s.slot=0};for k:=0;k<72;k++{on:=rng.Intn(2);if c%3==0&&(k<13||k>=19&&k<26||k>=32&&k<39||k>=45){on=0};if on==1{s.bits[k/64]|=1<<uint(63-k%64)}};samples=append(samples,s);input=append(input,wire(s))};rep:=profileI0(samples);bounds:=i0Boundaries(rep.FlipRate);if bounds==nil{bounds=[]int{}}
+ pay:=make([]byte,40);rng.Read(pay);at:=c%8;put:=func(w int,v uint64){for k:=0;k<w;k++{bit:=at+k;mask:=byte(1<<uint(7-bit%8));pay[bit/8]&=^mask;if v&(uint64(1)<<uint(w-1-k))!=0{pay[bit/8]|=mask}};at+=w};put(1,1);put(13,512);put(2,uint64(c%4));put(2,0);put(3,2);put(6,0);put(6,1);put(4,0);if c%7==0{pay=pay[:6]};collected:=collectI0Samples(pay,NewSlotBand(map[uint32]bool{512:true,513:true}),c,19,nil);got:=[]any{};for _,s:=range collected{got=append(got,wire(s))}
+ rows=append(rows,map[string]any{"samples":input,"records":rep.Records,"pairs":rep.Pairs,"rates":rep.FlipRate,"boundaries":bounds,"ones":rep.IndexBitOnes,"hex":hex.EncodeToString(pay),"chunk":c,"collected":got})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-i0-layout.json",b,0600);e!=nil{t.Fatal(e)}
+}
+
+func TestHaloRustI0LayoutCorpus(t *testing.T){
+ rows:=[]any{}
+ for _,folder:=range []string{"maps/01-bazaar-idle","maps/02-aquarius","bandit/01-evo","ranked-arena/02-oddball","appearance/01-cadet-blue","appearance/02-cadet-brick"}{
+ root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);var meta struct{Chunks []struct{Index int `json:"index"`;File string `json:"file"`}};b,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)};if e=json.Unmarshal(b,&meta);e!=nil{t.Fatal(e)};dir:=t.TempDir()
+ for _,c:=range meta.Chunks{if c.Index>7{continue};d,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};if e=os.WriteFile(filepath.Join(dir,fmt.Sprintf("chunk_%02d.bin",c.Index)),d,0600);e!=nil{t.Fatal(e)}}
+ film,e:=source.LoadDir(dir,nil);if e!=nil{t.Fatal(e)};lay,rep,err:=DetectI0LayoutOf(film);if rep.Boundaries==nil{rep.Boundaries=[]int{}};if rep.FlipRate==nil{rep.FlipRate=[]float64{}}
+ rows=append(rows,map[string]any{"folder":folder,"layout":map[string]any{"gate_bits":lay.GateBits,"axis_widths":lay.AxisW,"region":lay.Region},"records":rep.Records,"pairs":rep.Pairs,"rates":rep.FlipRate,"boundaries":rep.Boundaries,"ones":rep.IndexBitOnes,"error":err!=nil});t.Log(folder,lay,rep.Pairs,err)
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-i0-layout-corpus.json",b,0600);e!=nil{t.Fatal(e)}
+}
+
+func TestHaloRustI0Values(t *testing.T) {
+ rows:=[]any{};rng:=rand.New(rand.NewSource(4141))
+ for c:=0;c<512;c++ {
+  w:=[3]uint{uint(c%35),uint((c*7)%35),uint((c*13)%35)};g:=c%15-5
+  if c%3==0 {w=[3]uint{uint(rng.Uint64()),uint(rng.Uint64()),uint(rng.Uint64())};g=int(rng.Uint64())}
+  l:=profile.I0Layout{GateBits:g,AxisW:w,Region:uint32(c%3)}
+  offsets:=[]int{};for a:=0;a<=3;a++{offsets=append(offsets,l.AxisOffset(a))}
+  signed:=[]any{};for _,axis:=range []int{-1<<63,-4,-1,0,1,2,3,4,1<<63-1}{value,panicked:=0,false;func(){defer func(){if recover()!=nil{panicked=true}}();value=l.AxisOffset(axis)}();signed=append(signed,map[string]any{"axis":axis,"value":value,"panic":panicked})}
+  rows=append(rows,map[string]any{"layout":map[string]any{"gate_bits":g,"axis_widths":w,"region":l.Region},"valid":l.Valid(),"total":l.TotalBits(),"offsets":offsets,"signed_offsets":signed,"display":l.String()})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-i0-values.json",b,0600);e!=nil{t.Fatal(e)}
+}

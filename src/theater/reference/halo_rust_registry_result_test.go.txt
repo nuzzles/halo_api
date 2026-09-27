@@ -1,0 +1,57 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"os"
+	"testing"
+)
+
+func TestHaloRustRegistryResult(t *testing.T) {
+	rows := []any{}
+	lengths := []int{}
+	for n := 0; n < 17; n++ {
+		lengths = append(lengths, n)
+	}
+	for blocks := 1; blocks <= 3; blocks++ {
+		for _, delta := range []int{-1, 0, 1, 259} {
+			lengths = append(lengths, 8+blocks*archetypeBlockSize+delta)
+		}
+	}
+	for _, n := range lengths {
+		for mode := 0; mode < 4; mode++ {
+			data := make([]byte, n)
+			if n >= 8 {
+				data[0] = 41
+				data[4] = 27
+			}
+			if mode == 1 && n > 268 {
+				copy(data[8:], []byte("simulation-state"))
+				data[264] = 1
+			}
+			if mode == 2 && n >= 2 {
+				data[0] = 0x78
+				data[1] = 0x9c
+			}
+			if mode == 3 && n > 268 {
+				data[268] = 255
+			}
+			reg, err := ParseRegistryChunk(data)
+			row := map[string]any{"hex": hex.EncodeToString(data), "error": err != nil}
+			if err == nil {
+				row["truncated"] = reg.Truncated
+				row["tail"] = reg.TruncatedBytes
+				row["fingerprint"] = RegistryFingerprint(reg)
+				row["archetypes"] = reg.Archetypes
+			}
+			rows = append(rows, row)
+		}
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-registry-result.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

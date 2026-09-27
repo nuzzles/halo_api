@@ -1,0 +1,44 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native": {
+    "generator": "halo_rust_replay_score_document_test.go.txt",
+    "generator_dependency": "halo_rust_replay_score_series_test.go.txt (rustScoreSeriesHandler)",
+    "entry": "assemblage.poserScoreEtObjectifs",
+    "cases": 1536,
+    "objective_actions": 2883,
+    "ordered_diagnostics": 13498,
+    "actions_without_track": 1258,
+    "round_zero_fallbacks": 186,
+    "absent_score_inputs": 91,
+    "scope": "Whole typed document, returned coverage, clock, missing-track counts, fallback counts and ordered diagnostic levels/messages/attribute arrays"
+  },
+  "fixture": {
+    "path": "replay-score-document-v41.json.zlib",
+    "sha256": "0fd68d09a6e7dd91d8b3910bfd950c8187fc03eb93de99489b380e0622993357"
+  },
+  "host": {
+    "passed": 4,
+    "failed": 0,
+    "seconds": 12.09,
+    "log": "/private/tmp/halo-replay-score-document-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "One selected whole-stage oracle call; not the full suite",
+    "log": "/private/tmp/halo-replay-score-document-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-replay-score-document-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "One document stage, not full BuildFromFacts",
+    "Ordered diagnostic publications are compared to captured native slog; the final composer runtime sink is not wired",
+    "Stage fixture uses no death instants; the score reducer has separate round identity evidence",
+    "Synthetic track points are explicit empty arrays and do not close native null-points DTO fidelity",
+    "Legacy String and unsigned counter domains and full captured-document composition remain pending"
+  ]
+}

@@ -1,0 +1,22 @@
+package grammar
+import("testing";"math/rand";"encoding/json";"encoding/hex";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustWidthOverrideGeneric(t *testing.T){
+ rng:=rand.New(rand.NewSource(73141));rows:=[]any{}
+ for c:=0;c<512;c++{
+  name:=[]string{"biped-emp-timer-component","biped-spartan-ability-non-predicted-state-component","not-ported","biped-mobility-action-component",""}[c%5];level:=uint32((c/7)%4);reg:=&Registry{Archetypes:make([]Archetype,36)};for j:=range reg.Archetypes{reg.Archetypes[j].Index=j};reg.Archetypes[35].Components=[]string{name};reg.Archetypes[35].Levels=[]uint32{level}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=11;cfg.Profil.Grammaire.GenerationStricte=true;cfg.Obs=NouvelleObservation();cfg.Profil.Mouvement.FullPrecision=c%5==0
+  cfg.Profil.Grammaire.LargeursCalibrees=map[string]int{};cfg.Profil.Grammaire.LargeursBouchon=map[string]int{};width:=[]int{0,1,17,65,130}[(c/6)%5];switch c%6{case 1,2:cfg.Profil.Grammaire.LargeursCalibrees[name]=width;case 3,4:cfg.Profil.Grammaire.LargeursBouchon[name]=width;case 5:cfg.Profil.Grammaire.LargeursCalibrees[name]=width;cfg.Profil.Grammaire.LargeursBouchon[name]=width+5};cfg.Profil.Grammaire.ControleDeCorruption=c%5==0
+  var bw bitWriter;bw.bits(0,13)
+  copyBits:=func(data []byte,n int){for j:=0;j<n;j++{bw.bit(uint64(data[j/8]>>uint(7-j%8)))}}
+  component:=func(){data:=make([]byte,4096);if c%3!=0{rng.Read(data)};br:=LecteurSur(data);br.poserCadre(cfg);ported:=true;if w,ok:=cfg.Profil.Grammaire.LargeursCalibrees[name];ok{br.Skip(w)}else{_,_,ported=consumeByName(br,name,35,level);if !ported{if w,ok:=cfg.Profil.Grammaire.LargeursBouchon[name];ok{br.Skip(w);ported=true}}};if ported{consumeCorruptionCheck(br)};copyBits(data,br.BitPos())}
+  create:=func(slot uint64){bw.bits(1,3);bw.bits(slot,11);bw.bits(0,2);bw.bits(35,6);data:=make([]byte,4096);if c%3!=0{rng.Read(data)};br:=LecteurSur(data);br.poserCadre(cfg);consumeBipedDefaultState(br);copyBits(data,br.BitPos());bw.bit(0);bw.bits(1,4);bw.bits(0,6);component()}
+  delta:=func(slot uint64){bw.bit(1);bw.bits(slot,11);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);component()}
+  create(100);delta(50);create(101);delta(51);create(102);bw.end();bw.bit(0)
+  world:=NewWorld(reg);world.BindFull(50,35);world.BindFull(51,35);if c%11==0{world.Unbind(51)}
+  observations:=haloRustComponentHooks(cfg.Obs);cfg.Obs.EtatMouvementHook=func(comp EtatMouvementComposant,slot uint32,v []uint64){*observations=append(*observations,map[string]any{"kind":"movement_state","component":comp.String(),"slot":slot,"values":v})}
+  br:=LecteurSur(bw.buf);br.SetBitPos(13);records,err:=DecodeFrameRecords(br,world,cfg);end:=br.BitPos();rr:=[]any{};for _,r:=range records{rr=append(rr,map[string]any{"id":r.ID,"end":r.Trace.EndBit})}
+  p:=cfg.Profil;encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  rows=append(rows,map[string]any{"component_widths":map[string]any{"calibrated":cfg.Profil.Grammaire.LargeursCalibrees,"stubs":cfg.Profil.Grammaire.LargeursBouchon},"corruption_check":cfg.Profil.Grammaire.ControleDeCorruption,"name":name,"level":level,"unbound":c%11==0,"hex":hex.EncodeToString(bw.buf),"encoding":encoding,"observations":*observations,"records":rr,"inferred":0,"hit":err==nil,"tables":false,"chain":false,"end":end})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-width-override-generic.json",b,0600);e!=nil{t.Fatal(e)}
+}

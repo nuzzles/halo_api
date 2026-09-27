@@ -1,0 +1,44 @@
+package replay
+import("encoding/hex";"encoding/json";"fmt";"math";"math/rand";"os";"reflect";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func haloRustIdentityValue(v reflect.Value)any{
+ switch v.Kind(){
+ case reflect.String:out:=[]uint64{};for _,b:=range []byte(v.String()){out=append(out,uint64(b))};return out
+ case reflect.Pointer:if v.IsNil(){return nil};return haloRustIdentityValue(v.Elem())
+ case reflect.Slice:if v.IsNil(){return nil};fallthrough
+ case reflect.Array:out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustIdentityValue(v.Index(i)))};return out
+ case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{out[v.Type().Field(i).Name]=haloRustIdentityValue(v.Field(i))};return out
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:return v.Int()
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:return v.Uint()
+ case reflect.Bool:return v.Bool()
+ case reflect.Float32:return math.Float32bits(v.Interface().(float32))
+ case reflect.Float64:return math.Float64bits(v.Float())
+ };panic(v.Kind())
+}
+func haloRustIdentityFill(v reflect.Value,rng *rand.Rand,n int){switch v.Kind(){
+ case reflect.String:v.SetString([]string{"", "crouch", "sprint", "\x00\xff\xc0\x80", "跳跃"}[n%5])
+ case reflect.Pointer:if n%3!=0{v.Set(reflect.New(v.Type().Elem()));haloRustIdentityFill(v.Elem(),rng,n)}
+ case reflect.Slice:if n%4!=0{v.Set(reflect.MakeSlice(v.Type(),n%3,n%3));for i:=0;i<v.Len();i++{haloRustIdentityFill(v.Index(i),rng,n+i+1)}}
+ case reflect.Array:for i:=0;i<v.Len();i++{haloRustIdentityFill(v.Index(i),rng,n+i)}
+ case reflect.Struct:for i:=0;i<v.NumField();i++{haloRustIdentityFill(v.Field(i),rng,n+i)}
+ case reflect.Int,reflect.Int64,reflect.Int32,reflect.Int8:v.SetInt(int64(rng.Uint64()))
+ case reflect.Uint,reflect.Uint64,reflect.Uint32,reflect.Uint16,reflect.Uint8:v.SetUint(rng.Uint64())
+ case reflect.Bool:v.SetBool(rng.Intn(2)==0)
+ case reflect.Float32:v.Set(reflect.ValueOf(math.Float32frombits(rng.Uint32())))
+ case reflect.Float64:v.SetFloat(math.Float64frombits(rng.Uint64()))
+ default:panic(v.Kind())}}
+func TestHaloRustFactsIdentityJSON(t *testing.T){
+ rng:=rand.New(rand.NewSource(4100257));writers:=[]any{};reads:=[]any{}
+ for n:=0;n<256;n++{
+  var identity *profile.FilmIdentity;if n>0{identity=&profile.FilmIdentity{};haloRustIdentityFill(reflect.ValueOf(identity).Elem(),rng,n);identity.Version=string([]byte{byte(n),0,255})}
+  var fallbacks []fallback.Declenchement;if n%4!=0{fallbacks=[]fallback.Declenchement{{Nom:fallback.Nom(string([]byte{byte(n),0,255})),Declenchements:int(rng.Uint64())}}}else if n%8==0{fallbacks=[]fallback.Declenchement{}}
+  for _,kind:=range []string{"identity","fallbacks"}{var value any=identity;if kind=="fallbacks"{value=fallbacks};raw,err:=json.Marshal(value);if err!=nil{t.Fatal(err)};writers=append(writers,map[string]any{"kind":kind,"source":haloRustIdentityValue(reflect.ValueOf(value)),"encoded":hex.EncodeToString(raw)})}
+ }
+ add:=func(kind string,charges [][]byte){var identity *profile.FilmIdentity;var fallbacks []fallback.Declenchement;steps:=[]any{};for _,charge:=range charges{var err error;var got any;if kind=="identity"{err=json.Unmarshal(charge,&identity);got=haloRustIdentityValue(reflect.ValueOf(identity))}else{err=json.Unmarshal(charge,&fallbacks);got=haloRustIdentityValue(reflect.ValueOf(fallbacks))};msg:="";if err!=nil{msg=err.Error()};steps=append(steps,map[string]any{"input":hex.EncodeToString(charge),"decoded":got,"error":msg});if err!=nil{break}};reads=append(reads,map[string]any{"kind":kind,"steps":steps})}
+ identityCharges:=[]string{`null`,`{}`,`{"Version":"v41","Build":"x","Flavor":"release","BuildID":4294967295,"Changelist":1,"MatchStartUnix":2,"FormatVersion":41,"TypeVersions":[1,2,3],"RegistryBlocks":50,"RegistryFingerprint":18446744073709551615,"RegistryNamedSlots":300,"BuildOffset":-9223372036854775808,"BodyBit":9223372036854775807,"ControleDeCorruption":true}`,`{"Version":"\ud800","Build":"\udc00","Flavor":"\ud800\udc00"}`,`{"Version":2}`,`{"Build":[]}`,`{"FormatVersion":1.0}`,`{"TypeVersions":[-1]}`,`{"TypeVersions":[4294967296]}`,`{"RegistryFingerprint":-1}`,`{"Version":"keep","Version":null}`,`{"build":"fold","Build":"exact"}`,`{"TypeVersions":[1,2,3],"TypeVersions":[9],"TypeVersions":[null,null,null]}`,`{"Unknown":{"a":[{},[]]}}`,`[]`,`1`,`true`,`"text"`}
+ fallbackCharges:=[]string{`null`,`[]`,`[{}]`,`[{"Nom":"scan","Declenchements":-9223372036854775808}]`,`[{"Nom":false}]`,`[{"Declenchements":9223372036854775808}]`,`[{"Nom":"\ud800"}]`,`[{"Nom":"keep","Nom":null}]`,`[{"nom":"fold","DECLENCHEMENTS":7}]`,`[null]`,`{}`,`true`,`"text"`,`1`}
+ for _,kind:=range []string{"identity","fallbacks"}{charges:=identityCharges;if kind=="fallbacks"{charges=fallbackCharges};for _,charge:=range charges{raw:=[]byte(charge);for end:=0;end<=len(raw);end++{add(kind,[][]byte{raw[:end]})}}}
+ for b:=0;b<256;b++{add("identity",[][]byte{append(append([]byte(`{"Version":"`),byte(b)),[]byte(`"}`)...)});add("fallbacks",[][]byte{append(append([]byte(`[{"Nom":"`),byte(b)),[]byte(`"}]`)...)} )}
+ add("identity",[][]byte{[]byte(`{"Build":"first","TypeVersions":[1,2,3]}`),[]byte(`{"Version":"second","TypeVersions":[9]}`),[]byte(`{"TypeVersions":[null,null,null]}`),[]byte(`{"Build":null}`),[]byte(`null`),[]byte(`{}`)})
+ add("fallbacks",[][]byte{[]byte(`[{"Nom":"first","Declenchements":1},{"Nom":"tail","Declenchements":2}]`),[]byte(`[{"Nom":"short"}]`),[]byte(`[null,{}]`),[]byte(`[]`),[]byte(`[null,{}]`),[]byte(`null`),[]byte(`[{}]`)})
+ raw,err:=json.Marshal(map[string]any{"writers":writers,"reads":reads});if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-facts-identity-json.json",raw,0600);err!=nil{t.Fatal(err)};fmt.Printf("identity JSON writers=%d read sequences=%d\n",len(writers),len(reads))
+}

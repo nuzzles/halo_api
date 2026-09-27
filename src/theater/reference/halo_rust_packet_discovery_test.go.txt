@@ -1,0 +1,105 @@
+package grammar
+
+import (
+	"bytes"
+	"compress/zlib"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestHaloRustPacketDiscovery(t *testing.T) {
+	root := t.TempDir()
+	files := []any{}
+	dirs := []string{}
+	packet := func(kind uint16, ts uint64, pay []byte) []byte {
+		h := make([]byte, 16)
+		binary.LittleEndian.PutUint16(h, kind)
+		binary.LittleEndian.PutUint32(h[4:], uint32(len(pay)))
+		binary.LittleEndian.PutUint64(h[8:], ts)
+		return append(h, pay...)
+	}
+	for film := 0; film < 12; film++ {
+		name := fmt.Sprintf("film-%02d", 11-film)
+		dir := filepath.Join(root, name)
+		os.Mkdir(dir, 0700)
+		dirs = append(dirs, name)
+		for chunk := 0; chunk < 5; chunk++ {
+			if film%4 == 0 && chunk == 2 {
+				continue
+			}
+			rel := fmt.Sprintf("%s/chunk_%02d.bin", name, chunk)
+			if film%5 == 0 && chunk == 1 {
+				os.Mkdir(filepath.Join(root, rel), 0700)
+				dirs = append(dirs, rel)
+				continue
+			}
+			data := []byte{}
+			for j := 0; j < 4; j++ {
+				kind := uint16(j % 3)
+				pay := []byte{byte(j), byte(film), byte(chunk)}
+				data = append(data, packet(kind, uint64(j*1000), pay)...)
+			}
+			data = append(data, packet(7, 9999, nil)...)
+			data = append(data, packet(2, 10000, []byte{0})...)
+			if film%3 == 0 {
+				data = data[:len(data)-26]
+			}
+			if film%2 == 0 {
+				var b bytes.Buffer
+				z := zlib.NewWriter(&b)
+				z.Write(data)
+				z.Close()
+				data = b.Bytes()
+			}
+			os.WriteFile(filepath.Join(root, rel), data, 0600)
+			files = append(files, map[string]any{"path": rel, "hex": hex.EncodeToString(data)})
+		}
+	}
+	os.WriteFile(filepath.Join(root, "not-a-film"), []byte{1}, 0600)
+	files = append(files, map[string]any{"path": "not-a-film", "hex": "01"})
+	preds := []func([]byte) bool{KFQEqual(nil), KFQPrefix(nil), KFQPrefix([]byte{0}), KFQEqual([]byte{1, 1, 1}), func(p []byte) bool { return len(p) == 3 }}
+	found, e := FindPackets(root, preds)
+	if e != nil {
+		t.Fatal(e)
+	}
+	matches := []any{}
+	for _, group := range found {
+		g := []any{}
+		for _, r := range group {
+			g = append(g, map[string]any{"film": r.Film, "chunk": r.Chunk, "packet": r.Packet})
+		}
+		matches = append(matches, g)
+	}
+	queries := []any{}
+	for film := 0; film < 13; film++ {
+		name := fmt.Sprintf("film-%02d", film)
+		for _, kind := range []uint16{0, 2, 7, 99} {
+			data, pk, c, e := FirstPacketOfType(filepath.Join(root, name), kind)
+			failure := ""
+			if e != nil {
+				failure = "no_packet"
+				if CountFilmChunks(filepath.Join(root, name)) == 0 {
+					failure = "no_chunks"
+				}
+			}
+			ds, ps, cs := AllPacketsOfType(filepath.Join(root, name), kind)
+			all := []any{}
+			for i, p := range ps {
+				all = append(all, map[string]any{"chunk": cs[i], "packet": p, "hex": hex.EncodeToString(ds[i])})
+			}
+			queries = append(queries, map[string]any{"film": name, "kind": kind, "error": failure, "chunk": c, "packet": pk, "hex": hex.EncodeToString(data), "all": all})
+		}
+	}
+	raw, e := json.Marshal(map[string]any{"dirs": dirs, "files": files, "matches": matches, "queries": queries})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-packet-discovery.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

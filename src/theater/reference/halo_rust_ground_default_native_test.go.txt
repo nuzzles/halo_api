@@ -1,0 +1,7 @@
+package grammar
+import("encoding/hex";"encoding/json";"math/rand";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustGroundDefaultNative(t *testing.T){
+ rng:=rand.New(rand.NewSource(3741));rows:=[]any{};widths:=[]int{0,1,5,9,32,33,64,65}
+ for n:=0;n<384;n++{pay:=make([]byte,n%97);rng.Read(pay);if n%7==0{for i:=range pay{pay[i]=0}};p:=ProfilDeBalayageParDefaut();p.MPP=profile.MPPWidths{Lead:widths[n%8],Index:widths[(n/8)%8]};events:=[]any{};obs:=NouvelleObservation();obs.EquipmentCreationHook=func(f EquipmentCreationField,v uint64,p bool){events=append(events,map[string]any{"kind":"equipment","field":f,"value":v,"present":p})};obs.MppHook=func(f MPPField,v uint64,p bool){events=append(events,map[string]any{"kind":"mpp","field":f,"value":v,"present":p})};br:=LecteurSur(pay);br.PoserContexte(ContexteDeLecture{Profil:p,Obs:obs});br.SetBitPos(n%8);consumeDefaultStateTI42(br);rows=append(rows,map[string]any{"hex":hex.EncodeToString(pay),"start":n%8,"lead":p.MPP.Lead,"index":p.MPP.Index,"end":br.BitPos(),"events":events})
+ };b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-ground-default-native.json",b,0600);e!=nil{t.Fatal(e)}
+}

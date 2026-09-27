@@ -1,0 +1,15 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"sort";"math";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustGroundLifetimes(t *testing.T){
+ rng:=rand.New(rand.NewSource(4275));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  birth:=uint64(rng.Intn(20))*100000;end:=uint64(rng.Intn(25))*100000;filmEnd:=uint64(2500000);times:=[]uint64{};seen:=[]uint64{}
+  for i:=0;i<12;i++{ts:=uint64(rng.Intn(25))*100000;times=append(times,ts);if rng.Intn(2)==0{seen=append(seen,ts)}};sort.Slice(times,func(i,j int)bool{return times[i]<times[j]});sort.Slice(seen,func(i,j int)bool{return seen[i]<seen[j]});within:=gwPickupSeenWithin(seen,birth,end);bounds:=gwPickupBoundsFrom(birth,end,filmEnd,times,within)
+  tracks:=[]types.ProjectileTrack{};for i:=0;i<20;i++{pts:=[]types.ProjectileSample{};if i%5!=0{pts=append(pts,types.ProjectileSample{TimestampUS:uint64(rng.Intn(25))*100000})};tracks=append(tracks,types.ProjectileTrack{Slot:uint32(i),Gen:1,Pts:pts})};track,ok:=gwPickupLifeTrack(tracks,birth,end)
+  pos:=[3]float32{float32(rng.Intn(5))/4,float32(rng.Intn(5))/4,float32(rng.Intn(5))/4};samples:=[]grammar.BipedPosition{};for i:=0;i<100;i++{samples=append(samples,grammar.BipedPosition{Slot:uint32(rng.Intn(4)),TimestampUS:uint64(rng.Intn(25))*100000,X:float32(rng.Intn(10))/4,Y:float32(rng.Intn(10))/4,Z:float32(rng.Intn(10))/4,HasWorld:rng.Intn(5)!=0})};if run%4==0{for _,ts:=range []uint64{0,5000000,10000001,15000001}{samples=append(samples,grammar.BipedPosition{Slot:6,TimestampUS:ts,HasWorld:true})}};if run%8==0{for _,slot:=range []uint32{8,7}{samples=append(samples,grammar.BipedPosition{Slot:slot,TimestampUS:birth+200000,X:pos[0],Y:pos[1],Z:pos[2],HasWorld:true})}};sort.Slice(samples,func(i,j int)bool{return samples[i].TimestampUS<samples[j].TimestampUS});hit:=gwPickupNearestPass(pos,birth,end,samples)
+  c:=types.EquipmentCreation{TimestampUS:birth,X:pos[0],Y:pos[1],Z:pos[2]};var obj gwPickupObject;gwPickupResolve(&obj,c,end,filmEnd,gwResolveInputs{kfTimes:times,seen:seen,tracks:tracks,positions:samples})
+  lives:=equipmentLives(samples);lifeRows:=map[uint32][]map[string]any{};for slot,ls:=range lives{for _,l:=range ls{lifeRows[slot]=append(lifeRows[slot],map[string]any{"from":l.from,"to":l.to,"x":l.x,"y":l.y,"z":l.z})}};class,dropper:=gwPadsClass(lives,gwPadApparition{X:pos[0],Y:pos[1],Z:pos[2],TUS:birth})
+  rows=append(rows,map[string]any{"lives":lifeRows,"class":class,"dropper":dropper,"pos":pos,"positions":samples,"hit":hit,"hit_bits":math.Float64bits(hit.DistM),"resolution":map[string]any{"position":obj.Pos,"moved":obj.Moved,"bounds":obj.Bounds,"picker":obj.Picker,"status":obj.Status},"picker_bits":math.Float64bits(obj.Picker.DistM),"birth":birth,"end":end,"film_end":filmEnd,"times":times,"seen":seen,"within":within,"bounds":bounds,"tracks":tracks,"track":track,"found":ok})
+ }
+ d,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-ground-lifetimes.json",d,0600);e!=nil{t.Fatal(e)}
+}

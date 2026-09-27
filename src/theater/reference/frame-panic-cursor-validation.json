@@ -1,0 +1,32 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native_cases": 80,
+  "native_panics": 72,
+  "native_success": 8,
+  "native_regeneration_byte_identical": true,
+  "before": "failed first case: reader cursor 0 instead of native -1",
+  "intermediate": "cursor mirroring exposed native Skip(32) versus Rust read at negative optional prefix",
+  "focused_host": "passed all 80 cases",
+  "checked": [
+    "panic status",
+    "post-panic or successful cursor",
+    "capture slot",
+    "ordered EMP callbacks",
+    "world identities/archetypes and prior deletion",
+    "profile retention",
+    "reset/read recovery"
+  ],
+  "wasm": "passed actual wasm32 runtime; eight nonpanicking new controls; 23.53s build",
+  "full_suite": "597 passed, zero failed, 49 ignored; 88.11s",
+  "clippy": "passed; 18.00s",
+  "pinned_source_hashes": 485,
+  "remaining": [
+    "Signed/native header and MPP/raw width domains",
+    "Separate NativeFilmBits decode_native_frame_records adapter panic copyback",
+    "Other observer/capture mutations and complete all-data acceptance"
+  ],
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "format": "passed",
+  "diff_check": "passed",
+  "captured_regression": "Four-film march and six-film complete-document checks passed at the preceding signed-cursor checkpoint; not rerun for this correction."
+}

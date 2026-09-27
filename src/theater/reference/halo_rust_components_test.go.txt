@@ -1,0 +1,39 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustComponentsParity(t *testing.T){
+ var entries []struct{Name string;Archetype uint32;Level uint32}
+ d,e:=os.ReadFile("/private/tmp/halo-components-selected.json");if e!=nil{t.Fatal(e)};if e=json.Unmarshal(d,&entries);e!=nil{t.Fatal(e)}
+ rng:=rand.New(rand.NewSource(41));rows:=[]any{}
+ for _,entry:=range entries {modes:=1;if entry.Name=="object-position-dynamic-precision-component" {modes=8};if entry.Name=="flock-position-component"||entry.Name=="simulation-state-component"||entry.Name=="simulation-state"||entry.Name=="biped-control-context-component"||entry.Name=="biped-control-context"{modes=2};for mode:=0;mode<modes;mode++ {for sample:=0;sample<24;sample++ {
+  size:=2048;if entry.Name=="managed-navpoint-formatted-text-component" {size=16384};data:=make([]byte,size);if sample>0 {if _,e=rng.Read(data);e!=nil{t.Fatal(e)}}
+  start:=sample%8;if entry.Name=="object-multiplayer-properties-component" {data=haloRustTLVData(rng,sample,start)};br:=LecteurSur(data);br.SetBitPos(start)
+  p:=br.Profil();p.Grammaire.SimStateComplet=true;p.Mouvement.FullPrecision=mode&1!=0;p.Grammaire.GrammaireEcrivainI0=mode&2!=0;p.Mouvement.DeltaHasHandleTail=mode&4!=0;br.PoserProfil(p)
+  encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(profile.NiveauPositionDObjet),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+  _,_,ported:=consumeByName(br,entry.Name,entry.Archetype,entry.Level)
+  end:=br.BitPos();if end>len(data)*8{t.Fatalf("overflow %s",entry.Name)}
+  rows=append(rows,map[string]any{"ported":ported,"position_encoding":encoding,"name":entry.Name,"archetype":entry.Archetype,"level":entry.Level,"start_bit":start,"end_bit":end,"hex":hex.EncodeToString(data[:(end+7)/8])})
+ }}}
+ d,e=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-levelup-components-oracle.json",d,0600);e!=nil{t.Fatal(e)}
+}
+
+// Construct bounded, nested mode-2 messages; random bytes alone usually encode
+// enormous body lengths and do not exercise valid recursive messages.
+func haloRustTLVData(rng *rand.Rand, sample,start int) []byte {
+ body:=[]byte{0x81,0x01}
+ var leb func(uint64)
+ leb=func(v uint64){for v>=128{body=append(body,byte(v)|128);v>>=7};body=append(body,byte(v))}
+ var field func(int,int)
+ field=func(w,d int){switch w {
+ case 2,3,14:body=append(body,byte(rng.Intn(256)))
+ case 7,8:n:=4;if w==8{n=8};for i:=0;i<n;i++{body=append(body,byte(rng.Intn(256)))}
+ case 4,5,6,15,16,17:leb(rng.Uint64())
+ case 9,10,18:n:=rng.Intn(24);leb(uint64(n));if w==18{n*=2};for i:=0;i<n;i++{body=append(body,byte(rng.Intn(256)))}
+ case 11,12:elem:=2+rng.Intn(18);if d>=3{elem=7};n:=rng.Intn(5);if rng.Intn(2)==0{body=append(body,byte(elem));leb(uint64(n))}else{body=append(body,byte(elem)|byte((n+1)<<5))};for i:=0;i<n;i++{field(elem,d+1)}
+ case 13:key,val:=2+rng.Intn(18),2+rng.Intn(18);if d>=3{key=7;val=8};body=append(body,byte(key),byte(val));n:=rng.Intn(5);leb(uint64(n));for i:=0;i<n;i++{field(key,d+1);field(val,d+1)}
+ }}
+ for i:=0;i<30;i++{wire:=2+(i+sample)%30;skip:=rng.Intn(8);body=append(body,byte(wire)|byte(skip<<5));if skip==6{body=append(body,byte(rng.Intn(256)))};if skip==7{body=append(body,byte(rng.Intn(256)),byte(rng.Intn(256)))};field(wire,0)}
+ body=append(body,byte(sample%2))
+ data:=make([]byte,(start+6+len(body)*8+7)/8);at:=start
+ put:=func(v uint64,n int){for i:=n-1;i>=0;i--{if v>>uint(i)&1!=0{data[at/8]|=1<<uint(7-at%8)};at++}}
+ if sample==0{put(1,1);return data};put(0,1);put(uint64(sample%6),5);for _,b:=range body{put(uint64(b),8)};return data
+}

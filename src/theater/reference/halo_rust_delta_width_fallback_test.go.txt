@@ -1,0 +1,95 @@
+package grammar
+
+import (
+ "encoding/hex"
+ "encoding/json"
+ "math"
+ "os"
+ "testing"
+)
+
+// A zero override selects each traversal axis independently. Exercise the real
+// dispatcher, with and without an accumulator, and byte-prefix zero padding.
+func TestHaloRustDeltaWidthFallback(t *testing.T) {
+ rows := []any{}
+ for _,axes:=range [][3]uint{{1,2,3},{6,9,13},{31,32,33},{63,64,32},{0,0,0},{0,6,0},{65,127,129}} {
+  for _,override:=range []uint{0,1,8,32,64,65,129} {
+   for start:=0;start<8;start++ {
+    for mode:=0;mode<3;mode++ {
+     data:=make([]byte,32);for i:=range data{data[i]=byte(i*37+113)}
+     // usePrediction=0, delta=1, predictedAbsolute=0, fallback=0, delta8=0.
+     for k:=0;k<5;k++ {at:=start+k; data[at/8]&= ^(byte(1)<<uint(7-at%8));if k==1 {data[at/8]|=byte(1)<<uint(7-at%8)}}
+     for _,prefix:=range []int{1,8,32} {
+      cfg:=DefaultFrameConfig();cfg.Obs=NouvelleObservation()
+      cfg.Profil.Mouvement.Traversal.AxisW=axes
+      cfg.Profil.Mouvement.DeltaAxisWidth=override
+      cfg.Profil.Mouvement.DeltaQuantum=0.25
+      cfg.Profil.Mouvement.FullPrecision=false
+      cfg.Profil.Grammaire.PorteeBaseline=false
+      cfg.Profil.Mouvement.DeltaHasHandleTail=false
+      samples:=[]any{}
+      cfg.Obs.PosCaptureHook=func(s PositionSample){samples=append(samples,map[string]any{"kind":s.Kind.String(),"bit":s.BitPos,"slot":s.Slot,"vector":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}
+      br:=LecteurSur(data[:prefix]);br.poserCadre(cfg);br.SetBitPos(start);br.poserSlotDeCapture(42)
+      world:=NewWorld(&Registry{});world.BindFull(42,0)
+      if mode>0 {br.cap.accum=world};if mode==2 {world.SetPos(42,[3]float32{1,2,3})}
+      _,_,ok:=consumeByName(br,"object-position-dynamic-precision-component",16,0)
+      end:=br.BitPos();tail:=br.ReadBits(7)
+      var fields any
+      probe:=LecteurSur(data[:prefix]);probe.SetBitPos(start)
+      if probe.ReadBits(5)==8 {
+       values:=[]any{}
+       for axis,w:=range axes {if override>0{w=override};at:=probe.BitPos();raw:=probe.ReadBits(w)
+        values=append(values,map[string]any{"axis":axis,"bit":at,"width":w,"raw":raw})
+       }
+       fields=values
+      }
+      var position any;if v,valid:=world.PosOf(42);valid {position=[3]uint32{math.Float32bits(v[0]),math.Float32bits(v[1]),math.Float32bits(v[2])}}
+      rows=append(rows,map[string]any{"axes":axes,"override":override,"start":start,"mode":mode,"hex":hex.EncodeToString(data[:prefix]),"ok":ok,"end":end,"tail":tail,"tail_end":br.BitPos(),"samples":samples,"position":position,"axis_fields":fields})
+     }
+    }
+   }
+  }
+ }
+ out,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-delta-width-fallback.json",out,0600);e!=nil{t.Fatal(e)}
+}
+
+// Native absolute dequantization uses uint64 shifts, including zero when the
+// shift reaches 64. Capture IEEE bits because JSON numbers cannot retain NaN/Inf.
+func TestHaloRustAbsoluteWidthBoundaries(t *testing.T) {
+ rows:=[]any{}
+ for _,axes:=range [][3]uint{{13,14,15},{0,1,0},{0,0,0},{63,64,65},{65,127,129}} {
+  for start:=0;start<8;start++ {
+   for mode:=0;mode<3;mode++ {
+    for _,fill:=range []byte{0,255} {
+     data:=make([]byte,64);for i:=range data {data[i]=fill}
+     // Absolute low-precision, explicit world region zero.
+     for k:=0;k<5;k++ {at:=start+k;data[at/8]&= ^(byte(1)<<uint(7-at%8))}
+     for _,prefix:=range []int{1,16,64} {
+      cfg:=DefaultFrameConfig();cfg.Obs=NouvelleObservation()
+      cfg.Profil.Mouvement.WorldObject.AxisW=axes
+      cfg.Profil.Mouvement.WorldObject.IndexW=1
+      cfg.Profil.Mouvement.WorldObject.Region=0
+      cfg.Profil.Mouvement.FullPrecision=false
+      cfg.Profil.Grammaire.PorteeBaseline=false
+      cfg.Profil.Grammaire.GrammaireEcrivainI0=false
+      cfg.Profil.Mouvement.DeltaHasHandleTail=false
+      samples:=[]any{}
+      cfg.Obs.PosCaptureHook=func(s PositionSample){samples=append(samples,map[string]any{"kind":s.Kind.String(),"bit":s.BitPos,"slot":s.Slot,"vector":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}
+      br:=LecteurSur(data[:prefix]);br.poserCadre(cfg);br.SetBitPos(start);br.poserSlotDeCapture(42)
+      world:=NewWorld(&Registry{});world.BindFull(42,0)
+      if mode>0 {br.cap.accum=world};if mode==2 {world.SetPos(42,[3]float32{1,2,3})}
+      _,_,ok:=consumeByName(br,"object-position-dynamic-precision-component",16,0)
+      end:=br.BitPos();tail:=br.ReadBits(7)
+      probe:=LecteurSur(data[:prefix]);probe.SetBitPos(start+5);fields:=[]any{}
+      for axis,w:=range axes {at:=probe.BitPos();raw:=probe.ReadBits(w);fields=append(fields,map[string]any{"axis":axis,"bit":at,"width":w,"raw":raw})}
+      var position any;if v,valid:=world.PosOf(42);valid {position=[3]uint32{math.Float32bits(v[0]),math.Float32bits(v[1]),math.Float32bits(v[2])}}
+      rows=append(rows,map[string]any{"axes":axes,"start":start,"mode":mode,"hex":hex.EncodeToString(data[:prefix]),"ok":ok,"end":end,"tail":tail,"tail_end":br.BitPos(),"samples":samples,"position":position,"axis_fields":fields})
+     }
+    }
+   }
+  }
+ }
+ out,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)}
+ if e=os.WriteFile("/private/tmp/halo-absolute-width-boundaries.json",out,0600);e!=nil{t.Fatal(e)}
+}

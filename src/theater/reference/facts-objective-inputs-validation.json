@@ -1,0 +1,78 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "host_and_selected_wasm_validated",
+  "native": {
+    "raw_free_object_life_cases": 1024,
+    "objective_publication_cases": 5120,
+    "flag_marker_cases": 1024,
+    "flag_carry_publication_cases": 2048,
+    "expectations": "Existing pinned native ground-object and flag-geometry generators; previously unasserted cache-facing objective fields are now compared.",
+    "flag_layer_assembly_cases": 128,
+    "flag_layer_carries": 26,
+    "flag_layer_ordered_diagnostics": 1548,
+    "flag_layer_gauge_scans": 15,
+    "flag_layer_expectations": "Pinned native attachFlagCarries with unresolved, named and resolved-empty caller identities; empty free lives/marks; full coverage, fallback counts and ordered objectives diagnostics",
+    "vip_layer_assembly_cases": 128,
+    "skull_layer_assembly_cases": 128,
+    "skull_carries_by_identity_mode": {
+      "unresolved": 61,
+      "named": 24,
+      "resolved_empty": 0
+    },
+    "vip_skull_expectations": "Pinned native objective diagnostics fixture for VIP and new native attachSkullCarries generator for skull identity precedence, mode gates and deduced-track presence"
+  },
+  "host": {
+    "objectives": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 8.58,
+      "log": "/private/tmp/halo-facts-objective-host.log"
+    },
+    "flags": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 12.29,
+      "log": "/private/tmp/halo-facts-flag-layer-host.log"
+    },
+    "vip_skull_and_flag_layer": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 7.23,
+      "log": "/private/tmp/halo-facts-vip-skull-host.log"
+    }
+  },
+  "wasm": {
+    "objectives": {
+      "status": "passed",
+      "scope": "One selected free-object/objective-publication cache oracle call, not full suite",
+      "log": "/private/tmp/halo-facts-objective-wasm.log"
+    },
+    "flags": {
+      "status": "passed",
+      "scope": "One selected cached flag marker/carry oracle call",
+      "log": "/private/tmp/halo-facts-flag-wasm.log"
+    },
+    "flag_layer": {
+      "status": "passed",
+      "scope": "One selected cached flag-layer assembly oracle call, not full suite",
+      "log": "/private/tmp/halo-facts-flag-layer-wasm.log"
+    },
+    "objective_layers": {
+      "status": "passed",
+      "scope": "Three selected cached flag/VIP/skull assembly oracle calls, not full suite",
+      "log": "/private/tmp/halo-facts-vip-skull-wasm.log"
+    }
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-vip-skull-clippy.log"
+  },
+  "format_and_diff_checks": "passed",
+  "source_hashes": 485,
+  "full_v41_parity_complete": false,
+  "remaining": "Full cached objective/document composition, FlagReturnZone and runtime logs; separate bomb carry/arming gates; scan capture/fallback restoration; legacy domain reconciliation and final audit. Positive captured v41 VIP/Assault evidence remains absent.",
+  "validation_note": "Initial new host case used a resolved-empty identity for an unresolved native input; corrected the Rust fixture projection and added an explicit resolved-state assertion before successful rerun."
+}

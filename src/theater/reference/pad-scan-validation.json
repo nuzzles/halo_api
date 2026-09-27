@@ -1,0 +1,47 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded native weapon and powerup pad composition",
+  "fixture": "pad-scan-v41.json.zlib",
+  "generator": "halo_rust_pad_scan_test.go.txt",
+  "cases": 96,
+  "sha256": "573d2ad7e99d84f7faf53487f7dfcbd6c92f770a33a03be5508c3d10b087540b",
+  "counts": {
+    "weapons": {
+      "scanned": 17,
+      "creations": 46,
+      "tracks": 0
+    },
+    "powerups": {
+      "scanned": 24,
+      "creations": 416,
+      "tracks": 132
+    }
+  },
+  "logs": {
+    "socles : aucun slot de l archetype aux images-cles — rejeu sans ce calque": 131,
+    "socles : balayage d archetype": 41,
+    "socles : records de creation illisibles — rejeu sans ce calque": 20
+  },
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-pad-scan-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-pad-scan-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-pad-scan-clippy.log"
+  },
+  "source_hashes": 485,
+  "full_v41_parity_complete": false,
+  "limits": [
+    "No native post-creation track error occurs in this fixture.",
+    "Weapon creation cases do not produce mobile tracks; powerup cases cover track publication.",
+    "Unknown-format counter events are returned for the outer phase owner; global counter timing remains to be integrated.",
+    "Final all-data domain and runtime audits remain open.",
+    "Synthetic reference comparisons are not independently annotated gameplay expectations."
+  ],
+  "format_and_diff_checks": "passed"
+}

@@ -1,0 +1,81 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func haloBitsCatch(f func() uint64) (v uint64, panicked bool) {
+	defer func() {
+		if recover() != nil {
+			panicked = true
+		}
+	}()
+	v = f()
+	return
+}
+func TestHaloRustSourceBits(t *testing.T) {
+	rng := rand.New(rand.NewSource(417541))
+	rows := []any{}
+	for size := 0; size < 24; size++ {
+		d := make([]byte, size)
+		rng.Read(d)
+		data := []int{}
+		for _, b := range d {
+			data = append(data, int(b))
+		}
+		cases := []any{}
+		for p := -9; p <= size*8+9; p++ {
+			for _, n := range []int{-1, 0, 1, 7, 8, 9, 31, 32, 63, 64, 65, 96, 128} {
+				tr, tp := haloBitsCatch(func() uint64 { return source.BitsTronques(d, p, n) })
+				c := map[string]any{"p": p, "n": n, "bit": source.BitAt(d, p), "tolerant": source.BitsTolerants(d, p, n), "truncated": tr, "truncated_panic": tp}
+				if n >= 0 {
+					r := source.NewBits(d)
+					r.SetBitPos(p)
+					v, rp := haloBitsCatch(func() uint64 { return r.ReadBits(uint(n)) })
+					c["read"], c["read_panic"], c["end"], c["remaining"] = v, rp, r.BitPos(), r.Remaining()
+				}
+				cases = append(cases, c)
+			}
+		}
+
+        sequences := []any{}
+        max := int(^uint(0) >> 1)
+        for _, start := range []int{-9,-1,0,1,max-128,max-64,max-63,max-1,max} {
+            for _, width := range []int{0,1,63,64,65,96,128} {
+                r := source.NewBits(d)
+                r.SetBitPos(start)
+                steps := []any{}
+                read := func(n int) {
+                    v, panicked := haloBitsCatch(func() uint64 {return r.ReadBits(uint(n))})
+                    steps=append(steps,map[string]any{"op":"read","width":n,"value":v,"panic":panicked,"end":r.BitPos(),"remaining":r.Remaining()})
+                }
+                skip := func(n int) {
+                    r.Skip(n)
+                    steps=append(steps,map[string]any{"op":"skip","width":n,"end":r.BitPos(),"remaining":r.Remaining()})
+                }
+                read(width)
+                read(0)
+                read(1)
+                skip(-r.BitPos()) // native wrapping skip back to source start
+                read(9)
+                skip(-10)
+                read(1) // negative read panic must leave its cursor in place
+                skip(1)
+                read(8)
+                sequences=append(sequences,map[string]any{"start":start,"steps":steps})
+            }
+        }
+        rows = append(rows, map[string]any{"data": data, "cases": cases,"sequences":sequences})
+	}
+	raw, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-source-bits.json", raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

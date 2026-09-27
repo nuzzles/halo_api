@@ -1,0 +1,20 @@
+// Add only a second return value to the pinned native resync function.
+// Usage: go run helper.go FRAME_HARVEST.go GENERATED_TEST.go
+package main
+import("bytes";"crypto/sha256";"fmt";"go/ast";"go/parser";"go/printer";"go/token";"os")
+func main(){
+ if len(os.Args)==4&&os.Args[1]=="--"{os.Args=append(os.Args[:1],os.Args[2:]...)}
+ if len(os.Args)!=3{panic("SOURCE OUTPUT")};raw,err:=os.ReadFile(os.Args[1]);if err!=nil{panic(err)}
+ const digest="90c2faa1a7350babae02b75a9c63eede86b0678943ec84535797c92ac162028d"
+ if fmt.Sprintf("%x",sha256.Sum256(raw))!=digest{panic("pinned native source hash mismatch")}
+ fs:=token.NewFileSet();file,err:=parser.ParseFile(fs,os.Args[1],raw,0);if err!=nil{panic(err)}
+ for _,decl:=range file.Decls{fn,ok:=decl.(*ast.FuncDecl);if !ok||fn.Name.Name!="DecodeFrameResync"{continue}
+  fn.Name=ast.NewIdent("haloRustDecodeFrameResyncCursor")
+  if len(fn.Type.Results.List)!=1{panic("changed results")};fn.Type.Results.List=append(fn.Type.Results.List,&ast.Field{Type:ast.NewIdent("int")})
+  returns:=0
+  ast.Inspect(fn.Body,func(n ast.Node)bool{if r,ok:=n.(*ast.ReturnStmt);ok{if len(r.Results)!=1{panic("changed return")};id,ok:=r.Results[0].(*ast.Ident);if !ok||id.Name!="out"{panic("unexpected return")};r.Results=append(r.Results,&ast.CallExpr{Fun:&ast.SelectorExpr{X:ast.NewIdent("br"),Sel:ast.NewIdent("BitPos")}});returns++};return true})
+  if returns!=4{panic(fmt.Sprintf("changed return count: %d",returns))}
+  var out bytes.Buffer;fmt.Fprintln(&out,"// Generated from pinned frame_harvest.go; only name, result type and return expressions changed.\npackage grammar")
+  if err=printer.Fprint(&out,fs,fn);err!=nil{panic(err)};out.WriteByte('\n');if err=os.WriteFile(os.Args[2],out.Bytes(),0600);err!=nil{panic(err)};return
+ };panic("function missing")
+}

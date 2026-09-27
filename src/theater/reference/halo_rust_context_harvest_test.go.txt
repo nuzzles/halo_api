@@ -1,0 +1,15 @@
+package grammar
+import("encoding/hex";"encoding/json";"math";"os";"testing")
+func TestHaloRustContextHarvest(t *testing.T){
+ rows:=[]any{}
+ for _,extra:=range []bool{false,true}{for _,chain:=range []bool{false,true}{for mode:=0;mode<2;mode++{for mutation:=0;mutation<4;mutation++{
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=5;cfg.HasExtraFields=extra;cfg.Profil.Mouvement.DeltaAxisWidth=1;cfg.Profil.Mouvement.DeltaQuantum=0.25;cfg.Profil.Mouvement.FullPrecision=false;cfg.Profil.Grammaire.PorteeBaseline=false;cfg.Profil.Mouvement.DeltaHasHandleTail=false
+  widths:=map[string]int{"harvest-tail":8};if mode==0{cfg.Profil.Grammaire.LargeursCalibrees=widths}else{cfg.Profil.Grammaire.LargeursBouchon=widths}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"object-position-dynamic-precision-component","harvest-tail"},Levels:[]uint32{0,0}}}};world:=NewWorld(reg);world.BindFull(0,0);world.BindFull(1,0)
+  var bw bitWriter;for slot:=0;slot<2;slot++{if extra{bw.bits(0,32)};bw.bit(1);bw.bits(uint64(slot),5);bw.bits(0,2);bw.bit(0);bw.bits(2,4);bw.bits(0,6);bw.bits(1,6);bw.bits(uint64(0x40|slot),8);bw.bits(0x55,8)};if extra{bw.bits(0,32)};bw.end()
+  events:=[]any{};cfg.Obs=NouvelleObservation();cfg.Obs.PosCaptureHook=func(s PositionSample){events=append(events,map[string]any{"kind":"position","position_kind":[]string{"None","Baseline","Absolute","AbsoluteFallback","Delta8","DeltaAxis"}[int(s.Kind)],"slot":s.Slot,"bit":s.BitPos,"vector_bits":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}});switch mutation{case 1:delete(widths,"harvest-tail");case 2:widths["harvest-tail"]=0;case 3:widths["harvest-tail"]=16}}
+  confirm:=HarvestNextBound;if chain{confirm=HarvestChainWalk};records:=ScanFrameTargets(bw.buf,world,cfg,map[uint32]bool{0:true,1:true},confirm);if records==nil{records=[]FrameRecord{}}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"extra":extra,"chain":chain,"mode":mode,"mutation":mutation,"records":records,"events":events,"widths":widths})
+ }}}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-harvest.json",raw,0600);e!=nil{t.Fatal(e)}
+}

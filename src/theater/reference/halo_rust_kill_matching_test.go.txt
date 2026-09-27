@@ -1,0 +1,41 @@
+package killsource
+import("testing";"encoding/json";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustKillMatching(t *testing.T){
+ rng:=rand.New(rand.NewSource(810)); rows:=[]any{}
+ ev:=func(e feedEvent)any {var p any;if e.paquet.ok{p=map[string]int{"chunk":e.paquet.chunk,"packet":e.paquet.pidx}};return map[string]any{"time_ms":e.timeMS,"killer":e.killer,"victim":e.victim,"victim_xuid":e.victimXUID,"packet":p}}
+ es:=func(in []feedEvent)[]any{out:=[]any{};for _,e:=range in{out=append(out,ev(e))};return out}
+ cv:=func(c candidate)any{return map[string]any{"packet":map[string]int{"chunk":c.chunk,"packet":c.pidx},"time_ms":c.ms,"bit":c.bit,"tag":c.tag,"victim":c.victim,"killer":c.killer,"category":c.cat}}
+ sc:=func(c sourcedCandidate)any{return map[string]any{"candidate":cv(c.candidate),"path":c.path}}
+ for z:=0;z<1024;z++{
+  r:=roster{names:[]string{"A","B","C","Bot"},perm:[]int{0,1,2,3},pin:map[int]int{3:3},seatPin:map[int]bool{},motifPin:map[int]bool{}}
+  feed:=killFeed{}; gen:=func()feedEvent{return feedEvent{timeMS:rng.Intn(10)*1000,killer:r.names[rng.Intn(4)],victim:r.names[rng.Intn(4)],victimXUID:12,paquet:paquetID{chunk:0,pidx:rng.Intn(5),ok:rng.Intn(2)==0}}}
+  for j:=0;j<z%12;j++{feed.pairs=append(feed.pairs,gen());feed.orphD=append(feed.orphD,gen());feed.orphK=append(feed.orphK,gen());feed.fab=append(feed.fab,gen())}
+  readBots:=[]any{};if z%3==0{b:=killDeBot{ev:gen(),victime:3};feed.botLus=append(feed.botLus,b);readBots=append(readBots,map[string]any{"event":ev(b.ev),"victim_index":3})}
+  c:=decodeCtx{feed:&feed,roster:&r,opts:DefaultOptions()}; walk:=[]candidate{};scan:=[]candidate{}
+  for j:=0;j<z%25;j++{v:=candidate{chunk:0,pidx:rng.Intn(5),ms:rng.Intn(12)*1000+[]int{-2501,-2500,0,2500,2501}[j%5],bit:rng.Intn(5)-1,tag:uint32([]int{1,65535,65536,99999}[j%4]),victim:rng.Intn(6)-1,killer:rng.Intn(6)-1,cat:j%10};scan=append(scan,v);if j%2==0{walk=append(walk,v)}}
+  c.opts.SelfSource=z%4!=0;c.opts.StrongTagRequired=z%3!=0;c.opts.MultiplicityMax=z%4+1
+  c.scanCands=scan;p:=pass{ctx:&c};p.population(walk,scan,0)
+  cs:=[]any{};ws:=[]any{};for _,v:=range scan{cs=append(cs,cv(v))};for _,v:=range walk{ws=append(ws,cv(v))}
+  all:=[]any{};for _,v:=range p.all{all=append(all,sc(v))}
+  matches:=[]any{};for _,v:=range scan{var exact,victim any;e,f:=c.matchExact(v);if e!=nil{exact=map[string]any{"event":ev(*e),"fallback":f}};e,f=c.matchVictim(v);if e!=nil{victim=map[string]any{"event":ev(*e),"fallback":f}};matches=append(matches,map[string]any{"exact":exact,"victim":victim,"self_ok":c.selfSourceOK(v,p.mult),"bot":c.isBotSide(v)})}
+  bots:=[]any{};for _,m:=range c.resolveBotDeaths(){var cd any;if m.found{cd=sc(sourcedCandidate{m.cand,PathScan})};bots=append(bots,map[string]any{"event":ev(m.event),"candidate":cd,"window_fallback":m.parLaFenetre,"fabricated":m.fab})}
+  killers:=[]any{};for _,m:=range c.resolveBotKillerDeaths(p.all){var cd any;if m.found{cd=sc(m.cand)};killers=append(killers,map[string]any{"event":ev(m.event),"candidate":cd,"window_fallback":m.parLaFenetre,"fabricated":false})}
+  unclaimed:=[]any{};for _,e:=range feed.orphD{v,f,ok:=p.choisirNonRevendiquee(e);var out any;if ok{out=map[string]any{"candidate":sc(v),"fallback":f}};unclaimed=append(unclaimed,out)}
+  ghosts:=[]int{};for _,e:=range feed.fab{if c.ghostPairs()[e.timeMS]{ghosts=append(ghosts,e.timeMS)}}
+  hp:=pass{ctx:&c,byTime:map[int]Kill{},botUsed:map[[3]int]bool{}};hw:=append([]candidate{},walk...);sortCandidates(hw);hp.population(hw,scan,0);hp.runStrong();hp.runSelfSource();hp.runBots();hp.runBotKillers();hp.runUnclaimed();hp.countUnexplainedBot();hp.concordance(hw);hp.compterCouplesSansIdentite()
+  truth:=func(v SourceTruth)any{return map[string]any{"tag":v.Tag,"display":v.Display,"named":v.Named,"class":v.Class,"status":v.Status,"detail":v.Detail,"reserve":v.Reserve,"category":v.Category}}
+  prov:=func(v Provenance)any{return map[string]any{"path":v.Path,"origin":v.Origin,"multiplicity":v.Multiplicity}}
+  stats:=func(v PathStats)any{return map[string]int{"population":v.Population,"matched":v.Matched,"published":v.Published}}
+  kills:=[]any{};for _,v:=range hp.kills(){kills=append(kills,map[string]any{"time_ms":v.TimeMS,"victim":v.Victim,"killer":v.Feed.Killer,"feed_present":v.Feed.Present,"source":truth(v.Source),"diverges":v.Diverges,"read":prov(v.Read),"packet":map[string]int{"chunk":v.paquet.chunk,"packet":v.paquet.pidx},"assist":map[string]any{"name":"","index":0,"rejected":"","known":false,"extra":0},"killer_damage":map[string]any{"pct":0,"known":false},"assist_damage":map[string]any{"pct":0,"known":false}})}
+  deaths:=[]any{};for _,v:=range hp.unclaimed{deaths=append(deaths,map[string]any{"time_ms":v.TimeMS,"victim":v.Victim,"victim_xuid":v.VictimXUID,"source":truth(v.Source),"read":prov(v.Read)})}
+  hybrid:=map[string]any{"kills":kills,"unclaimed":deaths,"walk":stats(hp.walk),"scan":stats(hp.scan),"self_walk":stats(hp.selfWalk),"self_scan":stats(hp.selfScan),"bot":stats(hp.botStats),"bot_killer":stats(hp.botKillerStats),"unclaimed_stats":stats(hp.unclaimedStats),"matching":map[string]int{"identity":hp.appar.Identite,"window":hp.appar.Fenetre,"bot_window":hp.appar.BotFenetre,"unclaimed_window":hp.appar.NonRevendiqueeFenetre,"pairs_without_identity":hp.appar.CouplesSansIdentite},"redundant":hp.redundant,"no_bit":hp.noBit,"agree":hp.agree,"disagree":hp.disagree,"multi_candidate":hp.multiCand,"unexplained_pair":hp.unexpPair,"unexplained_self":hp.unexpSelf,"unexplained_bot":hp.unexpBot}
+  health:=grammar.KillSourceHealth{Film:"generated",Candidates:100,Published:z%110,UnexplainedPair:z%40,UnexplainedSelf:z%9,UnexplainedBotIdx:z%5,OutOfRoster:z%3,TagOutOfCatalogueWalk:z%2,TagOutOfCatalogueScan:z%4,DeathsReal:z%105-2,DeathsCovered:z%100}
+  alerts:=health.Alerts();if alerts==nil{alerts=[]string{}};degradations:=health.Degradations();if degradations==nil{degradations=[]string{}}
+  metrics:=[]any{};for _,m:=range health.ExpvarPairs(){metrics=append(metrics,[]any{m.Name,m.Value})}
+  healthInput:=map[string]any{"film":health.Film,"candidates":health.Candidates,"published":health.Published,"unexplained_pair":health.UnexplainedPair,"unexplained_self":health.UnexplainedSelf,"unexplained_bot":health.UnexplainedBotIdx,"out_of_roster":health.OutOfRoster,"tag_out_of_catalogue_walk":health.TagOutOfCatalogueWalk,"tag_out_of_catalogue_scan":health.TagOutOfCatalogueScan,"deaths_real":health.DeathsReal,"deaths_covered":health.DeathsCovered}
+  margin:=z%3-1;determined:=z%2==0;res:=Result{Health:health,BijectionMargin:margin,BijectionDetermined:determined}
+  healthExpected:=map[string]any{"alerts":alerts,"degradations":degradations,"verdict":health.Verdict(),"metrics":metrics,"unexplained_total":health.UnexplainedTotal(),"unexplained_ratio":health.UnexplainedRatio(),"coverage_ratio":health.CoverageRatio(),"publishable":res.LineByLinePublishable()}
+  rows=append(rows,map[string]any{"health":healthInput,"health_expected":healthExpected,"margin":margin,"determined":determined,"hybrid":hybrid,"read_bots":readBots,"self_source":c.opts.SelfSource,"strong_required":c.opts.StrongTagRequired,"multiplicity_max":c.opts.MultiplicityMax,"pairs":es(feed.pairs),"orphan_deaths":es(feed.orphD),"orphan_kills":es(feed.orphK),"fabricated":es(feed.fab),"walk":ws,"scan":cs,"all":all,"redundant":p.redundant,"matches":matches,"bots":bots,"killers":killers,"unclaimed":unclaimed,"ghosts":ghosts})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-matching.json",b,0600);e!=nil{t.Fatal(e)}
+}

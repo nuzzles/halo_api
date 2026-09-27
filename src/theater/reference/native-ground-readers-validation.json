@@ -1,0 +1,45 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Native ground-weapon default-state and complete ammo component traversal",
+  "defaults": {
+    "fixture": "ground-default-native-v41.json.zlib",
+    "generator": "halo_rust_ground_default_native_test.go.txt",
+    "cases": 384,
+    "hooks": 1920,
+    "padded_attempts": 152,
+    "sha256": "ffe63d7a5ddb71c254761e1e6a33e7665254349e797b8daa2b4b6711b85aad60"
+  },
+  "ammo": {
+    "fixture": "native-ground-ammo-v41.json.zlib",
+    "generator": "halo_rust_native_ground_ammo_test.go.txt",
+    "cases": 512,
+    "component_attempts": 874,
+    "successful": 240,
+    "i9_traversals": 128,
+    "after_ammo_traversals": 70,
+    "padded_final_cursors": 64,
+    "sha256": "89f1f37bfa1dba617fc55c60f635f1bf7ede1b08010c285f0f8b753af4d7df0c"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-native-ground-readers-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-native-ground-readers-clippy.log",
+    "note": "Source unchanged after pass; ammo fixture expanded to include i9 and rerun on host/WASM."
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Loaded ground-weapon creation and pad composition remain open.",
+    "The final all-data domain and runtime audit remains open.",
+    "Synthetic reference comparisons are not independently annotated gameplay expectations."
+  ],
+  "host": {
+    "status": "passed",
+    "tests": 12,
+    "log": "/private/tmp/halo-native-ground-readers-host.log"
+  }
+}

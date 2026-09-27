@@ -1,0 +1,65 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"reflect"
+	"testing"
+)
+
+func haloContractFill(v reflect.Value, seed int) {
+	switch v.Kind() {
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			haloContractFill(v.Field(i), seed+i+1)
+		}
+	case reflect.String:
+		v.SetString("recorded-" + v.Type().Name())
+	case reflect.Bool:
+		v.SetBool(seed%2 == 0)
+	case reflect.Int, reflect.Int32, reflect.Int64:
+		v.SetInt(int64(seed * 17))
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v.SetUint(uint64(seed * 19))
+	case reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			haloContractFill(v.Index(i), seed+i+1)
+		}
+	case reflect.Slice:
+		v.Set(reflect.MakeSlice(v.Type(), seed%3, seed%3))
+		for i := 0; i < v.Len(); i++ {
+			haloContractFill(v.Index(i), seed+i+1)
+		}
+	case reflect.Map:
+		v.Set(reflect.MakeMap(v.Type()))
+		for _, k := range []int64{-1, 0, 29} {
+			key := reflect.New(v.Type().Key()).Elem()
+			key.SetInt(k)
+			value := reflect.New(v.Type().Elem()).Elem()
+			haloContractFill(value, seed+int(k))
+			v.SetMapIndex(key, value)
+		}
+	}
+}
+func TestHaloRustTypeContracts(t *testing.T) {
+	catalog := map[string]any{"DeathInstant": types.DeathInstant{}, "FlagSpan": types.FlagSpan{}, "FlagTrack": types.FlagTrack{}, "FlagGrabsNetPlayer": types.FlagGrabsNetPlayer{}, "PlayerLine": types.PlayerLine{}, "ScorePoint": types.ScorePoint{}, "StatValue": types.StatValue{}, "StatRecord": types.StatRecord{}, "MovementStateRead": types.MovementStateRead{}, "MovementStateStats": types.MovementStateStats{}, "AbilityChargeStats": types.AbilityChargeStats{}, "AbilityImpulseStats": types.AbilityImpulseStats{}}
+	rows := map[string]any{}
+	for name, zero := range catalog {
+		samples := []any{}
+		for seed := 0; seed < 64; seed++ {
+			v := reflect.New(reflect.TypeOf(zero)).Elem()
+			haloContractFill(v, seed)
+			samples = append(samples, v.Interface())
+		}
+		rows[name] = samples
+	}
+	constants := map[string]any{"crouch": types.MovementCrouch, "slide": types.MovementSlide, "clamber": types.MovementClamber, "jump": types.MovementJumpDerived, "sprint": types.MovementSprint, "height": types.SpartanJumpHeightM, "tolerance": types.SpartanJumpHeightTol, "rise_speed": types.SpartanJumpRiseMinMS, "hold_us": types.SpartanJumpHoldMaxUS}
+	raw, e := json.Marshal(map[string]any{"types": rows, "constants": constants})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-type-contracts.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

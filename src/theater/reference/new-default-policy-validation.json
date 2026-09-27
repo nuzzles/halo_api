@@ -1,0 +1,44 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "../fixtures/new-default-policy-v41.json.zlib",
+  "native_cases": 624,
+  "unused_widths": 480,
+  "nonnegative_rewinds": 48,
+  "large_consumed_skips": 48,
+  "ordinary_consumed_skips": 48,
+  "focused_tests": {
+    "passed": 7,
+    "seconds": 2.18
+  },
+  "wasm32": {
+    "runner": "verify_frame_lazy_widths_wasm.py",
+    "native_comparisons": 3984,
+    "address_refusals": 80,
+    "new_fixture_native": 592,
+    "new_fixture_refusals": 32
+  },
+  "suite": {
+    "passed": 575,
+    "failed": 0,
+    "ignored": 48,
+    "seconds": 70.6
+  },
+  "clippy": {
+    "passed": true,
+    "seconds": 26.6
+  },
+  "captured_rerun": false,
+  "open": [
+    "negative and overflowed cursor targets",
+    "MPP and ID scalar widths",
+    "broader native output reconciliation"
+  ],
+  "new_trace_metadata": {
+    "host_records": 384,
+    "negative": 120,
+    "zero": 40,
+    "i64_max": 24,
+    "wasm_returned_records": 352,
+    "old_export_absence_verified": true
+  }
+}

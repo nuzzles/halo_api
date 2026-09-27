@@ -1,0 +1,32 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"os"
+	"testing"
+)
+
+func TestHaloRustProfileTable(t *testing.T) {
+	rows := profile.TableProfil()
+	raw, e := json.MarshalIndent(rows, "", "  ")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-profile-table.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+	layouts := []any{}
+	for major := -2; major <= 100; major++ {
+		p := profile.Resoudre(profile.ClesDuFilm{Majeure: major}, nil).Highlight()
+		layouts = append(layouts, p)
+	}
+	raw, e = json.Marshal(layouts)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-profile-layouts.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+	t.Log("rows", len(rows))
+}

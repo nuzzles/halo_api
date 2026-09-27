@@ -1,0 +1,52 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "shared_channels_and_vehicle_scan_validated",
+  "native_channels": {
+    "cases": 31841,
+    "states_per_channel": 48,
+    "cases_by_channel": {
+      "bipeds": 2184,
+      "weapons": 2892,
+      "pickups": 6153,
+      "equipment": 10364,
+      "zoom": 1830,
+      "events": 3863,
+      "aims": 1852,
+      "occupancy": 2703
+    },
+    "safe_panic_controls": 18,
+    "boolean_byte_patterns": 256,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-facts-channels-native.log"
+  },
+  "native_vehicle_composition": {
+    "cases": 8342,
+    "source_scans": 24,
+    "fully_prefix_exhausted_sources": 3,
+    "other_source_prefixes": "complete, boundary and seeded sampled prefixes",
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-facts-vehicles-native.log"
+  },
+  "host": {
+    "passed": 16,
+    "failed": 0,
+    "seconds": 7.86,
+    "scope": "All shared facts-codec tests",
+    "log": "/private/tmp/halo-facts-channels-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 27.81,
+    "log": "/private/tmp/halo-facts-channels-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 4.3,
+    "log": "/private/tmp/halo-facts-channels-wasm.log",
+    "harness_correction": "Added direct serde dependency to generated harness for generic test adapters after initial harness compile failure."
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "FilmFacts header and main body sections, full cache-file sections/version/freshness, BuildFromFacts, DTO integration and final source/field/runtime/export audit."
+}

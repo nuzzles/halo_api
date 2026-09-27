@@ -1,0 +1,19 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustMarchLazyPolicy(t *testing.T){
+ rows:=[]any{}
+ for _,width:=range []int{-1,0,1,5,33,65,4097,1<<32,(1<<63)-1}{for axis:=0;axis<5;axis++{for mode:=0;mode<2;mode++{
+  reg:=&Registry{Archetypes:make([]Archetype,4)};for i:=range reg.Archetypes{reg.Archetypes[i]=Archetype{Index:i,Components:[]string{},Levels:[]uint32{}}}
+  base:=DefaultFrameConfig();base.PacketPreambleBits=2
+  switch axis{case 0:base.IDLowBits=width;base.IDBase=0xffffffff;case 1:base.Profil.MPP.Lead=width;case 2:base.Profil.MPP.Index=width;case 3:base.NewDefaultStateBits=width;case 4:base.Profil.Mouvement.WorldObject.IndexW=uint(width)}
+  pay:=make([]byte,32);if mode==1{pay[0]=0x40}
+  deltas:=[]marchDelta{{timestampUS:1234,payload:pay}};var keys []marchKeyframe
+  cfg,def,best,runner:=calibrateFrameConfig(reg,keys,deltas,base)
+  st:=newObjectDeathStats();st.Deltas=1;st.Config=cfg;st.CadreParDefaut=def;st.CadreLocalises=best.located;st.CadreDauphin=runner.located;st.CadreEvenements=best.events
+  h:=&objectDeathHarvest{reg:reg,idx:map[uint32]int{},st:&st};tl:=newMarchTimeline(reg,keys)
+  for _,d:=range deltas{w:=tl.advanceTo(d.timestampUS);start,events,ok:=marchStartOf(d.payload,w,cfg);if events{st.EventPackets++};if !ok{continue};if events{st.LocatedPackets++};st.Packets++;h.harvest(marchRecordsOf(d.payload,w,cfg,start),d.timestampUS)}
+  facts:=MarchFacts{Deaths:dedupObjectDeaths(h.out),Occupancy:dedupOccupancy(h.rides),Stats:st};if facts.Deaths==nil{facts.Deaths=[]types.ObjectDeath{}};if facts.Occupancy==nil{facts.Occupancy=[]types.VehicleOccupancy{}}
+  rows=append(rows,map[string]any{"width":width,"axis":axis,"mode":mode,"hex":hex.EncodeToString(pay),"facts":facts})
+ }}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-march-lazy-policy.json",raw,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,11 @@
+package grammar
+import("testing";"encoding/json";"os";"math/rand";"encoding/hex")
+func TestHaloRustWeaponHitScan(t *testing.T){
+ rows:=[]any{};rng:=rand.New(rand.NewSource(741))
+ for c:=0;c<2048;c++ {p:=make([]byte,2+c%79);rng.Read(p);p[0]=0xc0;p[1]&=0x7f;br:=LecteurSur(p);readPacketHead(br);d:=WeaponDamage{TimestampUS:uint64(c),VictimIdx:-1,ResponsibleIdx:-1};if v,ok:=lot1RefDom1(br);ok{d.VictimIdx=int(v)};if v,ok:=lot1RefDom1(br);ok{d.ResponsibleIdx=int(v)};lot1RefDom(br,7);r:=lot1DecodeDamageAftermath(br);d.Source=r.sourceID;d.HasSource=r.hasSource;d.Negative=r.negatif;d.MagClear=r.dmgClear;d.MagRaw=r.dmgRaw
+ q:=make([]byte,4+c%79);rng.Read(q);q[0]=0xd2;q[1]&=0x7f;sr:=LecteurSur(q);readPacketHead(sr);shot:=WeaponShot{TimestampUS:uint64(c)};a,oka:=lot1RefDom1(sr);f,okf:=decodeFireEvent(q);if oka&&okf{shot.Attacker=a;shot.WeaponID=f.WeaponID;shot.FilmIndex=f.ShooterIndex5;shot.HasPair=true}
+ var bodyVictim any;if r.hasVictim{bodyVictim=r.victimIdx}
+ rows=append(rows,map[string]any{"secondary":r.dmg2Raw,"body_victim":bodyVictim,"end":br.BitPos(),"damage_bytes":hex.EncodeToString(p),"damage":d,"shot_bytes":hex.EncodeToString(q),"shot":shot})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-weapon-hit-scan.json",b,0600);e!=nil{t.Fatal(e)}
+}

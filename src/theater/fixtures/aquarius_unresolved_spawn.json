@@ -1,0 +1,17 @@
+{
+  "match_id": "16d67b8c-09c2-4ab8-8b94-892f7edb6212",
+  "map": "Aquarius",
+  "note": "Historical unresolved-spawn fixture. Aquarius map identity and independently published BSP bounds now corroborate 13/12/11 widths: raw [1980,2469,727]. No movement validation exists because the recorder stayed still.",
+  "hex": "088018e1b1876bda000019d0120430002002a0f97f5bd71cc10c9f01b0f9b890c07bc9a55ae1d4b9c080",
+  "length": 329,
+  "source": {
+    "chunk": 1,
+    "payload_byte": 505970,
+    "timestamp_us": 9101089730,
+    "spawn_bit": 3470
+  },
+  "coordinate_prefix": "110000010000110010011111000000011011000011111001101110001001000",
+  "candidate_coordinate_start": 263,
+  "candidate_coordinate_bits": "001111011110010011010010101011010111",
+  "suffix_start": 299
+}

@@ -1,0 +1,11 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "new-tail-policy-v41.json.zlib",
+  "sha256": "fdd7b6b4dab007a4d41f2c23b722f469cd17719972926cd15c02fc00ea5c96e0",
+  "cases": 384,
+  "scope": "positive-only New-record terminal tail; raw signed setting retained",
+  "focused_tests_passed": 4,
+  "wasm32_native_cases_passed": 3216,
+  "clippy": "passed",
+  "reference_source_hashes_verified": 485
+}

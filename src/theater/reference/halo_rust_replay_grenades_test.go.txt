@@ -1,0 +1,17 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustReplayGrenades(t *testing.T){
+ rng:=rand.New(rand.NewSource(42021));rows:=[]any{}
+ tags:=[]uint32{0xb0171062,0xc0e34c44,0x3b2567d4,0x9212e428,0,1}
+ for run:=0;run<1024;run++{
+  pos:=[]grammar.BipedPosition{};throws:=[]grammar.GrenadeThrow{};owner:=map[uint32]int{};proj:=[]types.ProjectileTrack{};published:=[]Track{};slots:=[]uint32{}
+  for slot:=0;slot<6;slot++{if run%7!=0{owner[uint32(slot)]=slot%4};if rng.Intn(3)!=0{published=append(published,Track{Slot:uint32(slot)});slots=append(slots,uint32(slot))}}
+  for i:=0;i<run%70;i++{pos=append(pos,grammar.BipedPosition{Slot:uint32(rng.Intn(6)),TimestampUS:uint64(rng.Intn(10))*200000,HasWorld:rng.Intn(4)!=0,X:float32(rng.Intn(20)),Y:float32(rng.Intn(20))})}
+  for i:=0;i<run%35;i++{tr:=types.ProjectileTrack{Slot:uint32(i),Pts:[]types.ProjectileSample{}};stamp:=uint64(rng.Intn(10))*200000+[]uint64{0,200000,200001}[i%3];x,y:=float32(rng.Intn(20)),float32(rng.Intn(20));for j:=0;j<i%8;j++{tr.Pts=append(tr.Pts,types.ProjectileSample{TimestampUS:stamp+uint64(j)*100000,X:x+float32(j)/10,Y:y,Z:float32(i%2),AtRest:j%2==0})};proj=append(proj,tr)}
+  for i:=0;i<run%50;i++{stamp:=uint64(rng.Intn(10))*200000;if run%17==0{stamp=^uint64(0)-100000};throws=append(throws,grammar.GrenadeThrow{TimestampUS:stamp,FilmIndex:rng.Intn(6),TypeID:tags[rng.Intn(len(tags))]})}
+  origin:=uint64(run%3)*100000;step:=uint64(run%3+1)*100000;ps,links,cuts:=buildProjectiles(proj,origin,step);if ps==nil{ps=[]Projectile{}};if links==nil{links=map[int]int{}}
+  grenades,cov:=buildGrenades(pos,throws,origin,step,owner,proj,links);before:=append([]Grenade{},grenades...);rawCov:=cov;grenades=keepGrenadesOfPublishedTracks(grenades,published);cov.Unpublished=countUnpublished(len(before),len(grenades));cov.Attached=len(grenades);if grenades==nil{grenades=[]Grenade{}}
+  rows=append(rows,map[string]any{"positions":pos,"throws":throws,"owners":owner,"projectiles":proj,"origin":origin,"step":step,"slots":slots,"projectile_output":map[string]any{"projectiles":ps,"published_by_raw":links,"coverage":ProjectileCoverage{Tracks:len(proj),Published:len(ps),Truncated:cuts}},"raw":map[string]any{"grenades":before,"coverage":rawCov},"output":map[string]any{"grenades":grenades,"coverage":cov}})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-grenades.json",b,0600);e!=nil{t.Fatal(e)}
+}

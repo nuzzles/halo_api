@@ -1,0 +1,47 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded equipment creations and complete native placement grammar pass",
+  "creations": {
+    "fixture": "context-equipment-creations-v41.json.zlib",
+    "generator": "halo_rust_context_equipment_creations_test.go.txt",
+    "cases": 64,
+    "accepted": 1053,
+    "sha256": "d3951360354f87ae823dc14e7db467b837f086e8a8836cc073b628a8cbc6fff7"
+  },
+  "placements": {
+    "fixture": "context-placements-v41.json.zlib",
+    "generator": "halo_rust_context_placements_test.go.txt",
+    "cases": 48,
+    "placements": 48,
+    "scanned": 30,
+    "conclusive_calibrations": 3,
+    "sha256": "038e3bfe77f5123923735edc3d980df5c19f4444aa3376c69787dfd0bb94ad7e"
+  },
+  "host": {
+    "status": "passed",
+    "tests": 4,
+    "log": "/private/tmp/halo-context-placements-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-placements-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Combined replay world-phase logging, fallback counters and observation ordering remain open.",
+    "Pad, vehicle and guarded world channels still need loaded-context integration.",
+    "Selective position-width domain audit remains open.",
+    "Synthetic native-oracle comparisons do not establish independently annotated gameplay truth."
+  ],
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-placements-clippy.log"
+  },
+  "regression": {
+    "passed": 10,
+    "ignored": 1,
+    "log": "/private/tmp/halo-context-placements-regression.log"
+  }
+}

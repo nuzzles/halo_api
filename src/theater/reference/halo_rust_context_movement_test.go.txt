@@ -1,0 +1,46 @@
+package grammar
+import("encoding/binary";"encoding/hex";"encoding/json";"os";"testing";"math/rand";"reflect";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustContextMovement(t *testing.T){
+ rows:=[]any{};rng:=rand.New(rand.NewSource(94141))
+ packet:=func(kind uint16,ts uint64,pay []byte)[]byte{h:=make([]byte,16);binary.LittleEndian.PutUint16(h,kind);binary.LittleEndian.PutUint32(h[4:],uint32(len(pay)));binary.LittleEndian.PutUint64(h[8:],ts);return append(h,pay...)}
+ for n:=0;n<224;n++ {
+  names:=[]string{haloRustMovementHookNames[n%len(haloRustMovementHookNames)],"unit-crouch-component"};blocks:=36;if n%23==0{blocks=35};if n%19==0||(n>=128&&n<160){names=[]string{"high-frequency"}}
+  if n>=160{blocks=36;names=[]string{"object-translational-velocity-dynamic-precision-component","unit-crouch-component"}}
+  regbuf:=make([]byte,8+blocks*64*260);binary.LittleEndian.PutUint32(regbuf,41);binary.LittleEndian.PutUint32(regbuf[4:],27)
+  copy(regbuf[8+3*64*260:],"high-frequency");binary.LittleEndian.PutUint32(regbuf[8+3*64*260+256:],1)
+  if blocks==36{for i,name:=range names{copy(regbuf[8+(35*64+i)*260:],name)}}
+  if n>=192{tail:=make([]byte,64*260);copy(tail[32:],"HI_1_13_0");tail[32+0x48]=0x80;tail[len(tail)-1]=1;regbuf=append(regbuf,tail...)}
+  p:=ProfilDeBalayageParDefaut();p.Grammaire.TablesParVue=n%3!=0;p.Grammaire.ClassesDeVue=n%4!=0;p.Grammaire.InferenceChaine=n%5==0;p.Grammaire.ControleDeCorruption=n>=192;p.Grammaire.CorpsActionMobilite=false
+  cfg:=DefaultFrameConfig();cfg.Profil=p
+  data:=[]byte{};for _,slot:=range []uint64{123,512,513}{if slot==513&&n%7==0{continue};var w bitWriter;w.bits(0,1);w.bits((1<<30)|slot,32);ti:=uint64(35);if slot==123{ti=3};w.bits(ti,32);w.bits(0,44);w.bits(0,32);w.bits(0,32);w.bits(0,64);data=append(data,packet(2,slot,w.buf)...)}
+  for j:=0;j<4&&n<160;j++{var w bitWriter;if n%26==13{w.bits(0,1);w.bit(1);w.bits(0,11);w.bit(1);w.bits(123,13);w.bits(1,2);w.bit(0);w.bits(1,4);w.bits(0,6);w.bits(77,8)}else{w.bits(0,2)}
+   copyBits:=func(b []byte,k int){for i:=0;i<k;i++{w.bit(uint64(b[i/8]>>uint(7-i%8)))}}
+   body:=func(){if p.Grammaire.ControleDeCorruption{w.bit(0)};b:=make([]byte,4096);if j%2==0{rng.Read(b)};br:=LecteurSur(b);br.poserCadre(cfg);consumeByName(br,names[0],35,0);copyBits(b,br.BitPos())}
+   mask:=func(){w.bits(1,4);w.bits(0,6);body()}
+   delta:=func(slot uint64){w.bit(1);w.bits(slot,13);w.bits(1,2);w.bit(0);mask()}
+   create:=func(slot uint64){w.bits(1,3);w.bits(slot,13);w.bits(1,2);w.bits(35,6);b:=make([]byte,4096);br:=LecteurSur(b);br.poserCadre(cfg);consumeBipedDefaultState(br);copyBits(b,br.BitPos());mask()}
+   delta(512);create(515);w.bits(2,3);w.bits(512,13);w.bits(1,2);w.bits(0,32);create(516);delta(513);delta(512);w.end();w.end();w.end()
+   pay:=w.buf;if n%11==0{pay=pay[:len(pay)/2]};if n%26==0{pay=append([]byte{0x40},pay...)}
+   data=append(data,packet(0,uint64(100000+j/2*250000),pay)...)
+  }
+  if n>=160 {
+   mode:=n%8;vz:=float64(DecodeVelocity(215549,273)[2]);height:=0.85;if mode==1{height=0.5};if mode==2{height=1.2};half:=uint64(height/vz*1e6/2);if mode==3{half=300001};origin:=uint64(n)*1000000
+   emit:=func(ts uint64,scale uint64){var w bitWriter;w.bits(0,2);w.bit(1);slot:=uint64(512);if mode==7{slot=799};w.bits(slot,13);w.bits(1,2);w.bit(0);w.bits(1,4);w.bits(0,6);if mode==6{w.bit(1);w.bits(0,96)}else{w.bit(0);w.bit(0);w.bits(215549,19);w.bits(scale,10)};if n>=192{w.bit(uint64(n%2));if n%2==1{w.bits(0xbcddcba,32)}};w.end();w.end();w.end();data=append(data,packet(0,ts,w.buf)...)}
+   if mode==5{emit(origin,0)};emit(origin,273);emit(origin+half,273);if mode!=4{emit(origin+2*half,0)}
+  }
+  orders:=[][]int{{0,1,2},{0,2,1},{0,1,3},{0},{0,1,1},{-1,0,1}}
+  raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};inputs:=[]any{}
+  order:=orders[n%6];if n>=160{order=orders[0]};for _,id:=range order{d:=data;if id==0{d=regbuf};if id<0{d=[]byte{}};raw=append(raw,d);meta=append(meta,types.ChunkMeta{Index:id});inputs=append(inputs,map[string]any{"index":id,"hex":hex.EncodeToString(d)})}
+  film,e:=source.Load(raw,meta);if e!=nil{t.Fatal(e)};fc:=NewFilmContext(film);if n>=128&&n<160{width:=[]uint{0,65,1<<32,(1<<32)+1,^uint(0)}[n%5];p.Mouvement.WorldObject.AxisW=[3]uint{width,width,width}};fc.PoserProfilDeBalayage(p)
+  if fc.ProfilDeBalayage().Grammaire.ControleDeCorruption!=(n>=192){t.Fatalf("recorded corruption %d",n)}
+  reads,stats,err:=ScanMovementStates(fc);msg:="";if err!=nil{msg=err.Error()}
+  if n>=160{want:=0;if n%8==0{want=1};if stats.JumpsDerived!=want{t.Fatalf("jump scenario %d: got %d want %d",n,stats.JumpsDerived,want)}}
+  observations:=[]any{}
+  if err==nil&&!stats.Absent {
+   reg,e:=fc.Registry();if e!=nil{t.Fatal(e)};st:=types.MovementStateStats{MapWidths:fc.LargeursObjetDuMonde().AxisW};sc:=&movementStateScanner{st:&st,monde:NewWorld(reg),vues:map[movementStateKey]types.MovementStateRead{}};sc.monde.PoserTableAnticipee(ConstruireTableAnticipee(fc));cfg:=fc.CadreDeBalayage();cfg.Obs=NouvelleObservation();cfg.Obs.EtatMouvementHook=func(comp EtatMouvementComposant,slot uint32,v []uint64){ti,ok:=sc.monde.ArchetypeForSlot(slot);var bound any;if ok{bound=ti};observations=append(observations,map[string]any{"chunk":sc.chunk,"packet":sc.paquetIndex,"ts":sc.ts,"archetype":bound,"component":comp.String(),"slot":slot,"values":v});sc.recevoir(comp,slot,v)}
+   for _,c:=range fc.ChunkNumbers(){d,pks,ok:=fc.ChunkAt(c);if !ok{continue};sc.monde.PoserChunkCourant(c);sc.lierLeMonde(d,pks);for _,pk:=range pks{sc.paquet(c,pk,d,cfg)}};sc.deriverLesSauts();sc.publier();st.Scanned=true;if !reflect.DeepEqual(reads,sc.out)||!reflect.DeepEqual(stats,st){t.Fatalf("instrumentation drift %d",n)}
+  }
+  rows=append(rows,map[string]any{"inputs":inputs,"axes":p.Mouvement.WorldObject.AxisW,"tables":p.Grammaire.TablesParVue,"classes":p.Grammaire.ClassesDeVue,"chain":p.Grammaire.InferenceChaine,"corruption":p.Grammaire.ControleDeCorruption,"reads":reads,"stats":stats,"error":msg,"observations":observations})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-movement.json",b,0600);e!=nil{t.Fatal(e)}
+}

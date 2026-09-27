@@ -1,0 +1,25 @@
+package grammar
+
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand")
+
+func TestHaloRustKeyframeReferencesD61443e(t *testing.T) {
+ rng:=rand.New(rand.NewSource(4105)); rows:=[]any{}
+ reg:=&Registry{Archetypes:make([]Archetype,10)}
+ reg.Archetypes[9]=Archetype{Index:9,Components:[]string{"unit-actor-control-component","unit-actor-state-component","weapon-state-ammo"},Levels:[]uint32{2,4,1}}
+ for sample:=0;sample<256;sample++ {
+  data:=make([]byte,4096);if _,err:=rng.Read(data);err!=nil{t.Fatal(err)}
+  start:=sample%8
+  put:=func(bit int,v uint32) {for j:=0;j<32;j++ {mask:=byte(1<<uint(7-(bit+j)%8));data[(bit+j)/8]&=^mask;if v&(1<<uint(31-j))!=0 {data[(bit+j)/8]|=mask}}}
+  put(start,0x40000203);put(start+32,9)
+  n1:=[]uint32{0,1,0xffffffff,23}[sample%4];put(start+108,n1)
+  ctx:=ContexteParDefaut();ctx.Profil.Grammaire.ControleDeCorruption=sample%3==0
+  br:=LecteurSur(data);br.PoserContexte(ctx);br.SetBitPos(start+140)
+  if int32(n1)>0 {consumeDefaultStateTI9(br);if ctx.Profil.Grammaire.ControleDeCorruption{br.ReadBits(32)}}
+  put(br.BitPos(),[]uint32{0,1,0xffffffff,19}[(sample/4)%4])
+  refs:=[]UnitRefRead{};ctx.Obs=NouvelleObservation();ctx.Obs.UnitRefHook=func(r UnitRefRead){refs=append(refs,r)}
+  out:=WalkKeyframeFullState(data,start,reg,ctx)
+  rows=append(rows,map[string]any{"references":refs,"start_bit":start,"end_bit":out.EndBit,"desync":out.DesyncAt,"components":out.Comps,"check":ctx.Profil.Grammaire.ControleDeCorruption,"hex":hex.EncodeToString(data[:(out.EndBit+7)/8])})
+ }
+ data,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-keyframe-references-d61443e.json",data,0600);err!=nil{t.Fatal(err)}
+}

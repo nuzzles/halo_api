@@ -1,0 +1,134 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native_field_count": 44,
+  "compared_fields": [
+    "AbilityChargeStats",
+    "AbilityCharges",
+    "AbilityImpulseStats",
+    "AbilityImpulses",
+    "AbilityRanks",
+    "BipedCreations",
+    "BombReads",
+    "CamoStates",
+    "Deaths",
+    "EquipmentChangeStats",
+    "EquipmentChanges",
+    "FilmClockOriginUS",
+    "FilmMajorVersion",
+    "FilmTable",
+    "Fire",
+    "FlagGauge",
+    "FlagGaugeScanned",
+    "FlagMarks",
+    "GrappleReads",
+    "Grenades",
+    "Inventory",
+    "InventoryDeltaAmmoRefused",
+    "InventoryDeltas",
+    "Loadouts",
+    "MovementStateStats",
+    "MovementStates",
+    "Pads",
+    "PickupStats",
+    "Pickups",
+    "PlacementStats",
+    "Placements",
+    "PlayerIndices",
+    "PlayerTeams",
+    "Positions",
+    "Projectiles",
+    "SpawnEvents",
+    "SpawnStats",
+    "TeamScan",
+    "Translocations",
+    "Vehicles",
+    "WeaponChanges",
+    "ZoneReads",
+    "ZoneScanned",
+    "ZoomEvents"
+  ],
+  "remaining_fields": [],
+  "fixtures": [
+    {
+      "folder": "maps/01-bazaar-idle",
+      "file": "full-document-inputs-0-v41.json.zlib",
+      "sha256": "0dfb023cfd378291732d6ba1d719fac7d2287ec209c3d935e20463515ca4d2e6"
+    },
+    {
+      "folder": "maps/02-aquarius",
+      "file": "full-document-inputs-1-v41.json.zlib",
+      "sha256": "bc4a55072f7a8df20702f50c03e8bc654adb332f2d6f32301f1c627e70eadc39"
+    },
+    {
+      "folder": "bandit/01-evo",
+      "file": "full-document-inputs-2-v41.json.zlib",
+      "sha256": "666ff36f4e25a43df7c3f237e2608927ce6defe75aff859b4564648480031b0c"
+    },
+    {
+      "folder": "ranked-arena/02-oddball",
+      "file": "full-document-inputs-3-v41.json.zlib",
+      "sha256": "4d689f0eb971a4949dfbb16727af4a3c1d3de87c306d543501bbf725792526ad"
+    },
+    {
+      "folder": "appearance/01-cadet-blue",
+      "file": "full-document-inputs-4-v41.json.zlib",
+      "sha256": "5735b972fb9028552a0f490ea48c8c3c95cdca5230c31ed8578f821884f9f2a7"
+    },
+    {
+      "folder": "appearance/02-cadet-brick",
+      "file": "full-document-inputs-5-v41.json.zlib",
+      "sha256": "1a348ca8de01cf555f22b00d4fd1004976072f31d13015f6ebe0eb2b279d1e66"
+    }
+  ],
+  "latest_validation": {
+    "six_film_input_and_document_seconds": 98.69,
+    "full_theater_passed": 563,
+    "full_theater_ignored": 46,
+    "native_clock_cases": 1024,
+    "native_clock_failures": 174,
+    "full_theater_seconds": 100.72,
+    "native_identity_cases": 1024,
+    "native_identity_collision_cases": 92,
+    "native_identity_death_failures": 282,
+    "native_identity_index_failures": 26
+  },
+  "captured_empty_only_fields": [
+    "BombReads",
+    "FlagGauge",
+    "FlagGaugeScanned",
+    "FlagMarks",
+    "Translocations",
+    "ZoneReads",
+    "ZoneScanned"
+  ],
+  "captured_empty_only_note": "Default six-film caller options disable objective consumers. Separate enabled-consumer fixture validates raw objective input projection without asserting actual match mode; positive carrier marks and captured translocations remain missing.",
+  "captured_world_input_counts": {
+    "projectile_tracks": 509,
+    "placements": 548,
+    "pad_creations": 2580,
+    "pad_tracks": 2794
+  },
+  "vehicle_raid_fixture": {
+    "file": "raid-vehicle-inputs-v41.json.zlib",
+    "sha256": "c405e8666f46fc7ad9f0a0e041daaf1a421a51d84cdbecf2bfcd1622f6687d3f",
+    "native_generation_seconds": 274.512,
+    "rust_comparison": "passed",
+    "creations": 150,
+    "positions": 89945,
+    "aims": 71488,
+    "events": 135,
+    "deaths": 12,
+    "occupancy": 291,
+    "rust_comparison_seconds": 278.98
+  },
+  "objective_input_fixture": {
+    "file": "objective-inputs-v41.json.zlib",
+    "sha256": "5adda427ad94f26a25f5c0d193b840d6a6bf10a6c6258f95473611ce3f21950d",
+    "native_generation_seconds": 15.692,
+    "rust_comparison": "passed",
+    "managed_reads_per_enabled_consumer": 16569,
+    "radial_reads": 13805,
+    "positive_carrier_marks": 0,
+    "scope": "resolved consumer enable/disable controls on captured bytes, not match mode or semantic actions"
+  }
+}

@@ -1,0 +1,731 @@
+{
+  "provenance": "Captured type-8 player snapshot windows. Coating/visor/region IDs independently matched against Game CMS metadata for the two High Ground controls. Other captures check the same structural form across equipment and players. Offsets are MSB-first. Attachment TagIds and mythic FxIds in the two later weapon controls match separately fetched official item metadata; empty controls retain zero identifiers.",
+  "records": [
+    {
+      "film": "appearance/01-cadet-blue",
+      "match_id": "5156fc6f-47da-4e7b-b54a-857e8d3a3128",
+      "chunk": 1,
+      "payload_byte": 524113,
+      "original_marker_bit": 12724,
+      "slice_byte": 1529,
+      "offset": 492,
+      "xuid": "2535472547643888",
+      "name": "Nuzzles",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": 497615889
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": -559891038
+          }
+        ],
+        "visor_id": -611521361,
+        "visor_color_id": 994132079,
+        "armor_variant_id": 332549919,
+        "coating_style_id": 1362766512,
+        "attachments": {
+          "chest_tag_id": 0,
+          "utility_tag_id": 0,
+          "wrist_tag_id": 0,
+          "left_shoulder_tag_id": 0,
+          "right_shoulder_tag_id": 0
+        },
+        "mythic_effect_ids": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "hex": "00000000000000000000000000000000000004e0075007a007a006c0065007300000000000000000000000000000000000000000000f0418ab4ff0109002dc0000000045800000000000003a59601f07d3f484ca64c15887d3f484cafc3df944412a47436341e207d3f484dbbc9d4347d3f484c3e6edb707d3f484c0b4896ac7d3f484ee75a69647d3f484cf21642107d3f484daabe44fc7d3f484f1942fe8e8af6837bf62d519c7d3f484c1e0e3d0c7d3f484f40cddeec7d3f484e5d2fa2c87d3f484daab59a647d3f484c86a2453a8af6837a560a05287d3f484c9040bdac7d3f484cd59868aa8af68378c9ab8ca47d3f484e0ed291ca8af6837800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bfb2336c0800000000000001bd0104ec000000000000000000000000000000007d3f484ec0a8e9440"
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "match_id": "cc336817-2d7a-431a-b704-fe782013943b",
+      "chunk": 1,
+      "payload_byte": 524113,
+      "original_marker_bit": 12724,
+      "slice_byte": 1529,
+      "offset": 492,
+      "xuid": "2535472547643888",
+      "name": "Nuzzles",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": 497615889
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": -559891038
+          }
+        ],
+        "visor_id": -611521361,
+        "visor_color_id": 994132079,
+        "armor_variant_id": 332549919,
+        "coating_style_id": 1920803940,
+        "attachments": {
+          "chest_tag_id": 0,
+          "utility_tag_id": 0,
+          "wrist_tag_id": 0,
+          "left_shoulder_tag_id": 0,
+          "right_shoulder_tag_id": 0
+        },
+        "mythic_effect_ids": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "hex": "00000000000000000000000000000000000004e0075007a007a006c0065007300000000000000000000000000000000000000000000f0418ab4ff0109002dc0000000045800000000000003a59601f07d3f484ca64c15887d3f484cafc3df944412a47436341e207d3f484dbbc9d4347d3f484c3e6edb707d3f484c0b4896ac7d3f484ee75a69647d3f484cf21642107d3f484daabe44fc7d3f484f1942fe8e8af6837bf62d519c7d3f484c1e0e3d0c7d3f484f40cddeec7d3f484e5d2fa2c87d3f484daab59a647d3f484c86a2453a8af6837a560a05287d3f484c9040bdac7d3f484cd59868aa8af68378c9ab8ca47d3f484e0ed291ca8af6837800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bfb2336c0800000000000001bd0104ec000000000000000000000000000000007d3f484d9091f5c80"
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "match_id": "9a875c4e-03bc-4fff-a688-e21216d1618b",
+      "chunk": 1,
+      "payload_byte": 476050,
+      "original_marker_bit": 12724,
+      "slice_byte": 1529,
+      "offset": 492,
+      "xuid": "2535472547643888",
+      "name": "Nuzzles",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": -1413796017
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 765472553
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 270486441
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": 270486441
+          }
+        ],
+        "visor_id": 1544031111,
+        "visor_color_id": 267723541,
+        "armor_variant_id": 270486441,
+        "coating_style_id": 2036754566,
+        "attachments": {
+          "chest_tag_id": 1814341499,
+          "utility_tag_id": 0,
+          "wrist_tag_id": 0,
+          "left_shoulder_tag_id": 1089755528,
+          "right_shoulder_tag_id": -941666327
+        },
+        "mythic_effect_ids": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "hex": "00000000000000000000000000000000000004e0075007a007a006c0065007300000000000000000000000000000000000000000000f0418ab4ff0109002dc0000000045800000000000003a59601f0a4be80b4a64c1588a4be80b4afc3df953cbeeeac36341e20a4be80b5bbc9d434a4be80b43e6edb72a52c7c400b4896ac7d3f484ee75a69647d3f484cf2164212a52c7c41aabe44fea52c7c431942fe8ea52c7c43f62d519ea52c7c401e0e3d0ea52c7c4340cddeeea52c7c425d2fa2c87d3f484daab59a647d3f484c86a2453aa52c7c42560a052aa52c7c409040bdaea52c7c40d59868aaa52c7c40c9ab8ca6a52c7c420ed291caa52c7c4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ee9c91b0ce2bef2800000000000000022167d103a53f7f1f1227f3b91e9760bcc59623de1c2c2173fffffffc00000000548fd43c00000000000000000000000000000002a52c7c4219a199e41"
+    },
+    {
+      "film": "bandit/01-evo",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c",
+      "chunk": 1,
+      "payload_byte": 480821,
+      "original_marker_bit": 12390,
+      "slice_byte": 1487,
+      "offset": 494,
+      "xuid": "2535471464931877",
+      "name": "diarrhea698343",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": 1226784639
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": 332549919
+          }
+        ],
+        "visor_id": 1544031111,
+        "visor_color_id": 1717887855,
+        "armor_variant_id": 332549919,
+        "coating_style_id": -1021578253,
+        "attachments": {
+          "chest_tag_id": 0,
+          "utility_tag_id": 0,
+          "wrist_tag_id": 0,
+          "left_shoulder_tag_id": 0,
+          "right_shoulder_tag_id": -1065742201
+        },
+        "mythic_effect_ids": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "hex": "00000000019001a4018401c801c801a00194018400d800e400e000cc00d000cc00000000000000000000000000000000000000000000958805d3fc042400b70000000001600000000000000e965807c1f4fd213299305621f4fd2132bf0f7e57f3f1f490d8d07881f4fd2136ef2750d1f4fd2130f9bb6dc1f4fd21302d225ab1f4fd213b9d69a591f4fd2133c8590841f4fd2136aaf913f1f4fd213c650bfa31f4fd213fd8b54671f4fd21307838f431f4fd213d03377bb1f4fd213974be8b21f4fd2136aad66991f4fd21321a8914e1f4fd2139582814a1f4fd21324102f6b1f4fd21335661a2a1f4fd213326ae3291f4fd21383b4a4721f4fd21300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000087107ac0000000000000000000000000870b085c04000000000000006fe36466000000000000000000000000000000001f4fd213f3f31bc30"
+    },
+    {
+      "film": "weapons/04-br-shock-rifle",
+      "match_id": "731ef1f7-a119-49ca-a056-4b8305aaf7c6",
+      "chunk": 1,
+      "payload_byte": 476728,
+      "original_marker_bit": 12724,
+      "slice_byte": 1529,
+      "offset": 492,
+      "xuid": "2535472547643888",
+      "name": "Nuzzles",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": 497615889
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": -559891038
+          }
+        ],
+        "visor_id": -611521361,
+        "visor_color_id": 994132079,
+        "armor_variant_id": 332549919,
+        "coating_style_id": 1920803940,
+        "attachments": {
+          "chest_tag_id": 1915707601,
+          "utility_tag_id": -263674835,
+          "wrist_tag_id": -1709170885,
+          "left_shoulder_tag_id": -103362575,
+          "right_shoulder_tag_id": -1762653079
+        },
+        "mythic_effect_ids": [
+          1385495886,
+          -1697600461,
+          -185323300,
+          1618680591
+        ]
+      },
+      "hex": "00000000000000000000000000000000000004e0075007a007a006c0065007300000000000000000000000000000000000000000000f0418ab4ff0109002dc0000000045800000000000003a59601f07d3f484ca64c15887d3f484cafc3df944412a47436341e207d3f484dbbc9d4347d3f484c3e6edb707d3f484c0b4896ac7d3f484ee75a69647d3f484cf21642107d3f484daabe44fc7d3f484f1942fe8e8af6837bf62d519c7d3f484c1e0e3d0c7d3f484f40cddeec7d3f484e5d2fa2c87d3f484daab59a647d3f484c86a2453a8af6837a560a05287d3f484c9040bdac7d3f484cd59868aa8af68378c9ab8ca47d3f484e0ed291ca8af68378000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000034580bdc800000000b69123c0ec7c826bc73f5be5a433c25a585913f7b6636c14c59623debfb2336c0800000000000001bd0104ed3bf65148ceb3426b70c3d3d03c6ded807d3f484d9091f5c94"
+    },
+    {
+      "film": "weapons/05-ar-stalker-rifle",
+      "match_id": "9ea11b0a-dddc-4061-a7f7-ac22fa62a05b",
+      "chunk": 1,
+      "payload_byte": 476728,
+      "original_marker_bit": 12724,
+      "slice_byte": 1529,
+      "offset": 492,
+      "xuid": "2535472547643888",
+      "name": "Nuzzles",
+      "expected": {
+        "regions": [
+          {
+            "region_id": 2088789481,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1644532521,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -436735957,
+            "permutation_id": 497615889
+          },
+          {
+            "region_id": -2012771059,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 225833582,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -592012529,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1423584766,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1503319737,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -2070903492,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1066512234,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1547743034,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1733594109,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1133478663,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1149815856,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1293399145,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": -1721324182,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1318168609,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 1250001557,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1798246436,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 706373173,
+            "permutation_id": -559891038
+          },
+          {
+            "region_id": 702769714,
+            "permutation_id": 332549919
+          },
+          {
+            "region_id": 1923396739,
+            "permutation_id": -559891038
+          }
+        ],
+        "visor_id": -611521361,
+        "visor_color_id": 994132079,
+        "armor_variant_id": 332549919,
+        "coating_style_id": 1920803940,
+        "attachments": {
+          "chest_tag_id": 1915707601,
+          "utility_tag_id": -263674835,
+          "wrist_tag_id": -1709170885,
+          "left_shoulder_tag_id": -103362575,
+          "right_shoulder_tag_id": -1762653079
+        },
+        "mythic_effect_ids": [
+          1385495886,
+          -1697600461,
+          -185323300,
+          1618680591
+        ]
+      },
+      "hex": "00000000000000000000000000000000000004e0075007a007a006c0065007300000000000000000000000000000000000000000000f0418ab4ff0109002dc0000000045800000000000003a59601f07d3f484ca64c15887d3f484cafc3df944412a47436341e207d3f484dbbc9d4347d3f484c3e6edb707d3f484c0b4896ac7d3f484ee75a69647d3f484cf21642107d3f484daabe44fc7d3f484f1942fe8e8af6837bf62d519c7d3f484c1e0e3d0c7d3f484f40cddeec7d3f484e5d2fa2c87d3f484daab59a647d3f484c86a2453a8af6837a560a05287d3f484c9040bdac7d3f484cd59868aa8af68378c9ab8ca47d3f484e0ed291ca8af68378000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000034580bdc800000000b69123c0ec7c826bc73f5be5a433c25a585913f7b6636c14c59623debfb2336c0800000000000001bd0104ed3bf65148ceb3426b70c3d3d03c6ded807d3f484d9091f5c94"
+    }
+  ]
+}

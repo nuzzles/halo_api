@@ -1,0 +1,12 @@
+# Downloaded chunks, metadata, decoded exports, and generated replay/analysis.
+/films/*
+!/films/.gitkeep
+
+# Local recovery snapshots; small archive/manifests remain tracked.
+/archive/cleanup-*/
+
+# Build outputs and local caches.
+/target/
+__pycache__/
+*.pyc
+.DS_Store

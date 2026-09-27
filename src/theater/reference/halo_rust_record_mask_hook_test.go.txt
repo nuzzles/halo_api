@@ -1,0 +1,68 @@
+package grammar
+import("reflect";"testing";"os";"encoding/json";"encoding/hex";"encoding/binary";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustRecordMaskHook(t *testing.T){
+ catalog,err:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if err!=nil{t.Fatal(err)}
+ names:=[]string{};for name:=range catalog.Maps{names=append(names,name)};sort.Strings(names);rows:=[]any{}
+ for c:=0;c<256;c++{
+  e:=catalog.Maps[names[c%len(names)]];lay:=e.Layout();worldRange:=e.Range();capture:=c%2==0;drop:=c%3!=0;gap:=0;if c%4<2{gap=15000};speed:=float64(0);if c%5<3{speed=1};dynamic:=c%7==0
+  opt:=ScanFilmOptions{RequireTag1:true,DropSaturated:drop,CaptureDirs:capture,DynPrecOrientation:dynamic,WorldRange:&worldRange}
+  ctx:=ContexteParDefaut();ctx.Obs=NouvelleObservation();quanta:=[]any{};masks:=[]any{};all:=[]BipedPosition{};data:=[]byte{}
+  for j:=0;j<24;j++{
+   w:=&translocWriter{};w.put(j%8,0);w.put(1,1);w.put(13,uint64(512+j%2));w.put(2,1);w.put(2,0);mask:=[][]int{{0,21},{0,1,2,21},{0,4,5,63},{0,2,3,21}}[(c+j)%4];w.put(3,uint64(len(mask)));for _,m:=range mask{w.put(6,uint64(m))};w.put(4,0);w.put(int(e.EffectiveRegionIndexBits()),uint64(e.Region))
+   for ax:=0;ax<3;ax++{q:=uint64(1<<e.AxisWidths[ax])/2+uint64(j%3);if j%5==0{q=0};if j%4==0&&j%5!=0{q/=2};w.put(int(e.AxisWidths[ax]),q)};for k:=0;k<64;k++{w.put(8,uint64((j+k+c)%256))}
+   pay:=w.pay;ts:=uint64(1000000+j*16000);if j==23{ts+=30000000};ctx.Obs.RecordMaskHook=func(idx []int,payload []byte,end int){masks=append(masks,map[string]any{"time":ts,"mask":idx,"end":end,"hex":hex.EncodeToString(payload)})}
+   got:=ScanBipedRecords(pay,NewSlotBand(map[uint32]bool{512:true,513:true}),lay,opt,ctx);for k:=range got{got[k].TimestampUS=ts;got[k].PacketIndex=j};all=append(all,got...)
+   qo:=opt;qo.WorldRange=nil;qo.QuantaOnly=true;qc:=ctx;qc.Obs=nil
+   qr:=ScanBipedRecords(pay,NewSlotBand(map[uint32]bool{512:true,513:true}),lay,qo,qc);if qr==nil{qr=[]BipedPosition{}}
+   quanta=append(quanta,map[string]any{"hex":hex.EncodeToString(pay),"records":qr})
+   h:=make([]byte,16);binary.LittleEndian.PutUint32(h[4:],uint32(len(pay)));binary.LittleEndian.PutUint64(h[8:],ts);data=append(data,h...);data=append(data,pay...)
+  }
+  numbers:=[]int{0,1,2};if c%3==1{numbers=[]int{0,2,1}};if c%3==2{numbers=[]int{0,1,3}}
+  meta:=[]types.ChunkMeta{};for _,n:=range numbers{meta=append(meta,types.ChunkMeta{Index:n,ChunkType:2})}
+  gameData:=append(make([]byte,17),data...);binary.LittleEndian.PutUint16(gameData,99);binary.LittleEndian.PutUint32(gameData[4:],1)
+  film,loadErr:=source.Load(source.MemoryChunks{[]byte{},gameData,gameData},meta);if loadErr!=nil{t.Fatal(loadErr)}
+  sourceCases:=[]any{};slots:=map[uint32]bool{512:true,513:true};if c%7==0{slots=map[uint32]bool{513:true}};if c%11==0{slots=map[uint32]bool{}}
+  for _,selection:=range [][]int{{},{1},{2,1,2},{99},{0}} {
+   so:=opt;so.WorldRange=nil;so.QuantaOnly=true;so.Layout=&lay;so.Chunks=selection;so.IsolationGapMS=gap;so.MaxSpeedMPS=speed
+   fc:=NewFilmContext(film);sourceMasks:=[]any{}
+   fc.Observation().RecordMaskHook=func(idx []int,payload []byte,end int){sourceMasks=append(sourceMasks,map[string]any{"mask":idx,"end":end,"hex":hex.EncodeToString(payload)})}
+   got,scanErr:=ScanBipedPositionsForBand(fc,NewSlotBand(slots),so)
+   category:="";if scanErr!=nil{switch {case scanErr==ErrNoFilmChunk:category="chunks";case scanErr==ErrNoReadableFilmChunk:category="readable";case scanErr.Error()=="bande de slots vide":category="band";default:t.Fatal(scanErr)}}
+   if got==nil{got=[]BipedPosition{}}
+   wo:=so;wo.WorldRange=&worldRange;wo.QuantaOnly=false
+   exemptions:=TeleportExemptions{}
+   if c%4!=0 {exemptions[512]=[]uint64{1016000,1128000};if c%4==2{exemptions[513]=[]uint64{1016000}};if c%4==3{exemptions[512]=[]uint64{1128000,1016000}}}
+   wo.TeleportExemptions=exemptions
+   worldMasks:=[]any{};wfc:=NewFilmContext(film)
+   wfc.Observation().RecordMaskHook=func(idx []int,payload []byte,end int){worldMasks=append(worldMasks,map[string]any{"mask":idx,"end":end,"hex":hex.EncodeToString(payload)})}
+   worldRecords,worldErr:=ScanBipedPositionsForBand(wfc,NewSlotBand(slots),wo)
+   if (worldErr==nil)!=(scanErr==nil){t.Fatal("world error differs",worldErr,scanErr)}
+   if worldRecords==nil{worldRecords=[]BipedPosition{}}
+   contexts:=[]any{}
+   for _,zero:=range []bool{false,true} {
+    pc:=NewFilmContext(film)
+    if zero {pc.PoserProfilDeBalayage(ProfilDeBalayage{})} else {p:=ProfilDeBalayageParDefaut();p.Mouvement.FullPrecision=true;p.Grammaire.SimStateComplet=true;pc.PoserProfilDeBalayage(p)}
+    calls:=map[string]int{};obs:=pc.Observation();v:=reflect.ValueOf(obs).Elem();hookCount:=0
+    for n:=0;n<v.NumField();n++ {f:=v.Field(n);if f.Kind()!=reflect.Func||!f.CanSet(){continue};name:=v.Type().Field(n).Name;typ:=f.Type();hookCount++;f.Set(reflect.MakeFunc(typ,func(args []reflect.Value)[]reflect.Value{calls[name]++;out:=[]reflect.Value{};for j:=0;j<typ.NumOut();j++{out=append(out,reflect.Zero(typ.Out(j)))};return out}))}
+    pmasks:=[]any{}
+    obs.RecordMaskHook=func(idx []int,payload []byte,end int){calls["RecordMaskHook"]++;pmasks=append(pmasks,map[string]any{"mask":idx,"end":end,"hex":hex.EncodeToString(payload)})}
+    pg,pe:=ScanBipedPositionsForBand(pc,NewSlotBand(slots),so);if pg==nil{pg=[]BipedPosition{}}
+    sameError:=(pe==nil)==(scanErr==nil);if pe!=nil&&scanErr!=nil{sameError=pe.Error()==scanErr.Error()}
+    if !sameError||!reflect.DeepEqual(pg,got)||!reflect.DeepEqual(pmasks,sourceMasks){t.Fatal("position context changed",c,selection,zero)}
+    for name,n:=range calls{if name!="RecordMaskHook"&&n!=0{t.Fatal("unexpected position hook",name,n)}}
+    contexts=append(contexts,map[string]any{"zero_profile":zero,"hook_count":hookCount,"calls":calls,"masks":pmasks,"same_records":true,"same_error":sameError})
+   }
+   sourceCases=append(sourceCases,map[string]any{"chunks":selection,"error":category,"records":got,"masks":sourceMasks,"contexts":contexts,"world_records":worldRecords,"world_masks":worldMasks,"exemptions":exemptions})
+  }
+  filtered:=DropTeleportsExcept(DropIsolated(all,gap),speed,nil);accepted:=[]uint64{};for _,p:=range filtered{accepted=append(accepted,p.TimestampUS)}
+  speedInput:=[]BipedPosition{};speedRaw:=[]any{}
+  edgeTimes:=[]uint64{0,1,199999,200000,200001,^uint64(0)-200001,^uint64(0)-200000,^uint64(0)-199999,^uint64(0)-1,^uint64(0)}
+  for k:=0;k<12;k++ {ts:=edgeTimes[(c+k)%len(edgeTimes)];p:=BipedPosition{Slot:uint32(512+k%2),TimestampUS:ts,X:float32(k*100),Y:1,Z:2,PacketIndex:k,HasWorld:true};speedInput=append(speedInput,p);speedRaw=append(speedRaw,map[string]any{"time":ts,"slot":p.Slot,"world":[3]float32{p.X,p.Y,p.Z}})}
+  ex:=TeleportExemptions{512:[]uint64{edgeTimes[c%len(edgeTimes)]},513:[]uint64{edgeTimes[(c+1)%len(edgeTimes)],edgeTimes[(c+3)%len(edgeTimes)]}}
+  if c%2==0{sort.Slice(ex[513],func(i,j int)bool{return ex[513][i]<ex[513][j]})}
+  acceptedSpeed:=[]int{};for _,p:=range DropTeleportsExcept(speedInput,float64(1+c%4),ex){acceptedSpeed=append(acceptedSpeed,p.PacketIndex)}
+  speedCase:=map[string]any{"input":speedRaw,"exemptions":ex,"speed":1+c%4,"accepted":acceptedSpeed}
+  rows=append(rows,map[string]any{"speed_case":speedCase,"source_hex":hex.EncodeToString(gameData),"source_cases":sourceCases,"source_numbers":numbers,"source_slots":slots,"quanta":quanta,"map":e,"hex":hex.EncodeToString(data),"capture":capture,"drop":drop,"gap":gap*1000,"speed":speed,"dynamic":dynamic,"masks":masks,"accepted":accepted,"accepted_records":filtered})
+ }
+ b,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-record-mask-hook.json",b,0600);err!=nil{t.Fatal(err)}
+}

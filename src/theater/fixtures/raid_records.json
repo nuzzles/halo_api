@@ -1,0 +1,244 @@
+{
+  "match_id": "9d644d09-38c3-429a-bf3d-de0ea577815f",
+  "note": "Captured raid spawn flags, alternate suffix, and generation tags 11/00, checked against nearby clocked position records. Logical generations 1..4 map wire tags 01/10/11/00; complete tag reuse remains unsupported.",
+  "cases": [
+    {
+      "spawn": {
+        "hex": "088058e1b1876bda004019d012043000208019417f5bd71cc10cbf0030f9b891c0f502815ed57c3a973830",
+        "serial": 1,
+        "player": 1,
+        "generation_tag": 1,
+        "header_flags": 0,
+        "shift": 0,
+        "expected": [
+          15680,
+          20523,
+          111967
+        ],
+        "end": 340,
+        "source": {
+          "chunk": 1,
+          "payload_byte": 655919,
+          "time_us": 9096453,
+          "bit": 1205
+        }
+      }
+    },
+    {
+      "spawn": {
+        "hex": "488298e1b1876bda028019d01204226b3012b0002011f6fd7f5bd71cc10cbf0030f9b891c10031ba3ed9f43a973810",
+        "serial": 10,
+        "player": 10,
+        "generation_tag": 1,
+        "header_flags": 1,
+        "shift": 32,
+        "expected": [
+          16396,
+          14151,
+          112253
+        ],
+        "end": 372,
+        "source": {
+          "chunk": 1,
+          "payload_byte": 659170,
+          "time_us": 9231305,
+          "bit": 1865
+        }
+      }
+    },
+    {
+      "spawn": {
+        "hex": "089118e1b1876bda000019d01204300020911a7d7f5bd71cc10cbf0030f9b891c123ce59aed5dc3a973830",
+        "serial": 68,
+        "player": 0,
+        "generation_tag": 1,
+        "header_flags": 0,
+        "shift": 0,
+        "expected": [
+          18675,
+          19253,
+          111991
+        ],
+        "end": 340,
+        "source": {
+          "chunk": 30,
+          "payload_byte": 781127,
+          "time_us": 592385478,
+          "bit": 87
+        }
+      },
+      "motion": {
+        "hex": "a07b42021c4068c0559045136c37b76a2291171434408895675510214344149000556410e15a736e0ac055689f120e74aa1a22d480022b208aacdb036fb613f4e4ef300054850d11824001559045156c3bb76b01130a84c6823228688c52000aac81f6db774db3b802c3635fec8fad4344669400455590451b6dc3b7db0b4118789b003d03388f254344749400455590430372b9b51202ec1e7593803142f1effd434476900055640fa09bd9ed9dc3496f1d7eaa7dca1a23c48002ab20780cdf4b6c7602d898ebfee44550d11ea40016760467871d1b64c08bd7c19d0d1e541be4139bec9c14acb8d42233f38fcdb13404bfcaf4c03bfa329bf2bc5329a30b69342bca8067fc8001321dcd888f92000aac823973ae0dab0867a163e7894fc943447e900055641195a25aed620312cd9dfc2d7eaa1a24048002ab208df2f0536a241876e8ebdb1c2c50d121240015590474d7a21b57f0c253484ea1a0ca86890d2000aac8223348d1dab9000c0b48b9f8f6143448890005968123ce59aed5d03a9738854353399b492230020c43d16a5fb67a06d439a86fe3c0292644106395d72c3a876014982400108311351bafedf8c0a8d40892839cfc7f1b6104035f7c101df6b040f7e14106df80041f7e38108dfb421213bea80856d409090bdfa504337e8c10dde7d043b7e5810fdf9f04437eb4111ddc021227bf3600",
+        "offset": 2965,
+        "end": 3105,
+        "serial": 68,
+        "tick": 67,
+        "expected": [
+          18675,
+          19253,
+          111988
+        ],
+        "source": {
+          "chunk": 30,
+          "payload_byte": 782527,
+          "time_us": 592448402
+        }
+      }
+    },
+    {
+      "spawn": {
+        "hex": "088038e1b1876bda010019d01204226b3012b00020811a817f5bd71cc10cbf0030f9b891c0dff26bf6d5403a973810",
+        "serial": 512,
+        "player": 4,
+        "generation_tag": 3,
+        "header_flags": 0,
+        "shift": 32,
+        "expected": [
+          14332,
+          19838,
+          111952
+        ],
+        "end": 372,
+        "source": {
+          "chunk": 112,
+          "payload_byte": 742440,
+          "time_us": 2233233331,
+          "bit": 174
+        }
+      },
+      "motion": {
+        "hex": "a07b42039c401900059680dff26bf6d5343a9738937353c19b138430016410ab5a4d6e070066de205734589140045559044d76f59b83a03c8cc6500002fc64bee757345cd09566696f157345d110005564110a9a946e0f4290878655e5568b9a2ef8800aab208760dfa76cee1d000dc27dcd997345e50c555940007887029f22e68bd228008aab207c76e1d36cee0a18f49c36007c04c99e02e68bd61800b208318fed76d36191bfca3b9a2f68a0022aac821a0351ddb3b849a75470e800ae18656feb9a2f8862aaca0003c43bb90e17345f304530005e045f514004555903d069607b545012040758b000033df4f7d7345f710005564120224856d6002bafb9d1ad67eeb9a2fc86002c8239c46b5dac90607c439ee68bf62000aac821024e72daa28426773c3688fed7345fd080640e2de614ed514b9a2ff86002c82107cf01daa285c4263a6e68ce12800841b20761ceb436a3617ed2d9726df7ae5cff28e100d7581adcd3bf21681a15150200048e8911041b0d0f4ec4037ed8101dfaf040b7e00103df9d04135f7c105df512820fbf320846c700213bec60856bef8217bf50086efb99490edf94043f5f7c70145bd28342853a886fc510911d7df044b7e7c113df6700",
+        "offset": 37,
+        "end": 177,
+        "serial": 512,
+        "tick": 115,
+        "expected": [
+          14332,
+          19838,
+          111949
+        ],
+        "source": {
+          "chunk": 112,
+          "payload_byte": 743768,
+          "time_us": 2233297438
+        }
+      }
+    },
+    {
+      "spawn": {
+        "hex": "088008e1b1876bda008019d01204300020111a7d7f5bd71cc10cbf0030f9b891c123ce59aed5dc3a973830",
+        "serial": 768,
+        "player": 2,
+        "generation_tag": 0,
+        "header_flags": 0,
+        "shift": 0,
+        "expected": [
+          18675,
+          19253,
+          111991
+        ],
+        "end": 340,
+        "source": {
+          "chunk": 161,
+          "payload_byte": 866819,
+          "time_us": 3221666094,
+          "bit": 87
+        }
+      },
+      "motion": {
+        "hex": "a07b4207244000c0059048ed966bb570096b50577911384500115564114f9bb6edf6c2bb9a1b8500000ccb73b8791170e3001641094da45ee0cc0798192fe445cb90005564110e1b49edf6c2f7e5159760686f222e7c4ab39b37c8f222f3c8002ab2076c0e94b6a2418243903ed7c0079117a6400155903ac9952db545042b625f41f2013c88bd72000aac81fd138f9da89008b883afc4b015e445ed900055641189dc626dac421c9d1b7a4480ef222f8c80022b208726f1c76b18161920c2300079879117ce30016411ad1ed1ed4d430bf21d9e445f9900055640e75a14bed67c30c661ef0987a2f222fdc403208e01112b6a5e79117f640015590464c8d75b5430d235c63d629fd3c88d452800841b209355395b6afc038bc064264fff30f8937ec01a43490f911aa25001083640e4b6219ed52c2f2ae1f84d14f1eed6e993807712626f229c78800210624a5ceb6dab00c80603a0c3dae1b3eefac53931000420c49129e45b55f07c024221e751cc4a15284a72e18008424ba4f35dab2023f6a41844acf4d3991000420c409c7b05b51c1ae6682a3516f2a0266279a736182107250433fd39f1000420c40997ba3b5170702d424788dce346b4588a7462000841881a2f5e76a3001bb9088e0ef3b64de8f63d5c230420e3f41c0894bdc1e201b3fc080ebc00205bf00081eb7f0209afbe082efb794106df9f041f4058108dfb421213bf640866bef9090ddf97043b7d6c10fd03e22221bf52088e80d8225bf12000",
+        "offset": 37,
+        "end": 171,
+        "serial": 768,
+        "tick": 228,
+        "expected": [
+          18669,
+          19253,
+          111984
+        ],
+        "source": {
+          "chunk": 161,
+          "payload_byte": 869014,
+          "time_us": 3221762756
+        }
+      }
+    },
+    {
+      "spawn": {
+        "hex": "488088e1b1876bda04c019d01204300020811a817f5bd71cc10cbf0030f9b891c0dff26bf6d5403a973810",
+        "serial": 770,
+        "player": 19,
+        "generation_tag": 0,
+        "header_flags": 1,
+        "shift": 0,
+        "expected": [
+          14332,
+          19838,
+          111952
+        ],
+        "end": 340,
+        "source": {
+          "chunk": 162,
+          "payload_byte": 661221,
+          "time_us": 3228976760,
+          "bit": 2002
+        }
+      },
+      "motion": {
+        "hex": "a07b4204d440210004f64103128186d5703107090402fc004dffffffc0c19a44040c0059037fc9afdb54c0ea5ce1d66913844001559045956f7bb7db09a7c24d5645e13348b872000aac822193631dbed82471320ada2d159a45c58c555920007585915dab348b972000aac821fcb4e1dbee04800b3b6f30f6d9a45cf90005564104e9a4d6d6542f2270c3f76800cd22edc6002c81f70b6bedb3b8147e033b348bcf1800b207996e1336db60280d0ddcd22f4c6002c81d5b49d5dab6816ee92b3348bd72002aac82074350cdacb86001210eec3e966917b62019045676db1b7db3348be32000aac8201f3801daa2060c243bb92f0299a45f39000556411a5dc866d888166b8939a4186ecd22fbc8002ab20776ee43f6a660d57ecf8df943a66917e6400155903b3579c3b5120cb77c757826033348bf71800b208de6fa876a961836c0e9cd22fec6002c82300c1c0daa10607fb3af348d452800841b20906d2ad76ac2109e2494265f0d1fba140b003bcf2176691aa25001083640ed79c966d45441a973ffb9a53b51000420c4700968fb549063cd00c4cc195a438d666eae110418fd0702440373f8101df96040f7eb4104d7d404177dd0a0836bff020fbf400846fcf8213be004242b7e6810cdf4904377e9810ed7df043f7e7c110df9d21223bf3e0896fcc0227afbe000",
+        "offset": 249,
+        "end": 383,
+        "serial": 770,
+        "tick": 154,
+        "expected": [
+          14332,
+          19838,
+          111948
+        ],
+        "source": {
+          "chunk": 162,
+          "payload_byte": 663518,
+          "time_us": 3229069215
+        }
+      }
+    }
+  ],
+  "unsupported": {
+    "hex": "0883d8e1b1876bda03c019d01204300020961d217f5bd71cc10cbf0030f9b891c11eda86ded578345d881127b60000000000",
+    "source": {
+      "chunk": 1,
+      "payload_byte": 661629,
+      "time_us": 9334889,
+      "bit": 1750
+    },
+    "reason": "Initial roster-15 spawn has an unvalidated coordinate suffix."
+  },
+  "firing": [
+    {
+      "hex": "d2605c1f4016acdc44d42c9679f76fda0d1f64400308a40bf810db632a4c1786b982d59b889a8592cf3eaab1208001ebb0400004478f0e1a76e3b01b12c17be783f35060acc93de8084480007f3d4006307a2490204642a793f509aef1452a291d703da1036e205c8002cbc0818901fb6be4198f78dced81d881f1800b208680dbef6cee0260a8e3eda20bca002ab2f01e39386adb6d84ce232ba026f8ddb0371066400155903c2b71e3b51201450075ffa206bb688372000aac81d9bb863db01063f3e2efc13065db441d8c005903a3184fbb57a0c28d86f76d107e5001155640ef69ea1ed59c33a3e9585e009e0e8fc2976d108e40011590482f8f39b58e090dd66c00003247b6884b2000aac81cddc322daad85e79d3bf75af5ddb44278956795cfdddb44e110005564116adbe96df6c0541f13d63979aeda2c48a0022aac81fb2b880db3c04b97719c800256162779aeda2e688002ab208a82de9f6fb606f50cd39c8bbb76d1744400155903e3c703fb6770c22303c5dae09bb68bbe2000aac8222bb5c9dbee05cc443a74f2f41db45fb1000556411131b57ee0480defe1e539d764eda2ff8a002ab3b021a53877db9a833fb620aa08ea5db473fe10904e5fb6307aa8649088690e1db6e6301cff6bad00f044c6cfef100c8584d5c0d8472e019ff2000630f10423394a002106c81cb4c23cdaac062ef55b49ad6f28e0a9ff3f068c3c15db467690108365069f0946f6d36321681a1515020007deae1084408bfbbd85210fd862400108311d0a4e1ed58c6686f0e532851f44429af7b0e480021062380c9d3dab68d19a21c233e4ec0a114640806fd38203bf41fa8205bf7c081efd614104df5f04175600a0836fcf8211ab7c424277e7ca0856fdb8217b5000866813021bb3c85043f7e7c110d7df04477ea4112dfa8044f7d6c0",
+      "offset": 0,
+      "serial": 517,
+      "player": 0,
+      "source": {
+        "chunk": 116,
+        "payload_byte": 732104,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "time_us": 2311911843
+    },
+    {
+      "hex": "d261d03b0032b1824d542c9679f361721d47783800188ead65ec6d61d03da10362208062aac80002206d00e95d844120c0059042c26947b7dc094be26f76110684001559042cd6959b83c08e49c6ee0b5f03b0883c2000aac8213d371fdb3b84adfb3aafa7031d844221000456411955c8d6d60c25c999d06001100ec221304032080d6e0936a2676110a04001559047ef7ea3b5d002c61833ec6e1a3b088542000aac8231940b5daa605febc3a7805059d8442c100055641181e0c16d5382f910995c1c810ec221708002ab2074992d036af21bfa24edca5be876110c030016411aea1096d53039769a4dd844320c005903f9c89b1b5450c64cc8476110d04001559038ad948db5850c3cfe774592033b0886c1800b20882726436ac818b790eaec221c06002c823eb4890dab08613b038fb088742800aacc2075712f436a8a18e9c0c2d18c2c76023c5e78c0059044816a4fb7dc089afe5c76117b62559ec834e7611a8a112bf46ac9400420d9040a671e7b5191069821cef61208c30010842006943b7e4129289cf24e15209ad10b40d0a8a810003d55a91000420c4131692bb7fc1d0454903376bbf358a553ab56100088218d2236fe83a2a9945d5c220831fa0e048806d9f0203bebe0816fcf8207bf420826fb4020dbf3e083e90090909dfa5042b61f810cd7df04377eb410ed2fd043f7e7c110df9b04477e6c112dfa9044f7e800",
+      "offset": 0,
+      "serial": 797,
+      "player": 0,
+      "source": {
+        "chunk": 167,
+        "payload_byte": 714071,
+        "bit": 0,
+        "end_bit": 108
+      },
+      "time_us": 3332607971
+    }
+  ]
+}

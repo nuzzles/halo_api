@@ -1,0 +1,45 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "native": {
+    "generator": "halo_rust_facts_inventory_document_test.go.txt",
+    "entry": "assemblage.poserLibellesEtInventaire",
+    "cases": 1024,
+    "inventory_reads": 12976,
+    "grenade_reads": 11322,
+    "neutral_deaths": 766,
+    "death_corroborated_empty_reads": 411,
+    "ordered_runtime_logs": 3416,
+    "absent_inventory_inputs": 94,
+    "present_empty_inventory_inputs": 110,
+    "missing_coverage_envelopes": 79
+  },
+  "fixture": {
+    "path": "facts-inventory-document-v41.json.zlib",
+    "sha256": "dc085e2c60d34182d5557a6bc36c5f9d3f4199d87a844fdc04b50530cd12d13c"
+  },
+  "host": {
+    "passed": 3,
+    "failed": 0,
+    "seconds": 1.59,
+    "log": "/private/tmp/halo-facts-inventory-document-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "scope": "One selected whole-stage oracle including runtime logs; not full suite",
+    "log": "/private/tmp/halo-facts-inventory-document-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-facts-inventory-document-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Synthetic native whole-stage comparison, not full BuildFromFacts or independently annotated golden-film evidence",
+    "Caller supplies the assembly interval after nonzero defaulting",
+    "UTF-8 catalog and neutral-death APIs retain broader raw-string fidelity audit",
+    "Explicit track point arrays do not close native null-points DTO gap",
+    "Abilities/actions, closing publication, remaining live-objective logs, full composer and capture/metadata/fallback entry semantics remain pending"
+  ]
+}

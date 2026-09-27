@@ -1,0 +1,25 @@
+package replay
+import("crypto/sha256";"encoding/hex";"encoding/json";"fmt";"os";"path/filepath";"reflect";"strings";"testing";"time")
+func haloRustBackgroundFields(v reflect.Value) any {
+ if v.Kind()==reflect.Pointer{if v.IsNil(){return nil};return haloRustBackgroundFields(v.Elem())}
+ if v.Type()==reflect.TypeOf(time.Time{}){t:=v.Interface().(time.Time);_,offset:=t.Zone();return map[string]any{"unix_seconds":t.Unix(),"nanosecond":t.Nanosecond(),"offset_seconds":offset}}
+ switch v.Kind(){case reflect.Struct:out:=map[string]any{};for i:=0;i<v.NumField();i++{f:=v.Type().Field(i);name:=strings.Split(f.Tag.Get("json"),",")[0];out[name]=haloRustBackgroundFields(v.Field(i))};return out
+ case reflect.Slice:if v.IsNil(){return nil};out:=[]any{};for i:=0;i<v.Len();i++{out=append(out,haloRustBackgroundFields(v.Index(i)))};return out
+ case reflect.String:return v.String();case reflect.Int:return v.Int();case reflect.Float64:return v.Float();case reflect.Bool:return v.Bool()};panic(v.Kind())
+}
+func TestHaloRustMapBackground(t *testing.T){
+ inputs:=[]string{`{"schemaVersion":1}`,`null`,`{}`,`[]`,`{"schemaVersion":2}`,`{"SCHEMAVERSION":1,"SOURCE":"case"}`,`{"schemaVersion":1,"unknown":1e9999}`,`{"schemaVersion":1,"mapNames":["a","b"],"mapNames":[null],"mapNames":[null,null]}`,`{"schemaVersion":1,"stats":{"anchorMedianGapM":0,"anchorMedianGapM":null}}`,`{"schemaVersion":1,"calibration":{"originX":2},"calibration":{"originX":null,"widthPx":3}}`}
+ dates:=[]string{"0001-01-01T00:00:00Z","0000-01-01T00:00:00Z","9999-12-31T23:59:59.999999999Z","2026-09-25T12:34:56Z","2026-09-25T1:34:56Z","2026-09-25T12:34:56,123Z","2026-09-25T12:34:56.123456789123456789Z","2026-09-25T12:34:56+24:00","2026-09-25T12:34:56+23:60","2026-09-25T12:34:56-24:60","2026-09-25T12:34:56+00:60","2026-09-25T12:34:56-00:00","2026-09-25T12:34:56+05:45","2026-09-25T12:34:60Z","2026-09-25T24:00:00Z","2026-02-29T00:00:00Z","2024-02-29T00:00:00Z","2026-09-25t12:34:56z","2026-09-25 12:34:56Z","2026-09-25T12:34:56.Z","2026-09-25T12:34:56+25:00","2026-09-25T12:34:56+00:61","2026-09-25T12:34:56+5:30","2026-9-25T12:34:56Z","","now"}
+ baseline:="2026-09-25T12:34:56.123+05:45"
+ alphabet:="0123456789TtZz+-:,._ /"
+ for i:=0;i<len(baseline);i++{dates=append(dates,baseline[:i]+baseline[i+1:]);for _,c:=range alphabet{dates=append(dates,baseline[:i]+string(c)+baseline[i+1:])}}
+ for _,d:=range dates{raw,_:=json.Marshal(d);inputs=append(inputs,`{"schemaVersion":1,"generatedAt":`+string(raw)+`}`)}
+ inputs=append(inputs,`{"schemaVersion":1,"generatedAt":"\u0032026-09-25T12:34:56Z"}`,`{"schemaVersion":1,"generatedAt":null}`,`{"schemaVersion":1,"generatedAt":"2026-09-25T12:34:56Z","generatedAt":null}`)
+ values:=[]string{`-0`,`-0.0`,`-0e0`,`1.7976931348623157e308`,`null`,`0`,`-1`,`1`,`1.0`,`1e0`,`9223372036854775807`,`9223372036854775808`,`1e400`,`1e-400`,`true`,`"text"`,`[]`,`{}`}
+ for _,v:=range values{for _,field:=range []string{"schemaVersion","generatedAt","module","mapNames","calibration","stats","degradations"}{inputs=append(inputs,`{"schemaVersion":1,"`+field+`":`+v+`}`)};for _,field:=range []string{"anchors","anchorMedianGapM","playLevelZ","covered","forgeObjects"}{inputs=append(inputs,`{"schemaVersion":1,"stats":{"`+field+`":`+v+`}}`)}}
+ cwd,e:=os.Getwd();if e!=nil{t.Fatal(e)};root:="";for d:=cwd;;d=filepath.Dir(d){p:=filepath.Join(d,"data/titles/halo_infinite/reference/map_backgrounds");if st,err:=os.Stat(p);err==nil&&st.IsDir(){root=p;break};if filepath.Dir(d)==d{t.Fatal("background catalog not found")}}
+ names:=map[int]string{};hashes:=map[int]string{};files,e:=os.ReadDir(root);if e!=nil{t.Fatal(e)};for _,f:=range files{if f.IsDir()||!strings.HasSuffix(f.Name(),".json"){continue};raw,e:=os.ReadFile(filepath.Join(root,f.Name()));if e!=nil{t.Fatal(e)};sum:=sha256.Sum256(raw);names[len(inputs)]=f.Name();hashes[len(inputs)]=hex.EncodeToString(sum[:]);inputs=append(inputs,string(raw))}
+ rows:=[]any{};path:=filepath.Join(t.TempDir(),"background.json")
+ for i,input:=range inputs{if e=os.WriteFile(path,[]byte(input),0600);e!=nil{t.Fatal(e)};b,err:=LoadMapBackground(path);row:=map[string]any{"input_hex":hex.EncodeToString([]byte(input)),"error":nil,"retained":nil,"published":nil,"marshal_error":false};if err!=nil{kind:="json";if strings.Contains(err.Error(),"fond de carte en version "){kind="schema"};row["error"]=kind}else{row["retained"]=haloRustBackgroundFields(reflect.ValueOf(b));raw,e:=json.Marshal(b);row["marshal_error"]=e!=nil;if e==nil{row["published"]=json.RawMessage(raw)}};if n,ok:=names[i];ok{row["asset"]=n;row["sha256"]=hashes[i]};rows=append(rows,row)}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-map-background.json",raw,0600);e!=nil{t.Fatal(e)};fmt.Printf("background cases=%d assets=%d\n",len(rows),len(names))
+}

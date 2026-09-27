@@ -1,0 +1,148 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustBipedRemainingContext(t *testing.T) {
+	rng := rand.New(rand.NewSource(414243))
+	rows := []any{}
+	names := make([]string, 64)
+	names[6] = "simulation-state"
+	names[43] = "weapon-state-type-info"
+	names[48] = "biped-desired-ability-set-component"
+	for c := 0; c < 512; c++ {
+		p := ProfilDeBalayageParDefaut()
+		p.Grammaire.SimStateComplet = c%2 != 0
+		e := profile.MapQuantEntry{Min: [3]float32{-1, -1, -1}, Max: [3]float32{1, 1, 1}, AxisWidths: [3]uint{6, 7, 8}, Region: uint32(c % 2), RegionIndexBits: 2}
+		p.PoserLargeursObjetDuMondeDepuisDecoupage(e.Layout())
+		p.Grammaire.SimStateComplet = c%2 != 0 // Map installation enables it; test the override afterward.
+		arch := Archetype{Index: 35, Components: names, Levels: make([]uint32, 64)}
+		at := 2 + c%8
+		data := make([]byte, 256)
+		if c%3 != 0 {
+			rng.Read(data)
+		}
+		data[at/8] &= ^(byte(1) << uint(7-at%8))
+		if c%11 == 0 {
+			data = data[:1+c%12]
+		}
+		obs := NouvelleObservation()
+		high, low := uint32(0), uint32(0)
+		got := false
+		obs.HeldWeaponHook = func(h, l uint32) { high, low, got = h, l, true }
+		visited := false
+		walkComponentsAt(data, at, len(data)*8, []int{6, 43}, grammaireRecord{arch: arch, prof: p, obs: obs}, func(id int) bool {
+			if id == 43 {
+				visited = true
+			}
+			return true
+		})
+		weapons := []types.HeldWeaponChange{}
+		if visited && got {
+			ch := types.HeldWeaponChange{TimestampUS: 1000, Chunk: 1, Slot: 512, SlotIndex: 43, Family: high, Low: low, Previous: noVariant}
+			ch.Kind = classifyHeldWeaponChange(ch, false, nil)
+			weapons = append(weapons, ch)
+		}
+		weaponAttempts := []any{}
+		pos := at
+		for _, id := range []int{6, 43} {
+			o := NouvelleObservation()
+			hooks := haloRustComponentHooks(o)
+			br := LecteurSur(data)
+			br.PoserContexte(ContexteDeLecture{Profil: p, Obs: o})
+			br.SetBitPos(pos)
+			_, _, ported := consumeByName(br, names[id], 35, 0)
+			weaponAttempts = append(weaponAttempts, map[string]any{"id": id, "end": br.BitPos(), "status": ported, "in_bounds": br.BitPos() <= len(data)*8, "observations": *hooks})
+			if !ported || br.BitPos() > len(data)*8 {
+				break
+			}
+			pos = br.BitPos()
+		}
+		w := &translocWriter{}
+		off := c % 8
+		w.put(off, 0)
+		w.put(1, 1)
+		w.put(13, 512)
+		w.put(2, 1)
+		w.put(1, 0)
+		dense := (c/2)%2 == 0
+		if dense {
+			w.put(1, 1)
+			w.put(64, uint64(1)|uint64(1)<<6|uint64(1)<<48)
+			w.put(4, 0)
+			region := e.Region
+			if c%13 == 0 {
+				region ^= 1
+			}
+			w.put(2, uint64(region))
+			for _, width := range e.AxisWidths {
+				w.put(int(width), 7)
+			}
+			w.put(2, 0)
+		} else {
+			w.put(1, 0)
+			w.put(3, 2)
+			w.put(6, 6)
+			w.put(6, 48)
+		}
+		componentAt := w.at
+		w.put(1, 0)
+		w.put(3, 2)
+		if c%3 == 0 {
+			w.put(1, 1)
+		} else {
+			w.put(1, 0)
+			w.put(6, uint64(c%64))
+		}
+		if c%17 == 0 {
+			w.pay = w.pay[:len(w.pay)-1]
+		}
+		last, recoveryObs := equipRecoveryHook()
+		recoveryHook := recoveryObs.AbilitySetHook
+		recoveryHooks := haloRustComponentHooks(recoveryObs)
+		diagnosticHook := recoveryObs.AbilitySetHook
+		recoveryObs.AbilitySetHook = func(counter uint64, rank, width int) {
+			recoveryHook(counter, rank, width)
+			diagnosticHook(counter, rank, width)
+		}
+		setup := abilityScanSetup{gram: grammaireRecord{lay: e.Layout(), arch: arch, prof: p, obs: recoveryObs}}
+		counter, rank, ok := walkEquipRecoveryAt(setup, w.pay, off, len(w.pay)*8, last)
+		recoveryAttempts := []any{}
+		headerEnd := componentAt
+		if dense {
+			headerEnd -= 2
+		}
+		if headerEnd <= len(w.pay)*8 && (!dense || c%13 != 0) {
+			pos := componentAt
+			for _, id := range []int{6, 48} {
+				o := NouvelleObservation()
+				hooks := haloRustComponentHooks(o)
+				br := LecteurSur(w.pay)
+				br.PoserContexte(ContexteDeLecture{Profil: p, Obs: o})
+				br.SetBitPos(pos)
+				_, _, accepted := consumeByName(br, names[id], 35, arch.Level(id))
+				recoveryAttempts = append(recoveryAttempts, map[string]any{"id": id, "start": pos, "end": br.BitPos(), "status": accepted, "in_bounds": br.BitPos() <= len(w.pay)*8, "observations": *hooks})
+				if !accepted || br.BitPos() > len(w.pay)*8 {
+					break
+				}
+				pos = br.BitPos()
+			}
+		}
+		encoding := map[string]any{"index_bits": p.Mouvement.WorldObject.IndexW, "world_axis_bits": p.Mouvement.WorldObject.AxisW, "handle_bits": p.Mouvement.Traversal.IndexW, "traversal_axis_bits": p.Mouvement.Traversal.AxisW, "default_axis_bits": profile.LargeursAxeParDefautDuBuild(16), "region_axis_bits": map[string]any{"0": p.Mouvement.WorldObject.AxisW, "1": p.Mouvement.WorldObject.AxisW}, "delta_axis_bits": [3]uint{p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth}, "full_precision": p.Mouvement.FullPrecision, "writer_absolute": false, "delta_handle_tail": false}
+		rows = append(rows, map[string]any{"names": names, "encoding": encoding, "simulation": p.Grammaire.SimStateComplet, "map": e, "hex": hex.EncodeToString(data), "start": at, "weapons": weapons, "weapon_attempts": weaponAttempts, "recovery": map[string]any{"hex": hex.EncodeToString(w.pay), "start": off, "dense": dense, "counter": counter, "rank": rank, "ok": ok, "observations": *recoveryHooks, "attempts": recoveryAttempts}})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-biped-remaining-context.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

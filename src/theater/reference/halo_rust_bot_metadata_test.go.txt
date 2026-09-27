@@ -1,0 +1,17 @@
+package killsource
+import("testing";"os";"encoding/json";"encoding/hex";"encoding/binary";"fmt";"strings")
+func rustBotRows(bots []bot)[]any{out:=[]any{};for _,b:=range bots{out=append(out,map[string]any{"slot":b.Slot,"bot_id":b.BotID,"name":b.Name,"bit_position":b.bitPos})};return out}
+func TestHaloRustBotMetadata(t *testing.T){
+ rows:=[]any{};put:=func(d []byte,p,n int,v uint64){for b:=0;b<n;b++{at:=p+b;if at<0||at>=len(d)*8{continue};mask:=byte(1<<uint(7-at%8));d[at/8]&=^mask;if v>>uint(n-b-1)&1!=0{d[at/8]|=mask}}}
+ for run:=0;run<512;run++{
+  f:=&film{};input:=[]any{}
+  for p:=0;p<1+run%5;p++{d:=make([]byte,256+(run%5)*256);count:=[]uint32{0,1,2,64,65,0xffffffff}[run%6];binary.BigEndian.PutUint32(d,count)
+   for i:=0;i<1+run%5;i++{at:=1024+i*2048+run%8;name:=fmt.Sprintf("343 Bot%d",(i+p)%5);if run%7==0{name=strings.Repeat("X",[]int{3,4,47,48,49}[run%5])};slot:=uint64((run+i)%66);id:=uint64((run+p*17+i)%4100);if run%3==0{slot=2};if run%13==0{id=4096};put(d,at-0x74*8,32,slot);put(d,at-0x70*8,32,id);for j,c:=range name{put(d,at+j*16,16,uint64(c))};put(d,at+len(name)*16,16,0)
+    if run%4==0{copyAt:=at+1000;for j,c:=range name{put(d,copyAt+j*16,16,uint64(c))};put(d,copyAt+len(name)*16,16,0)}
+   }
+   if run%11==0{d=d[:len(d)-100]};if run%17==0{d=d[:run%4]};kind:=12;if p==0&&run%19==0{kind=2};f.packets=append(f.packets,packet{typ:kind,payload:d});input=append(input,map[string]any{"kind":kind,"hex":hex.EncodeToString(d),"entries":rustBotRows(scanBotEntries(d))})
+  }
+  result:=loadBotMeta(f);rows=append(rows,map[string]any{"packets":input,"output":map[string]any{"max_declared_bots":result.NBots,"packets":result.NPkt,"bots":rustBotRows(result.Bots)}})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-bot-metadata.json",raw,0600);e!=nil{t.Fatal(e)}
+}

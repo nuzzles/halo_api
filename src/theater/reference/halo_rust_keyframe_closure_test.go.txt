@@ -1,0 +1,154 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustKeyframeClosure(t *testing.T) {
+	rng := rand.New(rand.NewSource(413003))
+	rows := []any{}
+	for run := 0; run < 256; run++ {
+		format := []uint32{20, 21, 24, 25, 27, 28, 0}[run%7]
+		p := ProfilDeBalayageParDefaut()
+		p.MPP = profile.MPPWidths{Lead: 6 + run%7, Index: 2 + run%6}
+		p.Grammaire.SimStateComplet = run%2 == 0
+		p.Grammaire.ControleDeCorruption = run%3 == 0
+		effective := p
+		if format == 27 {
+			effective.MPP = profile.MPPWidths{Lead: 9, Index: 5}
+		}
+		reg := &Registry{Archetypes: make([]Archetype, 50)}
+		for i := range reg.Archetypes {
+			reg.Archetypes[i].Index = i
+		}
+		reg.Archetypes[5].Components = []string{"simulation-state-component", "closure-unknown"}
+		reg.Archetypes[12].Components = []string{"managed-navpoint-radial-progress"}
+		reg.Archetypes[37].Components = []string{"object-dissolver-component"}
+		reg.Archetypes[49].Components = []string{"closure-unknown"}
+		arches := []any{}
+		for i := range reg.Archetypes {
+			reg.Archetypes[i].Levels = make([]uint32, len(reg.Archetypes[i].Components))
+			names := reg.Archetypes[i].Components
+			if names == nil {
+				names = []string{}
+			}
+			arches = append(arches, map[string]any{"index": i, "components": names, "levels": reg.Archetypes[i].Levels})
+		}
+		raw := make([]byte, 8)
+		binary.LittleEndian.PutUint32(raw, 41)
+		binary.LittleEndian.PutUint32(raw[4:], format)
+		chunks := source.MemoryChunks{raw}
+		meta := []types.ChunkMeta{{Index: 0, ChunkType: 1}}
+		inputs := []string{}
+		for c := 0; c < 3; c++ {
+			pay := make([]byte, 32768)
+			rng.Read(pay)
+			put := func(at, n int, v uint64) {
+				for j := 0; j < n; j++ {
+					m := byte(1 << uint(7-(at+j)%8))
+					pay[(at+j)/8] &= ^m
+					if v&(uint64(1)<<uint(n-1-j)) != 0 {
+						pay[(at+j)/8] |= m
+					}
+				}
+			}
+			pos := 1
+			for j := 0; j < 24; j++ {
+				ti := []uint32{5, 12, 37, 49}[j%4]
+				put(pos, 32, 0x40000000|uint64(100+j))
+				put(pos+32, 32, uint64(ti))
+				put(pos+64, 32, 0)
+				put(pos+96, 12, 0)
+				n1 := uint64(0)
+				if ti == 37 && j%3 == 0 {
+					n1 = 1
+				}
+				put(pos+108, 32, n1)
+				ctx := ContexteParDefaut()
+				ctx.Profil = effective
+				br := LecteurSur(pay)
+				br.PoserContexte(ctx)
+				br.SetBitPos(pos + 140)
+				if n1 != 0 {
+					consumeDefaultStateTI37(br)
+					if effective.Grammaire.ControleDeCorruption {
+						br.ReadBits(32)
+					}
+				}
+				n2 := uint64(1)
+				if (run+j)%5 == 0 {
+					n2 = 0
+				}
+				put(br.BitPos(), 32, n2)
+				if ti == 5 {
+					put(br.BitPos()+32, 1, uint64((j+run)/4%2))
+				}
+				tr := WalkKeyframeFullState(pay, pos, reg, ctx)
+				next := tr.EndBit
+				if tr.DesyncAt >= 0 {
+					next += 32
+				}
+				if (run+j)%3 == 0 {
+					next += 7
+				}
+				pos = next
+			}
+			pay = pay[:(pos+7)/8]
+			if run%13 == 0 {
+				pay = pay[:len(pay)-7]
+			}
+			h := make([]byte, 16)
+			kind := uint16(2)
+			if c == 1 && run%11 == 0 {
+				kind = 0
+			}
+			binary.LittleEndian.PutUint16(h, kind)
+			binary.LittleEndian.PutUint32(h[4:], uint32(len(pay)))
+			binary.LittleEndian.PutUint64(h[8:], uint64(c*1000))
+			chunk := append(h, pay...)
+			chunks = append(chunks, chunk)
+			meta = append(meta, types.ChunkMeta{Index: c + 1})
+			inputs = append(inputs, hex.EncodeToString(chunk))
+		}
+		if run%17 == 0 {
+			reg.Archetypes = reg.Archetypes[:13]
+			arches = arches[:13]
+		}
+		film, e := source.Load(chunks, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+		fc := NewFilmContext(film)
+		fc.bal = p
+		fc.reg = reg
+		fc.regLu = true
+		fc.corr = p.Grammaire.ControleDeCorruption
+		fc.corrLu = true
+		before := fc.ProfilDeBalayage()
+		stats, e := KeyframeClosure(fc)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if fc.ProfilDeBalayage().MPP != before.MPP {
+			t.Fatal("MPP restore")
+		}
+		encoding := map[string]any{"index_bits": p.Mouvement.WorldObject.IndexW, "world_axis_bits": p.Mouvement.WorldObject.AxisW, "handle_bits": p.Mouvement.Traversal.IndexW, "traversal_axis_bits": p.Mouvement.Traversal.AxisW, "default_axis_bits": profile.LargeursAxeParDefautDuBuild(16), "region_axis_bits": map[string]any{}, "delta_axis_bits": [3]uint{p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth}, "full_precision": p.Mouvement.FullPrecision, "writer_absolute": p.Grammaire.GrammaireEcrivainI0, "delta_handle_tail": p.Mouvement.DeltaHasHandleTail}
+		ranking := map[string]int{"i0 z": 1 + run%3, "i1 a": 1 + (run/3)%3, "i10": 1 + (run/9)%3, "i2": 1 + (run/27)%3}
+		rows = append(rows, map[string]any{"encoding": encoding, "ranking": ranking, "winner": composantLePlusBloquant(ranking), "format": format, "archetypes": arches, "widths": [2]int{p.MPP.Lead, p.MPP.Index}, "simulation": p.Grammaire.SimStateComplet, "check": p.Grammaire.ControleDeCorruption, "chunks": inputs, "stats": stats})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-keyframe-closure.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

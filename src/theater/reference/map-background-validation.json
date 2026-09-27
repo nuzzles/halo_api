@@ -1,0 +1,52 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "validated_background_sidecar_contract",
+  "native": {
+    "cases": 1031,
+    "accepted": 365,
+    "rejected": 666,
+    "publication_refusals": 3,
+    "assets": 109,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-map-background-native.log"
+  },
+  "focused": {
+    "passed": 3,
+    "failed": 0,
+    "seconds": 0.22,
+    "log": "/private/tmp/halo-background-final-focused.log"
+  },
+  "host_suite": {
+    "passed": 641,
+    "failed": 0,
+    "ignored": 49,
+    "seconds": 89.19,
+    "log": "/private/tmp/halo-background-full-tests.log",
+    "note": "Full suite on 1007-case fixture; subsequent fixture-only expansion to 1031 passed focused host and WASM tests. Shared callout regressions included."
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 30.38,
+    "log": "/private/tmp/halo-background-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 34.24,
+    "log": "/private/tmp/halo-background-wasm.log",
+    "note": "Actual Node WASM execution; includes background, callout and calibration oracles."
+  },
+  "source_hashes": {
+    "checked": 485,
+    "failed": 0
+  },
+  "format_diff_scripts": "passed",
+  "scope": "All native background metadata, statistics, timestamp, schema loading and JSON publication/refusal. Index/cache remains pending. Full v41 parity incomplete; architecture deferred.",
+  "sha256": {
+    "map_background.rs": "0001aa0eabf1989dd22103f46238e601a6413b37f23756afeb96d0aa343fa8c6",
+    "map_background_time.rs": "fd5e135ef646bbac5b1aba2bdc151e3828902503655bc7064d461bbbc6fd0290",
+    "catalog_integer_zero.rs": "4d72ced0f0804cd933446c3cc009477afc17cdccd90bc10c43c231186241be6d",
+    "callouts_json.rs": "613c5dc1e7560529465a3023fda90d97aa4162f5f2bfa48a60befbcc9bec5789",
+    "map_background_tests.rs": "8c63659517d41642ac020e9c12d20faaca6266aacd4fb14ee826257168ec118f",
+    "fixtures/map-background-v41.json.zlib": "83a9c7d3282091d53ede4941b593191784a43cbd6fd06ac4c416beab22d4b849"
+  }
+}

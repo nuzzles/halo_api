@@ -1,0 +1,85 @@
+{
+  "scope": "Unmodified, length-prefixed object structs captured from exact map revisions; no schema defaults added.",
+  "records": [
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/c395f3ac-4614-45f9-a83a-56f69e8ae962/dda9eaa7-441d-45ef-983b-bf9e89298be5/ctf_aquarius.mvar",
+      "asset_id": "c395f3ac-4614-45f9-a83a-56f69e8ae962",
+      "version_id": "dda9eaa7-441d-45ef-983b-bf9e89298be5",
+      "source_sha256": "6c0cbf2454cc3d69369111897ca4232841eb20deb6162bfa2446ac8f5488ba16",
+      "index": 43,
+      "offset": 6380,
+      "end": 6483,
+      "hex": "664a0710c79fe7d802006a0b079a99a1c14767666640008a06470000803f00aa0b070000803f27692122b400c30707ca08270b4a0a3002c30b02ca0d010000cb074a03220000cb184a0e10022a0710eb8d98aa080050040000ca090100ca0a0610efdcb6760000",
+      "type_value": -361555940,
+      "position": [
+        -20.200000762939453,
+        null,
+        3.6000001430511475
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/map.mvar",
+      "asset_id": "05d946c8-0ba1-4720-b8a0-2ebca0576f8e",
+      "version_id": "c2ff7421-6876-4528-8ee6-73f9ff477644",
+      "source_sha256": "51789ecea0de064c3759fac6b37a532c0a43c2beae8ccd702183f0369fd7457c",
+      "index": 17,
+      "offset": 2340,
+      "end": 2443,
+      "hex": "664a0710c79fe7d802006a100733338bc0270060ff39475c0f4842008a06470000803f00aa06070000803f00c30707ca082c0b4a0930046201ca0d010000cb074a092200c20a01c20b0100cb184a0e10022a0710eb8d98aa080050040000ca090100ca0a010000",
+      "type_value": -361555940,
+      "position": [
+        -4.349999904632568,
+        0.0004870891571044922,
+        50.01499938964844
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/336b5174-3579-4fd8-b2f0-922e4a5f7628/c0c6705e-167b-4335-afe0-2bafc7290f40/map.mvar",
+      "asset_id": "336b5174-3579-4fd8-b2f0-922e4a5f7628",
+      "version_id": "c0c6705e-167b-4335-afe0-2bafc7290f40",
+      "source_sha256": "8f4a065c6992042d699de8ec49f35b9dadbd1cda2ad7d21a392f3c09ff9add4b",
+      "index": 244,
+      "offset": 30622,
+      "end": 30722,
+      "hex": "634a0710f985d0b60b006a10075906174127ead580c14783e55240008a06470000803f00aa0b070200c034270000803f00c30707ca08240b4a073004ca0d010000cb074a03020000cb184a0e10022a0710f8e1abf0070050040000ca090100ca0a010000",
+      "type_value": -1533673853,
+      "position": [
+        9.43904972076416,
+        -16.104450225830078,
+        3.2952582836151123
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/map.mvar",
+      "asset_id": "6ece0a92-ef00-459c-b882-cea608cafe60",
+      "version_id": "1593a9c5-6867-4a95-bdf2-057ac997f5ce",
+      "source_sha256": "b8cc7d9732c1d361b2472bae021b67297bd6ffdc9eade962e612e67f365c7438",
+      "index": 252,
+      "offset": 32024,
+      "end": 32119,
+      "hex": "5e4a0710f985d0b60b006a1007ab8b194327a18339c347f252c542008a06470000803f00aa06070000803f00c30707ca08240b4a073004ca0d010000cb074a03020000cb184a0e10022a0710f8e1abf0070050040000ca090100ca0a010000",
+      "type_value": -1533673853,
+      "position": [
+        153.5455780029297,
+        -185.51417541503906,
+        98.66200256347656
+      ]
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/map.mvar",
+      "asset_id": "6ece0a92-ef00-459c-b882-cea608cafe60",
+      "version_id": "1593a9c5-6867-4a95-bdf2-057ac997f5ce",
+      "source_sha256": "b8cc7d9732c1d361b2472bae021b67297bd6ffdc9eade962e612e67f365c7438",
+      "index": 19,
+      "offset": 3257,
+      "end": 3395,
+      "hex": "88014a0710cefda18e0d006a100704a41c4327ec9540c3470300c742008a10074103353f27a40635bf47000040b500aa1007a50635bf27410335bf470000a0b400c30715ca083a0b4a0d3004ca0d07108ac7ba8c0f0000cb174a130a1007f4ffff3e27f9ff3f4047f4ffff3e0000cb184a0e10042a0710be9ecbac080050020000ca090100ca0a010000",
+      "type_value": 1759788903,
+      "position": [
+        156.64068603515625,
+        -192.58563232421875,
+        99.5000228881836
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Actual eight-player Ranked Arena match with Bandit EVO starts, movement, and respawns.
+# Recorder visually confirmed the decoded replay on 2026-09-10; see FILM_BANDIT.md.
+# Columns: group<TAB>slug<TAB>match_id<TAB>description
+bandit	01-evo	ec02ed9d-346e-4eb0-a491-77e6b557847c	Eight-player Ranked Arena with Bandit EVO starts, movement, and respawns

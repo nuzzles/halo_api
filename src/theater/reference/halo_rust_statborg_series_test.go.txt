@@ -1,0 +1,19 @@
+package objectives
+import("testing";"os";"encoding/json";"math/rand";"fmt";"sort";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustStatborgSeries(t *testing.T){
+ rng:=rand.New(rand.NewSource(7641));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  recs:=[]types.StatRecord{}
+  for round:=0;round<run%10;round++{n:=rng.Intn(65);if run%7==0&&round==1{n=0};for i:=0;i<n;i++{slot:=6+2*rng.Intn(10);ts:=round*20000+rng.Intn(18000);if run%9==0{ts=rng.Intn(80000)};if run%13==0&&slot==10{ts-=30000};v:=types.StatValue{A:int64(rng.Intn(255)-2),B:int64(rng.Intn(255)-2)};if run%5==0{v.A=int64(i);v.B=0};comps:=map[int]types.StatValue{2:{A:int64(i%19),B:int64(i%7)},3:{A:int64(i%13)}};if i%3!=0{comps[0]=v};recs=append(recs,types.StatRecord{Slot:slot,Round:round,TimeMS:ts,Comps:comps})}}
+  key:=statSlotKey{Comp:run%4,Side:sideA};if run%2==0{key.Side=sideB};side:="A";if key.Side==sideB{side="B"}
+  raw:=rawSeriesByRound(recs,key,run%3==0);series:=seriesBySlot(recs,key)
+  points:=[]types.ScorePoint{};for i:=0;i<run%60;i++{points=append(points,types.ScorePoint{TimeMS:rng.Intn(100)-20,Slot:10,Value:int64(rng.Intn(100)-10)})}
+  steps:=boundSteps(points);bounded:=boundedSeries(points);if bounded==nil{bounded=[]types.ScorePoint{}};long:=longestRun(points,run%2==0);if long==nil{long=[]types.ScorePoint{}}
+  budget:=newEventBudget("rust");budget.reste=run%50;times:=incrementTimes(points,key,budget);if times==nil{times=[]int{}};counts:=countsOf(recs,key,budget)
+  full:=newEventBudget("identity");kills:=countsOf(recs,statSlotKey{2,sideA},full);deaths:=countsOf(recs,statSlotKey{2,sideB},full);assists:=countsOf(recs,statSlotKey{3,sideA},full);lines:=[]types.PlayerLine{};slots:=[]int{};for slot:=range kills{slots=append(slots,slot)};sort.Ints(slots);for _,slot:=range slots{line:=types.PlayerLine{XUID:fmt.Sprint(100+slot),Kills:kills[slot],Deaths:deaths[slot],Assists:assists[slot]};if run%7==0{line.XUID="shared"};if run%11==0{line.Kills++};lines=append(lines,line);if run%13==0{lines=append(lines,line)}}
+  chronological:=ChronologicalTotal(points);if chronological==nil{chronological=[]types.ScorePoint{}}
+  rows=append(rows,map[string]any{"lines":lines,"identity":SlotIdentityFrom(recs,lines),"records":recs,"key":map[string]any{"component":key.Comp,"side":side},"teams":run%3==0,"raw":raw,"series":series,"points":points,"strict":run%2==0,"longest":long,"chronological":chronological,"steps":steps,"bounded":bounded,"initial_budget":run%50,"times":times,"counts":counts,"budget":map[string]any{"remaining":budget.reste,"rejected":budget.rejetes,"truncated":budget.tronque}})
+
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-statborg-series.json",raw,0600);e!=nil{t.Fatal(e)}
+}

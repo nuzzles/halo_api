@@ -1,0 +1,301 @@
+{
+  "note": "Original complete packet payloads. Cardinal expectations come from movement/jump controls; diagonal expectations use the independently corroborated cube-face quantizer.",
+  "records": [
+    {
+      "film": "natural-end/06-walk-left",
+      "match_id": "9e3114a9-483c-4e39-aae2-1eb9ec6fc622",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26272834,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 494507,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 43070,
+      "magnitude_code": 119,
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "tick": 31,
+      "hex": "a07b4200fc4008c005903fea8035ad2601507c3bc7c201affc00"
+    },
+    {
+      "film": "natural-end/05-walk-backward",
+      "match_id": "ce985770-c3dc-4e21-806e-368b9245a679",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26140918,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 494139,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 130451,
+      "magnitude_code": 119,
+      "direction": [
+        0,
+        1,
+        0
+      ],
+      "tick": 23,
+      "hex": "a07b4200bc4008c005903fe98037ad2603fb263bc5c201a03e00"
+    },
+    {
+      "film": "natural-end/02-jump",
+      "match_id": "dad793c7-0894-49c7-91ed-75c2c1074dad",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26037007,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 493817,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 217832,
+      "magnitude_code": 242,
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "tick": 16,
+      "hex": "a07b4200844008c005903fe98035ad2b06a5d079440201afbe4800"
+    },
+    {
+      "film": "natural-end/07-walk-right",
+      "match_id": "5e5a036c-9556-4d75-b7be-30513ab61755",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 27006490,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 496547,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 305213,
+      "magnitude_code": 119,
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "tick": 75,
+      "hex": "a07b42025c4008c005903fe88035ad2609507a3bd2c201af8000"
+    },
+    {
+      "film": "natural-end/04-walk-forward",
+      "match_id": "3d8fb39d-7492-4cbd-8cd0-bd7d84db946b",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26324445,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 494645,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 392594,
+      "magnitude_code": 119,
+      "direction": [
+        0,
+        -1,
+        0
+      ],
+      "tick": 34,
+      "hex": "a07b4201144008c005903fe98033ad260bfb243bc88201bf3e00"
+    },
+    {
+      "film": "natural-end/02-jump",
+      "match_id": "dad793c7-0894-49c7-91ed-75c2c1074dad",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26590689,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 495834,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 479975,
+      "magnitude_code": 0,
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "tick": 50,
+      "hex": "a07b4201944008c005903fe98035ad8a0ea5ce004c8201afbe00"
+    },
+    {
+      "film": "natural-end/02-jump",
+      "match_id": "dad793c7-0894-49c7-91ed-75c2c1074dad",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 27191622,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 498118,
+        "bit": 37,
+        "end_bit": 170
+      },
+      "velocity_bit": 130,
+      "velocity_end": 132,
+      "direction_code": null,
+      "magnitude_code": null,
+      "direction": null,
+      "tick": 86,
+      "hex": "a07b4202b44008c005903fe98035ad261ab04035f7c0"
+    },
+    {
+      "film": "natural-end/02-jump",
+      "match_id": "dad793c7-0894-49c7-91ed-75c2c1074dad",
+      "player": "Neutral",
+      "life": 0,
+      "time_us": 26590689,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 495834,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 479975,
+      "magnitude_code": 0,
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "tick": 50,
+      "hex": "a07b4201944008c005903fe98035ad8a0ea5ce004c8201afbe00"
+    },
+    {
+      "film": "controller/01-stick-circles",
+      "match_id": "df0fadd0-5d20-4f4a-ae99-e1f62656c502",
+      "player": "Nuzzles",
+      "life": 0,
+      "time_us": 21974575,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 487768,
+        "bit": 37,
+        "end_bit": 199
+      },
+      "velocity_bit": 130,
+      "velocity_end": 161,
+      "direction_code": 378188,
+      "magnitude_code": 27,
+      "direction": [
+        -0.31719861654409126,
+        -0.9483591290552934,
+        0.0
+      ],
+      "tick": 17,
+      "hex": "a07b42008c4008c005903eb58035ad270b8a980dc44201af3800"
+    },
+    {
+      "film": "maps/01-bazaar-idle",
+      "match_id": "79bce30e-0d61-4c57-93dd-92d61124e80c",
+      "player": "Nuzzles",
+      "life": 0,
+      "time_us": 35816621,
+      "layout": "X17Y17Z16",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 538172,
+        "bit": 37,
+        "end_bit": 174
+      },
+      "velocity_bit": 133,
+      "velocity_end": 164,
+      "direction_code": 322853,
+      "magnitude_code": 82,
+      "direction": [
+        -0.9253959527700486,
+        0.3790017554007026,
+        0.0
+      ],
+      "tick": 70,
+      "hex": "a07b4202344008c005906ecd906444fbc13b49452a32513420831cd18806d4d800"
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "match_id": "9a875c4e-03bc-4fff-a688-e21216d1618b",
+      "player": "Nuzzles",
+      "life": 0,
+      "time_us": 136966138,
+      "layout": "X15Y15Z17",
+      "source": {
+        "chunk": 7,
+        "payload_byte": 559755,
+        "bit": 37,
+        "end_bit": 205
+      },
+      "velocity_bit": 136,
+      "velocity_end": 167,
+      "direction_code": 336965,
+      "magnitude_code": 122,
+      "direction": [
+        -0.8049177177558396,
+        0.5933864403933836,
+        0.0
+      ],
+      "tick": 1,
+      "hex": "a07b42000c400900055641b8885767086c292228f57167fc808403be6c00"
+    },
+    {
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "life": 0,
+      "time_us": 25569334,
+      "layout": "X18Y18Z15",
+      "source": {
+        "chunk": 2,
+        "payload_byte": 545202,
+        "bit": 37,
+        "end_bit": 175
+      },
+      "velocity_bit": 134,
+      "velocity_end": 165,
+      "direction_code": 36888,
+      "magnitude_code": 32,
+      "direction": [
+        0.9884387854745447,
+        -0.14168747095539552,
+        -0.05397617941157927
+      ],
+      "tick": 209,
+      "hex": "a07b42068c4008c005902ee530155c0bf01203010745100a400155902ee57013140bd0bc1b82676d5ffba288091800b2060c9a00eb812013c6f442e8a20348002ab205dbfe023b817a197cc048f00bff74510223001640c172401f7024021e24847d1440c8c005902ed7b011d40bd00dda41bf45103a2559c39c05745280214a7b04a028528d752972104122f925304208245f24a64841048be494d10820917c929b2104122f925384208245f24a74841048be494f10820917c8201bf50080efc88205bf00081efce0209b13e082ebef820dbf50083ebef800"
+    }
+  ]
+}

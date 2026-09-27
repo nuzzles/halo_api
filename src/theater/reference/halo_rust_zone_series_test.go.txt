@@ -1,0 +1,16 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar")
+func TestHaloRustZoneSeries(t *testing.T) {
+ rng:=rand.New(rand.NewSource(41300)); rows:=[]any{}
+ convert:=func(m map[uint32][]zoneSample)map[uint32][]any{out:=map[uint32][]any{};for k,ss:=range m{out[k]=[]any{};for _,s:=range ss{out[k]=append(out[k],map[string]any{"t":s.t,"v":s.v})}};return out}
+ for i:=0;i<512;i++ {
+  c:=zoneCtx{origin:1000,step:uint64([]int{0,1,100,1000}[i%4]),frames:[]int{-1,0,1,100,1000}[i%5],intervalMS:[]int{-1,0,1,33,100,2000,3000}[i%7]}
+  reads:=[]grammar.ManagedPropertyRead{}
+  for j:=0;j<400;j++ {r:=grammar.ManagedPropertyRead{Slot:uint32(rng.Intn(8)),TimestampUS:uint64(rng.Intn(120000)),Value:uint64(rng.Intn(100000)),HasValue:j%13!=0,Chained:j%3!=0};r.Field=grammar.ManagedPropertyField(j%11/10);r.Tag=j%6;reads=append(reads,r)}
+  // Dense ramps and equal-frame decreases exercise maximal runs and stable ordering.
+  for s:=0;s<4;s++{for j:=0;j<20;j++{reads=append(reads,grammar.ManagedPropertyRead{Slot:uint32(s),TimestampUS:uint64(1000+j/2*100),Field:0,Tag:3,Value:uint64(j%7*4096),HasValue:true})}}
+  ser:=zoneSeriesOf(reads,c);ramps:=[]any{};for _,r:=range zoneRampsOf(ser){ramps=append(ramps,map[string]any{"slot":r.slot,"t0":r.t0,"t_peak":r.tPeak,"start":r.start,"top":r.top})}
+  rows=append(rows,map[string]any{"reads":reads,"origin":c.origin,"step":c.step,"frames":c.frames,"interval":c.intervalMS,"window":zoneWindowFrames(c.intervalMS),"series":map[string]any{"gauge":convert(ser.gauge),"owner":convert(ser.owner),"keys":ser.keys,"desig":convert(ser.desig),"owner_chained":convert(ser.ownerChained),"slots":ser.slots},"ramps":ramps})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-zone-series.json",b,0600);e!=nil{t.Fatal(e)}
+}

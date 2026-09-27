@@ -1,0 +1,8 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustContextEquipmentCreations(t *testing.T){
+ var seeds []struct{Inputs []struct{Index int;Hex string};EmptyBand bool `json:"empty_band"`;NoBounds bool `json:"no_bounds"`};b,e:=os.ReadFile("/private/tmp/halo-context-mpp-calibration.json");if e!=nil{t.Fatal(e)};if e=json.Unmarshal(b,&seeds);e!=nil{t.Fatal(e)};rows:=[]any{}
+ for n:=0;n<64;n++{s:=seeds[n%len(seeds)];raw:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};for _,c:=range s.Inputs{pay,e:=hex.DecodeString(c.Hex);if e!=nil{t.Fatal(e)};raw=append(raw,pay);meta=append(meta,types.ChunkMeta{Index:c.Index})};film,e:=source.Load(raw,meta);if e!=nil{t.Fatal(e)};fc:=NewFilmContext(film);p:=ProfilDeBalayageParDefaut();p.PoserLargeursObjetDuMonde(profile.PrecisionDescriptor{IndexW:1,AxisW:[3]uint{16,17,18}});if n>=32{p.MPP=profile.MPPWidths{Lead:11,Index:7}};fc.PoserProfilDeBalayage(p);wr:=&profile.Vec3Range{{Min:-100,Max:300},{Min:-200,Max:400},{Min:-300,Max:500}};if s.NoBounds{wr=nil};band:=map[uint32]bool{512:true,513:true,515:true};if s.EmptyBand{band=map[uint32]bool{}}
+ records,stats,err:=ScanEquipmentCreationsForBand(fc,wr,band);msg:="";if err!=nil{msg=err.Error()};if records==nil{records=[]types.EquipmentCreation{}};rows=append(rows,map[string]any{"seed":n%len(seeds),"lead":p.MPP.Lead,"index":p.MPP.Index,"records":records,"stats":stats,"error":msg})
+ };b,e=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-equipment-creations.json",b,0600);e!=nil{t.Fatal(e)}
+}

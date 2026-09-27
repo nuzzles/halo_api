@@ -1,0 +1,19 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing";"math")
+func TestHaloRustSignedHeader(t *testing.T) {
+ rows:=[]any{}
+ for _,data:=range [][]byte{nil,{0},{0xff,0x55,0xaa,0},{0x40,0x91,0x82,0x73}} {for _,start:=range []int{math.MinInt64,-8,-1,0,1,7,31,(1<<32)-1,1<<32,math.MaxInt64-3,math.MaxInt64-1,math.MaxInt64} {for _,width:=range []int{-1,0,1,11,31,64,65,1<<32,math.MaxInt64} {
+  // Unchanged native wide reads loop once per bit. Keep one practical 2^32
+  // active ID case; huge unused widths still exercise End-only admission.
+  if start>=0 && width>65 {
+   probe:=LecteurSur(data);probe.SetBitPos(start);k:=-1
+   func(){defer func(){recover()}();k=readRecordType(probe)}()
+   if k!=recEnd && !(width==1<<32 && start==0 && len(data)>0 && data[0]==0xff) {continue}
+  }
+  br:=LecteurSur(data);br.SetBitPos(start);kind:=-1;var id uint32;panicked:=false
+  func(){defer func(){panicked=recover()!=nil}();kind=readRecordType(br);if kind!=recEnd{id=readRecordID(br,width,0x81234567)}}()
+  end:=br.BitPos();br.SetBitPos(0);recovery:=br.ReadBits(8)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"start":start,"width":width,"base":uint32(0x81234567),"kind":kind,"id":id,"panic":panicked,"end":end,"recovery":recovery,"recoveryEnd":br.BitPos()})
+ }}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-header.json",raw,0600);e!=nil{t.Fatal(e)}
+}

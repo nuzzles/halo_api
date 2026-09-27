@@ -1,0 +1,37 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "file_coverage_header_freshness_validated",
+  "native": {
+    "coverage_cases": 6201,
+    "header_cases": 8492,
+    "freshness_cases": 448,
+    "source_states": 64,
+    "registry_presence_byte_values": 256,
+    "raw_error_bytes_compared": true,
+    "partial_headers_and_wrapping_offsets_compared": true,
+    "fixture_byte_identical": true,
+    "log": "/private/tmp/halo-facts-file-header-native.log"
+  },
+  "host": {
+    "passed": 22,
+    "failed": 0,
+    "seconds": 10.7,
+    "scope": "All shared native_facts_ tests",
+    "log": "/private/tmp/halo-facts-file-header-all-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 31.39,
+    "log": "/private/tmp/halo-facts-file-header-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 31.58,
+    "scope": "Actual wasm32 runtime, including all coverage/header/freshness cases",
+    "log": "/private/tmp/halo-facts-file-header-wasm.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "remaining": "Four FilmFactsFile JSON payloads; section framing/full-file codec; scan/cache conversion and BuildFromFacts; final source/field/runtime/export/captured-film reconciliation."
+}

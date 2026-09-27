@@ -1,0 +1,37 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded-context energy hook scanning and native charge publication",
+  "fixture": {
+    "path": "context-ability-charges-v41.json.zlib",
+    "sha256": "86fda526fa1a8b51f0396cbcfcb0c3fd004a2e1b94b1210cc4071e9e9dac450a",
+    "generator": "halo_rust_context_ability_charges_test.go.txt",
+    "cases": 192,
+    "charges": 1548,
+    "attempts": 1536,
+    "padded_attempts": 485,
+    "absent_cases": 42
+  },
+  "host": {
+    "status": "passed",
+    "tests_passed": 3,
+    "log": "/private/tmp/halo-context-ability-charges-host.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "prefix": "native_context_ability_charges",
+    "log": "/private/tmp/halo-context-ability-charges-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-ability-charges-clippy.log"
+  },
+  "source_hashes": 485,
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Controlled synthetic payloads compared with pinned reference, not independently annotated gameplay.",
+    "Equipment recovery and the combined abilities phase remain open.",
+    "Expanded profile/registry corruption combinations and multiple file-number ordering remain separate coverage gaps."
+  ],
+  "format_and_diff_checks": "passed",
+  "post_test_change": "Replaced two single-element test loops with equivalent blocks for Clippy; production code and fixture unchanged."
+}

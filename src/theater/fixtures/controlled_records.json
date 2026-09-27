@@ -1,0 +1,77 @@
+[
+  {
+    "layout": "B",
+    "source": [
+      "controller/01-stick-circles",
+      2,
+      487768
+    ],
+    "hex": "a07b42008c4008c005903eb58035ad270b8a980dc44201af3800",
+    "expected": {
+      "position": [
+        16053,
+        16410,
+        109863
+      ],
+      "input": [
+        30,
+        28
+      ]
+    }
+  },
+  {
+    "layout": "A",
+    "source": [
+      "controller/01-stick-circles",
+      2,
+      490496
+    ],
+    "hex": "a07b4201cc400880640fb86011eb49c9c840360f80",
+    "expected": {
+      "position": [
+        16097,
+        16419,
+        109863
+      ],
+      "input": [
+        32,
+        62
+      ]
+    }
+  },
+  {
+    "layout": "C",
+    "source": [
+      "controller/01-stick-circles",
+      3,
+      515170
+    ],
+    "hex": "a07b4202844008c005903f00806fad271a804035f7c0",
+    "expected": {
+      "position": [
+        16128,
+        16439,
+        109863
+      ],
+      "input": [
+        31,
+        31
+      ]
+    }
+  },
+  {
+    "layout": "aim",
+    "source": [
+      "aim/01-pitch-up",
+      2,
+      488550
+    ],
+    "hex": "a07b42011440089566001001220806bef800",
+    "expected": {
+      "aim": [
+        0,
+        1024
+      ]
+    }
+  }
+]

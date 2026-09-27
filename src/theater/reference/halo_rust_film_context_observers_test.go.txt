@@ -1,0 +1,26 @@
+package grammar
+
+import "testing"
+
+// This verifies the native observer ownership rule used by the Rust integration
+// audit. A scan frame does not inherit FilmContext's observer; direct readers do.
+func TestHaloRustFilmContextObservers(t *testing.T) {
+ for c := 0; c < 512; c++ {
+  fc := NewFilmContext(nil)
+  p := fc.ProfilDeBalayage()
+  p.Mouvement.DeltaQuantum = float32(c+1)*0.001
+  p.Mouvement.WorldObject.Region = uint32(c%4)
+  fc.PoserProfilDeBalayage(p)
+  obs := fc.Observation()
+  obs.PosCaptureHook = func(PositionSample) {}
+  cfg := fc.CadreDeBalayage()
+  if cfg.Obs != nil { t.Fatalf("frame inherited observer in case %d", c) }
+  if cfg.Profil.Mouvement.DeltaQuantum != p.Mouvement.DeltaQuantum || cfg.Profil.Mouvement.WorldObject.Region != p.Mouvement.WorldObject.Region {
+   t.Fatalf("frame lost inherited profile in case %d", c)
+  }
+  br := fc.NouveauLecteur(make([]byte, 32))
+  if br.obs != obs || br.p.Mouvement.DeltaQuantum != p.Mouvement.DeltaQuantum {
+   t.Fatalf("direct reader lost context in case %d", c)
+  }
+ }
+}

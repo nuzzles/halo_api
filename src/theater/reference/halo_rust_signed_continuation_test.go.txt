@@ -1,0 +1,41 @@
+package grammar
+
+import (
+ "encoding/hex"
+ "encoding/json"
+ "math"
+ "os"
+ "reflect"
+ "testing"
+)
+
+func TestHaloRustSignedContinuation(t *testing.T) {
+ rows:=[]any{}
+ for mode:=0;mode<2;mode++ {for _,tail:=range []bool{false,true} {
+  names:=[]string{"signed-first","signed-second"};if tail{names=append(names,"biped-emp-timer-component")}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:names,Levels:make([]uint32,len(names))}}}
+  var bw bitWriter;bw.bit(1);bw.bits(50,11);bw.bits(0,2);bw.bit(0);bw.bits(uint64(len(names)),4)
+  for i:=range names {bw.bits(uint64(i),6)}
+  start:=19+6*len(names)
+  bw.bits(0xa5a55a5a,32);bw.bits(0x55,8)
+  for _,first:=range []int{0,-1,-start,-start-1,math.MaxInt64,math.MinInt64} {
+   for _,second:=range []int{0,1,start+1,math.MaxInt64} {
+    cfg:=emptyCfg;cfg.Obs=NouvelleObservation()
+    widths:=map[string]int{names[0]:first,names[1]:second}
+    if mode==0 {cfg.Profil.Grammaire.LargeursCalibrees=widths}else{cfg.Profil.Grammaire.LargeursBouchon=widths}
+    world:=func()*World {w:=NewWorld(reg);w.BindFull(50,0);return w}
+    var original FrameRecord;var originalEnd int;var originalOK,originalPanic bool
+    func(){defer func(){originalPanic=recover()!=nil}();original,originalEnd,originalOK=TryDeltaAt(bw.buf,0,world(),cfg)}()
+    // Use the same native reader/header/Delta functions to expose the live
+    // cursor on panic; successful results must equal the public TryDeltaAt.
+    br:=LecteurSur(bw.buf);br.poserCadre(cfg);var trace EntityTrace;var panicked bool
+    func(){defer func(){panicked=recover()!=nil}();typ:=readRecordType(br);if typ!=recDelta{t.Fatal("non-Delta")};id:=readRecordID(br,cfg.IDLowBits,cfg.IDBase);trace=decodeDelta(br,world(),id&0x3fffffff)}()
+    if originalPanic!=panicked{t.Fatal("panic mismatch")}
+    if !panicked&&(originalEnd!=br.BitPos()||originalOK!=(trace.DesyncAt == -1)||!reflect.DeepEqual(original.Trace,trace)){t.Fatal("native public/direct mismatch")}
+    rows=append(rows,map[string]any{"mode":mode,"tail":tail,"first":first,"second":second,"start":start,"hex":hex.EncodeToString(bw.buf),"panic":panicked,"end":br.BitPos(),"record":original,"ok":originalOK})
+   }
+  }
+ }}
+ raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)}
+ if err=os.WriteFile("/private/tmp/halo-signed-continuation.json",raw,0600);err!=nil{t.Fatal(err)}
+}

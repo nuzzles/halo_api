@@ -1,0 +1,23 @@
+package replay
+import("testing";"os";"encoding/json";"encoding/hex";"bytes";"log/slog";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustFactsProvenance(t *testing.T){
+ old:=slog.Default();defer slog.SetDefault(old);rows:=[]any{}
+ names:=[]string{"repli_manche_zero_decretee","","unknown","\xff","\xfe","\xed\xa0\x80","x\x00y"};domain:=[]int{-9223372036854775808,-1,0,1,4294967296,9223372036854775807}
+ for run:=0;run<1024;run++{
+  build:=[]string{"HI_1_13_0","HI_1_12_0","","unknown","\xffHI_1_13_0","HI_1_13_0\x00"}[run%6]
+  id:=&profile.FilmIdentity{FormatVersion:[]int{20,21,24,25,27,-1,4294967316,9223372036854775807}[run%8],Build:build,RegistryBlocks:domain[(run/8)%6],RegistryNamedSlots:domain[(run/13)%6],RegistryFingerprint:[]uint64{0,1,0x36ca8c3d2a2f9b88,0x8879e2b6746ba047,^uint64(0)}[run%5]};if run%7==0{id=nil}
+  counter:=fallback.NouveauCompteur();counter.DeclencheN(fallback.Nom(names[0]),3)
+  hits:=[]fallback.Declenchement{};hitRows:=[]any{}
+  for j:=0;j<run%29;j++{h:=fallback.Declenchement{Nom:fallback.Nom(names[(run+j)%len(names)]),Declenchements:domain[(run+j)%len(domain)]};hits=append(hits,h);hitRows=append(hitRows,map[string]any{"name_hex":hex.EncodeToString([]byte(h.Nom)),"hits":h.Declenchements})}
+  f:=&FilmFactsFile{Identity:id,Fallbacks:hits,Coverage:DecoderCoverage{Build:"stale-header"}}
+  opt:=Options{FilmIdentity:&profile.FilmIdentity{Build:"caller-seed"},Fallbacks:counter}
+  var buf bytes.Buffer;slog.SetDefault(slog.New(slog.NewJSONHandler(&buf,nil)))
+  doc:=BuildFromFacts("entry","halo_infinite",f,opt)
+  logs:=[]any{};dec:=json.NewDecoder(&buf);dec.UseNumber();for dec.More(){v:=map[string]any{};if e:=dec.Decode(&v);e!=nil{t.Fatal(e)};delete(v,"time");logs=append(logs,v)}
+  report:=counter.Rapport();rawReport:=[]any{};for _,h:=range report{rawReport=append(rawReport,map[string]any{"name_hex":hex.EncodeToString([]byte(h.Nom)),"hits":h.Declenchements})}
+  final:=ReplayDocument{Coverage:&Coverage{Fallbacks:[]FallbackHit{{Name:"seed",Hits:99}}}};buf.Reset();attachFallbackCoverage(&final,counter)
+  finalLogs:=[]any{};dec=json.NewDecoder(&buf);dec.UseNumber();for dec.More(){v:=map[string]any{};if e:=dec.Decode(&v);e!=nil{t.Fatal(e)};delete(v,"time");finalLogs=append(finalLogs,v)}
+  rows=append(rows,map[string]any{"identity":id,"build_hex":hex.EncodeToString([]byte(build)),"hits":hitRows,"report":rawReport,"text_hex":hex.EncodeToString([]byte(fallback.Texte(report))),"decoder":couvertureDuDecodeur(id),"entry_document":doc,"entry_logs":logs,"final":final,"final_logs":finalLogs})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-facts-provenance.json",b,0600);e!=nil{t.Fatal(e)}
+}

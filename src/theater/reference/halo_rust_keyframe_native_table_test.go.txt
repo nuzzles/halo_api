@@ -1,0 +1,21 @@
+package grammar
+import("testing";"encoding/json";"encoding/hex";"os";"math/rand")
+func TestHaloRustKeyframeNativeTable(t *testing.T){
+ rng:=rand.New(rand.NewSource(17141));rows:=[]any{}
+ for c:=0;c<512;c++ {
+  data:=make([]byte,8192);rng.Read(data);fault:=(c/16)%8
+  ctx:=ContexteParDefaut();ctx.Profil.Cadre.EnTeteBits=[]int{64,108,160}[c%3];ctx.Profil.Cadre.MotDeTailleBits=[]int{0,1,16,32}[(c/3)%4];ctx.Profil.Grammaire.ControleDeCorruption=c%2==0
+  reg:=&Registry{Archetypes:make([]Archetype,6)};for i:=range reg.Archetypes{reg.Archetypes[i].Index=i};reg.Archetypes[5].Components=[]string{"biped-emp-timer-component","player-primary-respawn-object-component"};if fault==5{reg.Archetypes[5].Components=append(reg.Archetypes[5].Components,"not-ported")};reg.Archetypes[5].Levels=make([]uint32,len(reg.Archetypes[5].Components))
+  put:=func(at,n int,v uint32){for j:=0;j<n;j++{m:=byte(1<<uint(7-(at+j)%8));data[(at+j)/8]&=^m;if v&(1<<uint(n-1-j))!=0{data[(at+j)/8]|=m}}}
+  starts:=[]int{};pos:=1;hdr,mot:=ctx.Profil.Cadre.EnTeteBits,ctx.Profil.Cadre.MotDeTailleBits
+  for i:=0;i<22;i++{starts=append(starts,pos);put(pos,32,1<<30|uint32(100+i));ti:=uint32(5);if i%4==0{ti=0xffffffff};put(pos+32,32,ti);if ti==0xffffffff{pos+=hdr}else{put(pos+hdr,mot,0);put(pos+hdr+mot,mot,1);pos=WalkKeyframeFullState(data,pos,reg,ctx).EndBit}}
+  starts=append(starts,pos)
+  switch fault{case 1:put(starts[1],32,0xffffffff);case 2:put(starts[1],32,101);case 3:put(starts[1]+32,32,69);case 4:put(starts[2],32,1<<30|100)}
+  length:=(pos+7)/8;if fault==6{length=(starts[1]+50)/8};data=data[:length]
+  if c%11==0 { end:=(starts[21]+71)/8;if end<len(data){data=data[:end]} }
+  ctx.Obs=NouvelleObservation();obs:=haloRustComponentHooks(ctx.Obs);records,stop:=WalkKeyframeRecords(data,reg,ctx)
+  expected:=[]any{};for _,r:=range records{expected=append(expected,map[string]any{"start":r.BitStart,"end":r.BitEnd,"archetype":r.Archetype,"slot":r.Slot,"generation":r.Gen,"desync":r.DesyncAt})}
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"names":reg.Archetypes[5].Components,"layout":map[string]any{"header_bits":hdr,"size_word_bits":mot},"corruption":ctx.Profil.Grammaire.ControleDeCorruption,"stop":stop.String(),"records":expected,"observations":*obs})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-keyframe-native-table.json",b,0600);e!=nil{t.Fatal(e)}
+}

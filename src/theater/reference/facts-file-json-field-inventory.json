@@ -1,0 +1,1932 @@
+{
+  "*killsource.RelaxedProbe": {
+    "element": "killsource.RelaxedProbe",
+    "json_marshaler": false,
+    "kind": "ptr",
+    "text_marshaler": false
+  },
+  "*killsource.Result": {
+    "element": "killsource.Result",
+    "json_marshaler": false,
+    "kind": "ptr",
+    "text_marshaler": false
+  },
+  "*profile.FilmIdentity": {
+    "element": "profile.FilmIdentity",
+    "json_marshaler": false,
+    "kind": "ptr",
+    "text_marshaler": false
+  },
+  "[3]uint": {
+    "element": "uint",
+    "json_marshaler": false,
+    "kind": "array",
+    "length": 3,
+    "text_marshaler": false
+  },
+  "[]fallback.Declenchement": {
+    "element": "fallback.Declenchement",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]int": {
+    "element": "int",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]killsource.BotEntry": {
+    "element": "killsource.BotEntry",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]killsource.IndexOrigin": {
+    "element": "killsource.IndexOrigin",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]killsource.Kill": {
+    "element": "killsource.Kill",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]killsource.UnclaimedDeath": {
+    "element": "killsource.UnclaimedDeath",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]string": {
+    "element": "string",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]types.StatRecord": {
+    "element": "types.StatRecord",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "[]uint32": {
+    "element": "uint32",
+    "json_marshaler": false,
+    "kind": "slice",
+    "text_marshaler": false
+  },
+  "bool": {
+    "json_marshaler": false,
+    "kind": "bool",
+    "text_marshaler": false
+  },
+  "damagetag.Class": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "damagetag.Status": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "fallback.Declenchement": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Nom",
+        "type": "fallback.Nom"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Declenchements",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "fallback.Nom": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "float32": {
+    "json_marshaler": false,
+    "kind": "float32",
+    "text_marshaler": false
+  },
+  "grammar.GrammaireBalayage": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ControleDeCorruption",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BitsDeQueueRecordNew",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeserEtatParArchetype",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "SimStateComplet",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "PorteeBaseline",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "GrammaireEcrivainI0",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "CorpsActionMobilite",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "CorpsAncrageCapacite",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "InferenceChaine",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "LargeursCalibrees",
+        "type": "map[string]int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "GenerationStricte",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TablesParVue",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ClassesDeVue",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "LargeursBouchon",
+        "type": "map[string]int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "grammar.KillSourceHealth": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Film",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Candidates",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Published",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "UnexplainedPair",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "UnexplainedSelf",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "UnexplainedBotIdx",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "OutOfRoster",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TagOutOfCatalogueWalk",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TagOutOfCatalogueScan",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeathsReal",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeathsCovered",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "grammar.ProfilDeBalayage": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Mouvement",
+        "type": "profile.MovementProfile"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Cadre",
+        "type": "profile.KeyframeProfile"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MPP",
+        "type": "profile.MPPWidths"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Grammaire",
+        "type": "grammar.GrammaireBalayage"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "int": {
+    "json_marshaler": false,
+    "kind": "int",
+    "text_marshaler": false
+  },
+  "int64": {
+    "json_marshaler": false,
+    "kind": "int64",
+    "text_marshaler": false
+  },
+  "killsource.AssistStats": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "KillEvents",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Attached",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Multi",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Named",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "NoAssist",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RejectedSelf",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RejectedVictim",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RejectedRoster",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FlagSet",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AssistMulti",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AssistExtraTotal",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AssistFieldDisagree",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "KillerPctOver100",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AssistPctOver100",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ParLaFenetre",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Gate15",
+        "type": "bool"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.BotEntry": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Slot",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotID",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Name",
+        "type": "string"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Category": {
+    "json_marshaler": false,
+    "kind": "int",
+    "text_marshaler": false
+  },
+  "killsource.Coverage": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Covered",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RealPairs",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ReconstructedPairs",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "GhostPairs",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "SameInstantPairs",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FeedKills",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FeedDeaths",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotDeaths",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotKillerDeaths",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.DamageShare": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Pct",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Known",
+        "type": "bool"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.FeedTruth": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Killer",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Present",
+        "type": "bool"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.FilmTablePinning": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Refusal",
+        "type": "killsource.FilmTableRefusal"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Build",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Seats",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Pinned",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AddedNames",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotConflict",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DuplicateName",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "OutOfRange",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Inferred",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FreeNames",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifPinned",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifAgree",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifContradict",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifDuplicate",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifReadings",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifDisagreements",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotifAbsent",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Agree",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Contradict",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Silent",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.FilmTableRefusal": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "killsource.IndexOrigin": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "killsource.Kill": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TimeMS",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Victim",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Feed",
+        "type": "killsource.FeedTruth"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Source",
+        "type": "killsource.SourceTruth"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Diverges",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Read",
+        "type": "killsource.Provenance"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Assist",
+        "type": "types.Assist"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "KillerDamage",
+        "type": "killsource.DamageShare"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AssistDamage",
+        "type": "killsource.DamageShare"
+      },
+      {
+        "anonymous": false,
+        "exported": false,
+        "json_tag": "",
+        "name": "paquet",
+        "type": "killsource.paquetID"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Origin": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "killsource.Path": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "killsource.PathStats": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Population",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Matched",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Published",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Provenance": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Path",
+        "type": "killsource.Path"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Origin",
+        "type": "killsource.Origin"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Multiplicity",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.RelaxedProbe": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Candidates",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "OutOfCatalogue",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Paired",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Uncovered",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Tags",
+        "type": "[]uint32"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Result": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Kills",
+        "type": "[]killsource.Kill"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "UnclaimedDeaths",
+        "type": "[]killsource.UnclaimedDeath"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Coverage",
+        "type": "killsource.Coverage"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Health",
+        "type": "grammar.KillSourceHealth"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Stats",
+        "type": "killsource.Stats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Roster",
+        "type": "killsource.Roster"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Calibration",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ProfilCalibre",
+        "type": "grammar.ProfilDeBalayage"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BijectionMargin",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BijectionDetermined",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Probe",
+        "type": "*killsource.RelaxedProbe"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Roster": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Names",
+        "type": "[]string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Humans",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Bots",
+        "type": "[]killsource.BotEntry"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "IndexToName",
+        "type": "[]string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "UnpinnedBots",
+        "type": "[]killsource.BotEntry"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotsSuccedes",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "IndexSource",
+        "type": "[]killsource.IndexOrigin"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FilmTable",
+        "type": "killsource.FilmTablePinning"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.SourceTruth": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Tag",
+        "type": "uint32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Display",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Named",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Class",
+        "type": "damagetag.Class"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Status",
+        "type": "damagetag.Status"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Detail",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Reserve",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Category",
+        "type": "killsource.Category"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.Stats": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Walk",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Scan",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "SelfWalk",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "SelfScan",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Bot",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotKiller",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Unclaimed",
+        "type": "killsource.PathStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Redundant",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "NoBit",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Agree",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Disagree",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MultiCandidate",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "PacketsWithEvents",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "PacketsLocated",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Assist",
+        "type": "killsource.AssistStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Couples",
+        "type": "types.CoupleStats"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Appariement",
+        "type": "types.ApparStats"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "killsource.UnclaimedDeath": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TimeMS",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Victim",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "VictimXUID",
+        "type": "uint64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Source",
+        "type": "killsource.SourceTruth"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Read",
+        "type": "killsource.Provenance"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "map[int]int": {
+    "element": "int",
+    "json_marshaler": false,
+    "key": "int",
+    "kind": "map",
+    "text_marshaler": false
+  },
+  "map[int]types.StatValue": {
+    "element": "types.StatValue",
+    "json_marshaler": false,
+    "key": "int",
+    "kind": "map",
+    "text_marshaler": false
+  },
+  "map[string]int": {
+    "element": "int",
+    "json_marshaler": false,
+    "key": "string",
+    "kind": "map",
+    "text_marshaler": false
+  },
+  "profile.AxisRange": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Min",
+        "type": "float32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Max",
+        "type": "float32"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.FilmIdentity": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Version",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Build",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Flavor",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BuildID",
+        "type": "uint32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Changelist",
+        "type": "uint32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MatchStartUnix",
+        "type": "uint32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FormatVersion",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TypeVersions",
+        "type": "[]uint32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RegistryBlocks",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RegistryFingerprint",
+        "type": "uint64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "RegistryNamedSlots",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BuildOffset",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BodyBit",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ControleDeCorruption",
+        "type": "bool"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.KeyframeProfile": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "EnTeteBits",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MotDeTailleBits",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.MPPWidths": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Lead",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Index",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.MovementProfile": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Traversal",
+        "type": "profile.PrecisionDescriptor"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "WorldObject",
+        "type": "profile.PrecisionDescriptor"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeltaQuantum",
+        "type": "float32"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeltaAxisWidth",
+        "type": "uint"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Range",
+        "type": "profile.Vec3Range"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "FullPrecision",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "DeltaHasHandleTail",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "CalibratedSkip",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MobilityActionExtraBits",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.PrecisionDescriptor": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "IndexW",
+        "type": "uint"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "AxisW",
+        "type": "[3]uint"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Region",
+        "type": "uint32"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "profile.Vec3Range": {
+    "element": "profile.AxisRange",
+    "json_marshaler": false,
+    "kind": "array",
+    "length": 3,
+    "text_marshaler": false
+  },
+  "replay.FilmStatborg": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Records",
+        "type": "[]types.StatRecord"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BurstMS",
+        "type": "[]int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Truncated",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "ChunkStartMS",
+        "type": "map[int]int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "string": {
+    "json_marshaler": false,
+    "kind": "string",
+    "text_marshaler": false
+  },
+  "types.ApparStats": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Identite",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Fenetre",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "BotFenetre",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "NonRevendiqueeFenetre",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "CouplesSansIdentite",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "types.Assist": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Name",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Index",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Rejected",
+        "type": "string"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Known",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Extra",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "types.CoupleStats": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "MemeInstant",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Lus",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Recolles",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Perdus",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "VictimesBotLues",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Muet",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Ambigu",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Accord",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Contradiction",
+        "type": "int"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "types.StatRecord": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "TimeMS",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Slot",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Round",
+        "type": "int"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "Comps",
+        "type": "map[int]types.StatValue"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "types.StatValue": {
+    "fields": [
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "A",
+        "type": "int64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "B",
+        "type": "int64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "C",
+        "type": "int64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "D",
+        "type": "int64"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "HasC",
+        "type": "bool"
+      },
+      {
+        "anonymous": false,
+        "exported": true,
+        "json_tag": "",
+        "name": "HasD",
+        "type": "bool"
+      }
+    ],
+    "json_marshaler": false,
+    "kind": "struct",
+    "text_marshaler": false
+  },
+  "uint": {
+    "json_marshaler": false,
+    "kind": "uint",
+    "text_marshaler": false
+  },
+  "uint32": {
+    "json_marshaler": false,
+    "kind": "uint32",
+    "text_marshaler": false
+  },
+  "uint64": {
+    "json_marshaler": false,
+    "kind": "uint64",
+    "text_marshaler": false
+  }
+}

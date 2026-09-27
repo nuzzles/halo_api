@@ -1,0 +1,301 @@
+package replay
+
+import (
+ "bytes"
+ "log/slog"
+	"encoding/json"
+ "encoding/hex"
+ "levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/grammar"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"math/rand"
+	"os"
+	"sort"
+	"testing"
+)
+
+func TestHaloRustFactsGroundVehicleDocument(t *testing.T) {
+ previous := slog.Default(); defer slog.SetDefault(previous)
+	groundBytes,e:=os.ReadFile("/private/tmp/halo-facts-ground-items.json");if e!=nil{t.Fatal(e)}
+ var groundRows []struct {Objects []gwPickupObject; Changes []types.HeldWeaponChange; Positions []grammar.BipedPosition}
+ if e=json.Unmarshal(groundBytes,&groundRows);e!=nil{t.Fatal(e)}
+ rng := rand.New(rand.NewSource(872219))
+	rows := []any{}
+	for run := 0; run < 1024; run++ {
+		clock := replayClock{origin: uint64(run%7) * 100000, step: []uint64{0, 1, 100000, 200000}[run%4], frames: run%21 - 1}
+		in := vehicleRideInputs{clock: clock, drawable: map[types.EquipmentLifeKey]bool{}}
+		il := []lifeSpan{{slot: 0, from: 0, to: 900000, xuid: 1}, {slot: 1, from: 0, to: 300000, xuid: 2}, {slot: 1, from: 400000, to: 900000, xuid: 3}}
+		idx := map[uint64]int{1: 0, 2: 1, 3: 2}
+		owners, xuids, amb := ownersFromLives(il, idx)
+		in.reg = IdentityRegistry{own: OwnerReport{lives: il, Owner: owners, SlotXUID: xuids, SlotAmbiguous: amb}}
+		lifes := []any{}
+		draw := []types.EquipmentLifeKey{}
+		for i := 0; i < run%13; i++ {
+			key := types.EquipmentLifeKey{Slot: uint32(i/3 + 20), Gen: uint32(i % 3)+4294967290}
+			lo := uint64(rng.Intn(8)) * 100000
+			hi := lo + uint64(rng.Intn(5))*100000
+			l := vehicleLife{key: key, loUS: lo, hiUS: hi}
+			in.lives = append(in.lives, l)
+			lifes = append(lifes, map[string]any{"key": key, "lo": lo, "hi": hi})
+			if rng.Intn(4) != 0 {
+				in.drawable[key] = true
+				draw = append(draw, key)
+			}
+		}
+		occ := []types.VehicleOccupancy{}
+		for i := 0; i < run%49; i++ {
+			o := types.VehicleOccupancy{TimestampUS: uint64(rng.Intn(13)) * 100000, Slot: uint32(rng.Intn(5)), Gen: uint32(rng.Intn(4)), Attached: rng.Intn(4) != 0, ParentSlot: uint32(20 + rng.Intn(6)), ParentGen: uint32(rng.Intn(4)), HasSeat: rng.Intn(3) != 0, Seat: rng.Uint32()}
+			occ = append(occ, o)
+		}
+		in.occupancy = occ
+		points := []any{}
+		for i := 0; i < run%25; i++ {
+			p := grammar.BipedPosition{Slot: uint32(rng.Intn(5)), TimestampUS: uint64(rng.Intn(13)) * 100000, HasWorld: rng.Intn(3) != 0}
+			in.bipeds = append(in.bipeds, p)
+			points = append(points, map[string]any{"slot": p.Slot, "time": p.TimestampUS, "world": p.HasWorld})
+		}
+		aims := []grammar.BipedAim{}
+		for i := 0; i < run%151; i++ {
+			aims = append(aims, grammar.BipedAim{Slot: uint32(rng.Intn(5)), TimestampUS: uint64(rng.Intn(130)) * 10000, YawRaw: rng.Uint32(), PitchRaw: rng.Uint32()})
+		}
+		in.aimBySlot = vehicleAimBySlot(aims)
+		out, st := buildVehicleFilmRides(in)
+		keys := []types.EquipmentLifeKey{}
+		for k := range out.rides {
+			keys = append(keys, k)
+		}
+		sort.Slice(keys, func(i, j int) bool {
+			if keys[i].Slot != keys[j].Slot {
+				return keys[i].Slot < keys[j].Slot
+			}
+			return keys[i].Gen < keys[j].Gen
+		})
+		rides := []any{}
+		for _, k := range keys {
+			rides = append(rides, map[string]any{"key": k, "rides": out.rides[k]})
+		}
+		probes := []any{}
+		for i := 0; i < 20; i++ {
+			k := types.EquipmentLifeKey{Slot: uint32(20 + rng.Intn(6)), Gen: uint32(rng.Intn(4))}
+			r := VehicleRide{Slot: uint32(rng.Intn(5)), T0: rng.Intn(30) - 2, T1: rng.Intn(30) - 2}
+			probes = append(probes, map[string]any{"key": k, "ride": r, "contradicts": out.contredit(k, r)})
+		}
+		aimprobes := []any{}
+		for i := 0; i < 8; i++ {
+			start := uint64(rng.Intn(13)) * 100000
+			end := uint64(rng.Intn(13)) * 100000
+			v := aims
+			if i%2 == 0 {
+				v = in.aimBySlot[uint32(i%5)]
+			}
+			a := vehicleRideAimOf(v, start, end, clock)
+			if a == nil {
+				a = []VehicleAim{}
+			}
+			if v == nil {
+				v = []grammar.BipedAim{}
+			}
+			aimprobes = append(aimprobes, map[string]any{"input": v, "start": start, "end": end, "aim": a})
+		}
+		seatRng := rand.New(rand.NewSource(int64(run) + 881144))
+		seatInput := []any{}
+		seatMap := map[types.EquipmentLifeKey][]VehicleRide{}
+		for i := 0; i < 40; i++ {
+			k := types.EquipmentLifeKey{Slot: uint32(20 + i/8), Gen: uint32(i % 4)}
+			seat := seatRng.Intn(64)
+			r := VehicleRide{Slot: uint32(seatRng.Intn(5)), T0: seatRng.Intn(30) - 2, T1: seatRng.Intn(30) - 2, Seat: &seat}
+			seatMap[k] = append(seatMap[k], r)
+		}
+		seatKeys := []types.EquipmentLifeKey{}
+		for k := range seatMap {
+			seatKeys = append(seatKeys, k)
+		}
+		sort.Slice(seatKeys, func(i, j int) bool {
+			if seatKeys[i].Slot != seatKeys[j].Slot {
+				return seatKeys[i].Slot < seatKeys[j].Slot
+			}
+			return seatKeys[i].Gen < seatKeys[j].Gen
+		})
+		for _, k := range seatKeys {
+			v := append([]VehicleRide{}, seatMap[k]...)
+			seatInput = append(seatInput, map[string]any{"key": k, "rides": v})
+		}
+		seatCount := assignVehicleSeats(seatMap, occ, clock)
+		seatOutput := []any{}
+		for _, k := range seatKeys {
+			seatOutput = append(seatOutput, map[string]any{"key": k, "rides": seatMap[k]})
+		}
+		episodeRng := rand.New(rand.NewSource(int64(run) + 225578))
+		boards := map[uint32][]types.VehicleEvent{}
+		exits := map[uint32][]types.VehicleEvent{}
+		for j := 0; j < run%31; j++ {
+			e := types.VehicleEvent{Kind: 8, OccupantSlot: uint32(episodeRng.Intn(5)), TimestampUS: uint64(episodeRng.Intn(15)) * 100000, VehicleSlot: uint32(episodeRng.Intn(6) + 20), VehicleSlotValid: episodeRng.Intn(2) == 0}
+			if j%3 != 0 {
+				e.Kind = 22
+				exits[e.OccupantSlot] = append(exits[e.OccupantSlot], e)
+			} else {
+				boards[e.OccupantSlot] = append(boards[e.OccupantSlot], e)
+			}
+		}
+		for _, m := range []map[uint32][]types.VehicleEvent{boards, exits} {
+			for _, v := range m {
+				sort.SliceStable(v, func(i, j int) bool { return v[i].TimestampUS < v[j].TimestampUS })
+			}
+		}
+		epPts := map[uint32][]grammar.BipedPosition{}
+		for _, p := range in.bipeds {
+			epPts[p.Slot] = append(epPts[p.Slot], p)
+		}
+		for _, v := range epPts {
+			sort.SliceStable(v, func(i, j int) bool { return v[i].TimestampUS < v[j].TimestampUS })
+		}
+		episodes := vehicleEventEpisodes(boards, exits, epPts)
+		episodeOutput := []any{}
+		for _, e := range episodes {
+			episodeOutput = append(episodeOutput, map[string]any{"slot": e.slot, "start_us": e.startUS, "end_us": e.endUS, "borders": e.borders, "open_end": e.openEnd, "vehicle_slot": e.vehSlot, "vehicle_valid": e.vehValid, "vehicle_at_us": e.vehAtUS, "reappear_us": e.reappearUS})
+		}
+		coverProbes := []any{}
+		for j := 0; j < 20; j++ {
+			g := vehicleGap{slot: uint32(episodeRng.Intn(5)), startUS: uint64(episodeRng.Intn(15)) * 100000, endUS: uint64(episodeRng.Intn(15)) * 100000}
+			coverProbes = append(coverProbes, map[string]any{"slot": g.slot, "start": g.startUS, "end": g.endUS, "covers": vehicleEpisodeCovers(episodes, g)})
+		}
+		combined := in
+		combined.clock = replayClock{origin: uint64(run%3) * 100000, step: []uint64{0, 1, 100, 100000}[run%4], frames: run%151 - 1}
+		combinedRng := rand.New(rand.NewSource(int64(run) + 984474))
+		combined.bipeds = nil
+		combined.events = nil
+		combined.vehBySlot = map[uint32][]grammar.BipedPosition{}
+		combined.lives = nil
+		combinedLives := []any{}
+		for _, l := range in.lives {
+			l.loUS *= 10
+			l.hiUS *= 10
+			combined.lives = append(combined.lives, l)
+			combinedLives = append(combinedLives, map[string]any{"slot": l.key.Slot, "generation": l.key.Gen, "lo_us": l.loUS, "hi_us": l.hiUS})
+		}
+		for j := 0; j < run%60; j++ {
+			p := grammar.BipedPosition{Slot: uint32(combinedRng.Intn(5)), TimestampUS: uint64(combinedRng.Intn(15)) * 1000000, X: float32(combinedRng.Intn(12)) / 2, Y: float32(combinedRng.Intn(4)) / 2, HasWorld: combinedRng.Intn(4) != 0}
+			combined.bipeds = append(combined.bipeds, p)
+		}
+		allVehicles := []grammar.BipedPosition{}
+		for j := 0; j < run%80; j++ {
+			p := grammar.BipedPosition{Slot: uint32(combinedRng.Intn(6) + 20), TimestampUS: uint64(combinedRng.Intn(15)) * 1000000, X: float32(combinedRng.Intn(12)) / 2, Y: float32(combinedRng.Intn(4)) / 2, HasWorld: true}
+			allVehicles = append(allVehicles, p)
+		}
+		combined.vehBySlot = vehiclePositionsBySlot(allVehicles)
+		for j := 0; j < run%31; j++ {
+			e := types.VehicleEvent{Kind: []int{8,22,53,264,278,4294967304,4294967318,-9223372036854775808}[combinedRng.Intn(8)], OccupantSonde:-4294967296, OccupantPresent: combinedRng.Intn(5) != 0, OccupantInBand: combinedRng.Intn(6) != 0, OccupantSlot: uint32(combinedRng.Intn(5)), TimestampUS: uint64(combinedRng.Intn(15)) * 1000000, VehicleSlot: uint32(combinedRng.Intn(6) + 20), VehicleSlotValid: combinedRng.Intn(2) == 0}
+			combined.events = append(combined.events, e)
+		}
+		combinedOut, cs := buildVehicleRides(combined)
+		combinedKeys := []types.EquipmentLifeKey{}
+		for k := range combinedOut {
+			combinedKeys = append(combinedKeys, k)
+		}
+		sort.Slice(combinedKeys, func(i, j int) bool {
+			if combinedKeys[i].Slot != combinedKeys[j].Slot {
+				return combinedKeys[i].Slot < combinedKeys[j].Slot
+			}
+			return combinedKeys[i].Gen < combinedKeys[j].Gen
+		})
+		combinedRides := []any{}
+		for _, k := range combinedKeys {
+			combinedRides = append(combinedRides, map[string]any{"key": k, "rides": combinedOut[k]})
+		}
+		combinedPoints := []any{}
+		for _, p := range combined.bipeds {
+			combinedPoints = append(combinedPoints, p)
+		}
+		combinedEvents := []any{}
+		for _, e := range combined.events {
+			combinedEvents = append(combinedEvents, e)
+		}
+		var logBuf bytes.Buffer
+        slog.SetDefault(slog.New(slog.NewJSONHandler(&logBuf, nil)))
+        logVehicleRideResolution(cs)
+        rideLogs := []any{}
+        decoder := json.NewDecoder(&logBuf)
+        for decoder.More() { event := map[string]any{}; if err := decoder.Decode(&event); err != nil { t.Fatal(err) }; delete(event, "time"); rideLogs = append(rideLogs, event) }
+        combinedRow := map[string]any{"ride_logs": rideLogs, "origin": combined.clock.origin, "step": combined.clock.step, "frames": combined.clock.frames, "lives": combinedLives, "positions": combinedPoints, "vehicles": allVehicles, "events": combinedEvents, "rides": combinedRides, "tally": map[string]any{"episodes": cs.episodes, "named": cs.nommes, "lost": cs.perdus, "by_event": cs.parEvenement, "by_nearest_event": cs.parEvenementProche, "by_geometry": cs.parGeometrie, "gap_fallbacks": cs.repli, "seats": cs.sieges, "rejected": cs.ecartes, "borders_two": cs.bornes2, "borders_one": cs.bornes1, "borders_zero": cs.bornes0, "film": map[string]any{"reads": cs.film.lectures, "named": cs.film.nommees, "outside_life": cs.film.horsVie, "not_drawable": cs.film.nonDessinable, "published": cs.film.publies, "closed_by_read": cs.film.fermetureParLecture, "closed_by_return": cs.film.fermetureParRetour, "closed_by_life": cs.film.fermetureParVie}}}
+
+		kf := grammar.WorldObjectKeyframes{SeenUS: map[types.EquipmentLifeKey][]uint64{}, TimesUS: []uint64{0, 4000000, 8000000, 12000000, 16000000}}
+		seen := []any{}
+		creations := []types.EquipmentCreation{}
+		deathInputs := []types.ObjectDeath{}
+		deathRows := []any{}
+		for i, l := range combined.lives {
+			times := []uint64{l.loUS + uint64(i), l.hiUS + uint64(i)}
+			kf.SeenUS[l.key] = times
+			seen = append(seen, map[string]any{"slot": l.key.Slot, "generation": l.key.Gen, "times_us": times})
+			if i%3 != 0 {
+				creation := types.EquipmentCreation{Slot: l.key.Slot, Gen: l.key.Gen, TimestampUS: times[0], X: float32(i % 3), Y: 0, Mask: []int{}}
+				creation.MPPPresent[grammar.MPPWord32] = i%4 != 0
+				creation.MPPVal[grammar.MPPWord32] = []uint64{0x2705, 0x26f0, 0xdeadbeef}[i%3]
+				creations = append(creations, creation)
+			}
+			if i%2 == 0 {
+				d := types.ObjectDeath{Slot: l.key.Slot, Gen: l.key.Gen, TimestampUS: times[1], TailDesync: i%4 == 0}
+				deathInputs = append(deathInputs, d)
+				deathRows = append(deathRows, map[string]any{"slot": d.Slot, "generation": d.Gen, "timestamp_us": d.TimestampUS, "tail_desync": d.TailDesync})
+			}
+		}
+		scan := VehicleScan{Scanned: run%7 != 0, Keyframes: kf, Creations: creations, Positions: allVehicles, Events: combined.events, Aims: aims, Deaths: deathInputs, Occupancy: occ}
+		scan.DeathStats.CadreParDefaut = run%3 == 0
+        lay:=profile.I0Layout{AxisW:[3]uint{8,8,8}}
+        world:=profile.Vec3Range{{0,128},{0,128},{0,128}}
+        for j:=range scan.Positions {
+            p:=&scan.Positions[j];p.Q=[3]uint32{uint32(p.X*2),uint32(p.Y*2),uint32(j%8)}
+            p.HasAim=j%3!=0;p.AimRaw=rng.Uint32();p.HasRoll=j%2==0;p.RollRaw=rng.Uint32();p.FwdMode=byte(j%4)
+            p.HasVel=j%4!=0;p.VelRaw=uint32(j*191);p.VelScale=rng.Uint32()
+        }
+        for j:=range scan.Creations {scan.Creations[j].MPPVal[grammar.MPPWord32]|=uint64(1)<<48;scan.Creations[j].Chunk=-4294967296;scan.Creations[j].PacketIndex=4294967296;scan.Creations[j].Mask=[]int{-9223372036854775808,4294967296,9223372036854775807}}
+        wire:=gwriter{};encodeVehicleScan(&wire,scan);if wire.echec!=nil {t.Fatal(wire.echec)}
+        reader:=greader{b:wire.b};scan=decodeVehicleScan(&reader,lay,world);if reader.err!=nil||reader.off!=len(wire.b) {t.Fatalf("cache scan %v %d",reader.err,reader.off)}
+		pubClock := combined.clock
+		pubClock.fb = fallback.NouveauCompteur()
+		pubTracks, pubCoverage, pubStats := buildVehicleTracks(scan, combined.bipeds, in.reg, pubClock)
+		pubCycles := buildVehicleCycles(pubTracks, pubClock.step, &pubCoverage)
+		if pubCycles == nil {
+			pubCycles = []VehicleCycle{}
+		}
+		if pubTracks == nil {
+			pubTracks = []VehicleTrack{}
+		}
+		fallbackCounts := map[string]int{}
+		for _, f := range pubClock.fb.Rapport() {
+			fallbackCounts[string(f.Nom)] = f.Declenchements
+		}
+		publication := map[string]any{"scanned": scan.Scanned, "default_retained": scan.DeathStats.CadreParDefaut, "census": map[string]any{"band": []uint32{}, "times_us": kf.TimesUS, "seen_us": seen}, "creations": creations, "deaths": deathRows, "output": map[string]any{"cycles": pubCycles, "tracks": pubTracks, "coverage": pubCoverage, "fallbacks": fallbackCounts, "rides": map[string]any{"episodes": pubStats.episodes, "named": pubStats.nommes, "lost": pubStats.perdus, "by_event": pubStats.parEvenement, "by_nearest_event": pubStats.parEvenementProche, "by_geometry": pubStats.parGeometrie, "gap_fallbacks": pubStats.repli, "seats": pubStats.sieges, "rejected": pubStats.ecartes, "borders_two": pubStats.bornes2, "borders_one": pubStats.bornes1, "borders_zero": pubStats.bornes0, "film": map[string]any{"reads": pubStats.film.lectures, "named": pubStats.film.nommees, "outside_life": pubStats.film.horsVie, "not_drawable": pubStats.film.nonDessinable, "published": pubStats.film.publies, "closed_by_read": pubStats.film.fermetureParLecture, "closed_by_return": pubStats.film.fermetureParRetour, "closed_by_life": pubStats.film.fermetureParVie}}}}
+        ground:=groundRows[run%len(groundRows)]
+        sorted:=append([]grammar.BipedPosition{},combined.bipeds...)
+        sorted=append(sorted,ground.Positions...)
+        sort.SliceStable(sorted,func(i,j int)bool{return sorted[i].TimestampUS<sorted[j].TimestampUS})
+        tracks:=[]Track{};for slot:=0;slot<5;slot++{if (run+slot)%4!=0{tracks=append(tracks,Track{Slot:uint32(slot),Points:[]Point{}})}}
+        cov:=LayerCoverage{Available:1,Attached:1}
+        orphans:=[]orphanShot{};orphanRows:=[]any{}
+        for j:=0;j<run%45;j++{
+          ev:=grammar.FireEvent{TimestampUS:uint64(j%17)*100000,FilmIndex:j%4,WeaponID:0x123456789,HasAim:j%3!=0,Aim:[3]float32{1,0,0}}
+          reason:=reasonNoSlot;name:="NoSlot";if j%2==0{reason=reasonOutOfWindow;name="OutOfWindow";cov.OutOfWindow++}else{cov.NoSlot++};cov.Available++
+          orphans=append(orphans,orphanShot{ev:ev,reason:reason});orphanRows=append(orphanRows,map[string]any{"event":ev,"reason":name})
+        }
+        doc:=ReplayDocument{FrameCount:pubClock.frames,Tracks:tracks,Shots:[]Shot{{T:3,Slot:0,X:12,Y:14}},Vehicles:[]VehicleTrack{{Slot:99}},VehicleCycles:[]VehicleCycle{{}},GroundWeapons:[]GroundWeapon{{W:"seed"}},Coverage:&Coverage{Shots:cov,Verdict:map[string]string{"shots":"seed","other":"preserved"}}}
+        before,_:=json.Marshal(doc)
+        opt:=Options{WeaponChanges:ground.Changes,Vehicles:scan,Fallbacks:fallback.NouveauCompteur()}
+        a:=assemblage{doc:doc,opt:opt,sorted:sorted,origin:pubClock.origin,step:pubClock.step,reg:in.reg,gwObjs:ground.Objects,shotOrphans:orphans}
+        logBuf.Reset();slog.SetDefault(slog.New(slog.NewJSONHandler(&logBuf,nil)))
+        a.poserArmesAuSolEtVehicules()
+        logs:=[]any{};decoder=json.NewDecoder(&logBuf);for decoder.More(){v:=map[string]any{};if e:=decoder.Decode(&v);e!=nil{t.Fatal(e)};delete(v,"time");logs=append(logs,v)}
+        fb:=map[string]int{};for _,f:=range opt.Fallbacks.Rapport(){fb[string(f.Nom)]=f.Declenchements}
+        rows=append(rows,map[string]any{"before":json.RawMessage(before),"after":a.doc,"logs":logs,"fallbacks":fb,"scan_wire":hex.EncodeToString(wire.b),"objects":ground.Objects,"changes":ground.Changes,"positions":sorted,"origin":pubClock.origin,"step":pubClock.step,"orphans":orphanRows})
+        _=publication;_=combinedRow;_=st;_=seatCount
+
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-facts-ground-vehicle-document.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

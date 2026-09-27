@@ -1,0 +1,36 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded-context inventory-delta scanning with native hook/visitor publication gates and whole-film ammo refusal",
+  "fixture": {
+    "path": "context-inventory-v41.json.zlib",
+    "sha256": "9da8235d214677a52fc8d9f814fc6050ef28e5afc0a2d80e72e83afe597cb9ed",
+    "generator": "halo_rust_context_inventory_test.go.txt",
+    "cases": 48,
+    "records": 10465,
+    "attempts": 30372,
+    "ammo_refused_cases": 8
+  },
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-inventory-host.log",
+    "tests_passed": 3
+  },
+  "wasm": {
+    "status": "passed",
+    "prefix": "native_context_inventory::",
+    "log": "/private/tmp/halo-context-inventory-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-inventory-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Controlled native-generated source payloads with synthetic registry, not independently annotated gameplay",
+    "Successful setup covered; missing registry/profile/layout/component admission comparisons remain open",
+    "Complete carried-inventory phase composition remains open",
+    "Native facts projection intentionally omits delta ammo, file/packet locations and diagnostics; source scan retains them"
+  ]
+}

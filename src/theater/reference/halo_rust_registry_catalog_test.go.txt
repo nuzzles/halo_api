@@ -1,0 +1,12 @@
+package grammar
+import("testing";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustRegistryCatalog(t *testing.T){
+ rows:=[]any{};table:=profile.EmpreintesRegistre()
+ builds:=[]string{"HI_1_13_0","HI_1_12_0","HI_1_11_0","HI_1_10_0","HI_1_9_0","HI_1_8_0","HI_1_4_1","","HI_1_14_0","hi_1_13_0","HI_1_13_0 ","HI_新"}
+ fingerprints:=[]uint64{0,^uint64(0),1};for _,e:=range table{fingerprints=append(fingerprints,e.Empreinte,e.Empreinte^1)}
+ for _,build:=range builds{for _,fp:=range fingerprints{
+  entry,ok:=profile.EmpreinteRegistreAttendue(build,41);var expected any;if ok{expected=entry}
+  rows=append(rows,map[string]any{"build":build,"fingerprint":fp,"expected":expected,"catalogued":profile.EmpreinteAuCatalogue(fp),"status":profile.ClasserEmpreinteRegistre(build,41,fp)})
+ }}
+ b,e:=json.Marshal(map[string]any{"table":table,"rows":rows});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-registry-catalog.json",b,0600);e!=nil{t.Fatal(e)}
+}

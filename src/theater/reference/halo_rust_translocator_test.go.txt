@@ -1,0 +1,29 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"encoding/binary";"math/rand";"path/filepath";"sort";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustTranslocatorParity(t *testing.T) {
+ catalog,err:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if err!=nil{t.Fatal(err)}
+ rows:=[]any{}
+ add:=func(data []byte, entry *profile.MapQuantEntry, source string) {
+  ev,ok:=decodeTranslocHead(data,1000,entry)
+  row:=map[string]any{"map":entry,"hex":hex.EncodeToString(data),"event":ev,"ok":ok,"source":source}
+  if ok {br:=LecteurSur(data);br.SetBitPos(20);decodeTranslocJump(br,entry);row["end_bit"]=br.BitPos()}
+  rows=append(rows,row)
+ }
+ names:=[]string{};for name:=range catalog.Maps{names=append(names,name)};sort.Strings(names)
+ rng:=rand.New(rand.NewSource(117))
+ for _,name:=range names {e:=catalog.Maps[name];for mode:=0;mode<8;mode++ {
+  w:=translocHead(uint32(rng.Intn(256)))
+  if mode==3 {w.put(1,1);w.put(1,0);add(w.pay,&e,"synthetic:"+name);continue}
+  w.put(1,0);w.put(1,0);w.put(1,uint64(mode&1));if mode&1!=0{w.put(32,uint64(rng.Uint32()))}
+  for vec:=0;vec<2;vec++ {
+   defaults:=mode==2||mode==7
+   if defaults{w.put(1,1)}else {w.put(1,0);region:=e.Region;if mode==4{region^=1};w.put(int(e.EffectiveRegionIndexBits()),uint64(region))}
+   for ax:=0;ax<3;ax++ {width:=e.AxisWidths[ax];if defaults{width=22};w.put(int(width),uint64(rng.Uint32())&((uint64(1)<<width)-1))}
+  }
+  pay:=w.pay;if mode==6 {pay=pay[:len(pay)-3]}
+  if mode==5{add(pay,nil,"synthetic:"+name)}else{add(pay,&e,"synthetic:"+name)}
+ }}
+ paths,err:=filepath.Glob("/Users/simbleau/git/halo_api/experiments/films/*/*/chunk-*-type-2.bin");if err!=nil{t.Fatal(err)}
+ for _,p:=range paths {data,e:=os.ReadFile(p);if e!=nil{t.Fatal(e)};for at:=0;at+16<=len(data);{n:=int(binary.LittleEndian.Uint32(data[at+4:]));if at+16+n>len(data){t.Fatal("size")};pay:=data[at+16:at+16+n];if binary.LittleEndian.Uint16(data[at:])==0&&len(pay)>=3&&pay[0]==0xfa {kind,present:=PacketHeadEventType(pay);if present&&kind==117 {add(pay,nil,p)}};at+=16+n}}
+ d,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-levelup-translocator-oracle.json",d,0600);err!=nil{t.Fatal(err)}
+}

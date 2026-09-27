@@ -1,0 +1,24 @@
+package replay
+import("testing";"os";"bytes";"encoding/json";"encoding/hex";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustScanCapture(t *testing.T) {
+ raw,e:=os.ReadFile("/private/tmp/halo-i0-loaded.json");if e!=nil{t.Fatal(e)};var seeds []struct{Chunks []struct{Index int `json:"index"`;Hex string `json:"hex"`} `json:"chunks"`};if e=json.Unmarshal(raw,&seeds);e!=nil{t.Fatal(e)}
+ raw,e=os.ReadFile("/private/tmp/halo-facts-players.json");if e!=nil{t.Fatal(e)};var base []struct{Input string};if e=json.Unmarshal(raw,&base);e!=nil{t.Fatal(e)}
+ blob,e:=hex.DecodeString(base[10].Input);if e!=nil{t.Fatal(e)}
+ entry:=profile.MapQuantEntry{Module:"map",AxisWidths:[3]uint{13,14,15},Min:[3]float32{-10,-30,-50},Max:[3]float32{100,300,500}}
+ input,e:=DecodeFilmFactsFile(blob,entry);if e!=nil{t.Fatal(e)};rows:=[]any{}
+ for n:=0;n<24;n++ {
+  seed:=n;if n<16 {seed=128+n};chunks:=[]any{};bufs:=source.MemoryChunks{};meta:=[]types.ChunkMeta{}
+  if n%3!=2 {for _,c:=range seeds[seed].Chunks {b,e:=hex.DecodeString(c.Hex);if e!=nil{t.Fatal(e)};bufs=append(bufs,b);meta=append(meta,types.ChunkMeta{Index:c.Index});chunks=append(chunks,map[string]any{"index":c.Index,"hex":c.Hex})}}
+  var film *source.Film;if len(bufs)>0 {film,e=source.Load(bufs,meta);if e!=nil{t.Fatal(e)}}
+  var imposed *profile.I0Layout;if n%3==1 {imposed=&profile.I0Layout{GateBits:5,AxisW:[3]uint{16,17,18},Region:7}}
+  fc:=grammar.NewFilmContextForMap(film,nil,imposed)
+  var mapEntry *profile.MapQuantEntry;if n%4!=0 {copy:=entry;copy.Module="capture\xff";mapEntry=&copy}
+  var counter *fallback.Compteur;if n%4!=1 {counter=fallback.NouveauCompteur();counter.DeclencheN(fallback.Nom("repli_manche_zero_decretee"),n%5)}
+  id:=&profile.FilmIdentity{Build:"HI_1_13_0",FormatVersion:27,RegistryFingerprint:1,RegistryBlocks:-1,RegistryNamedSlots:4294967296,TypeVersions:[]uint32{41,27}};if n%5==0{id=nil};var original *profile.FilmIdentity;if id!=nil{copy:=*id;original=&copy}
+  f:=faitsDuBalayage("capture\x00film",fc,Options{MapQuant:mapEntry,FilmIdentity:id,Fallbacks:counter},input.Facts.FilmInputs)
+  var expected any;if f!=nil {b,e:=EncodeFilmFactsFile(f);if e!=nil{t.Fatal(e)};expected=hex.EncodeToString(b);if id!=nil{id.Build="mutated"};counter.DeclencheN(fallback.Nom("repli_manche_zero_decretee"),99);after,e:=EncodeFilmFactsFile(f);if e!=nil||!bytes.Equal(b,after){t.Fatal("capture alias")}}
+  module:="";if mapEntry!=nil{module=mapEntry.Module}
+  rows=append(rows,map[string]any{"chunks":chunks,"imposed":imposed,"map_present":mapEntry!=nil,"module_hex":hex.EncodeToString([]byte(module)),"identity":original,"counter_present":counter!=nil,"hits":n%5,"expected":expected})
+ }
+ raw,e=json.Marshal(map[string]any{"input":base[10].Input,"rows":rows});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-scan-capture.json",raw,0600);e!=nil{t.Fatal(e)}
+}

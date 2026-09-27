@@ -1,0 +1,9 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustEquipmentCreationProbe(t *testing.T){
+ var seeds []struct{Hex string};b,e:=os.ReadFile("/private/tmp/halo-equipment-creations.json");if e!=nil{t.Fatal(e)};if e=json.Unmarshal(b,&seeds);e!=nil{t.Fatal(e)};rows:=[]any{}
+ for n:=0;n<160;n++{pay,e:=hex.DecodeString(seeds[(n*5+n/32)%len(seeds)].Hex);if e!=nil{t.Fatal(e)};prof:=ProfilDeBalayageParDefaut();prof.PoserLargeursObjetDuMonde(profile.PrecisionDescriptor{IndexW:1,AxisW:[3]uint{16,17,18}});prof.MPP=profile.MPPWidths{Lead:[]int{9,0,33,65,9}[n%5],Index:5};wr:=profile.Vec3Range{{Min:-100,Max:300},{Min:-200,Max:400},{Min:-300,Max:500}};band:=map[uint32]bool{512:true,513:true,515:true};attempts:=[]any{}
+ for p:=0;p<=len(pay)*8-24;p++{slot,gen,ok:=matchEquipmentNewHeader(pay,p,band);if !ok{continue};var cur equipCreationRead;walk:=equipCreationWalk{obs:installCreationHooks(&cur),prof:prof,comps:31,wr:&wr,band:band,cur:&cur};var st types.EquipmentCreationStats;cre,ok:=walk.readCreation(pay,p,len(pay)*8,&st);if ok{cre.Slot=slot;cre.Gen=gen;cre.BitPos=p};attempts=append(attempts,map[string]any{"bit":p,"ok":ok,"creation":cre,"stats":st})}
+ rows=append(rows,map[string]any{"hex":hex.EncodeToString(pay),"lead":prof.MPP.Lead,"index":prof.MPP.Index,"attempts":attempts})
+ };b,e=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-equipment-creation-probe.json",b,0600);e!=nil{t.Fatal(e)}
+}

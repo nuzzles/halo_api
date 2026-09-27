@@ -1,0 +1,24 @@
+package grammar
+import("testing";"os";"encoding/json";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustMovementTrace(t *testing.T) {
+ folder:=os.Getenv("HALO_TRACE_FOLDER");if folder==""{folder="maps/01-bazaar-idle"};mapName:="recharge";widths:=[3]uint{18,18,15};if folder=="maps/01-bazaar-idle"{mapName="bazaar";widths=[3]uint{17,17,16}}
+ root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder)
+ manifest,err:=os.ReadFile(filepath.Join(root,"film.json"));if err!=nil{t.Fatal(err)}
+ var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}}
+ if err=json.Unmarshal(manifest,&meta);err!=nil{t.Fatal(err)}
+ var chunks source.MemoryChunks;var metadata []types.ChunkMeta
+ for _,c:=range meta.Chunks{d,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,d);metadata=append(metadata,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})}
+ film,err:=source.Load(chunks,metadata);if err!=nil{t.Fatal(err)}
+ catalog,err:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if err!=nil{t.Fatal(err)}
+ entry,err:=catalog.Lookup(mapName);if err!=nil{t.Fatal(err)}
+ fc:=NewFilmContextForMap(film,&entry,nil);fc.PoserLargeursObjetDuMonde(profile.PrecisionDescriptor{IndexW:1,AxisW:widths})
+ reg,err:=fc.Registry();if err!=nil{t.Fatal(err)}
+ sc:=&movementStateScanner{st:&types.MovementStateStats{},monde:NewWorld(reg)};sc.monde.PoserTableAnticipee(ConstruireTableAnticipee(fc));cfg:=fc.CadreDeBalayage();rows:=[]any{}
+ for _,c:=range fc.ChunkNumbers(){data,pks,ok:=fc.ChunkAt(c);if !ok{continue};sc.monde.PoserChunkCourant(c);sc.lierLeMonde(data,pks)
+  for _,pk:=range pks{if pk.Type!=PacketTypeDelta||pk.Size<1{continue};pay:=pk.Payload(data);start:=2;if _,ok:=PacketHeadEventType(pay);ok{start=marchLocateStrict(pay,sc.monde,cfg);if start<0{continue}}
+   recs,views,end:=DecodeFrameViewsCurseur(pay,sc.monde,cfg,3,start)
+   rows=append(rows,map[string]any{"chunk":c,"packet":pk.Index,"start":start,"end":end,"views":views,"records":recs})
+  }
+ }
+ d,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-movement-trace.json",d,0600);err!=nil{t.Fatal(err)}
+}

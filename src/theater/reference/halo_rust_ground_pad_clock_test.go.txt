@@ -1,0 +1,17 @@
+package replay
+import("testing";"os";"encoding/json";"math/rand";"math")
+func TestHaloRustGroundPadClockDomain(t *testing.T){
+ domain:=[]int{-9223372036854775808,-4294967296,-1,0,1,40,4294967296,9223372036854775807};rng:=rand.New(rand.NewSource(7542));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  app:=[]gwPadApparition{};objs:=[]gwPickupObject{};members:=[]int{}
+  for i:=0;i<run%129;i++{a:=gwPadApparition{Kind:[]string{"weapon","powerup"}[rng.Intn(2)],Family:[]string{"a","b"}[rng.Intn(2)],X:float32(rng.Intn(30))/10,Y:float32(rng.Intn(30))/10,Z:float32(rng.Intn(3))/10,TUS:uint64(rng.Intn(10))*1000000,Class:[]string{"spawned","dropped"}[rng.Intn(2)],HasDelta:rng.Intn(2)==0};if i%7==6 {a.TUS=^uint64(0)-uint64(i)};app=append(app,a);status:=[]string{"dated","never","unknown"}[rng.Intn(3)];objs=append(objs,gwPickupObject{Appar:a,FamilyID:rng.Uint32(),Status:status,Picker:gwPickupHit{TUS:uint64(rng.Intn(10))*1000000,Found:status=="dated"}});members=append(members,i)}
+  clusters,assign:=gwPadsClusterAssign(app);kept,src:=gwPadsKeep(clusters);gaps,missing:=gwPickupPadGaps(objs,members)
+  cycleGaps:=[]float64{};for i:=0;i<run%12;i++{v:=float64(rng.Intn(100))/10;if run%3==0{v=10+v/100};cycleGaps=append(cycleGaps,v)};cycle:=gwPadsCycleFromGaps(cycleGaps)
+  if clusters==nil{clusters=[]gwPadCluster{}};if gaps==nil{gaps=[]float64{}}
+  counts:=padChainCounts{};rest,source:=gwAtRestOf(objs,&counts);cs,as:=gwPadsClusterAssign(rest);retain,orig:=gwPadsKeep(cs);memberMap:=map[int][]int{};for j,idx:=range as{memberMap[idx]=append(memberMap[idx],source[j])};pads:=[]WeaponPad{};pickups:=[]PadPickup{};cov:=GroundWeaponCoverage{};clock:=replayClock{origin:[]uint64{0,2000000,^uint64(0)}[run%3],step:[]uint64{1,100000,^uint64(0)}[run%3],frames:domain[run%len(domain)]};for i,c:=range retain{pad,picks:=gwBuildPad(c,objs,memberMap[orig[i]],clock,&cov);for j:=range picks{picks[j].Pad=len(pads)};pads=append(pads,pad);pickups=append(pickups,picks...)}
+  layer:=map[string]any{"pads":pads,"pickups":pickups,"counts":map[string]any{"dropped":counts.dropped,"spawned":counts.spawned,"atRest":counts.atRest,"clusters":len(cs),"pads":len(pads),"occupancies":cov.Occupancies,"dated":cov.Dated,"unknown":cov.Unknown,"never":cov.Never,"cycles":cov.Cycles}}
+  rows=append(rows,map[string]any{"clock":map[string]any{"origin_us":clock.origin,"step_us":clock.step,"frames":clock.frames},"layer":layer,"appearances":app,"clusters":clusters,"assignments":assign,"kept":kept,"source":src,"objects":objs,"members":members,"gaps":gaps,"missing":missing,"cycle_gaps":cycleGaps,"cycle":cycle,"cycle_bits":[]uint64{math.Float64bits(cycle.MedianS),math.Float64bits(cycle.P10S),math.Float64bits(cycle.P90S),math.Float64bits(cycle.SDS)}})
+ }
+ d,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-ground-pad-clock.json",d,0600);e!=nil{t.Fatal(e)}
+}
+

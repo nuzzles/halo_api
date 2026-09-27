@@ -1,0 +1,23 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "parent_cases": 32,
+  "timer_cases": 4,
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "regression": "Before correction, payload 2/1 selected parameter 0 instead of native parameter 1 at the same bit 172.",
+  "focused_host": "passed: six payload tests; 0.30s",
+  "full_suite": "passed: 625 tests, zero failures, 49 ignored; 108.71s",
+  "clippy": "passed after test-only normalization; 36.37s including lock wait",
+  "wasm": "actual runtime passed, including 36 overlapping-payload cases; 28.04s build",
+  "captured_march": "passed: four films; 109.91s release",
+  "complete_documents": "passed: six films; 156.87s release",
+  "pinned_source_hashes": 485,
+  "format": "passed",
+  "diff_check": "passed",
+  "test_normalization": "Native probe comparison now validates additional Rust field/observation ranges separately and compares all native fields unchanged. Production sources unchanged after release compilation.",
+  "native_regeneration": "36-case fixture matches generator output byte-for-byte",
+  "remaining": [
+    "Component iteration beyond 64 in generic/full-keyframe/inference paths; native generic/keyframe oracle ready",
+    "Other nested/runtime and source contracts",
+    "Complete all-data v41 corpus acceptance"
+  ]
+}

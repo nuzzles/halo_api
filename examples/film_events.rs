@@ -1,51 +1,60 @@
-//! Downloads a Theater film and prints its decoded player-event timeline.
-
+//! Downloads only the version-41 footer and prints the recorded event timeline.
 mod common;
 
-use halo_api::clients::hi::film::FilmEventKind;
+use halo_api::theater::SummaryKind;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
-    let film = halo.match_film(&match_id).await?;
-    eprintln!(
-        "film_major_version: {}",
-        film.custom_data.film_major_version
-    );
-    let events = halo.match_highlight_events(&match_id).await?;
-
+    let report = halo.match_summary_events_with_validation(&match_id).await?;
     println!("Timeline:");
-    let mut kills = std::collections::BTreeMap::<String, usize>::new();
-    let mut deaths = std::collections::BTreeMap::<String, usize>::new();
-    for event in events {
-        let seconds = event.timestamp_ms as f64 / 1_000.0;
-        match event.kind {
-            FilmEventKind::Kill | FilmEventKind::Death | FilmEventKind::Mode => println!(
-                "  {seconds:>8.3}s  {:<16} {:?} (metadata {})",
-                event.gamertag, event.kind, event.metadata
+    for event in &report.summary.events {
+        let seconds = event.time_us as f64 / 1_000_000.;
+        match &event.medal {
+            Some(medal) => println!(
+                "  {seconds:>8.3}s  {:<16} {} (film code {}, NameId {:?})",
+                event.name,
+                medal.name.as_deref().unwrap_or("Unknown medal"),
+                medal.film_id,
+                medal.name_id,
             ),
-            FilmEventKind::Medal => {
-                let medal = event.medal().expect("medal event has medal metadata");
-                println!(
-                    "  {seconds:>8.3}s  {:<16} {} (film medal {})",
-                    event.gamertag,
-                    medal.name(),
-                    event.metadata
-                );
-            }
-            FilmEventKind::Other(code) => println!(
-                "  {seconds:>8.3}s  {:<16} unclassified event code {code} (metadata {})",
-                event.gamertag, event.metadata
+            None => println!(
+                "  {seconds:>8.3}s  {:<16} {:?} (type {:?}, metadata {})",
+                event.name, event.kind, event.type_code, event.metadata,
             ),
-        }
-        match event.kind {
-            FilmEventKind::Kill => *kills.entry(event.gamertag).or_default() += 1,
-            FilmEventKind::Death => *deaths.entry(event.gamertag).or_default() += 1,
-            _ => {}
         }
     }
-    println!("Kills:  {kills:?}");
-    println!("Deaths: {deaths:?}");
+    let count = |kind| {
+        report
+            .summary
+            .events
+            .iter()
+            .filter(|e| e.kind == kind)
+            .count()
+    };
+    println!(
+        "Kills: {}, deaths: {}, medals: {}, mode events: {}",
+        count(SummaryKind::Kill),
+        count(SummaryKind::Death),
+        count(SummaryKind::Medal),
+        count(SummaryKind::Mode)
+    );
+    println!(
+        "Matches declared footer count: {}",
+        report.summary.matches_declared_counts()
+    );
+    println!(
+        "Matches per-player stats and medal identities: {}",
+        report.validation.matches_stats()
+    );
+    for player in report
+        .validation
+        .players
+        .iter()
+        .filter(|p| !p.matches_stats())
+    {
+        println!("Mismatch: {player:?}");
+    }
     Ok(())
 }

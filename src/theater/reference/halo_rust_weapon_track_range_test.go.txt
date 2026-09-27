@@ -1,0 +1,55 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestHaloRustWeaponTrackRange(t *testing.T) {
+	raw, err := os.ReadFile("/Users/simbleau/git/halo_api/experiments/films/maps/01-bazaar-idle/chunk-002-type-2.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, err := catalog.Lookup("bazaar")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := []any{}
+	for _, indices := range [][]int{{1}, {2}, {1, 3}, {3, 1, 2}} {
+		dir := t.TempDir()
+		for _, index := range indices {
+			if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("chunk_%02d.bin", index)), raw, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for _, n := range []int{0, 1, 2, 3} {
+			tracks, err := BuildBipedTracks(dir, entry, n)
+			if err != nil {
+				t.Log(indices, n, err)
+			}
+			wire := map[uint32][]any{}
+			for slot, samples := range tracks {
+				for _, p := range samples {
+					wire[slot] = append(wire[slot], map[string]any{"timestamp_us": p.ts, "position": [3]float32{p.x, p.y, p.z}})
+				}
+			}
+			rows = append(rows, map[string]any{"indices": indices, "last": n, "error": err != nil, "tracks": wire})
+		}
+	}
+	out, err := json.Marshal(map[string]any{"chunk_hex": hex.EncodeToString(raw), "map": entry, "cases": rows})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile("/private/tmp/halo-weapon-track-range.json", out, 0600); err != nil {
+		t.Fatal(err)
+	}
+}

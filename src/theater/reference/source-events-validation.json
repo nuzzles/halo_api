@@ -1,0 +1,42 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded-source fire and translocator scanners plus native facts projections",
+  "fixtures": [
+    {
+      "path": "fire-scanner-v41.json.zlib",
+      "sha256": "9d085dae2bd3b142912de6fb7c01696bc888ddf42f9dd0f8bcf85274ce9f8fb4",
+      "cases": 48,
+      "events": 35,
+      "generator": "halo_rust_fire_test.go.txt"
+    },
+    {
+      "path": "translocator-source-v41.json.zlib",
+      "sha256": "f8fd550cd728d3a8a4faab966ca3d0b20b6a717c2aca50a7c12b37a73f6c1b7e",
+      "cases": 128,
+      "events": 1000,
+      "generator": "halo_rust_translocator_source_test.go.txt"
+    }
+  ],
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-source-events-host.log",
+    "tests_passed": 2
+  },
+  "wasm": {
+    "status": "passed",
+    "prefix": "native_source_events::",
+    "log": "/private/tmp/halo-source-events-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-source-events-clippy.log"
+  },
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed",
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Full fresh scanner entry remains open",
+    "Controlled source fixtures with default-box teleport coordinates; map-specific vector grammar is validated separately",
+    "Host/WASM selected tests only; not a full-suite or captured-film completion claim"
+  ]
+}

@@ -1,0 +1,12 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing";"math")
+func TestHaloRustSignedComponentCursor(t *testing.T) {
+ rows:=[]any{}
+ for _,data:=range [][]byte{nil,{0xff,0x55,0xaa,0}} {for _,name:=range []string{"unknown-signed", "biped-emp-timer-component", "biped-low-frequency-data", "change-scene-component"} {for _,start:=range []int{math.MinInt64,-8,-1,0,1,31,math.MaxInt64-8,math.MaxInt64-3,math.MaxInt64-1,math.MaxInt64} {
+  br:=LecteurSur(data);br.SetBitPos(start);ported,panicked:=false,false
+  func(){defer func(){panicked=recover()!=nil}();_,_,ported=consumeByName(br,name,35,0)}()
+  end:=br.BitPos();br.SetBitPos(0);recovery:=br.ReadBits(8)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"name":name,"start":start,"end":end,"panic":panicked,"ported":ported,"recovery":recovery,"recoveryEnd":br.BitPos()})
+ }}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-signed-component-cursor.json",raw,0600);e!=nil{t.Fatal(e)}
+}

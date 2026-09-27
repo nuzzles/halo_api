@@ -1,0 +1,39 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "../fixtures/march-lazy-policy-v41.json.zlib",
+  "native_cases": 90,
+  "native_generation_seconds": 0.366,
+  "legacy_id_case_extensions": 1440,
+  "host_projection_available": 30,
+  "wasm_projection_available": 26,
+  "focused_seconds": 0.12,
+  "suite": {
+    "passed": 579,
+    "failed": 0,
+    "ignored": 48,
+    "seconds": 85.73
+  },
+  "clippy": {
+    "passed": true,
+    "seconds": 17.09
+  },
+  "wasm32": {
+    "runner": "verify_frame_lazy_widths_wasm.py",
+    "native_fixture_comparisons": 14346,
+    "domain_refusals": 80,
+    "supplementary_legacy_id_cases": 1440,
+    "build_seconds": 18.85
+  },
+  "pinned_files_verified": 485,
+  "captured_march": {
+    "passed": true,
+    "films": 4,
+    "seconds": 19.83,
+    "release_build_seconds": 176
+  },
+  "open": [
+    "negative and overflowed cursor continuation",
+    "broader native output reconciliation",
+    "remaining corpus acceptance"
+  ]
+}

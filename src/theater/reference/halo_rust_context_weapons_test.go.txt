@@ -1,0 +1,33 @@
+package grammar
+import("encoding/binary";"encoding/hex";"encoding/json";"os";"testing";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustContextWeapons(t *testing.T){
+ registry:=make([]byte,8+36*64*260);binary.LittleEndian.PutUint32(registry,41);binary.LittleEndian.PutUint32(registry[4:],27)
+ for i:=0;i<64;i++{name:="unported-fixture";if i==43||i==44{name="weapon-state-type-info"};copy(registry[8+(35*64+i)*260:],name)}
+ rows:=[]any{}
+ for c:=0;c<128;c++ {
+  lay:=profile.I0Layout{GateBits:5,AxisW:[3]uint{8,9,10}}
+  packet:=func(kind uint16,p []byte,ts uint64)[]byte{b:=make([]byte,16);binary.LittleEndian.PutUint16(b,kind);binary.LittleEndian.PutUint32(b[4:],uint32(len(p)));binary.LittleEndian.PutUint64(b[8:],ts);return append(b,p...)}
+  k:=&translocWriter{};k.put(1,0);k.put(32,(1<<30)|512);k.put(32,35);k.put(44,0);k.put(32,0);k.put(32,0);k.put(64,0)
+  data:=packet(2,k.pay,1)
+  for j:=0;j<6;j++ {
+   w:=&translocWriter{};w.put(c%8,0);w.put(1,1);w.put(13,512);w.put(2,1);w.put(2,0)
+   masks:=[][]int{{0,43},{0,43,44},{0,43,48},{0,6,43}};mask:=masks[(c+j)%4];w.put(3,uint64(len(mask)));for _,id:=range mask{w.put(6,uint64(id))};w.put(5,0);w.put(8,3);w.put(9,5);w.put(10,7);w.put(2,0)
+   for n:=1;n<len(mask);n++ {if mask[n]!=43&&mask[n]!=44{w.put(8,0);continue};if (c+j)%3==0{w.put(1,0);w.put(1,0);w.put(3,0);w.put(1,1);w.put(1,1)}else{w.put(1,1);w.put(32,uint64(100+j%2));w.put(32,uint64(j+200));for z:=0;z<32;z++{w.put(8,0)}}}
+   payload:=w.pay;if c%5==0&&j%2==0{payload=payload[:len(payload)-1]}
+   data=append(data,packet(0,payload,uint64(1000+j*10))...)
+  }
+  raw:=source.MemoryChunks{registry,data};meta:=[]types.ChunkMeta{{Index:0},{Index:1}}
+  if c%11==0 {raw=source.MemoryChunks{registry};meta=meta[:1]}
+  film,e:=source.Load(raw,meta);if e!=nil{t.Fatal(e)};fc:=NewFilmContextForMap(film,nil,&lay)
+  spawn:=func(slot uint32,at uint64)(map[uint32]bool,bool){return map[uint32]bool{100:true},true}
+  if c%2==0{spawn=nil}
+  changes,stats,err:=ScanHeldWeaponChanges(fc,spawn);if changes==nil{changes=[]types.HeldWeaponChange{}}
+  category:="";if err!=nil{category=err.Error()}
+  attempts:=[]any{};cfg,ce:=newHeldWeaponScan(fc)
+  if ce==nil{walkDeltaBipedRecords(fc,cfg.chunks,cfg.slots,cfg.gram.lay,func(r deltaBipedRecord){if !heldWeaponMaskHas(r.Mask,cfg.weaponIdx){return};at:=r.I0+lay.TotalBits()+2
+   for _,id:=range r.Mask[1:] {name:=cfg.gram.arch.component(id);if name==""{break};br:=LecteurSur(r.Payload);br.PoserContexte(cfg.gram.contexte());br.SetBitPos(at);_,_,ported:=consumeByName(br,name,35,cfg.gram.arch.Level(id));attempts=append(attempts,map[string]any{"time":r.Packet.TimestampUS,"id":id,"start":at,"end":br.BitPos(),"status":ported,"in_bounds":br.BitPos()<=r.Total});if !ported||br.BitPos()>r.Total{break};at=br.BitPos()}
+  })}
+  rows=append(rows,map[string]any{"data":hex.EncodeToString(data),"no_chunks":c%11==0,"spawn":c%2!=0,"records":changes,"stats":stats,"error":category,"attempts":attempts})
+ }
+ b,e:=json.Marshal(map[string]any{"registry":hex.EncodeToString(registry),"cases":rows});if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-context-weapons.json",b,0600);e!=nil{t.Fatal(e)}
+}

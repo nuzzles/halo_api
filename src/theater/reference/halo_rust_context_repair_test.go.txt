@@ -1,0 +1,40 @@
+package grammar
+import("testing";"math/rand";"encoding/hex";"encoding/json";"sort";"os")
+func TestHaloRustContextRepair(t *testing.T){haloRustContextRepairWidths(t,false)}
+func TestHaloRustContextRepairLazyWidths(t *testing.T){haloRustContextRepairWidths(t,true)}
+func haloRustContextRepairWidths(t *testing.T,lazy bool){
+ rng:=rand.New(rand.NewSource(64041));rows:=[]any{}
+ for c:=0;c<64;c++{
+  names:=[]string{"biped-emp-timer-component","biped-mobility-action-component","unit-crouch-component","not-ported"};if c%2==1{names=[]string{"not-ported","biped-emp-timer-component","biped-mobility-action-component","unit-crouch-component"}}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:names,Levels:make([]uint32,len(names))},{Index:1}}};world:=NewWorld(reg);world.BindFull(50,0);world.BindFull(60,1)
+  isNew:=c%4>=2;recType:=recDelta;var bw bitWriter;if isNew{bw.bits(1,3);recType=recNew}else{bw.bit(1)};bw.bits(50,11);bw.bits(0,2);body:=bw.n;if isNew{bw.bits(0,6)};bw.bit(0);bw.bit(0);bw.bits(uint64(len(names)),3);for i:=range names{bw.bits(uint64(i),6)}
+  for _,name:=range names{switch name{case "biped-emp-timer-component":bw.bits(uint64(c),8);case "biped-mobility-action-component":bw.bits(2,2);case "unit-crouch-component":bw.bit(0);bw.bits(uint64(c),11);default:for j:=0;j<c%97;j++{bw.bit(rng.Uint64())}}}
+  bw.deltaEmpty(60);if c%2==0{bw.end()}else{for j:=0;j<40;j++{bw.bit(1)}}
+  cfg:=emptyCfg;cfg.Profil.Grammaire.CorpsActionMobilite=false;cfg.Profil.Grammaire.DeserEtatParArchetype=false;cfg.Obs=NouvelleObservation();preset:=c%11==0;cfg.Profil.Grammaire.LargeursBouchon=map[string]int{"unrelated":7};if preset{cfg.Profil.Grammaire.LargeursBouchon["not-ported"]=c%2*3}
+  var unusedWidth uint
+  if lazy {
+   unusedWidth=[]uint{0,65,1<<32,(1<<32)+1,^uint(0)}[c%5]
+   cfg.Profil.Mouvement.WorldObject.IndexW=unusedWidth;cfg.Profil.Mouvement.WorldObject.AxisW=[3]uint{unusedWidth,unusedWidth,unusedWidth}
+   cfg.Profil.Mouvement.Traversal.IndexW=unusedWidth;cfg.Profil.Mouvement.Traversal.AxisW=[3]uint{unusedWidth,unusedWidth,unusedWidth}
+   cfg.Profil.Mouvement.DeltaAxisWidth=unusedWidth
+  }
+
+  br:=LecteurSur(bw.buf);initial:=cfg;initial.Obs=nil;initial.Profil.Grammaire.LargeursBouchon=nil;br.poserCadre(initial);br.Skip(body);var tr EntityTrace;if isNew{tr=TraverseEntity(br,reg,0)}else{tr=decodeDelta(br,world,50)}
+  events:=[]any{};o:=cfg.Obs
+  counts:=func()map[string]any{return map[string]any{"repaired":o.ChaineReparees,"widths":o.CompWidths,"none":o.ChaineAucun,"ambiguous":o.ChaineAmbigu,"budget":o.ChaineBudget}}
+  oldMove:=func(k EtatMouvementComposant,slot uint32,v []uint64){events=append(events,[]any{"old-move",k.String(),slot,v})}
+  newMove:=func(k EtatMouvementComposant,slot uint32,v []uint64){events=append(events,[]any{"new-move",k.String(),slot,v})}
+  oldRef:=func(r UnitRefRead){events=append(events,[]any{"old-ref",r.Kind.String(),r.StartBit,r.EndBit,r.Present,r.Val,r.Tail,r.Probe})}
+  newRef:=func(r UnitRefRead){events=append(events,[]any{"new-ref",r.Kind.String(),r.StartBit,r.EndBit,r.Present,r.Val,r.Tail,r.Probe})}
+  o.EtatMouvementHook=oldMove;o.UnitRefHook=oldRef;o.PosCaptureHook=func(s PositionSample){events=append(events,[]any{"old-position"})}
+  o.EmpTimerHook=func(v uint32){b,_:=json.Marshal(counts());var snap any;json.Unmarshal(b,&snap);events=append(events,[]any{"emp",v,snap})}
+  o.MobilityActionHook=func(a,b bool){events=append(events,[]any{"mobility",a,b});if c%2==0{o.EtatMouvementHook=newMove;o.UnitRefHook=newRef}}
+  repairs:=[]any{};for pass:=0;pass<2;pass++{got,end,ok:=repairUnportedComponent(bw.buf,body,recType,50,tr,world,cfg);widths:=[]int{};for w:=range cfg.Obs.CompWidths["not-ported"]{widths=append(widths,w)};sort.Ints(widths);repairs=append(repairs,map[string]any{"ok":ok,"end":end,"trace_end":got.EndBit,"widths":widths})}
+  frameEvents:=append([]any{},events...)
+  o.PosCaptureHook(PositionSample{});o.publishUnitRef(UnitRefRead{Kind:UnitRefWord32Plain,Val:123,Present:true})
+  probe:=LecteurSur([]byte{0,0});probe.poserCadre(cfg);probe.cap.accumSlot=99;consumeByName(probe,"unit-crouch-component",0,0)
+
+  rows=append(rows,map[string]any{"unused_position_width":unusedWidth,"lazy":lazy,"case":c,"hex":hex.EncodeToString(bw.buf),"names":names,"preset":preset,"repairs":repairs,"frame_events":frameEvents,"events":events,"counts":counts(),"stubs":cfg.Profil.Grammaire.LargeursBouchon})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};path:="/private/tmp/halo-context-repair.json";if lazy{path="/private/tmp/halo-context-repair-lazy-widths.json"};if e=os.WriteFile(path,b,0600);e!=nil{t.Fatal(e)}
+}

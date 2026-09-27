@@ -1,0 +1,90 @@
+package grammar
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustEquipmentState(t *testing.T) {
+	rng := rand.New(rand.NewSource(413706))
+	rows := []any{}
+	for c := 0; c < 512; c++ {
+		p := ProfilDeBalayageParDefaut()
+		p.PoserLargeursObjetDuMonde(profile.PrecisionDescriptor{IndexW: 1, AxisW: [3]uint{6, 7, 8}})
+		p.Grammaire.SimStateComplet = c%2 != 0
+		names := []string{"object-position-component", compEquipmentDeployed, compEquipmentActivated, compEquipmentCreator, compEquipmentEnergy, compEquipmentEnergyDelay, compEquipmentCharges}
+		if c%4 == 0 {
+			names[2] = "simulation-state"
+		}
+		if c%7 == 0 {
+			names[3] = "unsupported-test-component"
+		}
+		if c%11 == 0 {
+			names[1] = compEquipmentCharges
+		}
+		arch := Archetype{Index: 37, Components: names, Levels: make([]uint32, 7)}
+		w := &translocWriter{}
+		for r := 0; r < 4; r++ {
+			w.put(c%8, 0)
+			w.put(1, 1)
+			w.put(13, uint64(512+r%2))
+			w.put(2, uint64(r))
+			w.put(2, 0)
+			ids := []int{0, 1, 2, 3, 4, 5, 6}
+			if r == 1 {
+				ids = []int{0}
+			}
+			if r == 2 {
+				ids = []int{0, 4, 5, 6}
+			}
+			w.put(3, uint64(len(ids)))
+			for _, id := range ids {
+				w.put(6, uint64(id))
+			}
+			w.put(2, 0)
+			w.put(1, 0)
+			w.put(6, 17)
+			w.put(7, 33)
+			w.put(8, 65)
+			w.put(2, 0)
+			for k := 0; k < 48; k++ {
+				if c%3 == 0 {
+					w.put(8, 0)
+				} else {
+					w.put(8, uint64(rng.Intn(256)))
+				}
+			}
+		}
+		pay := w.pay
+		if c%5 == 0 {
+			pay = pay[:rng.Intn(len(pay))]
+		}
+		cur := EquipmentStateSample{}
+        emissions := []any{}
+		obs := NouvelleObservation()
+		obs.EquipmentStateHook = func(f EquipmentField, v uint64, present bool) {
+			emissions = append(emissions, map[string]any{"slot":cur.Slot,"generation":cur.Gen,"field":f,"value":v,"present":present})
+            cur.Seen[f] = true
+			cur.Present[f] = present
+			cur.Val[f] = v
+		}
+		walk := equipmentWalk{obs: obs, prof: p, arch: arch, want: equipmentFieldIndices(arch)}
+		st := EquipmentStateStats{Slots: 2}
+		samples := walk.scanPayload(pay, map[uint32]bool{512: true, 513: true}, &st, &cur, FilmPacket{Index: 3, TimestampUS: 123456}, 2)
+		if samples == nil {
+			samples = []EquipmentStateSample{}
+		}
+		rows = append(rows, map[string]any{"hex": hex.EncodeToString(pay), "names": names, "simulation": c%2 != 0, "samples": samples, "stats": st, "emissions": emissions})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-equipment-state.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

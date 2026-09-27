@@ -1,0 +1,40 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "../fixtures/record-id-policy-v41.json.zlib",
+  "native_cases": 8640,
+  "overlapping_groups": {
+    "end_records": 1920,
+    "nonpositive_widths": 2400,
+    "consumed_widths_above_30": 3360
+  },
+  "native_generation_seconds": 0.448,
+  "focused_tests": {
+    "passed": 2,
+    "seconds": 0.71
+  },
+  "wasm32": {
+    "runner": "verify_frame_lazy_widths_wasm.py",
+    "native_comparisons": 14256,
+    "address_refusals": 80,
+    "additional_id_controls": 4,
+    "build_seconds": 21.95
+  },
+  "suite": {
+    "passed": 578,
+    "failed": 0,
+    "ignored": 48,
+    "seconds": 76.44
+  },
+  "clippy": {
+    "passed": true,
+    "seconds": 20.27
+  },
+  "pinned_files_verified": 485,
+  "captured_rerun": false,
+  "open": [
+    "native march checked adapter and calibration export",
+    "native traversal with legacy FrameEncoding ID arithmetic",
+    "negative and overflowed cursor continuation",
+    "broader native output reconciliation"
+  ]
+}

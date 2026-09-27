@@ -32,6 +32,9 @@ pub enum InfiniteClientError {
     #[error("failed to decompress Halo Infinite Theater film data: {0}")]
     FilmDecompression(Arc<std::io::Error>),
 
+    #[error("failed to decode Halo Infinite Theater film: {0}")]
+    FilmDecode(Arc<crate::theater::DecodeError>),
+
     #[error("no Halo Infinite record found for gamertag \"{0}\"")]
     GamertagNotFound(String),
 

@@ -1,0 +1,26 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"encoding/binary";"math/rand";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustEventHeadsParity(t *testing.T) {
+ rows:=[]any{}
+ add:=func(data []byte, source string) {
+  kind, present:=PacketHeadEventType(data);if !present{return}
+  var domains []int
+  switch kind {case 8:domains=[]int{2,3,7};case 9:domains=[]int{2,7,8};case 21:domains=[]int{4,8,7};case 22:domains=[]int{1,1,7};case 103:domains=[]int{0,0,7};default:return}
+  refs:=[]any{};at:=9
+  for _,domain:=range domains {start:=at;var ref guardedRef;if domain==1 {ref=readDom1Ref(data,at)}else{ref=readPlainRef(data,at,int(refDomWidth(domain)))};at=ref.EndBit
+   refs=append(refs,map[string]any{"domain":domain,"start":start,"ref":ref})
+  }
+  if kind==9 {at+=3;hasCatalog:=readBitsAt(data,at,1)!=0;at++;if hasCatalog{at+=33}};if kind==8||kind==22{at+=6};if kind==21{at+=2};if at>len(data)*8{t.Fatalf("truncated reference source %s",source)}
+  row:=map[string]any{"source":source,"kind":kind,"end":at,"refs":refs,"hex":hex.EncodeToString(data[:(at+7)/8])}
+  if kind==8||kind==22 {ev,ok:=decodeVehicleEvent(data,512,NewSlotBand(nil));if !ok{t.Fatal("vehicle refused")};row["vehicle"]=ev}
+  if kind==9 {var st types.BipedPickupStats;ev,ok:=decodeBipedPickup(data,&st);row["pickup"]=ev;row["pickup_valid"]=ok;row["pickup_stats"]=st}
+  if kind==21 {ev,ok:=decodeZoomHead(data,1000);row["zoom"]=ev;row["zoom_valid"]=ok}
+  if kind==103 {ev,_,ok:=decodeEquipmentSpawnEvent(data);if !ok{t.Fatal("spawn refused")};row["spawn"]=ev}
+  rows=append(rows,row)
+ }
+ rng:=rand.New(rand.NewSource(41))
+ for _,kind:=range []int{8,9,21,22,103} {for i:=0;i<256;i++ {d:=make([]byte,64);if i!=0 {rng.Read(d)};d[0]=0xc0|byte(kind>>1);d[1]=(d[1]&0x7f)|byte(kind&1)<<7;add(d,"synthetic")}}
+ paths,err:=filepath.Glob("/Users/simbleau/git/halo_api/experiments/films/*/*/chunk-*-type-2.bin");if err!=nil{t.Fatal(err)}
+ for _,p:=range paths {data,e:=os.ReadFile(p);if e!=nil{t.Fatal(e)};for at:=0;at+16<=len(data);{size:=int(binary.LittleEndian.Uint32(data[at+4:]));if at+16+size>len(data){t.Fatal("packet size")};if binary.LittleEndian.Uint16(data[at:])==0 {add(data[at+16:at+16+size],p)};at+=16+size}}
+ d,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-levelup-event-heads-oracle.json",d,0600);err!=nil{t.Fatal(err)}
+}

@@ -1,0 +1,39 @@
+package killsource
+
+import (
+ "encoding/json"
+ "os"
+ "path/filepath"
+ "testing"
+)
+
+// Compare two pinned readers, not Rust against itself. The damage endpoints
+// come from TestHaloRustNativeDamage in grammar; the list reader is native here.
+func TestHaloRustDamageLayoutAudit(t *testing.T) {
+ type row struct { File string; Packet int; Offset int; Size int; OK bool; End int }
+ raw,err:=os.ReadFile("/private/tmp/halo-native-damage.json");if err!=nil { t.Fatal(err) }
+ var rows []row;if err=json.Unmarshal(raw,&rows);err!=nil { t.Fatal(err) }
+ counts:=map[string]int{};examples:=[]any{};cache:=map[string][]byte{}
+ for _,entry:=range rows {
+  if !entry.OK { continue }
+  data,exists:=cache[entry.File];if !exists {
+   data,err=os.ReadFile(filepath.Join("/Users/simbleau/git/halo_api/experiments/films",entry.File));if err!=nil { t.Fatal(err) };cache[entry.File]=data
+  }
+  payload:=data[entry.Offset:entry.Offset+entry.Size]
+  cursor:=nouveauCurseurEv(payload,1)
+  fin,ok:=evStep(cursor,false)
+  counts["damage_accepted"]++
+  if !ok || fin { counts["generic_first_event_stopped"]++;continue }
+  genericEnd:=cursor.pos()
+  if genericEnd==entry.End { counts["matching_body_ends"]++;continue }
+  counts["different_body_ends"]++
+  terminated:=false
+  for n:=1;n<len(payload);n++ { fin,ok=evStep(cursor,false);if !ok { break };if fin { terminated=true;break } }
+  if terminated { counts["different_body_ends_with_generic_terminator"]++ }
+  if len(examples)<12 { examples=append(examples,map[string]any{"file":entry.File,"packet":entry.Packet,"damage_end":entry.End,"generic_body_end":genericEnd,"generic_terminated":terminated,"generic_list_end":cursor.pos()}) }
+ }
+ out:=map[string]any{"reference_commit":"43a01721e8a02c87c955e175936f0ccf8dd97a81","counts":counts,"examples":examples,"interpretation":"The pinned direct damage and generic event-body readers use opposite polarity for the optional five-bit field. Endpoint disagreement is evidence of incompatible reader grammars, not a choice of which grammar is correct. The generic terminator does not reconcile an earlier disagreement."}
+ raw,err=json.MarshalIndent(out,"","  ");if err!=nil { t.Fatal(err) }
+ if err=os.WriteFile("/private/tmp/halo-native-damage-layout-audit.json",append(raw,'\n'),0600);err!=nil { t.Fatal(err) }
+ t.Logf("%v",counts)
+}

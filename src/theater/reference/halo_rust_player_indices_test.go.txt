@@ -1,0 +1,13 @@
+package replay
+import("testing";"os";"encoding/json";"encoding/hex";"math/rand";"math/bits";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar/weaponv3";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustPlayerIndices(t *testing.T){
+ rng:=rand.New(rand.NewSource(7571));rows:=[]any{}
+ put:=func(d []byte,p,n int,v uint64){for b:=0;b<n;b++{at:=p+b;if at<0||at>=len(d)*8{continue};mask:=byte(1<<uint(7-at%8));d[at/8]&=^mask;if v>>uint(n-b-1)&1!=0{d[at/8]|=mask}}}
+ for run:=0;run<1024;run++{
+  roster:=[]uint64{};for i:=0;i<run%9;i++{roster=append(roster,rng.Uint64())};if run%13==0{roster=append(roster,0)}
+  chunks:=source.MemoryChunks{};meta:=[]types.ChunkMeta{};input:=[]any{}
+  for c:=0;c<1+run%8;c++{d:=make([]byte,(run+c*17)%256);rng.Read(d);for i,x:=range roster{if len(d)<8||rng.Intn(4)==0{continue};p:=(run+i*73+c*17)%(len(d)*8-63);put(d,p-5,5,uint64((i+c*(run%2))%32));put(d,p,64,bits.ReverseBytes64(x))};index:=c;if run%7==0&&c>2{index++};if run%17==0&&c==0{index=-1};chunks=append(chunks,d);meta=append(meta,types.ChunkMeta{Index:index});input=append(input,map[string]any{"index":index,"hex":hex.EncodeToString(d),"resolved":weaponv3.ResolveXuidToPI(roster,d)})}
+  film,e:=source.Load(chunks,meta);if e!=nil{t.Fatal(e)};out,e:=ScanPlayerIndices(film,roster);rows=append(rows,map[string]any{"roster":roster,"chunks":input,"output":out,"error":e!=nil})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-player-indices.json",raw,0600);e!=nil{t.Fatal(e)}
+}

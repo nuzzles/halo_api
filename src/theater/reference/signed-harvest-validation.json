@@ -1,0 +1,23 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "successor_cases": 224,
+  "native_successor_panics": 60,
+  "negative_confirmations": 2,
+  "context_harvest_cases": 32,
+  "focused_host": "16 tests passed, zero failures; 0.03s",
+  "clippy": "passed; 10.21s",
+  "format": "passed",
+  "diff_check": "passed",
+  "pinned_source_hashes": 485,
+  "full_suite": "passed: 609 tests, zero failures, 49 ignored; 105.17s",
+  "wasm": "passed actual runtime; 164 nonpanicking successors and 32 contextual harvest cases; 10.27s build",
+  "captured_march": "passed; four films; 81.45s release",
+  "complete_documents": "passed; six films; 104.81s release",
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "remaining": [
+    "Signed view orchestration and source-address projections",
+    "Broader repair/callback/runtime and nested type contracts",
+    "Complete all-data v41 corpus acceptance"
+  ],
+  "native_regeneration": "both oracle fixtures regenerate byte-identically"
+}

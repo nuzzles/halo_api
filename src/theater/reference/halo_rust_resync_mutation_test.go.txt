@@ -1,0 +1,20 @@
+package grammar
+import("encoding/json";"encoding/hex";"os";"testing")
+func TestHaloRustResyncMutation(t *testing.T){
+ rows:=[]any{}
+ for c:=0;c<16;c++{
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:[]string{"not-ported"},Levels:[]uint32{0}}}}
+  cfg:=DefaultFrameConfig();cfg.IDLowBits=11;cfg.HasExtraFields=c%2==1;cfg.Obs=NouvelleObservation()
+  widths:=map[string]int{"not-ported":8};stub:=c%4>=2
+  if stub{cfg.Profil.Grammaire.LargeursBouchon=widths}else{cfg.Profil.Grammaire.LargeursCalibrees=widths}
+  var bw bitWriter;prefix:=func(){if cfg.HasExtraFields{bw.bits(0,32)}}
+  prefix();bw.bit(1);bw.bits(100,11);bw.bits(0,2);bw.bits(0,16)
+  target:=bw.n;prefix();bw.bit(1);bw.bits(50,11);bw.bits(0,2);bw.bit(0);bw.bits(1,4);bw.bits(0,6);bw.bits(uint64(192+c),8);prefix();bw.end();bw.bits(0,32)
+  world:=NewWorld(reg);world.BindFull(50,0);calls:=[]any{};probe,probeEnd,probeOK:=TryDeltaAt(bw.buf,target,world,cfg)
+  remove:=c>=8
+  accept:=func(slot uint32,pos [3]float32,has bool)bool{calls=append(calls,[]any{slot,has});if remove{delete(widths,"not-ported")};return true}
+  records:=DecodeFrameResync(bw.buf,world,cfg,map[uint32]bool{50:true},accept);if records==nil{records=[]FrameRecord{}};if !probeOK||len(calls)!=1||len(records)!=1{t.Fatalf("case %d did not exercise resync: probe=%v calls=%d records=%d",c,probeOK,len(calls),len(records))};want:=-1;if remove{want=0};if records[0].DesyncAt!=want{t.Fatalf("case %d desync=%d want=%d",c,records[0].DesyncAt,want)}
+  rows=append(rows,map[string]any{"probe":probe,"probe_end":probeEnd,"probe_ok":probeOK,"case":c,"hex":hex.EncodeToString(bw.buf),"stub":stub,"remove":remove,"target":target,"records":records,"calls":calls,"widths":widths,"slots":world.cloneSlots()})
+ }
+ raw,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-resync-mutation.json",raw,0600);err!=nil{t.Fatal(err)}
+}

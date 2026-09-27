@@ -1,0 +1,28 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "change": "KillSourceProvenance Display matches native Provenance.String for published paths; no decoding changes.",
+  "native_oracle": {
+    "test": "TestHaloRustKillProvenance",
+    "fixture": "kill-provenance-v41.json",
+    "cases": 48,
+    "paths": 2,
+    "origins": 8,
+    "multiplicities": 3
+  },
+  "validation": {
+    "full_theater_passed": 1,
+    "full_theater_failed": 0,
+    "full_theater_ignored": 0,
+    "full_theater_seconds": 0.01,
+    "clippy": "passed",
+    "clippy_seconds": 20.89,
+    "wasm": "All 48 new provenance comparisons and existing harness controls passed.",
+    "wasm_build_seconds": 7.31,
+    "format": "passed",
+    "diff_check": "passed",
+    "reference_hashes": 485
+  },
+  "initial_wasm_attempt": "Harness compilation failed because its new local Deserialize derive required an undeclared serde dependency. The test now deserializes into the existing production type; verified retry passed.",
+  "captured_scope": "Four-film current resync comparison passed before the display-only addition (81.30s, release). Not rerun for formatting-only API change.",
+  "remaining": "Nested runtime/dynamic-type contracts and broader captured-mode/source acceptance remain open. Deferred architecture not started."
+}

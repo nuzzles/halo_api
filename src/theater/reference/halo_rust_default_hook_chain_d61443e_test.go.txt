@@ -1,0 +1,22 @@
+package grammar
+import("testing";"math/rand";"encoding/json";"encoding/hex";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustDefaultHookChainD61443e(t *testing.T){
+ rng:=rand.New(rand.NewSource(350641));rows:=[]any{}
+ for c:=0;c<512;c++{
+  createdTI:=uint32([]int{35,36,37,38,39,40,42,43}[c%8]);reg:=&Registry{Archetypes:make([]Archetype,44)};for i:=range reg.Archetypes{reg.Archetypes[i].Index=i};reg.Archetypes[0].Components=[]string{"biped-emp-timer-component"};reg.Archetypes[0].Levels=[]uint32{0}
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();if c%2==1{cfg.Profil.MPP.Lead=8;cfg.Profil.MPP.Index=3};cfg.Profil.Grammaire.ControleDeCorruption=c%7==0
+  world:=NewWorld(reg);if c%5==0{world.BindSoft(50,0)}else{world.BindFull(50,0)};world.BindFull(100,0)
+  var bw bitWriter;bw.bits(0,4);bw.bits(1,3);bw.bits(100,11);bw.bits(2,2);bw.bits(uint64(createdTI),6)
+  defaults:=make([]byte,4096);if c%3!=0{rng.Read(defaults)};br:=LecteurSur(defaults);br.poserCadre(cfg);if createdTI==35{consumeBipedDefaultState(br)}else{defaultStateDeserByTI[createdTI](br)};for i:=0;i<br.BitPos();i++{bw.bit(uint64(defaults[i/8]>>uint(7-i%8)))}
+  bw.bit(0);bw.bits(0,4)
+  if c%4==1||c%4==2{bw.bits(2,3);bw.bits(100,11);bw.bits(2,2);bw.bits(0,32)}
+  if c%4!=2{bw.deltaEmpty(100)}
+  for j:=0;j<c%3+1;j++{bw.bit(1);bw.bits(50,11);bw.bits(0,2);bw.bits(1,4);bw.bits(0,6);bw.bits(123,8);if cfg.Profil.Grammaire.ControleDeCorruption{bw.bit(0)}}
+  if c%2==0{bw.end()}else{for j:=0;j<40;j++{bw.bit(1)}}
+  observations:=haloRustComponentHooks(cfg.Obs);ti,end,unique,ok:=inferChainArchetype(bw.buf,0,world,cfg)
+  outcome:="NoConfirmation";if cfg.Obs.ChaineImmediat>0{outcome="Immediate"};if cfg.Obs.ChaineProfond>0{outcome="Deep"};if cfg.Obs.ChaineAmbigu>0{outcome="Ambiguous"};if cfg.Obs.ChaineBudget>0{outcome="BudgetExhausted"}
+  p:=cfg.Profil;encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{"0":p.Mouvement.WorldObject.AxisW,"1":p.Mouvement.WorldObject.AxisW},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":false,"delta_handle_tail":false}
+  rows=append(rows,map[string]any{"created_archetype":createdTI,"observations":*observations,"hex":hex.EncodeToString(bw.buf),"encoding":encoding,"mpp":[2]int{cfg.Profil.MPP.Lead,cfg.Profil.MPP.Index},"corruption":cfg.Profil.Grammaire.ControleDeCorruption,"soft":c%5==0,"ti":ti,"end":end,"unique":unique,"ok":ok,"outcome":outcome})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-default-hook-chain-d61443e.json",b,0600);e!=nil{t.Fatal(e)}
+}

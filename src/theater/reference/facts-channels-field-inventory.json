@@ -1,0 +1,162 @@
+{
+  "aims": {
+    "native_fields": [
+      "Slot",
+      "Chunk",
+      "PacketIndex",
+      "TimestampUS",
+      "YawRaw",
+      "PitchRaw"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "YawRaw",
+      "PitchRaw"
+    ]
+  },
+  "bipeds": {
+    "native_fields": [
+      "Slot",
+      "Generation",
+      "ParticipantIndex",
+      "HasIndex",
+      "Chunk",
+      "PacketIndex",
+      "TimestampUS",
+      "BitPos",
+      "Version",
+      "Representation"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "Generation",
+      "HasIndex",
+      "ParticipantIndex"
+    ]
+  },
+  "equipment": {
+    "native_fields": [
+      "TimestampUS",
+      "Chunk",
+      "PacketIndex",
+      "Slot",
+      "Counter",
+      "Rank",
+      "Previous",
+      "Kind",
+      "Recovered",
+      "Gap"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "Counter",
+      "Rank",
+      "Previous",
+      "Kind",
+      "Recovered",
+      "Gap"
+    ]
+  },
+  "events": {
+    "native_fields": [
+      "Kind",
+      "Chunk",
+      "PacketIndex",
+      "TimestampUS",
+      "OccupantPresent",
+      "OccupantSonde",
+      "OccupantSlot",
+      "OccupantInBand",
+      "VehicleSlot",
+      "VehicleSlotValid",
+      "VehicleGen",
+      "Seat",
+      "SeatValid"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Kind",
+      "OccupantPresent",
+      "OccupantSonde",
+      "OccupantSlot",
+      "OccupantInBand",
+      "VehicleSlot",
+      "VehicleSlotValid",
+      "VehicleGen",
+      "Seat",
+      "SeatValid"
+    ]
+  },
+  "occupancy": {
+    "native_fields": [
+      "TimestampUS",
+      "Slot",
+      "Gen",
+      "Attached",
+      "ParentSlot",
+      "ParentGen",
+      "HasSeat",
+      "Seat"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "Gen",
+      "Attached",
+      "ParentSlot",
+      "ParentGen",
+      "HasSeat",
+      "Seat"
+    ]
+  },
+  "pickups": {
+    "native_fields": [
+      "TimestampUS",
+      "Chunk",
+      "Slot",
+      "CatalogID",
+      "Class"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "CatalogID",
+      "Class"
+    ]
+  },
+  "weapons": {
+    "native_fields": [
+      "TimestampUS",
+      "Chunk",
+      "Slot",
+      "SlotIndex",
+      "Family",
+      "Low",
+      "Previous",
+      "Kind"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "SlotIndex",
+      "Family",
+      "Previous",
+      "Kind"
+    ]
+  },
+  "zoom": {
+    "native_fields": [
+      "TimestampUS",
+      "Slot",
+      "Level"
+    ],
+    "transported_fields": [
+      "TimestampUS",
+      "Slot",
+      "Level"
+    ]
+  }
+}

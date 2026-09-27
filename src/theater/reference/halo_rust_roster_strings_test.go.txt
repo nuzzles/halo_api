@@ -1,0 +1,8 @@
+package replay
+import("testing";"encoding/json";"os";"fmt";"strings")
+func TestHaloRustRosterStrings(t *testing.T){
+ samples:=[]string{"","0","0000","1","01","+1","-1"," 1","1 ","\t1","1\n","0x10","1_000","１２","١","18446744073709551615","18446744073709551616","00018446744073709551615","xuid:1","bid1","1\x002",strings.Repeat("0",100)+"42"}
+ rows:=[]any{}
+ for i:=0;i<256;i++{ss:=[]string{};for j:=0;j<i%33;j++{ss=append(ss,samples[(i+j)%len(samples)])};ss=append(ss,fmt.Sprint(i),fmt.Sprint(i));out:=RosterXUIDsOf(ss);if out==nil{out=[]uint64{}};rows=append(rows,map[string]any{"strings":ss,"expected":out})}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-roster-strings.json",raw,0600);e!=nil{t.Fatal(e)}
+}

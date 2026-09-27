@@ -1,0 +1,19 @@
+package killsource
+import("testing";"math";"encoding/json";"os";"path/filepath";"levelup/go-api/internal/games/halo_infinite/film/internal/source";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/types")
+func TestHaloRustKillWalk(t *testing.T){
+ rows:=[]any{};catalog,e:=profile.LoadMapQuantCatalog("/private/tmp/halo-levelup-v75/data/titles/halo_infinite/reference/map_quant_bounds.json");if e!=nil{t.Fatal(e)}
+ for _,folder:=range []string{"bandit/01-evo","ranked-arena/02-oddball"} {
+  root:=filepath.Join("/Users/simbleau/git/halo_api/experiments/films",folder);raw,e:=os.ReadFile(filepath.Join(root,"film.json"));if e!=nil{t.Fatal(e)}
+  var meta struct{Chunks []struct{Index int `json:"index"`;Kind int `json:"chunk_type"`;Start int `json:"start_time_offset_ms"`;File string `json:"file"`}};if e=json.Unmarshal(raw,&meta);e!=nil{t.Fatal(e)}
+  chunks:=source.MemoryChunks{};metadata:=[]types.ChunkMeta{};for _,c:=range meta.Chunks{b,e:=os.ReadFile(filepath.Join(root,c.File));if e!=nil{t.Fatal(e)};chunks=append(chunks,b);metadata=append(metadata,types.ChunkMeta{Index:c.Index,ChunkType:c.Kind,StartMS:c.Start})}
+  src,e:=source.Load(chunks,metadata);if e!=nil{t.Fatal(e)};f,e:=loadFilm(src);if e!=nil{t.Fatal(e)};kf,e:=loadKillFeed(f);if e!=nil{t.Fatal(e)}
+  table:=readFilmTable(f);motif:=lireIndexParMotif(f,table.slots,kf);r:=buildRoster(kf,loadBotMeta(f),true,table,motif)
+  tl,e:=newTimeline(f);if e!=nil{t.Fatal(e)};tl.rewind();entry,e:=catalog.Lookup("recharge");if e!=nil{t.Fatal(e)};c:=calibrate(f,tl,8,&entry);t.Logf("%s calibration: %s",folder,c.String())
+  m:=c.Profil.Mouvement;var lo,hi [3]uint32;for i:=0;i<3;i++{lo[i]=math.Float32bits(m.Range[i].Min);hi[i]=math.Float32bits(m.Range[i].Max)};capture:=map[string]any{"min_bits":lo,"max_bits":hi,"quantum_bits":math.Float32bits(m.DeltaQuantum),"region":m.WorldObject.Region,"axis_widths":m.WorldObject.AxisW,"region_index_bits":m.WorldObject.IndexW}
+  w:=runWalk(f,tl,r,8,c.Profil);deads:=func(ds []deadRecord)[]any{out:=[]any{};for _,d:=range ds{out=append(out,map[string]any{"time_ms":d.ms,"packet":map[string]int{"chunk":d.chunk,"packet":d.pidx},"slot":d.slot,"bit":d.bit,"dead":d.dead})};return out}
+  cs,nb:=w.candidates();cands:=[]any{};for _,d:=range cs{cands=append(cands,map[string]any{"time_ms":d.ms,"packet":map[string]int{"chunk":d.chunk,"packet":d.pidx},"bit":d.bit,"tag":d.tag,"victim":d.victim,"killer":d.killer,"category":d.cat})}
+  rows=append(rows,map[string]any{"folder":folder,"map":"recharge","participants":r.nPlay,"calibration":map[string]any{"native_profile":c.Profil,"reader_policy":map[string]any{"traversal_region":c.Profil.Mouvement.Traversal.Region,"chain_inference":c.Profil.Grammaire.InferenceChaine,"generation_strict":c.Profil.Grammaire.GenerationStricte,"view_tables":c.Profil.Grammaire.TablesParVue,"view_classes":c.Profil.Grammaire.ClassesDeVue},"position_observer_context":capture,"read_axis_widths":c.LueAxisW,"read_index_width":c.LueIndexW,"axis_width":c.AxisW,"handle_index_width":c.PoigneeIndexW,"handle_score":c.PoigneeScore,"handle_median":c.PoigneeMedian,"handle_discriminated":c.PoigneeDiscriminee,"map_read":c.CarteLue,"corruption_control_read":c.ControleDeCorruptionLu,"disagreements":c.Desaccords,"score":c.Score,"median":c.Median,"flat":c.Flat},"calibration_string":c.String(),"walk":map[string]any{"deaths":deads(w.deads),"credible":deads(w.credible),"biped_low":w.bipLo,"biped_high":w.bipHi,"located":w.located,"with_events":w.withEv},"candidates":cands,"no_bit":nb})
+  t.Logf("%s: deads=%d credible=%d candidates=%d located=%d/%d",folder,len(w.deads),len(w.credible),len(cs),w.located,w.withEv)
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-kill-walk.json",b,0600);e!=nil{t.Fatal(e)}
+}

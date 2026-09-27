@@ -1,0 +1,252 @@
+package grammar
+
+import (
+	"encoding/json"
+	"math"
+	"math/rand"
+	"os"
+	"testing"
+)
+
+func TestHaloRustOrientation(t *testing.T) {
+	rng := rand.New(rand.NewSource(42011))
+	rows := []any{}
+	for i := 0; i < 4096; i++ {
+		width := uint(i % 34)
+		code := rng.Uint32()
+		if width < 32 {
+			code &= (1 << width) - 1
+		}
+		v, ok := DecodeAimVectorChecked(code, width)
+		var dir any
+		if ok {
+			dir = v
+		}
+		up := [3]float32{float32(rng.Intn(200)-100) / 100, float32(rng.Intn(200)-100) / 100, float32(rng.Intn(200)-100) / 100}
+		if i%7 == 0 {
+			up = [3]float32{0, 0, 1}
+		}
+		if i%13 == 0 {
+			up = [3]float32{}
+		}
+		roll := float32(rng.Intn(1000)) / 100
+		switch i % 11 {
+		case 0:
+			roll = math.Pi
+		case 1:
+			roll = -math.Pi
+		case 2:
+			roll = 0
+		}
+		bits := uint([]int{8, 19, 30}[i%3])
+		raw := rng.Uint32() & ((1 << bits) - 1)
+		p := BipedPosition{}
+		p.HasAim = i%3 != 0
+		p.AimRaw = code
+		p.HasRoll = i%5 != 0
+		p.RollRaw = raw
+		p.FwdMode = uint8(i % 3)
+		p.AimDefault = i%4 == 0
+		pu, pok := p.AimVector()
+		pf, pfok := p.ChassisForwardVector()
+		var pdir, pforward, d, r any
+		if pok {
+			pdir = pu
+		}
+		if pfok {
+			pforward = pf
+		}
+		if p.HasAim {
+			d = p.AimRaw
+		}
+		if p.HasRoll {
+			r = p.RollRaw
+		}
+		data := make([]byte, 48)
+		rng.Read(data)
+		start := i % 8
+		level := uint32(i % 4)
+		br := LecteurSur(data)
+		br.SetBitPos(start)
+		dyn, _ := decodeObjectForwardAndUpDynPrec(br, level)
+		var dd, dr any
+		if dyn.HasDir {
+			dd = dyn.DirRaw
+		}
+		if dyn.HasRoll {
+			dr = dyn.RollRaw
+		}
+		bytes := []int{}
+		for _, b := range data {
+			bytes = append(bytes, int(b))
+		}
+		mask := []int{0}
+		for _, id := range []int{1, 2, 3, 4, 5, 7, 21} {
+			if rng.Intn(4) != 0 {
+				mask = append(mask, id)
+			}
+		}
+		short := data[:i%49]
+		g := dirsGrammar{fwdUpDynPrec: true, angVelDynPrec: i%3 != 0, fwdUpParam: level}
+		cd, cv := scanRecordDirs(LecteurSur(short), start, len(short)*8, mask, g)
+		flat, fok := DecodeAimVectorFlat(code, width)
+		var flatOut any
+		if fok {
+			flatOut = flat
+		}
+		enc, eok := EncodeAimVector(up, width)
+		var encoded any
+		if eok {
+			encoded = enc
+		}
+		sx, sy, sz := DecodeAimVector(code, width)
+		rows = append(rows, map[string]any{"flat": flatOut, "encoded": encoded, "sentinel": [3]float32{sx, sy, sz}, "mask": mask, "length": len(short), "angular": g.angVelDynPrec, "dirs": cd, "vitals": cv, "data": bytes, "start": start, "level": level, "end": br.BitPos(), "dynamic": map[string]any{"direction": dd, "roll": dr, "mode": dyn.Mode, "delta": dyn.Delta, "direction_default": dyn.DirDefault}, "width": width, "code": code, "direction": dir, "up": up, "roll": roll, "forward": ForwardFromUpRoll(up, roll), "raw": raw, "bits": bits, "angle": RollAngleFromRaw(raw, bits), "orientation": map[string]any{"direction": d, "roll": r, "mode": p.FwdMode, "delta": false, "direction_default": p.AimDefault}, "objectUp": pdir, "objectForward": pforward})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-orientation.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestHaloRustVelocityCodec(t *testing.T) {
+	rng := rand.New(rand.NewSource(42012))
+	rows := []any{}
+	vecbits := func(v [3]float32) [3]uint32 {
+		return [3]uint32{math.Float32bits(v[0]), math.Float32bits(v[1]), math.Float32bits(v[2])}
+	}
+	for i := 0; i < 8192; i++ {
+		width := uint(i % 72)
+		n := uint64(1) << width
+		scale := rng.Uint64()
+		switch (i / 72) % 8 {
+		case 0:
+			scale = 0
+		case 1:
+			scale = 1
+		case 2:
+			scale = n - 1
+		case 3:
+			scale = n
+		case 4:
+			scale = n / 2
+		case 5:
+			scale = ^uint64(0)
+		case 6:
+			scale = 1023
+		case 7:
+			if n != 0 {
+				scale %= n
+			}
+		}
+		packed := rng.Uint64()
+		switch i % 6 {
+		case 0:
+			packed = uint64(i % 524288)
+		case 1:
+			packed = 6 * 87381
+		case 2:
+			packed = uint64(1)<<40 | uint64(i%524288)
+		}
+		p := BipedPosition{}
+		p.HasVel = i%5 != 0
+		p.VelRaw = uint32(packed)
+		p.VelScale = uint32(scale)
+		p.HasYaw = i%7 != 0
+		p.YawRaw = uint32(i % 4096)
+		p.PitchRaw = uint32(i % 2048)
+		vv, vok := p.VelocityVector()
+		h, hok := p.AimHeadingDeg()
+		pitch, pok := p.AimPitchDeg()
+		var velocity, heading, angle any
+		if vok {
+			velocity = vecbits(vv)
+		}
+		if hok {
+			heading = math.Float32bits(h)
+		}
+		if pok {
+			angle = math.Float32bits(pitch)
+		}
+		rows = append(rows, map[string]any{"width": width, "scale": scale, "packed": packed, "magnitude": math.Float32bits(DecodeVelocityMagnitude(scale, width)), "direction": vecbits(DecodeDynPrecDir(packed, width)), "velocity": vecbits(DecodeVelocity(packed, scale)), "hasVel": p.HasVel, "hasYaw": p.HasYaw, "yaw": p.YawRaw, "pitch": p.PitchRaw, "checkedVelocity": velocity, "heading": heading, "angle": angle})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-velocity-codec.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestHaloRustOfflineAimHelpers(t *testing.T) {
+	rng := rand.New(rand.NewSource(42013))
+	rows := []any{}
+	read := func(data []byte, pos, width int) (out any) {
+		defer func() {
+			if recover() != nil {
+				out = nil
+			}
+		}()
+		return ReadBitsAtForDiag(data, pos, width)
+	}
+	for i := 0; i < 2048; i++ {
+		data := make([]byte, i%65)
+		rng.Read(data)
+		pos := rng.Intn(560) - 20
+		width := rng.Intn(92) - 5
+		switch i % 8 {
+		case 0:
+			pos = 0
+			width = 0
+		case 1:
+			pos = -1
+			width = 1
+		case 2:
+			pos = len(data) * 8
+			width = 1
+		case 3:
+			pos = 0
+			width = len(data) * 8
+		case 4:
+			pos = 0
+			width = 64
+		case 5:
+			pos = 0
+			width = 32
+		}
+		indices := []int{}
+		for j := 0; j < i%19; j++ {
+			indices = append(indices, rng.Intn(90)-8)
+		}
+		switch i % 8 {
+		case 0:
+			indices = []int{}
+		case 1:
+			indices = []int{0, 63}
+		case 2:
+			indices = []int{64, 255}
+		case 3:
+			indices = []int{-1, 0, 1}
+		case 4:
+			indices = []int{63, 63, 63}
+		case 5:
+			indices = []int{-1 << 63, 1<<63 - 1}
+		}
+		mask, over := maskBitsOf(indices)
+		bytes := []int{}
+		for _, b := range data {
+			bytes = append(bytes, int(b))
+		}
+		rows = append(rows, map[string]any{"data": bytes, "position": pos, "width": width, "value": read(data, pos, width), "indices": indices, "mask": mask, "overflow": over})
+	}
+	raw, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-offline-aim-helpers.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

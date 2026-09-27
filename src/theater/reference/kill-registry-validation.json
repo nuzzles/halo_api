@@ -1,0 +1,43 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "fixture": "../fixtures/kill-registry-v41.json.zlib",
+  "native_cases": 20,
+  "successes": 18,
+  "compressed_refusals": 2,
+  "native_generation_seconds": 0.407,
+  "focused": {
+    "passed": 2,
+    "seconds": 0.21
+  },
+  "suite": {
+    "passed": 581,
+    "failed": 0,
+    "ignored": 48,
+    "seconds": 75.47
+  },
+  "clippy": {
+    "passed": true,
+    "seconds": 10.43
+  },
+  "wasm32": {
+    "passed": true,
+    "native_fixture_comparisons": 14474,
+    "address_domain_refusals": 80,
+    "additional_kill_registry_cases": 20,
+    "build_seconds": 13.14
+  },
+  "pinned_files_verified": 485,
+  "captured_kill_decode": {
+    "passed": true,
+    "films": 2,
+    "kills": 369,
+    "seconds": 175.38,
+    "profile": "debug"
+  },
+  "open": [
+    "complete public target/type reconciliation",
+    "source warning and cancellation contracts",
+    "signed native option domain",
+    "remaining corpus acceptance"
+  ]
+}

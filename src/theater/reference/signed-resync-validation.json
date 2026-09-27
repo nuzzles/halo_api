@@ -1,0 +1,30 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scan_cases": 108,
+  "native_scan_panics": 38,
+  "scan_apis": [
+    "NativeFrameConfig::scan_for_target_delta",
+    "scan_for_target_delta_observed"
+  ],
+  "negative_accepted_landing": -32,
+  "native_frame_cases": 8,
+  "native_instrumentation_records_calls_match": true,
+  "focused_host": "passed; 108 cases for both raw scanner APIs plus eight complete frames; 0.02s",
+  "full_suite": "final suite passed: 607 passed, zero failed, 49 ignored; 101.18s",
+  "wasm": "final actual runtime passed; 70 scans per API, eight frames, and two 2^32-bit metadata-only round trips; 13.67s build",
+  "clippy": "final check passed; 13.31s",
+  "remaining": [
+    "Signed harvesting and view orchestration",
+    "Broader repair-domain acceptance",
+    "Complete runtime/nested type and all-data corpus acceptance"
+  ],
+  "status": "checkpoint_passed_full_parity_incomplete",
+  "format": "passed",
+  "diff_check": "passed",
+  "pinned_source_hashes": 485,
+  "captured_march": "final rerun passed; four films; 81.56s release",
+  "complete_documents": "final rerun passed; six films; 104.86s release",
+  "native_regeneration_byte_identical": true,
+  "initial_captured_march": "passed; four films; 80.02s release; before final resync_bits i64 migration",
+  "initial_complete_documents": "passed; six films; 104.40s release; before final resync_bits i64 migration"
+}

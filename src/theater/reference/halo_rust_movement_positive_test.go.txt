@@ -1,0 +1,95 @@
+package grammar
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/source"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"os"
+	"testing"
+)
+
+func TestHaloRustMovementPositive(t *testing.T) {
+	rows := []any{}
+	orders := [][]int{{0, 1, 2}, {0, 1, 3}, {0, 2, 1}, {1, 2}, {0}, {0, 1, 1}, {0, 1, 2, 4}, {-1, 1, 2}}
+	for c := 0; c < 32; c++ {
+		order := orders[0]
+		raw := source.MemoryChunks{}
+		meta := []types.ChunkMeta{}
+		inputs := []any{}
+		packet := func(kind uint16, body []byte) []byte {
+			p := make([]byte, 16)
+			binary.LittleEndian.PutUint16(p, kind)
+			binary.LittleEndian.PutUint32(p[4:], uint32(len(body)))
+			binary.LittleEndian.PutUint64(p[8:], uint64(1000+c))
+			return append(p, body...)
+		}
+		for i, num := range order {
+			var w bitWriter
+			w.bits(0, 1)
+			w.bits(uint64((1<<30)|uint32(512+i)), 32)
+			w.bits(35, 32)
+			w.bits(0, 44)
+			w.bits(0, 32)
+			w.bits(0, 32)
+			w.bits(0, 64)
+			data := packet(2, w.buf)
+			var f bitWriter
+            f.bits(0,2);f.bit(1);f.bits(uint64(512+i),13);f.bits(1,2);f.bit(0);f.bits(1,4);f.bits(0,6);f.bit(uint64(c%2));f.bits(uint64(c*31),11);f.end()
+            data = append(data, packet(0, f.buf)...)
+			raw = append(raw, data)
+			meta = append(meta, types.ChunkMeta{Index: num})
+			inputs = append(inputs, map[string]any{"index": num, "hex": hex.EncodeToString(data)})
+		}
+		film, e := source.Load(raw, meta)
+		if e != nil {
+			t.Fatal(e)
+		}
+		arches := make([]Archetype, 36)
+		for i := range arches {
+			arches[i].Index = i
+		}
+		arches[35].Components = []string{"unit-crouch-component"}
+		arches[35].Levels = []uint32{0}
+		if c/128 == 1 {
+			arches = arches[:35]
+		}
+		if c/128 == 2 {
+			arches[35].Components = nil
+			arches[35].Levels = nil
+		}
+		cfg := DefaultFrameConfig()
+		fc := NewFilmContext(film)
+		fc.reg = &Registry{Archetypes: arches}
+		fc.regLu = true
+		fc.bal = cfg.Profil
+		fc.corrLu = true
+		reads, stats, err := ScanMovementStates(fc)
+		errorKind := ""
+		if err == ErrNoFilmChunk {
+			errorKind = "source"
+		} else if err != nil {
+			errorKind = "biped"
+		}
+
+		tab := ConstruireTableAnticipee(fc)
+		decl := []any{}
+		for k, ds := range tab.entrees {
+			for _, d := range ds {
+				decl = append(decl, []uint64{uint64(k.slot) | uint64(k.tete)<<30, uint64(d.chunk), uint64(d.ti)})
+			}
+		}
+		p := cfg.Profil
+		encoding := map[string]any{"index_bits": p.Mouvement.WorldObject.IndexW, "world_axis_bits": p.Mouvement.WorldObject.AxisW, "handle_bits": p.Mouvement.Traversal.IndexW, "traversal_axis_bits": p.Mouvement.Traversal.AxisW, "default_axis_bits": profile.LargeursAxeParDefautDuBuild(16), "region_axis_bits": map[string]any{"0": p.Mouvement.WorldObject.AxisW, "1": p.Mouvement.WorldObject.AxisW}, "delta_axis_bits": [3]uint{p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth, p.Mouvement.DeltaAxisWidth}, "full_precision": p.Mouvement.FullPrecision, "writer_absolute": false, "delta_handle_tail": false}
+		rows = append(rows, map[string]any{"errorKind": errorKind, "registryCase": c / 128, "inputs": inputs, "encoding": encoding, "reads": reads, "stats": stats, "error": err != nil, "declarations": decl, "count": tab.declarations, "conflicts": tab.conflits})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-movement-positive.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

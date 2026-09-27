@@ -1,0 +1,28 @@
+package grammar
+import("testing";"math";"math/rand";"encoding/hex";"encoding/json";"os";"levelup/go-api/internal/games/halo_infinite/film/internal/profile")
+func TestHaloRustPositionCapture(t *testing.T) {
+ rng:=rand.New(rand.NewSource(804141));rows:=[]any{}
+ for c:=0;c<1024;c++ {
+  cfg:=DefaultFrameConfig();cfg.Obs=NouvelleObservation();p:=cfg.Profil
+  p.Mouvement.FullPrecision=c%5==0;p.Grammaire.GrammaireEcrivainI0=c%3==0;p.Mouvement.DeltaHasHandleTail=c%7==0
+  p.Mouvement.WorldObject.IndexW=uint(1+c%2);p.Mouvement.WorldObject.Region=uint32(c%2);p.Mouvement.WorldObject.AxisW=[3]uint{uint(6+c%11),uint(7+c%9),uint(8+c%7)}
+  p.Mouvement.DeltaAxisWidth=uint(6+c%12);p.Mouvement.DeltaQuantum=float32(c%9+1)*0.0138;cfg.Profil=p
+  world:=NewWorld(&Registry{});world.BindFull(50,0);world.BindFull(51,0)
+  steps:=[]any{}
+  for j:=0;j<12;j++ {
+   slot:=uint32(50+j%3);action:=j%6
+   seed:=[3]float32{float32(rng.Intn(1000)-500)/7,float32(rng.Intn(1000)-500)/11,float32(rng.Intn(1000)-500)/13}
+   switch action {case 0:world.BindFull(slot,0);case 1:world.Unbind(slot);case 2:world.SetPos(slot,seed)}
+   data:=make([]byte,64);rng.Read(data);start:=j%8
+   publications:=haloRustComponentHooks(cfg.Obs);obs:=[]any{};cfg.Obs.PosCaptureHook=func(s PositionSample){obs=append(obs,map[string]any{"kind":s.Kind.String(),"slot":s.Slot,"bit":s.BitPos,"vector":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}});*publications=append(*publications,map[string]any{"kind":"position","position_kind":[]string{"None","Baseline","Absolute","AbsoluteFallback","Delta8","DeltaAxis"}[int(s.Kind)],"slot":s.Slot,"bit":s.BitPos,"vector_bits":[3]uint32{math.Float32bits(s.Vec[0]),math.Float32bits(s.Vec[1]),math.Float32bits(s.Vec[2])}})}
+   br:=LecteurSur(data);br.poserCadre(cfg);br.Skip(start);br.poserSlotDeCapture(slot);if c%2==0{br.cap.accum=world}
+   consumeObjectPositionDynamicPrecisionD(br,p.Mouvement.Traversal)
+   positions:=map[uint32]any{};for slot,state:=range world.slots{var pos any;if state.PosValid{pos=[3]uint32{math.Float32bits(state.Pos[0]),math.Float32bits(state.Pos[1]),math.Float32bits(state.Pos[2])}};positions[slot]=pos}
+   steps=append(steps,map[string]any{"hex":hex.EncodeToString(data),"start":start,"slot":slot,"action":action,"seed":seed,"end":br.BitPos(),"samples":obs,"observations":*publications,"positions":positions})
+  }
+  encoding:=map[string]any{"index_bits":p.Mouvement.WorldObject.IndexW,"world_axis_bits":p.Mouvement.WorldObject.AxisW,"handle_bits":p.Mouvement.Traversal.IndexW,"traversal_axis_bits":p.Mouvement.Traversal.AxisW,"default_axis_bits":profile.LargeursAxeParDefautDuBuild(16),"region_axis_bits":map[string]any{},"delta_axis_bits":[3]uint{p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth,p.Mouvement.DeltaAxisWidth},"full_precision":p.Mouvement.FullPrecision,"writer_absolute":p.Grammaire.GrammaireEcrivainI0,"delta_handle_tail":p.Mouvement.DeltaHasHandleTail}
+  lo,hi:=[3]float32{},[3]float32{};for i,r:=range p.Mouvement.Range{lo[i]=r.Min;hi[i]=r.Max}
+  rows=append(rows,map[string]any{"encoding":encoding,"min":lo,"max":hi,"region":p.Mouvement.WorldObject.Region,"quantum":p.Mouvement.DeltaQuantum,"accumulate":c%2==0,"steps":steps})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-position-capture.json",b,0600);e!=nil{t.Fatal(e)}
+}

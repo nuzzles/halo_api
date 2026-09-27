@@ -1,0 +1,17 @@
+package grammar
+import("testing";"math/rand";"encoding/hex";"encoding/json";"sort";"os")
+func TestHaloRustChainRepair(t *testing.T){
+ rng:=rand.New(rand.NewSource(64041));rows:=[]any{}
+ for c:=0;c<512;c++{
+  names:=[]string{"not-ported"};if c%3==1{names=[]string{"biped-emp-timer-component","not-ported"}};if c%3==2{names=[]string{"not-ported","biped-emp-timer-component"}}
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0,Components:names,Levels:make([]uint32,len(names))},{Index:1}}};world:=NewWorld(reg);world.BindFull(50,0);world.BindFull(60,1)
+  var bw bitWriter;bw.bit(1);bw.bits(50,11);bw.bits(0,2);body:=bw.n;bw.bit(0);bw.bit(0);bw.bits(uint64(len(names)),3);for i:=range names{bw.bits(uint64(i),6)}
+  for _,name:=range names{width:=8;if name=="not-ported"{width=c%97};for j:=0;j<width;j++{bw.bit(rng.Uint64())}}
+  bw.deltaEmpty(60);if c%2==0{bw.end()}else{for j:=0;j<40;j++{bw.bit(1)}}
+  cfg:=emptyCfg;cfg.Obs=NouvelleObservation();preset:=c%11==0;if preset{cfg.Profil.Grammaire.LargeursBouchon=map[string]int{"not-ported":3}}
+  br:=LecteurSur(bw.buf);br.poserCadre(emptyCfg);br.Skip(body);tr:=decodeDelta(br,world,50)
+  got,end,ok:=repairUnportedComponent(bw.buf,body,recDelta,50,tr,world,cfg);widths:=[]int{};for w:=range cfg.Obs.CompWidths["not-ported"]{widths=append(widths,w)};sort.Ints(widths)
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(bw.buf),"names":names,"preset":preset,"ok":ok,"end":end,"trace_end":got.EndBit,"widths":widths})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-chain-repair.json",b,0600);e!=nil{t.Fatal(e)}
+}

@@ -1,0 +1,82 @@
+{
+  "families": {
+    "1124981320": "thruster",
+    "1133960002": "shroud_screen",
+    "1195693890": "threat_seeker",
+    "1385156166": "wall",
+    "1751859401": "wall",
+    "1914281146": "sensor",
+    "1924545897": "sensor",
+    "1930282767": "translocator_beacon",
+    "2091408092": "repulsor",
+    "2356674535": "grapple",
+    "2385364340": "wall",
+    "257365759": "grenade_spike",
+    "2866415603": "grenade_dynamo",
+    "3078691194": "powerup_overshield",
+    "3165371971": "grenade_frag",
+    "3400195248": "grenade_plasma",
+    "3888029532": "powerup_camo",
+    "4009088141": "thruster",
+    "658497771": "grapple",
+    "695517747": "wall",
+    "853112664": "repair_field"
+  },
+  "objective_families": {
+    "1530156": "ball",
+    "708387624": "flag"
+  },
+  "objective_labels": {
+    "1530156": {
+      "en": "Oddball",
+      "fr": "Crane"
+    },
+    "708387624": {
+      "en": "Flag",
+      "fr": "Drapeau"
+    }
+  },
+  "objective_objects": [
+    1530156,
+    708387624
+  ],
+  "spawned_piece_ids": [
+    1385156166,
+    1751859401
+  ],
+  "weapon_keys": {
+    "1040646679": "hinf_vestige_carbine",
+    "1220648237": "hinf_ma40_ar",
+    "1341363070": "hinf_energy_sword",
+    "169448124": "hinf_s7_sniper",
+    "1791870029": "hinf_bandit",
+    "1907034668": "hinf_m41_spnkr",
+    "1987950957": "hinf_hydra",
+    "206927455": "hinf_energy_sword",
+    "2157411237": "hinf_mangler",
+    "220251241": "hinf_skewer",
+    "2216347109": "hinf_gravity_hammer",
+    "2226989549": "hinf_disruptor",
+    "2475141305": "hinf_shock_rifle",
+    "2641014482": "hinf_fuel_rod_spnkr",
+    "2694143646": "hinf_sentinel_beam",
+    "3040056702": "hinf_needler",
+    "3055147082": "hinf_cqs48_bulldog",
+    "3067865816": "hinf_frag_grenade",
+    "3252796080": "hinf_plasma_grenade",
+    "3272443847": "hinf_ravager",
+    "3277072710": "hinf_plasma_pistol",
+    "3616626021": "hinf_mutilator",
+    "3673265095": "hinf_stalker_rifle",
+    "4094171407": "hinf_sidekick",
+    "4123211231": "hinf_ma5k_avenger",
+    "4254618956": "hinf_vk78_commando",
+    "438501094": "hinf_shock_rifle",
+    "587483057": "hinf_cindershot",
+    "717865727": "hinf_heatwave",
+    "723002581": "hinf_br75",
+    "800201863": "hinf_bandit",
+    "810045094": "hinf_pulse_carbine",
+    "987061668": "hinf_dynamo_grenade"
+  }
+}

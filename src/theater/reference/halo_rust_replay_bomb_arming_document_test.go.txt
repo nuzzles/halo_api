@@ -1,0 +1,33 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"math";"levelup/go-api/internal/games/halo_infinite/film/types";"levelup/go-api/internal/games/halo_infinite/film/internal/grammar";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustReplayBombArmingDocument(t *testing.T){
+ rng:=rand.New(rand.NewSource(4114));rows:=[]any{}
+ for run:=0;run<1024;run++{
+  reads:=[]types.NavpointRadialRead{};detonations:=[]int{}
+  patterns:=[][]uint8{{130,160,200,254,254,127},{130,170,210,253,127},{251,245,235,225},{130,140,160,254},{254},{0,8,16},{130,150,170,254,200,254},{240,180,127}}
+  for j:=0;j<run%13;j++ {
+   p:=patterns[(run+j)%len(patterns)];base:=j*15000;gap:=[]int{100,300,500,501}[run%4]
+   for mirror:=0;mirror<2;mirror++{for k,q:=range p{reads=append(reads,types.NavpointRadialRead{Slot:uint32(100+j%3+mirror*12),TMS:int32(base+k*gap+mirror*100),Q:q,Chained:k%2==0})}}
+   if run%4!=0 {for k,q:=range p{if q==254{detonations=append(detonations,base+k*gap+100+4930+(run%3)*j*1000);break}}}
+   if j%3==0 {for k,q:=range []uint8{250,240,230}{reads=append(reads,types.NavpointRadialRead{Slot:uint32(112+j%3),TMS:int32(base+2500+k*500),Q:q})}}
+  }
+  if run%9==0{detonations=append(detonations,1)}
+  if run%7==0{reads=append(reads,types.NavpointRadialRead{Slot:100,TMS:0,Q:127},types.NavpointRadialRead{Slot:100,TMS:0,Q:254})}
+  rng.Shuffle(len(reads),func(i,j int){reads[i],reads[j]=reads[j],reads[i]})
+  segments:=grammar.NavpointSegments(reads);rises:=grammar.NavpointContiguousRises(reads)
+  shapes:=[]any{};truncated:=[]grammar.NavpointSegment{};bySlot:=bombReadsBySlot(reads)
+  for _,g:=range segments{shapes=append(shapes,[]bool{g.EndsAtSummit(),g.IsDisarmHold()});truncated=append(truncated,bombTronquerAuPremierPlein(g,bySlot[g.Slot]))}
+  c:=scoreClock{originMS:(run%7)*1000,intervalMS:[]int{100,1000,0,33}[run%4],frames:[]int{10000,100,0,100000}[run%4]}
+  fb:=fallback.NouveauCompteur();armings,cov,v:=buildBombArmings(reads,detonations,c,fb);if armings==nil{armings=[]BombArming{}};if segments==nil{segments=[]grammar.NavpointSegment{}};if rises==nil{rises=[]grammar.NavpointRise{}}
+  doc:=ReplayDocument{BombArmings:[]BombArming{{TimeMS:-123}}}
+  if run%3!=0 {doc.Coverage=&Coverage{BombArmings:&BombArmingsCoverage{Reads:999}}}
+  for j:=len(detonations)-1;j>=0;j-- {doc.Objectives=append(doc.Objectives,ObjectiveAction{TimeMS:detonations[j],Stat:"bomb_detonations"})}
+  doc.Objectives=append(doc.Objectives,ObjectiveAction{TimeMS:1,Stat:"other"})
+  before,_:=json.Marshal(doc)
+  enabled:=run%5!=0
+  fb=fallback.NouveauCompteur()
+  attachBombArmings(&doc,Options{Bomb:BombInput{Scanned:enabled,Reads:reads},Fallbacks:fb},c)
+  rows=append(rows,map[string]any{"reads":reads,"before":json.RawMessage(before),"after":doc,"scanned":enabled,"clock":map[string]any{"origin_ms":c.originMS,"interval_ms":c.intervalMS,"frames":c.frames},"cv_bits":math.Float64bits(v.CV),"output":map[string]any{"armings":armings,"coverage":cov,"verdict":v},"fallbacks":fb.Compte(fallback.NomArmementBombeDebutAZero)})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-replay-bomb-arming-document.json",raw,0600);e!=nil{t.Fatal(e)}
+}

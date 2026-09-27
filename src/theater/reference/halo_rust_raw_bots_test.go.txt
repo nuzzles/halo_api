@@ -1,0 +1,20 @@
+package replay
+import("testing";"encoding/json";"encoding/hex";"os";"sort")
+func TestHaloRustRawBots(t *testing.T) {
+ names:=[]string{"","A","\xff","\xfe","\xc0\xaf","\x00\n","é","bot:A","A [bot]"};rows:=[]any{}
+ hexs:=func(s string)string{return hex.EncodeToString([]byte(s))}
+ for n:=0;n<len(names)*len(names);n++ {
+  a,b:=names[n%len(names)],names[n/len(names)]
+  bots:=[]BotIdentity{{FilmIndex:0,Name:a,BotID:1},{FilmIndex:0,Name:b,BotID:2},{FilmIndex:1,Name:a,BotID:3},{FilmIndex:2,Name:b,BotID:4}}
+  bn:=[]any{};for _,bot:=range bots {bn=append(bn,[]any{bot.FilmIndex,hexs(bot.Name),bot.BotID})}
+  bySeat,shared:=botNamesBySeat(bots);keys:=[]int{};for k:=range bySeat{keys=append(keys,k)};sort.Ints(keys);sn:=[]any{};for _,k:=range keys {sn=append(sn,[]any{k,hexs(bySeat[k])})}
+  tracks:=[]Track{{Slot:1,StartFrame:0,EndFrame:10},{Slot:2,StartFrame:12,EndFrame:20},{Slot:3,StartFrame:25,EndFrame:30},{Slot:4,XUID:"100",StartFrame:0,EndFrame:30}}
+  nameBotTracks(tracks,map[uint32]int{1:0,2:1,3:2,4:0},bots);tn:=[]any{};for _,tr:=range tracks {tn=append(tn,hexs(tr.Bot))}
+  roster:=buildRoster(PlayerIndexTable{ByXUID:map[uint64]int{100:3}},nil,bots,teamPublication{});rn:=[]any{};for _,r:=range roster {rn=append(rn,[]any{r.FilmIndex,r.XUID,hexs(r.Name),r.Bot,r.Bid})}
+  presence:=presencesParIdentite(tracks);pk:=[]string{};for k:=range presence {pk=append(pk,k)};sort.Strings(pk);ps:=[]any{};for _,k:=range pk{ps=append(ps,[]any{hexs(k),presence[k]})}
+  chain:=[]Track{{Slot:5,StartFrame:0,EndFrame:10},{Slot:6,StartFrame:220,EndFrame:230}}
+  matches:=1;if n%3==0 {matches=0};attributeSuccessions(chain,[]Succession{{BotName:a,FilmIndex:0,SwitchMatchMS:0}},0,100000,0,matches,nil);cn:=[]any{};for _,tr:=range chain {cn=append(cn,hexs(tr.Bot))}
+  rows=append(rows,map[string]any{"bots":bn,"seats":sn,"shared":shared,"tracks":tn,"roster":rn,"presence":ps,"matches":matches,"chain":cn})
+ }
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-raw-bots.json",raw,0600);e!=nil{t.Fatal(e)}
+}

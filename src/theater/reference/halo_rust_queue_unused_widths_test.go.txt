@@ -1,0 +1,12 @@
+package grammar
+import("encoding/hex";"encoding/json";"os";"testing")
+func TestHaloRustQueueUnusedWidths(t *testing.T){
+ rows:=[]any{}
+ for _,data:=range [][]byte{{},{0},make([]byte,16)}{for _,width:=range []int{-1,0,5,32,64,1<<32,1<<63-1}{for _,preamble:=range []int{-1,0,1,2,1<<63-1}{for _,extra:=range []bool{false,true}{
+  reg:=&Registry{Archetypes:[]Archetype{{Index:0}}};v:=KFQVariant{IDLowBits:width,Preamble:preamble,ExtraFields:extra}
+  result:=KFQWalk{};panicked:=false
+  func(){defer func(){panicked=recover()!=nil}();result=WalkPacketRecords(reg,data,v)}()
+  rows=append(rows,map[string]any{"hex":hex.EncodeToString(data),"variant":v,"panic":panicked,"result":result})
+ }}}}
+ raw,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-queue-unused-widths.json",raw,0600);e!=nil{t.Fatal(e)}
+}

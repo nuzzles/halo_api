@@ -1,0 +1,16 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"fmt";"levelup/go-api/internal/games/halo_infinite/film/replay/mapvar")
+func TestHaloRustZoneAttribution(t *testing.T){
+ rng:=rand.New(rand.NewSource(41400));rows:=[]any{};ptr:=func(v float64)*float64{return &v}
+ for i:=0;i<1024;i++ {
+  entry:=MapObjectivesEntry{Objectives:[]mapvar.Objective{}}
+  for j:=0;j<i%6;j++{x:=float64(j*5);if i%4==0{x=0};shape:=&mapvar.Shape{Family:mapvar.ShapeBox,HalfX:ptr(2),HalfY:ptr(2),UpZ:2,DownZ:1,Forward:mapvar.Vec3{X:1},Up:mapvar.Vec3{Z:1}};if i%3==0{shape.Family=mapvar.ShapeCylinder;shape.Radius=ptr(2)};entry.Objectives=append(entry.Objectives,mapvar.Objective{Role:mapvar.Role("strongholds_zone"),InstanceID:int32(j+1),ObjectIdx:j,Pos:mapvar.Vec3{X:x},Shape:shape,Labels:[]string{}})}
+  bridge:=map[uint32]uint64{1:100,2:200,3:0};tracks:=[]Track{}
+  for j:=0;j<8;j++{tr:=Track{Slot:uint32(j%4),Points:[]Point{}};if j%3==0{tr.XUID=fmt.Sprint(100*(j%3+1))};for k:=0;k<30;k++{tr.Points=append(tr.Points,Point{T:rng.Intn(25),X:float32(rng.Intn(28)-6),Y:float32(rng.Intn(8)-4),Z:float32(rng.Intn(5)-2)})};tracks=append(tracks,tr)}
+  actions:=[]ObjectiveAction{};for j:=0;j<80;j++{actions=append(actions,ObjectiveAction{T:rng.Intn(35)-5,XUID:fmt.Sprint(100*(j%4+1)),Stat:"zone_captures",TimeMS:j*100})}
+  opt:=AttributeOptions{MaxGapFrames:[]int{-1,0,1,2,5}[i%5],MaxDistanceM:[]float64{-1,0,1,5,30}[i%5]};delta:=mapvar.Vec3{X:100,Y:100,Z:100};if i%2==0{delta=mapvar.Vec3{X:1,Y:-1}}
+  zones:=entry.ZonesOfRole(mapvar.Role("strongholds_zone")).Zones;out,cov:=AttributeZones(actions,tracks,zones,bridge,opt);trans,tc:=AttributeZones(actions,tracks,TranslateZones(zones,delta),bridge,opt)
+  rows=append(rows,map[string]any{"entry":entry,"actions":actions,"tracks":tracks,"bridge":bridge,"options":opt,"delta":delta,"output":out,"coverage":cov,"translated":trans,"translated_coverage":tc})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-zone-attribution.json",b,0600);e!=nil{t.Fatal(e)}
+}

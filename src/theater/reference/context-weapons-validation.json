@@ -1,0 +1,42 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "scope": "Loaded-context held-weapon scan, local observer, retained component attempts and native facts projection",
+  "fixture": {
+    "path": "context-weapons-v41.json.zlib",
+    "sha256": "7b75c58caeee75fbc6e9abb0187dac179be770241e5d2badde0876e4b730c898",
+    "generator": "halo_rust_context_weapons_test.go.txt",
+    "cases": 128,
+    "records": 682,
+    "attempts": 1042,
+    "no_chunk_errors": 12,
+    "kinds": {
+      "dropped": 334,
+      "taken": 187,
+      "swapped": 141,
+      "restated": 20
+    }
+  },
+  "host": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-weapons-host.log",
+    "tests_passed": 2
+  },
+  "wasm": {
+    "status": "passed",
+    "prefix": "native_context_weapons::",
+    "log": "/private/tmp/halo-context-weapons-wasm.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "log": "/private/tmp/halo-context-weapons-clippy.log"
+  },
+  "full_v41_parity_complete": false,
+  "limits": [
+    "Controlled native-generated source records and synthetic registry, not independently annotated gameplay",
+    "Fixture covers successful admission and no chunks; other registry/profile/layout refusal branches require expanded native comparisons",
+    "Whole carried-inventory phase and inventory-delta context bridge remain open",
+    "Component attempt comparison checks order, start/end boundaries, status and in-bounds verdict; decoded component fields are covered by separate component oracles"
+  ],
+  "source_hashes": 485,
+  "format_and_diff_checks": "passed"
+}

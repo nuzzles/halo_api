@@ -1,0 +1,38 @@
+{
+  "reference_commit": "43a01721e8a02c87c955e175936f0ccf8dd97a81",
+  "status": "writer_validated_decoder_pending",
+  "native": {
+    "writer_cases": 2304,
+    "float32_cases": 68608,
+    "runtime": "go1.26.5",
+    "fixture_byte_identical": true
+  },
+  "host": {
+    "passed": 12,
+    "failed": 0,
+    "seconds": 5.24,
+    "scope": "All shared facts-codec tests",
+    "log": "/private/tmp/halo-facts-object-deaths-fixed-tests.log"
+  },
+  "clippy": {
+    "status": "passed",
+    "seconds": 8.94,
+    "log": "/private/tmp/halo-facts-object-deaths-final-clippy.log"
+  },
+  "wasm": {
+    "status": "passed",
+    "build_seconds": 12.32,
+    "log": "/private/tmp/halo-facts-object-deaths-final-wasm.log",
+    "subsequent_change": "Clippy-only replacement of modulo predicates with integer is_multiple_of; final source compiled by Clippy."
+  },
+  "runtime_source_hashes": 4,
+  "runtime_power_table_entries": 78,
+  "pinned_parser_source_hashes": 485,
+  "decoder_oracle": {
+    "native_cases": 5517,
+    "charges": 146,
+    "rust_decoder_implemented": false,
+    "log": "/private/tmp/halo-facts-object-death-decode-native.log"
+  },
+  "full_v41_parity_complete": false
+}

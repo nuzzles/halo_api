@@ -1,0 +1,21 @@
+package grammar
+import("testing";"os";"encoding/json";"encoding/hex";"encoding/binary";"math/rand";"path/filepath")
+func TestHaloRustRoster(t *testing.T) {
+ rows:=[]any{};add:=func(d []byte,source string,format,perso int){entries,report:=DecodeRoster(d,format,perso);rows=append(rows,map[string]any{"source":source,"hex":hex.EncodeToString(d),"format":format,"perso":perso,"entries":entries,"report":report})}
+ rng:=rand.New(rand.NewSource(418))
+ for run:=0;run<256;run++{
+  format:=27;if run%5==0{format=20};w:=&translocWriter{};w.put(32,3)
+  for i:=0;i<3;i++ {
+   if format>=21{gate:=rng.Intn(2);w.put(1,uint64(gate));if gate==0{w.put(5,uint64(rng.Intn(32)))}}
+   w.put(64,rng.Uint64());mask:=1+rng.Intn(64);w.put(11,uint64(mask-1));w.put(mask,rng.Uint64());n:=rng.Intn(8);w.put(12,uint64(n));for j:=0;j<n;j++{w.put(8,uint64(rng.Intn(256)))};m:=rng.Intn(8);w.put(8,uint64(m));for j:=0;j<m;j++{w.put(32,uint64(rng.Uint32()))};for j:=0;j<104;j++{w.put(8,0)}
+   name:=[]uint16{'A','B','C',0};if run%4==0{name=[]uint16{0xd800,0xdc00,0xd800,0}};if run%7==0{name=make([]uint16,16);for j:=range name{name[j]='X'}};for _,c:=range name{w.put(16,uint64(c))}
+   for j:=0;j<16;j++{w.put(8,0)};w.put(32,uint64(rng.Uint32()));w.put(64,rng.Uint64());for _,n:=range []int{10,14,6,8,7,1}{w.put(n,uint64(rng.Intn(1<<n)))};for j:=0;j<1852+44;j++{w.put(8,0)}
+  }
+  add(w.pay,"generated",format,1852*8)
+  for j:=0;j<8;j++{cut:=rng.Intn(len(w.pay));add(w.pay[:cut],"truncated",format,1852*8)}
+ }
+ for n:=0;n<64;n++ {d:=make([]byte,n);rng.Read(d);add(d,"random-count",27,1852*8)}
+ paths,err:=filepath.Glob("/Users/simbleau/git/halo_api/experiments/films/*/*/chunk-*-type-2.bin");if err!=nil{t.Fatal(err)}
+ for _,p:=range paths{data,e:=os.ReadFile(p);if e!=nil{t.Fatal(e)};for at:=0;at+16<=len(data);{size:=int(binary.LittleEndian.Uint32(data[at+4:]));if at+16+size>len(data){t.Fatal("packet size")};if binary.LittleEndian.Uint16(data[at:])==8{add(data[at+16:at+16+size],p,27,1852*8);row:=rows[len(rows)-1].(map[string]any);row["payload_offset"]=at+16;row["timestamp_us"]=binary.LittleEndian.Uint64(data[at+8:]);row["payload_size"]=size};at+=16+size}}
+ d,err:=json.Marshal(rows);if err!=nil{t.Fatal(err)};if err=os.WriteFile("/private/tmp/halo-roster.json",d,0600);err!=nil{t.Fatal(err)}
+}

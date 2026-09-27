@@ -1,0 +1,748 @@
+{
+  "note": "Original packet bytes. Magazine quantities agree with existing independent firing sequences and reload starts; no missed rounds are synthesized. Inventory component values remain opaque in the public decoder.",
+  "records": [
+    {
+      "label": "bandit_fourteen_rounds",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 71516444,
+      "life": 8,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 719704,
+        "bit": 843,
+        "end_bit": 1028
+      },
+      "layout": "X18Y18Z15",
+      "tick": 147,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        30
+      ],
+      "hex": "cac128526084070016acdc44d42c9679f760261b0211da28018cd17d1780732058207b42049c40494004555902f912fe0cc0900462825588003d8248affd934408900055640bcadc01c9048032d4c1a9f0c79ec9a20548002ab205e455fc4c81880204c8a0948c1164d10425001559780be8c4038d024030082179bca7fac981d88252000aac8180d9801060440213373332cd00593441494004555902f3dd00c9412003fb263080002687ba70019344169400455590301ef00bd40900d43ca5c80004647442fd99344188c555900004b0ee89f132694010a5892250142914ae94110a5cd7260748002106178ae7fd9e04983bd30018386506244111a8806fd18203b07c0816fcf90903d34104137804105d880041b4d448483ebef908",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 894,
+          "end_bit": 952,
+          "bits": "0000001011111010001100010000000011100011010000001001000000"
+        },
+        {
+          "id": 1,
+          "bit": 952,
+          "end_bit": 983,
+          "bits": "0011000000001000001000010111100"
+        },
+        {
+          "id": 21,
+          "bit": 983,
+          "end_bit": 1008,
+          "bits": "1101111001010011111111010"
+        },
+        {
+          "id": 25,
+          "bit": 1008,
+          "end_bit": 1018,
+          "bits": "1100100110"
+        },
+        {
+          "id": 30,
+          "bit": 1018,
+          "end_bit": 1028,
+          "bits": "0000011101"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 14
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 1187
+    },
+    {
+      "label": "bandit_thirteen_rounds",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 37548324,
+      "life": 0,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 772447,
+        "bit": 488,
+        "end_bit": 673
+      },
+      "layout": "X18Y18Z15",
+      "tick": 159,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        30
+      ],
+      "hex": "d26004008016acdc44d42c9679f5540484000f5e7de00c2c8bec4bf52f05da030138017cf07e6a004522e7bd010890000c5b1800c60f44d2040f68409f88012800aacbc05f645fa9a82ba037888df9adbbb67c0dc4028c005902f33efe1b40c4089b0635e7d10125001155640bf83c00e101dc3e9c79b440012c0d84c2f67d101a5001155640bcdabfde502fc009251b0080000cf873ef67d10225001155640bf194022300d8115d81986200af0d66c1867d102a40015590301ef0063409d0f8f948363e1f5b3e88191800b205e80a0073824003744831cfa207480022b205f51200b28120176cd472350000667d204240010940be1ac0083003049f4721c261312a01204a3001082f19f00f8c09712c0858375b054094010a5d6b250142968d0100df4121203a02c081681f0207bf3842413404c105d27e041b6384107d7df000",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 539,
+          "end_bit": 597,
+          "bits": "0000001011111011001000101111110101001101010000010101110100"
+        },
+        {
+          "id": 1,
+          "bit": 597,
+          "end_bit": 628,
+          "bits": "0000011011110001000100011011111"
+        },
+        {
+          "id": 21,
+          "bit": 628,
+          "end_bit": 653,
+          "bits": "1001101011011011101110110"
+        },
+        {
+          "id": 25,
+          "bit": 653,
+          "end_bit": 663,
+          "bits": "1100111110"
+        },
+        {
+          "id": 30,
+          "bit": 663,
+          "end_bit": 673,
+          "bits": "0000011011"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 13
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 801
+    },
+    {
+      "label": "bandit_twelve_rounds",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 72283579,
+      "life": 8,
+      "source": {
+        "chunk": 4,
+        "payload_byte": 732125,
+        "bit": 690,
+        "end_bit": 875
+      },
+      "layout": "X18Y18Z15",
+      "tick": 193,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        30
+      ],
+      "hex": "d26084080016acdc44d42c9679f65f1f7eba0187117d268062605ba07b42060c404900155640be683f8c5024000008a8c59df63828811100c8179f5803960901c1440a900055640bca43f88703100e05a9673747f4e0a2084a002ab2f017d268062a048053c6303b794ff5c1033104a40015590301cd0063c0900a666666df89f9b82882920008ac8179ee805ee09001fd930000000d83c144169400455590302cf0087c0be0cb6e66980003ac72befc5c144188450000340ca00852c979280a148b6f4a08852fa54201af22080ec3f0205bf7c4240f7d38104df64041776f0106d79f041f5f7c8400",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 741,
+          "end_bit": 799,
+          "bits": "0000001011111010010011010000000011000101010000001001000000"
+        },
+        {
+          "id": 1,
+          "bit": 799,
+          "end_bit": 830,
+          "bits": "0010100111100011000110000001110"
+        },
+        {
+          "id": 21,
+          "bit": 830,
+          "end_bit": 855,
+          "bits": "1101111001010011111111010"
+        },
+        {
+          "id": 25,
+          "bit": 855,
+          "end_bit": 865,
+          "bits": "1110000010"
+        },
+        {
+          "id": 30,
+          "bit": 865,
+          "end_bit": 875,
+          "bits": "0000011001"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 12
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 1034
+    },
+    {
+      "label": "nuzzles_first_shot",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Nuzzles",
+      "time_us": 30040560,
+      "life": 3,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 635642,
+        "bit": 722,
+        "end_bit": 870
+      },
+      "layout": "X18Y18Z15",
+      "tick": 221,
+      "components": [
+        0,
+        21,
+        25,
+        30
+      ],
+      "hex": "d26034000316acdc44d42c9679f760761c6b48a0030c081ed081bb1002400155902f0ccff6fc0a60c3d2e91f66deabba88052000aac8178e77f86e070863f0f412098f55dd4404900055640c037c084102e00efef9d79047d8eea2034802acbc05edf601dc812044cdfdbba07620448002ab205fae201607ffe16fe3848d27416775102a4001559030134ffb7c053045dea49de221b3ba881920008ac8179678030e0900444532684002481dd440e900055640c01440841024411dcb98d91e7f4eea40148002128180397f82a04d00c48abd07ceefdc065004295daa94050a54dd04037e308480ed4010902d000040f5f7c104d9a204175d28106d380041f40000",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 767,
+          "end_bit": 825,
+          "bits": "0000001011110110111110110000000011101110010000001001000000"
+        },
+        {
+          "id": 21,
+          "bit": 825,
+          "end_bit": 850,
+          "bits": "1000100110011011111110110"
+        },
+        {
+          "id": 25,
+          "bit": 850,
+          "end_bit": 860,
+          "bits": "1110111010"
+        },
+        {
+          "id": 30,
+          "bit": 860,
+          "end_bit": 870,
+          "bits": "0000011101"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 14
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 1029
+    },
+    {
+      "label": "nuzzles_reload_refill",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Nuzzles",
+      "time_us": 36113054,
+      "life": 3,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 744287,
+        "bit": 544,
+        "end_bit": 713
+      },
+      "layout": "X18Y18Z15",
+      "tick": 73,
+      "components": [
+        0,
+        5,
+        25,
+        30,
+        31
+      ],
+      "hex": "a07b42024c400900055640bdfdbf52d0458045e91f50297eca4a20148002ab205e7c1fc77819e116424c0887bda5251012400155902fdeb003ac0990d73d6766951f3a92880d2802b2f3e05e5da005e811e000014069207c144408900045640bef63ffbf00541160e1fc6201050a4a20546002c81807a804a204801269213292881928008aab205e886004b82b21216ec8b36000064005c4a92881d1802b205f50a01c881201800130292901918008417fdd7e80a08a8189909f3141491480e8c00420be273faf102ac0d62f5c58d51cc6500429711494050a592f04037e508480e80f90902d000040f7e6c104df4b04175778106d7fe041f7e7c0",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 595,
+          "end_bit": 653,
+          "bits": "0000001011110010111011010000000000101111010000001000111100"
+        },
+        {
+          "id": 5,
+          "bit": 653,
+          "end_bit": 682,
+          "bits": "00000000000000000010100000001"
+        },
+        {
+          "id": 25,
+          "bit": 682,
+          "end_bit": 692,
+          "bits": "1010010010"
+        },
+        {
+          "id": 30,
+          "bit": 692,
+          "end_bit": 702,
+          "bits": "0000011111"
+        },
+        {
+          "id": 31,
+          "bit": 702,
+          "end_bit": 713,
+          "bits": "00000101000"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 15
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 876
+    },
+    {
+      "label": "ranked_empty_magazine",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 666102668,
+      "life": 139,
+      "source": {
+        "chunk": 34,
+        "payload_byte": 602930,
+        "bit": 794,
+        "end_bit": 1006
+      },
+      "layout": "X18Y18Z15",
+      "tick": 188,
+      "components": [
+        0,
+        1,
+        5,
+        21,
+        25,
+        30
+      ],
+      "hex": "d268b42ec016acdc44d42c9679f768561d81853000308c01f40105015503e2102f2282480022b205ed9dfd2b811e19aab48b00001b0ef1142a6001559e7b02fb1cfffec090003eda73f1115c378011452400555902fa84ffb43fff000021235157f2de228b4c0022aacbc0600de0084805a13619cd21000848631211378e28d48002ab205e0d201c981421fcef9068513be6f1485a149a1656088820c98576e35832208323b69352382500100df41040b5f00105df9f2120dbf56083ebff00",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 851,
+          "end_bit": 909,
+          "bits": "0000001100000000011011110000000001000010010000000010110100"
+        },
+        {
+          "id": 1,
+          "bit": 909,
+          "end_bit": 940,
+          "bits": "0010011011000011001110011010010"
+        },
+        {
+          "id": 5,
+          "bit": 940,
+          "end_bit": 969,
+          "bits": "00010000000000001000010010000"
+        },
+        {
+          "id": 21,
+          "bit": 969,
+          "end_bit": 994,
+          "bits": "1100011000100100001000100"
+        },
+        {
+          "id": 25,
+          "bit": 994,
+          "end_bit": 1004,
+          "bits": "1101111000"
+        },
+        {
+          "id": 30,
+          "bit": 1004,
+          "end_bit": 1006,
+          "bits": "11"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 0
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 1165
+    },
+    {
+      "label": "ranked_large_magazine",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 209821720,
+      "life": 32,
+      "source": {
+        "chunk": 11,
+        "payload_byte": 651186,
+        "bit": 653,
+        "end_bit": 801
+      },
+      "layout": "X18Y18Z15",
+      "tick": 245,
+      "components": [
+        0,
+        21,
+        25,
+        33
+      ],
+      "hex": "d262041c8032b1824d542c9679f36276051278580305a2ff24fdcac147a4c4a8470a2d59b889a8592cf3ecd1bdbc58030222f3ef011fc0b740f6840f588712000aac817f797e8d209084e60c32a942f79f54440900559840bfcc3f72b0480a9e3c77d423c446900055640bd363f5d70240301151d9ed0848faa22448002ab205e595fd5e811e1993b8effaf3f67d5112a5001559780bcfa4047f02401ab2d011dc483efa81788992000aac817c4380bda0750660a238f702f5df5444e900155640beaf4005d02483000848412dff3ea88a128008aab20607ca00898120023750ab100086860e1ff3ea94010a472125014296c30100d04104076df8102df9f040f4014104df7504174030106dd00041f7e000",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 698,
+          "end_bit": 756,
+          "bits": "0000001011111111001100001111110111001010110000010010000000"
+        },
+        {
+          "id": 21,
+          "bit": 756,
+          "end_bit": 781,
+          "bits": "1010100111100011110001110"
+        },
+        {
+          "id": 25,
+          "bit": 781,
+          "end_bit": 791,
+          "bits": "1111101010"
+        },
+        {
+          "id": 33,
+          "bit": 791,
+          "end_bit": 801,
+          "bits": "0001000111"
+        }
+      ],
+      "expected": {
+        "slot": 1,
+        "rounds": 35
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 960
+    },
+    {
+      "label": "ranked_large_refill",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "KOTHA 21st",
+      "time_us": 292221421,
+      "life": 54,
+      "source": {
+        "chunk": 15,
+        "payload_byte": 715432,
+        "bit": 206,
+        "end_bit": 443
+      },
+      "layout": "X18Y18Z15",
+      "tick": 64,
+      "components": [
+        0,
+        1,
+        5,
+        21,
+        25,
+        33,
+        34
+      ],
+      "hex": "a07b420204468900055640be57c025902402934891f25a80aa022364e0022aacc310182427f2320928179a9330d40008167b748a004904f11ba5001155640c0e43f8f30480251d19001600c409783a150111c23015640bce9401a50484f2bbfd50111ca400155902fb93001b40b708bd2e756079e828088e91800b205fd72042a816a12653cd5a0245e46002105f485fe298294010cc3202d5ca7122fa3001082fc53019dc0930a7858c574f9a1994010a48ff250142924969e01200084185efb5ff3581240fb580facabff7eeaa621f3caa40010830be93bfa83024c07b742089662cf1d4b9cba79746002105f2c1fd38812634c1b8e41da0eeb3cca40010830be89bfa4d024c0711e16c326c2388d2cfae79b4800210617d147f4b204980e9202d8672646918a0f58806fc48203bf2e081e838820ba03e0836fd6820faffc000",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 269,
+          "end_bit": 327,
+          "bits": "0000001100000100100001001111111001000110010000010010010100"
+        },
+        {
+          "id": 1,
+          "bit": 327,
+          "end_bit": 358,
+          "bits": "0000101111001101010010011001100"
+        },
+        {
+          "id": 5,
+          "bit": 358,
+          "end_bit": 387,
+          "bits": "00110101000000000000001000000"
+        },
+        {
+          "id": 21,
+          "bit": 387,
+          "end_bit": 412,
+          "bits": "1011001111011011101001000"
+        },
+        {
+          "id": 25,
+          "bit": 412,
+          "end_bit": 422,
+          "bits": "1010000000"
+        },
+        {
+          "id": 33,
+          "bit": 422,
+          "end_bit": 432,
+          "bits": "0001001001"
+        },
+        {
+          "id": 34,
+          "bit": 432,
+          "end_bit": 443,
+          "bits": "00000100111"
+        }
+      ],
+      "expected": {
+        "slot": 1,
+        "rounds": 36
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 637
+    },
+    {
+      "label": "second_match_first_shot",
+      "film": "bandit/01-evo",
+      "match_id": "ec02ed9d-346e-4eb0-a491-77e6b557847c",
+      "player": "diarrhea698343",
+      "time_us": 34950408,
+      "life": 0,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 731632,
+        "bit": 619,
+        "end_bit": 839
+      },
+      "layout": "X18Y18Z15",
+      "tick": 10,
+      "components": [
+        0,
+        1,
+        5,
+        21,
+        25,
+        30
+      ],
+      "hex": "d26004000016acdc44d42c9679f55404840004de79c001ea2f8d8fed5c0b781c048200e8631cbc048da43b771a8d4ac06027002f9e0fcd401a18c4f7a0a1120001cf3700088098b20081ed080151002600115565e02f8cefed3c0900825e26000004687b7afb10a03b100a5001155640be5ec010904982bc2d15c6e0000ce44baa4291012400555902f9fafe71c090000025833fe7fc8522044600ac817dc17fd520000600078085220548002ab205ec3a0233812012172450e67bfe429103240015590300a2fe0cc12008a436525e21e5a14900918008417e317f0da0950972fabab94180f4a00852db71280a14b0df4bb485b7cbf0066802bae5dd427484bce9000420c2f59cfe5cc09200abd02438e105e2773d9897a5200084185eb1dfcc181240262c03269090e44b2d9032f5213c0d40003dff7fff8bb400133000099800000400064cc0008d540014028000a0140002aa4000666000a4600001d097b1100085f3c600ce81580b22b9432f7220010be7b401e102981c4ff3604035f00101d91b040b4df8104df8e04176400106df7900",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 676,
+          "end_bit": 734,
+          "bits": "0000001011111000110011101111111011010011110000001001000000"
+        },
+        {
+          "id": 1,
+          "bit": 734,
+          "end_bit": 765,
+          "bits": "0010000010010111100010011000000"
+        },
+        {
+          "id": 5,
+          "bit": 765,
+          "end_bit": 794,
+          "bits": "00000000000000001000110100001"
+        },
+        {
+          "id": 21,
+          "bit": 794,
+          "end_bit": 819,
+          "bits": "1110110111101011111011000"
+        },
+        {
+          "id": 25,
+          "bit": 819,
+          "end_bit": 829,
+          "bits": "1000010100"
+        },
+        {
+          "id": 30,
+          "bit": 829,
+          "end_bit": 839,
+          "bits": "0000011101"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 14
+      },
+      "boundary": "clocked pawn",
+      "peer_tick_bit": 1033
+    },
+    {
+      "label": "ar_control_34_followed_by_vitality",
+      "film": "octagon/02-ar-kill",
+      "match_id": "2b4e00fe-69c9-452e-b1b2-df3a9a0a6b3a",
+      "player": "Nuzzles",
+      "time_us": 22917991,
+      "life": 0,
+      "source": {
+        "chunk": 2,
+        "payload_byte": 493933,
+        "bit": 439,
+        "end_bit": 523
+      },
+      "layout": "X15Y15Z17",
+      "tick": 65,
+      "components": [
+        21,
+        25,
+        30
+      ],
+      "hex": "d260040080148c19d2d42c9679f5540284000f5f85d84080c4060170028000591c002a594f7a021120001d59f0008c1e89e4081ed08083100235597a00700d4108b100a114d402580201afbe080ebef800",
+      "accepted": true,
+      "fields": [
+        {
+          "id": 21,
+          "bit": 478,
+          "end_bit": 503,
+          "bits": "1000000000011100000000110"
+        },
+        {
+          "id": 25,
+          "bit": 503,
+          "end_bit": 513,
+          "bits": "1010000010"
+        },
+        {
+          "id": 30,
+          "bit": 513,
+          "end_bit": 523,
+          "bits": "0001000101"
+        }
+      ],
+      "expected": {
+        "slot": 0,
+        "rounds": 34
+      },
+      "boundary": "vitality pawn"
+    },
+    {
+      "label": "unsupported_following_record",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Yet",
+      "time_us": 51880175,
+      "life": 8,
+      "source": {
+        "chunk": 3,
+        "payload_byte": 703163,
+        "bit": 788,
+        "end_bit": 973
+      },
+      "layout": "X18Y18Z15",
+      "tick": 250,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        30
+      ],
+      "hex": "d26084040016acdc44d42c9679f7602601c2c5f038018211825480576054207b4207d4404900055640bcee3fc5502402541e9814ec80afd2204480022b205f1920156824019aab0d70000228fe9102a400155902fbdafd6841260aec1c425349d3bf488212800aacbc06092a015a8120120df4e9c784017e80eca008524701281214a56d4a0a85262852f3240010830bc4ac04d902487561a2bcdf60e84047d6a65e748002106178a680a7604c0ee85a469be15783b8f0210806e9e8205affc0826fd8020bbf2a00",
+      "accepted": false,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 839,
+          "end_bit": 897,
+          "bits": "0000001100000100100101010000000010101101010000001001000000"
+        },
+        {
+          "id": 1,
+          "bit": 897,
+          "end_bit": 928,
+          "bits": "0010010000011011111010011101001"
+        },
+        {
+          "id": 21,
+          "bit": 928,
+          "end_bit": 953,
+          "bits": "1100011110000100000000010"
+        },
+        {
+          "id": 25,
+          "bit": 953,
+          "end_bit": 963,
+          "bits": "1111110100"
+        },
+        {
+          "id": 30,
+          "bit": 963,
+          "end_bit": 973,
+          "bits": "0000011101"
+        }
+      ]
+    },
+    {
+      "label": "unsupported_energy_ammo_form",
+      "film": "ranked-arena/02-oddball",
+      "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+      "player": "Nuzzles",
+      "time_us": 783153637,
+      "life": 166,
+      "source": {
+        "chunk": 40,
+        "payload_byte": 567976,
+        "bit": 379,
+        "end_bit": 554
+      },
+      "layout": "X18Y18Z15",
+      "tick": 36,
+      "components": [
+        0,
+        1,
+        21,
+        25,
+        33
+      ],
+      "hex": "a07c42012453e900055640be8d3f38d0508263ef9c773c7329222a5480022b205fdfa00ee814810b73901190000649115325001559840be123f403042c23d479c171972e9220018a9d2000aac817c2c7fcc60880715bb42b3e4cf52445508c005903029afe70409309507a64c91485a14953857ce9000420c2f21d008c40911560dc4515bcf940018bd9afa5200084185e30e01a18122277b182841b5722b759b195f5a30420e1c348a43fb2600203bf460816fc010903df791c0624137e64105dc01210",
+      "accepted": false,
+      "fields": [
+        {
+          "id": 0,
+          "bit": 430,
+          "end_bit": 488,
+          "bits": "0000001011111000010010001111110100000000110000010000101100"
+        },
+        {
+          "id": 1,
+          "bit": 488,
+          "end_bit": 519,
+          "bits": "0010001111010100011110011100000"
+        },
+        {
+          "id": 21,
+          "bit": 519,
+          "end_bit": 544,
+          "bits": "1011100011001011100101110"
+        },
+        {
+          "id": 25,
+          "bit": 544,
+          "end_bit": 554,
+          "bits": "1001001000"
+        },
+        {
+          "id": 33,
+          "bit": 554,
+          "end_bit": 564,
+          "bits": "1000000000"
+        }
+      ]
+    }
+  ]
+}

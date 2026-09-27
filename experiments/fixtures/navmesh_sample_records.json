@@ -1,0 +1,277 @@
+{
+  "scope": "Unmodified 44-byte samples spanning every referenced navigation face and both numeric/unavailable distance states. Includes a Str8 sample whose nearest boundary belongs to a neighboring face.",
+  "records": [
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/navmesh.blob",
+      "source_sha256": "ce3e297a5fe843b7a6804203749e30d5dffd442482d29f279f417d48a8015294",
+      "mesh_fixture_index": 0,
+      "offset": 17012,
+      "sha256": "d8c3d48049a84b3e0777000f025c641e12a39c7a516c7e5aea95be042cee7846",
+      "hex": "2e00d6c132008ec100008c42000000000000000041010000db0fc93fda0fc93f00000000ffffffff02ce7f3d",
+      "position": [
+        -26.75008773803711,
+        -17.75009536743164,
+        70.0
+      ],
+      "face_index": 0,
+      "boundary_distance_squared": 0.062452323734760284,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/navmesh.blob",
+      "source_sha256": "ce3e297a5fe843b7a6804203749e30d5dffd442482d29f279f417d48a8015294",
+      "mesh_fixture_index": 0,
+      "offset": 80444,
+      "sha256": "d29223a91290bbbf55ee29151507d9f57e8b61eb4992f89636bed55acb95c4dc",
+      "hex": "370086c1d000f8c000008c4200000000000000004101000000000000db0fc93f00000000ffffffffffff7fff",
+      "position": [
+        -16.750104904174805,
+        -7.750099182128906,
+        70.0
+      ],
+      "face_index": 0,
+      "boundary_distance_squared": null,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/navmesh.blob",
+      "source_sha256": "ce3e297a5fe843b7a6804203749e30d5dffd442482d29f279f417d48a8015294",
+      "mesh_fixture_index": 0,
+      "offset": 161424,
+      "sha256": "dead42689b84b8841a104350801738b15c81ed7229c0fa0806b3ca4e84a044e1",
+      "hex": "d00098c04003e0bf2e33484200000000010000004201000000000000db0fc93f00000000ffffffffcb48893a",
+      "position": [
+        -4.750099182128906,
+        -1.7500991821289062,
+        50.04998016357422
+      ],
+      "face_index": 1,
+      "boundary_distance_squared": 0.001047396450303495,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/navmesh.blob",
+      "source_sha256": "ce3e297a5fe843b7a6804203749e30d5dffd442482d29f279f417d48a8015294",
+      "mesh_fixture_index": 0,
+      "offset": 162712,
+      "sha256": "f92347ba4bdbe2b4f77b6149da0cc8996ee5001f60f7e7b2aa113da5e27eb1f2",
+      "hex": "d00088c080f93f3f3e0a484200000000020000004201000000000000db0fc93f00000000ffffffff6cf88c3e",
+      "position": [
+        -4.250099182128906,
+        0.7499008178710938,
+        50.01000213623047
+      ],
+      "face_index": 2,
+      "boundary_distance_squared": 0.27533280849456787,
+      "requires_connected_region": true
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/05d946c8-0ba1-4720-b8a0-2ebca0576f8e/c2ff7421-6876-4528-8ee6-73f9ff477644/navmesh.blob",
+      "source_sha256": "ce3e297a5fe843b7a6804203749e30d5dffd442482d29f279f417d48a8015294",
+      "mesh_fixture_index": 0,
+      "offset": 163516,
+      "sha256": "c7d2a72f8a3caab3d7c3a5e6c8452249be1562f1bb2f40dfe8f756c56d1ef107",
+      "hex": "d00098c0c0fc9f3f2e33484200000000040000004201000000000000db0fc93f00000000ffffffffddc5f93a",
+      "position": [
+        -4.750099182128906,
+        1.2499008178710938,
+        50.04998016357422
+      ],
+      "face_index": 4,
+      "boundary_distance_squared": 0.0019056160235777497,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 303828,
+      "sha256": "b42def31e0405f7cee92ed6db87840da52be47261cbd9b883d590146d3d768e9",
+      "hex": "07401bc307551bc300f8474200000000000000004101000000000000db0fc93f00000000ffffffffd2a9943d",
+      "position": [
+        -155.25010681152344,
+        -155.33213806152344,
+        49.9921875
+      ],
+      "face_index": 0,
+      "boundary_distance_squared": 0.07258953154087067,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 389964,
+      "sha256": "d67bf9b8101d3dde582dba10711311d8f1fe3b2a9476ad45a2c6527c878fc894",
+      "hex": "07401bc3f92a1b4300f8474200000000010000004101000000000000db0fc93f00000000ffffffff32ede13d",
+      "position": [
+        -155.25010681152344,
+        155.16786193847656,
+        49.9921875
+      ],
+      "face_index": 1,
+      "boundary_distance_squared": 0.11031569540500641,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 849364,
+      "sha256": "46aea93021f0bfe632b280c4c0472ad449a2faab813f029f63764c87995e4101",
+      "hex": "074011c3075511c300f8474200000000000000004101000000000000db0fc93f00000000ffffffffffff7fff",
+      "position": [
+        -145.25010681152344,
+        -145.33213806152344,
+        49.9921875
+      ],
+      "face_index": 0,
+      "boundary_distance_squared": null,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 955548,
+      "sha256": "23df3c5a43609f42216e81f85e02b75bf166d3a65c302544fe4851abfaf68ccb",
+      "hex": "074011c3f92a114300f8474200000000010000004101000000000000db0fc93f00000000ffffffffffff7fff",
+      "position": [
+        -145.25010681152344,
+        145.16786193847656,
+        49.9921875
+      ],
+      "face_index": 1,
+      "boundary_distance_squared": null,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 17693980,
+      "sha256": "51bf289ee027ed1b5ba68ea51a993789d06831bccf8f66db57bb4425db6b169f",
+      "hex": "f9bf174307d539c35ab5c54200000000060000004401000000000000db0fc93f00000000ffffffff62ccf03a",
+      "position": [
+        151.74989318847656,
+        -185.83213806152344,
+        98.85420227050781
+      ],
+      "face_index": 6,
+      "boundary_distance_squared": 0.0018371457699686289,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 17807936,
+      "sha256": "a80c2dc42f23d9da85d817202b03f9a94788288e15b995e4c340b4e014b81acd",
+      "hex": "f9bf194307553fc328afc54200000000040000004401000000000000db0fc93f00000000ffffffff00409c3b",
+      "position": [
+        153.74989318847656,
+        -191.33213806152344,
+        98.84210205078125
+      ],
+      "face_index": 4,
+      "boundary_distance_squared": 0.00476837158203125,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 17808008,
+      "sha256": "22446cb6b816ace1bbc69ec0f9fd0d3f45242d12eb1147bbaca6a6cc642b5d8a",
+      "hex": "f9bf184307553cc3714ec54200000000050000004201000000000000db0fc93f00000000ffffffff31580f3b",
+      "position": [
+        152.74989318847656,
+        -188.33213806152344,
+        98.65320587158203
+      ],
+      "face_index": 5,
+      "boundary_distance_squared": 0.0021872634533792734,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 18019572,
+      "sha256": "e80e4a9b6f6caf25760c2eddd57e03ae3786424a965a9e282b4b7bd86f9bc22e",
+      "hex": "f9bf1f4307d541c328afc54200000000070000004401000000000000db0fc93f00000000ffffffff1866f13b",
+      "position": [
+        159.74989318847656,
+        -193.83213806152344,
+        98.84210205078125
+      ],
+      "face_index": 7,
+      "boundary_distance_squared": 0.007366906851530075,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 18024812,
+      "sha256": "53259088f36778198bef71082e890485039be0ce7f80c4e1b1d0edf34384ff25",
+      "hex": "f9bf1f43075531c328afc54200000000020000004401000000000000db0fc93f00000000ffffffff0034bb3c",
+      "position": [
+        159.74989318847656,
+        -177.33213806152344,
+        98.84210205078125
+      ],
+      "face_index": 2,
+      "boundary_distance_squared": 0.022851943969726562,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 18035920,
+      "sha256": "8da5689a5287852706b5bdd74ae6c9a0f146fa67a252fb39e1a1498a59f42633",
+      "hex": "f9bf254307553fc328afc54200000000030000004401000000000000db0fc93f00000000ffffffff00108a3d",
+      "position": [
+        165.74989318847656,
+        -191.33213806152344,
+        98.84210205078125
+      ],
+      "face_index": 3,
+      "boundary_distance_squared": 0.067413330078125,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 18039740,
+      "sha256": "4cf3a1be9e396dbf0e9c5afad702aa2dac06630e35f75171ed4ee64a3cd02e15",
+      "hex": "f9bf254307d533c328afc54200000000080000004401000000000000db0fc93f00000000ffffffff58cd393c",
+      "position": [
+        165.74989318847656,
+        -179.83213806152344,
+        98.84210205078125
+      ],
+      "face_index": 8,
+      "boundary_distance_squared": 0.011340461671352386,
+      "requires_connected_region": false
+    },
+    {
+      "source_url": "https://blobs-infiniteugc.svc.halowaypoint.com/ugcstorage/map/6ece0a92-ef00-459c-b882-cea608cafe60/1593a9c5-6867-4a95-bdf2-057ac997f5ce/navmesh.blob",
+      "source_sha256": "34b4d8f8317ee78b36ddddaaac0ed0f571457092956abce4d3ccb875158f2d68",
+      "mesh_fixture_index": 1,
+      "offset": 18042048,
+      "sha256": "222ed4cdb2a0969eea337275baf37b523fc028cdc6ffee255dd4b6aa61665caa",
+      "hex": "f93f284307d539c357b5c54200000000090000004401000000000000db0fc93f00000000ffffffff62ccf03a",
+      "position": [
+        168.24989318847656,
+        -185.83213806152344,
+        98.85417938232422
+      ],
+      "face_index": 9,
+      "boundary_distance_squared": 0.0018371457699686289,
+      "requires_connected_region": false
+    }
+  ]
+}

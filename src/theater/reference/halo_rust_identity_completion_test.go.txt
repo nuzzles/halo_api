@@ -1,0 +1,73 @@
+package objectives
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/types"
+	"log/slog"
+	"os"
+	"testing"
+)
+
+func TestHaloRustIdentityCompletion(t *testing.T) {
+	old := slog.Default()
+	defer slog.SetDefault(old)
+	rows := []any{}
+	for i := 0; i < 512; i++ {
+		recs := []types.StatRecord{}
+		for r := 0; r < 2; r++ {
+			for j := 0; j <= 30; j++ {
+				value := j
+				if i%3 == 0 {
+					value *= 17
+				}
+				at := (2-r)*60000 + j*1000
+				if i%3 == 2 {
+					at = r*60000 + j*1000
+				}
+				recs = append(recs, types.StatRecord{Slot: 10, Round: r, TimeMS: at, Comps: map[int]types.StatValue{0: {A: int64(j)}, 2: {A: int64(value), B: int64(value)}, 3: {A: int64(value)}}})
+			}
+		}
+		total := 30
+		if i%3 == 0 {
+			total = 0
+		}
+		if i%3 == 2 {
+			total = 60
+		}
+		lines := []types.PlayerLine{{XUID: "player", Kills: total, Deaths: total, Assists: total}}
+		if i%7 == 0 {
+			lines = []types.PlayerLine{}
+		}
+		ri := RoundIdentity{byRound: map[int]map[int]string{4: {}}, origins: map[int]map[int]string{4: {99: "stale-slot"}, 8: {10: "stale-round"}}, starts: []roundStart{{round: 4, startMS: -20}}}
+		switch i % 8 {
+		case 0:
+			ri.byRound = map[int]map[int]string{}
+		case 1:
+			ri.byRound[5] = map[int]string{}
+		case 2:
+			ri.byRound[4][10] = "incumbent"
+			ri.origins[4][10] = "kept"
+		case 3:
+			ri.byRound[4][12] = "player"
+		case 4:
+			ri.byRound[4][12] = "other"
+		case 5:
+			ri.origins = nil
+		case 6:
+			ri.byRound[4][10] = "player"
+		case 7:
+		}
+		before := rustRoundIdentity(ri)
+		h := &rustBudgetHandler{records: []any{}}
+		slog.SetDefault(slog.New(h))
+		result := ri.CompletedByLines(recs, lines)
+		rows = append(rows, map[string]any{"records": recs, "lines": lines, "input": before, "result": rustRoundIdentity(result), "after": rustRoundIdentity(ri), "warnings": h.records})
+	}
+	b, e := json.Marshal(rows)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-identity-completion.json", b, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

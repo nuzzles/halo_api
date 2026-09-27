@@ -1,0 +1,17 @@
+package replay
+import("testing";"encoding/json";"os";"math/rand";"fmt")
+func TestHaloRustT0(t *testing.T){
+ type Row struct { Tracks []Track `json:"tracks"`; Step int `json:"step"`; Origin int64 `json:"origin"`; Time *int64 `json:"time"`; Coverage *T0FilmCoverage `json:"coverage"` }
+ rows:=[]Row{};rng:=rand.New(rand.NewSource(410068))
+ for n:=0;n<1024;n++ {
+  r:=Row{Step:[]int{-1,0,1,50,100,333,1000,1001}[n%8],Origin:int64(n*79-8000)}
+  base:=[]int{0,10,120,1200,2400}[n%5]
+  for j:=0;j<n%13;j++ { tr:=Track{}; if n%4!=0 {tr.XUID=fmt.Sprint(j%3)}; x,y,z:=float32(0),float32(0),float32(0)
+   for k:=0;k<2+n%31;k++ { at:=base+k+rng.Intn(3);switch n%7 {case 0:x+=0.01;case 1:x+=0.25;case 2:x+=6;case 3:x+=0.51;case 4:y+=0.3;z+=0.4;case 5:x+=float32(rng.Intn(100))/100;case 6:x+=0.5};if n%11==0 {at+=k*40};tr.Points=append(tr.Points,Point{T:at,X:x,Y:y,Z:z}) }
+   if n%3==0 {rng.Shuffle(len(tr.Points),func(a,b int){tr.Points[a],tr.Points[b]=tr.Points[b],tr.Points[a]})};r.Tracks=append(r.Tracks,tr)
+  }
+  ts:=[]T0FilmTrack{};for _,tr:=range r.Tracks {tt:=T0FilmTrack{XUID:tr.XUID};for _,p:=range tr.Points {tt.Points=append(tt.Points,T0FilmPoint{T:p.T,X:p.X,Y:p.Y,Z:p.Z})};ts=append(ts,tt)}
+  r.Time,r.Coverage=DetectT0Film(ts,r.Step,r.Origin,"");rows=append(rows,r)
+ }
+ b,e:=json.Marshal(rows);if e!=nil {t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-t0.json",b,0600);e!=nil {t.Fatal(e)}
+}

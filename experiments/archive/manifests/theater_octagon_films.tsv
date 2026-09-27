@@ -1,0 +1,4 @@
+# Two-player Octagon follow-up: Nuzzles and Yet spawn facing each other.
+# Columns: group<TAB>slug<TAB>match_id<TAB>description
+octagon	01-idle	10cb8ac3-f0c7-4d71-ae4a-103e4fa5d2b8	Nuzzles and Yet stand still facing each other for the whole game
+octagon	02-ar-kill	2b4e00fe-69c9-452e-b1b2-df3a9a0a6b3a	Nuzzles stands still and kills Yet with an assault rifle starting around 0:55 remaining

@@ -1,0 +1,35 @@
+package grammar
+
+import (
+	"encoding/json"
+	"levelup/go-api/internal/games/halo_infinite/film/internal/profile"
+	"math"
+	"os"
+	"testing"
+)
+
+func TestHaloRustProfileValues(t *testing.T) {
+	widths := []any{}
+	vals := []int{-9223372036854775808, -1, 0, 1, 5, 9, 32, 64, 9223372036854775807}
+	for _, lead := range vals {
+		for _, index := range vals {
+			w := profile.MPPWidths{Lead: lead, Index: index}
+			widths = append(widths, map[string]any{"widths": w, "valid": w.Valid(), "text": w.String()})
+		}
+	}
+	ranges := map[string][3][2]uint32{}
+	for name, r := range map[string]profile.Vec3Range{"unit3": profile.QuantRangeUnit3, "norm": profile.QuantRangeNorm, "world100": profile.QuantRangeWorld100, "rejected": profile.QuantRangeCliffhanger, "biped": profile.QuantRangeCEBiped, "build": profile.QuantRangeParDefautDuBuild()} {
+		var bits [3][2]uint32
+		for i, a := range r {
+			bits[i] = [2]uint32{math.Float32bits(a.Min), math.Float32bits(a.Max)}
+		}
+		ranges[name] = bits
+	}
+	raw, e := json.Marshal(map[string]any{"widths": widths, "default": profile.MPPParDefaut(), "ranges": ranges})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile("/private/tmp/halo-profile-values.json", raw, 0600); e != nil {
+		t.Fatal(e)
+	}
+}

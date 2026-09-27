@@ -1,0 +1,22 @@
+package replay
+import("testing";"encoding/json";"os";"bytes";"log/slog";"levelup/go-api/internal/games/halo_infinite/film/internal/profile";"levelup/go-api/internal/games/halo_infinite/film/internal/facts/fallback")
+func TestHaloRustFinalizeDocument(t *testing.T){
+ old:=slog.Default();defer slog.SetDefault(old);rows:=[]any{}
+ for run:=0;run<1024;run++{
+  mask:=(run*97)%8192;opt:=Options{};doc:=ReplayDocument{MatchID:"closing",FrameCount:[]int{-1,0,1,100}[run%4],Layers:map[string]string{"seed":"replace"},Coverage:&Coverage{Shots:LayerCoverage{Available:run+20,Attached:run+2,NoSlot:3,Ambiguous:4,OutOfWindow:5,Unpublished:6},Grenades:LayerCoverage{Available:999,Attached:888},Verdict:map[string]string{},Fallbacks:[]FallbackHit{{Name:"seed",Hits:99}}}}
+  if mask&1!=0{v:=int64(0);doc.OriginMs=&v};if mask&2!=0{opt.MapQuant=&profile.MapQuantEntry{}};if mask&4!=0{opt.Inventory=[]KeyframeInventory{}};opt.AbilityImpulseStats.Scanned=mask&8!=0;opt.AbilityChargeStats.Scanned=mask&16!=0;if mask&32!=0{opt.Score=&ScoreInput{}};opt.Flag.Scanned=mask&64!=0;opt.Vip.Scanned=mask&128!=0;opt.Skull.Scanned=mask&256!=0;opt.Bomb.Scanned=mask&512!=0;opt.Bomb.CarryScanned=mask&1024!=0;opt.Zone.Scanned=mask&2048!=0;opt.Vehicles.Scanned=mask&4096!=0
+  if run%2==0{doc.Coverage.Verdict["shots"]="attached"};if run%3==0{doc.Coverage.Verdict["grenades"]="none"};if run%5==0{doc.Coverage.Verdict["bridge"]="direct"}
+  grenade:=LayerCoverage{Available:run+7,Attached:run+1};hits:=[]fallback.Declenchement{}
+  names:=[]fallback.Nom{"repli_manche_zero_decretee","repli_armement_bombe_debut_a_zero","repli_chassis_vehicule_marqueur_neutre"}
+  domain:=[]int{-9223372036854775808,-1,0,1,4294967296,9223372036854775807}
+  counter:=fallback.NouveauCompteur();for j:=0;j<run%17;j++{h:=fallback.Declenchement{Nom:names[j%3],Declenchements:domain[(run+j)%len(domain)]};hits=append(hits,h);counter.DeclencheN(h.Nom,h.Declenchements)}
+  if run%9==0{counter=nil};opt.Fallbacks=counter
+  missing:=run%7==0;if missing{doc.Coverage=nil}
+  before,_:=json.Marshal(doc);a:=assemblage{doc:doc,opt:opt,grenCov:grenade,shotCov:LayerCoverage{Available:777,Attached:666}}
+  var buf bytes.Buffer;slog.SetDefault(slog.New(slog.NewJSONHandler(&buf,nil)))
+  if missing{attachFallbackCoverage(&a.doc,counter)}else{a.clore()};a.poserLesCalquesProduits()
+  logs:=[]any{};dec:=json.NewDecoder(&buf);dec.UseNumber();for dec.More(){v:=map[string]any{};if e:=dec.Decode(&v);e!=nil{t.Fatal(e)};delete(v,"time");logs=append(logs,v)}
+  rows=append(rows,map[string]any{"before":json.RawMessage(before),"after":a.doc,"logs":logs,"hits":hits,"counter_present":counter!=nil,"missing_coverage":missing,"grenade":grenade,"mask":mask})
+ }
+ b,e:=json.Marshal(rows);if e!=nil{t.Fatal(e)};if e=os.WriteFile("/private/tmp/halo-finalize-document.json",b,0600);e!=nil{t.Fatal(e)}
+}

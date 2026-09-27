@@ -1,0 +1,254 @@
+{
+  "anchor": {
+    "Slot": 1341,
+    "TI": 38,
+    "Gen": 1,
+    "Bit": 303122
+  },
+  "check": false,
+  "file": "octagon/03-first-to-50/chunk-003-type-2.bin",
+  "offset": 343051,
+  "packet": 1,
+  "size": 134808,
+  "trace": {
+    "TypeIndex": 38,
+    "DefaultBits": 0,
+    "Gate": false,
+    "Mask": 18446744073709551615,
+    "Comps": [
+      {
+        "Index": 0,
+        "Name": "object-position-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303405,
+        "Payload": null
+      },
+      {
+        "Index": 1,
+        "Name": "object-translational-velocity-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303450,
+        "Payload": null
+      },
+      {
+        "Index": 2,
+        "Name": "object-forward-and-up-dynamic-precision-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303451,
+        "Payload": null
+      },
+      {
+        "Index": 3,
+        "Name": "object-angular-velocity-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303480,
+        "Payload": null
+      },
+      {
+        "Index": 4,
+        "Name": "object-body-vitality-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303508,
+        "Payload": {
+          "Health": 1.0118577,
+          "Q": 255,
+          "F5c": true,
+          "F5d": true,
+          "F5e": true
+        }
+      },
+      {
+        "Index": 5,
+        "Name": "object-shield-vitality-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303519,
+        "Payload": {
+          "Shield": 4,
+          "Q": 255,
+          "RegenPresent": true,
+          "HasRegen0": true,
+          "HasRegen1": true,
+          "Regen0": 3842,
+          "Regen1": 4064,
+          "Block64": 0,
+          "F66": false,
+          "F67": false,
+          "F69": false,
+          "F68": false
+        }
+      },
+      {
+        "Index": 6,
+        "Name": "object-region-state-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303574,
+        "Payload": null
+      },
+      {
+        "Index": 7,
+        "Name": "object-damage-sections-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303581,
+        "Payload": null
+      },
+      {
+        "Index": 8,
+        "Name": "object-constraint-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303588,
+        "Payload": null
+      },
+      {
+        "Index": 9,
+        "Name": "object-multiplayer-properties-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 303593,
+        "Payload": null
+      },
+      {
+        "Index": 10,
+        "Name": "object-parent-state-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784111,
+        "Payload": {
+          "TypeIndex": 38,
+          "Param": 3,
+          "Attached": false,
+          "StartBit": 8784111,
+          "EndBit": 0,
+          "Quant16": 0,
+          "Word16": 0,
+          "HasOpt16": false,
+          "Opt16": 0,
+          "FlagA": false,
+          "FlagB": false,
+          "Mtx": [
+            0,
+            0,
+            0
+          ],
+          "HasVel": false,
+          "Vel": 0,
+          "Byte8": 0,
+          "FlagC": false,
+          "FreeRead": false,
+          "FreeBits": 0,
+          "HasFreeID": false,
+          "FreeID": 0,
+          "HasAlt11": false,
+          "Alt11": 0,
+          "TailSign": false,
+          "HasTail6": false,
+          "Tail6": 0,
+          "TailBit": false,
+          "HasTail3": false,
+          "Tail3": 0
+        }
+      },
+      {
+        "Index": 11,
+        "Name": "object-dead-state-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784114,
+        "Payload": null
+      },
+      {
+        "Index": 12,
+        "Name": "object-scale-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784115,
+        "Payload": null
+      },
+      {
+        "Index": 13,
+        "Name": "object-maximum-vitalities-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784132,
+        "Payload": null
+      },
+      {
+        "Index": 14,
+        "Name": "object-dissolver-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784140,
+        "Payload": {
+          "Etat": 0,
+          "Corps": true,
+          "DureeQ": 0,
+          "Drapeau": false
+        }
+      },
+      {
+        "Index": 15,
+        "Name": "object-low-frequency-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784253,
+        "Payload": null
+      },
+      {
+        "Index": 16,
+        "Name": "object-physics-flags-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784303,
+        "Payload": null
+      },
+      {
+        "Index": 17,
+        "Name": "object-frame-configuration-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784308,
+        "Payload": null
+      },
+      {
+        "Index": 18,
+        "Name": "generic-rigid-body-transforms-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784336,
+        "Payload": null
+      },
+      {
+        "Index": 19,
+        "Name": "animated-mesh-dynamic-state-component",
+        "Variant": 4294967295,
+        "Ported": true,
+        "StartBit": 8784344,
+        "Payload": null
+      }
+    ],
+    "Dead": {
+      "Mort": false,
+      "EnumA": -1,
+      "EnumB": -1,
+      "Val0c": 0,
+      "Val0e": 0,
+      "HasRef": false,
+      "GIDPresent": false,
+      "GlobalID": 4294967295,
+      "Val14": 0,
+      "Val18": -1,
+      "SrcTag0": 4294967295,
+      "SrcTag4c": 4294967295
+    },
+    "DesyncAt": -1,
+    "EndBit": 8784369
+  }
+}
