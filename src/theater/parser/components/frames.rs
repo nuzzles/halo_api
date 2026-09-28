@@ -121,9 +121,6 @@ pub enum BindingOrigin {
     Creation {
         bit: i64,
     },
-    RecoveredKeyframe {
-        bit: usize,
-    },
 }
 
 /// Bindings from checked keyframes and completely decoded creation records.

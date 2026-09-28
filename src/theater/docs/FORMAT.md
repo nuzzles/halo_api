@@ -1,51 +1,64 @@
 # Native structure and fidelity
 
-`Film` owns the supplied transport chunks, decompressed chunk data, manifest
-metadata, bootstrap reads and ordered packet reads. Packet bodies preserve
-views, records, component fields, summary records, stops and diagnostics. Native
-IDs, generations, masks and quantized values are retained in the relevant reads.
+The native recording consists of a component registry/bootstrap chunk (type 1),
+a replication packet stream (type 2 chunks), and summary data (type 3 chunks).
+`Film` represents those as `registry`, `replication`, and `summaries`.
 
-The bootstrap begins with version words and a registry of archetypes and named
-component slots. The captured v41 corpus has 50 accepted registry blocks and
-1,067 slots. Registry reads retain the rejected terminal attempt as well as the
-accepted entries. Identity and player-table reads are separate bootstrap sections;
-heuristically selected player slots do not establish a canonical partition of
-all bootstrap bytes.
+The bootstrap begins with version words and archetype/component registry blocks.
+The captured v41 corpus has 50 accepted registry blocks and 1,067 named slots.
+`registry.definition` retains the decoded component registry and its read diagnostics;
+`registry.chunk` retains the entire input, including bootstrap data beyond that
+structurally decoded registry. Identity/player searches over those bytes belong to
+resolution rather than being presented as established native boundaries.
 
-Replication packets use 16-byte headers. The packet walker records header and
-payload offsets and packet time. Nested bit offsets are relative to that packet's
-payload, not the compressed chunk. Source positions refer to supplied chunk order;
-manifest numbers remain separate metadata. The unwalked chunk suffix begins at
-`packet_walk_end_byte`. Bootstrap chunks are not partitioned as replication packets.
+Replication packets use 16-byte headers. Native packet reads preserve their
+header, payload offset, timestamp, ordered views/records/component fields, partial
+reads and stops. Keyframe traversal advances through decoded record boundaries;
+it stops at an invalid header or unsupported component and never searches ahead
+for a plausible replacement boundary.
 
-Within payloads, view readers walk ordered NEW, UPDATE, DELETE and End records.
-Registry-selected component readers consume masks and fields with version-specific
-widths. Traversal must establish an actual terminator; payload length or padding
-alone cannot prove a record chain complete. Independent event-head, fire, damage,
-roster and footer reads retain their own boundaries and refusal status. They can
-overlap the generic body and do not replace it or imply a single complete partition.
+Summary packets retain declared counts and entries from the guarded v41 footer
+layout. Each summary has its own recorded timestamp and XUID. Player linkage is a
+resolved interpretation. The separate whole-chunk highlight search is available
+only through resolved interpretation evidence.
 
-Some reference readers support padded lookahead. Their synthetic bits, partial
-fields and read refusals remain distinguishable from backed source bits. Keyframe
-anchor recovery and whole-chunk highlight scans are explicitly candidate reads;
-they are separate from admitted sequential records. Unknown component layouts,
-opaque bodies and gaps retain their source bytes. Absence of a decoded observation
-is not evidence that an action did not happen.
+## Source coordinates
 
-## Meaning of faithful
+Every parsed chunk retains its original `FilmChunk`, decompressed `data`, and
+`source_position` in the supplied list. Source positions are never replaced by
+manifest indices. Nested packet bit offsets are relative to the header's
+`payload_offset` in decompressed data; compressed transport has separate storage.
+`packet_walk_end_byte` identifies the unwalked suffix. The bootstrap is retained
+whole rather than misrepresented as a replication packet sequence.
 
-The contract is preservation of all supplied source information plus ordered,
-source-addressable native decoding where supported. The full bytes are retained
-even where a typed schema is unknown. The structure is an incremental decoding
-report, including overlapping reference reads and heuristic candidates; it does
-not claim that every source bit already has a unique typed field. Parser settings
-and supplied map bounds are labeled separately from recorded values.
+## Unknowns and runtime settings
 
-Original transport bytes can be retrieved unchanged. Editing the typed structure
-and byte-for-byte re-encoding it is **not implemented**. JSON is an inspection
-format, not a replacement for native byte identity.
+The v41 reader uses its fixed grammar defaults, not inferred map calibration.
+Unknown component layouts and stopped reads remain explicit. Runtime-dependent
+code-15 event bodies stop with `MissingRuntimeGate15`; the native parser never
+chooses a gate by scoring candidate parses. Roster bodies needing an unestablished
+personalization width remain refused/opaque. Map-relative translocator reads may
+stop with `MissingMap`. Quantized component fields remain available; default map
+bounds are not used to publish inferred world coordinates into Film.
 
-Scope is v41 behavior supported by the pinned LevelUp reader. Newer film versions,
-map assets, renderer geometry, inferred physical actions and external catalog
-publication are outside this module's parser contract. Quantization context may
-require caller inputs; missing context is not silently invented.
+Bootstrap/player searches, event-gate selection, bot candidates, modal fire-aim
+interpretation and whole-chunk highlight scans run during resolution. Their results
+are separate from native records and do not silently repair or replace stopped
+native records.
+
+Some native readers retain padded lookahead diagnostics; synthetic bits and partial
+fields must not be treated as backed source bits. Independent native packet-head
+and damage reads can overlap the generic body, so their results do not establish
+an exhaustive, nonoverlapping partition of every source bit.
+
+## Fidelity contract
+
+All supplied source information is retained, with structural decoding where known.
+Unknown bytes are not discarded or replaced by guessed records. This does not
+claim every bit already has a typed schema. Original input bytes can be retrieved
+unchanged; editing models and byte-for-byte re-encoding is not implemented.
+JSON is an inspection format, not a replacement for native byte identity.
+
+Scope is v41. Unsupported major versions fail before a v41 body reader is selected.
+Map assets, rendering, interpolation and inferred physical-action semantics are
+outside the native model.

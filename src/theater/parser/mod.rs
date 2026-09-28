@@ -10,8 +10,6 @@ pub(crate) use bot_metadata::*;
 pub mod chain_inference;
 pub mod components;
 pub(crate) use components::*;
-#[cfg(test)]
-pub(crate) mod control_verdict;
 pub mod datums;
 pub(crate) use datums::*;
 pub mod event_heads;
@@ -27,24 +25,18 @@ pub(crate) use kill_decode::*;
 pub mod kill_event_chain;
 pub(crate) use kill_event_chain::*;
 pub mod medals;
-pub mod native_context;
-pub(crate) use native_context::*;
 pub mod native_event_gate;
 pub(crate) use native_event_gate::*;
 pub mod native_identity;
 pub(crate) use native_identity::*;
-pub mod native_march;
 pub mod native_packet_heads;
 pub(crate) use native_packet_heads::*;
 pub mod native_pickups;
 pub(crate) use native_pickups::*;
 pub mod native_profile;
-pub(crate) use native_profile::*;
 pub mod native_reader;
 pub(crate) use native_reader::*;
 pub mod native_scan_profile;
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) mod native_sort;
 pub mod native_weapon_damage;
 pub(crate) use native_weapon_damage::*;
 pub mod native_zoom;
@@ -58,21 +50,16 @@ pub(crate) use position_capture::*;
 pub mod production_frame;
 pub mod profile;
 pub(crate) use profile::*;
-pub mod profile_table;
-pub(crate) use profile_table::*;
 pub mod profile_values;
 pub(crate) use profile_values::*;
 pub mod read_diagnostics;
 pub mod records;
 pub(crate) use records::*;
-pub mod recovery;
-pub(crate) use recovery::*;
 pub mod registry;
 pub(crate) use registry::*;
-pub mod replication;
 pub mod roster_updates;
 pub(crate) use roster_updates::*;
-pub mod source;
+pub(crate) mod source;
 pub mod source_bits;
 pub(crate) use source_bits::*;
 pub mod summary;
@@ -113,15 +100,11 @@ pub use kill_event_chain::{
     NativeEventListRead, NativeEventListStop, NativeEventRecord,
 };
 pub use medals::MedalAward;
-pub use native_context::NativeContextRegistryError;
 pub use native_event_gate::{NativeEventGate15Policy, NativeEventGate15Selection};
 pub use native_identity::{NativeIdentityField, NativeIdentityRead, NativeIdentityValue};
-pub use native_march::NativeFrameMetadata;
 pub use native_packet_heads::NativePacketHeadRead;
 pub use native_pickups::{NativePickupOutcome, NativePickupRead};
-pub use native_profile::{
-    NativeMovementProfile, NativePrecisionDescriptor, NativeProfileResolveError,
-};
+pub use native_profile::{NativeMovementProfile, NativePrecisionDescriptor};
 pub use native_scan_profile::{
     NativeKeyframeLayout, NativeScanGrammar, NativeScanProfile, NativeSharedWidths,
 };
@@ -145,16 +128,12 @@ pub use read_diagnostics::{
     NativeWidthPurpose, NativeWidthRefusal,
 };
 pub use records::{RecordHeader, RecordKind};
-pub use recovery::{AnchorRecovery, RecoveredKeyframeAnchor};
 pub use registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
     NativeRegistrySlotRead,
 };
-pub use replication::KeyframeRecoveryPolicy;
 pub use roster_updates::{NativeRosterRead, RosterEntry, RosterReport, RosterUpdate};
-pub use source::{
-    FilmChunkProvider, FilmInflateError, FilmSource, FilmSourceError, FilmSourceMetadata,
-};
+pub(crate) use source::{FilmSource, FilmSourceMetadata};
 pub use translocator::{
     NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
 };
@@ -164,3 +143,5 @@ pub use unit_references::{NativeUnitReference, NativeUnitReferenceKind};
 pub use weapon_hit_scan::WeaponDamageRead;
 pub use weapon_hits::WeaponDamage;
 pub use world::{FilmViewAdmission, NativeNewBindingRefusal};
+
+pub(crate) mod v41;

@@ -1,37 +1,54 @@
 # Theater v41
 
-The public flow is `Film::parse(&source, options) -> Film`, then
-`film.resolve() -> ResolvedFilm<'_>`. Both live under `theater`, in the `film`
-and `resolved` modules. Supporting record types are public under `theater::parser` (and its submodules);
-film container types are public under `theater::film`, and resolved models under
-`theater::resolved`. Only `Film` and `ResolvedFilm` are reexported at the Theater root;
-there is no alternate legacy parser or client-side event-reporting facade.
-
-- [Format and fidelity](FORMAT.md): native structure, coordinates, unknown data.
-- [Resolution](RESOLUTION.md): source references, queries and playback costs.
-- [Validation](VALIDATION.md): pinned reference and regression coverage.
-
-`FilmSource::load(&chunks, &metadata)` loads ordered transport chunks and retains
-both input and decompressed bytes. Metadata carries manifest indices, chunk types
-and millisecond offsets. Supply actual manifest offsets; file names alone cannot
-establish timing. Network and filesystem loading belong to callers. The client
-continues to provide raw film manifests and chunk downloads.
+The API has two steps:
 
 ```rust
-use halo_api::theater::{Film, film::ParseOptions, parser::{FilmSource, FilmSourceMetadata}};
+use halo_api::theater::{Film, film::{FilmChunk, ChunkKind}};
 
-fn inspect(chunks: &[Vec<u8>], metadata: &[FilmSourceMetadata])
+fn inspect(registry_bytes: Vec<u8>, replication_bytes: Vec<u8>, summary_bytes: Vec<u8>)
     -> Result<(), Box<dyn std::error::Error>>
 {
-    let source = FilmSource::load(chunks, metadata)?;
-    let film = Film::parse(&source, ParseOptions::default())?;
+    let film = Film::parse([
+        FilmChunk::new(ChunkKind::Registry, registry_bytes),
+        FilmChunk::new(ChunkKind::Replication, replication_bytes),
+        FilmChunk::new(ChunkKind::Summary, summary_bytes),
+    ])?;
     let mut resolved = film.resolve();
-    let world = resolved.seek(10_000_000); // microseconds
-    println!("{} entities", world.entities.len());
+    println!("{} summaries", film.summaries.events().count());
+    println!("{} entities", resolved.seek(10_000_000).entities.len());
     Ok(())
 }
 ```
 
-Input needs the v41 bootstrap/registry. Parser options expose reference grammar selection,
-recovery policy and caller-provided quantization context. These are configuration,
-not recorded facts. Unsupported layouts and missing context remain explicit.
+A `FilmChunk` combines its category and bytes with optional manifest `index` and
+`start_ms`. Supply real metadata when available; `None` explicitly means it was
+not supplied. Input order defines source positions, independent of manifest
+numbers. Raw and zlib-compressed chunks are accepted. No separate metadata list,
+source loader, or parsing options are part of the public entry point.
+
+`Film::parse` locates exactly one registry chunk, reads its version, selects the
+`parser::v41::V41ChunkParser` or returns an error, then parses the supplied chunks.
+The version-specific decoder is internal; callers continue to use `Film::parse`. `Film` has exactly
+three fields:
+
+- `registry`: component definitions and the complete bootstrap chunk.
+- `replication`: ordered replication chunks and native packet reads.
+- `summaries`: ordered summary chunks and recorded summary entries.
+
+Each section preserves original input, decompressed bytes, source positions and
+unparsed data. `ParsedChunk::payload` returns a checked borrowed packet payload.
+The registry can appear anywhere in the input list; zero or multiple registry
+chunks are errors. Unsupported chunk categories are rejected by `ChunkKind::try_from`.
+
+`film.resolve()` borrows this recording, builds chronological query indexes and
+playback state, and performs explicitly labeled interpretation. It exposes those
+results through `interpretations()` without changing the native recording.
+
+Only `Film` and `ResolvedFilm` are reexported at `theater`'s root. Input and native
+container types live under `film`; parser models remain public under `parser`;
+resolved models and interpretation evidence live under `resolved`.
+
+- [Format and fidelity](FORMAT.md)
+- [Resolution and playback](RESOLUTION.md)
+- [Validation and reference provenance](VALIDATION.md)
+- [Credits](CREDIT.md)

@@ -1,4 +1,4 @@
-//! Component value readers ported from LevelUp. See `docs/LEVELUP_LICENSE.txt`.
+//! Component value readers ported from LevelUp. See `docs/CREDIT.md`.
 //! Every primitive read is retained, including unnamed flags and raw quantized values.
 
 mod cursor;

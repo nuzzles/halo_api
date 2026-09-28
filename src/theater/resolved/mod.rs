@@ -2,11 +2,13 @@
 //!
 //! This layer accumulates raw recorded component state. It does not infer physical
 //! actions, interpolate movement, or promote recovery candidates into entities.
+pub mod interpretation;
 use super::film::{Film, NativeContinuationStatePolicy, NativeFilmPacket, NativeFilmPacketBody};
 use super::parser::{
     ComponentField, EntityRecord, EntityViewStop, KeyframeRecord, KeyframeStop, NativeControlEntry,
     NativeEventRecord, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
 };
+use interpretation::Interpretations;
 use std::{collections::BTreeMap, sync::Arc};
 
 /// A stable path into the borrowed Film. Positions are vector positions, not manifest IDs.
@@ -203,6 +205,7 @@ impl QueryIndices {
 #[derive(Debug, Clone)]
 pub struct ResolvedFilm<'film> {
     film: &'film Film,
+    interpretations: Interpretations,
     events: Arc<Vec<Event>>,
     query_indices: Arc<QueryIndices>,
     checkpoints: Arc<Vec<Checkpoint>>,
@@ -219,6 +222,9 @@ impl<'film> ResolvedFilm<'film> {
     pub fn film(&self) -> &Film {
         self.film
     }
+    pub fn interpretations(&self) -> &Interpretations {
+        &self.interpretations
+    }
     pub fn events(&self) -> &[Event] {
         &self.events
     }
@@ -233,7 +239,7 @@ impl<'film> ResolvedFilm<'film> {
     /// Bootstrap identity by recorded film index. Dynamic roster evidence stays
     /// accessible through packet records; this does not guess entity ownership.
     pub fn player(&self, film_index: usize) -> Option<&PlayerTableSlot> {
-        self.film
+        self.interpretations
             .player_table
             .as_ref()?
             .slots
@@ -332,9 +338,10 @@ const CHECKPOINT_INTERVAL: usize = 1024;
 
 impl<'film> ResolvedFilm<'film> {
     pub(super) fn from_film(film: &'film Film) -> Self {
-        let mut events = index(film);
+        let interpretations = Interpretations::from_film(film);
+        let mut events = index(film, interpretations.player_table.as_ref());
         // Stable sort preserves source chunk/packet/record order for clock ties.
-        events.sort_by_key(|e| e.timestamp_us);
+        events.sort_by_key(|e| (e.timestamp_us, e.source.chunk, e.source.packet));
         let mut timestamp = None;
         let mut order = 0;
         let mut world = WorldSnapshot::default();
@@ -360,7 +367,7 @@ impl<'film> ResolvedFilm<'film> {
                 });
             }
         }
-        let player_slot_by_film_index = film
+        let player_slot_by_film_index = interpretations
             .player_table
             .as_ref()
             .map(|p| {
@@ -373,6 +380,7 @@ impl<'film> ResolvedFilm<'film> {
             .unwrap_or_default();
         Self {
             film,
+            interpretations,
             query_indices: Arc::new(QueryIndices::new(&events)),
             events: Arc::new(events),
             checkpoints: Arc::new(checkpoints),
@@ -385,7 +393,10 @@ impl<'film> ResolvedFilm<'film> {
 }
 
 fn provenance(film: &Film, source: SourceRef) -> Provenance {
-    let packet = &film.chunks[source.chunk].packets[source.packet];
+    let packet = &film
+        .chunk(source.chunk)
+        .expect("indexed source chunk")
+        .packets[source.packet];
     let bounded = |start: i64, end: i64| {
         start >= 0 && end >= start && i128::from(end) <= packet.header.payload_size as i128 * 8
     };
@@ -435,7 +446,7 @@ fn frame(packet: &NativeFilmPacket, continuation: bool) -> Option<&ProductionFra
 }
 
 fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
-    let packet = film.chunks.get(source.chunk)?.packets.get(source.packet)?;
+    let packet = film.chunk(source.chunk)?.packets.get(source.packet)?;
     Some(match source.record {
         RecordRef::Packet => Record::Packet(packet),
         RecordRef::Entity {
@@ -468,13 +479,20 @@ fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
     })
 }
 
-fn index(film: &Film) -> Vec<Event> {
+fn index(film: &Film, players: Option<&crate::theater::parser::PlayerTable>) -> Vec<Event> {
     let mut events = Vec::new();
-    for (chunk_index, chunk) in film.chunks.iter().enumerate() {
+    for chunk in film.chunks() {
+        let chunk_index = chunk.source_position;
         for (packet_index, packet) in chunk.packets.iter().enumerate() {
             let mut push = |record, kind, entity_id, player_index| {
                 events.push(Event {
-                    timestamp_us: packet.header.timestamp_us,
+                    timestamp_us: match record {
+                        RecordRef::Summary(i) => match &packet.body {
+                            NativeFilmPacketBody::Summary { events, .. } => events[i].time_us,
+                            _ => packet.header.timestamp_us,
+                        },
+                        _ => packet.header.timestamp_us,
+                    },
                     order: 0,
                     provenance: Provenance::PacketEnvelope,
                     kind,
@@ -548,7 +566,12 @@ fn index(film: &Film) -> Vec<Event> {
                             RecordRef::Summary(i),
                             EventKind::Summary,
                             None,
-                            summary.player.map(usize::from),
+                            summary.player.map(usize::from).or_else(|| {
+                                let xuid = summary.xuid.parse::<u64>().ok()?;
+                                let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
+                                let player = matches.next()?;
+                                matches.next().is_none().then_some(player.film_index)
+                            }),
                         );
                     }
                 }
@@ -571,14 +594,20 @@ fn resolve_change(
                 continuation: true, ..
             } = event.source.record
             {
-                let continuation = film.chunks[event.source.chunk].packets[event.source.packet]
+                let continuation = film
+                    .chunk(event.source.chunk)
+                    .expect("indexed source chunk")
+                    .packets[event.source.packet]
                     .event_continuation
                     .as_ref()?;
                 if continuation.state_policy != NativeContinuationStatePolicy::Applied {
                     return None;
                 }
             }
-            let packet = &film.chunks[event.source.chunk].packets[event.source.packet];
+            let packet = &film
+                .chunk(event.source.chunk)
+                .expect("indexed source chunk")
+                .packets[event.source.packet];
             if record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }
@@ -605,7 +634,10 @@ fn resolve_change(
                 slot: record.id & 0x3fff_ffff,
             };
             // Native padded reads remain visible but cannot become recorded state.
-            let packet = &film.chunks[event.source.chunk].packets[event.source.packet];
+            let packet = &film
+                .chunk(event.source.chunk)
+                .expect("indexed source chunk")
+                .packets[event.source.packet];
             if record.start_bit < 0 || record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }

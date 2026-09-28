@@ -2,46 +2,37 @@
 
 mod common;
 
-use halo_api::clients::hi::models::{FilmChunk, FilmChunkData};
 use halo_api::theater::{
     Film,
-    film::ParseOptions,
-    parser::{FilmSource, FilmSourceMetadata},
+    film::{ChunkKind, FilmChunk as InputChunk},
 };
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
-    let (chunks, film_major_version) = if let Ok(directory) = std::env::var("HALO_FILM_DIR") {
-        let version = std::env::var("HALO_FILM_MAJOR_VERSION")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(41);
-        (local_chunks(&directory)?, version)
+    let input = if let Ok(directory) = std::env::var("HALO_FILM_DIR") {
+        local_chunks(&directory)?
     } else {
         let (_, halo) = common::halo_infinite_client()?;
         let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
         let film = halo.match_film(&match_id).await?;
-        let version = film.custom_data.film_major_version;
-        (halo.film_chunks(&film).await?, version)
+        halo.film_chunks(&film)
+            .await?
+            .into_iter()
+            .map(|c| {
+                Ok(InputChunk {
+                    kind: ChunkKind::try_from(c.metadata.chunk_type)?,
+                    index: Some(i64::from(c.metadata.index)),
+                    start_ms: Some(c.metadata.start_time_offset_ms),
+                    data: c.data,
+                })
+            })
+            .collect::<Result<Vec<_>, halo_api::theater::film::ParseError>>()?
     };
-    if film_major_version != 41 {
-        return Err("only v41 films are supported".into());
-    }
-    let metadata: Vec<_> = chunks
-        .iter()
-        .map(|c| FilmSourceMetadata {
-            index: i64::from(c.metadata.index),
-            chunk_type: i64::from(c.metadata.chunk_type),
-            start_ms: c.metadata.start_time_offset_ms,
-        })
-        .collect();
-    let bytes: Vec<_> = chunks.iter().map(|c| c.data.as_slice()).collect();
-    let source = FilmSource::load(&bytes, &metadata)?;
-    let film = Film::parse(&source, ParseOptions::default())?;
+    let film = Film::parse(input)?;
     let mut resolved = film.resolve();
     println!(
         "{} chunks, {} indexed records",
-        film.chunks.len(),
+        1 + film.replication.chunks.len() + film.summaries.chunks.len(),
         resolved.events().len()
     );
     if let Some(end) = resolved.events().last().map(|e| e.timestamp_us) {
@@ -57,7 +48,7 @@ async fn main() -> Result<(), common::ExampleError> {
     Ok(())
 }
 
-fn local_chunks(directory: &str) -> Result<Vec<FilmChunkData>, common::ExampleError> {
+fn local_chunks(directory: &str) -> Result<Vec<InputChunk>, common::ExampleError> {
     let mut chunks = Vec::new();
     for entry in std::fs::read_dir(directory)? {
         let entry = entry?;
@@ -73,18 +64,14 @@ fn local_chunks(directory: &str) -> Result<Vec<FilmChunkData>, common::ExampleEr
         };
         let index = index.parse::<i32>()?;
         let chunk_type = chunk_type.parse::<i32>()?;
-        chunks.push(FilmChunkData {
-            metadata: FilmChunk {
-                index,
-                start_time_offset_ms: i64::from(index.saturating_sub(1)) * 20_000,
-                duration_ms: 0,
-                size: 0,
-                file_relative_path: name,
-                chunk_type,
-            },
+        chunks.push(InputChunk {
+            kind: ChunkKind::try_from(chunk_type)?,
+            index: Some(i64::from(index)),
+            // Filenames provide order and category, but no recorded start time.
+            start_ms: None,
             data: std::fs::read(entry.path())?,
         });
     }
-    chunks.sort_by_key(|chunk| chunk.metadata.index);
+    chunks.sort_by_key(|chunk| chunk.index);
     Ok(chunks)
 }

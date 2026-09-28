@@ -1,5 +1,6 @@
 use super::*;
 use crate::theater::film::*;
+use crate::theater::parser::v41::test_chunks;
 use crate::theater::parser::weapon_hit_scan::decode_weapon_damage;
 use serde_json::{Value, json};
 use std::io::Read;
@@ -124,9 +125,8 @@ fn native_data_damage_admission_and_provenance() {
         ],
     )
     .unwrap();
-    let parsed =
-        Film::parse_v41_with_recovery(&source, KeyframeRecoveryPolicy::SequentialOnly).unwrap();
-    let packets = &parsed.chunks[1].packets;
+    let parsed = Film::parse(test_chunks(&source)).unwrap();
+    let packets = &parsed.replication.chunks[0].packets;
     let read = packets[0].damage_read.as_ref().unwrap();
     check_fields(read, &[0xc0, 0]);
     assert!(read.padding_bits > 0);
@@ -137,7 +137,7 @@ fn native_data_damage_admission_and_provenance() {
     assert!(packets[1].damage_read.as_ref().unwrap().read.is_none());
     assert!(packets[2..].iter().all(|p| p.damage_read.is_none()));
     assert!(
-        parsed.chunks[2]
+        parsed.summaries.chunks[0]
             .packets
             .iter()
             .all(|p| p.damage_read.is_none())

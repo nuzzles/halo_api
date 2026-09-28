@@ -1,5 +1,5 @@
 //! Bootstrap player table, ported from LevelUp's player_table*.go.
-//! See docs/LEVELUP_LICENSE.txt. Slot ranks include vacant entries.
+//! See docs/CREDIT.md. Slot ranks include vacant entries.
 use super::{
     FilmIdentity,
     bits::{Bits, Cursor},

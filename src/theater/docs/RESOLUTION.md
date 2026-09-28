@@ -1,32 +1,39 @@
 # Resolution and playback
 
-`Film::resolve(&self)` walks the existing decoded records and returns
-`ResolvedFilm<'_>`, borrowing the film. It does not decompress or parse source bytes
-again. Multiple independent resolutions can borrow one film.
+`Film::resolve(&self)` returns `ResolvedFilm<'_>`, borrowing the recording. It walks
+already decoded native records to build an ordered event stream, query indexes,
+entity/component state and checkpoints. Multiple independent cursors can borrow
+one film. The retained source buffers are neither copied nor decompressed again.
 
-The resolved model orders events by microsecond timestamp and stable order within
-a timestamp, indexes them by kind/category/entity/player, and accumulates entity
-state with generation checks. Native source references retrieve the original typed
-record. Events identify recorded reads, partial reads or packet envelopes. Derived
-state changes carry previous/new shared entity states and a derivation identifier.
+`interpretations()` exposes separate, source-linked evidence from bootstrap identity
+and player-slot searches, event-layout inference, bot metadata, fire-aim reads and
+whole-chunk highlight scans. Those routines may inspect preserved bytes; they do
+not rerun the structural packet parser or mutate Film. An inferred event gate is
+reported as a selection with candidate counts, not a recorded bit, and is not used
+to silently reinterpret the native event stream or apply extra world updates.
 
-This is native state resolution. It does not invent player-to-entity associations
-or label a control bit as an observed physical jump. Continuous component fields
-remain queryable. Filtering affects the query result, not the stored events or
-playback. `EventFilter` combines time, kind, category, entity and player constraints;
-queries start from the smallest applicable index within the time bounds.
+Events use packet wire timestamps except summaries, which use their own recorded
+`time_us`. Ties retain input chunk, packet, and record order. Summary player linkage
+uses a unique XUID match from the bootstrap interpretation; missing or ambiguous
+matches stay unresolved. This is not a guessed player-to-entity ownership mapping.
+Native reads have source references and explicit read provenance. Accumulated state
+changes retain previous/new shared values and a derivation identifier.
 
-- `current()` returns a borrowed, already-materialized world in O(1).
-- `advance_to(t)` applies intervening indexed updates; the cost depends on the
-  updates and affected state. Backward movement uses the seek path.
-- `seek(t)` locates a checkpoint and applies its remaining updates. Checkpoints
-  are stored every 1,024 indexed events. Finding an index is logarithmic; cloning
-  the checkpoint's world map scales with the number of entities. Seek is not O(1).
-- Enumerating or copying the world scales with world size. Entity state uses
-  shared storage, but indexing, checkpoints and changes still consume memory.
+`EventFilter` combines kind, category, entity, player and inclusive time ranges.
+Queries begin from the smallest applicable bounded index. Continuous component
+updates stay available; filtering does not change playback or the stored events.
 
-Partial component reads and incomplete NEW records cannot silently promote unknown
-state to known state. Recovery candidates never create resolved entities. Seeking
-and sequential playback must agree at the same timestamp, including ties and
-entity generations. Interpolation and a browser renderer are separate consumers;
-this API does not fabricate intermediate recorded samples.
+- `current()` borrows the already-materialized world in O(1).
+- `advance_to(t)` applies intervening indexed updates. Backward movement seeks.
+- `seek(t)` binary-searches the event/checkpoint indexes, clones a checkpoint world
+  map, and applies at most 1,024 remaining events. Cloning scales with entity count;
+  seeking is not O(1).
+- Iterating/copying the world scales with its size. Checkpoints and historical state
+  use memory even though unchanged entity states share storage.
+
+A new resolved cursor has an empty current world until advanced or sought. Partial
+reads cannot silently promote unknown component values to known state. Incomplete
+NEW records do not establish entities. Keyframe data beyond a parsing stop cannot
+create world entities. Seeking and sequential playback must agree at the same time.
+
+No visual interpolation or inferred jump/shot/action semantics are added here.

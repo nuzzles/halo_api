@@ -4,8 +4,7 @@ mod common;
 use halo_api::theater::resolved::{EventFilter, EventKind, Record};
 use halo_api::theater::{
     Film,
-    film::ParseOptions,
-    parser::{FilmSource, FilmSourceMetadata},
+    film::{ChunkKind, FilmChunk as InputChunk},
 };
 
 #[tokio::main]
@@ -17,17 +16,18 @@ async fn main() -> Result<(), common::ExampleError> {
         return Err("only v41 films are supported".into());
     }
     let chunks = halo.film_chunks(&manifest).await?;
-    let metadata: Vec<_> = chunks
-        .iter()
-        .map(|chunk| FilmSourceMetadata {
-            index: i64::from(chunk.metadata.index),
-            chunk_type: i64::from(chunk.metadata.chunk_type),
-            start_ms: chunk.metadata.start_time_offset_ms,
+    let input = chunks
+        .into_iter()
+        .map(|c| {
+            Ok(InputChunk {
+                kind: ChunkKind::try_from(c.metadata.chunk_type)?,
+                index: Some(i64::from(c.metadata.index)),
+                start_ms: Some(c.metadata.start_time_offset_ms),
+                data: c.data,
+            })
         })
-        .collect();
-    let bytes: Vec<_> = chunks.iter().map(|chunk| chunk.data.as_slice()).collect();
-    let source = FilmSource::load(&bytes, &metadata)?;
-    let film = Film::parse(&source, ParseOptions::default())?;
+        .collect::<Result<Vec<_>, halo_api::theater::film::ParseError>>()?;
+    let film = Film::parse(input)?;
     let resolved = film.resolve();
     for event in resolved.query(EventFilter {
         kind: Some(EventKind::Summary),

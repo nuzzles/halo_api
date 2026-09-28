@@ -1,5 +1,6 @@
 use super::*;
 use crate::theater::film::*;
+use crate::theater::parser::v41::test_chunks;
 use crate::theater::parser::{
     EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader,
 };
@@ -13,7 +14,7 @@ fn recording() -> Film {
         &[],
     )
     .unwrap();
-    Film::parse(&source, ParseOptions::default()).unwrap()
+    Film::parse(test_chunks(&source)).unwrap()
 }
 
 // Independently authored decoded-record fixtures test resolution, not decoding.
@@ -59,7 +60,7 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
 }
 fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> NativeFilmPacket {
     // Parse a real packet shell, then substitute explicit resolution fixtures.
-    let mut p = film.chunks[1].packets[0].clone();
+    let mut p = film.replication.chunks[0].packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
     p.body = NativeFilmPacketBody::Frame(Box::new(ProductionFrame {
@@ -104,11 +105,11 @@ fn resolved_native_entry_preserves_source_and_decoder_output() {
         &[],
     )
     .unwrap();
-    let native = Film::parse_v41(&source).unwrap();
-    let film = Film::parse(&source, Default::default()).unwrap();
+    let native = Film::parse(test_chunks(&source)).unwrap();
+    let film = Film::parse(test_chunks(&source)).unwrap();
     assert_eq!(film, native);
-    assert_eq!(film.original_chunks[0], compressed);
-    assert_eq!(film.chunks[0].data, bootstrap);
+    assert_eq!(film.registry.chunk.source.data, compressed);
+    assert_eq!(film.registry.chunk.data, bootstrap);
     let json = serde_json::to_vec(&film).unwrap();
     let resolved = film.resolve();
     let second = film.resolve();
@@ -123,7 +124,7 @@ fn resolved_native_entry_preserves_source_and_decoder_output() {
 fn resolved_chronology_generations_filters_and_source_references() {
     let mut film = recording();
     let id = 0x4000_0007;
-    film.chunks[1].packets = vec![
+    film.replication.chunks[0].packets = vec![
         packet(&film, 20, vec![entity(RecordKind::Delta, id, 2)]),
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         packet(
@@ -185,7 +186,7 @@ fn resolved_chronology_generations_filters_and_source_references() {
 fn resolved_seek_matches_sequential_across_checkpoints_and_ties() {
     let mut film = recording();
     let id = 0x4000_0007;
-    film.chunks[1].packets = (0..1200)
+    film.replication.chunks[0].packets = (0..1200)
         .map(|i| {
             packet(
                 &film,
@@ -229,7 +230,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
     padded.padded_bits = 1;
     let mut opaque = packet(&film, 15, vec![]);
     opaque.body = NativeFilmPacketBody::Opaque;
-    film.chunks[1].packets = vec![
+    film.replication.chunks[0].packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         opaque,
         packet(&film, 20, vec![partial]),
@@ -280,7 +281,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     if let NativeFilmPacketBody::Keyframes(table) = &mut padded.body {
         table.records[0].record.as_mut().unwrap().end_bit = 4096;
     }
-    film.chunks[1].packets = vec![
+    film.replication.chunks[0].packets = vec![
         keyframe,
         packet(&film, 20, vec![entity(RecordKind::Delta, 0x4000_0007, 8)]),
         padded,
@@ -315,7 +316,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
             },
         );
     }
-    film.chunks[1].packets = vec![
+    film.replication.chunks[0].packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         rejected,
     ];
@@ -353,7 +354,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
             stop: crate::theater::parser::FrameViewStop::Truncated,
         });
     }
-    film.chunks[1].packets = vec![p];
+    film.replication.chunks[0].packets = vec![p];
     let mut resolved = film.resolve();
     assert!(resolved.advance_to(10).entities.is_empty());
     for event in resolved
@@ -377,47 +378,9 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
 }
 
 #[test]
-fn resolved_recovery_candidates_never_create_world_entities() {
-    use crate::theater::parser::{AnchorRecovery, RecoveredKeyframeAnchor};
-    let mut film = recording();
-    let mut p = packet(&film, 10, vec![]);
-    p.body = NativeFilmPacketBody::Opaque;
-    p.keyframe_candidates = Some(vec![NativeKeyframeCandidate {
-        anchor: RecoveredKeyframeAnchor {
-            id: 0x4000_0007,
-            archetype: 3,
-            bit: 1,
-            recovery: AnchorRecovery::Scan { from_bit: 0 },
-        },
-        read: Ok(KeyframeRecord {
-            references: vec![],
-            diagnostics: Default::default(),
-            start_bit: 1,
-            end_bit: 65,
-            id: 0x4000_0007,
-            archetype: 3,
-            fields: vec![],
-            components: vec![],
-            attempts: vec![],
-            stop: KeyframeStop::Complete,
-        }),
-        crosses_next_anchor: false,
-    }]);
-    film.chunks[1].packets = vec![p];
-    let mut resolved = film.resolve();
-    assert!(resolved.advance_to(10).entities.is_empty());
-    assert_eq!(resolved.events().len(), 1);
-    assert!(
-        resolved.film().chunks[1].packets[0]
-            .keyframe_candidates
-            .is_some()
-    );
-}
-
-#[test]
 fn resolved_query_indices_intersect_filters_and_preserve_order() {
     let mut film = recording();
-    film.chunks[1].packets = vec![
+    film.replication.chunks[0].packets = vec![
         packet(
             &film,
             10,
@@ -488,5 +451,89 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
             })
             .count(),
         0
+    );
+}
+
+#[test]
+fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
+    use crate::theater::parser::{PlayerTable, PlayerTableSlot};
+    use serde_json::json;
+    let mut film = Film::parse([
+        FilmChunk::new(
+            ChunkKind::Registry,
+            [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
+        ),
+        FilmChunk::new(
+            ChunkKind::Summary,
+            [
+                9u16.to_le_bytes().as_slice(),
+                &[0, 0],
+                &4u32.to_le_bytes(),
+                &999_999u64.to_le_bytes(),
+                &0u32.to_be_bytes(),
+            ]
+            .concat(),
+        ),
+    ])
+    .unwrap();
+    let summary = |time, xuid| {
+        serde_json::from_value::<SummaryEvent>(json!({
+            "xuid": xuid, "player": null, "name":"Recorded player", "time_us":time,
+            "kind":"Kill", "metadata":0, "medal_flag":0
+        }))
+        .unwrap()
+    };
+    film.summaries.chunks[0].packets[0].body = NativeFilmPacketBody::Summary {
+        declared_events: 3,
+        events: vec![
+            summary(2000, "42"),
+            summary(1000, "42"),
+            summary(3000, "99"),
+        ],
+    };
+    let resolved = film.resolve();
+    let times: Vec<_> = resolved
+        .query(EventFilter {
+            kind: Some(EventKind::Summary),
+            ..Default::default()
+        })
+        .map(|e| e.timestamp_us)
+        .collect();
+    assert_eq!(times, vec![1000, 2000, 3000]);
+    assert_eq!(
+        resolved
+            .query(EventFilter {
+                kind: Some(EventKind::Summary),
+                start_us: Some(1000),
+                end_us: Some(1000),
+                ..Default::default()
+            })
+            .count(),
+        1
+    );
+    let player:PlayerTableSlot=serde_json::from_value(json!({
+        "film_index":7,"xuid":42,"gamertag":"Recorded player","session_token":0,"bit":0,"total_bits":0,
+        "shorts":{"tete":0,"deux":0,"repr":0,"q64":0,"f10":0,"f14":0,"f6":0,"f8":0,"f7":0,"f1":0}
+    })).unwrap();
+    let mut table = PlayerTable {
+        slots: vec![player.clone()],
+        report: Default::default(),
+        error: None,
+    };
+    let actors: Vec<_> = index(&film, Some(&table))
+        .into_iter()
+        .filter(|e| e.kind == EventKind::Summary)
+        .map(|e| e.player_index)
+        .collect();
+    assert_eq!(actors, vec![Some(7), Some(7), None]);
+    table.slots.push(PlayerTableSlot {
+        film_index: 8,
+        ..player
+    });
+    assert!(
+        index(&film, Some(&table))
+            .iter()
+            .filter(|e| e.kind == EventKind::Summary)
+            .all(|e| e.player_index.is_none())
     );
 }

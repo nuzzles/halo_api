@@ -112,25 +112,6 @@ pub struct NativeScanProfile {
     pub mpp: FilmMppWidths,
     pub grammar: NativeScanGrammar,
 }
-impl NativeScanProfile {
-    /// Freeze allocated width maps instead of sharing subsequent native mutations.
-    /// Ordinary Clone deliberately preserves Go map aliasing.
-    pub(crate) fn snapshot(&self) -> Self {
-        let mut value = self.clone();
-        value.grammar.calibrated_widths = self
-            .grammar
-            .calibrated_widths
-            .as_ref()
-            .map(|map| NativeSharedWidths::from_map(map.snapshot()));
-        value.grammar.stub_widths = self
-            .grammar
-            .stub_widths
-            .as_ref()
-            .map(|map| NativeSharedWidths::from_map(map.snapshot()));
-        value
-    }
-}
-
 #[cfg(test)]
 impl NativeSharedWidths {
     pub fn insert(&self, name: String, width: i64) -> Option<i64> {

@@ -1,5 +1,5 @@
 //! Type-117 teleport events from LevelUp's transloc_events.go.
-//! See docs/LEVELUP_LICENSE.txt. Failed position reads retain the known event.
+//! See docs/CREDIT.md. Failed position reads retain the known event.
 use super::{FilmMapBounds, bits::Cursor};
 use serde::{Deserialize, Serialize};
 

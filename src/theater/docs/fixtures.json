@@ -25,11 +25,6 @@
       "sha256": "7d46364b26f26991dfa6194aeb31f3b6e0f92c41b042079cd17404f4a49d7680"
     },
     {
-      "file": "keyframe-anchor-bodies-d61443e-v41.jsonl.zlib",
-      "bytes": 22692792,
-      "sha256": "f9d331bfc9ffeac7ed4acaa35c71cfc527c2e1ff8523fb8f1b4da90cd3a628b6"
-    },
-    {
       "file": "native-baseline-d61443e-v41.jsonl.zlib",
       "bytes": 1851110,
       "sha256": "ba4c2d3060378a27c4324ee9813e822400f8e90a617dc03610f4aa19ef16c4e7"

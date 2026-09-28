@@ -1,5 +1,6 @@
 use super::*;
 use crate::theater::film::*;
+use crate::theater::parser::v41::test_chunks;
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -120,18 +121,11 @@ fn native_data_packet_heads_padding_oracles() {
                 &[],
             )
             .unwrap();
-            let parsed = Film::parse_v41_with_options(
-                &source,
-                ParseOptions {
-                    recovery_policy: KeyframeRecoveryPolicy::SequentialOnly,
-                    event_gate15: NativeEventGate15Policy::Unknown,
-                    translocator_map: map.clone(),
-                    ..Default::default()
-                },
-            )
-            .unwrap();
-            assert_eq!(parsed.translocator_map, map);
-            assert_eq!(parsed.chunks[1].packets[0].native_head, Some(read));
+            let parsed = Film::parse(test_chunks(&source)).unwrap();
+            assert_eq!(
+                parsed.replication.chunks[0].packets[0].native_head,
+                read_native_packet_head(0, &payload, None)
+            );
             assert_eq!(
                 serde_json::from_value::<Film>(json!(parsed)).unwrap(),
                 parsed
@@ -154,7 +148,6 @@ fn native_data_packet_heads_context_and_footer_boundaries() {
         .find(|r| r["map"].is_object() && r["event"]["HasPositions"] == true)
         .unwrap();
     let payload = bytes(row["hex"].as_str().unwrap());
-    let map: FilmMapBounds = serde_json::from_value(row["map"].clone()).unwrap();
     let packet = framed(&payload);
     let source = FilmSource::load(
         &[
@@ -181,41 +174,18 @@ fn native_data_packet_heads_context_and_footer_boundaries() {
         ],
     )
     .unwrap();
-    for map in [None, Some(map)] {
-        let parsed = Film::parse_v41_with_options(
-            &source,
-            ParseOptions {
-                translocator_map: map.clone(),
-                ..Default::default()
-            },
-        )
-        .unwrap();
-        let NativePacketHeadRead::Translocator(Some(read)) =
-            parsed.chunks[1].packets[0].native_head.as_ref().unwrap()
-        else {
-            panic!("missing direct read")
-        };
-        if map.is_some() {
-            assert!(read.event.positions().is_some())
-        } else {
-            assert_eq!(read.event.stop, TranslocatorStop::MissingMap);
-        }
-        assert!(parsed.chunks[2].packets[0].native_head.is_none());
-        let mut old = json!(parsed);
-        old.as_object_mut().unwrap().remove("translocator_map");
-        for chunk in old["chunks"].as_array_mut().unwrap() {
-            for packet in chunk["packets"].as_array_mut().unwrap() {
-                packet.as_object_mut().unwrap().remove("native_head");
-            }
-        }
-        let restored: Film = serde_json::from_value(old).unwrap();
-        assert!(restored.translocator_map.is_none());
-        assert!(
-            restored
-                .chunks
-                .iter()
-                .flat_map(|c| &c.packets)
-                .all(|p| p.native_head.is_none())
-        );
-    }
+    let parsed = Film::parse(test_chunks(&source)).unwrap();
+    let NativePacketHeadRead::Translocator(Some(read)) = parsed.replication.chunks[0].packets[0]
+        .native_head
+        .as_ref()
+        .unwrap()
+    else {
+        panic!("missing direct read")
+    };
+    assert_eq!(read.event.stop, TranslocatorStop::MissingMap);
+    assert!(parsed.summaries.chunks[0].packets[0].native_head.is_none());
+    assert_eq!(
+        serde_json::from_value::<Film>(json!(parsed)).unwrap(),
+        parsed
+    );
 }

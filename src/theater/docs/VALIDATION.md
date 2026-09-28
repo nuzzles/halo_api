@@ -6,8 +6,7 @@ The parser targets v41 Theater data from
 `d61443ef59268ad734355db8e9974f68db5ca6d0`. It does not claim support for every
 newer recording version or LevelUp's derived analysis/publication APIs.
 
-Attribution is retained in [LEVELUP_LICENSE.txt](LEVELUP_LICENSE.txt) and
-[GO_LICENSE.txt](GO_LICENSE.txt) (the native ordering implementation).
+Attribution is retained in [CREDIT.md](CREDIT.md).
 [fixtures.json](fixtures.json) versions the retained compressed reference outputs
 with byte lengths and SHA-256 hashes. Names containing `d61443e` identify that
 selected reference; other v41 fixtures originate from the baseline parity work.
@@ -19,7 +18,7 @@ recoverable from commit `7eb8e3c`; they are not part of the library API.
 | --- | --- | --- |
 | Source/native structure | Original and decompressed bytes, packet order, fields, masks, terminal reads and source boundaries | Synthetic boundary cases and pinned reference outputs; unknown bytes remain retained |
 | Native readers | Continuation views, padding, position/profile context, packet heads and damage fields | Reference fixtures include accepted reads and negative/refused forms |
-| Captured corpus | Frame counts/end bits, keyframe reads, summaries, packet-head/fire/damage reads | 32 local v41 recordings; requires separately retained source recordings |
+| Captured corpus | Reference frame-reader counts/end bits, source retention, registry size, summary timestamps and player links | 32 local v41 recordings; requires separately retained source recordings |
 | Resolution | Borrow identity, source references, chronological ties, generation/lifetime checks, filters and partial states | Independently authored decoded records, including cases that must not create entities |
 | Playback | Selected state, backward seeks, rewind and seek/sequential agreement | Resolution tests exercise the same timestamp through different playback paths |
 
@@ -39,10 +38,14 @@ CARGO_INCREMENTAL=0 cargo test --doc
 CARGO_INCREMENTAL=0 cargo check --target wasm32-unknown-unknown --lib
 ```
 
-The cleanup validation passed all 26 Theater tests, including the 32-film corpus:
-403,465 frame boundary comparisons, 134,657 keyframe candidate reads, and 3,667
-summary records. These are corpus coverage counts, not a claim that all retained
-opaque regions have typed decoding.
+The corpus compares 403,465 frame-reader boundaries against pinned outputs and
+checks timestamp/source consistency for 3,667 summary records. The frame oracle
+exercises the reference reader traversal separately from Film's continuation-aware
+decoder; it does not establish field-for-field agreement for every Film record. A negative
+keyframe test puts a plausible header beyond an invalid boundary and verifies that
+parsing stops, preserves the bytes, and creates no resolved entities. Candidate
+recovery and its oracle fixture have been removed; those speculative reads are
+no longer counted as decoding coverage.
 
 The optional captured-film test reads `HALO_FILM_CORPUS`, defaulting to the
 historical local directory `experiments/films`. Recordings must have their original
@@ -50,5 +53,13 @@ historical local directory `experiments/films`. Recordings must have their origi
 Reference fixture file names preserve original corpus-relative paths.
 
 ```sh
-CARGO_INCREMENTAL=0 cargo test --release --lib native_data_captured_corpus -- --ignored --nocapture
+CARGO_INCREMENTAL=0 cargo test --release --lib captured_v41_corpus -- --ignored --nocapture
 ```
+
+## Retained historical fixtures
+
+The manifest also retains `fire-d61443e`, `highlights-corpus`, `native-damage`,
+`native-entry-profile-d61443e`, and `native-packet-heads` corpus fixtures for
+reference provenance. Current tests do not consume these five fixtures; they are
+not counted as current coverage. Focused packet-head and damage tests use their
+own cases. Interpretation searches do not have independent semantic action goldens.

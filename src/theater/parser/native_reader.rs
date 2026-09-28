@@ -75,22 +75,6 @@ impl Default for NativeFrameConfig {
 }
 
 impl NativeFrameConfig {
-    /// Native full-state keyframe read with live profile maps and hooks.
-    pub(crate) fn read_keyframe_record(
-        &self,
-        data: &[u8],
-        start: impl TryInto<i64>,
-        registry: &FilmRegistry,
-    ) -> Result<KeyframeRecord, NativeReaderProfileError> {
-        components::decode_native_keyframe_record_contextual(
-            data,
-            start,
-            registry,
-            &self.contextual_frame_encoding()?,
-            Some(&self.context),
-        )
-        .ok_or(NativeReaderProfileError::Width("keyframe layout or start"))
-    }
     /// Native sequential keyframe table, including its sentinel fallback behavior.
     pub(crate) fn read_keyframe_table(
         &self,
@@ -162,6 +146,8 @@ impl NativeFrameConfig {
         encoding.new_record.native_fallback_default_bits = Some(self.new_default_state_bits);
         encoding.native_id_low_bits = Some(self.id_low_bits);
         encoding.ids.base = self.id_base;
+        // Native Film retains quantized fields; map calibration belongs to resolution.
+        encoding.position_capture = None;
         Ok(encoding)
     }
 

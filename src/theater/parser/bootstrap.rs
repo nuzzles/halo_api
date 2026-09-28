@@ -1,5 +1,5 @@
 //! Version-41 bootstrap identification. Ported from LevelUp's `film_identity.go`;
-//! see `docs/LEVELUP_LICENSE.txt` and the pinned port manifest.
+//! see `docs/CREDIT.md` and the pinned port manifest.
 
 use super::{DecodeError, FilmRegistry, bits::Bits};
 use serde::{Deserialize, Serialize};
