@@ -1,7 +1,7 @@
 use super::*;
 use crate::theater::film::*;
 use crate::theater::parser::v41::test_chunks;
-use crate::theater::parser::{
+use crate::theater::parser::v41::{
     EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader,
 };
 
@@ -251,7 +251,9 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
 
 #[test]
 fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() {
-    use crate::theater::parser::{KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable};
+    use crate::theater::parser::v41::{
+        KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable,
+    };
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
     keyframe.body = NativeFilmPacketBody::Keyframes(NativeKeyframeTable {
@@ -307,7 +309,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
     if let NativeFilmPacketBody::Frame(frame) = &mut rejected.body {
         frame.header_diagnostics.new_binding_refusals.push(
-            crate::theater::parser::NativeNewBindingRefusal {
+            crate::theater::parser::v41::NativeNewBindingRefusal {
                 record_bit: 2,
                 id,
                 slot: 7,
@@ -332,7 +334,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
     if let NativeFilmPacketBody::Frame(frame) = &mut p.body {
-        frame.controls = Some(crate::theater::parser::DecodedFrameView {
+        frame.controls = Some(crate::theater::parser::v41::DecodedFrameView {
             control_entries: vec![NativeControlEntry {
                 start_bit: 2040,
                 end_bit: 2050,
@@ -351,7 +353,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
             padded_bits: 2,
             kinds: vec![0],
             fields: vec![],
-            stop: crate::theater::parser::FrameViewStop::Truncated,
+            stop: crate::theater::parser::v41::FrameViewStop::Truncated,
         });
     }
     film.replication.chunks[0].packets = vec![p];
@@ -456,7 +458,7 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
 
 #[test]
 fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
-    use crate::theater::parser::{PlayerTable, PlayerTableSlot};
+    use crate::theater::parser::v41::{PlayerTable, PlayerTableSlot};
     use serde_json::json;
     let mut film = Film::parse([
         FilmChunk::new(

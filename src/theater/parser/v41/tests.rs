@@ -1,3 +1,4 @@
+use super::replication::continue_event_views;
 use super::*;
 use serde_json::{Value, json};
 use std::io::Read;

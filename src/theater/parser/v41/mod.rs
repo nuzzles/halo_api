@@ -1,211 +1,10 @@
 //! Structural v41 decoding. No candidate searches or inferred runtime settings.
-use super::*;
+pub(crate) use super::{bits, transport};
 use crate::theater::film::*;
-
-fn continue_event_views(
-    payload: &[u8],
-    events: &NativeEventListRead,
-    config: &NativeFrameConfig,
-    registry: &FilmRegistry,
-    world: &mut FilmWorld,
-) -> Option<NativeEventContinuation> {
-    // Empty lists are already handled by the generic production reader. Never
-    // scan for a replacement boundary after an unsupported or truncated body.
-    if events.stop != NativeEventListStop::Terminator || events.records.is_empty() {
-        return None;
-    }
-    let state_policy = if events.records.iter().any(|r| r.code == Some(0)) {
-        NativeContinuationStatePolicy::IsolatedConflictingDamageGrammar
-    } else {
-        NativeContinuationStatePolicy::Applied
-    };
-    let frame = if state_policy == NativeContinuationStatePolicy::Applied {
-        config.decode_production_views(payload, events.end_bit, registry, world)
-    } else {
-        config.decode_production_views(payload, events.end_bit, registry, &mut world.clone())
-    };
-    Some(NativeEventContinuation {
-        start_bit: events.end_bit,
-        frame: frame.map_err(|error| error.to_string()),
-        state_policy,
-    })
-}
 
 /// Version-specific chunk decoder selected by `Film::parse` after registry validation.
 /// Kept internal so callers use the single version-dispatching entry point.
 pub(crate) struct V41ChunkParser;
-
-impl V41ChunkParser {
-    pub(crate) fn parse(
-        inputs: Vec<FilmChunk>,
-        source: &FilmSource,
-        registry: FilmRegistryRead,
-        registry_chunk_position: usize,
-    ) -> Result<Film, ParseError> {
-        let config = NativeFrameConfig::default();
-        // These runtime/build-dependent values are not established by structural
-        // registry decoding. Preserve stopped reads instead of choosing a layout.
-        let gate15 = None;
-        let personalization_bits: Option<usize> = None;
-        // This accumulator exists solely to select subsequent native grammars.
-        // It is deliberately neither exported nor interpreted as a replay.
-        let mut world = FilmWorld::default();
-        let mut chunks = Vec::with_capacity(source.num_chunks());
-        for (source_position, input) in inputs.into_iter().enumerate() {
-            let data = source.chunk(source_position).unwrap();
-            world.current_chunk = source
-                .metadata()
-                .get(source_position)
-                .map_or(source_position as i64, |m| m.index);
-            let mut chunk = ParsedChunk {
-                source: input,
-                source_position,
-                data: data.to_vec(),
-                packets: Vec::new(),
-                packet_walk_end_byte: 0,
-            };
-            if source_position != registry_chunk_position
-                && source
-                    .metadata()
-                    .get(source_position)
-                    .is_none_or(|m| matches!(m.chunk_type, 2 | 3))
-            {
-                for (packet_index, header) in source.packets(source_position).iter().enumerate() {
-                    let payload = source.payload(header).expect("indexed source payload");
-
-                    let footer = source
-                        .metadata()
-                        .get(source_position)
-                        .is_some_and(|m| m.chunk_type == 3);
-                    let event_list = (!footer && header.packet_type == 0).then(|| {
-                        // Every event consumes at least eight header bits.
-                        read_native_event_list(payload, 1, gate15, payload.len())
-                    });
-                    let roster_read = if !footer && header.packet_type == 8 {
-                        personalization_bits.map(|width| {
-                            read_native_roster_update(
-                                payload,
-                                registry.registry.format_version,
-                                width,
-                            )
-                        })
-                    } else {
-                        None
-                    };
-                    let body = match (footer, header.packet_type) {
-                        (true, 9) => summary::read_summary_packet(
-                            payload,
-                            header.chunk_index,
-                            header.payload_offset,
-                        )
-                        .map(|(declared_events, events)| NativeFilmPacketBody::Summary {
-                            declared_events,
-                            events,
-                        })
-                        .unwrap_or_else(|| NativeFilmPacketBody::Refused {
-                            message: "truncated summary count".into(),
-                        }),
-                        (true, _) => NativeFilmPacketBody::Opaque,
-                        (false, 0) => config
-                            .decode_production_views(payload, 2, &registry.registry, &mut world)
-                            .map(|frame| NativeFilmPacketBody::Frame(Box::new(frame)))
-                            .unwrap_or_else(|error| NativeFilmPacketBody::Refused {
-                                message: error.to_string(),
-                            }),
-                        (false, 1) => decode_datum_table(payload)
-                            .map(NativeFilmPacketBody::Datums)
-                            .unwrap_or_else(|error| NativeFilmPacketBody::Refused {
-                                message: error.to_string(),
-                            }),
-                        (false, 2) => match config.read_keyframe_table(payload, &registry.registry)
-                        {
-                            Ok(table) => {
-                                for attempt in &table.records {
-                                    if attempt.record.is_some() {
-                                        world.bind_keyframe(
-                                            attempt.id >> 30,
-                                            attempt.id & 0x3fff_ffff,
-                                            attempt.archetype,
-                                        );
-                                    }
-                                }
-                                NativeFilmPacketBody::Keyframes(table)
-                            }
-                            Err(error) => NativeFilmPacketBody::Refused {
-                                message: error.to_string(),
-                            },
-                        },
-                        (false, 8) => roster_read
-                            .as_ref()
-                            .map(|read| NativeFilmPacketBody::Roster(read.roster.clone()))
-                            .unwrap_or_else(|| NativeFilmPacketBody::Refused {
-                                message: "unknown build personalization width".into(),
-                            }),
-                        _ => NativeFilmPacketBody::Opaque,
-                    };
-                    let event_continuation = event_list.as_ref().and_then(|events| {
-                        continue_event_views(
-                            payload,
-                            events,
-                            &config,
-                            &registry.registry,
-                            &mut world,
-                        )
-                    });
-                    chunk.packet_walk_end_byte = header.payload_offset + header.payload_size;
-                    chunk.packets.push(NativeFilmPacket {
-                        header: *header,
-                        roster_read,
-                        body,
-                        event_head: (!footer && header.packet_type == 0)
-                            .then(|| decode_packet_head_event(payload))
-                            .flatten(),
-                        event_list,
-                        event_continuation,
-                        native_head: (!footer)
-                            .then(|| read_native_packet_head(header.packet_type, payload, None))
-                            .flatten(),
-                        damage_read: (!footer
-                            && header.packet_type == 0
-                            && payload.len() >= 2
-                            && payload[0] == 0xc0)
-                            .then(|| {
-                                let mut read =
-                                    read_native_weapon_damage(payload, header.timestamp_us);
-                                if let Some(damage) = &mut read.read {
-                                    damage.source = Some(*header);
-                                    damage.packet_index = Some(packet_index);
-                                }
-                                read
-                            }),
-                    });
-                }
-            }
-            chunks.push(chunk);
-        }
-
-        let mut registry_chunk = None;
-        let mut replication = Vec::new();
-        let mut summaries = Vec::new();
-        for chunk in chunks {
-            match chunk.source.kind {
-                ChunkKind::Registry => registry_chunk = Some(chunk),
-                ChunkKind::Replication => replication.push(chunk),
-                ChunkKind::Summary => summaries.push(chunk),
-            }
-        }
-        Ok(Film {
-            registry: Registry {
-                definition: registry,
-                chunk: registry_chunk.expect("validated registry"),
-            },
-            replication: ReplicationStream {
-                chunks: replication,
-            },
-            summaries: SummaryEvents { chunks: summaries },
-        })
-    }
-}
 
 #[cfg(test)]
 pub(crate) fn test_chunks(source: &FilmSource) -> Vec<FilmChunk> {
@@ -234,3 +33,125 @@ pub(crate) fn test_chunks(source: &FilmSource) -> Vec<FilmChunk> {
 
 #[cfg(test)]
 mod tests;
+
+pub(crate) mod anticipated_bindings;
+
+pub(crate) mod components;
+
+pub(crate) mod datums;
+
+pub(crate) mod event_heads;
+
+pub(crate) mod kill_decode;
+
+pub(crate) mod kill_event_chain;
+
+pub(crate) mod medals;
+
+pub(crate) mod native_packet_heads;
+
+pub(crate) mod native_pickups;
+
+pub(crate) mod native_reader;
+
+pub(crate) use crate::theater::film::components::native_scan_profile;
+
+pub(crate) mod native_weapon_damage;
+
+pub(crate) mod native_zoom;
+
+pub(crate) mod production_frame;
+
+pub(crate) use crate::theater::film::components::profile;
+
+pub(crate) use crate::theater::film::components::profile_values;
+
+pub(crate) use crate::theater::film::components::read_diagnostics;
+
+pub(crate) mod records;
+
+pub(crate) mod registry;
+
+pub(crate) mod roster_updates;
+
+pub(crate) mod source_bits;
+
+pub(crate) mod summary;
+
+pub(crate) mod translocator;
+
+pub(crate) mod types;
+
+pub(crate) use crate::theater::film::components::unit_equipment;
+
+pub(crate) use crate::theater::film::components::unit_references;
+
+pub(crate) mod weapon_hit_scan;
+
+pub(crate) mod world;
+
+pub(crate) mod player_slot;
+
+pub(crate) mod position_capture;
+pub(crate) use crate::theater::resolved::interpretation::bootstrap;
+pub(crate) use crate::theater::resolved::interpretation::bot_metadata;
+
+pub(crate) use crate::theater::resolved::interpretation::fire_events;
+pub(crate) use crate::theater::resolved::interpretation::head_observations;
+pub(crate) use crate::theater::resolved::interpretation::highlight_events;
+pub(crate) use crate::theater::resolved::interpretation::native_event_gate;
+pub(crate) use crate::theater::resolved::interpretation::native_identity;
+pub(crate) use crate::theater::resolved::interpretation::objective_extract;
+pub(crate) use crate::theater::resolved::interpretation::player_table;
+pub(crate) use anticipated_bindings::*;
+pub(crate) use bootstrap::*;
+pub(crate) use bot_metadata::*;
+pub(crate) use components::*;
+pub(crate) use datums::*;
+pub(crate) use event_heads::*;
+pub(crate) use fire_events::*;
+pub(crate) use head_observations::*;
+pub(crate) use highlight_events::*;
+pub(crate) use kill_decode::*;
+pub(crate) use kill_event_chain::*;
+pub(crate) use native_event_gate::*;
+pub(crate) use native_identity::*;
+pub(crate) use native_packet_heads::*;
+pub(crate) use native_pickups::*;
+pub(crate) use native_reader::*;
+pub(crate) use native_weapon_damage::*;
+pub(crate) use native_zoom::*;
+pub(crate) use objective_extract::*;
+pub(crate) use player_table::*;
+pub(crate) use position_capture::*;
+pub(crate) use profile_values::*;
+pub(crate) use records::*;
+pub(crate) use roster_updates::*;
+pub(crate) use source_bits::*;
+pub(crate) use translocator::*;
+pub(crate) use types::*;
+pub(crate) use world::*;
+
+pub(crate) use crate::theater::resolved::identity::PlayerTable;
+pub(crate) use components::{ComponentField, EntityRecord, EntityViewStop};
+pub(crate) use native_scan_profile::NativeScanProfile;
+
+pub(crate) use production_frame::ProductionFrame;
+pub(crate) use profile::FilmMapBounds;
+pub(crate) use read_diagnostics::{
+    FilmComponentObservation, FilmReadDiagnostics, NativeAbilityNonPredictedState,
+    NativeEquipmentCreationField, NativeEquipmentField, NativeGameEngineField,
+    NativeManagedObjectField, NativeMovementComponent, NativeMppField, NativeNavpointField,
+    NativeObjectiveField, NativePlayerStateField, NativeProbeComponent, NativeWidthAdjustment,
+    NativeWidthPurpose,
+};
+pub(crate) use records::{RecordHeader, RecordKind};
+pub(crate) use registry::FilmRegistry;
+#[cfg(test)]
+pub(crate) use transport::{FilmSource, FilmSourceMetadata};
+pub(crate) use unit_equipment::UnitEquipmentRead;
+pub(crate) use unit_references::{NativeUnitReference, NativeUnitReferenceKind};
+
+pub(crate) use crate::theater::film::PlayerTableSlot;
+
+pub(crate) mod replication;

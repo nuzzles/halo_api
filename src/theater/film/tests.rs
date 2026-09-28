@@ -21,6 +21,15 @@ fn packet(kind: u16, payload: &[u8], time: u64) -> Vec<u8> {
 #[test]
 fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
     assert!(matches!(Film::parse([]), Err(ParseError::MissingRegistry)));
+    for kind in [ChunkKind::Replication, ChunkKind::Summary] {
+        assert!(matches!(
+            Film::parse([FilmChunk::new(kind, Vec::new()), registry()]),
+            Err(ParseError::RegistryNotFirst)
+        ));
+    }
+    let only_registry = Film::parse([registry()]).unwrap();
+    assert!(only_registry.replication.chunks.is_empty());
+    assert!(only_registry.summaries.chunks.is_empty());
     assert!(matches!(
         Film::parse([registry(), registry()]),
         Err(ParseError::MultipleRegistries)
@@ -49,18 +58,18 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     let mut stream = packet(99, b"opaque", 0);
     stream.extend([0xff; 3]);
     let chunks = vec![
+        FilmChunk::new(ChunkKind::Registry, compressed.clone()),
         FilmChunk {
             kind: ChunkKind::Summary,
             index: Some(8),
             start_ms: Some(-10),
             data: packet(9, &0u32.to_be_bytes(), 200),
         },
-        FilmChunk::new(ChunkKind::Registry, compressed.clone()),
         FilmChunk::new(ChunkKind::Replication, stream.clone()),
         FilmChunk::new(ChunkKind::Summary, packet(9, &0u32.to_be_bytes(), 100)),
     ];
     let film = Film::parse(chunks.clone()).unwrap();
-    assert_eq!(film.registry.chunk.source_position, 1);
+    assert_eq!(film.registry.chunk.source_position, 0);
     assert_eq!(film.registry.chunk.source.data, compressed);
     assert_eq!(film.registry.chunk.data, bootstrap);
     assert_eq!(film.replication.chunks[0].source_position, 2);
@@ -78,7 +87,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
             .iter()
             .map(|c| c.source_position)
             .collect::<Vec<_>>(),
-        vec![0, 3]
+        vec![1, 3]
     );
     for (i, input) in chunks.iter().enumerate() {
         assert_eq!(&film.chunk(i).unwrap().source, input);
@@ -286,3 +295,5 @@ fn captured_v41_corpus() {
     assert_eq!(frames, 403465);
     assert_eq!(summaries, 3667);
 }
+
+use crate::theater::parser::v41::{FilmWorld, NativeEventGate15Policy, NativeFrameConfig};
