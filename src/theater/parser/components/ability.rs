@@ -1,11 +1,11 @@
 //! Predicted ability and non-predicted grapple body grammar.
 use super::Reader;
-use crate::theater::{FilmComponentObservation, NativeAbilityNonPredictedState};
+use crate::theater::parser::{FilmComponentObservation, NativeAbilityNonPredictedState};
 
 pub(super) fn predicted(r: &mut Reader<'_>) -> Option<bool> {
     let tag = r.r("tag", 2)?;
     r.publish_movement(
-        crate::theater::NativeMovementComponent::ActiveAbility,
+        crate::theater::parser::NativeMovementComponent::ActiveAbility,
         vec![tag],
     );
     let mut sub = 0;
@@ -101,7 +101,7 @@ pub(super) fn mobility(r: &mut Reader<'_>) -> Option<bool> {
     let flag = r.bit("flag")?;
     r.publish_mobility([active, flag]);
     r.publish_movement(
-        crate::theater::NativeMovementComponent::Mobility,
+        crate::theater::parser::NativeMovementComponent::Mobility,
         vec![u64::from(active), u64::from(flag)],
     );
     if !active {
@@ -143,7 +143,7 @@ fn mobility_extra(r: &mut Reader<'_>, width: i64) -> Option<bool> {
         "biped-mobility-action-component",
         width,
         false,
-        Some(crate::theater::NativeWidthPurpose::MobilityExtra),
+        Some(crate::theater::parser::NativeWidthPurpose::MobilityExtra),
         ("mobility.skipped", "mobility.skipped_tail"),
     )?;
     Some(true)

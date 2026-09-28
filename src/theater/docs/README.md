@@ -2,7 +2,9 @@
 
 The public flow is `Film::parse(&source, options) -> Film`, then
 `film.resolve() -> ResolvedFilm<'_>`. Both live under `theater`, in the `film`
-and `resolved` modules. Supporting record types describe the native data;
+and `resolved` modules. Supporting record types are public under `theater::parser` (and its submodules);
+film container types are public under `theater::film`, and resolved models under
+`theater::resolved`. Only `Film` and `ResolvedFilm` are reexported at the Theater root;
 there is no alternate legacy parser or client-side event-reporting facade.
 
 - [Format and fidelity](FORMAT.md): native structure, coordinates, unknown data.
@@ -16,7 +18,7 @@ establish timing. Network and filesystem loading belong to callers. The client
 continues to provide raw film manifests and chunk downloads.
 
 ```rust
-use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
+use halo_api::theater::{Film, film::ParseOptions, parser::{FilmSource, FilmSourceMetadata}};
 
 fn inspect(chunks: &[Vec<u8>], metadata: &[FilmSourceMetadata])
     -> Result<(), Box<dyn std::error::Error>>

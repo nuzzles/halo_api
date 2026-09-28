@@ -1,5 +1,5 @@
-//! Native-entry precision routing against independently read Go frames.
-use super::*;
+use crate::theater::film::*;
+// Native-entry precision routing against independently read Go frames.
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -73,7 +73,7 @@ fn native_data_explicit_frame_profile_d61443e() {
         let control = frame.controls.as_ref().unwrap();
         for field in &control.fields {
             assert_eq!(
-                crate::theater::bits::Bits(&payload).read(field.bit, field.width),
+                crate::theater::parser::bits::Bits(&payload).read(field.bit, field.width),
                 Some(field.raw),
                 "source field {i}: {}",
                 field.name

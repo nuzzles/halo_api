@@ -200,8 +200,8 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                 } else {
                     0
                 };
-                r.publish_reference(crate::theater::NativeUnitReference {
-                    kind: crate::theater::NativeUnitReferenceKind::GatedWord32,
+                r.publish_reference(crate::theater::parser::NativeUnitReference {
+                    kind: crate::theater::parser::NativeUnitReferenceKind::GatedWord32,
                     start_bit,
                     end_bit: r.cursor.position,
                     present,
@@ -225,13 +225,13 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                     let value = r.gated_value("player_index", 5, false)?;
                     publish_creation(
                         r,
-                        crate::theater::NativeEquipmentCreationField::Reference,
+                        crate::theater::parser::NativeEquipmentCreationField::Reference,
                         value,
                     );
                     let value = r.gated_value("ability_enabled_id", 32, true)?;
                     publish_creation(
                         r,
-                        crate::theater::NativeEquipmentCreationField::AbilityId,
+                        crate::theater::parser::NativeEquipmentCreationField::AbilityId,
                         value,
                     );
                 }
@@ -259,7 +259,7 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                     let value = r.gated_value("player_index", 5, false)?;
                     publish_creation(
                         r,
-                        crate::theater::NativeEquipmentCreationField::Reference,
+                        crate::theater::parser::NativeEquipmentCreationField::Reference,
                         value,
                     );
                 }
@@ -272,8 +272,12 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
     Some(true)
 }
 
-fn publish_mpp(r: &mut Reader<'_>, field: crate::theater::NativeMppField, value: Option<u64>) {
-    r.publish_component(crate::theater::FilmComponentObservation::Mpp {
+fn publish_mpp(
+    r: &mut Reader<'_>,
+    field: crate::theater::parser::NativeMppField,
+    value: Option<u64>,
+) {
+    r.publish_component(crate::theater::parser::FilmComponentObservation::Mpp {
         field,
         value: value.unwrap_or(0),
         present: value.is_some(),
@@ -282,11 +286,11 @@ fn publish_mpp(r: &mut Reader<'_>, field: crate::theater::NativeMppField, value:
 
 fn publish_creation(
     r: &mut Reader<'_>,
-    field: crate::theater::NativeEquipmentCreationField,
+    field: crate::theater::parser::NativeEquipmentCreationField,
     value: Option<u64>,
 ) {
     r.publish_component(
-        crate::theater::FilmComponentObservation::EquipmentCreation {
+        crate::theater::parser::FilmComponentObservation::EquipmentCreation {
             field,
             value: value.unwrap_or(0),
             present: value.is_some(),
@@ -317,11 +321,23 @@ fn mpp_field(r: &mut Reader<'_>, lead: bool, fallback: usize) -> Option<u64> {
 
 fn multiplayer(r: &mut Reader<'_>, widths: [usize; 2]) -> Option<()> {
     let value = mpp_field(r, true, widths[0])?;
-    publish_mpp(r, crate::theater::NativeMppField::Word9, Some(value));
+    publish_mpp(
+        r,
+        crate::theater::parser::NativeMppField::Word9,
+        Some(value),
+    );
     let value = r.r("mpp.object_tag", 32)?;
-    publish_mpp(r, crate::theater::NativeMppField::Word32, Some(value));
+    publish_mpp(
+        r,
+        crate::theater::parser::NativeMppField::Word32,
+        Some(value),
+    );
     let value = r.gated_value("mpp.variant_name", 32, false)?;
-    publish_mpp(r, crate::theater::NativeMppField::VariantName, value);
+    publish_mpp(
+        r,
+        crate::theater::parser::NativeMppField::VariantName,
+        value,
+    );
     r.gate("mpp.value18", 18, true)?;
     r.gate("mpp.value13", 13, true)?;
     r.r("mpp.kind", 2)?;
@@ -340,11 +356,15 @@ fn multiplayer(r: &mut Reader<'_>, widths: [usize; 2]) -> Option<()> {
     }
     if r.bit("mpp.tail.present")? {
         let value = r.r("mpp.tail.name", 32)?;
-        publish_mpp(r, crate::theater::NativeMppField::TailName, Some(value));
+        publish_mpp(
+            r,
+            crate::theater::parser::NativeMppField::TailName,
+            Some(value),
+        );
         r.optional_word_reference("mpp.tail.reference", true)?;
         r.r("mpp.tail.fraction", 14)?;
     } else {
-        publish_mpp(r, crate::theater::NativeMppField::TailName, None);
+        publish_mpp(r, crate::theater::parser::NativeMppField::TailName, None);
     }
     Some(())
 }

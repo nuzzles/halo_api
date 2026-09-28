@@ -1,119 +1,166 @@
-//! Private native v41 readers.
-pub(crate) mod anticipated_bindings;
+//! Native v41 record models and parser support.
+//! Use `Film::parse` from the parent module to parse a recording.
+pub mod anticipated_bindings;
 pub(crate) use anticipated_bindings::*;
 pub(crate) mod bits;
-pub(crate) mod bootstrap;
+pub mod bootstrap;
 pub(crate) use bootstrap::*;
-pub(crate) mod bot_metadata;
+pub mod bot_metadata;
 pub(crate) use bot_metadata::*;
-pub(crate) mod chain_inference;
-pub(crate) mod components;
+pub mod chain_inference;
+pub mod components;
 pub(crate) use components::*;
 #[cfg(test)]
 pub(crate) mod control_verdict;
-pub(crate) mod datums;
+pub mod datums;
 pub(crate) use datums::*;
-pub(crate) mod event_heads;
+pub mod event_heads;
 pub(crate) use event_heads::*;
-pub(crate) mod fire_events;
+pub mod fire_events;
 pub(crate) use fire_events::*;
-pub(crate) mod head_observations;
+pub mod head_observations;
 pub(crate) use head_observations::*;
-pub(crate) mod highlight_events;
+pub mod highlight_events;
 pub(crate) use highlight_events::*;
-pub(crate) mod kill_decode;
+pub mod kill_decode;
 pub(crate) use kill_decode::*;
-pub(crate) mod kill_event_chain;
+pub mod kill_event_chain;
 pub(crate) use kill_event_chain::*;
-pub(crate) mod medals;
-pub(crate) mod native_context;
+pub mod medals;
+pub mod native_context;
 pub(crate) use native_context::*;
-pub(crate) mod native_event_gate;
+pub mod native_event_gate;
 pub(crate) use native_event_gate::*;
-pub(crate) mod native_identity;
+pub mod native_identity;
 pub(crate) use native_identity::*;
-pub(crate) mod native_march;
-pub(crate) mod native_packet_heads;
+pub mod native_march;
+pub mod native_packet_heads;
 pub(crate) use native_packet_heads::*;
-pub(crate) mod native_pickups;
+pub mod native_pickups;
 pub(crate) use native_pickups::*;
-pub(crate) mod native_profile;
+pub mod native_profile;
 pub(crate) use native_profile::*;
-pub(crate) mod native_reader;
+pub mod native_reader;
 pub(crate) use native_reader::*;
-pub(crate) mod native_scan_profile;
+pub mod native_scan_profile;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) mod native_sort;
-pub(crate) mod native_weapon_damage;
+pub mod native_weapon_damage;
 pub(crate) use native_weapon_damage::*;
-pub(crate) mod native_zoom;
+pub mod native_zoom;
 pub(crate) use native_zoom::*;
-pub(crate) mod objective_extract;
+pub mod objective_extract;
 pub(crate) use objective_extract::*;
-pub(crate) mod player_table;
+pub mod player_table;
 pub(crate) use player_table::*;
-pub(crate) mod position_capture;
+pub mod position_capture;
 pub(crate) use position_capture::*;
-pub(crate) mod production_frame;
-pub(crate) mod profile;
+pub mod production_frame;
+pub mod profile;
 pub(crate) use profile::*;
-pub(crate) mod profile_table;
+pub mod profile_table;
 pub(crate) use profile_table::*;
-pub(crate) mod profile_values;
+pub mod profile_values;
 pub(crate) use profile_values::*;
-pub(crate) mod read_diagnostics;
-pub(crate) mod records;
+pub mod read_diagnostics;
+pub mod records;
 pub(crate) use records::*;
-pub(crate) mod recovery;
+pub mod recovery;
 pub(crate) use recovery::*;
-pub(crate) mod registry;
+pub mod registry;
 pub(crate) use registry::*;
-pub(crate) mod replication;
-pub(crate) mod roster_updates;
+pub mod replication;
+pub mod roster_updates;
 pub(crate) use roster_updates::*;
-pub(crate) mod source;
-pub(crate) mod source_bits;
+pub mod source;
+pub mod source_bits;
 pub(crate) use source_bits::*;
-pub(crate) mod summary;
-pub(crate) mod translocator;
+pub mod summary;
+pub mod translocator;
 pub(crate) use translocator::*;
-pub(crate) mod types;
+pub mod types;
 pub(crate) use types::*;
-pub(crate) mod unit_equipment;
-pub(crate) mod unit_references;
-pub(crate) mod weapon_hit_scan;
-pub(crate) mod weapon_hits;
-pub(crate) mod world;
+pub mod unit_equipment;
+pub mod unit_references;
+pub mod weapon_hit_scan;
+pub mod weapon_hits;
+pub mod world;
 pub(crate) use world::*;
 
 pub use anticipated_bindings::AnticipatedDeclaration;
 pub use bootstrap::FilmIdentity;
+pub use bot_metadata::{FilmBotEntry, NativeBotCandidate, NativeBotMetadataRead};
+pub use chain_inference::ChainInferenceOutcome;
 pub use components::{
-    ComponentField, DecodedFrameView, EntityRecord, EntityViewStop, FrameViewStop, KeyframeRecord,
+    BindingOrigin, ComponentField, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan,
+    EntityRecord, EntityViewStop, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop,
+    KeyframeComponentSpan, KeyframeRecord, KeyframeStop, NativeActionBlock, NativeControlEntry,
     NativeKeyframeTable,
 };
-pub use event_heads::{DecodedHeadEvent, EventReference};
+pub use datums::{DatumEntry, DatumTable};
+pub use event_heads::{
+    DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
+};
+pub use fire_events::{
+    FilmFireEvent, FireUnitReference, NativeFireAimAttempt, NativeFireAimMethod, NativeFireAimStop,
+    NativeFireField, NativeFireHeaderStop, NativeFireRead,
+};
+pub use highlight_events::{
+    NativeHighlightEvent, NativeHighlightIdentityRead, NativeHighlightScan, NativeHighlightTailRead,
+};
+pub use kill_event_chain::{
+    KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
+    NativeEventListRead, NativeEventListStop, NativeEventRecord,
+};
 pub use medals::MedalAward;
-pub use native_pickups::NativePickupRead;
-pub use native_profile::{NativeMovementProfile, NativeProfileResolveError};
-pub use native_scan_profile::{NativeKeyframeLayout, NativeScanGrammar, NativeScanProfile};
+pub use native_context::NativeContextRegistryError;
+pub use native_event_gate::{NativeEventGate15Policy, NativeEventGate15Selection};
+pub use native_identity::{NativeIdentityField, NativeIdentityRead, NativeIdentityValue};
+pub use native_march::NativeFrameMetadata;
+pub use native_packet_heads::NativePacketHeadRead;
+pub use native_pickups::{NativePickupOutcome, NativePickupRead};
+pub use native_profile::{
+    NativeMovementProfile, NativePrecisionDescriptor, NativeProfileResolveError,
+};
+pub use native_scan_profile::{
+    NativeKeyframeLayout, NativeScanGrammar, NativeScanProfile, NativeSharedWidths,
+};
+pub use native_weapon_damage::{NativeWeaponDamageField, NativeWeaponDamageRead};
 pub use native_zoom::NativeZoomRead;
 pub use objective_extract::ObjectiveFooterEvent;
-pub use player_table::{NativeSlotField, PlayerTableSlot};
-pub use production_frame::ProductionFrame;
+pub use player_table::{
+    NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTable, PlayerTableError,
+    PlayerTableReport, PlayerTableShorts, PlayerTableSlot,
+};
+pub use position_capture::NativePositionKind;
+pub use production_frame::{ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame};
 pub use profile::FilmMapBounds;
 pub use profile_values::{FilmMppWidths, FilmQuantizationRange};
 pub use read_diagnostics::{
-    FilmComponentObservation, FilmReadDiagnostics, NativeCamoState, NativeManagedPropertyField,
-    NativeObjectParentState, NativeReadOperation, NativeReadRefusal, NativeWidthRefusal,
+    FilmComponentObservation, FilmReadDiagnostics, NativeAbilityNonPredictedState, NativeCamoState,
+    NativeEquipmentCreationField, NativeEquipmentField, NativeGameEngineField,
+    NativeManagedObjectField, NativeManagedPropertyField, NativeMovementComponent, NativeMppField,
+    NativeNavpointField, NativeObjectParentState, NativeObjectiveField, NativePlayerStateField,
+    NativeProbeComponent, NativeReadOperation, NativeReadRefusal, NativeWidthAdjustment,
+    NativeWidthPurpose, NativeWidthRefusal,
 };
 pub use records::{RecordHeader, RecordKind};
-pub use registry::{FilmRegistry, FilmRegistryRead, FilmRegistryReadError};
-pub use source::FilmSource;
-pub use translocator::NativeTranslocatorEvent;
+pub use recovery::{AnchorRecovery, RecoveredKeyframeAnchor};
+pub use registry::{
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
+    NativeRegistrySlotRead,
+};
+pub use replication::KeyframeRecoveryPolicy;
+pub use roster_updates::{NativeRosterRead, RosterEntry, RosterReport, RosterUpdate};
+pub use source::{
+    FilmChunkProvider, FilmInflateError, FilmSource, FilmSourceError, FilmSourceMetadata,
+};
+pub use translocator::{
+    NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
+};
 pub use types::{FilmPacket, SourceSpan, SummaryEvent, SummaryKind};
 pub use unit_equipment::{UnitEquipmentEntry, UnitEquipmentRead};
 pub use unit_references::{NativeUnitReference, NativeUnitReferenceKind};
 pub use weapon_hit_scan::WeaponDamageRead;
 pub use weapon_hits::WeaponDamage;
-pub use world::FilmViewAdmission;
+pub use world::{FilmViewAdmission, NativeNewBindingRefusal};

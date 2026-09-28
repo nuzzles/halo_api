@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// A known film-code mapping. Metadata fields are absent for medals missing from the CMS snapshot.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct FilmMedalDefinition {
+pub struct FilmMedalDefinition {
     pub film_id: u8,
     pub name: &'static str,
     pub name_id: Option<u32>,

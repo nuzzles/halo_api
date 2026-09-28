@@ -2,7 +2,9 @@
 use super::{
     FrameEncoding, KeyframeRecord, KeyframeStop, decode_native_keyframe_record_contextual,
 };
-use crate::theater::{FilmReadDiagnostics, FilmRegistry, NativeReaderContext, native_bits_at};
+use crate::theater::parser::{
+    FilmReadDiagnostics, FilmRegistry, NativeReaderContext, native_bits_at,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

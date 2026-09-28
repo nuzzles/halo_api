@@ -73,7 +73,9 @@ fn weapon(r: &mut Reader<'_>) -> Option<()> {
     r.r("tail_state", 3)?;
     r.gate("tail_a", 2, false)?;
     r.gate("tail_b", 2, false)?;
-    r.publish_component(crate::theater::FilmComponentObservation::HeldWeapon { id_high, id_low });
+    r.publish_component(
+        crate::theater::parser::FilmComponentObservation::HeldWeapon { id_high, id_low },
+    );
     Some(())
 }
 

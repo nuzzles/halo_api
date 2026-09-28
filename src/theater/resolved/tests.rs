@@ -1,6 +1,7 @@
 use super::*;
-use crate::theater::{
-    EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader, film::ParseOptions,
+use crate::theater::film::*;
+use crate::theater::parser::{
+    EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader,
 };
 
 fn recording() -> Film {
@@ -249,7 +250,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
 
 #[test]
 fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() {
-    use crate::theater::{KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable};
+    use crate::theater::parser::{KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable};
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
     keyframe.body = NativeFilmPacketBody::Keyframes(NativeKeyframeTable {
@@ -305,7 +306,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
     if let NativeFilmPacketBody::Frame(frame) = &mut rejected.body {
         frame.header_diagnostics.new_binding_refusals.push(
-            crate::theater::NativeNewBindingRefusal {
+            crate::theater::parser::NativeNewBindingRefusal {
                 record_bit: 2,
                 id,
                 slot: 7,
@@ -330,7 +331,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
     if let NativeFilmPacketBody::Frame(frame) = &mut p.body {
-        frame.controls = Some(crate::theater::DecodedFrameView {
+        frame.controls = Some(crate::theater::parser::DecodedFrameView {
             control_entries: vec![NativeControlEntry {
                 start_bit: 2040,
                 end_bit: 2050,
@@ -349,7 +350,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
             padded_bits: 2,
             kinds: vec![0],
             fields: vec![],
-            stop: crate::theater::FrameViewStop::Truncated,
+            stop: crate::theater::parser::FrameViewStop::Truncated,
         });
     }
     film.chunks[1].packets = vec![p];
@@ -377,7 +378,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
 
 #[test]
 fn resolved_recovery_candidates_never_create_world_entities() {
-    use crate::theater::{AnchorRecovery, NativeKeyframeCandidate, RecoveredKeyframeAnchor};
+    use crate::theater::parser::{AnchorRecovery, RecoveredKeyframeAnchor};
     let mut film = recording();
     let mut p = packet(&film, 10, vec![]);
     p.body = NativeFilmPacketBody::Opaque;

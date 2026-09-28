@@ -1,7 +1,7 @@
 //! Sequential replication views and generation-aware entity bindings.
 use super::Cursor;
 use super::{ComponentField, PositionEncoding, Reader, defaults};
-use crate::theater::{
+use crate::theater::parser::{
     FilmRegistry, RecordHeader, RecordIdLayout, RecordKind, decode_record_header,
 };
 use serde::{Deserialize, Serialize};
@@ -77,7 +77,7 @@ pub(crate) struct FrameEncoding {
     #[serde(default, skip_serializing_if = "NewRecordEncoding::is_default")]
     pub new_record: NewRecordEncoding,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub position_capture: Option<crate::theater::PositionCaptureEncoding>,
+    pub position_capture: Option<crate::theater::parser::PositionCaptureEncoding>,
     /// Original signed native ID width; admitted only after a non-End prefix.
     /// None uses ids.low_bits. Native readers still use wrapping slot arithmetic;
     /// the public bounded header reader retains its checked contract.
@@ -161,7 +161,7 @@ pub enum EntityViewStop {
     Truncated,
     InvalidEncoding,
     InvalidWidthOverride {
-        adjustment: Box<crate::theater::NativeWidthAdjustment>,
+        adjustment: Box<crate::theater::parser::NativeWidthAdjustment>,
     },
     InvalidArchetype {
         archetype: u32,
@@ -213,12 +213,12 @@ pub struct EntityComponentAttempt {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EntityRecord {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub references: Vec<crate::theater::NativeUnitReference>,
+    pub references: Vec<crate::theater::parser::NativeUnitReference>,
     #[serde(
         default,
-        skip_serializing_if = "crate::theater::FilmReadDiagnostics::is_empty"
+        skip_serializing_if = "crate::theater::parser::FilmReadDiagnostics::is_empty"
     )]
-    pub diagnostics: crate::theater::FilmReadDiagnostics,
+    pub diagnostics: crate::theater::parser::FilmReadDiagnostics,
     pub header: RecordHeader,
     pub archetype: Option<u32>,
     /// Configured signed width returned as native New Trace.DefaultBits, even
@@ -247,7 +247,7 @@ pub struct EntityRecord {
 
 /// Native locator trials suppress movement independently of position capture.
 pub(crate) struct RecordCaptureSlots {
-    pub context: Option<crate::theater::NativeReaderContext>,
+    pub context: Option<crate::theater::parser::NativeReaderContext>,
     pub movement: Option<u32>,
     pub position: Option<u32>,
 }
@@ -363,7 +363,7 @@ fn read_entity_record(
                 "record.prefix",
                 32,
                 false,
-                Some(crate::theater::NativeWidthPurpose::RecordPrefix),
+                Some(crate::theater::parser::NativeWidthPurpose::RecordPrefix),
                 ("record.prefix", "record.prefix"),
             )?;
         } else {
@@ -418,7 +418,7 @@ fn read_entity_record(
     .unwrap_or(EntityViewStop::Truncated);
     rec.end_bit = r.cursor.position;
     rec.padded_bits =
-        crate::theater::bits::padded_from_native(rec.end_bit, data.len().saturating_mul(8));
+        crate::theater::parser::bits::padded_from_native(rec.end_bit, data.len().saturating_mul(8));
     rec.fields = std::mem::take(&mut r.fields);
     rec.references = std::mem::take(&mut r.references);
     rec.diagnostics = std::mem::take(&mut r.diagnostics);
@@ -496,7 +496,7 @@ fn record_body(
                     width,
                     "new.default_skipped",
                     "new default state",
-                    crate::theater::NativeWidthPurpose::NewRecordDefault,
+                    crate::theater::parser::NativeWidthPurpose::NewRecordDefault,
                 )?;
             } else {
                 read_new_raw_bits(
@@ -605,7 +605,7 @@ fn read_native_new_tail(r: &mut Reader<'_>, width: i64) -> Option<()> {
         width,
         "new.terminal",
         "new record tail",
-        crate::theater::NativeWidthPurpose::NewRecordTail,
+        crate::theater::parser::NativeWidthPurpose::NewRecordTail,
     )
 }
 
@@ -614,7 +614,7 @@ fn read_native_new_skip(
     width: i64,
     name: &str,
     _field: &'static str,
-    purpose: crate::theater::NativeWidthPurpose,
+    purpose: crate::theater::parser::NativeWidthPurpose,
 ) -> Option<()> {
     super::widths::signed_skip(
         r,

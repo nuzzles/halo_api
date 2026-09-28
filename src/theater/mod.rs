@@ -2,11 +2,13 @@
 //!
 //! Parse once, then borrow the recording for queries and playback:
 //! ```no_run
-//! use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
+//! use halo_api::theater::{Film, film::ParseOptions, parser::{FilmSource, FilmSourceMetadata}};
 //! # fn example(chunks: &[Vec<u8>], metadata: &[FilmSourceMetadata]) -> Result<(), Box<dyn std::error::Error>> {
 //! let source = FilmSource::load(chunks, metadata)?;
 //! let film = Film::parse(&source, ParseOptions::default())?;
 //! let mut resolved = film.resolve();
+//! let _: &[halo_api::theater::film::NativeFilmChunk] = &film.chunks;
+//! let _: &[halo_api::theater::resolved::Event] = resolved.events();
 //! assert!(std::ptr::eq(resolved.film(), &film));
 //! let world = resolved.seek(10_000_000);
 //! # Ok(())
@@ -20,10 +22,13 @@
 //! ```compile_fail
 //! use halo_api::clients::hi::film::FilmEventReport;
 //! ```
+//! Supporting models are public through their modules, not reexported at the root:
+//! ```compile_fail
+//! use halo_api::theater::FilmSource;
+//! ```
 //! See the module's `docs/` directory for format, fidelity and validation.
 pub mod film;
-mod parser;
+pub mod parser;
 pub mod resolved;
-pub use film::*;
-pub(crate) use parser::*;
+pub use film::Film;
 pub use resolved::ResolvedFilm;

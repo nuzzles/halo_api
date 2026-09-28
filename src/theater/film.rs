@@ -1,88 +1,5 @@
 //! Recording-only entry. Parsing stops are data, not discarded packets.
-pub use super::parser::anticipated_bindings::AnticipatedDeclaration;
-pub use super::parser::bootstrap::FilmIdentity;
-pub use super::parser::bot_metadata::{FilmBotEntry, NativeBotCandidate, NativeBotMetadataRead};
-pub use super::parser::chain_inference::ChainInferenceOutcome;
-pub use super::parser::components::{
-    BindingOrigin, ComponentField, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan,
-    EntityRecord, EntityViewStop, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop,
-    KeyframeComponentSpan, KeyframeRecord, KeyframeStop, NativeActionBlock, NativeControlEntry,
-    NativeKeyframeTable,
-};
-pub use super::parser::datums::{DatumEntry, DatumTable};
-pub use super::parser::event_heads::{
-    DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
-};
-pub use super::parser::fire_events::{
-    FilmFireEvent, FireUnitReference, NativeFireAimAttempt, NativeFireAimMethod, NativeFireAimStop,
-    NativeFireField, NativeFireHeaderStop, NativeFireRead,
-};
-pub use super::parser::highlight_events::{
-    NativeHighlightEvent, NativeHighlightIdentityRead, NativeHighlightScan, NativeHighlightTailRead,
-};
-pub use super::parser::kill_event_chain::{
-    KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
-    NativeEventListRead, NativeEventListStop, NativeEventRecord,
-};
-pub use super::parser::medals::MedalAward;
-pub use super::parser::native_context::NativeContextRegistryError;
-pub use super::parser::native_event_gate::{NativeEventGate15Policy, NativeEventGate15Selection};
-pub use super::parser::native_identity::{
-    NativeIdentityField, NativeIdentityRead, NativeIdentityValue,
-};
-pub use super::parser::native_march::NativeFrameMetadata;
-pub use super::parser::native_packet_heads::NativePacketHeadRead;
-pub use super::parser::native_pickups::{NativePickupOutcome, NativePickupRead};
-pub use super::parser::native_profile::{
-    NativeMovementProfile, NativePrecisionDescriptor, NativeProfileResolveError,
-};
-pub use super::parser::native_scan_profile::{
-    NativeKeyframeLayout, NativeScanGrammar, NativeScanProfile, NativeSharedWidths,
-};
-pub use super::parser::native_weapon_damage::{NativeWeaponDamageField, NativeWeaponDamageRead};
-pub use super::parser::native_zoom::NativeZoomRead;
-pub use super::parser::objective_extract::ObjectiveFooterEvent;
-pub use super::parser::player_table::{
-    NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTable, PlayerTableError,
-    PlayerTableReport, PlayerTableShorts, PlayerTableSlot,
-};
-pub use super::parser::position_capture::NativePositionKind;
-pub use super::parser::production_frame::{
-    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
-};
-pub use super::parser::profile::FilmMapBounds;
-pub use super::parser::profile_values::{FilmMppWidths, FilmQuantizationRange};
-pub use super::parser::read_diagnostics::{
-    FilmComponentObservation, FilmReadDiagnostics, NativeAbilityNonPredictedState, NativeCamoState,
-    NativeEquipmentCreationField, NativeEquipmentField, NativeGameEngineField,
-    NativeManagedObjectField, NativeManagedPropertyField, NativeMovementComponent, NativeMppField,
-    NativeNavpointField, NativeObjectParentState, NativeObjectiveField, NativePlayerStateField,
-    NativeProbeComponent, NativeReadOperation, NativeReadRefusal, NativeWidthAdjustment,
-    NativeWidthPurpose, NativeWidthRefusal,
-};
-pub use super::parser::records::{RecordHeader, RecordKind};
-pub use super::parser::recovery::{AnchorRecovery, RecoveredKeyframeAnchor};
-pub use super::parser::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
-    NativeRegistrySlotRead,
-};
-pub use super::parser::replication::KeyframeRecoveryPolicy;
-pub use super::parser::roster_updates::{
-    NativeRosterRead, RosterEntry, RosterReport, RosterUpdate,
-};
-pub use super::parser::source::{
-    FilmChunkProvider, FilmInflateError, FilmSource, FilmSourceError, FilmSourceMetadata,
-};
-pub use super::parser::translocator::{
-    NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
-};
-pub use super::parser::types::{FilmPacket, SourceSpan, SummaryEvent, SummaryKind};
-pub use super::parser::unit_equipment::{UnitEquipmentEntry, UnitEquipmentRead};
-pub use super::parser::unit_references::{NativeUnitReference, NativeUnitReferenceKind};
-pub use super::parser::weapon_hit_scan::WeaponDamageRead;
-pub use super::parser::weapon_hits::WeaponDamage;
-pub use super::parser::world::{FilmViewAdmission, NativeNewBindingRefusal};
-use super::*;
+use super::parser::*;
 use serde::{Deserialize, Serialize};
 
 /// Native reads together with the complete decompressed source they address.
@@ -1228,7 +1145,7 @@ mod tests {
                             if let (Some(start), Some(bytes)) = (tail.data_start_bit, &tail.data) {
                                 for (i, byte) in bytes.iter().enumerate() {
                                     assert_eq!(
-                                        super::super::bits::Bits(&chunk.data)
+                                        crate::theater::parser::bits::Bits(&chunk.data)
                                             .read(start + i * 8, 8),
                                         Some(u64::from(*byte))
                                     );

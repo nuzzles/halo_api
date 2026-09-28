@@ -226,13 +226,13 @@ pub struct NativeAbilityNonPredictedState {
 pub enum FilmComponentObservation {
     /// IEEE-754 bits retain exact native values, including non-finite values.
     Position {
-        position_kind: crate::theater::NativePositionKind,
+        position_kind: crate::theater::parser::NativePositionKind,
         vector_bits: [u32; 3],
         bit: i64,
         slot: u32,
     },
     UnitReference {
-        reference: crate::theater::NativeUnitReference,
+        reference: crate::theater::parser::NativeUnitReference,
     },
     MovementState {
         component: NativeMovementComponent,
@@ -294,7 +294,7 @@ pub enum FilmComponentObservation {
         state: Box<NativeObjectParentState>,
     },
     UnitEquipment {
-        state: Box<crate::theater::UnitEquipmentRead>,
+        state: Box<crate::theater::parser::UnitEquipmentRead>,
     },
     CamoState {
         state: Box<NativeCamoState>,
@@ -407,7 +407,7 @@ pub enum NativeReadOperation {
 pub struct FilmReadDiagnostics {
     /// Native NEW binding refusals, in read order; parsed records are retained.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub new_binding_refusals: Vec<crate::theater::NativeNewBindingRefusal>,
+    pub new_binding_refusals: Vec<crate::theater::parser::NativeNewBindingRefusal>,
     /// Reads assuming vehicle object byte +0x818 is set, as in LevelUp d61443e.
     /// This byte is runtime state, not a recorded presence bit. Counts include
     /// refused attempts and are kept separate from raw component fields.
@@ -422,7 +422,7 @@ pub struct FilmReadDiagnostics {
     pub repaired_records: u64,
     pub validated_resyncs: u64,
     pub component_widths: BTreeMap<String, BTreeMap<usize, u64>>,
-    pub chain_outcomes: BTreeMap<crate::theater::ChainInferenceOutcome, u64>,
+    pub chain_outcomes: BTreeMap<crate::theater::parser::ChainInferenceOutcome, u64>,
     pub rejected_unbound: u64,
     pub rejected_other_view: u64,
     pub anticipated_bindings: BTreeMap<u32, u64>,

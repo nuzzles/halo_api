@@ -3,7 +3,11 @@
 mod common;
 
 use halo_api::clients::hi::models::{FilmChunk, FilmChunkData};
-use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
+use halo_api::theater::{
+    Film,
+    film::ParseOptions,
+    parser::{FilmSource, FilmSourceMetadata},
+};
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {

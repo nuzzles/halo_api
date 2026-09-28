@@ -2,7 +2,7 @@
 //! not the presence masks used by delta records.
 use super::Cursor;
 use super::{ComponentField, PositionEncoding, Reader, defaults};
-use crate::theater::FilmRegistry;
+use crate::theater::parser::FilmRegistry;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -38,12 +38,12 @@ pub struct KeyframeComponentSpan {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct KeyframeRecord {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub references: Vec<crate::theater::NativeUnitReference>,
+    pub references: Vec<crate::theater::parser::NativeUnitReference>,
     #[serde(
         default,
-        skip_serializing_if = "crate::theater::FilmReadDiagnostics::is_empty"
+        skip_serializing_if = "crate::theater::parser::FilmReadDiagnostics::is_empty"
     )]
-    pub diagnostics: crate::theater::FilmReadDiagnostics,
+    pub diagnostics: crate::theater::parser::FilmReadDiagnostics,
     pub start_bit: i64,
     pub end_bit: i64,
     pub id: u32,
@@ -64,7 +64,7 @@ pub(crate) fn decode_native_keyframe_record_contextual(
     bit: impl TryInto<i64>,
     registry: &FilmRegistry,
     encoding: &super::FrameEncoding,
-    context: Option<&crate::theater::NativeReaderContext>,
+    context: Option<&crate::theater::parser::NativeReaderContext>,
 ) -> Option<KeyframeRecord> {
     decode_keyframe_record_inner(
         data,
@@ -93,11 +93,11 @@ fn decode_keyframe_record_inner(
     corruption_check: bool,
     policy: (
         bool,
-        Option<&crate::theater::PositionCaptureEncoding>,
+        Option<&crate::theater::parser::PositionCaptureEncoding>,
         Option<&super::ComponentWidthOverrides>,
         bool,
         super::KeyframeLayout,
-        Option<&crate::theater::NativeReaderContext>,
+        Option<&crate::theater::parser::NativeReaderContext>,
     ),
 ) -> Option<KeyframeRecord> {
     let (padded, capture_encoding, component_widths, simulation_complete, layout, context) = policy;
@@ -144,8 +144,9 @@ fn decode_keyframe_record_inner(
         position_encoding: encoding,
     };
     let (id, archetype) = if padded {
-        let archetype = crate::theater::native_bits_at(data, bit.wrapping_add(58), 6) as u32;
-        let id = crate::theater::native_bits_tolerant(data, bit, 32) as u32;
+        let archetype =
+            crate::theater::parser::native_bits_at(data, bit.wrapping_add(58), 6) as u32;
+        let id = crate::theater::parser::native_bits_tolerant(data, bit, 32) as u32;
         let mut remaining = header_bits.max(64);
         for (name, width) in [
             ("header.id", 32),
@@ -160,7 +161,11 @@ fn decode_keyframe_record_inner(
                     name: name.into(),
                     bit: r.cursor.position,
                     width: width as u64,
-                    raw: crate::theater::native_bits_tolerant(data, r.cursor.position, width),
+                    raw: crate::theater::parser::native_bits_tolerant(
+                        data,
+                        r.cursor.position,
+                        width,
+                    ),
                 });
                 r.cursor.skip_signed(width);
                 remaining -= width;

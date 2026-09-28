@@ -2,10 +2,10 @@
 //!
 //! This layer accumulates raw recorded component state. It does not infer physical
 //! actions, interpolate movement, or promote recovery candidates into entities.
-use super::{
-    ComponentField, EntityRecord, EntityViewStop, Film, KeyframeRecord, KeyframeStop,
-    NativeContinuationStatePolicy, NativeControlEntry, NativeEventRecord, NativeFilmPacket,
-    NativeFilmPacketBody, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
+use super::film::{Film, NativeContinuationStatePolicy, NativeFilmPacket, NativeFilmPacketBody};
+use super::parser::{
+    ComponentField, EntityRecord, EntityViewStop, KeyframeRecord, KeyframeStop, NativeControlEntry,
+    NativeEventRecord, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
 };
 use std::{collections::BTreeMap, sync::Arc};
 
@@ -206,7 +206,10 @@ pub struct ResolvedFilm<'film> {
     events: Arc<Vec<Event>>,
     query_indices: Arc<QueryIndices>,
     checkpoints: Arc<Vec<Checkpoint>>,
-    players: BTreeMap<usize, usize>,
+    /// Recorded film player index -> position in `film.player_table.slots`.
+    /// Recorded indices may differ from vector positions. This indexes the
+    /// bootstrap roster without copying it; it does not resolve entity ownership.
+    player_slot_by_film_index: BTreeMap<usize, usize>,
     world: WorldSnapshot,
     next_event: usize,
     timestamp_us: Option<u64>,
@@ -234,7 +237,7 @@ impl<'film> ResolvedFilm<'film> {
             .player_table
             .as_ref()?
             .slots
-            .get(*self.players.get(&film_index)?)
+            .get(*self.player_slot_by_film_index.get(&film_index)?)
     }
     pub fn record(&self, source: SourceRef) -> Option<Record<'_>> {
         record(self.film, source)
@@ -357,7 +360,7 @@ impl<'film> ResolvedFilm<'film> {
                 });
             }
         }
-        let players = film
+        let player_slot_by_film_index = film
             .player_table
             .as_ref()
             .map(|p| {
@@ -373,7 +376,7 @@ impl<'film> ResolvedFilm<'film> {
             query_indices: Arc::new(QueryIndices::new(&events)),
             events: Arc::new(events),
             checkpoints: Arc::new(checkpoints),
-            players,
+            player_slot_by_film_index,
             world: WorldSnapshot::default(),
             next_event: 0,
             timestamp_us: None,

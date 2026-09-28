@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 Parse v41 recordings once, then borrow an indexed view for queries and playback:
 
 ```rust,no_run
-use halo_api::theater::{Film, FilmSource, FilmSourceMetadata, film::ParseOptions};
+use halo_api::theater::{Film, film::ParseOptions, parser::{FilmSource, FilmSourceMetadata}};
 # fn example(chunks: &[Vec<u8>], metadata: &[FilmSourceMetadata]) -> Result<(), Box<dyn std::error::Error>> {
 let source = FilmSource::load(chunks, metadata)?;
 let film = Film::parse(&source, ParseOptions::default())?;

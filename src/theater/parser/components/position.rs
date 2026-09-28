@@ -1,6 +1,6 @@
 //! Position bit grammar from LevelUp components_position_i0.go.
 use super::Reader;
-use crate::theater::position_capture::native_shift_one;
+use crate::theater::parser::position_capture::native_shift_one;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -98,8 +98,12 @@ pub(super) fn traversal_payload(r: &mut Reader<'_>) -> Option<()> {
 }
 
 impl Reader<'_> {
-    fn emit_position(&mut self, kind: crate::theater::NativePositionKind, mut vector: [f32; 3]) {
-        use crate::theater::NativePositionKind as K;
+    fn emit_position(
+        &mut self,
+        kind: crate::theater::parser::NativePositionKind,
+        mut vector: [f32; 3],
+    ) {
+        use crate::theater::parser::NativePositionKind as K;
         let Some(capture) = self.position_capture.as_mut() else {
             return;
         };
@@ -124,7 +128,7 @@ impl Reader<'_> {
             world.set_position(capture.slot, vector);
         }
         if capture.emit {
-            self.publish_component(crate::theater::FilmComponentObservation::Position {
+            self.publish_component(crate::theater::parser::FilmComponentObservation::Position {
                 position_kind: kind,
                 vector_bits: vector.map(f32::to_bits),
                 bit: self.position_start,
@@ -146,9 +150,9 @@ impl Reader<'_> {
         });
         self.emit_position(
             if self.position_fallback {
-                crate::theater::NativePositionKind::AbsoluteFallback
+                crate::theater::parser::NativePositionKind::AbsoluteFallback
             } else {
-                crate::theater::NativePositionKind::Absolute
+                crate::theater::parser::NativePositionKind::Absolute
             },
             vector,
         );
@@ -176,7 +180,10 @@ pub(super) fn component(r: &mut Reader<'_>) -> Option<bool> {
     if predicted {
         let handle = r.bit("has_handle")?;
         r.words("baseline_vector_bits", 3, 32)?;
-        r.emit_position(crate::theater::NativePositionKind::Baseline, [0.; 3]);
+        r.emit_position(
+            crate::theater::parser::NativePositionKind::Baseline,
+            [0.; 3],
+        );
         handle_tail(r, handle, encoding)?;
         return Some(true);
     }
@@ -198,7 +205,10 @@ pub(super) fn component(r: &mut Reader<'_>) -> Option<bool> {
     if !r.bit("predicted_absolute")? {
         if encoding.full_precision_gate() {
             r.words("baseline_vector_bits", 3, 32)?;
-            r.emit_position(crate::theater::NativePositionKind::Baseline, [0.; 3]);
+            r.emit_position(
+                crate::theater::parser::NativePositionKind::Baseline,
+                [0.; 3],
+            );
         } else if r.bit("absolute_fallback")? {
             r.position_fallback = true;
             let result = absolute(r, encoding);
@@ -210,7 +220,7 @@ pub(super) fn component(r: &mut Reader<'_>) -> Option<bool> {
             for (i, v) in d.iter_mut().enumerate() {
                 *v = r.r(&format!("delta_signed8[{i}]"), 8)? as u8 as i8 as f32 * quantum;
             }
-            r.emit_position(crate::theater::NativePositionKind::Delta8, d);
+            r.emit_position(crate::theater::parser::NativePositionKind::Delta8, d);
         } else {
             let mut d = [0.; 3];
             let quantum = r.position_capture.as_ref().map_or(0., |c| c.quantum);
@@ -228,7 +238,7 @@ pub(super) fn component(r: &mut Reader<'_>) -> Option<bool> {
                 let q = r.r_wide(&format!("delta[{i}]"), width)?;
                 d[i] = (q as f32 - native_shift_one(width.wrapping_sub(1)) as f32) * quantum;
             }
-            r.emit_position(crate::theater::NativePositionKind::DeltaAxis, d);
+            r.emit_position(crate::theater::parser::NativePositionKind::DeltaAxis, d);
         }
     } else {
         let default = r.bit("default_vector")?;

@@ -33,7 +33,7 @@ pub struct DecodedFrameView {
     pub control_entries: Vec<NativeControlEntry>,
     /// Includes the precise failed bounded read or grouped guard, when present.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub diagnostics: Option<Box<crate::theater::FilmReadDiagnostics>>,
+    pub diagnostics: Option<Box<crate::theater::parser::FilmReadDiagnostics>>,
     pub start_bit: i64,
     /// First unread bit, including when an unsupported branch is encountered.
     pub end_bit: i64,
@@ -57,9 +57,9 @@ pub(crate) fn decode_control_view_contextual(
     data: &[u8],
     bit: i64,
     encoding: Option<&super::PositionEncoding>,
-    context: Option<&crate::theater::NativeReaderContext>,
+    context: Option<&crate::theater::parser::NativeReaderContext>,
 ) -> DecodedFrameView {
-    let default_encoding = crate::theater::NativeScanProfile::default()
+    let default_encoding = crate::theater::parser::NativeScanProfile::default()
         .component_encoding()
         .expect("default native widths");
     decode_view(
@@ -76,7 +76,7 @@ fn decode_view(
     bit: i64,
     is_control: bool,
     encoding: Option<&super::PositionEncoding>,
-    context: Option<&crate::theater::NativeReaderContext>,
+    context: Option<&crate::theater::parser::NativeReaderContext>,
 ) -> DecodedFrameView {
     let mut out = DecodedFrameView {
         control_entries: Vec::new(),

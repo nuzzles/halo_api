@@ -104,15 +104,17 @@ impl Reader<'_> {
 
     fn publish_movement(
         &mut self,
-        component: crate::theater::NativeMovementComponent,
+        component: crate::theater::parser::NativeMovementComponent,
         values: Vec<u64>,
     ) {
         if let Some(slot) = self.movement_slot {
-            self.publish_component(crate::theater::FilmComponentObservation::MovementState {
-                component,
-                slot,
-                values,
-            });
+            self.publish_component(
+                crate::theater::parser::FilmComponentObservation::MovementState {
+                    component,
+                    slot,
+                    values,
+                },
+            );
         }
     }
 
@@ -349,9 +351,9 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
         }
         "managed-object-networked-splash-message-dynamic-component" => {
             let value = r.r("message", 24)?;
-            r.publish_component(crate::theater::FilmComponentObservation::Probe {
+            r.publish_component(crate::theater::parser::FilmComponentObservation::Probe {
                 archetype,
-                component: crate::theater::NativeProbeComponent::SplashDynamic,
+                component: crate::theater::parser::NativeProbeComponent::SplashDynamic,
                 values: vec![value],
             });
         }
@@ -514,7 +516,10 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                 values[2] = u64::from(second.is_some());
                 values[3] = second.unwrap_or(0);
             }
-            r.publish_movement(crate::theater::NativeMovementComponent::UnitControl, values);
+            r.publish_movement(
+                crate::theater::parser::NativeMovementComponent::UnitControl,
+                values,
+            );
             r.optional_word_reference("control.reference", true)?;
         }
         "unit-actor-control-component" => return control::actor_control(r, level),
@@ -533,7 +538,10 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                     values[3] = r.r("magnitude", 10)?;
                 }
             }
-            r.publish_movement(crate::theater::NativeMovementComponent::Velocity, values);
+            r.publish_movement(
+                crate::theater::parser::NativeMovementComponent::Velocity,
+                values,
+            );
         }
         "object-translational-velocity-component" => r.direction(10)?,
         "object-angular-velocity-component" => r.direction(8)?,
@@ -653,7 +661,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let flag = r.bit("flag")?;
             let progress = r.r("progress", 10)?;
             r.publish_movement(
-                crate::theater::NativeMovementComponent::Crouch,
+                crate::theater::parser::NativeMovementComponent::Crouch,
                 vec![u64::from(flag), progress],
             );
         }
@@ -771,9 +779,9 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
         }
         "high-frequency" => {
             let value = r.r("counter", 8)?;
-            r.publish_component(crate::theater::FilmComponentObservation::Probe {
+            r.publish_component(crate::theater::parser::FilmComponentObservation::Probe {
                 archetype,
-                component: crate::theater::NativeProbeComponent::HighFrequency,
+                component: crate::theater::parser::NativeProbeComponent::HighFrequency,
                 values: vec![value],
             });
         }
@@ -788,43 +796,53 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
         }
         "equipment-deployed-component" => {
             let value = r.r("value", 1)?;
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::Deployed,
-                value,
-                present: true,
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::Deployed,
+                    value,
+                    present: true,
+                },
+            );
         }
         "equipment-energy-component" => {
             let value = r.r("energy", 14)?;
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::Energy,
-                value,
-                present: true,
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::Energy,
+                    value,
+                    present: true,
+                },
+            );
         }
         "equipment-energy-delay-ticks-left-component" => {
             let value = r.r("ticks", 10)?;
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::EnergyDelay,
-                value,
-                present: true,
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::EnergyDelay,
+                    value,
+                    present: true,
+                },
+            );
         }
         "equipment-charges-remaining-component" => {
             let value = r.r("charges", 8)?;
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::Charges,
-                value,
-                present: true,
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::Charges,
+                    value,
+                    present: true,
+                },
+            );
         }
         "equipment-creator-component" => {
             let value = r.gated_value("creator", 5, false)?;
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::Creator,
-                value: value.unwrap_or(0),
-                present: value.is_some(),
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::Creator,
+                    value: value.unwrap_or(0),
+                    present: value.is_some(),
+                },
+            );
         }
         "equipment-activated-component" => {
             let value = if r.bit("reference_present")? {
@@ -833,11 +851,13 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             } else {
                 Some(r.r("value", 3)?)
             };
-            r.publish_component(crate::theater::FilmComponentObservation::EquipmentState {
-                field: crate::theater::NativeEquipmentField::Activated,
-                value: value.unwrap_or(0),
-                present: value.is_some(),
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::EquipmentState {
+                    field: crate::theater::parser::NativeEquipmentField::Activated,
+                    value: value.unwrap_or(0),
+                    present: value.is_some(),
+                },
+            );
         }
         "equipment-tracked-object-handles-stack-component" => {
             let count = r.r("count", 4)?;

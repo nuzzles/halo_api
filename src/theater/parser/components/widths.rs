@@ -21,13 +21,13 @@ pub(super) fn signed_skip(
     component: &str,
     width: i64,
     calibrated: bool,
-    purpose: Option<crate::theater::NativeWidthPurpose>,
+    purpose: Option<crate::theater::parser::NativeWidthPurpose>,
     fields: (&str, &str),
 ) -> Option<()> {
     let bit = r.cursor.position;
     let native_end = bit.wrapping_add(width);
     let end_bit = usize::try_from(native_end).ok();
-    let adjustment = |retained_bits| crate::theater::NativeWidthAdjustment {
+    let adjustment = |retained_bits| crate::theater::parser::NativeWidthAdjustment {
         component: component.into(),
         calibrated,
         purpose,

@@ -1,6 +1,6 @@
 use super::*;
-use crate::theater::weapon_hit_scan::decode_weapon_damage;
-use crate::theater::*;
+use crate::theater::film::*;
+use crate::theater::parser::weapon_hit_scan::decode_weapon_damage;
 use serde_json::{Value, json};
 use std::io::Read;
 

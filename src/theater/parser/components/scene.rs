@@ -63,9 +63,9 @@ pub(super) fn component(
         }
         "managed-object-property-name-component" => {
             let value = r.r("name", 32)?;
-            r.publish_component(crate::theater::FilmComponentObservation::Probe {
+            r.publish_component(crate::theater::parser::FilmComponentObservation::Probe {
                 archetype,
-                component: crate::theater::NativeProbeComponent::ManagedObjectPropertyName,
+                component: crate::theater::parser::NativeProbeComponent::ManagedObjectPropertyName,
                 values: vec![value],
             });
         }
@@ -125,9 +125,9 @@ pub(super) fn component(
                     r.r("tail_c", 32)?;
                 }
             }
-            r.publish_component(crate::theater::FilmComponentObservation::Probe {
+            r.publish_component(crate::theater::parser::FilmComponentObservation::Probe {
                 archetype,
-                component: crate::theater::NativeProbeComponent::SplashStatic,
+                component: crate::theater::parser::NativeProbeComponent::SplashStatic,
                 values: vec![value],
             });
         }
@@ -211,11 +211,13 @@ pub(super) fn component(
                     values.push(id);
                 }
             }
-            r.publish_component(crate::theater::FilmComponentObservation::PlayerState {
-                field: crate::theater::NativePlayerStateField::DesiredRespawnLocation,
-                values,
-                present,
-            });
+            r.publish_component(
+                crate::theater::parser::FilmComponentObservation::PlayerState {
+                    field: crate::theater::parser::NativePlayerStateField::DesiredRespawnLocation,
+                    values,
+                    present,
+                },
+            );
         }
 
         "flock-position-component" => {

@@ -54,11 +54,11 @@ impl<'a> ComponentCursor<'a> {
             return None;
         }
         if self.padded {
-            let mut reader = crate::theater::NativeFilmBits::new(self.data);
+            let mut reader = crate::theater::parser::NativeFilmBits::new(self.data);
             reader.set_position(self.position);
             // Restore the native position even when a read unwinds on the host.
             struct CopyBack<'r, 'd> {
-                reader: crate::theater::NativeFilmBits<'d>,
+                reader: crate::theater::parser::NativeFilmBits<'d>,
                 position: &'r mut i64,
                 mirror: Option<&'r std::cell::Cell<i64>>,
             }
@@ -78,7 +78,7 @@ impl<'a> ComponentCursor<'a> {
             return Some(guard.reader.read_wide(width));
         }
         let bit = usize::try_from(self.position).ok()?;
-        let value = crate::theater::bits::Bits(self.data).read(bit, width)?;
+        let value = crate::theater::parser::bits::Bits(self.data).read(bit, width)?;
         self.position = self.position.checked_add(i64::try_from(width).ok()?)?;
         Some(value)
     }
@@ -96,11 +96,15 @@ impl<'a> ComponentCursor<'a> {
     pub(crate) fn address(&self) -> Option<usize> {
         usize::try_from(self.position).ok()
     }
-    pub(crate) fn native_header(&mut self, width: i64, base: u32) -> crate::theater::RecordHeader {
-        let mut reader = crate::theater::NativeFilmBits::new(self.data);
+    pub(crate) fn native_header(
+        &mut self,
+        width: i64,
+        base: u32,
+    ) -> crate::theater::parser::RecordHeader {
+        let mut reader = crate::theater::parser::NativeFilmBits::new(self.data);
         reader.set_position(self.position);
         struct CopyBack<'r, 'd> {
-            reader: crate::theater::NativeFilmBits<'d>,
+            reader: crate::theater::parser::NativeFilmBits<'d>,
             cursor: &'r mut ComponentCursor<'d>,
         }
         impl Drop for CopyBack<'_, '_> {
@@ -115,6 +119,6 @@ impl<'a> ComponentCursor<'a> {
             reader,
             cursor: self,
         };
-        crate::theater::decode_native_record_header(&mut guard.reader, width, base)
+        crate::theater::parser::decode_native_record_header(&mut guard.reader, width, base)
     }
 }

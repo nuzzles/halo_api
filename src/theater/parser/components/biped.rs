@@ -1,6 +1,6 @@
 //! Biped action and simple world-state wire fields.
 use super::Reader;
-use crate::theater::FilmComponentObservation;
+use crate::theater::parser::FilmComponentObservation;
 
 pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
     match name {
