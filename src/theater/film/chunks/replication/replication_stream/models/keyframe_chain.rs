@@ -23,6 +23,8 @@ pub struct KeyframeChainAttempt {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+/// Entity baselines decoded from a type-2
+/// [`ReplicationStreamPacket`](crate::theater::film::chunks::replication::ReplicationStreamPacket).
 pub struct KeyframeTable {
     pub records: Vec<KeyframeChainAttempt>,
     pub stop: KeyframeChainStop,

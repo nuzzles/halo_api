@@ -22,8 +22,8 @@ pub(super) fn decode(
         0 => frame::decode(payload, context),
         1 => datums::decode(payload),
         2 => keyframes::decode(payload, context),
-        8 => roster::decode(),
-        _ => Ok(ReplicationStreamPacketBody::Unknown),
+        8 => Ok(roster::decode()),
+        _ => Ok(ReplicationStreamPacketBody::UnknownPacketBody),
     }
 }
 

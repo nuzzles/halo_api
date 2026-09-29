@@ -9,7 +9,11 @@ pub struct DatumEntry {
     pub component_mask: [u64; 4],
 }
 
-/// Lossless sparse representation: absent entries equal `default_entry`, not unknown.
+/// Decoded body of a type-1
+/// [`ReplicationStreamPacket`](crate::theater::film::chunks::replication::ReplicationStreamPacket).
+///
+/// This is a lossless sparse representation: absent entries equal
+/// `default_entry`, not unknown.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct DatumTable {
     pub slot_count: usize,

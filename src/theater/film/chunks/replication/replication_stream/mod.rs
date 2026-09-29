@@ -26,15 +26,21 @@ pub struct ReplicationStreamPacket {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[allow(clippy::large_enum_variant)]
-/// Successfully decoded replication packet payload.
+/// Successfully decoded body of a [`ReplicationStreamPacket`].
+///
+/// The packet header selects one of these layouts by its numeric `packet_type`.
+/// The enclosing [`ReplicationStreamChunk`] retains the source bytes and exposes
+/// them through [`ReplicationStreamChunk::payload`].
 pub enum ReplicationStreamPacketBody {
-    /// Packet type 0: incremental events, entity records, and controls.
-    Frame(Box<FramePacket>),
-    /// Packet type 1: datum/reference table entries.
-    Datums(DatumTable),
-    /// Packet type 2: entity baseline records.
-    Keyframes(KeyframeTable),
+    /// Packet type 0: incremental events, entity records, and controls in a
+    /// [`FramePacket`].
+    FramePacketBody(Box<FramePacket>),
+    /// Packet type 1: datum/reference entries in a [`DatumTable`].
+    DatumsPacketBody(Box<DatumTable>),
+    /// Packet type 2: entity baselines in a [`KeyframeTable`].
+    KeyframesPacketBody(Box<KeyframeTable>),
+    /// Packet type 8: a known roster packet with no established v41 body model.
+    RosterPacketBody,
     /// A packet type without a v41 body decoder. Inspect the packet payload.
-    Unknown,
+    UnknownPacketBody,
 }

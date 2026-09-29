@@ -66,7 +66,7 @@ pub(super) fn resolve_change(
             } = event.source.record
             {
                 let body = &replication_packet(film, event.source)?.body;
-                let Ok(ReplicationStreamPacketBody::Frame(frame)) = body else {
+                let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = body else {
                     return None;
                 };
                 let continuation = frame.continuation.as_ref()?;

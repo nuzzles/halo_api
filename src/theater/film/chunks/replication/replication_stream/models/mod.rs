@@ -22,7 +22,7 @@ pub mod anticipated_bindings;
 pub use anticipated_bindings::AnticipatedDeclaration;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-/// Decoded contents of a type-0 replication packet.
+/// Decoded contents of a type-0 [`ReplicationStreamPacket`].
 ///
 /// The initial frame read and the event continuation remain separate because
 /// they begin at distinct recorded bit boundaries.

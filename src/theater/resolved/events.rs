@@ -140,7 +140,7 @@ pub(super) fn frame(
     packet: &ReplicationStreamPacket,
     continuation: bool,
 ) -> Option<&ProductionFrame> {
-    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &packet.body else {
+    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body else {
         return None;
     };
     if continuation {
@@ -196,13 +196,15 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
                         .get(index)?,
                 ),
                 RecordRef::Keyframe(index) => {
-                    let Ok(ReplicationStreamPacketBody::Keyframes(table)) = &packet.body else {
+                    let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &packet.body
+                    else {
                         return None;
                     };
                     Record::Keyframe(table.records.get(index)?.record.as_ref()?)
                 }
                 RecordRef::Event(index) => {
-                    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &packet.body else {
+                    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body
+                    else {
                         return None;
                     };
                     Record::Event(frame.events.records.get(index)?)
@@ -238,7 +240,7 @@ pub(super) fn index(
                 })
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
-            if let Ok(ReplicationStreamPacketBody::Frame(frame_packet)) = &packet.body {
+            if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame_packet)) = &packet.body {
                 for i in 0..frame_packet.events.records.len() {
                     push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
@@ -277,7 +279,7 @@ pub(super) fn index(
                     }
                 }
             }
-            if let Ok(ReplicationStreamPacketBody::Keyframes(table)) = &packet.body {
+            if let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &packet.body {
                 for (i, attempt) in table.records.iter().enumerate() {
                     if attempt.record.is_some() {
                         push(

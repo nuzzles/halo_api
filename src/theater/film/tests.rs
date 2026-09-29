@@ -110,7 +110,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     assert_eq!(film.replication.chunks[0].source_position, 2);
     assert!(matches!(
         film.replication.chunks[0].packets[0].body,
-        Ok(ReplicationStreamPacketBody::Unknown)
+        Ok(ReplicationStreamPacketBody::UnknownPacketBody)
     ));
     assert_eq!(
         film.summaries
@@ -174,7 +174,7 @@ fn keyframes_stop_without_searching_past_invalid_header() {
         },
     ])
     .unwrap();
-    let Ok(ReplicationStreamPacketBody::Keyframes(table)) =
+    let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
         &film.replication.chunks[0].packets[0].body
     else {
         panic!()
@@ -209,7 +209,8 @@ fn event_gate_is_unresolved_in_reference_film() {
         },
     ])
     .unwrap();
-    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &film.replication.chunks[0].packets[0].body
+    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) =
+        &film.replication.chunks[0].packets[0].body
     else {
         panic!("missing frame packet")
     };
@@ -311,7 +312,7 @@ fn captured_v41_corpus() {
                     for packet in &chunk.packets {
                         let payload = chunk.payload(packet).unwrap();
                         match &packet.body {
-                            Ok(ReplicationStreamPacketBody::Frame(_)) => {
+                            Ok(ReplicationStreamPacketBody::FramePacketBody(_)) => {
                                 let baseline = baseline_config
                                     .decode_production_views(
                                         payload,
@@ -332,7 +333,7 @@ fn captured_v41_corpus() {
                                 );
                                 frames += 1;
                             }
-                            Ok(ReplicationStreamPacketBody::Keyframes(table)) => {
+                            Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) => {
                                 for attempt in &table.records {
                                     if attempt.record.is_some() {
                                         baseline_world.bind_keyframe(

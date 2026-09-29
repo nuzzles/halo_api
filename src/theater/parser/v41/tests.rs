@@ -128,7 +128,7 @@ fn reference_data_event_continuation_preserves_original_stop() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let packet = &parsed.replication.chunks[0].packets[0];
-    let Ok(ReplicationStreamPacketBody::Frame(original)) = &packet.body else {
+    let Ok(ReplicationStreamPacketBody::FramePacketBody(original)) = &packet.body else {
         panic!("missing frame")
     };
     let initial = original.frame.decoded().unwrap();

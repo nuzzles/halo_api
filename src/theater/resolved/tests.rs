@@ -63,7 +63,7 @@ fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> Replica
     let mut p = film.replication.chunks[0].packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
-    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &mut p.body else {
+    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body else {
         panic!("missing frame packet")
     };
     frame.frame = FrameRead::Decoded(Box::new(ProductionFrame {
@@ -231,7 +231,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
     let mut padded = entity(RecordKind::Delta, id, 99);
     padded.padded_bits = 1;
     let mut opaque = packet(&film, 15, vec![]);
-    opaque.body = Ok(ReplicationStreamPacketBody::Unknown);
+    opaque.body = Ok(ReplicationStreamPacketBody::UnknownPacketBody);
     film.replication.chunks[0].packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         opaque,
@@ -246,7 +246,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
             .events()
             .iter()
             .any(|e| matches!(resolved.record(e.source),
-        Some(Record::ReplicationPacket(p)) if matches!(p.body, Ok(ReplicationStreamPacketBody::Unknown))))
+        Some(Record::ReplicationPacket(p)) if matches!(p.body, Ok(ReplicationStreamPacketBody::UnknownPacketBody))))
     );
     assert!(resolved.events().last().unwrap().change.is_none());
 }
@@ -256,31 +256,33 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     use crate::theater::parser::v41::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
-    keyframe.body = Ok(ReplicationStreamPacketBody::Keyframes(KeyframeTable {
-        records: vec![KeyframeChainAttempt {
-            start_bit: 1,
-            end_bit: 65,
-            id: 0x8000_0007,
-            archetype: 3,
-            record: Some(KeyframeRecord {
-                references: vec![],
-                diagnostics: Default::default(),
+    keyframe.body = Ok(ReplicationStreamPacketBody::KeyframesPacketBody(Box::new(
+        KeyframeTable {
+            records: vec![KeyframeChainAttempt {
                 start_bit: 1,
                 end_bit: 65,
                 id: 0x8000_0007,
                 archetype: 3,
-                fields: vec![],
-                components: vec![],
-                attempts: vec![],
-                stop: KeyframeStop::Complete,
-            }),
-        }],
-        stop: KeyframeChainStop::End,
-        diagnostics: Default::default(),
-    }));
+                record: Some(KeyframeRecord {
+                    references: vec![],
+                    diagnostics: Default::default(),
+                    start_bit: 1,
+                    end_bit: 65,
+                    id: 0x8000_0007,
+                    archetype: 3,
+                    fields: vec![],
+                    components: vec![],
+                    attempts: vec![],
+                    stop: KeyframeStop::Complete,
+                }),
+            }],
+            stop: KeyframeChainStop::End,
+            diagnostics: Default::default(),
+        },
+    )));
     let mut padded = keyframe.clone();
     padded.header.timestamp_us = 30;
-    if let Ok(ReplicationStreamPacketBody::Keyframes(table)) = &mut padded.body {
+    if let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &mut padded.body {
         table.records[0].record.as_mut().unwrap().end_bit = 4096;
     }
     film.replication.chunks[0].packets = vec![
@@ -307,7 +309,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let mut film = recording();
     let id = 0x4000_0007;
     let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
-    if let Ok(ReplicationStreamPacketBody::Frame(frame)) = &mut rejected.body {
+    if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut rejected.body {
         frame
             .frame
             .decoded_mut()
@@ -337,7 +339,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     let mut incomplete = entity(RecordKind::New, 0x4000_0007, 99);
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
-    if let Ok(ReplicationStreamPacketBody::Frame(frame)) = &mut p.body {
+    if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
         frame.frame.decoded_mut().unwrap().controls =
             Some(crate::theater::parser::v41::DecodedFrameView {
                 control_entries: vec![ControlEntry {

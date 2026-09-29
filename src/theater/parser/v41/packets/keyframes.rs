@@ -21,5 +21,7 @@ pub(super) fn decode(
             );
         }
     }
-    Ok(ReplicationStreamPacketBody::Keyframes(table))
+    Ok(ReplicationStreamPacketBody::KeyframesPacketBody(Box::new(
+        table,
+    )))
 }

@@ -12,11 +12,13 @@ pub(super) fn decode(
         .map(|frame| FrameRead::Decoded(Box::new(frame)))
         .unwrap_or_else(|error| FrameRead::Refused(error.into()));
     let continuation = continue_event_views(payload, &events, context);
-    Ok(ReplicationStreamPacketBody::Frame(Box::new(FramePacket {
-        frame,
-        events,
-        continuation,
-    })))
+    Ok(ReplicationStreamPacketBody::FramePacketBody(Box::new(
+        FramePacket {
+            frame,
+            events,
+            continuation,
+        },
+    )))
 }
 
 pub(super) fn continue_event_views(
