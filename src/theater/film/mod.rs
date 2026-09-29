@@ -48,9 +48,12 @@ pub use chunks::registry::{
     RegistrySlotRead,
 };
 pub use chunks::replication::{
-    AnticipatedDeclaration, ContinuationStatePolicy, DatumEntry, DatumTable, EventContinuation,
-    EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
-    FilmViewAdmission, FramePacket, KillEventFields, NewBindingRefusal,
+    AnticipatedDeclaration, BindingOrigin, ContinuationStatePolicy, ControlEntry, DatumDecodeError,
+    DatumEntry, DatumTable, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan,
+    EntityRecord, EntityViewStop, EventContinuation, EventField, EventFieldStage, EventFieldValue,
+    EventListRead, EventListStop, EventRecord, FilmViewAdmission, FrameDecodeError, FramePacket,
+    FrameRead, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop, KeyframeComponentSpan,
+    KeyframeRecord, KeyframeStop, KeyframeTable, KillEventFields, NewBindingRefusal,
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
     ReplicationStream, ReplicationStreamPacket, ReplicationStreamPacketBody,
 };
@@ -58,20 +61,17 @@ pub use chunks::summary::{
     FilmMedalDefinition, MedalAward, SummaryEvents, SummaryPacket, SummaryPacketBody,
 };
 pub use chunks::{
-    ChunkKind, FilmChunk, FilmPacketHeader, RegistryChunk, ReplicationStreamChunk, SourceSpan,
-    SummaryChunk,
+    ChunkKind, FilmChunk, FilmPacketHeader, PacketDecodeError, RegistryChunk,
+    ReplicationStreamChunk, SourceSpan, SummaryChunk,
 };
 
 pub use chunks::replication::components::{
-    AbilityNonPredictedState, ActionBlock, BindingOrigin, CamoState, ControlEntry,
-    DecodedFrameView, EntityComponentAttempt, EntityComponentSpan, EntityRecord, EntityViewStop,
-    EquipmentCreationField, EquipmentField, FilmComponentObservation, FilmReadDiagnostics,
-    FrameViewStop, GameEngineField, KeyframeChainAttempt, KeyframeChainStop, KeyframeComponentSpan,
-    KeyframeRecord, KeyframeStop, KeyframeTable, ManagedObjectField, ManagedPropertyField,
-    MovementComponent, MppField, NavpointField, ObjectParentState, ObjectiveField,
-    PlayerStateField, ProbeComponent, ReadOperation, ReadRefusal, UnitEquipmentEntry,
-    UnitEquipmentRead, UnitReference, UnitReferenceKind, WidthAdjustment, WidthPurpose,
-    WidthRefusal,
+    AbilityNonPredictedState, ActionBlock, CamoState, EquipmentCreationField, EquipmentField,
+    FilmComponentObservation, FilmReadDiagnostics, GameEngineField, ManagedObjectField,
+    ManagedPropertyField, MovementComponent, MppField, NavpointField, ObjectParentState,
+    ObjectiveField, PlayerStateField, ProbeComponent, ReadOperation, ReadRefusal,
+    UnitEquipmentEntry, UnitEquipmentRead, UnitReference, UnitReferenceKind, WidthAdjustment,
+    WidthPurpose, WidthRefusal,
 };
 
 pub use chunks::replication::components::position::PositionKind;

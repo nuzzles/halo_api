@@ -16,7 +16,7 @@ pub struct SummaryChunk {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SummaryPacket {
     pub header: FilmPacketHeader,
-    pub body: SummaryPacketBody,
+    pub body: Result<SummaryPacketBody, PacketDecodeError>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -26,10 +26,8 @@ pub enum SummaryPacketBody {
         declared_events: u32,
         events: Vec<SummaryEvent>,
     },
-    /// The summary reader could not start. The payload remains in its chunk.
-    Refused { message: String },
-    /// No summary reader selected; this does not imply an empty payload.
-    Opaque,
+    /// A packet type without a v41 summary decoder.
+    Unknown,
 }
 impl SummaryChunk {
     pub fn payload(&self, packet: &SummaryPacket) -> Option<&[u8]> {
@@ -45,7 +43,7 @@ impl SummaryEvents {
             .iter()
             .flat_map(|c| &c.packets)
             .flat_map(|p| match &p.body {
-                SummaryPacketBody::Events { events, .. } => events.as_slice(),
+                Ok(SummaryPacketBody::Events { events, .. }) => events.as_slice(),
                 _ => &[],
             })
     }

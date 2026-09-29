@@ -7,9 +7,6 @@ pub(crate) enum DecodeError {
     /// A reference signed option cannot be represented by this target's indexes.
     #[error(transparent)]
     KillOption(#[from] super::KillDecodeOptionError),
-    /// A framed type-1 datum body failed reference size validation.
-    #[error(transparent)]
-    Datums(#[from] super::DatumTableError),
     /// A supported capture's independent guards disagree.
     #[error("inconsistent Theater data: {0}")]
     Inconsistent(String),

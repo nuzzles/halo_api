@@ -2,7 +2,7 @@
 //! not the presence masks used by delta records.
 use super::Cursor;
 use super::{ComponentField, PositionEncoding, Reader, defaults};
-pub(crate) use crate::theater::film::chunks::replication::components::keyframes::{
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::keyframes::{
     KeyframeComponentSpan, KeyframeRecord, KeyframeStop,
 };
 use crate::theater::parser::v41::FilmRegistry;

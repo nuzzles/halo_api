@@ -11,9 +11,11 @@ The captured v41 corpus has 50 accepted registry blocks and 1,067 named slots.
 structurally decoded registry. Identity/player searches over those bytes belong to
 resolution rather than being presented as established reference boundaries.
 
-Replication packets use 16-byte headers. Reference packet reads preserve their
-header, payload offset, timestamp, ordered views/records/component fields, partial
-reads and stops. Keyframe traversal advances through decoded record boundaries;
+Replication packets use 16-byte headers. Each packet header identifies its exact
+payload range in the enclosing chunk, while `body` is a fallible typed decoding.
+An unsupported or invalid body therefore does not discard or duplicate the wire
+payload. Packet reads preserve their header, payload offset, timestamp, ordered
+views/records/component fields, partial reads and stops. Keyframe traversal advances through decoded record boundaries;
 it stops at an invalid header or unsupported component and never searches ahead
 for a plausible replacement boundary.
 

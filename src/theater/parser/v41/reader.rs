@@ -8,6 +8,16 @@ pub(crate) enum ReaderProfileError {
     #[error("reference traversal policy not supported by this entry point: {0}")]
     Policy(&'static str),
 }
+impl From<ReaderProfileError> for FrameDecodeError {
+    fn from(value: ReaderProfileError) -> Self {
+        match value {
+            ReaderProfileError::Width(field) => Self::Width {
+                field: field.to_owned(),
+            },
+            ReaderProfileError::Policy(_) => Self::MissingViewTables,
+        }
+    }
+}
 impl ScanProfile {
     // Widths are consumed from ComponentWidths only when reached on wire.
     /// Adapt raw metadata to the existing component reader's address-sized widths.

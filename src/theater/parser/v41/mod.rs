@@ -81,6 +81,10 @@ pub(crate) mod world;
 
 pub(crate) mod position_capture;
 
+pub(crate) mod packets;
+
+pub(crate) mod chunks;
+
 pub(crate) use anticipated_bindings::*;
 pub(crate) use components::*;
 pub(crate) use datums::*;
@@ -106,5 +110,3 @@ pub(crate) use registry::FilmRegistry;
 pub(crate) use transport::{FilmSource, FilmSourceMetadata};
 pub(crate) use unit_equipment::UnitEquipmentRead;
 pub(crate) use unit_references::{UnitReference, UnitReferenceKind};
-
-pub(crate) mod replication;

@@ -20,3 +20,19 @@ pub struct DatumTable {
     pub padding_bits: usize,
     pub padding: u8,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, thiserror::Error)]
+pub enum DatumDecodeError {
+    #[error("{bytes} bytes cannot contain a datum entry")]
+    NoEntries { bytes: usize },
+    #[error("derived slot count {slots} exceeds the v41 capacity of 8191")]
+    AboveCapacity { slots: usize },
+    #[error("{total_bits} bits for {slots} slots leaves an invalid remainder of {remainder}")]
+    Misaligned {
+        total_bits: usize,
+        slots: usize,
+        remainder: i64,
+    },
+    #[error("datum table ended before all declared fields were read")]
+    Truncated,
+}

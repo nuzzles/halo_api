@@ -1,4 +1,4 @@
-use super::replication::continue_event_views;
+use super::packets::continue_event_views;
 use super::*;
 use crate::theater::resolved::interpretation::weapon_damage::read_weapon_damage;
 use serde_json::{Value, json};
@@ -72,7 +72,7 @@ fn reference_data_event_continuation_reference_oracle() {
             };
             continued += 1;
             assert_eq!(result.start_bit, events.end_bit);
-            let frame = result.frame.as_ref().unwrap();
+            let frame = result.frame.decoded().unwrap();
             assert_eq!(json!(frame.end_bit), expected["end"], "case {index}");
             assert_eq!(
                 json!(frame.views_completed),
@@ -128,15 +128,15 @@ fn reference_data_event_continuation_preserves_original_stop() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let packet = &parsed.replication.chunks[0].packets[0];
-    let ReplicationStreamPacketBody::Frame(original) = &packet.body else {
+    let Ok(ReplicationStreamPacketBody::Frame(original)) = &packet.body else {
         panic!("missing frame")
     };
-    let initial = original.frame.as_ref().unwrap();
+    let initial = original.frame.decoded().unwrap();
     assert_eq!(initial.views_completed, 0);
     assert_eq!(initial.end_bit, 9);
     let continuation = original.continuation.as_ref().unwrap();
     assert_eq!(continuation.start_bit, 13);
-    let frame = continuation.frame.as_ref().unwrap();
+    let frame = continuation.frame.decoded().unwrap();
     assert_eq!(frame.views_completed, 2);
     assert_eq!(frame.end_bit, 17);
     assert_eq!(
@@ -203,7 +203,7 @@ fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
         let before = world.clone();
         let result =
             continue_event_views(&payload, &events, &config, &registry, &mut world).unwrap();
-        assert!(!result.frame.as_ref().unwrap().records.is_empty());
+        assert!(!result.frame.decoded().unwrap().records.is_empty());
         if damage {
             assert_eq!(read_weapon_damage(&payload, 0).end_bit, 106);
             assert_eq!(

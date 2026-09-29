@@ -1,9 +1,8 @@
-//! Type-1 entity datum tables, ported from LevelUp `type1_datums.go`.
-use super::{DecodeError, bits::Cursor};
+//! Type-1 entity datum table decoding.
+use super::bits::Cursor;
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::datums::{
-    DatumEntry, DatumTable,
+    DatumDecodeError, DatumEntry, DatumTable,
 };
-use serde::{Deserialize, Serialize};
 
 impl Default for DatumEntry {
     fn default() -> Self {
@@ -17,45 +16,29 @@ impl Default for DatumEntry {
     }
 }
 
-/// Reference datum-block size refusals, preserving the quantities in each error.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
-pub(crate) enum DatumTableError {
-    #[error("bloc de datums : {bytes} octets ne portent aucune entree")]
-    NoEntries { bytes: usize },
-    #[error("bloc de datums : {slots} entrees derivees au-dela du cap 8191")]
-    AboveCapacity { slots: usize },
-    #[error("bloc de datums : {total_bits} bits pour {slots} entrees, reste {remainder}")]
-    Misaligned {
-        total_bits: usize,
-        slots: usize,
-        remainder: i64,
-    },
-}
-
 /// Decode one complete decompressed type-1 packet payload. The layout has 79 bits
 /// per datum, a separate 256-bit bitmap per slot, five tail words and byte alignment.
-pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DecodeError> {
-    let invalid = || DecodeError::Inconsistent("invalid type-1 datum table length".into());
+pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeError> {
+    let invalid = || DatumDecodeError::Truncated;
     let total = data.len().checked_mul(8).ok_or_else(invalid)?;
     if total < 160 {
-        return Err(DatumTableError::NoEntries { bytes: data.len() }.into());
+        return Err(DatumDecodeError::NoEntries { bytes: data.len() });
     }
     let count = (total - 160 + 7) / 335;
     if count == 0 {
-        return Err(DatumTableError::NoEntries { bytes: data.len() }.into());
+        return Err(DatumDecodeError::NoEntries { bytes: data.len() });
     }
     if count > 8191 {
-        return Err(DatumTableError::AboveCapacity { slots: count }.into());
+        return Err(DatumDecodeError::AboveCapacity { slots: count });
     }
     let consumed_bits = count * 335 + 160;
     let remainder = total as i64 - consumed_bits as i64;
     if !(0..=7).contains(&remainder) {
-        return Err(DatumTableError::Misaligned {
+        return Err(DatumDecodeError::Misaligned {
             total_bits: total,
             slots: count,
             remainder,
-        }
-        .into());
+        });
     }
     let padding_bits = remainder as usize;
     let mut r = Cursor::new(data, 0).ok_or_else(invalid)?;

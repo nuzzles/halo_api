@@ -1,6 +1,6 @@
 //! Deterministic reference chaining between independently established keyframe boundaries.
 use super::{FrameEncoding, KeyframeStop, decode_reference_keyframe_record_contextual};
-pub(crate) use crate::theater::film::chunks::replication::components::keyframe_chain::{
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::keyframe_chain::{
     KeyframeChainAttempt, KeyframeChainStop, KeyframeTable,
 };
 use crate::theater::parser::v41::{FilmRegistry, ReaderContext, reference_bits_at};

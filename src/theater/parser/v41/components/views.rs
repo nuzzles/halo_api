@@ -1,7 +1,7 @@
 //! Message and control views. Unsupported paths mirror explicit LevelUp gaps.
 use super::Cursor;
 use super::{Reader, control};
-pub(crate) use crate::theater::film::chunks::replication::components::views::{
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::frame_views::{
     ControlEntry, DecodedFrameView, FrameViewStop,
 };
 

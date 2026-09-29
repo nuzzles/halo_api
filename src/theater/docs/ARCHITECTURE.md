@@ -21,9 +21,10 @@ theater/
         mod.rs             ReplicationStreamChunk and components
         replication_stream/
           mod.rs           ReplicationStream and ReplicationStreamPacket
-          models/          Frame, record, datum and event models
+          models/          Frame, view, entity, keyframe, datum and event models
         components/
           models/          Component observations, refusals and diagnostics
+          *.rs             Component fields, controls, position and references
       summary/
         mod.rs             SummaryChunk, SummaryPacket and SummaryEvents
         models.rs          Recorded summary event models
@@ -33,10 +34,11 @@ theater/
     bits.rs                Shared bounded bit primitives
     v41/
       mod.rs               V41ChunkReader and kind-specific reader types
-      replication.rs       Ordered packet decoding and grammar-state updates
+      chunks/              Registry, replication and summary chunk readers
       registry.rs          v41 registry layout
       config/              Private fixed and runtime decoding configuration
       components/          v41 component decoding
+      packets/             Replication packet dispatch and isolated body decoders
       summary.rs           v41 summary decoding
   resolved/
     mod.rs                 ResolvedFilm construction and shared indexes

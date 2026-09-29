@@ -140,13 +140,13 @@ pub(super) fn frame(
     packet: &ReplicationStreamPacket,
     continuation: bool,
 ) -> Option<&ProductionFrame> {
-    let ReplicationStreamPacketBody::Frame(frame) = &packet.body else {
+    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &packet.body else {
         return None;
     };
     if continuation {
-        frame.continuation.as_ref()?.frame.as_ref().ok()
+        frame.continuation.as_ref()?.frame.decoded()
     } else {
-        frame.frame.as_ref().ok()
+        frame.frame.decoded()
     }
 }
 
@@ -171,7 +171,7 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
             let PacketRef::Summary(packet) = packet else {
                 return None;
             };
-            let SummaryPacketBody::Events { events, .. } = &packet.body else {
+            let Ok(SummaryPacketBody::Events { events, .. }) = &packet.body else {
                 return None;
             };
             Record::Summary(events.get(index)?)
@@ -196,13 +196,13 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
                         .get(index)?,
                 ),
                 RecordRef::Keyframe(index) => {
-                    let ReplicationStreamPacketBody::Keyframes(table) = &packet.body else {
+                    let Ok(ReplicationStreamPacketBody::Keyframes(table)) = &packet.body else {
                         return None;
                     };
                     Record::Keyframe(table.records.get(index)?.record.as_ref()?)
                 }
                 RecordRef::Event(index) => {
-                    let ReplicationStreamPacketBody::Frame(frame) = &packet.body else {
+                    let Ok(ReplicationStreamPacketBody::Frame(frame)) = &packet.body else {
                         return None;
                     };
                     Record::Event(frame.events.records.get(index)?)
@@ -238,7 +238,7 @@ pub(super) fn index(
                 })
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
-            if let ReplicationStreamPacketBody::Frame(frame_packet) = &packet.body {
+            if let Ok(ReplicationStreamPacketBody::Frame(frame_packet)) = &packet.body {
                 for i in 0..frame_packet.events.records.len() {
                     push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
@@ -277,7 +277,7 @@ pub(super) fn index(
                     }
                 }
             }
-            if let ReplicationStreamPacketBody::Keyframes(table) = &packet.body {
+            if let Ok(ReplicationStreamPacketBody::Keyframes(table)) = &packet.body {
                 for (i, attempt) in table.records.iter().enumerate() {
                     if attempt.record.is_some() {
                         push(
@@ -308,9 +308,9 @@ pub(super) fn index(
                 player_index: None,
                 change: None,
             });
-            let SummaryPacketBody::Events {
+            let Ok(SummaryPacketBody::Events {
                 events: summaries, ..
-            } = &packet.body
+            }) = &packet.body
             else {
                 continue;
             };
