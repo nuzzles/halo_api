@@ -29,11 +29,49 @@ pub(super) fn continue_event_views(
     })
 }
 
-impl V41ChunkParser {
-    pub(crate) fn parse(
-        registry: Registry,
+impl V41RegistryChunkReader {
+    fn read(source: FilmChunk, data: Vec<u8>) -> Result<Registry, ParseError> {
+        let definition = registry::parse_registry_chunk(&data)?;
+        Ok(Registry {
+            definition,
+            chunk: ParsedChunk {
+                source,
+                source_position: 0,
+                data,
+                packets: Vec::new(),
+                packet_walk_end_byte: 0,
+            },
+        })
+    }
+}
+
+enum V41DataChunkReader {
+    Replication(V41ReplicationStreamChunkReader),
+    Summary(V41SummaryChunkReader),
+}
+
+impl V41DataChunkReader {
+    fn for_kind(kind: ChunkKind) -> Result<Self, ParseError> {
+        match kind {
+            ChunkKind::Registry => Err(ParseError::MultipleRegistries),
+            ChunkKind::Replication => Ok(Self::Replication(V41ReplicationStreamChunkReader)),
+            ChunkKind::Summary => Ok(Self::Summary(V41SummaryChunkReader)),
+        }
+    }
+
+    fn is_summary(&self) -> bool {
+        matches!(self, Self::Summary(_))
+    }
+}
+
+impl V41ChunkReader {
+    pub(crate) fn read(
+        self,
+        registry_source: FilmChunk,
+        registry_data: Vec<u8>,
         inputs: impl IntoIterator<Item = FilmChunk>,
     ) -> Result<Film, ParseError> {
+        let registry = V41RegistryChunkReader::read(registry_source, registry_data)?;
         let config = NativeFrameConfig::default();
         // These runtime/build-dependent values are not established by structural
         // registry decoding. Preserve stopped reads instead of choosing a layout.
@@ -44,15 +82,13 @@ impl V41ChunkParser {
         let mut world = FilmWorld::default();
         let mut chunks = Vec::new();
         for (index, input) in inputs.into_iter().enumerate() {
-            if input.kind == ChunkKind::Registry {
-                return Err(ParseError::MultipleRegistries);
-            }
+            let reader = V41DataChunkReader::for_kind(input.kind)?;
             let source_position = index + 1;
             let chunk_index = i32::try_from(source_position)
                 .map_err(|_| ParseError::Source("too many chunks".into()))?;
             let data = transport::inflate_film_chunk(&input.data).into_owned();
             world.current_chunk = input.index.unwrap_or(source_position as i64);
-            let footer = input.kind == ChunkKind::Summary;
+            let footer = reader.is_summary();
             let mut chunk = ParsedChunk {
                 source: input,
                 source_position,

@@ -15,11 +15,11 @@ theater/
     components/            Component fields, read diagnostics and value models
     summary/               Recorded summaries and medals
   parser/
-    registry_chunk.rs      First-chunk validation and registry version decoding
+    mod.rs                 ChunkReader and registry-first version dispatch
     transport.rs           Decompression and bounded packet framing
     bits.rs                Shared bounded bit primitives
     v41/
-      mod.rs               V41ChunkParser and internal decoder wiring
+      mod.rs               V41ChunkReader and kind-specific reader types
       replication.rs       Ordered packet decoding and grammar-state updates
       registry.rs          v41 registry layout
       player_slot.rs       Bounded roster/bootstrap slot grammar
@@ -36,9 +36,11 @@ theater/
   docs/                    Format, fidelity, architecture and validation
 ```
 
-`RegistryChunkParser` requires the first input to be a registry, decompresses it
-once, and checks its version before decoding version-dependent fields. Dispatch
-passes the decoded registry and remaining input iterator to `V41ChunkParser`.
+`ChunkReader` requires the first input to be a registry, decompresses it once,
+and checks its version before decoding version-dependent fields. Its sole
+current variant owns a `V41ChunkReader`, which dispatches each chunk kind to
+`V41RegistryChunkReader`, `V41ReplicationStreamChunkReader`, or
+`V41SummaryChunkReader`.
 Source positions remain positions in the original full input: registry is zero,
 the next chunk is one. Additional registry chunks are errors.
 

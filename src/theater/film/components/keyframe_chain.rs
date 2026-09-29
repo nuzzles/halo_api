@@ -1,16 +1,13 @@
 //! Native data models.
-use crate::theater::film::*;
+use super::{FilmReadDiagnostics, KeyframeRecord};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum KeyframeChainStop {
-    #[serde(rename = "fin-du-payload")]
     End,
-    #[serde(rename = "en-tete-invalide")]
     Header,
-    #[serde(rename = "composant-non-porte")]
     Desync,
-    #[serde(rename = "slot-non-croissant")]
     Slot,
-    #[serde(rename = "budget-epuise")]
     Budget,
     InvalidEncoding,
 }

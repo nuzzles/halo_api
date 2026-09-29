@@ -26,12 +26,11 @@ not supplied. Input order defines source positions, independent of manifest
 numbers. Raw and zlib-compressed chunks are accepted. No separate metadata list,
 source loader, or parsing options are part of the public entry point.
 
-`Film::parse` requires a registry as the first chunk. The internal
-`RegistryChunkParser` decompresses it, reads the version before version-dependent
-fields, and decodes the supported registry layout. The dispatcher then passes the
-decoded registry and only the remaining chunks to `parser::v41::V41ChunkParser`.
-Unsupported versions return an error. Both parsers are internal; callers use
-`Film::parse`. `Film` has exactly
+`Film::parse` requires a registry as the first chunk. `parser::ChunkReader`
+decompresses it, reads the version before version-dependent fields, and selects
+its `V41ChunkReader` variant. That reader dispatches registry, replication, and
+summary chunks to their v41 kind-specific readers. Unsupported versions return
+an error; callers still use the single `Film::parse` entry point. `Film` has exactly
 three fields:
 
 - `registry`: component definitions and the complete bootstrap chunk.

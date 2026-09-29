@@ -2,9 +2,17 @@
 pub(crate) use super::{bits, transport};
 use crate::theater::film::*;
 
-/// Version-specific chunk decoder selected by `Film::parse` after registry validation.
-/// Kept internal so callers use the single version-dispatching entry point.
-pub(crate) struct V41ChunkParser;
+/// Version-specific chunk reader selected by [`super::ChunkReader`].
+pub struct V41ChunkReader;
+
+/// Reader for a v41 component-registry chunk.
+pub struct V41RegistryChunkReader;
+
+/// Reader for a v41 replication-stream chunk.
+pub struct V41ReplicationStreamChunkReader;
+
+/// Reader for a v41 summary chunk.
+pub struct V41SummaryChunkReader;
 
 #[cfg(test)]
 pub(crate) fn test_chunks(source: &FilmSource) -> Vec<FilmChunk> {

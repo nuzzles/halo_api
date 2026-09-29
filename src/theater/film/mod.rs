@@ -12,13 +12,7 @@ impl Film {
     /// Read the registry header, select a supported parser, and decode the chunks.
     /// The first chunk must be the only registry chunk. Remaining input order is retained.
     pub fn parse(chunks: impl IntoIterator<Item = FilmChunk>) -> Result<Self, ParseError> {
-        let mut chunks = chunks.into_iter();
-        let first = chunks.next().ok_or(ParseError::MissingRegistry)?;
-        let registry = crate::theater::parser::registry_chunk::RegistryChunkParser::parse(first)?;
-        match registry.definition.registry.major_version {
-            41 => crate::theater::parser::v41::V41ChunkParser::parse(registry, chunks),
-            version => Err(ParseError::UnsupportedVersion(version)),
-        }
+        crate::theater::parser::ChunkReader::read(chunks)
     }
 
     pub fn resolve(&self) -> crate::theater::ResolvedFilm<'_> {
