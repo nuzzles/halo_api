@@ -121,8 +121,15 @@ fn native_data_packet_heads_padding_oracles() {
             )
             .unwrap();
             let parsed = Film::parse(test_chunks(&source)).unwrap();
+            let resolved = parsed.resolve();
+            let interpretation = resolved
+                .interpretations()
+                .packets
+                .iter()
+                .find(|entry| entry.source.chunk == 1 && entry.source.packet == 0)
+                .unwrap();
             assert_eq!(
-                parsed.replication.chunks[0].packets[0].native_head,
+                interpretation.packet_head,
                 read_native_packet_head(0, &payload, None)
             );
             assert_eq!(
@@ -174,15 +181,25 @@ fn native_data_packet_heads_context_and_footer_boundaries() {
     )
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let NativePacketHeadRead::Translocator(Some(read)) = parsed.replication.chunks[0].packets[0]
-        .native_head
-        .as_ref()
+    let resolved = parsed.resolve();
+    let NativePacketHeadRead::Translocator(Some(read)) = resolved
+        .interpretations()
+        .packets
+        .iter()
+        .find(|entry| entry.source.chunk == 1 && entry.source.packet == 0)
+        .and_then(|entry| entry.packet_head.as_ref())
         .unwrap()
     else {
         panic!("missing direct read")
     };
     assert_eq!(read.event.stop, TranslocatorStop::MissingMap);
-    assert!(parsed.summaries.chunks[0].packets[0].native_head.is_none());
+    assert!(
+        resolved
+            .interpretations()
+            .packets
+            .iter()
+            .all(|entry| entry.source.chunk != 2)
+    );
     assert_eq!(
         serde_json::from_value::<Film>(json!(parsed)).unwrap(),
         parsed

@@ -1,7 +1,7 @@
 //! Type-117 teleport events from LevelUp's transloc_events.go.
 //! See docs/CREDIT.md. Failed position reads retain the known event.
 use super::{FilmMapBounds, bits::Cursor};
-pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::translocator::{
+pub(crate) use crate::theater::resolved::interpretation::packet::translocator::{
     NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
 };
 

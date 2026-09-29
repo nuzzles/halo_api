@@ -186,10 +186,10 @@ fn event_gate_is_unresolved_in_native_film() {
         },
     ])
     .unwrap();
-    let read = film.replication.chunks[0].packets[0]
-        .event_list
-        .as_ref()
-        .unwrap();
+    let FilmPacketBody::Frame(frame) = &film.replication.chunks[0].packets[0].body else {
+        panic!("missing frame packet")
+    };
+    let read = &frame.events;
     assert_eq!(read.gate15, None);
     let before = serde_json::to_value(&film).unwrap();
     let resolved = film.resolve();

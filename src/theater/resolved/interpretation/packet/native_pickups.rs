@@ -1,5 +1,5 @@
 //! Native data models.
-use crate::theater::film::*;
+use super::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum NativePickupOutcome {
     EmptyList,

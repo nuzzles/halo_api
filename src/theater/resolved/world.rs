@@ -65,12 +65,15 @@ pub(super) fn resolve_change(
                 continuation: true, ..
             } = event.source.record
             {
-                let continuation = film
+                let body = &film
                     .chunk(event.source.chunk)
                     .expect("indexed source chunk")
                     .packets()[event.source.packet]
-                    .event_continuation
-                    .as_ref()?;
+                    .body;
+                let FilmPacketBody::Frame(frame) = body else {
+                    return None;
+                };
+                let continuation = frame.continuation.as_ref()?;
                 if continuation.state_policy != NativeContinuationStatePolicy::Applied {
                     return None;
                 }

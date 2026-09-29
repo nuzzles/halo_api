@@ -76,16 +76,13 @@ pub use chunks::registry::{
     NativeRegistrySlotRead,
 };
 pub use chunks::replication::{
-    AnticipatedDeclaration, DatumEntry, DatumTable, DecodedHeadEvent, EventReference,
-    EventReferenceValue, FilmPacket, FilmPacketBody, FilmPacketHeader, FilmViewAdmission,
-    HeadEventPayload, HeadEventStop, KillEventFields, NativeContinuationStatePolicy,
+    AnticipatedDeclaration, DatumEntry, DatumTable, FilmPacket, FilmPacketBody, FilmPacketHeader,
+    FilmViewAdmission, FramePacket, KillEventFields, NativeContinuationStatePolicy,
     NativeEventContinuation, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
     NativeEventListRead, NativeEventListStop, NativeEventRecord, NativeNewBindingRefusal,
-    NativePacketHeadRead, NativePickupOutcome, NativePickupRead, NativeRosterRead,
-    NativeTranslocatorEvent, NativeWeaponDamageField, NativeWeaponDamageRead, NativeZoomRead,
-    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
-    ReplicationStream, RosterEntry, RosterReport, RosterUpdate, SourceSpan, TeleportPosition,
-    TranslocatorEvent, TranslocatorStop, WeaponDamage, WeaponDamageRead,
+    NativeRosterRead, ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
+    RecordHeader, RecordKind, ReplicationStream, RosterEntry, RosterReport, RosterUpdate,
+    SourceSpan,
 };
 pub use chunks::summary::{FilmMedalDefinition, MedalAward, SummaryEvents};
 pub use chunks::{

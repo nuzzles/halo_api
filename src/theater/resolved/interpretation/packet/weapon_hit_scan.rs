@@ -1,5 +1,5 @@
 //! Native data models.
-use crate::theater::film::*;
+use super::*;
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct WeaponDamageRead {
     /// Loaded packet provenance. None for payload-only reads and older exports.

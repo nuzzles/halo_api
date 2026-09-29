@@ -63,7 +63,10 @@ fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> FilmPac
     let mut p = film.replication.chunks[0].packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
-    p.body = FilmPacketBody::Frame(Box::new(ProductionFrame {
+    let FilmPacketBody::Frame(frame) = &mut p.body else {
+        panic!("missing frame packet")
+    };
+    frame.frame = Ok(ProductionFrame {
         header_diagnostics: Default::default(),
         admission_diagnostics: None,
         record_prefixes: vec![],
@@ -74,9 +77,8 @@ fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> FilmPac
         views_completed: 1,
         end_bit: 48,
         padded_bits: 0,
-    }));
-    p.event_continuation = None;
-    p.event_list = None;
+    });
+    frame.continuation = None;
     p
 }
 fn key() -> EntityKey {
@@ -308,15 +310,19 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let id = 0x4000_0007;
     let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
     if let FilmPacketBody::Frame(frame) = &mut rejected.body {
-        frame.header_diagnostics.new_binding_refusals.push(
-            crate::theater::parser::v41::NativeNewBindingRefusal {
+        frame
+            .frame
+            .as_mut()
+            .unwrap()
+            .header_diagnostics
+            .new_binding_refusals
+            .push(crate::theater::parser::v41::NativeNewBindingRefusal {
                 record_bit: 2,
                 id,
                 slot: 7,
                 existing_archetype: 3,
                 proposed_archetype: 4,
-            },
-        );
+            });
     }
     film.replication.chunks[0].packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
@@ -334,27 +340,28 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
     if let FilmPacketBody::Frame(frame) = &mut p.body {
-        frame.controls = Some(crate::theater::parser::v41::DecodedFrameView {
-            control_entries: vec![NativeControlEntry {
+        frame.frame.as_mut().unwrap().controls =
+            Some(crate::theater::parser::v41::DecodedFrameView {
+                control_entries: vec![NativeControlEntry {
+                    start_bit: 2040,
+                    end_bit: 2050,
+                    index: 2,
+                    baseline: None,
+                    short: None,
+                    analog: None,
+                    third_analog: None,
+                    extra: None,
+                    flags: None,
+                    action: None,
+                }],
+                diagnostics: None,
                 start_bit: 2040,
                 end_bit: 2050,
-                index: 2,
-                baseline: None,
-                short: None,
-                analog: None,
-                third_analog: None,
-                extra: None,
-                flags: None,
-                action: None,
-            }],
-            diagnostics: None,
-            start_bit: 2040,
-            end_bit: 2050,
-            padded_bits: 2,
-            kinds: vec![0],
-            fields: vec![],
-            stop: crate::theater::parser::v41::FrameViewStop::Truncated,
-        });
+                padded_bits: 2,
+                kinds: vec![0],
+                fields: vec![],
+                stop: crate::theater::parser::v41::FrameViewStop::Truncated,
+            });
     }
     film.replication.chunks[0].packets = vec![p];
     let mut resolved = film.resolve();

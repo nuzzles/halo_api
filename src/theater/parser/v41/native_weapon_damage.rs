@@ -1,8 +1,9 @@
 //! Direct native damage projection and raw read trace, without actor resolution.
 use super::*;
-pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::native_weapon_damage::{
+pub(crate) use crate::theater::resolved::interpretation::packet::native_weapon_damage::{
     NativeWeaponDamageField, NativeWeaponDamageRead,
 };
+use crate::theater::resolved::interpretation::packet::{WeaponDamage, WeaponDamageRead};
 
 /// Native weapon-statistics damage reader. This is independent of the generic
 /// event-list layout reader: its endpoint must not substitute for a terminated

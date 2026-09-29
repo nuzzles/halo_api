@@ -1,5 +1,5 @@
 //! Native data models.
-use crate::theater::film::*;
+use super::*;
 /// The scanner selected a reader for this packet. `None` inside a selected
 /// variant is a native refusal, distinct from no applicable reader. Padding is
 /// retained on successful reader results and must not become recorded data.

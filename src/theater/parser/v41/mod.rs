@@ -116,7 +116,6 @@ pub(crate) use bootstrap::*;
 pub(crate) use bot_metadata::*;
 pub(crate) use components::*;
 pub(crate) use datums::*;
-pub(crate) use event_heads::*;
 pub(crate) use fire_events::*;
 pub(crate) use head_observations::*;
 pub(crate) use highlight_events::*;

@@ -1,5 +1,5 @@
 //! Native data models.
-use crate::theater::film::*;
+use super::*;
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct NativeWeaponDamageField {
     pub field: ComponentField,

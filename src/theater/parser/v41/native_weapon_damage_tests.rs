@@ -126,31 +126,33 @@ fn native_data_damage_admission_and_provenance() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let packets = &parsed.replication.chunks[0].packets;
-    let read = packets[0].damage_read.as_ref().unwrap();
+    let resolved = parsed.resolve();
+    let damage = |packet| {
+        resolved
+            .interpretations()
+            .packets
+            .iter()
+            .find(|entry| entry.source.chunk == 1 && entry.source.packet == packet)
+            .and_then(|entry| entry.damage.as_ref())
+    };
+    let read = damage(0).unwrap();
     check_fields(read, &[0xc0, 0]);
     assert!(read.padding_bits > 0);
     let projection = read.read.as_ref().unwrap();
     assert_eq!(projection.source, Some(packets[0].header));
     assert_eq!(projection.packet_index, Some(0));
     assert_eq!(projection.damage.timestamp_us, 123);
-    assert!(packets[1].damage_read.as_ref().unwrap().read.is_none());
-    assert!(packets[2..].iter().all(|p| p.damage_read.is_none()));
+    assert!(damage(1).unwrap().read.is_none());
+    assert!((2..packets.len()).all(|packet| damage(packet).is_none()));
     assert!(
-        parsed.summaries.chunks[0]
+        resolved
+            .interpretations()
             .packets
             .iter()
-            .all(|p| p.damage_read.is_none())
+            .all(|entry| entry.source.chunk != 2)
     );
     assert_eq!(
         serde_json::from_value::<Film>(json!(parsed)).unwrap(),
         parsed
-    );
-    let mut old = json!(packets[0]);
-    old.as_object_mut().unwrap().remove("damage_read");
-    assert!(
-        serde_json::from_value::<FilmPacket>(old)
-            .unwrap()
-            .damage_read
-            .is_none()
     );
 }

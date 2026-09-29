@@ -39,6 +39,7 @@ theater/
     mod.rs                 ResolvedFilm construction and shared indexes
     identity.rs            Identity models and player lookup
     interpretation/        Bootstrap searches and interpretation evidence
+      packet/              Packet-head, pickup, damage and teleport projections
     events.rs              Source references, provenance and event indexing
     query.rs               Filters and query indexes
     world.rs               Entity/component models and state accumulation

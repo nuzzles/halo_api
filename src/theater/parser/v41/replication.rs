@@ -112,10 +112,10 @@ impl V41ChunkReader {
                     "stopped parsing film chunk before the end"
                 );
             }
-            for (packet_index, header) in headers.iter().enumerate() {
+            for header in &headers {
                 let payload =
                     &chunk.data[header.payload_offset..header.payload_offset + header.payload_size];
-                let event_list = (!footer && header.packet_type == 0).then(|| {
+                let mut event_list = (!footer && header.packet_type == 0).then(|| {
                     // Every event consumes at least eight header bits.
                     read_native_event_list(payload, 1, gate15, payload.len())
                 });
@@ -144,17 +144,30 @@ impl V41ChunkReader {
                         message: "truncated summary count".into(),
                     }),
                     (true, _) => FilmPacketBody::Opaque,
-                    (false, 0) => config
-                        .decode_production_views(
-                            payload,
-                            2,
-                            &registry.definition.registry,
-                            &mut world,
-                        )
-                        .map(|frame| FilmPacketBody::Frame(Box::new(frame)))
-                        .unwrap_or_else(|error| FilmPacketBody::Refused {
-                            message: error.to_string(),
-                        }),
+                    (false, 0) => {
+                        let frame = config
+                            .decode_production_views(
+                                payload,
+                                2,
+                                &registry.definition.registry,
+                                &mut world,
+                            )
+                            .map_err(|error| error.to_string());
+                        let continuation = event_list.as_ref().and_then(|events| {
+                            continue_event_views(
+                                payload,
+                                events,
+                                &config,
+                                &registry.definition.registry,
+                                &mut world,
+                            )
+                        });
+                        FilmPacketBody::Frame(Box::new(FramePacket {
+                            frame,
+                            events: event_list.take().expect("frame packet event read"),
+                            continuation,
+                        }))
+                    }
                     (false, 1) => decode_datum_table(payload)
                         .map(FilmPacketBody::Datums)
                         .unwrap_or_else(|error| FilmPacketBody::Refused {
@@ -187,39 +200,9 @@ impl V41ChunkReader {
                         }),
                     _ => FilmPacketBody::Opaque,
                 };
-                let event_continuation = event_list.as_ref().and_then(|events| {
-                    continue_event_views(
-                        payload,
-                        events,
-                        &config,
-                        &registry.definition.registry,
-                        &mut world,
-                    )
-                });
                 chunk.packets.push(FilmPacket {
                     header: *header,
-                    roster_read,
                     body,
-                    event_head: (!footer && header.packet_type == 0)
-                        .then(|| decode_packet_head_event(payload))
-                        .flatten(),
-                    event_list,
-                    event_continuation,
-                    native_head: (!footer)
-                        .then(|| read_native_packet_head(header.packet_type, payload, None))
-                        .flatten(),
-                    damage_read: (!footer
-                        && header.packet_type == 0
-                        && payload.len() >= 2
-                        && payload[0] == 0xc0)
-                        .then(|| {
-                            let mut read = read_native_weapon_damage(payload, header.timestamp_us);
-                            if let Some(damage) = &mut read.read {
-                                damage.source = Some(*header);
-                                damage.packet_index = Some(packet_index);
-                            }
-                            read
-                        }),
                 });
             }
             chunks.push(chunk);

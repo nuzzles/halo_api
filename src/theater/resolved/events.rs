@@ -135,12 +135,13 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
 }
 
 pub(super) fn frame(packet: &FilmPacket, continuation: bool) -> Option<&ProductionFrame> {
+    let FilmPacketBody::Frame(frame) = &packet.body else {
+        return None;
+    };
     if continuation {
-        packet.event_continuation.as_ref()?.frame.as_ref().ok()
-    } else if let FilmPacketBody::Frame(frame) = &packet.body {
-        Some(frame)
+        frame.continuation.as_ref()?.frame.as_ref().ok()
     } else {
-        None
+        frame.frame.as_ref().ok()
     }
 }
 
@@ -174,7 +175,12 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
             };
             Record::Summary(events.get(index)?)
         }
-        RecordRef::Event(index) => Record::Event(packet.event_list.as_ref()?.records.get(index)?),
+        RecordRef::Event(index) => {
+            let FilmPacketBody::Frame(frame) = &packet.body else {
+                return None;
+            };
+            Record::Event(frame.events.records.get(index)?)
+        }
     })
 }
 
@@ -210,8 +216,8 @@ pub(super) fn index(
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
             // Event lists precede the continuation's entity and control views.
-            if let Some(list) = &packet.event_list {
-                for i in 0..list.records.len() {
+            if let FilmPacketBody::Frame(frame) = &packet.body {
+                for i in 0..frame.events.records.len() {
                     push(RecordRef::Event(i), EventKind::NativeEvent, None, None);
                 }
             }

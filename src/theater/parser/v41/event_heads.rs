@@ -1,6 +1,6 @@
 //! Native packet-head events. These readers do not imply complete event-list coverage.
 use super::bits::Cursor;
-pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::event_heads::{
+pub(crate) use crate::theater::resolved::interpretation::packet::event_heads::{
     DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
 };
 
@@ -43,13 +43,6 @@ pub(super) fn reference(r: &mut Cursor<'_>, domain: u8) -> Option<EventReference
         r.position = r.source_bits().saturating_add(1);
     }
     result
-}
-
-/// Read the first event using the pinned reference's domains and payload fields.
-/// None means an empty list or an incomplete nine-bit head. Unknown types remain
-/// explicit. Failed payload reads never zero-fill absent bits as valid data.
-pub(crate) fn decode_packet_head_event(data: &[u8]) -> Option<DecodedHeadEvent> {
-    decode_head_with_cursor(Cursor::new(data, 0)?)
 }
 
 pub(super) fn decode_head_with_cursor(mut r: Cursor<'_>) -> Option<DecodedHeadEvent> {

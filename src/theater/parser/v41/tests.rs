@@ -130,9 +130,10 @@ fn native_data_event_continuation_preserves_original_stop() {
     let FilmPacketBody::Frame(original) = &packet.body else {
         panic!("missing frame")
     };
-    assert_eq!(original.views_completed, 0);
-    assert_eq!(original.end_bit, 9);
-    let continuation = packet.event_continuation.as_ref().unwrap();
+    let initial = original.frame.as_ref().unwrap();
+    assert_eq!(initial.views_completed, 0);
+    assert_eq!(initial.end_bit, 9);
+    let continuation = original.continuation.as_ref().unwrap();
     assert_eq!(continuation.start_bit, 13);
     let frame = continuation.frame.as_ref().unwrap();
     assert_eq!(frame.views_completed, 2);
@@ -140,17 +141,6 @@ fn native_data_event_continuation_preserves_original_stop() {
     assert_eq!(
         serde_json::from_value::<Film>(json!(parsed)).unwrap(),
         parsed
-    );
-    let mut old_packet = json!(packet);
-    old_packet
-        .as_object_mut()
-        .unwrap()
-        .remove("event_continuation");
-    assert!(
-        serde_json::from_value::<FilmPacket>(old_packet)
-            .unwrap()
-            .event_continuation
-            .is_none()
     );
 }
 

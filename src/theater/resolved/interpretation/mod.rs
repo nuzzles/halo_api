@@ -13,6 +13,8 @@ pub struct PacketInterpretation {
     pub source: SourceRef,
     pub bot_metadata: Option<NativeBotMetadataRead>,
     pub fire: Option<NativeFireRead>,
+    pub packet_head: Option<NativePacketHeadRead>,
+    pub damage: Option<NativeWeaponDamageRead>,
 }
 /// Heuristic evidence is deliberately separate from structurally decoded records.
 /// A selected event gate or bootstrap anchor is not a recorded fact.
@@ -86,7 +88,23 @@ impl Interpretations {
                     }
                     read
                 });
-                if bot_metadata.is_some() || fire.is_some() {
+                let packet_head = read_native_packet_head(packet.header.packet_type, payload, None);
+                let damage =
+                    (packet.header.packet_type == 0 && payload.len() >= 2 && payload[0] == 0xc0)
+                        .then(|| {
+                            let mut read =
+                                read_native_weapon_damage(payload, packet.header.timestamp_us);
+                            if let Some(damage) = &mut read.read {
+                                damage.source = Some(packet.header);
+                                damage.packet_index = Some(index);
+                            }
+                            read
+                        });
+                if bot_metadata.is_some()
+                    || fire.is_some()
+                    || packet_head.is_some()
+                    || damage.is_some()
+                {
                     packets.push(PacketInterpretation {
                         source: SourceRef {
                             chunk: chunk.source_position(),
@@ -95,6 +113,8 @@ impl Interpretations {
                         },
                         bot_metadata,
                         fire,
+                        packet_head,
+                        damage,
                     });
                 }
             }
@@ -127,6 +147,9 @@ pub(crate) mod native_identity;
 pub(crate) mod objective_extract;
 
 pub(crate) mod player_table;
+
+pub mod packet;
+pub use packet::*;
 
 pub use bot_metadata::{FilmBotEntry, NativeBotCandidate, NativeBotMetadataRead};
 
