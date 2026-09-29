@@ -18,7 +18,7 @@ pub(super) fn slide(r: &mut Reader<'_>, level: u32) -> Option<bool> {
         r.fields[field_start..]
             .iter()
             .find(|f| f.name == name)
-            .map_or(0, |f| f.raw)
+            .map_or(0, |f| f.raw.low_u64())
     };
     let values = [
         "active",
@@ -102,7 +102,7 @@ pub(super) fn posture(r: &mut Reader<'_>) -> Option<bool> {
         r.fields[field_start..]
             .iter()
             .find(|f| f.name == name)
-            .map_or(0, |f| f.raw)
+            .map_or(0, |f| f.raw.low_u64())
     };
     let tag = field("tag");
     let gate = if tag == 1 {

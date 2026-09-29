@@ -1,4 +1,4 @@
-//! Position bit grammar from LevelUp components_position_i0.go.
+//! v41 position component bit grammar.
 use super::Reader;
 use crate::theater::parser::v41::position_capture::reference_shift_one;
 use serde::{Deserialize, Serialize};

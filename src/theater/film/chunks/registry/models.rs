@@ -14,21 +14,9 @@ pub struct FilmArchetype {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct FilmRegistry {
     pub archetypes: Vec<FilmArchetype>,
-    /// Version words preceding the registry (distinct from component entries).
-    #[serde(default)]
-    pub major_version: u32,
-    #[serde(default)]
-    pub format_version: u32,
-    /// First byte of the section following the registry.
-    #[serde(default)]
-    pub end_byte: usize,
-    /// Input ended before a structural registry terminator was encountered.
-    #[serde(default)]
-    pub truncated: bool,
 }
 
-/// Parses decompressed bootstrap bytes using LevelUp's structural registry boundary.
-/// Port source: `docs/VALIDATION.md`; MIT attribution alongside it.
+/// Failure reported before a structural registry result can be produced.
 /// Reference ParseRegistryChunk failure, distinct from a truncated registry result.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum FilmRegistryReadError {
@@ -69,14 +57,21 @@ pub struct RegistryBlockRead {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct FilmRegistryRead {
     pub registry: FilmRegistry,
-    pub truncated_bytes: usize,
     /// None means fewer than eight physical header bytes were available. The
     /// compatibility registry's zero version words must not be read as recorded.
     pub header: Option<[u32; 2]>,
     /// None for old exports. Includes the rejected boundary block, if present;
     /// incomplete trailing blocks are not read by the reference grammar.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block_reads: Option<Vec<RegistryBlockRead>>,
+    pub blocks: Vec<RegistryBlockRead>,
+    pub registry_end_byte: usize,
+    pub stop: RegistryStop,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum RegistryStop {
+    BoundaryBlock,
+    SourceBoundary,
+    TruncatedHeader,
 }
 
 impl FilmRegistry {
@@ -84,7 +79,7 @@ impl FilmRegistry {
         self.archetypes.get(index)
     }
 
-    /// LevelUp-compatible FNV-1a over each named entry's LE level and name.
+    /// FNV-1a over each named entry's little-endian level and name.
     /// Older exports without levels have no comparable fingerprint.
     pub(crate) fn fingerprint(&self) -> Option<u64> {
         let mut hash = 0xcbf29ce484222325u64;

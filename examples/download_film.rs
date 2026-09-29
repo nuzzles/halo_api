@@ -19,6 +19,7 @@ async fn main() -> Result<(), common::ExampleError> {
             halo_api::theater::film::ChunkKind::Registry => 1,
             halo_api::theater::film::ChunkKind::Replication => 2,
             halo_api::theater::film::ChunkKind::Summary => 3,
+            halo_api::theater::film::ChunkKind::Unknown(value) => value,
         };
         let path = output.join(format!(
             "chunk-{:03}-type-{}.bin",

@@ -15,7 +15,7 @@ pub struct V41ReplicationStreamChunkReader;
 pub struct V41SummaryChunkReader;
 
 #[cfg(test)]
-pub(crate) fn test_chunks(source: &FilmSource) -> Vec<FilmChunk> {
+pub(crate) fn test_chunks(source: &FixtureFilmSource) -> Vec<FilmChunk> {
     source
         .original_chunks()
         .iter()
@@ -55,13 +55,12 @@ pub(crate) mod kill_decode;
 
 pub(crate) mod kill_event_chain;
 
-pub(crate) mod medals;
-
 pub(crate) mod reader;
 
 pub(crate) mod production_frame;
 
-pub(crate) use crate::theater::film::chunks::replication::components::models as component_models;
+mod diagnostics;
+mod observations;
 
 pub(crate) mod records;
 
@@ -97,16 +96,20 @@ pub(crate) use source_bits::*;
 pub(crate) use types::*;
 pub(crate) use world::*;
 
-pub(crate) use component_models::{
-    AbilityNonPredictedState, EquipmentCreationField, EquipmentField, FilmComponentObservation,
-    FilmReadDiagnostics, GameEngineField, ManagedObjectField, MovementComponent, MppField,
-    NavpointField, ObjectiveField, PlayerStateField, ProbeComponent, WidthAdjustment, WidthPurpose,
-};
 pub(crate) use components::{ComponentField, EntityRecord, EntityViewStop};
+pub(crate) use diagnostics::{
+    FilmReadDiagnostics, ReadOperation, ReadRefusal, WidthAdjustment, WidthPurpose, WidthRefusal,
+};
+pub(crate) use observations::{
+    AbilityNonPredictedState, CamoState, EquipmentCreationField, EquipmentField,
+    FilmComponentObservation, GameEngineField, ManagedObjectField, ManagedPropertyField,
+    MovementComponent, MppField, NavpointField, ObjectParentState, ObjectiveField,
+    PlayerStateField, ProbeComponent,
+};
 pub(crate) use production_frame::ProductionFrame;
 pub(crate) use records::{RecordHeader, RecordKind};
 pub(crate) use registry::FilmRegistry;
 #[cfg(test)]
-pub(crate) use transport::{FilmSource, FilmSourceMetadata};
+pub(crate) use transport::{FixtureChunkMetadata, FixtureFilmSource};
 pub(crate) use unit_equipment::UnitEquipmentRead;
 pub(crate) use unit_references::{UnitReference, UnitReferenceKind};

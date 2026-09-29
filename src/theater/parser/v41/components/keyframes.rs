@@ -2,8 +2,9 @@
 //! not the presence masks used by delta records.
 use super::Cursor;
 use super::{ComponentField, PositionEncoding, Reader, defaults};
+use crate::theater::film::RawBits;
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::keyframes::{
-    KeyframeComponentSpan, KeyframeRecord, KeyframeStop,
+    KeyframeComponentRead, KeyframeRecord, KeyframeStop,
 };
 use crate::theater::parser::v41::FilmRegistry;
 
@@ -107,13 +108,13 @@ fn decode_keyframe_record_inner(
             if width > 0 {
                 r.fields.push(ComponentField {
                     name: name.into(),
-                    bit: r.cursor.position,
-                    width: width as u64,
-                    raw: crate::theater::parser::v41::reference_bits_tolerant(
+                    bit: usize::try_from(r.cursor.position).ok()?,
+                    width: usize::try_from(width).ok()?,
+                    raw: RawBits::from_source(
                         data,
-                        r.cursor.position,
-                        width,
-                    ),
+                        usize::try_from(r.cursor.position).ok()?,
+                        usize::try_from(width).ok()?,
+                    )?,
                 });
                 r.cursor.skip_signed(width);
                 remaining -= width;
@@ -161,14 +162,13 @@ fn decode_keyframe_record_inner(
         (id, archetype)
     };
     let mut components = Vec::new();
-    let mut attempts = Vec::new();
-    let stop = body(
+    let mut stop = body(
         &mut r,
         archetype,
         registry,
         mpp_widths,
         corruption_check,
-        (&mut components, &mut attempts),
+        &mut components,
         (
             padded,
             component_widths,
@@ -177,16 +177,37 @@ fn decode_keyframe_record_inner(
         ),
     )
     .unwrap_or(KeyframeStop::Truncated);
+    let source_end = i64::try_from(data.len().saturating_mul(8)).ok()?;
+    if r.cursor.position > source_end {
+        stop = KeyframeStop::Truncated;
+    }
+    components.retain_mut(|component| {
+        if component.start_bit >= source_end {
+            return false;
+        }
+        component.end_bit = component.end_bit.min(source_end);
+        true
+    });
+    let mut fields = r.fields;
+    fields.retain(|field| {
+        !components.iter().any(|component: &KeyframeComponentRead| {
+            let Ok(start) = usize::try_from(component.start_bit) else {
+                return false;
+            };
+            let Ok(end) = usize::try_from(component.end_bit) else {
+                return false;
+            };
+            field.bit >= start && field.bit < end
+        })
+    });
     Some(KeyframeRecord {
         start_bit: bit,
-        end_bit: r.cursor.position,
+        end_bit: r.cursor.position.min(source_end),
         id,
         archetype,
-        fields: r.fields,
+        fields,
         references: r.references,
-        diagnostics: r.diagnostics,
         components,
-        attempts,
         stop,
     })
 }
@@ -197,13 +218,9 @@ fn body(
     registry: &FilmRegistry,
     widths: [usize; 2],
     check: bool,
-    outputs: (
-        &mut Vec<KeyframeComponentSpan>,
-        &mut Vec<KeyframeComponentSpan>,
-    ),
+    components: &mut Vec<KeyframeComponentRead>,
     policy: (bool, Option<&super::ComponentWidthOverrides>, bool, u64),
 ) -> Option<KeyframeStop> {
-    let (components, attempts) = outputs;
     let (reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
     // The writer omits n1, n2 and the entire body for this sentinel archetype.
     if ti == u32::MAX {
@@ -231,7 +248,6 @@ fn body(
         }
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
-        let observation_start = r.diagnostics.component_observations.len();
         let calibrated = super::widths::is_calibrated(r, name, component_widths);
         let status = super::widths::read_component(
             r,
@@ -241,19 +257,15 @@ fn body(
             component_widths,
             (simulation_complete, None),
         );
-        attempts.push(KeyframeComponentSpan {
+        components.push(KeyframeComponentRead {
             variant: status
                 .map(|_| super::widths::result_variant(name, &r.fields[field_start..], calibrated)),
             ported: status,
-            field_range: Some([field_start, r.fields.len()]),
-            observation_range: Some([
-                observation_start,
-                r.diagnostics.component_observations.len(),
-            ]),
             index,
             name: name.clone(),
             start_bit,
             end_bit: r.cursor.position,
+            fields: r.fields[field_start..].to_vec(),
         });
         if !status? {
             return Some(KeyframeStop::UnsupportedComponent {
@@ -264,20 +276,9 @@ fn body(
         if check {
             r.gate("component_corruption_check", 32, true)?;
         }
-        components.push(KeyframeComponentSpan {
-            variant: attempts.last().unwrap().variant,
-            ported: status,
-            field_range: Some([field_start, r.fields.len()]),
-            observation_range: Some([
-                observation_start,
-                r.diagnostics.component_observations.len(),
-            ]),
-            index,
-            name: name.clone(),
-            start_bit,
-            end_bit: r.cursor.position,
-        });
-        *attempts.last_mut().unwrap() = components.last().unwrap().clone();
+        let component = components.last_mut().unwrap();
+        component.end_bit = r.cursor.position;
+        component.fields = r.fields[field_start..].to_vec();
     }
     Some(KeyframeStop::Complete)
 }

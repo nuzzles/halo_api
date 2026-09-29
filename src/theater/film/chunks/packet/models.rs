@@ -8,34 +8,81 @@ use super::super::replication::{DatumDecodeError, FrameDecodeError};
 /// A failed body decode therefore preserves the packet envelope and source bytes.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Packet<T> {
+    pub source: PacketSource,
     pub header: FilmPacketHeader,
-    pub body: Result<T, PacketDecodeError>,
+    pub body: PacketRead<T>,
 }
 
-/// Original location in a decompressed chunk; bits are MSB-first and half-open.
+/// Associates a decoded body variant with its recorded packet type code.
+pub trait PacketBody {
+    fn packet_type(&self) -> u16;
+}
+
+impl<T: PacketBody> Packet<T> {
+    /// Checks that a decoded body agrees with the wire header. Opaque bodies
+    /// carry no typed variant and therefore cannot conflict.
+    pub fn body_type_matches_header(&self) -> bool {
+        match &self.body {
+            PacketRead::Complete(body) => body.packet_type() == self.header.packet_type,
+            PacketRead::Opaque { .. } => true,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct PacketStream<T> {
+    pub packets: Vec<Packet<T>>,
+    /// Source byte ranges that framing did not classify as packets.
+    pub opaque: Vec<ByteRange>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub enum PacketRead<T> {
+    Complete(T),
+    Opaque { reason: PacketDecodeError },
+}
+
+impl<T> PacketRead<T> {
+    pub fn complete(&self) -> Option<&T> {
+        match self {
+            Self::Complete(value) => Some(value),
+            Self::Opaque { .. } => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct SourceSpan {
-    pub chunk: i32,
-    pub payload_byte: usize,
-    pub bit: usize,
-    pub end_bit: usize,
+pub struct ByteRange {
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct BitRange {
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct PacketSource {
+    pub header: ByteRange,
+    pub payload: ByteRange,
 }
 
 /// One checked byte-aligned film packet header.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct FilmPacketHeader {
-    pub chunk_index: i32,
     pub packet_type: u16,
-    pub byte_2: u8,
-    pub byte_3: u8,
-    pub payload_offset: usize,
-    pub payload_size: usize,
+    pub unknown_2: [u8; 2],
+    pub payload_size: u32,
     pub timestamp_us: u64,
 }
 
 /// Why a structurally recognized packet could not be decoded.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, thiserror::Error)]
 pub enum PacketDecodeError {
+    #[error("packet type {packet_type} has no established v41 layout")]
+    UnsupportedLayout { packet_type: u16 },
     #[error("packet type {packet_type} has an invalid datum table: {reason}")]
     InvalidDatumTable {
         packet_type: u16,

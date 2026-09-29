@@ -1,6 +1,6 @@
 use super::*;
 use crate::theater::Film;
-use crate::theater::parser::v41::{FilmSource, FilmSourceMetadata, test_chunks};
+use crate::theater::parser::v41::{FixtureChunkMetadata, FixtureFilmSource, test_chunks};
 use crate::theater::resolved::interpretation::{PickupOutcome, TranslocatorStop};
 use serde_json::{Value, json};
 use std::io::Read;
@@ -114,7 +114,7 @@ fn reference_data_packet_heads_padding_oracles() {
             let Some(read) = read else { continue };
             selected += 1;
             check_read(&read, row);
-            let source = FilmSource::load(
+            let source = FixtureFilmSource::load(
                 &[
                     [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
                     framed(&payload),
@@ -157,24 +157,24 @@ fn reference_data_packet_heads_context_and_footer_boundaries() {
         .unwrap();
     let payload = bytes(row["hex"].as_str().unwrap());
     let packet = framed(&payload);
-    let source = FilmSource::load(
+    let source = FixtureFilmSource::load(
         &[
             [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
             packet.clone(),
             packet,
         ],
         &[
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 0,
                 chunk_type: 1,
                 start_ms: 0,
             },
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 17,
                 chunk_type: 2,
                 start_ms: 0,
             },
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 18,
                 chunk_type: 3,
                 start_ms: 0,

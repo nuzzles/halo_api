@@ -1,67 +1,74 @@
-# Reference structure and fidelity
+# Canonical structure and fidelity
 
-The reference recording consists of a component registry/bootstrap chunk (type 1),
-a replication packet stream (type 2 chunks), and summary data (type 3 chunks).
-`Film` represents those as `registry`, `replication`, and `summaries`.
+A v41 recording consists of a component registry/bootstrap chunk (type 1),
+replication packet-stream chunks (type 2), and summary chunks (type 3). `Film`
+retains the required registry separately and stores every following chunk in one
+ordered `chunks` vector. Filtering helpers do not create a second ordering.
 
 The bootstrap begins with version words and archetype/component registry blocks.
-The captured v41 corpus has 50 accepted registry blocks and 1,067 named slots.
-`registry.definition` retains the decoded component registry and its read diagnostics;
-`registry` retains the entire input, including bootstrap data beyond that
-structurally decoded registry. Identity/player searches over those bytes belong to
-resolution rather than being presented as established reference boundaries.
+`registry.body` retains the ordered decoded registry, the two recorded header
+words, every attempted block boundary, the terminal byte, and its stop. The chunk
+also retains all bootstrap bytes beyond the structurally decoded registry.
+Identity and player-table searches over those bytes belong to resolution because
+their boundaries are not established by the registry grammar.
 
-Replication packets use 16-byte headers. Each packet header identifies its exact
-payload range in the enclosing chunk, while `body` is a fallible typed decoding.
-An unsupported or invalid body therefore does not discard or duplicate the wire
-payload. Packet reads preserve their header, payload offset, timestamp, ordered
-views/records/component fields, partial reads and stops. Keyframe traversal advances through decoded record boundaries;
-it stops at an invalid header or unsupported component and never searches ahead
-for a plausible replacement boundary.
+Replication packets use 16-byte headers. `PacketSource` identifies each header
+and payload byte range in the enclosing decompressed chunk. `PacketRead`
+distinguishes complete, partial, and opaque body decoding. `PacketStream::opaque`
+records ranges that framing could not classify as packets. Unsupported packet
+layouts never become successful placeholder bodies.
 
-Summary packets retain declared counts and entries from the guarded v41 footer
-layout. Each summary has its own recorded timestamp and XUID. Player linkage is a
-resolved interpretation. The separate whole-chunk highlight search is available
-only through resolved interpretation evidence.
+Packet type 0 contains ordered frame events, views, entity records, components,
+and controls. Type 1 contains every datum-table slot in wire order. Type 2 contains
+keyframe/baseline records. Types 7 and 8 are represented explicitly as end and
+roster packet layouts; the roster body remains opaque until its grammar is known.
+Component records directly own their component fields. `RawBits` retains the full
+recorded bit sequence of every decoded field, including fields wider than 64 bits.
+Readers stop at source bounds and never synthesize zero padding.
+
+Summary packets retain declared counts and an ordered sequence of decoded events
+and opaque gaps from the guarded v41 footer layout. Each event stores its recorded
+timestamp, numeric XUID, UTF-16 code units, raw flags, and bit ranges. Text decoding,
+summary kinds, and player linkage are exposed by `ResolvedFilm::summaries()`.
 
 ## Source coordinates
 
-Every parsed chunk retains its original `FilmChunk`, decompressed `data`, and
-`source_position` in the supplied list. Source positions are never replaced by
-manifest indices. Nested packet bit offsets are relative to the header's
-`payload_offset` in decompressed data; compressed transport has separate storage.
-The reader warns when packet framing stops before the end of a chunk. All bytes
-remain retained in `data`. The bootstrap is retained whole rather than
-misrepresented as a replication packet sequence.
+Every parsed `Chunk<T>` retains its original `FilmChunk`, decompressed `data`,
+position in the supplied list, transport/decompression outcome, and typed body.
+Source positions are never replaced by manifest indices. Nested packet bit offsets
+are payload-relative; `PacketSource::payload` locates that payload in the chunk.
+All source bytes remain available even when decompression, framing, or body decoding
+is partial.
 
-## Unknowns and runtime settings
+Byte and bit ranges are half-open. Unknown chunk kinds are retained as
+`FilmDataChunk::Unknown`. Known packet envelopes with unsupported body layouts are
+retained as `PacketRead::Opaque`. Typed bodies carry their own ordered stop and
+opaque-region models where decoding can end partway through a known layout. This
+keeps recorded absence distinct from parser inability.
 
-The v41 reader uses its fixed grammar defaults, not inferred map calibration.
-Unknown component layouts and stopped reads remain explicit. Runtime-dependent
-code-15 event bodies stop with `MissingRuntimeGate15`; the reference parser never
-chooses a gate by scoring candidate parses. Roster bodies needing an unestablished
-personalization width remain refused/opaque. Map-relative translocator reads may
-stop with `MissingMap`. Quantized component fields remain available; default map
-bounds are not used to publish inferred world coordinates into Film.
+## Decoder scope
 
-Bootstrap/player searches, event-gate selection, bot candidates, modal fire-aim
-interpretation and whole-chunk highlight scans run during resolution. Their results
-are separate from reference records and do not silently repair or replace stopped
-reference records.
+The v41 reader uses fixed grammar rules and does not search ahead for plausible
+record boundaries. Unknown component layouts and stopped reads remain explicit.
+Runtime-dependent event layouts stop when their required gate is unavailable.
+Roster layouts needing an unestablished personalization width remain opaque.
+Map-relative values remain quantized unless external map data is supplied during
+higher-level interpretation.
 
-Some reference readers retain padded lookahead diagnostics; synthetic bits and partial
-fields must not be treated as backed source bits. Independent reference packet-head
-and damage reads can overlap the generic body, so their results do not establish
-an exhaustive, nonoverlapping partition of every source bit.
+Bootstrap/player searches, event-gate selection, bot candidates, fire/aim
+interpretation, and whole-chunk highlight scans run only during resolution. Their
+results are source-linked interpretations and do not repair or replace canonical
+records.
 
 ## Fidelity contract
 
-All supplied source information is retained, with structural decoding where known.
-Unknown bytes are not discarded or replaced by guessed records. This does not
-claim every bit already has a typed schema. Original input bytes can be retrieved
-unchanged; editing models and byte-for-byte re-encoding is not implemented.
-JSON is an inspection format, not a replacement for reference byte identity.
+Structural fidelity means preserving supplied bytes, hierarchy, order, recorded
+identities and timestamps, masks and quantized values, source ranges, unknown
+regions, and explicit decoding stops. It does not mean every bit already has a
+typed schema. Original input bytes can be retrieved unchanged. Editing the model
+and byte-for-byte re-encoding are separate work and are not implemented. JSON is
+an inspection format rather than a replacement for source-byte identity.
 
 Scope is v41. Unsupported major versions fail before a v41 body reader is selected.
-Map assets, rendering, interpolation and inferred physical-action semantics are
-outside the reference model.
+Map assets, rendering, interpolation, and inferred physical actions are outside
+`Film`.

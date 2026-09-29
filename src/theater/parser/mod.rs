@@ -25,7 +25,8 @@ impl ChunkReader {
 
         // The registry version header selects the reader before any
         // version-dependent registry fields are interpreted.
-        let registry_data = inflate_film_chunk(&first.data).into_owned();
+        let (registry_data, registry_transport) = inflate_film_chunk(&first.data);
+        let registry_data = registry_data.into_owned();
         let header = registry_data
             .get(..4)
             .ok_or(ParseError::TruncatedRegistryHeader)?;
@@ -36,7 +37,7 @@ impl ChunkReader {
         };
 
         match reader {
-            Self::V41(reader) => reader.read(first, registry_data, chunks),
+            Self::V41(reader) => reader.read(first, registry_data, registry_transport, chunks),
         }
     }
 }

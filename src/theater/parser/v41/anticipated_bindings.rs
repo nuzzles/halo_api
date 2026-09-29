@@ -1,8 +1,13 @@
 //! Dated keyframe declarations used by the reference's later-keyframe fallback.
 //! These are evidence for a binding, not decoded creation records.
-pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::anticipated_bindings::AnticipatedDeclaration;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct AnticipatedDeclaration {
+    pub chunk_index: i64,
+    pub archetype: u32,
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct AnticipatedBindings {

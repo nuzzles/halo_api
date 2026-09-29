@@ -17,6 +17,25 @@ pub enum ChunkKind {
     Registry,
     Replication,
     Summary,
+    Unknown(i32),
+}
+
+/// One decoded chunk with its original transport input and canonical payload.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct Chunk<T> {
+    pub source: FilmChunk,
+    pub source_position: usize,
+    pub data: Vec<u8>,
+    pub transport: ChunkTransport,
+    pub body: T,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum ChunkTransport {
+    Clear,
+    ZlibComplete,
+    ZlibPartial,
+    ZlibRejected,
 }
 impl TryFrom<i32> for ChunkKind {
     type Error = ParseError;
@@ -25,7 +44,7 @@ impl TryFrom<i32> for ChunkKind {
             1 => Ok(Self::Registry),
             2 => Ok(Self::Replication),
             3 => Ok(Self::Summary),
-            other => Err(ParseError::ChunkKind(other)),
+            other => Ok(Self::Unknown(other)),
         }
     }
 }

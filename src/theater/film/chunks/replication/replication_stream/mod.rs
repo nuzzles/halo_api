@@ -1,17 +1,10 @@
 //! Ordered replication stream and packet envelope models.
 
-use super::{Packet, ReplicationStreamChunk};
+use super::Packet;
 use serde::{Deserialize, Serialize};
 
 pub mod models;
 pub use models::*;
-
-/// The replication stream is an ordered sequence of differently typed packets.
-/// The packet header’s packet_type determines how its payload is decoded.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-pub struct ReplicationStream {
-    pub chunks: Vec<ReplicationStreamChunk>,
-}
 
 /// One framed entry from a replication-stream chunk.
 ///
@@ -23,8 +16,8 @@ pub type ReplicationStreamPacket = Packet<ReplicationStreamPacketBody>;
 /// Successfully decoded body of a [`ReplicationStreamPacket`].
 ///
 /// The packet header selects one of these layouts by its numeric `packet_type`.
-/// The enclosing [`ReplicationStreamChunk`] retains the source bytes and exposes
-/// them through [`ReplicationStreamChunk::payload`].
+/// The enclosing [`super::ReplicationStreamChunk`] retains the source bytes and
+/// exposes them through [`super::ReplicationStreamChunk::payload`].
 pub enum ReplicationStreamPacketBody {
     /// Packet type 0: incremental events, entity records, and controls in a
     /// [`FramePacket`].
@@ -35,6 +28,18 @@ pub enum ReplicationStreamPacketBody {
     KeyframesPacketBody(Box<KeyframeTable>),
     /// Packet type 8: a known roster packet with no established v41 body model.
     RosterPacketBody,
-    /// A packet type without a v41 body decoder. Inspect the packet payload.
-    UnknownPacketBody,
+    /// Packet type 7: the recorded end-of-stream packet.
+    EndPacketBody,
+}
+
+impl super::PacketBody for ReplicationStreamPacketBody {
+    fn packet_type(&self) -> u16 {
+        match self {
+            Self::FramePacketBody(_) => 0,
+            Self::DatumsPacketBody(_) => 1,
+            Self::KeyframesPacketBody(_) => 2,
+            Self::EndPacketBody => 7,
+            Self::RosterPacketBody => 8,
+        }
+    }
 }

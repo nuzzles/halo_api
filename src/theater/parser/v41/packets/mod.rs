@@ -22,8 +22,9 @@ pub(super) fn decode(
         0 => frame::decode(payload, context),
         1 => datums::decode(payload),
         2 => keyframes::decode(payload, context),
+        7 => Ok(ReplicationStreamPacketBody::EndPacketBody),
         8 => Ok(roster::decode()),
-        _ => Ok(ReplicationStreamPacketBody::UnknownPacketBody),
+        _ => Err(PacketDecodeError::UnsupportedLayout { packet_type }),
     }
 }
 

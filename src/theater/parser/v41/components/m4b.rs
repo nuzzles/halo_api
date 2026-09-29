@@ -1,4 +1,4 @@
-//! Reference component additions from LevelUp d61443e, composants_vue_b_m4b.go.
+//! Additional v41 view-B component readers.
 //! Raw values and gates remain fields. Layouts selected by unavailable runtime
 //! state are left unsupported so the enclosing record retains the stop.
 use super::Reader;

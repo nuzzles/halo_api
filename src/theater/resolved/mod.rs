@@ -8,8 +8,8 @@ use super::film::{
     KeyframeStop, ProductionFrame, RecordKind, SummaryEvent,
 };
 use super::film::{
-    ContinuationStatePolicy, Film, ReplicationStreamPacket, ReplicationStreamPacketBody,
-    SummaryPacket, SummaryPacketBody,
+    ContinuationStatePolicy, Film, PacketRead, ReplicationStreamPacket,
+    ReplicationStreamPacketBody, SummaryPacket, SummaryPacketBody, SummarySegment,
 };
 use interpretation::Interpretations;
 use std::{collections::BTreeMap, sync::Arc};
@@ -19,12 +19,14 @@ pub mod identity;
 pub mod playback;
 pub mod query;
 mod source;
+pub mod summary;
 use source::{PacketRef, chunk};
 pub mod world;
 pub use events::*;
 use playback::{CHECKPOINT_INTERVAL, Checkpoint};
 pub use query::EventFilter;
 use query::QueryIndices;
+pub use summary::{ResolvedSummary, SummaryKind};
 pub use world::*;
 /// Resolved recording, chronological index and independent playback cursor.
 /// Conversion walks decoded records without reparsing or copying source bytes.
@@ -34,6 +36,7 @@ pub struct ResolvedFilm<'film> {
     film: &'film Film,
     interpretations: Interpretations,
     events: Arc<Vec<Event>>,
+    summaries: Arc<Vec<ResolvedSummary>>,
     query_indices: Arc<QueryIndices>,
     checkpoints: Arc<Vec<Checkpoint>>,
     /// Recorded film player index -> position in `interpretations.player_table.slots`.
@@ -55,6 +58,9 @@ impl<'film> ResolvedFilm<'film> {
     pub fn events(&self) -> &[Event] {
         &self.events
     }
+    pub fn summaries(&self) -> &[ResolvedSummary] {
+        &self.summaries
+    }
     pub fn record(&self, source: SourceRef) -> Option<Record<'_>> {
         record(self.film, source)
     }
@@ -63,6 +69,7 @@ impl<'film> ResolvedFilm<'film> {
 impl<'film> ResolvedFilm<'film> {
     pub(super) fn from_film(film: &'film Film) -> Self {
         let interpretations = Interpretations::from_film(film);
+        let summaries = summary::resolve_summaries(film, interpretations.player_table.as_ref());
         let mut events = index(film, interpretations.player_table.as_ref());
         // Stable sort preserves source chunk/packet/record order for clock ties.
         events.sort_by_key(|e| (e.timestamp_us, e.source.chunk, e.source.packet));
@@ -107,6 +114,7 @@ impl<'film> ResolvedFilm<'film> {
             interpretations,
             query_indices: Arc::new(QueryIndices::new(&events)),
             events: Arc::new(events),
+            summaries: Arc::new(summaries),
             checkpoints: Arc::new(checkpoints),
             player_slot_by_film_index,
             world: WorldSnapshot::default(),

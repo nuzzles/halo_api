@@ -1,5 +1,5 @@
 //! Reference data models.
-use super::{FilmReadDiagnostics, KeyframeRecord};
+use super::KeyframeRecord;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -28,5 +28,4 @@ pub struct KeyframeChainAttempt {
 pub struct KeyframeTable {
     pub records: Vec<KeyframeChainAttempt>,
     pub stop: KeyframeChainStop,
-    pub diagnostics: FilmReadDiagnostics,
 }

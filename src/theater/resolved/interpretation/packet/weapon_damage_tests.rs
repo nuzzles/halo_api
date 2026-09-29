@@ -1,7 +1,7 @@
 use super::decode_weapon_damage;
 use super::*;
 use crate::theater::Film;
-use crate::theater::parser::v41::{FilmSource, FilmSourceMetadata, test_chunks};
+use crate::theater::parser::v41::{FixtureChunkMetadata, FixtureFilmSource, test_chunks};
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -11,15 +11,15 @@ pub(crate) fn check_fields(read: &WeaponDamageTrace, payload: &[u8]) {
     let mut padded = 0;
     for field in &read.fields {
         let raw = &field.field;
-        assert_eq!(raw.bit, end as i64);
+        assert_eq!(raw.bit, end);
         let start = end;
-        end += raw.width as usize;
+        end += raw.width;
         let mut expected = 0u64;
         for bit in start..end {
             expected = (expected << 1)
                 | u64::from(payload.get(bit / 8).map_or(0, |b| (b >> (7 - bit % 8)) & 1));
         }
-        assert_eq!(raw.raw, expected, "{}", raw.name);
+        assert_eq!(raw.value, expected, "{}", raw.name);
         assert_eq!(
             field.padded_bits,
             end.saturating_sub(start.max(payload.len() * 8))
@@ -66,7 +66,7 @@ fn reference_data_damage_raw_fields_match_reference() {
         opaque_nonzero += read
             .fields
             .iter()
-            .filter(|f| f.opaque && f.field.raw != 0)
+            .filter(|f| f.opaque && f.field.value != 0)
             .count();
         generations += read
             .fields
@@ -100,24 +100,24 @@ fn reference_data_damage_admission_and_provenance() {
     stream.extend(packet(0, &[0xc0])); // too short for reference selection
     stream.extend(packet(6, &[0xc0, 0])); // wrong packet type
     stream.extend(packet(0, &[0x80, 0])); // wrong first byte
-    let source = FilmSource::load(
+    let source = FixtureFilmSource::load(
         &[
             [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
             stream.clone(),
             stream,
         ],
         &[
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 0,
                 chunk_type: 1,
                 start_ms: 0,
             },
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 9,
                 chunk_type: 2,
                 start_ms: 0,
             },
-            FilmSourceMetadata {
+            FixtureChunkMetadata {
                 index: 10,
                 chunk_type: 3,
                 start_ms: 0,
@@ -126,7 +126,7 @@ fn reference_data_damage_admission_and_provenance() {
     )
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let packets = &parsed.replication.chunks[0].packets;
+    let packets = &parsed.replication_chunks().next().unwrap().body.packets;
     let resolved = parsed.resolve();
     let damage = |packet| {
         resolved

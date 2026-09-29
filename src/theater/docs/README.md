@@ -14,7 +14,7 @@ fn inspect(registry_bytes: Vec<u8>, replication_bytes: Vec<u8>, summary_bytes: V
         FilmChunk { kind: ChunkKind::Summary, index: None, start_ms: None, data: summary_bytes },
     ])?;
     let mut resolved = film.resolve();
-    println!("{} summaries", film.summaries.events().count());
+    println!("{} summaries", resolved.summaries().len());
     println!("{} entities", resolved.seek(10_000_000).entities.len());
     Ok(())
 }
@@ -30,17 +30,17 @@ source loader, or parsing options are part of the public entry point.
 decompresses it, reads the version before version-dependent fields, and selects
 its `V41ChunkReader` variant. That reader dispatches registry, replication, and
 summary chunks to their v41 kind-specific readers. Unsupported versions return
-an error; callers still use the single `Film::parse` entry point. `Film` has exactly
-three fields:
+an error; callers still use the single `Film::parse` entry point. `Film` has two
+fields:
 
-- `registry`: component definitions and the complete bootstrap chunk.
-- `replication`: ordered replication chunks and reference packet reads.
-- `summaries`: ordered summary chunks and recorded summary entries.
+- `registry`: the required registry chunk, including its source and read result.
+- `chunks`: every later chunk in input order as replication, summary, or unknown.
 
 Each section preserves original input, decompressed bytes, source positions and
 unparsed data. Replication and summary chunks provide checked borrowed packet payloads.
 Empty input, a non-registry first chunk, or any later registry chunk is an error.
-A registry-only film is accepted with empty replication and summary sections. Unsupported chunk categories are rejected by `ChunkKind::try_from`.
+A registry-only film is accepted. Unknown numeric chunk categories are retained
+as `FilmDataChunk::Unknown` with their source bytes and transport result.
 
 `film.resolve()` borrows this recording, builds chronological query indexes and
 playback state, and performs explicitly labeled interpretation. It exposes those

@@ -1,4 +1,4 @@
-//! v41 archetype defaults, before the component loop. LevelUp default_state*.go.
+//! v41 archetype defaults read before the component loop.
 use super::Reader;
 
 /// FUN_1408efb58 at d61443e. NEW calls with param5=true. The full-state
@@ -76,7 +76,7 @@ fn projectile_position(r: &mut Reader<'_>) -> Option<bool> {
     Some(true)
 }
 
-/// Entries in LevelUp's defaultStateDeserByTI (plus its special biped path).
+/// Known v41 default-state entries, including the special biped path.
 /// Verified zero-bit stubs are intentionally absent: TraverseEntity applies its
 /// configured fallback width to them even though their ordinary default is empty.
 pub(super) fn has_reference_deserializer(ti: u32) -> bool {
@@ -306,11 +306,11 @@ fn mpp_field(r: &mut Reader<'_>, lead: bool, fallback: usize) -> Option<u64> {
     } else {
         ("mpp.index", "MPP index")
     };
-    if let Some(native) = r.reference_widths {
+    if let Some(reference) = r.reference_widths {
         let raw = if lead {
-            native.mpp.lead
+            reference.mpp.lead
         } else {
-            native.mpp.index
+            reference.mpp.index
         } as u64;
         let width = r.reference_width_limited(raw, field, u64::MAX)?;
         r.r_wide(name, width)

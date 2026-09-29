@@ -36,7 +36,7 @@ impl PositionCaptureEncoding {
 }
 
 /// Map and reader-local state used by reference position publications. Suppressing
-/// emission still updates an explicitly supplied accumulator, matching LevelUp.
+/// emission still updates an explicitly supplied accumulator.
 #[derive(Debug)]
 pub(crate) struct PositionCapture<'a> {
     pub map: &'a FilmMapBounds,

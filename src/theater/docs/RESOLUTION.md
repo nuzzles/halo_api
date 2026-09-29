@@ -12,8 +12,10 @@ not rerun the structural packet parser or mutate Film. An inferred event gate is
 reported as a selection with candidate counts, not a recorded bit, and is not used
 to silently reinterpret the reference event stream or apply extra world updates.
 
-Events use packet wire timestamps except summaries, which use their own recorded
-`time_us`. Ties retain input chunk, packet, and record order. Summary player linkage
+Events use packet wire timestamps except summaries, whose recorded milliseconds
+are converted to microseconds. Ties retain input chunk, packet, and record order.
+`summaries()` exposes decoded text and semantic kinds without modifying the
+canonical UTF-16 and raw flags. Summary player linkage
 uses a unique XUID match from the bootstrap interpretation; missing or ambiguous
 matches stay unresolved. This is not a guessed player-to-entity ownership mapping.
 Reference reads have source references and explicit read provenance. Accumulated state

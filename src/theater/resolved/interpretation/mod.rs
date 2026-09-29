@@ -40,7 +40,7 @@ pub struct Interpretations {
 }
 impl Interpretations {
     pub(super) fn from_film(film: &Film) -> Self {
-        let identity = read_identity(&film.registry.data, &film.registry.definition.registry);
+        let identity = read_identity(&film.registry.data, &film.registry.body);
         let player_table = identity
             .identity
             .as_ref()
@@ -55,8 +55,9 @@ impl Interpretations {
             })
             .unwrap_or_default();
         let event_gate15 = select_event_gate15(
-            film.replication.chunks.iter().flat_map(|c| {
-                c.packets
+            film.replication_chunks().flat_map(|c| {
+                c.body
+                    .packets
                     .iter()
                     .filter(|p| p.header.packet_type == 0)
                     .filter_map(move |p| c.payload(p))
@@ -64,17 +65,15 @@ impl Interpretations {
             EventGate15Policy::CandidateCountInference,
         );
         let chunks = film
-            .summaries
-            .chunks
-            .iter()
+            .summary_chunks()
             .map(|chunk| ChunkInterpretation {
                 source_position: chunk.source_position,
                 highlights: read_v41_highlights(&chunk.data),
             })
             .collect();
         let mut packets = Vec::new();
-        for chunk in &film.replication.chunks {
-            for (index, packet) in chunk.packets.iter().enumerate() {
+        for chunk in film.replication_chunks() {
+            for (index, packet) in chunk.body.packets.iter().enumerate() {
                 let Some(payload) = chunk.payload(packet) else {
                     continue;
                 };
@@ -172,6 +171,18 @@ pub use highlight_events::{
 };
 
 use player_slot::read_player_slot;
+
+/// One scalar produced by an interpretation reader. `source_bits` records how
+/// much of the requested width came from the packet; the remainder is reader
+/// padding and is never represented as a canonical component field.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct ProjectedField {
+    pub name: String,
+    pub bit: usize,
+    pub width: usize,
+    pub value: u64,
+    pub source_bits: usize,
+}
 
 pub use super::identity::{
     FilmIdentity, IdentityField, IdentityRead, IdentityValue, PlayerTable, PlayerTableError,

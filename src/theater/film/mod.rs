@@ -5,8 +5,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Film {
     pub registry: RegistryChunk,
-    pub replication: ReplicationStream,
-    pub summaries: SummaryEvents,
+    pub chunks: Vec<FilmDataChunk>,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum FilmDataChunk {
+    Replication(ReplicationStreamChunk),
+    Summary(SummaryChunk),
+    Unknown(Chunk<()>),
 }
 impl Film {
     /// Read the registry header, select a supported parser, and decode the chunks.
@@ -17,6 +22,20 @@ impl Film {
 
     pub fn resolve(&self) -> crate::theater::ResolvedFilm<'_> {
         crate::theater::ResolvedFilm::from_film(self)
+    }
+    pub fn replication_chunks(&self) -> impl Iterator<Item = &ReplicationStreamChunk> {
+        self.chunks.iter().filter_map(|chunk| match chunk {
+            FilmDataChunk::Replication(chunk) => Some(chunk),
+            FilmDataChunk::Summary(_) => None,
+            FilmDataChunk::Unknown(_) => None,
+        })
+    }
+    pub fn summary_chunks(&self) -> impl Iterator<Item = &SummaryChunk> {
+        self.chunks.iter().filter_map(|chunk| match chunk {
+            FilmDataChunk::Summary(chunk) => Some(chunk),
+            FilmDataChunk::Replication(_) => None,
+            FilmDataChunk::Unknown(_) => None,
+        })
     }
 }
 #[derive(Debug, thiserror::Error)]
@@ -31,12 +50,10 @@ pub enum ParseError {
     TruncatedRegistryHeader,
     #[error("unsupported film version {0}; supported: 41")]
     UnsupportedVersion(u32),
-    #[error("unsupported film chunk kind {0}")]
-    ChunkKind(i32),
     #[error(transparent)]
     Registry(#[from] FilmRegistryReadError),
-    #[error("unable to load film chunks: {0}")]
-    Source(String),
+    #[error("film contains more chunks than this platform can index")]
+    TooManyChunks,
 }
 
 #[cfg(test)]
@@ -45,37 +62,30 @@ mod tests;
 pub mod chunks;
 pub use chunks::registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
-    RegistrySlotRead,
+    RegistrySlotRead, RegistryStop,
 };
 pub use chunks::replication::{
-    AnticipatedDeclaration, BindingOrigin, ContinuationStatePolicy, ControlEntry, DatumDecodeError,
-    DatumEntry, DatumTable, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan,
-    EntityRecord, EntityViewStop, EventContinuation, EventField, EventFieldStage, EventFieldValue,
-    EventListRead, EventListStop, EventRecord, FilmViewAdmission, FrameDecodeError, FramePacket,
-    FrameRead, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop, KeyframeComponentSpan,
-    KeyframeRecord, KeyframeStop, KeyframeTable, KillEventFields, NewBindingRefusal,
-    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
-    ReplicationStream, ReplicationStreamPacket, ReplicationStreamPacketBody,
+    ContinuationStatePolicy, ControlEntry, DatumDecodeError, DatumEntry, DatumTable,
+    DecodedFrameView, EntityComponentRead, EntityRecord, EntityViewStop, EventContinuation,
+    EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
+    FrameDecodeError, FramePacket, FrameRead, FrameViewStop, KeyframeChainAttempt,
+    KeyframeChainStop, KeyframeComponentRead, KeyframeRecord, KeyframeStop, KeyframeTable,
+    KillEventFields, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
+    ReplicationStreamPacket, ReplicationStreamPacketBody,
 };
-pub use chunks::summary::{
-    FilmMedalDefinition, MedalAward, SummaryEvents, SummaryPacket, SummaryPacketBody,
-};
+pub use chunks::summary::{SummaryPacket, SummaryPacketBody, SummarySegment};
 pub use chunks::{
-    ChunkKind, FilmChunk, FilmPacketHeader, Packet, PacketDecodeError, RegistryChunk,
-    ReplicationStreamChunk, SourceSpan, SummaryChunk,
+    BitRange, ByteRange, Chunk, ChunkKind, ChunkTransport, FilmChunk, FilmPacketHeader, Packet,
+    PacketBody, PacketDecodeError, PacketRead, PacketSource, PacketStream, RegistryChunk,
+    ReplicationStreamChunk, SummaryChunk,
 };
 
 pub use chunks::replication::components::{
-    AbilityNonPredictedState, ActionBlock, CamoState, EquipmentCreationField, EquipmentField,
-    FilmComponentObservation, FilmReadDiagnostics, GameEngineField, ManagedObjectField,
-    ManagedPropertyField, MovementComponent, MppField, NavpointField, ObjectParentState,
-    ObjectiveField, PlayerStateField, ProbeComponent, ReadOperation, ReadRefusal,
-    UnitEquipmentEntry, UnitEquipmentRead, UnitReference, UnitReferenceKind, WidthAdjustment,
-    WidthPurpose, WidthRefusal,
+    ActionBlock, UnitEquipmentEntry, UnitEquipmentRead, UnitReference, UnitReferenceKind,
 };
 
 pub use chunks::replication::components::position::PositionKind;
 
-pub use chunks::replication::components::field::ComponentField;
+pub use chunks::replication::components::field::{ComponentField, RawBits};
 
-pub use chunks::summary::{SummaryEvent, SummaryKind};
+pub use chunks::summary::SummaryEvent;

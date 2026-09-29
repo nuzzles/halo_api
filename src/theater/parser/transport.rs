@@ -1,4 +1,5 @@
 //! Reference source loading: compressed or clear chunks, indexed once in source order.
+use crate::theater::film::ChunkTransport;
 use flate2::{Decompress, FlushDecompress, Status};
 use std::borrow::Cow;
 
@@ -65,40 +66,45 @@ fn inflate_body(raw: &[u8], header: usize) -> (Vec<u8>, Result<(), FilmInflateEr
 
 /// Reference `Inflate`: clear/invalid input passes through; a damaged stream keeps
 /// its decompressed prefix, unless it produced no bytes, in which case raw input survives.
-pub fn inflate_film_chunk(raw: &[u8]) -> Cow<'_, [u8]> {
+pub fn inflate_film_chunk(raw: &[u8]) -> (Cow<'_, [u8]>, ChunkTransport) {
     if raw.len() < 2 || raw[0] != 0x78 {
-        return Cow::Borrowed(raw);
+        return (Cow::Borrowed(raw), ChunkTransport::Clear);
     }
     let Ok(header) = zlib_header(raw) else {
-        return Cow::Borrowed(raw);
+        return (Cow::Borrowed(raw), ChunkTransport::ZlibRejected);
     };
     let (out, status) = inflate_body(raw, header);
     if status.is_err() && out.is_empty() {
-        Cow::Borrowed(raw)
+        (Cow::Borrowed(raw), ChunkTransport::ZlibRejected)
     } else {
-        Cow::Owned(out)
+        let transport = if status.is_ok() {
+            ChunkTransport::ZlibComplete
+        } else {
+            ChunkTransport::ZlibPartial
+        };
+        (Cow::Owned(out), transport)
     }
 }
 
 // Legacy fixture adapters are test-only; production parsing consumes FilmChunk directly.
 #[cfg(test)]
 #[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct FilmSourceMetadata {
+pub(crate) struct FixtureChunkMetadata {
     pub index: i64,
     pub chunk_type: i64,
     pub start_ms: i64,
 }
 
 #[cfg(test)]
-pub(crate) struct FilmSource {
+pub(crate) struct FixtureFilmSource {
     original_chunks: Vec<Vec<u8>>,
-    metadata: Vec<FilmSourceMetadata>,
+    metadata: Vec<FixtureChunkMetadata>,
 }
 #[cfg(test)]
-impl FilmSource {
+impl FixtureFilmSource {
     pub(crate) fn load(
         chunks: &[impl AsRef<[u8]>],
-        metadata: &[FilmSourceMetadata],
+        metadata: &[FixtureChunkMetadata],
     ) -> Result<Self, &'static str> {
         if chunks.is_empty() {
             return Err("empty film input");
@@ -111,15 +117,17 @@ impl FilmSource {
     pub(crate) fn original_chunks(&self) -> &[Vec<u8>] {
         &self.original_chunks
     }
-    pub(crate) fn metadata(&self) -> &[FilmSourceMetadata] {
+    pub(crate) fn metadata(&self) -> &[FixtureChunkMetadata] {
         &self.metadata
     }
 }
 
 pub(crate) fn read_packet_headers(
     data: &[u8],
-    chunk_index: i32,
-) -> Vec<crate::theater::film::FilmPacketHeader> {
+) -> Vec<(
+    crate::theater::film::PacketSource,
+    crate::theater::film::FilmPacketHeader,
+)> {
     let mut out = Vec::new();
     let mut offset = 0usize;
     while let Some(header) = data.get(offset..offset.saturating_add(16)) {
@@ -133,15 +141,21 @@ pub(crate) fn read_packet_headers(
         if size == 0 && kind != 7 {
             break;
         }
-        out.push(crate::theater::film::FilmPacketHeader {
-            chunk_index,
-            packet_type: kind,
-            byte_2: header[2],
-            byte_3: header[3],
-            payload_offset: start,
-            payload_size: size,
-            timestamp_us: stamp,
-        });
+        out.push((
+            crate::theater::film::PacketSource {
+                header: crate::theater::film::ByteRange {
+                    start: offset,
+                    end: start,
+                },
+                payload: crate::theater::film::ByteRange { start, end },
+            },
+            crate::theater::film::FilmPacketHeader {
+                packet_type: kind,
+                unknown_2: [header[2], header[3]],
+                payload_size: size as u32,
+                timestamp_us: stamp,
+            },
+        ));
         offset = end;
         if kind == 7 {
             break;

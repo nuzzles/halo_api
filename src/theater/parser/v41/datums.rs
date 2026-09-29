@@ -62,15 +62,7 @@ pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeE
         *word = r.read(32).ok_or_else(invalid)? as u32;
     }
     let padding = r.read(padding_bits).ok_or_else(invalid)? as u8;
-    let default_entry = DatumEntry::default();
-    let entries = entries
-        .into_iter()
-        .enumerate()
-        .filter(|(_, e)| *e != default_entry)
-        .collect();
     Ok(DatumTable {
-        slot_count: count,
-        default_entry,
         entries,
         tail_words,
         consumed_bits,

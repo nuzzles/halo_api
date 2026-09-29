@@ -1,4 +1,4 @@
-//! Bootstrap player table, ported from LevelUp's player_table*.go.
+//! Bootstrap player-table interpretation.
 //! See docs/CREDIT.md. Slot ranks include vacant entries.
 use super::{
     FilmIdentity,

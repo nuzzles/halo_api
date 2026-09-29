@@ -1,6 +1,6 @@
 //! Source-linked interpretations of replication packet payloads.
 
-use crate::theater::film::{ComponentField, FilmPacketHeader};
+use crate::theater::film::FilmPacketHeader;
 
 pub mod event_heads;
 pub use event_heads::{

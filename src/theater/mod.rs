@@ -8,9 +8,9 @@
 //!     FilmChunk { kind: ChunkKind::Replication, index: None, start_ms: None, data: replication },
 //! ])?;
 //! let mut resolved = film.resolve();
-//! let _: &[halo_api::theater::film::ReplicationStreamChunk] = &film.replication.chunks;
-//! let _: &halo_api::theater::film::chunks::registry::FilmRegistry = &film.registry.definition.registry;
-//! let _: Vec<&halo_api::theater::film::chunks::summary::SummaryEvent> = film.summaries.events().collect();
+//! let _: Vec<&halo_api::theater::film::ReplicationStreamChunk> = film.replication_chunks().collect();
+//! let _: &halo_api::theater::film::chunks::registry::FilmRegistry = &film.registry.body.registry;
+//! let _: &[halo_api::theater::resolved::ResolvedSummary] = resolved.summaries();
 //! let _: Vec<halo_api::theater::film::chunks::replication::components::ComponentField> = Vec::new();
 //! let _: &[halo_api::theater::resolved::Event] = resolved.events();
 //! assert!(std::ptr::eq(resolved.film(), &film));
@@ -18,7 +18,7 @@
 //! # Ok(())
 //! # }
 //! ```
-//! The recording has exactly three sections: registry, replication, summaries.
+//! The recording has a registry and one ordered sequence of all later chunks.
 //! Supporting models are public in their defining modules, not flattened here.
 //! ```compile_fail
 //! use halo_api::theater::FilmChunk;

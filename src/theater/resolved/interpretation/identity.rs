@@ -1,7 +1,7 @@
 //! Source-preserving identity-section reads from the pinned film_identity.go map.
 use super::bits::Bits;
 use super::{
-    FilmRegistry,
+    FilmRegistryRead, RegistryStop,
     bootstrap::{decode_film_identity, find_identity_build},
 };
 
@@ -9,7 +9,7 @@ use super::{
 /// Unknown blocks are opaque, not decoded structures. A truncated identification
 /// preserves earlier fields and the first unavailable range, while retaining the
 /// original projection error. No anchor means no fields are guessed.
-pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistry) -> IdentityRead {
+pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistryRead) -> IdentityRead {
     let (identity, error) = match decode_film_identity(data, registry) {
         Ok(identity) => (identity, None),
         Err(error) => (None, Some(error.to_string())),
@@ -21,14 +21,16 @@ pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistry) -> IdentityRea
         build_anchor_byte: None,
         fields: Vec::new(),
     };
-    if registry.major_version != 41 || registry.truncated {
+    if registry.header.map(|header| header[0]) != Some(41)
+        || registry.stop != RegistryStop::BoundaryBlock
+    {
         return out;
     }
-    let Ok(Some(anchor)) = find_identity_build(data, registry.end_byte) else {
+    let Ok(Some(anchor)) = find_identity_build(data, registry.registry_end_byte) else {
         return out;
     };
     out.build_anchor_byte = Some(anchor);
-    let mut at = registry.end_byte * 8;
+    let mut at = registry.registry_end_byte * 8;
     let mut stopped = false;
     // The anchor is at a four-byte step from registry end plus 32 bytes.
     let mut add = |name: &str, width: usize, kind: u8| {
@@ -60,7 +62,7 @@ pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistry) -> IdentityRea
             at = end.unwrap();
         }
     };
-    for _ in (registry.end_byte..anchor - 32).step_by(4) {
+    for _ in (registry.registry_end_byte..anchor - 32).step_by(4) {
         add("type_version", 32, 0);
     }
     for name in ["version", "build", "flavor"] {

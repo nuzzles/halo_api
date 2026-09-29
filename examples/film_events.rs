@@ -21,10 +21,11 @@ async fn main() -> Result<(), common::ExampleError> {
     }) {
         if let Some(Record::Summary(summary)) = resolved.record(event.source) {
             println!(
-                "{:.3}s {} {:?}",
+                "{:.3}s {} type={} medal={}",
                 event.timestamp_us as f64 / 1_000_000.0,
-                summary.name,
-                summary.kind
+                String::from_utf16_lossy(&summary.gamertag_utf16),
+                summary.type_code,
+                summary.medal_flag,
             );
         }
     }

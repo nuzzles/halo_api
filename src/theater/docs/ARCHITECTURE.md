@@ -8,27 +8,26 @@ functions are internal.
 ```text
 theater/
   film/
-    mod.rs                 Film, ParseError, dispatch and model reexports
+    mod.rs                 Film, ordered FilmDataChunk values and model reexports
     chunks/
       mod.rs               Chunk hierarchy and reexports
       models.rs            FilmChunk and ChunkKind
       packet/
         mod.rs             Shared packet model reexports
-        models.rs          Packet<T>, FilmPacketHeader, errors and source spans
+        models.rs          Packet<T>, PacketStream<T>, read states and source ranges
       registry/
         mod.rs             RegistryChunk
-        models.rs          Component registry and read trace
+        models.rs          Ordered component registry and structural read trace
       replication/
         mod.rs             ReplicationStreamChunk and components
         replication_stream/
           mod.rs           ReplicationStream and ReplicationStreamPacket
           models/          Frame, view, entity, keyframe, datum and event models
         components/
-          models/          Component observations, refusals and diagnostics
-          *.rs             Component fields, controls, position and references
+          *.rs             Recorded component fields, controls, position and references
       summary/
-        mod.rs             SummaryChunk, SummaryPacket and SummaryEvents
-        models.rs          Recorded summary event models
+        mod.rs             SummaryChunk, packets and ordered opaque/event segments
+        models.rs          Raw recorded summary fields
   parser/
     mod.rs                 ChunkReader and registry-first version dispatch
     transport.rs           Decompression and bounded packet framing
@@ -39,6 +38,8 @@ theater/
       registry.rs          v41 registry layout
       config/              Private fixed and runtime decoding configuration
       components/          v41 component decoding
+      diagnostics.rs       Private refusal and width traces
+      observations.rs      Private decoder callback state
       packets/             Replication packet dispatch and isolated body decoders
       summary.rs           v41 summary decoding
   resolved/
@@ -47,6 +48,7 @@ theater/
     interpretation/        Bootstrap searches, player-slot traces and interpretation evidence
       packet/              Packet-head, pickup, damage, zoom and teleport decoders/models
     events.rs              Source references, provenance and event indexing
+    summary.rs             Decoded text and semantic summary kinds
     query.rs               Filters and query indexes
     world.rs               Entity/component models and state accumulation
     playback.rs            Current snapshot, advance, seek and checkpoints
@@ -60,7 +62,8 @@ current variant owns a `V41ChunkReader`, which dispatches each chunk kind to
 `V41RegistryChunkReader`, `V41ReplicationStreamChunkReader`, or
 `V41SummaryChunkReader`.
 Source positions remain positions in the original full input: registry is zero,
-the next chunk is one. Additional registry chunks are errors.
+the next chunk is one. Additional registry chunks are errors. Unknown later chunk kinds remain ordered
+and retain their bytes without selecting a v41 body reader.
 
 The version reader retains grammar state for subsequent records. That state is
 internal decoding context, not a replay world. Resolution separately accumulates
@@ -83,8 +86,9 @@ through its section submodules). For example:
 
 `Film::parse`, `film.resolve()`, and the resolved query/playback methods keep their
 signatures. No second public parsing API or compatibility parser facade is added.
-Canonical model serialization and packet/source ordering are unchanged by these
-module moves. Source retention and decoding limits are described in FORMAT.md.
+Canonical packet headers retain only wire fields; locations live in `PacketSource`.
+Body reads explicitly distinguish complete, partial, and opaque results. Source
+retention and decoding limits are described in FORMAT.md.
 
 The Halo client keeps the manifest's JSON-only chunk entry as
 `clients::hi::models::FilmChunkResponse`. Downloading one or all of those entries

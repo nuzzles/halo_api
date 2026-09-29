@@ -25,26 +25,19 @@ impl PacketRef<'_> {
 impl<'a> FilmChunkRef<'a> {
     pub(super) fn packet(self, index: usize) -> Option<PacketRef<'a>> {
         match self {
-            Self::Replication(chunk) => chunk.packets.get(index).map(PacketRef::Replication),
-            Self::Summary(chunk) => chunk.packets.get(index).map(PacketRef::Summary),
+            Self::Replication(chunk) => chunk.body.packets.get(index).map(PacketRef::Replication),
+            Self::Summary(chunk) => chunk.body.packets.get(index).map(PacketRef::Summary),
         }
     }
 }
 
 pub(super) fn chunk(film: &Film, position: usize) -> Option<FilmChunkRef<'_>> {
-    if film.registry.source_position == position {
+    if position == 0 {
         return None;
     }
-    if let Ok(i) = film
-        .replication
-        .chunks
-        .binary_search_by_key(&position, |chunk| chunk.source_position)
-    {
-        return Some(FilmChunkRef::Replication(&film.replication.chunks[i]));
+    match film.chunks.get(position - 1)? {
+        FilmDataChunk::Replication(chunk) => Some(FilmChunkRef::Replication(chunk)),
+        FilmDataChunk::Summary(chunk) => Some(FilmChunkRef::Summary(chunk)),
+        FilmDataChunk::Unknown(_) => None,
     }
-    film.summaries
-        .chunks
-        .binary_search_by_key(&position, |chunk| chunk.source_position)
-        .ok()
-        .map(|i| FilmChunkRef::Summary(&film.summaries.chunks[i]))
 }

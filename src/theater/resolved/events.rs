@@ -18,7 +18,7 @@ pub enum RecordRef {
     Event(usize),
 }
 
-/// Borrowed reference payload. Independent diagnostic projections remain on Packet.
+/// Borrowed canonical payload. Independent projections remain in interpretations.
 #[derive(Debug, Clone, Copy)]
 pub enum Record<'a> {
     ReplicationPacket(&'a ReplicationStreamPacket),
@@ -113,9 +113,7 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
     };
     match record(film, source) {
         Some(Record::Entity(r))
-            if r.stop == EntityViewStop::Complete
-                && r.padded_bits == 0
-                && bounded(r.header.start_bit, r.end_bit) =>
+            if r.stop == EntityViewStop::Complete && bounded(r.header.start_bit, r.end_bit) =>
         {
             Provenance::RecordedRead
         }
@@ -127,7 +125,7 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
         Some(Record::Control(r)) if bounded(r.start_bit, r.end_bit) => Provenance::RecordedRead,
         Some(Record::Summary(_)) => Provenance::RecordedRead,
         Some(Record::Event(r))
-            if r.layout_complete && r.end_bit <= header.payload_size.saturating_mul(8) =>
+            if r.layout_complete && r.end_bit <= header.payload_size as usize * 8 =>
         {
             Provenance::RecordedRead
         }
@@ -140,7 +138,8 @@ pub(super) fn frame(
     packet: &ReplicationStreamPacket,
     continuation: bool,
 ) -> Option<&ProductionFrame> {
-    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body else {
+    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body
+    else {
         return None;
     };
     if continuation {
@@ -171,10 +170,19 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
             let PacketRef::Summary(packet) = packet else {
                 return None;
             };
-            let Ok(SummaryPacketBody::Events { events, .. }) = &packet.body else {
+            let PacketRead::Complete(SummaryPacketBody::Events { segments, .. }) = &packet.body
+            else {
                 return None;
             };
-            Record::Summary(events.get(index)?)
+            Record::Summary(
+                segments
+                    .iter()
+                    .filter_map(|segment| match segment {
+                        SummarySegment::Event(event) => Some(event),
+                        SummarySegment::Opaque { .. } => None,
+                    })
+                    .nth(index)?,
+            )
         }
         record => {
             let PacketRef::Replication(packet) = packet else {
@@ -196,14 +204,17 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
                         .get(index)?,
                 ),
                 RecordRef::Keyframe(index) => {
-                    let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &packet.body
+                    let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(
+                        table,
+                    )) = &packet.body
                     else {
                         return None;
                     };
                     Record::Keyframe(table.records.get(index)?.record.as_ref()?)
                 }
                 RecordRef::Event(index) => {
-                    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body
+                    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) =
+                        &packet.body
                     else {
                         return None;
                     };
@@ -220,9 +231,9 @@ pub(super) fn index(
     players: Option<&crate::theater::resolved::identity::PlayerTable>,
 ) -> Vec<Event> {
     let mut events = Vec::new();
-    for chunk in &film.replication.chunks {
+    for chunk in film.replication_chunks() {
         let chunk_index = chunk.source_position;
-        for (packet_index, packet) in chunk.packets.iter().enumerate() {
+        for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
             let mut push = |record, kind, entity_id, player_index| {
                 events.push(Event {
                     timestamp_us: packet.header.timestamp_us,
@@ -240,7 +251,10 @@ pub(super) fn index(
                 })
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
-            if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame_packet)) = &packet.body {
+            if let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(
+                frame_packet,
+            )) = &packet.body
+            {
                 for i in 0..frame_packet.events.records.len() {
                     push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
@@ -279,7 +293,9 @@ pub(super) fn index(
                     }
                 }
             }
-            if let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &packet.body {
+            if let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
+                &packet.body
+            {
                 for (i, attempt) in table.records.iter().enumerate() {
                     if attempt.record.is_some() {
                         push(
@@ -293,9 +309,9 @@ pub(super) fn index(
             }
         }
     }
-    for chunk in &film.summaries.chunks {
+    for chunk in film.summary_chunks() {
         let chunk_index = chunk.source_position;
-        for (packet_index, packet) in chunk.packets.iter().enumerate() {
+        for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
             events.push(Event {
                 timestamp_us: packet.header.timestamp_us,
                 order: 0,
@@ -310,21 +326,26 @@ pub(super) fn index(
                 player_index: None,
                 change: None,
             });
-            let Ok(SummaryPacketBody::Events {
-                events: summaries, ..
-            }) = &packet.body
+            let PacketRead::Complete(SummaryPacketBody::Events { segments, .. }) = &packet.body
             else {
                 continue;
             };
-            for (i, summary) in summaries.iter().enumerate() {
-                let player_index = summary.player.map(usize::from).or_else(|| {
-                    let xuid = summary.xuid.parse::<u64>().ok()?;
+            for (i, summary) in segments
+                .iter()
+                .filter_map(|segment| match segment {
+                    SummarySegment::Event(event) => Some(event),
+                    SummarySegment::Opaque { .. } => None,
+                })
+                .enumerate()
+            {
+                let player_index = (|| {
+                    let xuid = summary.xuid;
                     let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
                     let player = matches.next()?;
                     matches.next().is_none().then_some(player.film_index)
-                });
+                })();
                 events.push(Event {
-                    timestamp_us: summary.time_us,
+                    timestamp_us: u64::from(summary.timestamp_ms) * 1000,
                     order: 0,
                     provenance: Provenance::PacketEnvelope,
                     kind: EventKind::Summary,

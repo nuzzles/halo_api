@@ -2,12 +2,12 @@
 
 pub(crate) use crate::theater::film::chunks::registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
-    RegistrySlotRead,
+    RegistrySlotRead, RegistryStop,
 };
 use std::collections::HashSet;
 use std::sync::{Mutex, OnceLock};
 
-/// LevelUp's reference v41 component registry (50 blocks, 1,067 named slots).
+/// Structural v41 component registry (50 blocks, 1,067 named slots in the corpus).
 pub const KNOWN_REGISTRY_FINGERPRINT: u64 = 0x36ca8c3d2a2f9b88;
 
 fn first_unknown_registry(fingerprint: u64, seen: &mut HashSet<u64>) -> bool {
@@ -63,28 +63,28 @@ pub(crate) fn parse_registry_chunk(data: &[u8]) -> Result<FilmRegistryRead, Film
     let registry = if let Some(registry) = parse_registry_with_trace(data, Some(&mut block_reads)) {
         registry
     } else {
-        let registry = FilmRegistry {
-            archetypes: vec![],
-            major_version: 0,
-            format_version: 0,
-            end_byte: 0,
-            truncated: true,
-        };
+        let registry = FilmRegistry { archetypes: vec![] };
         warn_unknown_registry(&registry);
         registry
     };
-    let truncated_bytes = if !registry.truncated {
-        0
-    } else if data.len() < 8 {
-        data.len()
+    let registry_end_byte = block_reads
+        .iter()
+        .take_while(|block| block.accepted)
+        .last()
+        .map_or(header.map_or(0, |_| 8), |block| block.end_byte);
+    let stop = if header.is_none() {
+        RegistryStop::TruncatedHeader
+    } else if block_reads.last().is_some_and(|block| !block.accepted) {
+        RegistryStop::BoundaryBlock
     } else {
-        (data.len() - 8) % REGISTRY_BLOCK_SIZE
+        RegistryStop::SourceBoundary
     };
     Ok(FilmRegistryRead {
         registry,
-        truncated_bytes,
         header,
-        block_reads: Some(block_reads),
+        blocks: block_reads,
+        registry_end_byte,
+        stop,
     })
 }
 fn registry_looks_compressed(data: &[u8]) -> bool {
@@ -101,13 +101,9 @@ fn parse_registry_with_trace(
     if registry_looks_compressed(data) {
         return None; // Compatibility API intentionally loses the reference error category.
     }
-    let header = data.get(..8)?;
+    data.get(..8)?;
     let mut registry = FilmRegistry {
         archetypes: Vec::new(),
-        major_version: u32::from_le_bytes(header[..4].try_into().ok()?),
-        format_version: u32::from_le_bytes(header[4..].try_into().ok()?),
-        end_byte: 8,
-        truncated: true,
     };
     for (index, block) in data[8..]
         .as_chunks::<REGISTRY_BLOCK_SIZE>()
@@ -157,7 +153,6 @@ fn parse_registry_with_trace(
             });
         }
         if first_nonzero.is_some() {
-            registry.truncated = false;
             break;
         }
         registry.archetypes.push(FilmArchetype {
@@ -165,7 +160,6 @@ fn parse_registry_with_trace(
             components,
             levels,
         });
-        registry.end_byte += REGISTRY_BLOCK_SIZE;
     }
     warn_unknown_registry(&registry);
     Some(registry)

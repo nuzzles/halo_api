@@ -5,34 +5,42 @@ impl V41ReplicationStreamChunkReader {
     pub(super) fn read(
         source: FilmChunk,
         source_position: usize,
-        chunk_index: i32,
         data: Vec<u8>,
+        transport: ChunkTransport,
         config: &FrameConfig,
         registry: &FilmRegistry,
         world: &mut FilmWorld,
     ) -> ReplicationStreamChunk {
-        let packets = packet_headers(&data, chunk_index, source.kind, source_position)
+        let (headers, opaque) = packet_headers(&data, source.kind, source_position);
+        let packets = headers
             .into_iter()
-            .map(|header| {
-                let payload =
-                    &data[header.payload_offset..header.payload_offset + header.payload_size];
+            .map(|(packet_source, header)| {
+                let payload = &data[packet_source.payload.start..packet_source.payload.end];
                 let mut context = packets::DecodeContext {
                     config,
                     registry,
                     world,
                     event_gate15: None,
                 };
-                ReplicationStreamPacket {
+                let body = match packets::decode(header.packet_type, payload, &mut context) {
+                    Ok(value) => PacketRead::Complete(value),
+                    Err(reason) => PacketRead::Opaque { reason },
+                };
+                let packet = ReplicationStreamPacket {
+                    source: packet_source,
                     header,
-                    body: packets::decode(header.packet_type, payload, &mut context),
-                }
+                    body,
+                };
+                debug_assert!(packet.body_type_matches_header());
+                packet
             })
             .collect();
         ReplicationStreamChunk {
             source,
             source_position,
             data,
-            packets,
+            transport,
+            body: PacketStream { packets, opaque },
         }
     }
 }

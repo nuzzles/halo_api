@@ -143,12 +143,3 @@ impl Iterator for Windows<'_> {
         Some(result)
     }
 }
-
-/// Synthetic tail accounting is zero for negative reference cursor positions.
-/// The reference signed endpoint remains authoritative on narrower targets.
-pub(crate) fn padded_from_native(bit: i64, source_bits: usize) -> usize {
-    if bit < 0 {
-        return 0;
-    }
-    usize::try_from((bit as u64).saturating_sub(source_bits as u64)).unwrap_or(usize::MAX)
-}

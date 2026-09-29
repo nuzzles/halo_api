@@ -6,36 +6,52 @@ impl V41SummaryChunkReader {
         source_position: usize,
         chunk_index: i32,
         data: Vec<u8>,
+        transport: ChunkTransport,
     ) -> SummaryChunk {
-        let packets = packet_headers(&data, chunk_index, source.kind, source_position)
+        let (headers, opaque) = packet_headers(&data, source.kind, source_position);
+        let packets = headers
             .into_iter()
-            .map(|header| {
-                let payload =
-                    &data[header.payload_offset..header.payload_offset + header.payload_size];
+            .map(|(packet_source, header)| {
+                let payload = &data[packet_source.payload.start..packet_source.payload.end];
                 let body = if header.packet_type == 9 {
                     crate::theater::parser::v41::summary::read_summary_packet(
                         payload,
-                        header.chunk_index,
-                        header.payload_offset,
+                        chunk_index,
+                        packet_source.payload.start,
                     )
-                    .map(|(declared_events, events)| SummaryPacketBody::Events {
-                        declared_events,
-                        events,
+                    .map(|(declared_events, segments)| {
+                        PacketRead::Complete(SummaryPacketBody::Events {
+                            declared_events,
+                            segments,
+                        })
                     })
-                    .ok_or(PacketDecodeError::TruncatedSummaryCount {
-                        packet_type: header.packet_type,
+                    .unwrap_or(PacketRead::Opaque {
+                        reason: PacketDecodeError::TruncatedSummaryCount {
+                            packet_type: header.packet_type,
+                        },
                     })
                 } else {
-                    Ok(SummaryPacketBody::Unknown)
+                    PacketRead::Opaque {
+                        reason: PacketDecodeError::UnsupportedLayout {
+                            packet_type: header.packet_type,
+                        },
+                    }
                 };
-                SummaryPacket { header, body }
+                let packet = SummaryPacket {
+                    source: packet_source,
+                    header,
+                    body,
+                };
+                debug_assert!(packet.body_type_matches_header());
+                packet
             })
             .collect();
         SummaryChunk {
             source,
             source_position,
             data,
-            packets,
+            transport,
+            body: PacketStream { packets, opaque },
         }
     }
 }

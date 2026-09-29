@@ -1,4 +1,4 @@
-//! Inspects native entity state through Film::parse and Film::resolve.
+//! Inspects recorded entity state through Film::parse and Film::resolve.
 
 mod common;
 
@@ -21,7 +21,7 @@ async fn main() -> Result<(), common::ExampleError> {
     let mut resolved = film.resolve();
     println!(
         "{} chunks, {} indexed records",
-        1 + film.replication.chunks.len() + film.summaries.chunks.len(),
+        1 + film.chunks.len(),
         resolved.events().len()
     );
     if let Some(end) = resolved.events().last().map(|e| e.timestamp_us) {

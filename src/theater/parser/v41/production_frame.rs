@@ -1,21 +1,8 @@
 //! Reference default production frame policy: message/entity/control classes and world admission.
 use super::*;
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::production_frame::{
-    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
+    ProductionEntityEnd, ProductionFrame,
 };
-
-impl ProductionAdmissionDiagnostics {
-    fn observe(&mut self, admission: &FilmViewAdmission) {
-        match admission {
-            FilmViewAdmission::Unbound => self.rejected_unbound += 1,
-            FilmViewAdmission::OtherView => self.rejected_other_view += 1,
-            FilmViewAdmission::Anticipated(d) => {
-                *self.anticipated_bindings.entry(d.archetype).or_default() += 1
-            }
-            FilmViewAdmission::Allowed => {}
-        }
-    }
-}
 
 pub(crate) struct ProductionReaderContext<'a> {
     pub reader: Option<&'a ReaderContext>,
@@ -40,8 +27,6 @@ pub(crate) fn decode_production_frame_contextual(
         body_encoding.to_mut().extra_fields = false;
     }
     let mut out = ProductionFrame {
-        header_diagnostics: Default::default(),
-        admission_diagnostics: Some(ProductionAdmissionDiagnostics::default()),
         record_prefixes: Vec::new(),
         messages: None,
         records: vec![],
@@ -49,7 +34,6 @@ pub(crate) fn decode_production_frame_contextual(
         entity_end: None,
         views_completed: 0,
         end_bit: start_bit,
-        padded_bits: 0,
     };
     if start_bit == context.preamble_bits && context.preamble_bits >= 1 {
         let messages = decode_message_view_signed(data, context.preamble_bits - 1);
@@ -57,8 +41,6 @@ pub(crate) fn decode_production_frame_contextual(
         let complete = messages.stop == FrameViewStop::Complete;
         out.messages = Some(messages);
         if !complete {
-            out.padded_bits =
-                super::bits::padded_from_native(out.end_bit, data.len().saturating_mul(8));
             return Some(out);
         }
         out.views_completed += 1;
@@ -73,11 +55,9 @@ pub(crate) fn decode_production_frame_contextual(
         if encoding.extra_fields {
             out.record_prefixes.push(ComponentField {
                 name: "record.prefix".into(),
-                bit: out.end_bit,
+                bit: usize::try_from(out.end_bit).ok()?,
                 width: 32,
-                // Reference skips this prefix. Retaining its available bits must
-                // not introduce a read/panic before a prefix-repaired header.
-                raw: reference_bits_tolerant(data, out.end_bit, 32),
+                raw: RawBits::from_source(data, usize::try_from(out.end_bit).ok()?, 32)?,
             });
         }
         let header_bit = out
@@ -93,13 +73,12 @@ pub(crate) fn decode_production_frame_contextual(
         let id = header.id?;
         if header.kind == RecordKind::Delta {
             let reason = world.admit_delta(id, true);
-            out.admission_diagnostics.as_mut().unwrap().observe(&reason);
             if matches!(
                 reason,
                 FilmViewAdmission::Unbound | FilmViewAdmission::OtherView
             ) {
                 out.end_bit = header.end_bit;
-                out.entity_end = Some(ProductionEntityEnd::Rejected { header, reason });
+                out.entity_end = Some(ProductionEntityEnd::Rejected { header });
                 hit_end = true;
                 break;
             }
@@ -135,11 +114,8 @@ pub(crate) fn decode_production_frame_contextual(
         if complete {
             match record.header.kind {
                 RecordKind::New => {
-                    if let Some(refusal) =
-                        world.bind_reference_new(id, record.archetype?, record.header.start_bit)
-                    {
-                        out.header_diagnostics.new_binding_refusals.push(refusal);
-                    }
+                    let _ =
+                        world.bind_reference_new(id, record.archetype?, record.header.start_bit);
                 }
                 RecordKind::Delete => world.unbind(id & 0x3fff_ffff),
                 _ => {}
@@ -170,6 +146,13 @@ pub(crate) fn decode_production_frame_contextual(
             ProductionEntityEnd::PayloadBoundary
         });
     }
-    out.padded_bits = super::bits::padded_from_native(out.end_bit, data.len().saturating_mul(8));
+    let source_end = i64::try_from(data.len().saturating_mul(8)).ok()?;
+    if out.end_bit > source_end {
+        out.end_bit = source_end;
+        if let Some(controls) = &mut out.controls {
+            controls.end_bit = controls.end_bit.min(source_end);
+            controls.stop = FrameViewStop::Truncated;
+        }
+    }
     Some(out)
 }

@@ -2,11 +2,23 @@
 use super::Cursor;
 use super::{PositionEncoding, Reader, defaults};
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::entity_records::{
-    BindingOrigin, EntityComponentAttempt, EntityComponentSpan, EntityRecord, EntityViewStop,
+    EntityComponentRead, EntityRecord, EntityViewStop,
 };
 use crate::theater::parser::v41::{FilmRegistry, RecordIdLayout, RecordKind, decode_record_header};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) enum BindingOrigin {
+    #[default]
+    Supplied,
+    SequentialKeyframe {
+        bit: usize,
+    },
+    Creation {
+        bit: i64,
+    },
+}
 
 /// Reference New-record default routing and calibration widths. Neither skip is
 /// a component length; terminal bits apply only after a successful New body.
@@ -267,6 +279,9 @@ fn read_entity_record(
         let width = encoding
             .reference_id_low_bits
             .or_else(|| i64::try_from(encoding.ids.low_bits).ok())?;
+        if !r.cursor.fits_source(width) {
+            return None;
+        }
         r.cursor.reference_header(width, encoding.ids.base)
     } else {
         decode_record_header(data, r.cursor.address()?, encoding.ids)?
@@ -285,18 +300,12 @@ fn read_entity_record(
     }
     let mut rec = EntityRecord {
         references: Vec::new(),
-        diagnostics: Default::default(),
         header,
         archetype: None,
-        default_state_bits: None,
-        default_state_fallback: false,
-        binding_origin: None,
         mask: None,
         fields: Vec::new(),
         components: Vec::new(),
-        attempts: Vec::new(),
         end_bit: r.cursor.position,
-        padded_bits: 0,
         stop: EntityViewStop::Truncated,
     };
     rec.stop = record_body(
@@ -309,12 +318,31 @@ fn read_entity_record(
         policy,
     )
     .unwrap_or(EntityViewStop::Truncated);
-    rec.end_bit = r.cursor.position;
-    rec.padded_bits =
-        crate::theater::parser::bits::padded_from_native(rec.end_bit, data.len().saturating_mul(8));
+    let source_end = i64::try_from(data.len().saturating_mul(8)).ok()?;
+    if r.cursor.position > source_end {
+        rec.stop = EntityViewStop::Truncated;
+    }
+    rec.end_bit = r.cursor.position.min(source_end);
+    rec.components.retain_mut(|component| {
+        if component.start_bit >= source_end {
+            return false;
+        }
+        component.end_bit = component.end_bit.min(source_end);
+        true
+    });
     rec.fields = std::mem::take(&mut r.fields);
+    rec.fields.retain(|field| {
+        !rec.components.iter().any(|component| {
+            let Ok(start) = usize::try_from(component.start_bit) else {
+                return false;
+            };
+            let Ok(end) = usize::try_from(component.end_bit) else {
+                return false;
+            };
+            field.bit >= start && field.bit < end
+        })
+    });
     rec.references = std::mem::take(&mut r.references);
-    rec.diagnostics = std::mem::take(&mut r.diagnostics);
     Some(rec)
 }
 
@@ -342,10 +370,6 @@ fn record_body(
         return Some(EntityViewStop::Complete);
     }
     let ti = if rec.header.kind == RecordKind::New {
-        rec.default_state_bits = encoding
-            .new_record
-            .reference_fallback_default_bits
-            .or_else(|| i64::try_from(encoding.new_record.fallback_default_bits).ok());
         r.r("archetype", 6)? as u32
     } else {
         let Some(binding) = bindings.slots.get(&(id & 0x3fff_ffff)) else {
@@ -360,7 +384,6 @@ fn record_body(
                 bound_id: binding.id,
             });
         }
-        rec.binding_origin = Some(binding.origin.clone());
         r.gate("baseline", 7, true)?;
         binding.archetype
     };
@@ -373,15 +396,6 @@ fn record_body(
         let skip_default = ti != 35
             && (!encoding.new_record.deserialize_defaults
                 || !(ti == 41 || defaults::has_reference_deserializer(ti)));
-        rec.default_state_fallback = skip_default
-            && (!encoding.new_record.deserialize_defaults
-                || encoding
-                    .new_record
-                    .reference_fallback_default_bits
-                    .map_or(encoding.new_record.fallback_default_bits > 0, |bits| {
-                        bits != 0
-                    })
-                || matches!(ti, 23 | 41 | 44));
         if skip_default {
             if let Some(width) = encoding.new_record.reference_fallback_default_bits {
                 read_reference_new_skip(
@@ -428,7 +442,6 @@ fn record_body(
         };
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
-        let observation_start = r.diagnostics.component_observations.len();
         let calibrated = super::widths::is_calibrated(r, name, Some(&encoding.component_widths));
         let status = super::widths::read_component(
             r,
@@ -438,24 +451,17 @@ fn record_body(
             Some(&encoding.component_widths),
             (policy.simulation_complete, policy.stub),
         );
-        let span = EntityComponentSpan {
+        let mut component = EntityComponentRead {
             index,
             name: name.clone(),
             start_bit,
             end_bit: r.cursor.position,
-        };
-        rec.attempts.push(EntityComponentAttempt {
             variant: status
                 .map(|_| super::widths::result_variant(name, &r.fields[field_start..], calibrated)),
-            span: span.clone(),
             status,
-            field_start,
-            field_end: r.fields.len(),
-            observation_range: Some([
-                observation_start,
-                r.diagnostics.component_observations.len(),
-            ]),
-        });
+            fields: r.fields[field_start..].to_vec(),
+        };
+        rec.components.push(component.clone());
         if status.is_none()
             && let Some(adjustment) = r
                 .diagnostics
@@ -464,7 +470,7 @@ fn record_body(
                 .filter(|a| a.end_bit.is_none())
         {
             return Some(EntityViewStop::InvalidWidthOverride {
-                adjustment: Box::new(adjustment.clone()),
+                field: adjustment.component.clone(),
             });
         }
         if !status? {
@@ -473,10 +479,12 @@ fn record_body(
                 name: name.clone(),
             });
         }
-        rec.components.push(span);
         if encoding.corruption_check {
             r.gate("component.corruption_check", 32, true)?;
         }
+        component.end_bit = r.cursor.position;
+        component.fields = r.fields[field_start..].to_vec();
+        *rec.components.last_mut().unwrap() = component;
     }
     if rec.header.kind == RecordKind::New {
         if let Some(grammar) = &r.live_grammar {

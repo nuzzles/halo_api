@@ -1,7 +1,7 @@
-//! Version-41 bootstrap identification. Ported from LevelUp's `film_identity.go`;
+//! Version-41 bootstrap identification;
 //! see `docs/CREDIT.md` and the pinned port manifest.
 
-use super::{DecodeError, FilmRegistry, bits::Bits};
+use super::{DecodeError, FilmRegistryRead, RegistryStop, bits::Bits};
 
 fn field(data: &[u8], offset: usize) -> Option<String> {
     let raw = data.get(offset..offset.checked_add(32)?)?;
@@ -31,19 +31,20 @@ pub(super) fn find_identity_build(
 /// Returns `None` when no build anchor is present; never supplies guessed metadata.
 pub(crate) fn decode_film_identity(
     data: &[u8],
-    registry: &FilmRegistry,
+    registry: &FilmRegistryRead,
 ) -> Result<Option<FilmIdentity>, DecodeError> {
-    if registry.major_version != 41 {
-        return Err(DecodeError::UnsupportedVersion(
-            registry.major_version as i32,
-        ));
+    let [major_version, format_version] = registry
+        .header
+        .ok_or_else(|| DecodeError::Inconsistent("truncated bootstrap registry header".into()))?;
+    if major_version != 41 {
+        return Err(DecodeError::UnsupportedVersion(major_version as i32));
     }
-    if registry.truncated {
+    if registry.stop != RegistryStop::BoundaryBlock {
         return Err(DecodeError::Inconsistent(
             "truncated bootstrap registry".into(),
         ));
     }
-    let Some(build_offset) = find_identity_build(data, registry.end_byte)? else {
+    let Some(build_offset) = find_identity_build(data, registry.registry_end_byte)? else {
         return Ok(None);
     };
     // Two 256-byte names, four u32s, three 4096-byte blocks and two 16-byte blocks,
@@ -66,16 +67,21 @@ pub(crate) fn decode_film_identity(
     let bits = Bits(data);
     let timestamp_bit = flag_byte * 8 + 1 + 2 * 256 * 8;
     Ok(Some(FilmIdentity {
-        format_version: registry.format_version,
-        registry_blocks: registry.archetypes.len(),
-        registry_fingerprint: registry.fingerprint().unwrap_or(0),
-        registry_named_slots: registry.archetypes.iter().map(|a| a.components.len()).sum(),
+        format_version,
+        registry_blocks: registry.registry.archetypes.len(),
+        registry_fingerprint: registry.registry.fingerprint().unwrap_or(0),
+        registry_named_slots: registry
+            .registry
+            .archetypes
+            .iter()
+            .map(|a| a.components.len())
+            .sum(),
         version: field(data, build_offset - 32).unwrap_or_default(),
         build: field(data, build_offset).expect("validated build anchor"),
         flavor: field(data, build_offset + 32).unwrap_or_default(),
         build_id: word(build_offset + 0x40),
         changelist: word(build_offset + 0x44),
-        type_versions: (registry.end_byte..build_offset - 32)
+        type_versions: (registry.registry_end_byte..build_offset - 32)
             .step_by(4)
             .map(word)
             .collect(),

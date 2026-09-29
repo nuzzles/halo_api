@@ -1,5 +1,4 @@
 //! Reference data models.
-use std::collections::BTreeMap;
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct DatumEntry {
     pub flags: u8,
@@ -12,13 +11,10 @@ pub struct DatumEntry {
 /// Decoded body of a type-1
 /// [`ReplicationStreamPacket`](crate::theater::film::chunks::replication::ReplicationStreamPacket).
 ///
-/// This is a lossless sparse representation: absent entries equal
-/// `default_entry`, not unknown.
+/// Every wire slot remains present and ordered, including default-valued slots.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct DatumTable {
-    pub slot_count: usize,
-    pub default_entry: DatumEntry,
-    pub entries: BTreeMap<usize, DatumEntry>,
+    pub entries: Vec<DatumEntry>,
     pub tail_words: [u32; 5],
     pub consumed_bits: usize,
     pub padding_bits: usize,

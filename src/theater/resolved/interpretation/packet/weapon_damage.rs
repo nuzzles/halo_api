@@ -1,7 +1,7 @@
 //! Reference data models.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct WeaponDamageField {
-    pub field: ComponentField,
+    pub field: ProjectedField,
     /// The reference skips these bits; retaining their raw value does not
     /// assign semantics to the field. Offset names follow the reference reader.
     pub opaque: bool,
@@ -19,8 +19,9 @@ pub struct WeaponDamageTrace {
     pub fields: Vec<WeaponDamageField>,
 }
 
-use super::{ComponentField, WeaponDamage, WeaponDamageRead};
+use super::{WeaponDamage, WeaponDamageRead};
 use crate::theater::parser::bits;
+use crate::theater::resolved::interpretation::ProjectedField;
 
 /// Reference weapon-statistics damage reader. This is independent of the generic
 /// event-list layout reader: its endpoint must not substitute for a terminated
@@ -41,11 +42,15 @@ impl DamageReader<'_> {
         let raw = self.cursor.read(width)?;
         if let Some(fields) = &mut self.fields {
             fields.push(WeaponDamageField {
-                field: ComponentField {
+                field: ProjectedField {
                     name: name.into(),
-                    bit: start as i64,
-                    width: width as u64,
-                    raw,
+                    bit: start,
+                    width,
+                    value: raw,
+                    source_bits: self
+                        .source_bits
+                        .min(self.cursor.position)
+                        .saturating_sub(start.min(self.source_bits)),
                 },
                 opaque,
                 padded_bits: self

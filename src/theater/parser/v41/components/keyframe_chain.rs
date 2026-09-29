@@ -69,7 +69,6 @@ pub(crate) fn decode_reference_keyframe_table_contextual(
     let mut out = KeyframeTable {
         records: Vec::new(),
         stop: KeyframeChainStop::End,
-        diagnostics: Default::default(),
     };
     let (mut pos, mut previous) = (1i64, None);
 
@@ -100,9 +99,6 @@ pub(crate) fn decode_reference_keyframe_table_contextual(
             return out;
         };
         let complete = attempt.complete();
-        if let Some(record) = &attempt.record {
-            out.diagnostics.merge(&record.diagnostics);
-        }
         pos = attempt.end_bit;
         out.records.push(attempt);
         if !complete {

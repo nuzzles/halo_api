@@ -38,8 +38,7 @@ fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
         ));
     }
     let only_registry = Film::parse([registry()]).unwrap();
-    assert!(only_registry.replication.chunks.is_empty());
-    assert!(only_registry.summaries.chunks.is_empty());
+    assert!(only_registry.chunks.is_empty());
     assert!(matches!(
         Film::parse([registry(), registry()]),
         Err(ParseError::MultipleRegistries)
@@ -62,10 +61,7 @@ fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
         }]),
         Err(ParseError::TruncatedRegistryHeader)
     ));
-    assert!(matches!(
-        ChunkKind::try_from(99),
-        Err(ParseError::ChunkKind(99))
-    ));
+    assert_eq!(ChunkKind::try_from(99).unwrap(), ChunkKind::Unknown(99));
 }
 
 #[test]
@@ -107,15 +103,15 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     assert_eq!(film.registry.source_position, 0);
     assert_eq!(film.registry.source.data, compressed);
     assert_eq!(film.registry.data, bootstrap);
-    assert_eq!(film.replication.chunks[0].source_position, 2);
+    assert_eq!(film.replication_chunks().next().unwrap().source_position, 2);
     assert!(matches!(
-        film.replication.chunks[0].packets[0].body,
-        Ok(ReplicationStreamPacketBody::UnknownPacketBody)
+        film.replication_chunks().next().unwrap().body.packets[0].body,
+        PacketRead::Opaque {
+            reason: PacketDecodeError::UnsupportedLayout { packet_type: 99 }
+        }
     ));
     assert_eq!(
-        film.summaries
-            .chunks
-            .iter()
+        film.summary_chunks()
             .map(|c| c.source_position)
             .collect::<Vec<_>>(),
         vec![1, 3]
@@ -123,24 +119,11 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     for (i, input) in chunks.iter().enumerate() {
         let source = match input.kind {
             ChunkKind::Registry => &film.registry.source,
-            ChunkKind::Replication => {
-                &film
-                    .replication
-                    .chunks
-                    .iter()
-                    .find(|chunk| chunk.source_position == i)
-                    .unwrap()
-                    .source
-            }
-            ChunkKind::Summary => {
-                &film
-                    .summaries
-                    .chunks
-                    .iter()
-                    .find(|chunk| chunk.source_position == i)
-                    .unwrap()
-                    .source
-            }
+            _ => match &film.chunks[i - 1] {
+                FilmDataChunk::Replication(chunk) => &chunk.source,
+                FilmDataChunk::Summary(chunk) => &chunk.source,
+                FilmDataChunk::Unknown(chunk) => &chunk.source,
+            },
         };
         assert_eq!(source, input);
     }
@@ -151,7 +134,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
             .keys()
             .map(String::as_str)
             .collect::<Vec<_>>(),
-        vec!["registry", "replication", "summaries"]
+        vec!["chunks", "registry"]
     );
     assert_eq!(serde_json::from_value::<Film>(json).unwrap(), film);
     let resolved = film.resolve();
@@ -174,14 +157,17 @@ fn keyframes_stop_without_searching_past_invalid_header() {
         },
     ])
     .unwrap();
-    let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
-        &film.replication.chunks[0].packets[0].body
+    let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
+        &film.replication_chunks().next().unwrap().body.packets[0].body
     else {
         panic!()
     };
     assert_eq!(table.stop, KeyframeChainStop::Header);
     assert!(table.records.is_empty());
-    assert_eq!(film.replication.chunks[0].data, packet(2, &payload, 10));
+    assert_eq!(
+        film.replication_chunks().next().unwrap().data,
+        packet(2, &payload, 10)
+    );
     assert!(film.resolve().advance_to(10).entities.is_empty());
 }
 
@@ -209,8 +195,8 @@ fn event_gate_is_unresolved_in_reference_film() {
         },
     ])
     .unwrap();
-    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) =
-        &film.replication.chunks[0].packets[0].body
+    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) =
+        &film.replication_chunks().next().unwrap().body.packets[0].body
     else {
         panic!("missing frame packet")
     };
@@ -285,7 +271,7 @@ fn captured_v41_corpus() {
             })
             .collect();
         let film = Film::parse(input.clone()).unwrap();
-        assert_eq!(film.registry.definition.registry.archetypes.len(), 50);
+        assert_eq!(film.registry.body.registry.archetypes.len(), 50);
         let mut baseline_world = FilmWorld::default();
         let baseline_config = FrameConfig::default();
         for (i, original) in input.iter().enumerate() {
@@ -293,47 +279,47 @@ fn captured_v41_corpus() {
                 ChunkKind::Registry => assert_eq!(&film.registry.source, original),
                 ChunkKind::Summary => {
                     let chunk = film
-                        .summaries
-                        .chunks
-                        .iter()
+                        .summary_chunks()
                         .find(|chunk| chunk.source_position == i)
                         .unwrap();
                     assert_eq!(&chunk.source, original);
                 }
                 ChunkKind::Replication => {
                     let chunk = film
-                        .replication
-                        .chunks
-                        .iter()
+                        .replication_chunks()
                         .find(|chunk| chunk.source_position == i)
                         .unwrap();
                     assert_eq!(&chunk.source, original);
                     baseline_world.current_chunk = original.index.unwrap_or(i as i64);
-                    for packet in &chunk.packets {
+                    for packet in &chunk.body.packets {
                         let payload = chunk.payload(packet).unwrap();
                         match &packet.body {
-                            Ok(ReplicationStreamPacketBody::FramePacketBody(_)) => {
+                            PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(
+                                _,
+                            )) => {
                                 let baseline = baseline_config
                                     .decode_production_views(
                                         payload,
                                         2,
-                                        &film.registry.definition.registry,
+                                        &film.registry.body.registry,
                                         &mut baseline_world,
                                     )
                                     .unwrap();
                                 let oracle = expected
-                                    .remove(&(files[i].clone(), packet.header.payload_offset))
+                                    .remove(&(files[i].clone(), packet.source.payload.start))
                                     .unwrap();
                                 assert_eq!(
                                     (baseline.views_completed, baseline.end_bit),
                                     oracle,
                                     "{}:{}",
                                     files[i],
-                                    packet.header.payload_offset
+                                    packet.source.payload.start
                                 );
                                 frames += 1;
                             }
-                            Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) => {
+                            PacketRead::Complete(
+                                ReplicationStreamPacketBody::KeyframesPacketBody(table),
+                            ) => {
                                 for attempt in &table.records {
                                     if attempt.record.is_some() {
                                         baseline_world.bind_keyframe(
@@ -348,6 +334,7 @@ fn captured_v41_corpus() {
                         }
                     }
                 }
+                ChunkKind::Unknown(_) => {}
             }
         }
         let resolved = film.resolve();
@@ -357,19 +344,26 @@ fn captured_v41_corpus() {
                 ..Default::default()
             })
             .collect();
-        assert_eq!(events.len(), film.summaries.events().count());
+        assert_eq!(
+            events.len(),
+            film.summary_chunks()
+                .flat_map(|chunk| &chunk.body.packets)
+                .filter_map(|packet| packet.body.complete())
+                .flat_map(|body| match body {
+                    SummaryPacketBody::Events { segments, .. } => segments,
+                })
+                .filter(|segment| matches!(segment, SummarySegment::Event(_)))
+                .count()
+        );
         for event in events {
             let Some(crate::theater::resolved::Record::Summary(summary)) =
                 resolved.record(event.source)
             else {
                 panic!()
             };
-            assert_eq!(event.timestamp_us, summary.time_us);
+            assert_eq!(event.timestamp_us, u64::from(summary.timestamp_ms) * 1000);
             if let Some(player) = event.player_index {
-                assert_eq!(
-                    resolved.player(player).unwrap().xuid.to_string(),
-                    summary.xuid
-                );
+                assert_eq!(resolved.player(player).unwrap().xuid, summary.xuid);
             }
             summaries += 1;
         }

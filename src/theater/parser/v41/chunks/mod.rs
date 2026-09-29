@@ -11,64 +11,71 @@ impl V41ChunkReader {
         self,
         registry_source: FilmChunk,
         registry_data: Vec<u8>,
+        registry_transport: ChunkTransport,
         inputs: impl IntoIterator<Item = FilmChunk>,
     ) -> Result<Film, ParseError> {
-        let registry = V41RegistryChunkReader::read(registry_source, registry_data)?;
+        let registry =
+            V41RegistryChunkReader::read(registry_source, registry_data, registry_transport)?;
         let config = FrameConfig::default();
         let mut world = FilmWorld::default();
-        let mut replication = Vec::new();
-        let mut summaries = Vec::new();
+        let mut chunks = Vec::new();
 
         for (index, input) in inputs.into_iter().enumerate() {
             let source_position = index + 1;
-            let chunk_index = i32::try_from(source_position)
-                .map_err(|_| ParseError::Source("too many chunks".into()))?;
-            let data = transport::inflate_film_chunk(&input.data).into_owned();
+            let chunk_index =
+                i32::try_from(source_position).map_err(|_| ParseError::TooManyChunks)?;
+            let (data, transport) = transport::inflate_film_chunk(&input.data);
+            let data = data.into_owned();
             match input.kind {
                 ChunkKind::Registry => return Err(ParseError::MultipleRegistries),
                 ChunkKind::Replication => {
                     world.current_chunk = input.index.unwrap_or(source_position as i64);
-                    replication.push(V41ReplicationStreamChunkReader::read(
+                    chunks.push(FilmDataChunk::Replication(
+                        V41ReplicationStreamChunkReader::read(
+                            input,
+                            source_position,
+                            data,
+                            transport,
+                            &config,
+                            &registry.body.registry,
+                            &mut world,
+                        ),
+                    ));
+                }
+                ChunkKind::Summary => {
+                    chunks.push(FilmDataChunk::Summary(V41SummaryChunkReader::read(
                         input,
                         source_position,
                         chunk_index,
                         data,
-                        &config,
-                        &registry.definition.registry,
-                        &mut world,
-                    ));
+                        transport,
+                    )))
                 }
-                ChunkKind::Summary => summaries.push(V41SummaryChunkReader::read(
-                    input,
+                ChunkKind::Unknown(_) => chunks.push(FilmDataChunk::Unknown(Chunk {
+                    source: input,
                     source_position,
-                    chunk_index,
                     data,
-                )),
+                    transport,
+                    body: (),
+                })),
             }
         }
 
-        Ok(Film {
-            registry,
-            replication: ReplicationStream {
-                chunks: replication,
-            },
-            summaries: SummaryEvents { chunks: summaries },
-        })
+        Ok(Film { registry, chunks })
     }
 }
 
 fn packet_headers(
     data: &[u8],
-    chunk_index: i32,
     kind: ChunkKind,
     source_position: usize,
-) -> Vec<FilmPacketHeader> {
-    let headers = transport::read_packet_headers(data, chunk_index);
+) -> (Vec<(PacketSource, FilmPacketHeader)>, Vec<ByteRange>) {
+    let headers = transport::read_packet_headers(data);
     let walk_end = headers
         .last()
-        .map(|header| header.payload_offset + header.payload_size)
+        .map(|(source, _)| source.payload.end)
         .unwrap_or(0);
-    if walk_end < data.len() {
+    let opaque = if walk_end < data.len() {
         tracing::warn!(
             ?kind,
             source_position,
@@ -76,6 +83,12 @@ fn packet_headers(
             remaining_bytes = data.len() - walk_end,
             "stopped parsing film chunk before the end"
         );
-    }
-    headers
+        vec![ByteRange {
+            start: walk_end,
+            end: data.len(),
+        }]
+    } else {
+        Vec::new()
+    };
+    (headers, opaque)
 }

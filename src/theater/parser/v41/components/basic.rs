@@ -1,4 +1,4 @@
-//! Player, game-engine, objective and navpoint primitives from LevelUp.
+//! Player, game-engine, objective, and navpoint component primitives.
 use super::Reader;
 
 pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
@@ -138,7 +138,7 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
     let values = || {
         r.fields[field_start..]
             .iter()
-            .map(|f| f.raw)
+            .map(|f| f.raw.low_u64())
             .collect::<Vec<_>>()
     };
     let publication = match name {
@@ -215,8 +215,11 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
         "game-engine-current-round-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
                 field: crate::theater::parser::v41::GameEngineField::Round,
-                values: r.fields[field_start + 1..].iter().map(|f| f.raw).collect(),
-                present: r.fields[field_start].raw == 0,
+                values: r.fields[field_start + 1..]
+                    .iter()
+                    .map(|f| f.raw.low_u64())
+                    .collect(),
+                present: r.fields[field_start].raw.low_u64() == 0,
             },
         ),
         "game-engine-sudden-death-time-left-component" => Some(
@@ -247,7 +250,7 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
                     r.fields[field_start..]
                         .iter()
                         .enumerate()
-                        .fold(0u64, |mask, (i, f)| mask | (f.raw << i)),
+                        .fold(0u64, |mask, (i, f)| mask | (f.raw.low_u64() << i)),
                 ],
             },
         ),

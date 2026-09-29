@@ -7,19 +7,13 @@ pub mod datums;
 pub use datums::{DatumDecodeError, DatumEntry, DatumTable};
 
 pub mod production_frame;
-pub use production_frame::{ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame};
+pub use production_frame::{ProductionEntityEnd, ProductionFrame};
 
 pub mod kill_event_chain;
 pub use kill_event_chain::{
     EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
     KillEventFields,
 };
-
-pub mod world;
-pub use world::{FilmViewAdmission, NewBindingRefusal};
-
-pub mod anticipated_bindings;
-pub use anticipated_bindings::AnticipatedDeclaration;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 /// Decoded contents of a type-0 [`ReplicationStreamPacket`].
@@ -94,15 +88,13 @@ pub enum ContinuationStatePolicy {
 }
 
 pub mod entity_records;
-pub use entity_records::{
-    BindingOrigin, EntityComponentAttempt, EntityComponentSpan, EntityRecord, EntityViewStop,
-};
+pub use entity_records::{EntityComponentRead, EntityRecord, EntityViewStop};
 
 pub mod frame_views;
 pub use frame_views::{ControlEntry, DecodedFrameView, FrameViewStop};
 
 pub mod keyframes;
-pub use keyframes::{KeyframeComponentSpan, KeyframeRecord, KeyframeStop};
+pub use keyframes::{KeyframeComponentRead, KeyframeRecord, KeyframeStop};
 
 pub mod keyframe_chain;
 pub use keyframe_chain::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};

@@ -66,7 +66,9 @@ pub(super) fn resolve_change(
             } = event.source.record
             {
                 let body = &replication_packet(film, event.source)?.body;
-                let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = body else {
+                let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) =
+                    body
+                else {
                     return None;
                 };
                 let continuation = frame.continuation.as_ref()?;
@@ -76,15 +78,6 @@ pub(super) fn resolve_change(
             }
             let packet = replication_packet(film, event.source)?;
             if record.end_bit > packet.header.payload_size as i64 * 8 {
-                return None;
-            }
-            if let RecordRef::Entity { continuation, .. } = event.source.record
-                && frame(packet, continuation)?
-                    .header_diagnostics
-                    .new_binding_refusals
-                    .iter()
-                    .any(|refusal| refusal.record_bit == record.header.start_bit)
-            {
                 return None;
             }
             entity_change(world, event, record)
@@ -115,18 +108,12 @@ pub(super) fn resolve_change(
                 initial_fields: Arc::new(record.fields.clone()),
                 last_source: event.source,
             };
-            for component in &record.attempts {
-                let Some([start, end]) = component.field_range else {
-                    continue;
-                };
-                let Some(fields) = record.fields.get(start..end) else {
-                    continue;
-                };
+            for component in &record.components {
                 state.components.insert(
                     component.index,
                     Arc::new(ComponentState {
                         name: component.name.clone(),
-                        fields: fields.to_vec(),
+                        fields: component.fields.clone(),
                         complete: component.ported == Some(true),
                         source: event.source,
                     }),
@@ -154,10 +141,7 @@ fn entity_change(
     record: &EntityRecord,
 ) -> Option<StateChange> {
     let id = record.header.id?;
-    if record.padded_bits != 0
-        || record.header.start_bit < 0
-        || !record.diagnostics.new_binding_refusals.is_empty()
-    {
+    if record.header.start_bit < 0 {
         return None;
     }
     let key = EntityKey {
@@ -182,15 +166,16 @@ fn entity_change(
         return None;
     }
     let mut state = match record.header.kind {
-        RecordKind::New => EntityState {
+        RecordKind::New if previous.is_none() => EntityState {
             id: Some(id),
             archetype: record.archetype?,
             created_at_us: Some(event.timestamp_us),
-            baseline_read_complete: !record.default_state_fallback,
+            baseline_read_complete: record.stop == EntityViewStop::Complete,
             components: BTreeMap::new(),
             initial_fields: Arc::new(record.fields.clone()),
             last_source: event.source,
         },
+        RecordKind::New => return None,
         RecordKind::Delta => {
             let previous = previous.as_ref()?;
             if previous.id.is_some_and(|old| old != id)
@@ -205,18 +190,12 @@ fn entity_change(
         _ => return None,
     };
     state.last_source = event.source;
-    for component in &record.attempts {
-        let Some(fields) = record
-            .fields
-            .get(component.field_start..component.field_end)
-        else {
-            continue;
-        };
+    for component in &record.components {
         state.components.insert(
-            component.span.index,
+            component.index,
             Arc::new(ComponentState {
-                name: component.span.name.clone(),
-                fields: fields.to_vec(),
+                name: component.name.clone(),
+                fields: component.fields.clone(),
                 complete: component.status == Some(true),
                 source: event.source,
             }),

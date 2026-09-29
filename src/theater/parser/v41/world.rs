@@ -1,10 +1,24 @@
 //! Reference world state for production frame walking and rollback.
 use super::{AnticipatedBindings, AnticipatedDeclaration};
-pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::world::{
-    FilmViewAdmission, NewBindingRefusal,
-};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct NewBindingRefusal {
+    pub record_bit: i64,
+    pub id: u32,
+    pub slot: u32,
+    pub existing_archetype: u32,
+    pub proposed_archetype: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) enum FilmViewAdmission {
+    Allowed,
+    Anticipated(AnticipatedDeclaration),
+    Unbound,
+    OtherView,
+}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub(crate) struct FilmWorldSlot {

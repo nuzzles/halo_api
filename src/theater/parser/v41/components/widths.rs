@@ -109,7 +109,7 @@ pub(super) fn result_variant(
         fields
             .iter()
             .find(|f| f.name == "variant")
-            .map_or(u32::MAX, |f| f.raw as u32)
+            .map_or(u32::MAX, |f| f.raw.low_u64() as u32)
     } else {
         u32::MAX
     }

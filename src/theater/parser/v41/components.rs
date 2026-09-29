@@ -1,4 +1,4 @@
-//! Component value readers ported from LevelUp. See `docs/CREDIT.md`.
+//! Structural v41 component value readers.
 //! Every primitive read is retained, including unnamed flags and raw quantized values.
 
 pub(crate) use crate::theater::film::chunks::replication::components::field::ComponentField;
@@ -140,35 +140,17 @@ impl Reader<'_> {
     }
     fn r_wide(&mut self, name: &str, width: u64) -> Option<u64> {
         let bit = self.cursor.position;
-        let mut prefix = self.cursor.detached();
-        let Some(raw) = self.cursor.read_wide(width) else {
+        let Some(bits) = self.cursor.raw_bits(bit, width) else {
             self.refuse_read(name, width, super::ReadOperation::Scalar);
             return None;
         };
-        if width > 64 {
-            // Retain information the reference numeric accumulator discards.
-            // Bound work by actual source size, even for enormous padded reads.
-            let mut remaining = (width - 64).min(prefix.remaining_source_bits() as u64);
-            let mut index = 0;
-            while remaining > 0 {
-                let part_width = remaining.min(64);
-                let part_bit = prefix.position;
-                let part_raw = prefix.read_wide(part_width)?;
-                self.fields.push(ComponentField {
-                    name: format!("{name}.discarded[{index}]"),
-                    bit: part_bit,
-                    width: part_width,
-                    raw: part_raw,
-                });
-                remaining -= part_width;
-                index += 1;
-            }
-        }
+        self.cursor.skip_signed(i64::try_from(width).ok()?);
+        let raw = bits.low_u64();
         self.fields.push(ComponentField {
             name: name.into(),
-            bit,
-            width,
-            raw,
+            bit: usize::try_from(bit).ok()?,
+            width: usize::try_from(width).ok()?,
+            raw: bits,
         });
         Some(raw)
     }
@@ -223,8 +205,8 @@ impl Reader<'_> {
         let (value, tail) = if present {
             self.handle(name, category)?;
             (
-                self.fields[self.fields.len() - 2].raw as u32,
-                self.fields[self.fields.len() - 1].raw as u32,
+                self.fields[self.fields.len() - 2].raw.low_u64() as u32,
+                self.fields[self.fields.len() - 1].raw.low_u64() as u32,
             )
         } else {
             (0, 0)
@@ -914,8 +896,8 @@ fn parent(r: &mut Reader<'_>, level: u32, archetype: u32) -> Option<()> {
     };
     if state.attached {
         r.handle("parent", 1)?;
-        state.quantized_word = (r.fields[r.fields.len() - 1].raw as u32) << 30
-            | r.fields[r.fields.len() - 2].raw as u32;
+        state.quantized_word = (r.fields[r.fields.len() - 1].raw.low_u64() as u32) << 30
+            | r.fields[r.fields.len() - 2].raw.low_u64() as u32;
         state.word = r.r("word", 16)? as u32;
         state.optional_word = r.gated_value("optional_word", 16, true)?.map(|v| v as u32);
         for i in 0..2 {

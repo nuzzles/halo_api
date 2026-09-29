@@ -1,12 +1,30 @@
 use super::*;
 use crate::theater::film::*;
 use crate::theater::parser::v41::test_chunks;
-use crate::theater::parser::v41::{
-    EntityComponentAttempt, EntityComponentSpan, FilmSource, RecordHeader,
-};
+use crate::theater::parser::v41::{FixtureFilmSource, RecordHeader};
+
+fn replication_chunk_mut(film: &mut Film) -> &mut ReplicationStreamChunk {
+    film.chunks
+        .iter_mut()
+        .find_map(|chunk| match chunk {
+            FilmDataChunk::Replication(chunk) => Some(chunk),
+            _ => None,
+        })
+        .unwrap()
+}
+
+fn summary_chunk_mut(film: &mut Film) -> &mut SummaryChunk {
+    film.chunks
+        .iter_mut()
+        .find_map(|chunk| match chunk {
+            FilmDataChunk::Summary(chunk) => Some(chunk),
+            _ => None,
+        })
+        .unwrap()
+}
 
 fn recording() -> Film {
-    let source = FilmSource::load(
+    let source = FixtureFilmSource::load(
         &[
             [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
             [vec![0, 0, 0, 0], 16u32.to_le_bytes().to_vec(), vec![0; 24]].concat(),
@@ -21,7 +39,6 @@ fn recording() -> Film {
 fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
     EntityRecord {
         references: vec![],
-        diagnostics: Default::default(),
         header: RecordHeader {
             kind,
             id: Some(id),
@@ -29,46 +46,36 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
             end_bit: 36,
         },
         archetype: Some(3),
-        default_state_bits: None,
-        default_state_fallback: false,
-        binding_origin: None,
         mask: Some(1),
-        fields: vec![ComponentField {
-            name: "value".into(),
-            bit: 40,
-            width: 8,
-            raw: value,
-        }],
-        components: vec![],
-        attempts: vec![EntityComponentAttempt {
-            span: EntityComponentSpan {
-                index: 0,
-                name: "test-component".into(),
-                start_bit: 40,
-                end_bit: 48,
-            },
+        fields: vec![],
+        components: vec![EntityComponentRead {
+            index: 0,
+            name: "test-component".into(),
+            start_bit: 40,
+            end_bit: 48,
             variant: None,
             status: Some(true),
-            observation_range: None,
-            field_start: 0,
-            field_end: 1,
+            fields: vec![ComponentField {
+                name: "value".into(),
+                bit: 40,
+                width: 8,
+                raw: RawBits::from_low(value, 8),
+            }],
         }],
         end_bit: 48,
-        padded_bits: 0,
         stop: EntityViewStop::Complete,
     }
 }
 fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> ReplicationStreamPacket {
     // Parse a real packet shell, then substitute explicit resolution fixtures.
-    let mut p = film.replication.chunks[0].packets[0].clone();
+    let mut p = film.replication_chunks().next().unwrap().body.packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
-    let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body else {
+    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body
+    else {
         panic!("missing frame packet")
     };
     frame.frame = FrameRead::Decoded(Box::new(ProductionFrame {
-        header_diagnostics: Default::default(),
-        admission_diagnostics: None,
         record_prefixes: vec![],
         messages: None,
         records,
@@ -76,7 +83,6 @@ fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> Replica
         entity_end: None,
         views_completed: 1,
         end_bit: 48,
-        padded_bits: 0,
     }));
     frame.continuation = None;
     p
@@ -88,7 +94,9 @@ fn key() -> EntityKey {
     }
 }
 fn value(world: &WorldSnapshot) -> u64 {
-    world.entities[&key()].components[&0].fields[0].raw
+    world.entities[&key()].components[&0].fields[0]
+        .raw
+        .low_u64()
 }
 
 #[test]
@@ -99,7 +107,7 @@ fn resolved_reference_entry_preserves_source_and_decoder_output() {
     encoder.write_all(&bootstrap).unwrap();
     let mut compressed = encoder.finish().unwrap();
     compressed.extend_from_slice(b"trailing transport");
-    let source = FilmSource::load(
+    let source = FixtureFilmSource::load(
         &[
             compressed.clone(),
             [vec![0, 0, 0, 0], 16u32.to_le_bytes().to_vec(), vec![0; 24]].concat(),
@@ -126,7 +134,7 @@ fn resolved_reference_entry_preserves_source_and_decoder_output() {
 fn resolved_chronology_generations_filters_and_source_references() {
     let mut film = recording();
     let id = 0x4000_0007;
-    film.replication.chunks[0].packets = vec![
+    replication_chunk_mut(&mut film).body.packets = vec![
         packet(&film, 20, vec![entity(RecordKind::Delta, id, 2)]),
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         packet(
@@ -164,14 +172,21 @@ fn resolved_chronology_generations_filters_and_source_references() {
         .next()
         .unwrap();
     assert!(
-        matches!(resolved.record(delta.source), Some(Record::Entity(r)) if r.fields[0].raw == 2)
+        matches!(resolved.record(delta.source), Some(Record::Entity(r)) if r.components[0].fields[0].raw.low_u64() == 2)
     );
     let change = delta.change.as_ref().unwrap();
     assert_eq!(
-        change.previous.as_ref().unwrap().components[&0].fields[0].raw,
+        change.previous.as_ref().unwrap().components[&0].fields[0]
+            .raw
+            .low_u64(),
         1
     );
-    assert_eq!(change.new.as_ref().unwrap().components[&0].fields[0].raw, 2);
+    assert_eq!(
+        change.new.as_ref().unwrap().components[&0].fields[0]
+            .raw
+            .low_u64(),
+        2
+    );
     assert_eq!(
         resolved
             .query(EventFilter {
@@ -188,7 +203,7 @@ fn resolved_chronology_generations_filters_and_source_references() {
 fn resolved_seek_matches_sequential_across_checkpoints_and_ties() {
     let mut film = recording();
     let id = 0x4000_0007;
-    film.replication.chunks[0].packets = (0..1200)
+    replication_chunk_mut(&mut film).body.packets = (0..1200)
         .map(|i| {
             packet(
                 &film,
@@ -226,13 +241,15 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
     let mut film = recording();
     let id = 0x4000_0007;
     let mut partial = entity(RecordKind::Delta, id, 2);
-    partial.attempts[0].status = None;
+    partial.components[0].status = None;
     partial.stop = EntityViewStop::Truncated;
     let mut padded = entity(RecordKind::Delta, id, 99);
-    padded.padded_bits = 1;
+    padded.end_bit = 4096;
     let mut opaque = packet(&film, 15, vec![]);
-    opaque.body = Ok(ReplicationStreamPacketBody::UnknownPacketBody);
-    film.replication.chunks[0].packets = vec![
+    opaque.body = PacketRead::Opaque {
+        reason: PacketDecodeError::UnsupportedLayout { packet_type: 99 },
+    };
+    replication_chunk_mut(&mut film).body.packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         opaque,
         packet(&film, 20, vec![partial]),
@@ -246,7 +263,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
             .events()
             .iter()
             .any(|e| matches!(resolved.record(e.source),
-        Some(Record::ReplicationPacket(p)) if matches!(p.body, Ok(ReplicationStreamPacketBody::UnknownPacketBody))))
+        Some(Record::ReplicationPacket(p)) if matches!(p.body, PacketRead::Opaque { .. })))
     );
     assert!(resolved.events().last().unwrap().change.is_none());
 }
@@ -256,8 +273,8 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     use crate::theater::parser::v41::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
-    keyframe.body = Ok(ReplicationStreamPacketBody::KeyframesPacketBody(Box::new(
-        KeyframeTable {
+    keyframe.body = PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(
+        Box::new(KeyframeTable {
             records: vec![KeyframeChainAttempt {
                 start_bit: 1,
                 end_bit: 65,
@@ -265,27 +282,26 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
                 archetype: 3,
                 record: Some(KeyframeRecord {
                     references: vec![],
-                    diagnostics: Default::default(),
                     start_bit: 1,
                     end_bit: 65,
                     id: 0x8000_0007,
                     archetype: 3,
                     fields: vec![],
                     components: vec![],
-                    attempts: vec![],
                     stop: KeyframeStop::Complete,
                 }),
             }],
             stop: KeyframeChainStop::End,
-            diagnostics: Default::default(),
-        },
-    )));
+        }),
+    ));
     let mut padded = keyframe.clone();
     padded.header.timestamp_us = 30;
-    if let Ok(ReplicationStreamPacketBody::KeyframesPacketBody(table)) = &mut padded.body {
+    if let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
+        &mut padded.body
+    {
         table.records[0].record.as_mut().unwrap().end_bit = 4096;
     }
-    film.replication.chunks[0].packets = vec![
+    replication_chunk_mut(&mut film).body.packets = vec![
         keyframe,
         packet(&film, 20, vec![entity(RecordKind::Delta, 0x4000_0007, 8)]),
         padded,
@@ -308,23 +324,8 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
 fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let mut film = recording();
     let id = 0x4000_0007;
-    let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
-    if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut rejected.body {
-        frame
-            .frame
-            .decoded_mut()
-            .unwrap()
-            .header_diagnostics
-            .new_binding_refusals
-            .push(crate::theater::parser::v41::NewBindingRefusal {
-                record_bit: 2,
-                id,
-                slot: 7,
-                existing_archetype: 3,
-                proposed_archetype: 4,
-            });
-    }
-    film.replication.chunks[0].packets = vec![
+    let rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
+    replication_chunk_mut(&mut film).body.packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         rejected,
     ];
@@ -339,7 +340,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     let mut incomplete = entity(RecordKind::New, 0x4000_0007, 99);
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
-    if let Ok(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
+    if let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
         frame.frame.decoded_mut().unwrap().controls =
             Some(crate::theater::parser::v41::DecodedFrameView {
                 control_entries: vec![ControlEntry {
@@ -354,16 +355,14 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
                     flags: None,
                     action: None,
                 }],
-                diagnostics: None,
                 start_bit: 2040,
                 end_bit: 2050,
-                padded_bits: 2,
                 kinds: vec![0],
                 fields: vec![],
                 stop: crate::theater::parser::v41::FrameViewStop::Truncated,
             });
     }
-    film.replication.chunks[0].packets = vec![p];
+    replication_chunk_mut(&mut film).body.packets = vec![p];
     let mut resolved = film.resolve();
     assert!(resolved.advance_to(10).entities.is_empty());
     for event in resolved
@@ -389,7 +388,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
 #[test]
 fn resolved_query_indices_intersect_filters_and_preserve_order() {
     let mut film = recording();
-    film.replication.chunks[0].packets = vec![
+    replication_chunk_mut(&mut film).body.packets = vec![
         packet(
             &film,
             10,
@@ -420,7 +419,7 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
     assert_eq!(rows.len(), 1);
     assert_eq!(rows[0].timestamp_us, 20);
     assert!(
-        matches!(resolved.record(rows[0].source), Some(Record::Entity(r)) if r.fields[0].raw == 4)
+        matches!(resolved.record(rows[0].source), Some(Record::Entity(r)) if r.components[0].fields[0].raw.low_u64() == 4)
     );
     assert_eq!(
         resolved
@@ -490,22 +489,31 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         },
     ])
     .unwrap();
-    let summary = |time, xuid| {
-        serde_json::from_value::<SummaryEvent>(json!({
-            "xuid": xuid, "player": null, "name":"Recorded player", "time_us":time,
-            "kind":"Kill", "metadata":0, "medal_flag":0
-        }))
-        .unwrap()
+    let summary = |time: u64, xuid| SummaryEvent {
+        xuid,
+        gamertag_utf16: "Recorded player".encode_utf16().collect(),
+        timestamp_ms: (time / 1000) as u32,
+        metadata: 0,
+        medal_flag: 0,
+        type_code: 50,
+        source: BitRange { start: 0, end: 0 },
+        identity_source: BitRange { start: 0, end: 0 },
     };
-    film.summaries.chunks[0].packets[0].body = Ok(SummaryPacketBody::Events {
-        declared_events: 3,
-        events: vec![
-            summary(2000, "42"),
-            summary(1000, "42"),
-            summary(3000, "99"),
-        ],
-    });
+    summary_chunk_mut(&mut film).body.packets[0].body =
+        PacketRead::Complete(SummaryPacketBody::Events {
+            declared_events: 3,
+            segments: vec![
+                SummarySegment::Event(summary(2000, 42)),
+                SummarySegment::Event(summary(1000, 42)),
+                SummarySegment::Event(summary(3000, 99)),
+            ],
+        });
     let resolved = film.resolve();
+    assert_eq!(resolved.summaries().len(), 3);
+    assert_eq!(resolved.summaries()[0].timestamp_us, 2000);
+    assert_eq!(resolved.summaries()[0].gamertag, "Recorded player");
+    assert_eq!(resolved.summaries()[0].kind, SummaryKind::Kill);
+    assert_eq!(resolved.summaries()[0].source.record, RecordRef::Summary(0));
     let times: Vec<_> = resolved
         .query(EventFilter {
             kind: Some(EventKind::Summary),

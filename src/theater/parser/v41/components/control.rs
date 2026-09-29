@@ -1,4 +1,4 @@
-//! Shared actor/input grammar from LevelUp's unit_control.go.
+//! Shared v41 actor/input component grammar.
 //! Reference action fields and source ranges follow d61443e bloc_action.go.
 use super::Reader;
 pub(crate) use crate::theater::film::chunks::replication::components::control::ActionBlock;

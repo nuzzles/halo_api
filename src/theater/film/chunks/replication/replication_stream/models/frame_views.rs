@@ -28,21 +28,10 @@ pub struct ControlEntry {
 pub struct DecodedFrameView {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub control_entries: Vec<ControlEntry>,
-    /// Includes the precise failed bounded read or grouped guard, when present.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub diagnostics: Option<Box<crate::theater::film::FilmReadDiagnostics>>,
     pub start_bit: i64,
     /// First unread bit, including when an unsupported branch is encountered.
     pub end_bit: i64,
-    /// Synthetic bits consumed by reference action decoding beyond the source.
-    /// A padded view remains truncated rather than becoming a complete view.
-    #[serde(default, skip_serializing_if = "no_padding")]
-    pub padded_bits: usize,
     pub kinds: Vec<u8>,
     pub fields: Vec<ComponentField>,
     pub stop: FrameViewStop,
-}
-
-fn no_padding(bits: &usize) -> bool {
-    *bits == 0
 }

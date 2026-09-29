@@ -1,4 +1,4 @@
-//! Message and control views. Unsupported paths mirror explicit LevelUp gaps.
+//! Message and control views with explicit unsupported paths.
 use super::Cursor;
 use super::{Reader, control};
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::frame_views::{
@@ -39,10 +39,8 @@ fn decode_view(
 ) -> DecodedFrameView {
     let mut out = DecodedFrameView {
         control_entries: Vec::new(),
-        diagnostics: Default::default(),
         start_bit: bit,
         end_bit: bit,
-        padded_bits: 0,
         kinds: Vec::new(),
         fields: Vec::new(),
         stop: FrameViewStop::Truncated,
@@ -76,11 +74,7 @@ fn decode_view(
         data,
     );
     out.end_bit = r.cursor.position;
-    out.padded_bits = usize::try_from(out.end_bit)
-        .unwrap_or(0)
-        .saturating_sub((data.len() * 8).max(usize::try_from(bit).unwrap_or(0)));
     out.fields = r.fields;
-    out.diagnostics = (!r.diagnostics.is_empty()).then(|| Box::new(r.diagnostics));
     out.stop = result.unwrap_or(FrameViewStop::Truncated);
     out
 }

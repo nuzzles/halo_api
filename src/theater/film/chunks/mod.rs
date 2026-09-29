@@ -4,10 +4,13 @@ use super::ParseError;
 use serde::{Deserialize, Serialize};
 
 pub mod models;
-pub use models::{ChunkKind, FilmChunk};
+pub use models::{Chunk, ChunkKind, ChunkTransport, FilmChunk};
 
 pub mod packet;
-pub use packet::{FilmPacketHeader, Packet, PacketDecodeError, SourceSpan};
+pub use packet::{
+    BitRange, ByteRange, FilmPacketHeader, Packet, PacketBody, PacketDecodeError, PacketRead,
+    PacketSource, PacketStream,
+};
 
 pub mod registry;
 pub use registry::*;

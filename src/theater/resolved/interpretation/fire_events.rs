@@ -1,4 +1,4 @@
-//! Reference long fire-event records and modal aim grammar (LevelUp fire_events.go).
+//! Long fire-event records and modal aim interpretation grammar.
 //! A fire event does not establish a hit or identify a victim.
 use super::bits::{Bits, Cursor};
 use serde::{Deserialize, Serialize};
@@ -47,7 +47,7 @@ pub struct FireAimAttempt {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FireField {
-    pub field: super::ComponentField,
+    pub field: super::ProjectedField,
     pub opaque: bool,
     pub padded_bits: usize,
 }
@@ -92,11 +92,15 @@ impl FireReader<'_> {
             .read(width)
             .expect("reference zero-tail fire read");
         self.fields.push(FireField {
-            field: super::ComponentField {
+            field: super::ProjectedField {
                 name: name.into(),
-                bit: bit as i64,
-                width: width as u64,
-                raw,
+                bit,
+                width,
+                value: raw,
+                source_bits: self
+                    .source_bits
+                    .min(self.cursor.position)
+                    .saturating_sub(bit.min(self.source_bits)),
             },
             opaque,
             padded_bits: self
