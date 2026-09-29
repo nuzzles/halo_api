@@ -58,12 +58,12 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
         stop: EntityViewStop::Complete,
     }
 }
-fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> NativeFilmPacket {
+fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> FilmPacket {
     // Parse a real packet shell, then substitute explicit resolution fixtures.
     let mut p = film.replication.chunks[0].packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
-    p.body = NativeFilmPacketBody::Frame(Box::new(ProductionFrame {
+    p.body = FilmPacketBody::Frame(Box::new(ProductionFrame {
         header_diagnostics: Default::default(),
         admission_diagnostics: None,
         record_prefixes: vec![],
@@ -229,7 +229,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
     let mut padded = entity(RecordKind::Delta, id, 99);
     padded.padded_bits = 1;
     let mut opaque = packet(&film, 15, vec![]);
-    opaque.body = NativeFilmPacketBody::Opaque;
+    opaque.body = FilmPacketBody::Opaque;
     film.replication.chunks[0].packets = vec![
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         opaque,
@@ -244,7 +244,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
             .events()
             .iter()
             .any(|e| matches!(resolved.record(e.source),
-        Some(Record::Packet(p)) if matches!(p.body, NativeFilmPacketBody::Opaque)))
+        Some(Record::Packet(p)) if matches!(p.body, FilmPacketBody::Opaque)))
     );
     assert!(resolved.events().last().unwrap().change.is_none());
 }
@@ -256,7 +256,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     };
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
-    keyframe.body = NativeFilmPacketBody::Keyframes(NativeKeyframeTable {
+    keyframe.body = FilmPacketBody::Keyframes(NativeKeyframeTable {
         records: vec![KeyframeChainAttempt {
             start_bit: 1,
             end_bit: 65,
@@ -280,7 +280,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     });
     let mut padded = keyframe.clone();
     padded.header.timestamp_us = 30;
-    if let NativeFilmPacketBody::Keyframes(table) = &mut padded.body {
+    if let FilmPacketBody::Keyframes(table) = &mut padded.body {
         table.records[0].record.as_mut().unwrap().end_bit = 4096;
     }
     film.replication.chunks[0].packets = vec![
@@ -307,7 +307,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
     let mut film = recording();
     let id = 0x4000_0007;
     let mut rejected = packet(&film, 20, vec![entity(RecordKind::New, id, 99)]);
-    if let NativeFilmPacketBody::Frame(frame) = &mut rejected.body {
+    if let FilmPacketBody::Frame(frame) = &mut rejected.body {
         frame.header_diagnostics.new_binding_refusals.push(
             crate::theater::parser::v41::NativeNewBindingRefusal {
                 record_bit: 2,
@@ -333,7 +333,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     let mut incomplete = entity(RecordKind::New, 0x4000_0007, 99);
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
-    if let NativeFilmPacketBody::Frame(frame) = &mut p.body {
+    if let FilmPacketBody::Frame(frame) = &mut p.body {
         frame.controls = Some(crate::theater::parser::v41::DecodedFrameView {
             control_entries: vec![NativeControlEntry {
                 start_bit: 2040,
@@ -489,7 +489,7 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         }))
         .unwrap()
     };
-    film.summaries.chunks[0].packets[0].body = NativeFilmPacketBody::Summary {
+    film.summaries.chunks[0].packets[0].body = FilmPacketBody::Summary {
         declared_events: 3,
         events: vec![
             summary(2000, "42"),

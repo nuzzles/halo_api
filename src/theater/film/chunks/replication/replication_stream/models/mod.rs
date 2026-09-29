@@ -11,8 +11,8 @@ pub use event_heads::{
     DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
 };
 
-pub mod types;
-pub use types::{FilmPacket, SourceSpan};
+pub mod packet_header;
+pub use packet_header::{FilmPacketHeader, SourceSpan};
 
 pub mod translocator;
 pub use translocator::{
@@ -61,11 +61,11 @@ pub use player::{
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct NativeFilmPacket {
-    pub header: FilmPacket,
+pub struct FilmPacket {
+    pub header: FilmPacketHeader,
     /// All nested bit offsets are relative to this header's payload_offset.
     /// Stops and synthetic padded reads remain in the native reader result.
-    pub body: NativeFilmPacketBody,
+    pub body: FilmPacketBody,
     /// An independent direct event-head read, never an inferred gameplay event.
     pub event_head: Option<DecodedHeadEvent>,
     /// Sequential event-layout reads at payload bit one. An absent runtime
@@ -114,7 +114,7 @@ pub enum NativeContinuationStatePolicy {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
-pub enum NativeFilmPacketBody {
+pub enum FilmPacketBody {
     Frame(Box<ProductionFrame>),
     Datums(DatumTable),
     Roster(RosterUpdate),

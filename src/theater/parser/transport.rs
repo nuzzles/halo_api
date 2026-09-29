@@ -119,7 +119,7 @@ impl FilmSource {
 pub(crate) fn native_packet_bytes(
     data: &[u8],
     chunk_index: i32,
-) -> Vec<crate::theater::film::FilmPacket> {
+) -> Vec<crate::theater::film::FilmPacketHeader> {
     let mut out = Vec::new();
     let mut offset = 0usize;
     while let Some(header) = data.get(offset..offset.saturating_add(16)) {
@@ -133,7 +133,7 @@ pub(crate) fn native_packet_bytes(
         if size == 0 && kind != 7 {
             break;
         }
-        out.push(crate::theater::film::FilmPacket {
+        out.push(crate::theater::film::FilmPacketHeader {
             chunk_index,
             packet_type: kind,
             byte_2: header[2],

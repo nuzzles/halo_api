@@ -21,7 +21,7 @@ pub enum RecordRef {
 /// Borrowed native payload. Independent diagnostic projections remain on Packet.
 #[derive(Debug, Clone, Copy)]
 pub enum Record<'a> {
-    Packet(&'a NativeFilmPacket),
+    Packet(&'a FilmPacket),
     Entity(&'a EntityRecord),
     Keyframe(&'a KeyframeRecord),
     Control(&'a NativeControlEntry),
@@ -134,10 +134,10 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
     }
 }
 
-pub(super) fn frame(packet: &NativeFilmPacket, continuation: bool) -> Option<&ProductionFrame> {
+pub(super) fn frame(packet: &FilmPacket, continuation: bool) -> Option<&ProductionFrame> {
     if continuation {
         packet.event_continuation.as_ref()?.frame.as_ref().ok()
-    } else if let NativeFilmPacketBody::Frame(frame) = &packet.body {
+    } else if let FilmPacketBody::Frame(frame) = &packet.body {
         Some(frame)
     } else {
         None
@@ -163,13 +163,13 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
                 .get(index)?,
         ),
         RecordRef::Keyframe(index) => {
-            let NativeFilmPacketBody::Keyframes(table) = &packet.body else {
+            let FilmPacketBody::Keyframes(table) = &packet.body else {
                 return None;
             };
             Record::Keyframe(table.records.get(index)?.record.as_ref()?)
         }
         RecordRef::Summary(index) => {
-            let NativeFilmPacketBody::Summary { events, .. } = &packet.body else {
+            let FilmPacketBody::Summary { events, .. } = &packet.body else {
                 return None;
             };
             Record::Summary(events.get(index)?)
@@ -190,7 +190,7 @@ pub(super) fn index(
                 events.push(Event {
                     timestamp_us: match record {
                         RecordRef::Summary(i) => match &packet.body {
-                            NativeFilmPacketBody::Summary { events, .. } => events[i].time_us,
+                            FilmPacketBody::Summary { events, .. } => events[i].time_us,
                             _ => packet.header.timestamp_us,
                         },
                         _ => packet.header.timestamp_us,
@@ -250,7 +250,7 @@ pub(super) fn index(
                 }
             }
             match &packet.body {
-                NativeFilmPacketBody::Keyframes(table) => {
+                FilmPacketBody::Keyframes(table) => {
                     for (i, attempt) in table.records.iter().enumerate() {
                         if attempt.record.is_some() {
                             push(
@@ -262,7 +262,7 @@ pub(super) fn index(
                         }
                     }
                 }
-                NativeFilmPacketBody::Summary { events, .. } => {
+                FilmPacketBody::Summary { events, .. } => {
                     for (i, summary) in events.iter().enumerate() {
                         push(
                             RecordRef::Summary(i),

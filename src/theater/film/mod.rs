@@ -77,10 +77,10 @@ pub use chunks::registry::{
 };
 pub use chunks::replication::{
     AnticipatedDeclaration, DatumEntry, DatumTable, DecodedHeadEvent, EventReference,
-    EventReferenceValue, FilmPacket, FilmViewAdmission, HeadEventPayload, HeadEventStop,
-    KillEventFields, NativeContinuationStatePolicy, NativeEventContinuation, NativeEventField,
-    NativeEventFieldStage, NativeEventFieldValue, NativeEventListRead, NativeEventListStop,
-    NativeEventRecord, NativeFilmPacket, NativeFilmPacketBody, NativeNewBindingRefusal,
+    EventReferenceValue, FilmPacket, FilmPacketBody, FilmPacketHeader, FilmViewAdmission,
+    HeadEventPayload, HeadEventStop, KillEventFields, NativeContinuationStatePolicy,
+    NativeEventContinuation, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
+    NativeEventListRead, NativeEventListStop, NativeEventRecord, NativeNewBindingRefusal,
     NativePacketHeadRead, NativePickupOutcome, NativePickupRead, NativeRosterRead,
     NativeTranslocatorEvent, NativeWeaponDamageField, NativeWeaponDamageRead, NativeZoomRead,
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,

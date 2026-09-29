@@ -14,7 +14,7 @@ pub struct SourceSpan {
 
 /// One checked byte-aligned replication packet.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct FilmPacket {
+pub struct FilmPacketHeader {
     pub chunk_index: i32,
     pub packet_type: u16,
     pub byte_2: u8,

@@ -148,7 +148,7 @@ fn native_data_damage_admission_and_provenance() {
     let mut old = json!(packets[0]);
     old.as_object_mut().unwrap().remove("damage_read");
     assert!(
-        serde_json::from_value::<NativeFilmPacket>(old)
+        serde_json::from_value::<FilmPacket>(old)
             .unwrap()
             .damage_read
             .is_none()

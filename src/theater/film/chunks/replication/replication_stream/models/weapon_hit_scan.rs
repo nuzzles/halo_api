@@ -4,7 +4,7 @@ use crate::theater::film::*;
 pub struct WeaponDamageRead {
     /// Loaded packet provenance. None for payload-only reads and older exports.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub source: Option<FilmPacket>,
+    pub source: Option<FilmPacketHeader>,
     /// Ordinal among all packets in the chunk, before filtering by packet type.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub packet_index: Option<usize>,

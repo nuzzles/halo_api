@@ -45,7 +45,7 @@ struct V41PacketChunk {
     source: FilmChunk,
     source_position: usize,
     data: Vec<u8>,
-    packets: Vec<NativeFilmPacket>,
+    packets: Vec<FilmPacket>,
 }
 
 enum V41DataChunkReader {
@@ -136,14 +136,14 @@ impl V41ChunkReader {
                         header.chunk_index,
                         header.payload_offset,
                     )
-                    .map(|(declared_events, events)| NativeFilmPacketBody::Summary {
+                    .map(|(declared_events, events)| FilmPacketBody::Summary {
                         declared_events,
                         events,
                     })
-                    .unwrap_or_else(|| NativeFilmPacketBody::Refused {
+                    .unwrap_or_else(|| FilmPacketBody::Refused {
                         message: "truncated summary count".into(),
                     }),
-                    (true, _) => NativeFilmPacketBody::Opaque,
+                    (true, _) => FilmPacketBody::Opaque,
                     (false, 0) => config
                         .decode_production_views(
                             payload,
@@ -151,13 +151,13 @@ impl V41ChunkReader {
                             &registry.definition.registry,
                             &mut world,
                         )
-                        .map(|frame| NativeFilmPacketBody::Frame(Box::new(frame)))
-                        .unwrap_or_else(|error| NativeFilmPacketBody::Refused {
+                        .map(|frame| FilmPacketBody::Frame(Box::new(frame)))
+                        .unwrap_or_else(|error| FilmPacketBody::Refused {
                             message: error.to_string(),
                         }),
                     (false, 1) => decode_datum_table(payload)
-                        .map(NativeFilmPacketBody::Datums)
-                        .unwrap_or_else(|error| NativeFilmPacketBody::Refused {
+                        .map(FilmPacketBody::Datums)
+                        .unwrap_or_else(|error| FilmPacketBody::Refused {
                             message: error.to_string(),
                         }),
                     (false, 2) => {
@@ -172,20 +172,20 @@ impl V41ChunkReader {
                                         );
                                     }
                                 }
-                                NativeFilmPacketBody::Keyframes(table)
+                                FilmPacketBody::Keyframes(table)
                             }
-                            Err(error) => NativeFilmPacketBody::Refused {
+                            Err(error) => FilmPacketBody::Refused {
                                 message: error.to_string(),
                             },
                         }
                     }
                     (false, 8) => roster_read
                         .as_ref()
-                        .map(|read| NativeFilmPacketBody::Roster(read.roster.clone()))
-                        .unwrap_or_else(|| NativeFilmPacketBody::Refused {
+                        .map(|read| FilmPacketBody::Roster(read.roster.clone()))
+                        .unwrap_or_else(|| FilmPacketBody::Refused {
                             message: "unknown build personalization width".into(),
                         }),
-                    _ => NativeFilmPacketBody::Opaque,
+                    _ => FilmPacketBody::Opaque,
                 };
                 let event_continuation = event_list.as_ref().and_then(|events| {
                     continue_event_views(
@@ -196,7 +196,7 @@ impl V41ChunkReader {
                         &mut world,
                     )
                 });
-                chunk.packets.push(NativeFilmPacket {
+                chunk.packets.push(FilmPacket {
                     header: *header,
                     roster_read,
                     body,

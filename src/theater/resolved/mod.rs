@@ -7,7 +7,7 @@ use super::film::{
     ComponentField, EntityRecord, EntityViewStop, KeyframeRecord, KeyframeStop, NativeControlEntry,
     NativeEventRecord, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
 };
-use super::film::{Film, NativeContinuationStatePolicy, NativeFilmPacket, NativeFilmPacketBody};
+use super::film::{Film, FilmPacket, FilmPacketBody, NativeContinuationStatePolicy};
 use interpretation::Interpretations;
 use std::{collections::BTreeMap, sync::Arc};
 

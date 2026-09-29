@@ -62,7 +62,7 @@ impl<'a> FilmChunkRef<'a> {
         }
     }
 
-    pub fn packets(self) -> &'a [NativeFilmPacket] {
+    pub fn packets(self) -> &'a [FilmPacket] {
         match self {
             Self::Registry(_) => &[],
             Self::Replication(chunk) => &chunk.packets,
@@ -70,7 +70,7 @@ impl<'a> FilmChunkRef<'a> {
         }
     }
 
-    pub fn payload(self, packet: &NativeFilmPacket) -> Option<&'a [u8]> {
+    pub fn payload(self, packet: &FilmPacket) -> Option<&'a [u8]> {
         let header = packet.header;
         self.data()
             .get(header.payload_offset..header.payload_offset.checked_add(header.payload_size)?)

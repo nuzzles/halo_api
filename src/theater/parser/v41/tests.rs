@@ -127,7 +127,7 @@ fn native_data_event_continuation_preserves_original_stop() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let packet = &parsed.replication.chunks[0].packets[0];
-    let NativeFilmPacketBody::Frame(original) = &packet.body else {
+    let FilmPacketBody::Frame(original) = &packet.body else {
         panic!("missing frame")
     };
     assert_eq!(original.views_completed, 0);
@@ -147,7 +147,7 @@ fn native_data_event_continuation_preserves_original_stop() {
         .unwrap()
         .remove("event_continuation");
     assert!(
-        serde_json::from_value::<NativeFilmPacket>(old_packet)
+        serde_json::from_value::<FilmPacket>(old_packet)
             .unwrap()
             .event_continuation
             .is_none()

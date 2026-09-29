@@ -110,7 +110,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     assert_eq!(film.replication.chunks[0].source_position, 2);
     assert!(matches!(
         film.replication.chunks[0].packets[0].body,
-        NativeFilmPacketBody::Opaque
+        FilmPacketBody::Opaque
     ));
     assert_eq!(
         film.summaries
@@ -153,7 +153,7 @@ fn keyframes_stop_without_searching_past_invalid_header() {
         },
     ])
     .unwrap();
-    let NativeFilmPacketBody::Keyframes(table) = &film.replication.chunks[0].packets[0].body else {
+    let FilmPacketBody::Keyframes(table) = &film.replication.chunks[0].packets[0].body else {
         panic!()
     };
     assert_eq!(table.stop, KeyframeChainStop::Header);
@@ -271,7 +271,7 @@ fn captured_v41_corpus() {
                 let payload = &chunk.data()[packet.header.payload_offset
                     ..packet.header.payload_offset + packet.header.payload_size];
                 match &packet.body {
-                    NativeFilmPacketBody::Frame(_) => {
+                    FilmPacketBody::Frame(_) => {
                         let baseline = baseline_config
                             .decode_production_views(
                                 payload,
@@ -292,7 +292,7 @@ fn captured_v41_corpus() {
                         );
                         frames += 1;
                     }
-                    NativeFilmPacketBody::Keyframes(table) => {
+                    FilmPacketBody::Keyframes(table) => {
                         for attempt in &table.records {
                             if attempt.record.is_some() {
                                 baseline_world.bind_keyframe(
