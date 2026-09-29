@@ -11,18 +11,21 @@ theater/
     mod.rs                 Film, ParseError, dispatch and model reexports
     chunks/
       mod.rs               Chunk hierarchy and reexports
-      models.rs            FilmChunk, ChunkKind, FilmChunkRef
+      models.rs            FilmChunk and ChunkKind
+      packet/
+        mod.rs             Shared FilmPacketHeader and SourceSpan
       registry/
         mod.rs             RegistryChunk
         models.rs          Component registry and read trace
       replication/
         mod.rs             ReplicationStreamChunk and components
         replication_stream/
-          mod.rs           ReplicationStream
-          models/          Packet, record, datum, roster and event models
-        components/        Component fields, diagnostics and value models
+          mod.rs           ReplicationStream and ReplicationStreamPacket
+          models/          Frame, record, datum and event models
+        components/
+          models/          Component observations, refusals and diagnostics
       summary/
-        mod.rs             SummaryChunk and SummaryEvents
+        mod.rs             SummaryChunk, SummaryPacket and SummaryEvents
         models.rs          Recorded summary event models
   parser/
     mod.rs                 ChunkReader and registry-first version dispatch
@@ -37,13 +40,14 @@ theater/
       summary.rs           v41 summary decoding
   resolved/
     mod.rs                 ResolvedFilm construction and shared indexes
-    identity.rs            Identity models and player lookup
+    identity.rs            Identity/player-table models and player lookup
     interpretation/        Bootstrap searches, player-slot traces and interpretation evidence
       packet/              Packet-head, pickup, damage, zoom and teleport decoders/models
     events.rs              Source references, provenance and event indexing
     query.rs               Filters and query indexes
     world.rs               Entity/component models and state accumulation
     playback.rs            Current snapshot, advance, seek and checkpoints
+    source.rs              Internal borrowed chunk/packet navigation
   docs/                    Format, fidelity, architecture and validation
 ```
 

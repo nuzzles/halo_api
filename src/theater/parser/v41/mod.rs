@@ -61,7 +61,7 @@ pub(crate) mod reader;
 
 pub(crate) mod production_frame;
 
-pub(crate) use crate::theater::film::chunks::replication::components::read_diagnostics;
+pub(crate) use crate::theater::film::chunks::replication::components::models as component_models;
 
 pub(crate) mod records;
 
@@ -93,13 +93,13 @@ pub(crate) use source_bits::*;
 pub(crate) use types::*;
 pub(crate) use world::*;
 
-pub(crate) use components::{ComponentField, EntityRecord, EntityViewStop};
-pub(crate) use production_frame::ProductionFrame;
-pub(crate) use read_diagnostics::{
+pub(crate) use component_models::{
     AbilityNonPredictedState, EquipmentCreationField, EquipmentField, FilmComponentObservation,
     FilmReadDiagnostics, GameEngineField, ManagedObjectField, MovementComponent, MppField,
     NavpointField, ObjectiveField, PlayerStateField, ProbeComponent, WidthAdjustment, WidthPurpose,
 };
+pub(crate) use components::{ComponentField, EntityRecord, EntityViewStop};
+pub(crate) use production_frame::ProductionFrame;
 pub(crate) use records::{RecordHeader, RecordKind};
 pub(crate) use registry::FilmRegistry;
 #[cfg(test)]

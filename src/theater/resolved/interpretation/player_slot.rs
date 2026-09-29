@@ -1,6 +1,6 @@
 //! Bounded reference player-slot grammar shared by roster and bootstrap reads.
-use crate::theater::film::*;
 use crate::theater::parser::bits::Cursor;
+use crate::theater::resolved::identity::{PlayerTableShorts, PlayerTableSlot};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SlotField {

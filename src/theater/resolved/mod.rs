@@ -5,10 +5,10 @@
 pub mod interpretation;
 use super::film::{
     ComponentField, ControlEntry, EntityRecord, EntityViewStop, EventRecord, KeyframeRecord,
-    KeyframeStop, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
+    KeyframeStop, ProductionFrame, RecordKind, SummaryEvent,
 };
 use super::film::{
-    ContinuationStatePolicy, Film, PacketRef, ReplicationStreamPacket, ReplicationStreamPacketBody,
+    ContinuationStatePolicy, Film, ReplicationStreamPacket, ReplicationStreamPacketBody,
     SummaryPacket, SummaryPacketBody,
 };
 use interpretation::Interpretations;
@@ -18,6 +18,8 @@ pub mod events;
 pub mod identity;
 pub mod playback;
 pub mod query;
+mod source;
+use source::{PacketRef, chunk};
 pub mod world;
 pub use events::*;
 use playback::{CHECKPOINT_INTERVAL, Checkpoint};
@@ -119,5 +121,5 @@ mod tests;
 
 pub use identity::{
     FilmIdentity, IdentityField, IdentityRead, IdentityValue, PlayerTable, PlayerTableError,
-    PlayerTableReport,
+    PlayerTableReport, PlayerTableShorts, PlayerTableSlot,
 };

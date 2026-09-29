@@ -121,7 +121,28 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
         vec![1, 3]
     );
     for (i, input) in chunks.iter().enumerate() {
-        assert_eq!(film.chunk(i).unwrap().source(), input);
+        let source = match input.kind {
+            ChunkKind::Registry => &film.registry.source,
+            ChunkKind::Replication => {
+                &film
+                    .replication
+                    .chunks
+                    .iter()
+                    .find(|chunk| chunk.source_position == i)
+                    .unwrap()
+                    .source
+            }
+            ChunkKind::Summary => {
+                &film
+                    .summaries
+                    .chunks
+                    .iter()
+                    .find(|chunk| chunk.source_position == i)
+                    .unwrap()
+                    .source
+            }
+        };
+        assert_eq!(source, input);
     }
     let json = serde_json::to_value(&film).unwrap();
     assert_eq!(
@@ -266,49 +287,64 @@ fn captured_v41_corpus() {
         let mut baseline_world = FilmWorld::default();
         let baseline_config = FrameConfig::default();
         for (i, original) in input.iter().enumerate() {
-            let chunk = film.chunk(i).unwrap();
-            assert_eq!(chunk.source(), original);
-            baseline_world.current_chunk = original.index.unwrap_or(i as i64);
-            for packet in chunk.packets() {
-                let PacketRef::Replication(packet) = packet else {
-                    continue;
-                };
-                let payload = &chunk.data()[packet.header.payload_offset
-                    ..packet.header.payload_offset + packet.header.payload_size];
-                match &packet.body {
-                    ReplicationStreamPacketBody::Frame(_) => {
-                        let baseline = baseline_config
-                            .decode_production_views(
-                                payload,
-                                2,
-                                &film.registry.definition.registry,
-                                &mut baseline_world,
-                            )
-                            .unwrap();
-                        let oracle = expected
-                            .remove(&(files[i].clone(), packet.header.payload_offset))
-                            .unwrap();
-                        assert_eq!(
-                            (baseline.views_completed, baseline.end_bit),
-                            oracle,
-                            "{}:{}",
-                            files[i],
-                            packet.header.payload_offset
-                        );
-                        frames += 1;
-                    }
-                    ReplicationStreamPacketBody::Keyframes(table) => {
-                        for attempt in &table.records {
-                            if attempt.record.is_some() {
-                                baseline_world.bind_keyframe(
-                                    attempt.id >> 30,
-                                    attempt.id & 0x3fffffff,
-                                    attempt.archetype,
+            match original.kind {
+                ChunkKind::Registry => assert_eq!(&film.registry.source, original),
+                ChunkKind::Summary => {
+                    let chunk = film
+                        .summaries
+                        .chunks
+                        .iter()
+                        .find(|chunk| chunk.source_position == i)
+                        .unwrap();
+                    assert_eq!(&chunk.source, original);
+                }
+                ChunkKind::Replication => {
+                    let chunk = film
+                        .replication
+                        .chunks
+                        .iter()
+                        .find(|chunk| chunk.source_position == i)
+                        .unwrap();
+                    assert_eq!(&chunk.source, original);
+                    baseline_world.current_chunk = original.index.unwrap_or(i as i64);
+                    for packet in &chunk.packets {
+                        let payload = chunk.payload(packet).unwrap();
+                        match &packet.body {
+                            ReplicationStreamPacketBody::Frame(_) => {
+                                let baseline = baseline_config
+                                    .decode_production_views(
+                                        payload,
+                                        2,
+                                        &film.registry.definition.registry,
+                                        &mut baseline_world,
+                                    )
+                                    .unwrap();
+                                let oracle = expected
+                                    .remove(&(files[i].clone(), packet.header.payload_offset))
+                                    .unwrap();
+                                assert_eq!(
+                                    (baseline.views_completed, baseline.end_bit),
+                                    oracle,
+                                    "{}:{}",
+                                    files[i],
+                                    packet.header.payload_offset
                                 );
+                                frames += 1;
                             }
+                            ReplicationStreamPacketBody::Keyframes(table) => {
+                                for attempt in &table.records {
+                                    if attempt.record.is_some() {
+                                        baseline_world.bind_keyframe(
+                                            attempt.id >> 30,
+                                            attempt.id & 0x3fffffff,
+                                            attempt.archetype,
+                                        );
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
                     }
-                    _ => {}
                 }
             }
         }

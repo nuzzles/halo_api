@@ -463,8 +463,8 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
 
 #[test]
 fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
-    use crate::theater::film::PlayerTableSlot;
     use crate::theater::resolved::PlayerTable;
+    use crate::theater::resolved::PlayerTableSlot;
     use serde_json::json;
     let mut film = Film::parse([
         FilmChunk {

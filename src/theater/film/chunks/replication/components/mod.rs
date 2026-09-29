@@ -3,14 +3,8 @@
 pub mod unit_equipment;
 pub use unit_equipment::{UnitEquipmentEntry, UnitEquipmentRead};
 
-pub mod read_diagnostics;
-pub use read_diagnostics::{
-    AbilityNonPredictedState, CamoState, EquipmentCreationField, EquipmentField,
-    FilmComponentObservation, FilmReadDiagnostics, GameEngineField, ManagedObjectField,
-    ManagedPropertyField, MovementComponent, MppField, NavpointField, ObjectParentState,
-    ObjectiveField, PlayerStateField, ProbeComponent, ReadOperation, ReadRefusal, WidthAdjustment,
-    WidthPurpose, WidthRefusal,
-};
+pub mod models;
+pub use models::*;
 
 pub mod unit_references;
 pub use unit_references::{UnitReference, UnitReferenceKind};

@@ -4,7 +4,10 @@ use super::ParseError;
 use serde::{Deserialize, Serialize};
 
 pub mod models;
-pub use models::{ChunkKind, FilmChunk, FilmChunkRef, PacketRef};
+pub use models::{ChunkKind, FilmChunk};
+
+pub mod packet;
+pub use packet::{FilmPacketHeader, SourceSpan};
 
 pub mod registry;
 pub use registry::*;

@@ -1,13 +1,7 @@
 use super::super::*;
 
-pub mod packet_header;
-pub use packet_header::{FilmPacketHeader, SourceSpan};
-
 pub mod records;
 pub use records::{RecordHeader, RecordKind};
-
-pub mod roster_updates;
-pub use roster_updates::{RosterEntry, RosterReport, RosterUpdate};
 
 pub mod datums;
 pub use datums::{DatumEntry, DatumTable};
@@ -26,15 +20,6 @@ pub use world::{FilmViewAdmission, NewBindingRefusal};
 
 pub mod anticipated_bindings;
 pub use anticipated_bindings::AnticipatedDeclaration;
-
-pub mod player;
-pub use player::{PlayerTableShorts, PlayerTableSlot};
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ReplicationStreamPacket {
-    pub header: FilmPacketHeader,
-    pub body: ReplicationStreamPacketBody,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FramePacket {
@@ -67,19 +52,4 @@ pub enum ContinuationStatePolicy {
     /// Pinned code-0 body readers disagree on a field's gate polarity. Keep the
     /// generic continuation attempt but do not propagate its binding effects.
     IsolatedConflictingDamageGrammar,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[allow(clippy::large_enum_variant)]
-pub enum ReplicationStreamPacketBody {
-    Frame(Box<FramePacket>),
-    Datums(DatumTable),
-    Roster(RosterUpdate),
-    Keyframes(KeyframeTable),
-    /// A reader could not start. The complete payload remains in the chunk.
-    Refused {
-        message: String,
-    },
-    /// No body reader selected; this does not imply an empty payload.
-    Opaque,
 }

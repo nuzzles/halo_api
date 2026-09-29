@@ -18,24 +18,6 @@ impl Film {
     pub fn resolve(&self) -> crate::theater::ResolvedFilm<'_> {
         crate::theater::ResolvedFilm::from_film(self)
     }
-    /// Sections retain input positions, allowing a lookup without copying bytes.
-    pub(crate) fn chunk(&self, position: usize) -> Option<FilmChunkRef<'_>> {
-        if self.registry.source_position == position {
-            return Some(FilmChunkRef::Registry(&self.registry));
-        }
-        if let Ok(i) = self
-            .replication
-            .chunks
-            .binary_search_by_key(&position, |c| c.source_position)
-        {
-            return Some(FilmChunkRef::Replication(&self.replication.chunks[i]));
-        }
-        self.summaries
-            .chunks
-            .binary_search_by_key(&position, |c| c.source_position)
-            .ok()
-            .map(|i| FilmChunkRef::Summary(&self.summaries.chunks[i]))
-    }
 }
 #[derive(Debug, thiserror::Error)]
 pub enum ParseError {
@@ -68,16 +50,15 @@ pub use chunks::registry::{
 pub use chunks::replication::{
     AnticipatedDeclaration, ContinuationStatePolicy, DatumEntry, DatumTable, EventContinuation,
     EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
-    FilmPacketHeader, FilmViewAdmission, FramePacket, KillEventFields, NewBindingRefusal,
+    FilmViewAdmission, FramePacket, KillEventFields, NewBindingRefusal,
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
-    ReplicationStream, ReplicationStreamPacket, ReplicationStreamPacketBody, RosterEntry,
-    RosterReport, RosterUpdate, SourceSpan,
+    ReplicationStream, ReplicationStreamPacket, ReplicationStreamPacketBody,
 };
 pub use chunks::summary::{
     FilmMedalDefinition, MedalAward, SummaryEvents, SummaryPacket, SummaryPacketBody,
 };
 pub use chunks::{
-    ChunkKind, FilmChunk, FilmChunkRef, PacketRef, RegistryChunk, ReplicationStreamChunk,
+    ChunkKind, FilmChunk, FilmPacketHeader, RegistryChunk, ReplicationStreamChunk, SourceSpan,
     SummaryChunk,
 };
 
@@ -92,8 +73,6 @@ pub use chunks::replication::components::{
     UnitEquipmentRead, UnitReference, UnitReferenceKind, WidthAdjustment, WidthPurpose,
     WidthRefusal,
 };
-
-pub use chunks::replication::player::{PlayerTableShorts, PlayerTableSlot};
 
 pub use chunks::replication::components::position::PositionKind;
 

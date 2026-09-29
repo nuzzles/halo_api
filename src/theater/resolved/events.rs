@@ -103,8 +103,7 @@ pub struct StateChange {
 }
 
 pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
-    let packet = film
-        .chunk(source.chunk)
+    let packet = chunk(film, source.chunk)
         .expect("indexed source chunk")
         .packet(source.packet)
         .expect("indexed source packet");
@@ -155,14 +154,14 @@ pub(super) fn replication_packet(
     film: &Film,
     source: SourceRef,
 ) -> Option<&ReplicationStreamPacket> {
-    match film.chunk(source.chunk)?.packet(source.packet)? {
+    match chunk(film, source.chunk)?.packet(source.packet)? {
         PacketRef::Replication(packet) => Some(packet),
         PacketRef::Summary(_) => None,
     }
 }
 
 pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
-    let packet = film.chunk(source.chunk)?.packet(source.packet)?;
+    let packet = chunk(film, source.chunk)?.packet(source.packet)?;
     Some(match source.record {
         RecordRef::Packet => match packet {
             PacketRef::Replication(packet) => Record::ReplicationPacket(packet),
