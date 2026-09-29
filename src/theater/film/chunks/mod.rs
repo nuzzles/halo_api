@@ -7,7 +7,7 @@ pub mod models;
 pub use models::{ChunkKind, FilmChunk};
 
 pub mod packet;
-pub use packet::{FilmPacketHeader, PacketDecodeError, SourceSpan};
+pub use packet::{FilmPacketHeader, Packet, PacketDecodeError, SourceSpan};
 
 pub mod registry;
 pub use registry::*;

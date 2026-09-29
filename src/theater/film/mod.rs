@@ -61,7 +61,7 @@ pub use chunks::summary::{
     FilmMedalDefinition, MedalAward, SummaryEvents, SummaryPacket, SummaryPacketBody,
 };
 pub use chunks::{
-    ChunkKind, FilmChunk, FilmPacketHeader, PacketDecodeError, RegistryChunk,
+    ChunkKind, FilmChunk, FilmPacketHeader, Packet, PacketDecodeError, RegistryChunk,
     ReplicationStreamChunk, SourceSpan, SummaryChunk,
 };
 

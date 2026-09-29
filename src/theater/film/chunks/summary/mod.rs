@@ -13,11 +13,8 @@ pub struct SummaryChunk {
     pub packets: Vec<SummaryPacket>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SummaryPacket {
-    pub header: FilmPacketHeader,
-    pub body: Result<SummaryPacketBody, PacketDecodeError>,
-}
+/// Packet envelope used by type-3 summary chunks.
+pub type SummaryPacket = Packet<SummaryPacketBody>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum SummaryPacketBody {

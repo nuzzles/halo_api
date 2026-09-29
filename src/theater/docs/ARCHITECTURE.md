@@ -13,7 +13,8 @@ theater/
       mod.rs               Chunk hierarchy and reexports
       models.rs            FilmChunk and ChunkKind
       packet/
-        mod.rs             Shared FilmPacketHeader and SourceSpan
+        mod.rs             Shared packet model reexports
+        models.rs          Packet<T>, FilmPacketHeader, errors and source spans
       registry/
         mod.rs             RegistryChunk
         models.rs          Component registry and read trace

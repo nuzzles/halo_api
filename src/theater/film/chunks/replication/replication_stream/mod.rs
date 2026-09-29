@@ -1,6 +1,6 @@
 //! Ordered replication stream and packet envelope models.
 
-use super::{FilmPacketHeader, PacketDecodeError, ReplicationStreamChunk};
+use super::{Packet, ReplicationStreamChunk};
 use serde::{Deserialize, Serialize};
 
 pub mod models;
@@ -13,17 +13,11 @@ pub struct ReplicationStream {
     pub chunks: Vec<ReplicationStreamChunk>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 /// One framed entry from a replication-stream chunk.
 ///
 /// The enclosing chunk retains the exact payload bytes. `body` is the v41
 /// decoder's interpretation and can fail without discarding those bytes.
-pub struct ReplicationStreamPacket {
-    /// Recorded framing metadata and the payload's location in its chunk.
-    pub header: FilmPacketHeader,
-    /// Typed decoding, kept separate from the recorded bytes.
-    pub body: Result<ReplicationStreamPacketBody, PacketDecodeError>,
-}
+pub type ReplicationStreamPacket = Packet<ReplicationStreamPacketBody>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 /// Successfully decoded body of a [`ReplicationStreamPacket`].
