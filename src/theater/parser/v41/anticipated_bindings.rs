@@ -1,6 +1,6 @@
 //! Dated keyframe declarations used by the reference's later-keyframe fallback.
 //! These are evidence for a binding, not decoded creation records.
-pub(crate) use crate::theater::film::chunks::replication::anticipated_bindings::AnticipatedDeclaration;
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::anticipated_bindings::AnticipatedDeclaration;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 

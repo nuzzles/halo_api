@@ -16,8 +16,10 @@ theater/
         mod.rs             RegistryChunk
         models.rs          Component registry and read trace
       replication/
-        mod.rs             ReplicationStreamChunk and focused submodules
-        replication_stream/ Stream and packet envelope models
+        mod.rs             ReplicationStreamChunk and components
+        replication_stream/
+          mod.rs           ReplicationStream
+          models/          Packet, record, datum, roster and event models
         components/        Component fields, diagnostics and value models
       summary/
         mod.rs             SummaryChunk and SummaryEvents

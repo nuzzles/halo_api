@@ -1,6 +1,6 @@
 //! Native weapon-hit event readers, including their explicit zero-tail provenance.
 #[cfg(test)]
-use crate::theater::film::chunks::replication::weapon_hit_scan::WeaponDamageRead;
+use crate::theater::film::chunks::replication::replication_stream::models::weapon_hit_scan::WeaponDamageRead;
 
 #[cfg(test)]
 /// Read the first damage_aftermath exactly as the native statistics scanner.

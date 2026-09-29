@@ -1,6 +1,6 @@
 //! Native default production frame policy: message/entity/control classes and world admission.
 use super::*;
-pub(crate) use crate::theater::film::chunks::replication::production_frame::{
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::production_frame::{
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
 };
 

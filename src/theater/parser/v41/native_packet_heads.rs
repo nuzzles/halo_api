@@ -1,6 +1,6 @@
 //! Source-selected native head readers. These do not establish list boundaries.
 use super::*;
-pub(crate) use crate::theater::film::chunks::replication::native_packet_heads::NativePacketHeadRead;
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::native_packet_heads::NativePacketHeadRead;
 
 /// Apply the pinned native type, minimum-length and first-byte predicates.
 /// Pickup results are direct decoder attempts, without slot-band publication

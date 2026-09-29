@@ -1,7 +1,9 @@
 //! Record headers and registry-driven delta traversal. The caller supplies a checked
 //! boundary and entity binding; this layer never searches for a plausible header.
 use super::bits::Cursor;
-pub(crate) use crate::theater::film::chunks::replication::records::{RecordHeader, RecordKind};
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::records::{
+    RecordHeader, RecordKind,
+};
 use serde::{Deserialize, Serialize};
 
 /// Entity ID widths belong to the replication view, not a universal film constant.

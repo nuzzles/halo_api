@@ -108,10 +108,6 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     assert_eq!(film.registry.source.data, compressed);
     assert_eq!(film.registry.data, bootstrap);
     assert_eq!(film.replication.chunks[0].source_position, 2);
-    assert_eq!(
-        film.replication.chunks[0].packet_walk_end_byte,
-        stream.len() - 3
-    );
     assert!(matches!(
         film.replication.chunks[0].packets[0].body,
         NativeFilmPacketBody::Opaque

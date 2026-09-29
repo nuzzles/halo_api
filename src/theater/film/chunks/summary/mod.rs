@@ -11,8 +11,6 @@ pub struct SummaryChunk {
     pub source_position: usize,
     pub data: Vec<u8>,
     pub packets: Vec<NativeFilmPacket>,
-    /// Start of the unwalked suffix. Nested packet bit offsets address `data`.
-    pub packet_walk_end_byte: usize,
 }
 impl SummaryChunk {
     pub fn payload(&self, packet: &NativeFilmPacket) -> Option<&[u8]> {

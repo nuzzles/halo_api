@@ -28,8 +28,9 @@ Every parsed chunk retains its original `FilmChunk`, decompressed `data`, and
 `source_position` in the supplied list. Source positions are never replaced by
 manifest indices. Nested packet bit offsets are relative to the header's
 `payload_offset` in decompressed data; compressed transport has separate storage.
-`packet_walk_end_byte` identifies the unwalked suffix. The bootstrap is retained
-whole rather than misrepresented as a replication packet sequence.
+The reader warns when packet framing stops before the end of a chunk. All bytes
+remain retained in `data`. The bootstrap is retained whole rather than
+misrepresented as a replication packet sequence.
 
 ## Unknowns and runtime settings
 

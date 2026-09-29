@@ -46,7 +46,6 @@ struct V41PacketChunk {
     source_position: usize,
     data: Vec<u8>,
     packets: Vec<NativeFilmPacket>,
-    packet_walk_end_byte: usize,
 }
 
 enum V41DataChunkReader {
@@ -98,12 +97,22 @@ impl V41ChunkReader {
                 source_position,
                 data,
                 packets: Vec::new(),
-                packet_walk_end_byte: 0,
             };
-            for (packet_index, header) in transport::native_packet_bytes(&chunk.data, chunk_index)
-                .iter()
-                .enumerate()
-            {
+            let headers = transport::native_packet_bytes(&chunk.data, chunk_index);
+            let walk_end = headers
+                .last()
+                .map(|header| header.payload_offset + header.payload_size)
+                .unwrap_or(0);
+            if walk_end < chunk.data.len() {
+                tracing::warn!(
+                    kind = ?chunk.source.kind,
+                    source_position,
+                    byte_offset = walk_end,
+                    remaining_bytes = chunk.data.len() - walk_end,
+                    "stopped parsing film chunk before the end"
+                );
+            }
+            for (packet_index, header) in headers.iter().enumerate() {
                 let payload =
                     &chunk.data[header.payload_offset..header.payload_offset + header.payload_size];
                 let event_list = (!footer && header.packet_type == 0).then(|| {
@@ -187,7 +196,6 @@ impl V41ChunkReader {
                         &mut world,
                     )
                 });
-                chunk.packet_walk_end_byte = header.payload_offset + header.payload_size;
                 chunk.packets.push(NativeFilmPacket {
                     header: *header,
                     roster_read,
@@ -227,14 +235,12 @@ impl V41ChunkReader {
                     source_position: chunk.source_position,
                     data: chunk.data,
                     packets: chunk.packets,
-                    packet_walk_end_byte: chunk.packet_walk_end_byte,
                 }),
                 ChunkKind::Summary => summaries.push(SummaryChunk {
                     source: chunk.source,
                     source_position: chunk.source_position,
                     data: chunk.data,
                     packets: chunk.packets,
-                    packet_walk_end_byte: chunk.packet_walk_end_byte,
                 }),
             }
         }

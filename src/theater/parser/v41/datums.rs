@@ -1,6 +1,8 @@
 //! Type-1 entity datum tables, ported from LevelUp `type1_datums.go`.
 use super::{DecodeError, bits::Cursor};
-pub(crate) use crate::theater::film::chunks::replication::datums::{DatumEntry, DatumTable};
+pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::datums::{
+    DatumEntry, DatumTable,
+};
 use serde::{Deserialize, Serialize};
 
 impl Default for DatumEntry {
