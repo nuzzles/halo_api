@@ -45,7 +45,12 @@ struct V41PacketChunk {
     source: FilmChunk,
     source_position: usize,
     data: Vec<u8>,
-    packets: Vec<FilmPacket>,
+    packets: Vec<V41Packet>,
+}
+
+enum V41Packet {
+    Replication(Box<ReplicationStreamPacket>),
+    Summary(SummaryPacket),
 }
 
 enum V41DataChunkReader {
@@ -90,7 +95,7 @@ impl V41ChunkReader {
                 .map_err(|_| ParseError::Source("too many chunks".into()))?;
             let data = transport::inflate_film_chunk(&input.data).into_owned();
             world.current_chunk = input.index.unwrap_or(source_position as i64);
-            let footer = reader.is_summary();
+            let summary_chunk = reader.is_summary();
             let mut chunk = V41PacketChunk {
                 source: input,
                 source_position,
@@ -114,25 +119,36 @@ impl V41ChunkReader {
             for header in &headers {
                 let payload =
                     &chunk.data[header.payload_offset..header.payload_offset + header.payload_size];
-                let mut event_list = (!footer && header.packet_type == 0).then(|| {
+                if summary_chunk {
+                    let body = if header.packet_type == 9 {
+                        summary::read_summary_packet(
+                            payload,
+                            header.chunk_index,
+                            header.payload_offset,
+                        )
+                        .map(|(declared_events, events)| SummaryPacketBody::Events {
+                            declared_events,
+                            events,
+                        })
+                        .unwrap_or_else(|| SummaryPacketBody::Refused {
+                            message: "truncated summary count".into(),
+                        })
+                    } else {
+                        SummaryPacketBody::Opaque
+                    };
+                    chunk.packets.push(V41Packet::Summary(SummaryPacket {
+                        header: *header,
+                        body,
+                    }));
+                    continue;
+                }
+
+                let mut event_list = (header.packet_type == 0).then(|| {
                     // Every event consumes at least eight header bits.
                     read_reference_event_list(payload, 1, gate15, payload.len())
                 });
-                let body = match (footer, header.packet_type) {
-                    (true, 9) => summary::read_summary_packet(
-                        payload,
-                        header.chunk_index,
-                        header.payload_offset,
-                    )
-                    .map(|(declared_events, events)| FilmPacketBody::Summary {
-                        declared_events,
-                        events,
-                    })
-                    .unwrap_or_else(|| FilmPacketBody::Refused {
-                        message: "truncated summary count".into(),
-                    }),
-                    (true, _) => FilmPacketBody::Opaque,
-                    (false, 0) => {
+                let body = match header.packet_type {
+                    0 => {
                         let frame = config
                             .decode_production_views(
                                 payload,
@@ -150,45 +166,45 @@ impl V41ChunkReader {
                                 &mut world,
                             )
                         });
-                        FilmPacketBody::Frame(Box::new(FramePacket {
+                        ReplicationStreamPacketBody::Frame(Box::new(FramePacket {
                             frame,
                             events: event_list.take().expect("frame packet event read"),
                             continuation,
                         }))
                     }
-                    (false, 1) => decode_datum_table(payload)
-                        .map(FilmPacketBody::Datums)
-                        .unwrap_or_else(|error| FilmPacketBody::Refused {
+                    1 => decode_datum_table(payload)
+                        .map(ReplicationStreamPacketBody::Datums)
+                        .unwrap_or_else(|error| ReplicationStreamPacketBody::Refused {
                             message: error.to_string(),
                         }),
-                    (false, 2) => {
-                        match config.read_keyframe_table(payload, &registry.definition.registry) {
-                            Ok(table) => {
-                                for attempt in &table.records {
-                                    if attempt.record.is_some() {
-                                        world.bind_keyframe(
-                                            attempt.id >> 30,
-                                            attempt.id & 0x3fff_ffff,
-                                            attempt.archetype,
-                                        );
-                                    }
+                    2 => match config.read_keyframe_table(payload, &registry.definition.registry) {
+                        Ok(table) => {
+                            for attempt in &table.records {
+                                if attempt.record.is_some() {
+                                    world.bind_keyframe(
+                                        attempt.id >> 30,
+                                        attempt.id & 0x3fff_ffff,
+                                        attempt.archetype,
+                                    );
                                 }
-                                FilmPacketBody::Keyframes(table)
                             }
-                            Err(error) => FilmPacketBody::Refused {
-                                message: error.to_string(),
-                            },
+                            ReplicationStreamPacketBody::Keyframes(table)
                         }
-                    }
-                    (false, 8) => FilmPacketBody::Refused {
+                        Err(error) => ReplicationStreamPacketBody::Refused {
+                            message: error.to_string(),
+                        },
+                    },
+                    8 => ReplicationStreamPacketBody::Refused {
                         message: "player roster layout is not encoded by the v41 registry".into(),
                     },
-                    _ => FilmPacketBody::Opaque,
+                    _ => ReplicationStreamPacketBody::Opaque,
                 };
-                chunk.packets.push(FilmPacket {
-                    header: *header,
-                    body,
-                });
+                chunk
+                    .packets
+                    .push(V41Packet::Replication(Box::new(ReplicationStreamPacket {
+                        header: *header,
+                        body,
+                    })));
             }
             chunks.push(chunk);
         }
@@ -202,13 +218,29 @@ impl V41ChunkReader {
                     source: chunk.source,
                     source_position: chunk.source_position,
                     data: chunk.data,
-                    packets: chunk.packets,
+                    packets: chunk
+                        .packets
+                        .into_iter()
+                        .map(|packet| match packet {
+                            V41Packet::Replication(packet) => *packet,
+                            V41Packet::Summary(_) => unreachable!("chunk reader preserves kind"),
+                        })
+                        .collect(),
                 }),
                 ChunkKind::Summary => summaries.push(SummaryChunk {
                     source: chunk.source,
                     source_position: chunk.source_position,
                     data: chunk.data,
-                    packets: chunk.packets,
+                    packets: chunk
+                        .packets
+                        .into_iter()
+                        .map(|packet| match packet {
+                            V41Packet::Summary(packet) => packet,
+                            V41Packet::Replication(_) => {
+                                unreachable!("chunk reader preserves kind")
+                            }
+                        })
+                        .collect(),
                 }),
             }
         }

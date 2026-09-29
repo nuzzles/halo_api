@@ -37,6 +37,22 @@ pub enum FilmChunkRef<'a> {
     Summary(&'a SummaryChunk),
 }
 
+/// Borrowed access to either concrete packet type without erasing its origin.
+#[derive(Debug, Clone, Copy)]
+pub enum PacketRef<'a> {
+    Replication(&'a ReplicationStreamPacket),
+    Summary(&'a SummaryPacket),
+}
+
+impl PacketRef<'_> {
+    pub fn header(self) -> FilmPacketHeader {
+        match self {
+            Self::Replication(packet) => packet.header,
+            Self::Summary(packet) => packet.header,
+        }
+    }
+}
+
 impl<'a> FilmChunkRef<'a> {
     pub fn source(self) -> &'a FilmChunk {
         match self {
@@ -62,16 +78,32 @@ impl<'a> FilmChunkRef<'a> {
         }
     }
 
-    pub fn packets(self) -> &'a [FilmPacket] {
+    pub fn packets(self) -> impl Iterator<Item = PacketRef<'a>> {
+        let replication = match self {
+            Self::Replication(chunk) => Some(chunk.packets.as_slice()),
+            _ => None,
+        };
+        let summaries = match self {
+            Self::Summary(chunk) => Some(chunk.packets.as_slice()),
+            _ => None,
+        };
+        replication
+            .into_iter()
+            .flatten()
+            .map(PacketRef::Replication)
+            .chain(summaries.into_iter().flatten().map(PacketRef::Summary))
+    }
+
+    pub fn packet(self, index: usize) -> Option<PacketRef<'a>> {
         match self {
-            Self::Registry(_) => &[],
-            Self::Replication(chunk) => &chunk.packets,
-            Self::Summary(chunk) => &chunk.packets,
+            Self::Registry(_) => None,
+            Self::Replication(chunk) => chunk.packets.get(index).map(PacketRef::Replication),
+            Self::Summary(chunk) => chunk.packets.get(index).map(PacketRef::Summary),
         }
     }
 
-    pub fn payload(self, packet: &FilmPacket) -> Option<&'a [u8]> {
-        let header = packet.header;
+    pub fn payload(self, packet: PacketRef<'a>) -> Option<&'a [u8]> {
+        let header = packet.header();
         self.data()
             .get(header.payload_offset..header.payload_offset.checked_add(header.payload_size)?)
     }

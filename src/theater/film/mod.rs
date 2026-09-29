@@ -36,16 +36,6 @@ impl Film {
             .ok()
             .map(|i| FilmChunkRef::Summary(&self.summaries.chunks[i]))
     }
-    pub(crate) fn chunks(&self) -> impl Iterator<Item = FilmChunkRef<'_>> {
-        std::iter::once(FilmChunkRef::Registry(&self.registry))
-            .chain(
-                self.replication
-                    .chunks
-                    .iter()
-                    .map(FilmChunkRef::Replication),
-            )
-            .chain(self.summaries.chunks.iter().map(FilmChunkRef::Summary))
-    }
 }
 #[derive(Debug, thiserror::Error)]
 pub enum ParseError {
@@ -78,14 +68,17 @@ pub use chunks::registry::{
 pub use chunks::replication::{
     AnticipatedDeclaration, ContinuationStatePolicy, DatumEntry, DatumTable, EventContinuation,
     EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
-    FilmPacket, FilmPacketBody, FilmPacketHeader, FilmViewAdmission, FramePacket, KillEventFields,
-    NewBindingRefusal, ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
-    RecordHeader, RecordKind, ReplicationStream, RosterEntry, RosterReport, RosterUpdate,
-    SourceSpan,
+    FilmPacketHeader, FilmViewAdmission, FramePacket, KillEventFields, NewBindingRefusal,
+    ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
+    ReplicationStream, ReplicationStreamPacket, ReplicationStreamPacketBody, RosterEntry,
+    RosterReport, RosterUpdate, SourceSpan,
 };
-pub use chunks::summary::{FilmMedalDefinition, MedalAward, SummaryEvents};
+pub use chunks::summary::{
+    FilmMedalDefinition, MedalAward, SummaryEvents, SummaryPacket, SummaryPacketBody,
+};
 pub use chunks::{
-    ChunkKind, FilmChunk, FilmChunkRef, RegistryChunk, ReplicationStreamChunk, SummaryChunk,
+    ChunkKind, FilmChunk, FilmChunkRef, PacketRef, RegistryChunk, ReplicationStreamChunk,
+    SummaryChunk,
 };
 
 pub use chunks::replication::components::{

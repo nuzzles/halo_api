@@ -110,7 +110,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     assert_eq!(film.replication.chunks[0].source_position, 2);
     assert!(matches!(
         film.replication.chunks[0].packets[0].body,
-        FilmPacketBody::Opaque
+        ReplicationStreamPacketBody::Opaque
     ));
     assert_eq!(
         film.summaries
@@ -153,7 +153,8 @@ fn keyframes_stop_without_searching_past_invalid_header() {
         },
     ])
     .unwrap();
-    let FilmPacketBody::Keyframes(table) = &film.replication.chunks[0].packets[0].body else {
+    let ReplicationStreamPacketBody::Keyframes(table) = &film.replication.chunks[0].packets[0].body
+    else {
         panic!()
     };
     assert_eq!(table.stop, KeyframeChainStop::Header);
@@ -186,7 +187,8 @@ fn event_gate_is_unresolved_in_reference_film() {
         },
     ])
     .unwrap();
-    let FilmPacketBody::Frame(frame) = &film.replication.chunks[0].packets[0].body else {
+    let ReplicationStreamPacketBody::Frame(frame) = &film.replication.chunks[0].packets[0].body
+    else {
         panic!("missing frame packet")
     };
     let read = &frame.events;
@@ -268,10 +270,13 @@ fn captured_v41_corpus() {
             assert_eq!(chunk.source(), original);
             baseline_world.current_chunk = original.index.unwrap_or(i as i64);
             for packet in chunk.packets() {
+                let PacketRef::Replication(packet) = packet else {
+                    continue;
+                };
                 let payload = &chunk.data()[packet.header.payload_offset
                     ..packet.header.payload_offset + packet.header.payload_size];
                 match &packet.body {
-                    FilmPacketBody::Frame(_) => {
+                    ReplicationStreamPacketBody::Frame(_) => {
                         let baseline = baseline_config
                             .decode_production_views(
                                 payload,
@@ -292,7 +297,7 @@ fn captured_v41_corpus() {
                         );
                         frames += 1;
                     }
-                    FilmPacketBody::Keyframes(table) => {
+                    ReplicationStreamPacketBody::Keyframes(table) => {
                         for attempt in &table.records {
                             if attempt.record.is_some() {
                                 baseline_world.bind_keyframe(

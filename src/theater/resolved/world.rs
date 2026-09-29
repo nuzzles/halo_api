@@ -65,12 +65,8 @@ pub(super) fn resolve_change(
                 continuation: true, ..
             } = event.source.record
             {
-                let body = &film
-                    .chunk(event.source.chunk)
-                    .expect("indexed source chunk")
-                    .packets()[event.source.packet]
-                    .body;
-                let FilmPacketBody::Frame(frame) = body else {
+                let body = &replication_packet(film, event.source)?.body;
+                let ReplicationStreamPacketBody::Frame(frame) = body else {
                     return None;
                 };
                 let continuation = frame.continuation.as_ref()?;
@@ -78,10 +74,7 @@ pub(super) fn resolve_change(
                     return None;
                 }
             }
-            let packet = &film
-                .chunk(event.source.chunk)
-                .expect("indexed source chunk")
-                .packets()[event.source.packet];
+            let packet = replication_packet(film, event.source)?;
             if record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }
@@ -108,10 +101,7 @@ pub(super) fn resolve_change(
                 slot: record.id & 0x3fff_ffff,
             };
             // Reference padded reads remain visible but cannot become recorded state.
-            let packet = &film
-                .chunk(event.source.chunk)
-                .expect("indexed source chunk")
-                .packets()[event.source.packet];
+            let packet = replication_packet(film, event.source)?;
             if record.start_bit < 0 || record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }

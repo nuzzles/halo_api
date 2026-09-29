@@ -12,10 +12,10 @@ pub struct ReplicationStreamChunk {
     pub source: FilmChunk,
     pub source_position: usize,
     pub data: Vec<u8>,
-    pub packets: Vec<FilmPacket>,
+    pub packets: Vec<ReplicationStreamPacket>,
 }
 impl ReplicationStreamChunk {
-    pub fn payload(&self, packet: &FilmPacket) -> Option<&[u8]> {
+    pub fn payload(&self, packet: &ReplicationStreamPacket) -> Option<&[u8]> {
         let header = packet.header;
         self.data
             .get(header.payload_offset..header.payload_offset.checked_add(header.payload_size)?)

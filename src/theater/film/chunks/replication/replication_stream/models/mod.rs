@@ -31,9 +31,9 @@ pub mod player;
 pub use player::{PlayerTableShorts, PlayerTableSlot};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FilmPacket {
+pub struct ReplicationStreamPacket {
     pub header: FilmPacketHeader,
-    pub body: FilmPacketBody,
+    pub body: ReplicationStreamPacketBody,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -71,16 +71,11 @@ pub enum ContinuationStatePolicy {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
-pub enum FilmPacketBody {
+pub enum ReplicationStreamPacketBody {
     Frame(Box<FramePacket>),
     Datums(DatumTable),
     Roster(RosterUpdate),
     Keyframes(KeyframeTable),
-    /// Guarded captured-layout reads in wire order; intervening state is opaque.
-    Summary {
-        declared_events: u32,
-        events: Vec<SummaryEvent>,
-    },
     /// A reader could not start. The complete payload remains in the chunk.
     Refused {
         message: String,

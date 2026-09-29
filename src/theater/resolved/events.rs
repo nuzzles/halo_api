@@ -21,7 +21,8 @@ pub enum RecordRef {
 /// Borrowed reference payload. Independent diagnostic projections remain on Packet.
 #[derive(Debug, Clone, Copy)]
 pub enum Record<'a> {
-    Packet(&'a FilmPacket),
+    ReplicationPacket(&'a ReplicationStreamPacket),
+    SummaryPacket(&'a SummaryPacket),
     Entity(&'a EntityRecord),
     Keyframe(&'a KeyframeRecord),
     Control(&'a ControlEntry),
@@ -102,12 +103,14 @@ pub struct StateChange {
 }
 
 pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
-    let packet = &film
+    let packet = film
         .chunk(source.chunk)
         .expect("indexed source chunk")
-        .packets()[source.packet];
+        .packet(source.packet)
+        .expect("indexed source packet");
+    let header = packet.header();
     let bounded = |start: i64, end: i64| {
-        start >= 0 && end >= start && i128::from(end) <= packet.header.payload_size as i128 * 8
+        start >= 0 && end >= start && i128::from(end) <= header.payload_size as i128 * 8
     };
     match record(film, source) {
         Some(Record::Entity(r))
@@ -125,17 +128,20 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
         Some(Record::Control(r)) if bounded(r.start_bit, r.end_bit) => Provenance::RecordedRead,
         Some(Record::Summary(_)) => Provenance::RecordedRead,
         Some(Record::Event(r))
-            if r.layout_complete && r.end_bit <= packet.header.payload_size.saturating_mul(8) =>
+            if r.layout_complete && r.end_bit <= header.payload_size.saturating_mul(8) =>
         {
             Provenance::RecordedRead
         }
-        Some(Record::Packet(_)) => Provenance::PacketEnvelope,
+        Some(Record::ReplicationPacket(_) | Record::SummaryPacket(_)) => Provenance::PacketEnvelope,
         _ => Provenance::PartialRead,
     }
 }
 
-pub(super) fn frame(packet: &FilmPacket, continuation: bool) -> Option<&ProductionFrame> {
-    let FilmPacketBody::Frame(frame) = &packet.body else {
+pub(super) fn frame(
+    packet: &ReplicationStreamPacket,
+    continuation: bool,
+) -> Option<&ProductionFrame> {
+    let ReplicationStreamPacketBody::Frame(frame) = &packet.body else {
         return None;
     };
     if continuation {
@@ -145,41 +151,65 @@ pub(super) fn frame(packet: &FilmPacket, continuation: bool) -> Option<&Producti
     }
 }
 
+pub(super) fn replication_packet(
+    film: &Film,
+    source: SourceRef,
+) -> Option<&ReplicationStreamPacket> {
+    match film.chunk(source.chunk)?.packet(source.packet)? {
+        PacketRef::Replication(packet) => Some(packet),
+        PacketRef::Summary(_) => None,
+    }
+}
+
 pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
-    let packet = film.chunk(source.chunk)?.packets().get(source.packet)?;
+    let packet = film.chunk(source.chunk)?.packet(source.packet)?;
     Some(match source.record {
-        RecordRef::Packet => Record::Packet(packet),
-        RecordRef::Entity {
-            continuation,
-            index,
-        } => Record::Entity(frame(packet, continuation)?.records.get(index)?),
-        RecordRef::Control {
-            continuation,
-            index,
-        } => Record::Control(
-            frame(packet, continuation)?
-                .controls
-                .as_ref()?
-                .control_entries
-                .get(index)?,
-        ),
-        RecordRef::Keyframe(index) => {
-            let FilmPacketBody::Keyframes(table) = &packet.body else {
+        RecordRef::Packet => match packet {
+            PacketRef::Replication(packet) => Record::ReplicationPacket(packet),
+            PacketRef::Summary(packet) => Record::SummaryPacket(packet),
+        },
+        RecordRef::Summary(index) => {
+            let PacketRef::Summary(packet) = packet else {
                 return None;
             };
-            Record::Keyframe(table.records.get(index)?.record.as_ref()?)
-        }
-        RecordRef::Summary(index) => {
-            let FilmPacketBody::Summary { events, .. } = &packet.body else {
+            let SummaryPacketBody::Events { events, .. } = &packet.body else {
                 return None;
             };
             Record::Summary(events.get(index)?)
         }
-        RecordRef::Event(index) => {
-            let FilmPacketBody::Frame(frame) = &packet.body else {
+        record => {
+            let PacketRef::Replication(packet) = packet else {
                 return None;
             };
-            Record::Event(frame.events.records.get(index)?)
+            match record {
+                RecordRef::Entity {
+                    continuation,
+                    index,
+                } => Record::Entity(frame(packet, continuation)?.records.get(index)?),
+                RecordRef::Control {
+                    continuation,
+                    index,
+                } => Record::Control(
+                    frame(packet, continuation)?
+                        .controls
+                        .as_ref()?
+                        .control_entries
+                        .get(index)?,
+                ),
+                RecordRef::Keyframe(index) => {
+                    let ReplicationStreamPacketBody::Keyframes(table) = &packet.body else {
+                        return None;
+                    };
+                    Record::Keyframe(table.records.get(index)?.record.as_ref()?)
+                }
+                RecordRef::Event(index) => {
+                    let ReplicationStreamPacketBody::Frame(frame) = &packet.body else {
+                        return None;
+                    };
+                    Record::Event(frame.events.records.get(index)?)
+                }
+                RecordRef::Packet | RecordRef::Summary(_) => unreachable!(),
+            }
         }
     })
 }
@@ -189,18 +219,12 @@ pub(super) fn index(
     players: Option<&crate::theater::resolved::identity::PlayerTable>,
 ) -> Vec<Event> {
     let mut events = Vec::new();
-    for chunk in film.chunks() {
-        let chunk_index = chunk.source_position();
-        for (packet_index, packet) in chunk.packets().iter().enumerate() {
+    for chunk in &film.replication.chunks {
+        let chunk_index = chunk.source_position;
+        for (packet_index, packet) in chunk.packets.iter().enumerate() {
             let mut push = |record, kind, entity_id, player_index| {
                 events.push(Event {
-                    timestamp_us: match record {
-                        RecordRef::Summary(i) => match &packet.body {
-                            FilmPacketBody::Summary { events, .. } => events[i].time_us,
-                            _ => packet.header.timestamp_us,
-                        },
-                        _ => packet.header.timestamp_us,
-                    },
+                    timestamp_us: packet.header.timestamp_us,
                     order: 0,
                     provenance: Provenance::PacketEnvelope,
                     kind,
@@ -215,9 +239,8 @@ pub(super) fn index(
                 })
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
-            // Event lists precede the continuation's entity and control views.
-            if let FilmPacketBody::Frame(frame) = &packet.body {
-                for i in 0..frame.events.records.len() {
+            if let ReplicationStreamPacketBody::Frame(frame_packet) = &packet.body {
+                for i in 0..frame_packet.events.records.len() {
                     push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
             }
@@ -255,35 +278,64 @@ pub(super) fn index(
                     }
                 }
             }
-            match &packet.body {
-                FilmPacketBody::Keyframes(table) => {
-                    for (i, attempt) in table.records.iter().enumerate() {
-                        if attempt.record.is_some() {
-                            push(
-                                RecordRef::Keyframe(i),
-                                EventKind::Keyframe,
-                                Some(attempt.id),
-                                None,
-                            );
-                        }
-                    }
-                }
-                FilmPacketBody::Summary { events, .. } => {
-                    for (i, summary) in events.iter().enumerate() {
+            if let ReplicationStreamPacketBody::Keyframes(table) = &packet.body {
+                for (i, attempt) in table.records.iter().enumerate() {
+                    if attempt.record.is_some() {
                         push(
-                            RecordRef::Summary(i),
-                            EventKind::Summary,
+                            RecordRef::Keyframe(i),
+                            EventKind::Keyframe,
+                            Some(attempt.id),
                             None,
-                            summary.player.map(usize::from).or_else(|| {
-                                let xuid = summary.xuid.parse::<u64>().ok()?;
-                                let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
-                                let player = matches.next()?;
-                                matches.next().is_none().then_some(player.film_index)
-                            }),
                         );
                     }
                 }
-                _ => {}
+            }
+        }
+    }
+    for chunk in &film.summaries.chunks {
+        let chunk_index = chunk.source_position;
+        for (packet_index, packet) in chunk.packets.iter().enumerate() {
+            events.push(Event {
+                timestamp_us: packet.header.timestamp_us,
+                order: 0,
+                provenance: Provenance::PacketEnvelope,
+                kind: EventKind::Packet,
+                source: SourceRef {
+                    chunk: chunk_index,
+                    packet: packet_index,
+                    record: RecordRef::Packet,
+                },
+                entity_id: None,
+                player_index: None,
+                change: None,
+            });
+            let SummaryPacketBody::Events {
+                events: summaries, ..
+            } = &packet.body
+            else {
+                continue;
+            };
+            for (i, summary) in summaries.iter().enumerate() {
+                let player_index = summary.player.map(usize::from).or_else(|| {
+                    let xuid = summary.xuid.parse::<u64>().ok()?;
+                    let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
+                    let player = matches.next()?;
+                    matches.next().is_none().then_some(player.film_index)
+                });
+                events.push(Event {
+                    timestamp_us: summary.time_us,
+                    order: 0,
+                    provenance: Provenance::PacketEnvelope,
+                    kind: EventKind::Summary,
+                    source: SourceRef {
+                        chunk: chunk_index,
+                        packet: packet_index,
+                        record: RecordRef::Summary(i),
+                    },
+                    entity_id: None,
+                    player_index,
+                    change: None,
+                });
             }
         }
     }

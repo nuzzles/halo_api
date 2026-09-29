@@ -1,7 +1,6 @@
 //! Source-linked interpretation. These searches never modify the reference Film.
 use super::SourceRef;
 use crate::theater::Film;
-use crate::theater::film::ChunkKind;
 use crate::theater::film::*;
 use crate::theater::parser::{
     bits,
@@ -64,19 +63,18 @@ impl Interpretations {
             }),
             EventGate15Policy::CandidateCountInference,
         );
-        let mut chunks = Vec::new();
+        let chunks = film
+            .summaries
+            .chunks
+            .iter()
+            .map(|chunk| ChunkInterpretation {
+                source_position: chunk.source_position,
+                highlights: read_v41_highlights(&chunk.data),
+            })
+            .collect();
         let mut packets = Vec::new();
-        for chunk in film.chunks() {
-            if chunk.source().kind == ChunkKind::Summary {
-                chunks.push(ChunkInterpretation {
-                    source_position: chunk.source_position(),
-                    highlights: read_v41_highlights(chunk.data()),
-                });
-            }
-            if chunk.source().kind != ChunkKind::Replication {
-                continue;
-            }
-            for (index, packet) in chunk.packets().iter().enumerate() {
+        for chunk in &film.replication.chunks {
+            for (index, packet) in chunk.packets.iter().enumerate() {
                 let Some(payload) = chunk.payload(packet) else {
                     continue;
                 };
@@ -87,7 +85,7 @@ impl Interpretations {
                 .then(|| {
                     let mut read = read_fire_event(payload);
                     if let Some(event) = &mut read.event {
-                        event.chunk = chunk.source_position() as i64;
+                        event.chunk = chunk.source_position as i64;
                         event.packet_index = index;
                         event.timestamp_us = packet.header.timestamp_us;
                     }
@@ -111,7 +109,7 @@ impl Interpretations {
                 {
                     packets.push(PacketInterpretation {
                         source: SourceRef {
-                            chunk: chunk.source_position(),
+                            chunk: chunk.source_position,
                             packet: index,
                             record: super::RecordRef::Packet,
                         },
