@@ -437,23 +437,24 @@ fn record_body(
         if mask & (1 << (index & 63)) == 0 {
             continue;
         }
-        let Some(name) = arch.components.get(index) else {
+        let Some(registry_component) = arch.components.get(index) else {
             return Some(EntityViewStop::InvalidComponent { index });
         };
+        let name = registry_component.name()?;
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
         let calibrated = super::widths::is_calibrated(r, name, Some(&encoding.component_widths));
         let status = super::widths::read_component(
             r,
             name,
-            arch.levels.get(index).copied().unwrap_or(0),
+            registry_component.precision_level,
             ti,
             Some(&encoding.component_widths),
             (policy.simulation_complete, policy.stub),
         );
         let mut component = EntityComponentRead {
             index,
-            name: name.clone(),
+            name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
             variant: status
@@ -476,7 +477,7 @@ fn record_body(
         if !status? {
             return Some(EntityViewStop::UnsupportedComponent {
                 index,
-                name: name.clone(),
+                name: name.to_owned(),
             });
         }
         if encoding.corruption_check {

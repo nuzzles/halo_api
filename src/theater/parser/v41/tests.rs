@@ -19,11 +19,22 @@ fn reference_data_event_continuation_reference_oracle() {
             .map(|index| FilmArchetype {
                 index,
                 components: if index == 3 {
-                    vec!["high-frequency".into()]
+                    vec![RegistryComponent {
+                        name_bytes: [b"high-frequency".as_slice(), &[0; 242]].concat(),
+                        precision_level: 1,
+                        source: ByteRange { start: 0, end: 260 },
+                    }]
                 } else {
                     vec![]
                 },
-                levels: if index == 3 { vec![1] } else { vec![] },
+                source: ByteRange {
+                    start: 0,
+                    end: 16640,
+                },
+                padding: ByteRange {
+                    start: if index == 3 { 260 } else { 0 },
+                    end: 16640,
+                },
             })
             .collect(),
     };
@@ -179,11 +190,22 @@ fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
             .map(|index| FilmArchetype {
                 index,
                 components: if index == 3 {
-                    vec!["high-frequency".into()]
+                    vec![RegistryComponent {
+                        name_bytes: [b"high-frequency".as_slice(), &[0; 242]].concat(),
+                        precision_level: 1,
+                        source: ByteRange { start: 0, end: 260 },
+                    }]
                 } else {
                     vec![]
                 },
-                levels: if index == 3 { vec![1] } else { vec![] },
+                source: ByteRange {
+                    start: 0,
+                    end: 16640,
+                },
+                padding: ByteRange {
+                    start: if index == 3 { 260 } else { 0 },
+                    end: 16640,
+                },
             })
             .collect(),
     };

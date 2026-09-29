@@ -17,7 +17,7 @@ theater/
         models.rs          Packet<T>, PacketStream<T>, read states and source ranges
       registry/
         mod.rs             RegistryChunk
-        models.rs          Ordered component registry and structural read trace
+        models.rs          Archetypes, owned component slots, ranges and read outcome
       replication/
         mod.rs             ReplicationStreamChunk and components
         replication_stream/

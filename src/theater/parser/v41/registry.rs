@@ -1,8 +1,9 @@
 //! Bootstrap entity-component registry.
+use crate::theater::film::ByteRange;
 
 pub(crate) use crate::theater::film::chunks::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
-    RegistrySlotRead, RegistryStop,
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryComponent,
+    RegistryStop,
 };
 use std::collections::HashSet;
 use std::sync::{Mutex, OnceLock};
@@ -59,30 +60,60 @@ pub(crate) fn parse_registry_chunk(data: &[u8]) -> Result<FilmRegistryRead, Film
             u32::from_le_bytes(h[4..].try_into().unwrap()),
         ]
     });
-    let mut block_reads = Vec::new();
-    let registry = if let Some(registry) = parse_registry_with_trace(data, Some(&mut block_reads)) {
-        registry
-    } else {
-        let registry = FilmRegistry { archetypes: vec![] };
-        warn_unknown_registry(&registry);
-        registry
+    let mut registry = FilmRegistry {
+        archetypes: Vec::new(),
     };
-    let registry_end_byte = block_reads
-        .iter()
-        .take_while(|block| block.accepted)
-        .last()
-        .map_or(header.map_or(0, |_| 8), |block| block.end_byte);
-    let stop = if header.is_none() {
-        RegistryStop::TruncatedHeader
-    } else if block_reads.last().is_some_and(|block| !block.accepted) {
-        RegistryStop::BoundaryBlock
-    } else {
+    let mut registry_end_byte = header.map_or(0, |_| 8);
+    let mut stop = if header.is_some() {
         RegistryStop::SourceBoundary
+    } else {
+        RegistryStop::TruncatedHeader
     };
+    if header.is_some() {
+        for (index, block) in data[8..]
+            .as_chunks::<REGISTRY_BLOCK_SIZE>()
+            .0
+            .iter()
+            .enumerate()
+        {
+            let start = 8 + index * REGISTRY_BLOCK_SIZE;
+            let mut components = Vec::new();
+            for (slot_index, slot) in block.as_chunks::<REGISTRY_SLOT_SIZE>().0.iter().enumerate() {
+                if registry_slot_name(slot).is_none() {
+                    break;
+                }
+                let slot_start = start + slot_index * REGISTRY_SLOT_SIZE;
+                components.push(RegistryComponent {
+                    name_bytes: slot[..256].to_vec(),
+                    precision_level: u32::from_le_bytes(slot[256..260].try_into().unwrap()),
+                    source: ByteRange {
+                        start: slot_start,
+                        end: slot_start + REGISTRY_SLOT_SIZE,
+                    },
+                });
+            }
+            let tail_start = components.len() * REGISTRY_SLOT_SIZE;
+            if block[tail_start..].iter().any(|byte| *byte != 0) {
+                stop = RegistryStop::BoundaryBlock;
+                break;
+            }
+            let end = start + REGISTRY_BLOCK_SIZE;
+            registry.archetypes.push(FilmArchetype {
+                index,
+                components,
+                source: ByteRange { start, end },
+                padding: ByteRange {
+                    start: start + tail_start,
+                    end,
+                },
+            });
+            registry_end_byte = end;
+        }
+    }
+    warn_unknown_registry(&registry);
     Ok(FilmRegistryRead {
         registry,
         header,
-        blocks: block_reads,
         registry_end_byte,
         stop,
     })
@@ -92,77 +123,6 @@ fn registry_looks_compressed(data: &[u8]) -> bool {
         && data[0] & 15 == 8
         && data[1] & 32 == 0
         && u16::from_be_bytes([data[0], data[1]]).is_multiple_of(31)
-}
-
-fn parse_registry_with_trace(
-    data: &[u8],
-    mut trace: Option<&mut Vec<RegistryBlockRead>>,
-) -> Option<FilmRegistry> {
-    if registry_looks_compressed(data) {
-        return None; // Compatibility API intentionally loses the reference error category.
-    }
-    data.get(..8)?;
-    let mut registry = FilmRegistry {
-        archetypes: Vec::new(),
-    };
-    for (index, block) in data[8..]
-        .as_chunks::<REGISTRY_BLOCK_SIZE>()
-        .0
-        .iter()
-        .enumerate()
-    {
-        let start_byte = 8 + index * REGISTRY_BLOCK_SIZE;
-        let mut slot_reads = Vec::new();
-        let mut components = Vec::new();
-        let mut levels = Vec::new();
-        for (slot_index, slot) in block.as_chunks::<REGISTRY_SLOT_SIZE>().0.iter().enumerate() {
-            let name = registry_slot_name(slot);
-            if trace.is_some() {
-                slot_reads.push(RegistrySlotRead {
-                    index: slot_index,
-                    start_byte: start_byte + slot_index * REGISTRY_SLOT_SIZE,
-                    name_bytes: slot[..256].to_vec(),
-                    name: name.clone(),
-                    level_bytes: name.as_ref().map(|_| slot[256..260].try_into().unwrap()),
-                });
-            }
-            let Some(name) = name else {
-                break;
-            };
-            components.push(name);
-            levels.push(u32::from_le_bytes(slot[256..260].try_into().ok()?));
-        }
-        // A terminated list must have zero padding through the end of its block.
-        // Nonzero bytes here belong to the next bootstrap section, not an archetype.
-        let tail_start = components.len() * REGISTRY_SLOT_SIZE;
-        let first_nonzero = block[tail_start..]
-            .iter()
-            .position(|b| *b != 0)
-            .map(|offset| start_byte + tail_start + offset);
-        if let Some(trace) = &mut trace {
-            trace.push(RegistryBlockRead {
-                index,
-                start_byte,
-                end_byte: start_byte + REGISTRY_BLOCK_SIZE,
-                slots: slot_reads,
-                tail_start_byte: start_byte + tail_start,
-                tail_checked_end_byte: first_nonzero
-                    .map_or(start_byte + REGISTRY_BLOCK_SIZE, |at| at + 1),
-                first_nonzero_byte: first_nonzero,
-                accepted: first_nonzero.is_none(),
-            });
-        }
-        if first_nonzero.is_some() {
-            break;
-        }
-        registry.archetypes.push(FilmArchetype {
-            index,
-            components,
-            levels,
-        });
-    }
-    warn_unknown_registry(&registry);
-    Some(registry)
 }
 
 fn registry_slot_name(slot: &[u8]) -> Option<String> {
@@ -176,4 +136,92 @@ fn registry_slot_name(slot: &[u8]) -> Option<String> {
         return None;
     }
     String::from_utf8(name.to_vec()).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn registry_components_own_wire_fields_and_block_ranges() {
+        let mut data = [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat();
+        data.resize(8 + REGISTRY_BLOCK_SIZE * 2, 0);
+        data[8..13].copy_from_slice(b"alpha");
+        // Bytes after the name terminator are still part of the recorded slot.
+        data[20] = 0xee;
+        data[264..268].copy_from_slice(&7u32.to_le_bytes());
+        data[268..272].copy_from_slice(b"beta");
+        data[524..528].copy_from_slice(&11u32.to_le_bytes());
+        let boundary = 8 + REGISTRY_BLOCK_SIZE;
+        data[boundary] = 0xff;
+        let read = parse_registry_chunk(&data).unwrap();
+        assert_eq!(read.stop, RegistryStop::BoundaryBlock);
+        assert_eq!(read.registry_end_byte, boundary);
+        assert_eq!(read.registry.archetypes.len(), 1);
+        let archetype = &read.registry.archetypes[0];
+        assert_eq!(
+            archetype.source,
+            ByteRange {
+                start: 8,
+                end: boundary
+            }
+        );
+        assert_eq!(
+            archetype.padding,
+            ByteRange {
+                start: 528,
+                end: boundary
+            }
+        );
+        assert!(
+            data[archetype.padding.start..archetype.padding.end]
+                .iter()
+                .all(|b| *b == 0)
+        );
+        assert_eq!(archetype.components.len(), 2);
+        for (component, name, level, start) in [
+            (&archetype.components[0], "alpha", 7, 8),
+            (&archetype.components[1], "beta", 11, 268),
+        ] {
+            assert_eq!(component.name(), Some(name));
+            assert_eq!(component.precision_level, level);
+            assert_eq!(
+                component.source,
+                ByteRange {
+                    start,
+                    end: start + 260
+                }
+            );
+            assert_eq!(component.name_bytes, data[start..start + 256]);
+        }
+        assert_eq!(archetype.components[0].name_bytes[12], 0xee);
+        // Fingerprints use accepted names and levels, excluding retained tails.
+        let mut expected = 0xcbf29ce484222325u64;
+        for (name, level) in [("alpha", 7u32), ("beta", 11)] {
+            for byte in level.to_le_bytes().iter().chain(name.as_bytes()) {
+                expected = (expected ^ u64::from(*byte)).wrapping_mul(0x100000001b3);
+            }
+        }
+        assert_eq!(read.registry.fingerprint(), Some(expected));
+        let roundtrip: FilmRegistryRead =
+            serde_json::from_slice(&serde_json::to_vec(&read).unwrap()).unwrap();
+        assert_eq!(roundtrip, read);
+    }
+
+    #[test]
+    fn registry_keeps_empty_blocks_and_stops_before_incomplete_blocks() {
+        let mut data = [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat();
+        data.resize(8 + REGISTRY_BLOCK_SIZE + 100, 0);
+        data[8 + REGISTRY_BLOCK_SIZE] = 0x42;
+        let read = parse_registry_chunk(&data).unwrap();
+        assert_eq!(read.stop, RegistryStop::SourceBoundary);
+        assert_eq!(read.registry.archetypes.len(), 1);
+        let archetype = &read.registry.archetypes[0];
+        assert!(archetype.components.is_empty());
+        assert_eq!(archetype.padding, archetype.source);
+        assert_eq!(read.registry_end_byte, 8 + REGISTRY_BLOCK_SIZE);
+        let truncated = parse_registry_chunk(&[41, 0, 0, 0]).unwrap();
+        assert_eq!(truncated.stop, RegistryStop::TruncatedHeader);
+        assert!(truncated.registry.archetypes.is_empty());
+    }
 }

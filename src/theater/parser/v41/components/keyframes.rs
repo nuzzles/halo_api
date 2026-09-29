@@ -221,7 +221,7 @@ fn body(
     components: &mut Vec<KeyframeComponentRead>,
     policy: (bool, Option<&super::ComponentWidthOverrides>, bool, u64),
 ) -> Option<KeyframeStop> {
-    let (reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
+    let (_reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
     // The writer omits n1, n2 and the entire body for this sentinel archetype.
     if ti == u32::MAX {
         return Some(KeyframeStop::Complete);
@@ -242,17 +242,15 @@ fn body(
     if n2 <= 0 {
         return Some(KeyframeStop::Complete);
     }
-    for (index, name) in arch.components.iter().enumerate() {
-        if name.is_empty() && !reference_policy && component_widths.is_none() {
-            continue;
-        }
+    for (index, registry_component) in arch.components.iter().enumerate() {
+        let name = registry_component.name()?;
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
         let calibrated = super::widths::is_calibrated(r, name, component_widths);
         let status = super::widths::read_component(
             r,
             name,
-            arch.levels.get(index).copied().unwrap_or(0),
+            registry_component.precision_level,
             ti,
             component_widths,
             (simulation_complete, None),
@@ -262,7 +260,7 @@ fn body(
                 .map(|_| super::widths::result_variant(name, &r.fields[field_start..], calibrated)),
             ported: status,
             index,
-            name: name.clone(),
+            name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
             fields: r.fields[field_start..].to_vec(),
@@ -270,7 +268,7 @@ fn body(
         if !status? {
             return Some(KeyframeStop::UnsupportedComponent {
                 index,
-                name: name.clone(),
+                name: name.to_owned(),
             });
         }
         if check {

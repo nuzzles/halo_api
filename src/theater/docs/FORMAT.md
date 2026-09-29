@@ -7,10 +7,24 @@ ordered `chunks` vector. Filtering helpers do not create a second ordering.
 
 The bootstrap begins with version words and archetype/component registry blocks.
 `registry.body` retains the ordered decoded registry, the two recorded header
-words, every attempted block boundary, the terminal byte, and its stop. The chunk
+words, the accepted archetype blocks, the terminal byte, and its stop. The chunk
 also retains all bootstrap bytes beyond the structurally decoded registry.
 Identity and player-table searches over those bytes belong to resolution because
 their boundaries are not established by the registry grammar.
+
+Each archetype owns ordered `RegistryComponent` entries. Each component retains
+all 256 name bytes, its recorded precision level, and its complete 260-byte source
+range. `name()` borrows the accepted ASCII name without replacing the raw bytes.
+The archetype records its complete block range and zero-padding range. A rejected
+boundary block is not an archetype; its bytes remain in the bootstrap after
+`registry_end_byte`. There is no duplicate slot trace or parallel levels array.
+
+`RegistryComponent::precision_level` is the little-endian 32-bit value immediately
+after the 256-byte name. It is a component-specific encoding parameter, rather
+than a universal bit count. Some v41 quantized vector readers use
+`min(6 + level, 26)` bits per axis; other readers use it to gate additional fields
+or select layouts, and some ignore it. The parser retains the recorded value
+exactly. Converting quantized values into world coordinates belongs to resolution.
 
 Replication packets use 16-byte headers. `PacketSource` identifies each header
 and payload byte range in the enclosing decompressed chunk. `PacketRead`

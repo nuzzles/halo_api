@@ -61,8 +61,8 @@ mod tests;
 
 pub mod chunks;
 pub use chunks::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
-    RegistrySlotRead, RegistryStop,
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryComponent,
+    RegistryStop,
 };
 pub use chunks::replication::{
     ContinuationStatePolicy, ControlEntry, DatumDecodeError, DatumEntry, DatumTable,
