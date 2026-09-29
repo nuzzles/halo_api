@@ -30,19 +30,23 @@ pub(super) fn continue_event_views(
 }
 
 impl V41RegistryChunkReader {
-    fn read(source: FilmChunk, data: Vec<u8>) -> Result<Registry, ParseError> {
+    fn read(source: FilmChunk, data: Vec<u8>) -> Result<RegistryChunk, ParseError> {
         let definition = registry::parse_registry_chunk(&data)?;
-        Ok(Registry {
+        Ok(RegistryChunk {
             definition,
-            chunk: ParsedChunk {
-                source,
-                source_position: 0,
-                data,
-                packets: Vec::new(),
-                packet_walk_end_byte: 0,
-            },
+            source,
+            source_position: 0,
+            data,
         })
     }
+}
+
+struct V41PacketChunk {
+    source: FilmChunk,
+    source_position: usize,
+    data: Vec<u8>,
+    packets: Vec<NativeFilmPacket>,
+    packet_walk_end_byte: usize,
 }
 
 enum V41DataChunkReader {
@@ -89,7 +93,7 @@ impl V41ChunkReader {
             let data = transport::inflate_film_chunk(&input.data).into_owned();
             world.current_chunk = input.index.unwrap_or(source_position as i64);
             let footer = reader.is_summary();
-            let mut chunk = ParsedChunk {
+            let mut chunk = V41PacketChunk {
                 source: input,
                 source_position,
                 data,
@@ -218,8 +222,20 @@ impl V41ChunkReader {
         for chunk in chunks {
             match chunk.source.kind {
                 ChunkKind::Registry => unreachable!("registry chunks rejected above"),
-                ChunkKind::Replication => replication.push(chunk),
-                ChunkKind::Summary => summaries.push(chunk),
+                ChunkKind::Replication => replication.push(ReplicationStreamChunk {
+                    source: chunk.source,
+                    source_position: chunk.source_position,
+                    data: chunk.data,
+                    packets: chunk.packets,
+                    packet_walk_end_byte: chunk.packet_walk_end_byte,
+                }),
+                ChunkKind::Summary => summaries.push(SummaryChunk {
+                    source: chunk.source,
+                    source_position: chunk.source_position,
+                    data: chunk.data,
+                    packets: chunk.packets,
+                    packet_walk_end_byte: chunk.packet_walk_end_byte,
+                }),
             }
         }
         Ok(Film {

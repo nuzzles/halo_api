@@ -105,7 +105,7 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
     let packet = &film
         .chunk(source.chunk)
         .expect("indexed source chunk")
-        .packets[source.packet];
+        .packets()[source.packet];
     let bounded = |start: i64, end: i64| {
         start >= 0 && end >= start && i128::from(end) <= packet.header.payload_size as i128 * 8
     };
@@ -145,7 +145,7 @@ pub(super) fn frame(packet: &NativeFilmPacket, continuation: bool) -> Option<&Pr
 }
 
 pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
-    let packet = film.chunk(source.chunk)?.packets.get(source.packet)?;
+    let packet = film.chunk(source.chunk)?.packets().get(source.packet)?;
     Some(match source.record {
         RecordRef::Packet => Record::Packet(packet),
         RecordRef::Entity {
@@ -184,8 +184,8 @@ pub(super) fn index(
 ) -> Vec<Event> {
     let mut events = Vec::new();
     for chunk in film.chunks() {
-        let chunk_index = chunk.source_position;
-        for (packet_index, packet) in chunk.packets.iter().enumerate() {
+        let chunk_index = chunk.source_position();
+        for (packet_index, packet) in chunk.packets().iter().enumerate() {
             let mut push = |record, kind, entity_id, player_index| {
                 events.push(Event {
                     timestamp_us: match record {

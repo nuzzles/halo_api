@@ -7,7 +7,7 @@ a replication packet stream (type 2 chunks), and summary data (type 3 chunks).
 The bootstrap begins with version words and archetype/component registry blocks.
 The captured v41 corpus has 50 accepted registry blocks and 1,067 named slots.
 `registry.definition` retains the decoded component registry and its read diagnostics;
-`registry.chunk` retains the entire input, including bootstrap data beyond that
+`registry` retains the entire input, including bootstrap data beyond that
 structurally decoded registry. Identity/player searches over those bytes belong to
 resolution rather than being presented as established native boundaries.
 

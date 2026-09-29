@@ -68,7 +68,7 @@ pub(super) fn resolve_change(
                 let continuation = film
                     .chunk(event.source.chunk)
                     .expect("indexed source chunk")
-                    .packets[event.source.packet]
+                    .packets()[event.source.packet]
                     .event_continuation
                     .as_ref()?;
                 if continuation.state_policy != NativeContinuationStatePolicy::Applied {
@@ -78,7 +78,7 @@ pub(super) fn resolve_change(
             let packet = &film
                 .chunk(event.source.chunk)
                 .expect("indexed source chunk")
-                .packets[event.source.packet];
+                .packets()[event.source.packet];
             if record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }
@@ -108,7 +108,7 @@ pub(super) fn resolve_change(
             let packet = &film
                 .chunk(event.source.chunk)
                 .expect("indexed source chunk")
-                .packets[event.source.packet];
+                .packets()[event.source.packet];
             if record.start_bit < 0 || record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
             }

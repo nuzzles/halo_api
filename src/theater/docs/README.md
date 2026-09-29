@@ -9,9 +9,9 @@ fn inspect(registry_bytes: Vec<u8>, replication_bytes: Vec<u8>, summary_bytes: V
     -> Result<(), Box<dyn std::error::Error>>
 {
     let film = Film::parse([
-        FilmChunk::new(ChunkKind::Registry, registry_bytes),
-        FilmChunk::new(ChunkKind::Replication, replication_bytes),
-        FilmChunk::new(ChunkKind::Summary, summary_bytes),
+        FilmChunk { kind: ChunkKind::Registry, index: None, start_ms: None, data: registry_bytes },
+        FilmChunk { kind: ChunkKind::Replication, index: None, start_ms: None, data: replication_bytes },
+        FilmChunk { kind: ChunkKind::Summary, index: None, start_ms: None, data: summary_bytes },
     ])?;
     let mut resolved = film.resolve();
     println!("{} summaries", film.summaries.events().count());
@@ -38,7 +38,7 @@ three fields:
 - `summaries`: ordered summary chunks and recorded summary entries.
 
 Each section preserves original input, decompressed bytes, source positions and
-unparsed data. `ParsedChunk::payload` returns a checked borrowed packet payload.
+unparsed data. Replication and summary chunks provide checked borrowed packet payloads.
 Empty input, a non-registry first chunk, or any later registry chunk is an error.
 A registry-only film is accepted with empty replication and summary sections. Unsupported chunk categories are rejected by `ChunkKind::try_from`.
 

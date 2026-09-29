@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 /// Structurally decoded native recording. Interpretations belong to ResolvedFilm.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Film {
-    pub registry: Registry,
+    pub registry: RegistryChunk,
     pub replication: ReplicationStream,
     pub summaries: SummaryEvents,
 }
@@ -19,21 +19,32 @@ impl Film {
         crate::theater::ResolvedFilm::from_film(self)
     }
     /// Sections retain input positions, allowing a lookup without copying bytes.
-    pub(crate) fn chunk(&self, position: usize) -> Option<&ParsedChunk> {
-        if self.registry.chunk.source_position == position {
-            return Some(&self.registry.chunk);
+    pub(crate) fn chunk(&self, position: usize) -> Option<FilmChunkRef<'_>> {
+        if self.registry.source_position == position {
+            return Some(FilmChunkRef::Registry(&self.registry));
         }
-        for chunks in [&self.replication.chunks, &self.summaries.chunks] {
-            if let Ok(i) = chunks.binary_search_by_key(&position, |c| c.source_position) {
-                return Some(&chunks[i]);
-            }
+        if let Ok(i) = self
+            .replication
+            .chunks
+            .binary_search_by_key(&position, |c| c.source_position)
+        {
+            return Some(FilmChunkRef::Replication(&self.replication.chunks[i]));
         }
-        None
+        self.summaries
+            .chunks
+            .binary_search_by_key(&position, |c| c.source_position)
+            .ok()
+            .map(|i| FilmChunkRef::Summary(&self.summaries.chunks[i]))
     }
-    pub(crate) fn chunks(&self) -> impl Iterator<Item = &ParsedChunk> {
-        std::iter::once(&self.registry.chunk)
-            .chain(&self.replication.chunks)
-            .chain(&self.summaries.chunks)
+    pub(crate) fn chunks(&self) -> impl Iterator<Item = FilmChunkRef<'_>> {
+        std::iter::once(FilmChunkRef::Registry(&self.registry))
+            .chain(
+                self.replication
+                    .chunks
+                    .iter()
+                    .map(FilmChunkRef::Replication),
+            )
+            .chain(self.summaries.chunks.iter().map(FilmChunkRef::Summary))
     }
 }
 #[derive(Debug, thiserror::Error)]
@@ -63,10 +74,10 @@ pub mod chunk;
 pub mod registry;
 pub mod replication;
 pub mod summary;
-pub use chunk::{ChunkKind, FilmChunk, ParsedChunk};
+pub use chunk::{ChunkKind, FilmChunk, FilmChunkRef};
 pub use registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
-    NativeRegistrySlotRead, Registry,
+    NativeRegistrySlotRead, RegistryChunk,
 };
 pub use replication::{
     AnticipatedDeclaration, DatumEntry, DatumTable, DecodedHeadEvent, EventReference,
@@ -77,10 +88,10 @@ pub use replication::{
     NativePacketHeadRead, NativePickupOutcome, NativePickupRead, NativeRosterRead,
     NativeTranslocatorEvent, NativeWeaponDamageField, NativeWeaponDamageRead, NativeZoomRead,
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
-    ReplicationStream, RosterEntry, RosterReport, RosterUpdate, SourceSpan, TeleportPosition,
-    TranslocatorEvent, TranslocatorStop, WeaponDamage, WeaponDamageRead,
+    ReplicationStream, ReplicationStreamChunk, RosterEntry, RosterReport, RosterUpdate, SourceSpan,
+    TeleportPosition, TranslocatorEvent, TranslocatorStop, WeaponDamage, WeaponDamageRead,
 };
-pub use summary::{FilmMedalDefinition, MedalAward, SummaryEvents};
+pub use summary::{FilmMedalDefinition, MedalAward, SummaryChunk, SummaryEvents};
 
 pub mod components;
 pub use components::{

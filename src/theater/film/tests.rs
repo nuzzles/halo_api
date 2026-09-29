@@ -2,10 +2,12 @@ use super::*;
 use std::io::{BufRead, Write};
 
 fn registry() -> FilmChunk {
-    FilmChunk::new(
-        ChunkKind::Registry,
-        [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
-    )
+    FilmChunk {
+        kind: ChunkKind::Registry,
+        index: None,
+        start_ms: None,
+        data: [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
+    }
 }
 fn packet(kind: u16, payload: &[u8], time: u64) -> Vec<u8> {
     [
@@ -23,7 +25,15 @@ fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
     assert!(matches!(Film::parse([]), Err(ParseError::MissingRegistry)));
     for kind in [ChunkKind::Replication, ChunkKind::Summary] {
         assert!(matches!(
-            Film::parse([FilmChunk::new(kind, Vec::new()), registry()]),
+            Film::parse([
+                FilmChunk {
+                    kind,
+                    index: None,
+                    start_ms: None,
+                    data: Vec::new()
+                },
+                registry()
+            ]),
             Err(ParseError::RegistryNotFirst)
         ));
     }
@@ -35,11 +45,21 @@ fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
         Err(ParseError::MultipleRegistries)
     ));
     assert!(matches!(
-        Film::parse([FilmChunk::new(ChunkKind::Registry, 75u32.to_le_bytes())]),
+        Film::parse([FilmChunk {
+            kind: ChunkKind::Registry,
+            index: None,
+            start_ms: None,
+            data: 75u32.to_le_bytes().to_vec()
+        }]),
         Err(ParseError::UnsupportedVersion(75))
     ));
     assert!(matches!(
-        Film::parse([FilmChunk::new(ChunkKind::Registry, vec![41])]),
+        Film::parse([FilmChunk {
+            kind: ChunkKind::Registry,
+            index: None,
+            start_ms: None,
+            data: vec![41]
+        }]),
         Err(ParseError::TruncatedRegistryHeader)
     ));
     assert!(matches!(
@@ -58,20 +78,35 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
     let mut stream = packet(99, b"opaque", 0);
     stream.extend([0xff; 3]);
     let chunks = vec![
-        FilmChunk::new(ChunkKind::Registry, compressed.clone()),
+        FilmChunk {
+            kind: ChunkKind::Registry,
+            index: None,
+            start_ms: None,
+            data: compressed.clone(),
+        },
         FilmChunk {
             kind: ChunkKind::Summary,
             index: Some(8),
             start_ms: Some(-10),
             data: packet(9, &0u32.to_be_bytes(), 200),
         },
-        FilmChunk::new(ChunkKind::Replication, stream.clone()),
-        FilmChunk::new(ChunkKind::Summary, packet(9, &0u32.to_be_bytes(), 100)),
+        FilmChunk {
+            kind: ChunkKind::Replication,
+            index: None,
+            start_ms: None,
+            data: stream.clone(),
+        },
+        FilmChunk {
+            kind: ChunkKind::Summary,
+            index: None,
+            start_ms: None,
+            data: packet(9, &0u32.to_be_bytes(), 100),
+        },
     ];
     let film = Film::parse(chunks.clone()).unwrap();
-    assert_eq!(film.registry.chunk.source_position, 0);
-    assert_eq!(film.registry.chunk.source.data, compressed);
-    assert_eq!(film.registry.chunk.data, bootstrap);
+    assert_eq!(film.registry.source_position, 0);
+    assert_eq!(film.registry.source.data, compressed);
+    assert_eq!(film.registry.data, bootstrap);
     assert_eq!(film.replication.chunks[0].source_position, 2);
     assert_eq!(
         film.replication.chunks[0].packet_walk_end_byte,
@@ -90,7 +125,7 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
         vec![1, 3]
     );
     for (i, input) in chunks.iter().enumerate() {
-        assert_eq!(&film.chunk(i).unwrap().source, input);
+        assert_eq!(film.chunk(i).unwrap().source(), input);
     }
     let json = serde_json::to_value(&film).unwrap();
     assert_eq!(
@@ -114,7 +149,12 @@ fn keyframes_stop_without_searching_past_invalid_header() {
     payload[20..24].copy_from_slice(&3u32.to_be_bytes());
     let film = Film::parse([
         registry(),
-        FilmChunk::new(ChunkKind::Replication, packet(2, &payload, 10)),
+        FilmChunk {
+            kind: ChunkKind::Replication,
+            index: None,
+            start_ms: None,
+            data: packet(2, &payload, 10),
+        },
     ])
     .unwrap();
     let NativeFilmPacketBody::Keyframes(table) = &film.replication.chunks[0].packets[0].body else {
@@ -142,7 +182,12 @@ fn event_gate_is_unresolved_in_native_film() {
     }
     let film = Film::parse([
         registry(),
-        FilmChunk::new(ChunkKind::Replication, packet(0, &payload, 10)),
+        FilmChunk {
+            kind: ChunkKind::Replication,
+            index: None,
+            start_ms: None,
+            data: packet(0, &payload, 10),
+        },
     ])
     .unwrap();
     let read = film.replication.chunks[0].packets[0]
@@ -224,10 +269,10 @@ fn captured_v41_corpus() {
         let baseline_config = NativeFrameConfig::default();
         for (i, original) in input.iter().enumerate() {
             let chunk = film.chunk(i).unwrap();
-            assert_eq!(&chunk.source, original);
+            assert_eq!(chunk.source(), original);
             baseline_world.current_chunk = original.index.unwrap_or(i as i64);
-            for packet in &chunk.packets {
-                let payload = &chunk.data[packet.header.payload_offset
+            for packet in chunk.packets() {
+                let payload = &chunk.data()[packet.header.payload_offset
                     ..packet.header.payload_offset + packet.header.payload_size];
                 match &packet.body {
                     NativeFilmPacketBody::Frame(_) => {

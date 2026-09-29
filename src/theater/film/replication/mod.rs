@@ -2,7 +2,24 @@
 use super::*;
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ReplicationStream {
-    pub chunks: Vec<ParsedChunk>,
+    pub chunks: Vec<ReplicationStreamChunk>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ReplicationStreamChunk {
+    pub source: FilmChunk,
+    pub source_position: usize,
+    pub data: Vec<u8>,
+    pub packets: Vec<NativeFilmPacket>,
+    /// Start of the unwalked suffix. Nested packet bit offsets address `data`.
+    pub packet_walk_end_byte: usize,
+}
+impl ReplicationStreamChunk {
+    pub fn payload(&self, packet: &NativeFilmPacket) -> Option<&[u8]> {
+        let header = packet.header;
+        self.data
+            .get(header.payload_offset..header.payload_offset.checked_add(header.payload_size)?)
+    }
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct NativeFilmPacket {

@@ -108,8 +108,8 @@ fn resolved_native_entry_preserves_source_and_decoder_output() {
     let native = Film::parse(test_chunks(&source)).unwrap();
     let film = Film::parse(test_chunks(&source)).unwrap();
     assert_eq!(film, native);
-    assert_eq!(film.registry.chunk.source.data, compressed);
-    assert_eq!(film.registry.chunk.data, bootstrap);
+    assert_eq!(film.registry.source.data, compressed);
+    assert_eq!(film.registry.data, bootstrap);
     let json = serde_json::to_vec(&film).unwrap();
     let resolved = film.resolve();
     let second = film.resolve();
@@ -461,13 +461,17 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
     use crate::theater::parser::v41::{PlayerTable, PlayerTableSlot};
     use serde_json::json;
     let mut film = Film::parse([
-        FilmChunk::new(
-            ChunkKind::Registry,
-            [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
-        ),
-        FilmChunk::new(
-            ChunkKind::Summary,
-            [
+        FilmChunk {
+            kind: ChunkKind::Registry,
+            index: None,
+            start_ms: None,
+            data: [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
+        },
+        FilmChunk {
+            kind: ChunkKind::Summary,
+            index: None,
+            start_ms: None,
+            data: [
                 9u16.to_le_bytes().as_slice(),
                 &[0, 0],
                 &4u32.to_le_bytes(),
@@ -475,7 +479,7 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
                 &0u32.to_be_bytes(),
             ]
             .concat(),
-        ),
+        },
     ])
     .unwrap();
     let summary = |time, xuid| {

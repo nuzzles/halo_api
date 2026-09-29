@@ -1,10 +1,14 @@
 //! Native registry models.
 use super::*;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Registry {
+pub struct RegistryChunk {
     pub definition: FilmRegistryRead,
-    /// Includes all bootstrap bytes after the component registry, even when opaque.
-    pub chunk: ParsedChunk,
+    /// Original input, including exact transport bytes and supplied metadata.
+    pub source: FilmChunk,
+    /// Always zero for a valid film because the registry must be first.
+    pub source_position: usize,
+    /// Decompressed registry and bootstrap bytes, including opaque trailing data.
+    pub data: Vec<u8>,
 }
 
 /// Ordered replication components for one ECS entity archetype.

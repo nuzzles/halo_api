@@ -9,7 +9,7 @@ functions are internal.
 theater/
   film/
     mod.rs                 Film, ParseError, dispatch and model reexports
-    chunk.rs               FilmChunk, ChunkKind, ParsedChunk
+    chunk.rs               FilmChunk, ChunkKind, FilmChunkRef
     registry.rs            Native component registry and read trace
     replication/           Packet, record, player-slot and native event models
     components/            Component fields, read diagnostics and value models

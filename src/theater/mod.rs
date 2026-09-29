@@ -4,11 +4,11 @@
 //! use halo_api::theater::{Film, film::{FilmChunk, ChunkKind}};
 //! # fn inspect(registry: Vec<u8>, replication: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
 //! let film = Film::parse([
-//!     FilmChunk::new(ChunkKind::Registry, registry),
-//!     FilmChunk::new(ChunkKind::Replication, replication),
+//!     FilmChunk { kind: ChunkKind::Registry, index: None, start_ms: None, data: registry },
+//!     FilmChunk { kind: ChunkKind::Replication, index: None, start_ms: None, data: replication },
 //! ])?;
 //! let mut resolved = film.resolve();
-//! let _: &[halo_api::theater::film::ParsedChunk] = &film.replication.chunks;
+//! let _: &[halo_api::theater::film::ReplicationStreamChunk] = &film.replication.chunks;
 //! let _: &halo_api::theater::film::registry::FilmRegistry = &film.registry.definition.registry;
 //! let _: Vec<&halo_api::theater::film::summary::SummaryEvent> = film.summaries.events().collect();
 //! let _: Vec<halo_api::theater::film::components::ComponentField> = Vec::new();

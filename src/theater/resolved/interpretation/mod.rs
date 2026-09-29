@@ -27,14 +27,12 @@ pub struct Interpretations {
 }
 impl Interpretations {
     pub(super) fn from_film(film: &Film) -> Self {
-        let identity = read_native_identity(
-            &film.registry.chunk.data,
-            &film.registry.definition.registry,
-        );
+        let identity =
+            read_native_identity(&film.registry.data, &film.registry.definition.registry);
         let player_table = identity
             .identity
             .as_ref()
-            .map(|id| decode_player_table(&film.registry.chunk.data, id));
+            .map(|id| decode_player_table(&film.registry.data, id));
         let player_slot_reads = player_table
             .as_ref()
             .map(|t| {
@@ -42,7 +40,7 @@ impl Interpretations {
                     .iter()
                     .map(|s| {
                         read_native_player_slot(
-                            &film.registry.chunk.data,
+                            &film.registry.data,
                             s.bit,
                             t.report.perso_bytes * 8,
                         )
@@ -62,16 +60,16 @@ impl Interpretations {
         let mut chunks = Vec::new();
         let mut packets = Vec::new();
         for chunk in film.chunks() {
-            if chunk.source.kind == ChunkKind::Summary {
+            if chunk.source().kind == ChunkKind::Summary {
                 chunks.push(ChunkInterpretation {
-                    source_position: chunk.source_position,
-                    highlights: read_native_v41_highlights(&chunk.data),
+                    source_position: chunk.source_position(),
+                    highlights: read_native_v41_highlights(chunk.data()),
                 });
             }
-            if chunk.source.kind != ChunkKind::Replication {
+            if chunk.source().kind != ChunkKind::Replication {
                 continue;
             }
-            for (index, packet) in chunk.packets.iter().enumerate() {
+            for (index, packet) in chunk.packets().iter().enumerate() {
                 let Some(payload) = chunk.payload(packet) else {
                     continue;
                 };
@@ -82,7 +80,7 @@ impl Interpretations {
                 .then(|| {
                     let mut read = read_native_fire_event(payload);
                     if let Some(event) = &mut read.event {
-                        event.chunk = chunk.source_position as i64;
+                        event.chunk = chunk.source_position() as i64;
                         event.packet_index = index;
                         event.timestamp_us = packet.header.timestamp_us;
                     }
@@ -91,7 +89,7 @@ impl Interpretations {
                 if bot_metadata.is_some() || fire.is_some() {
                     packets.push(PacketInterpretation {
                         source: SourceRef {
-                            chunk: chunk.source_position,
+                            chunk: chunk.source_position(),
                             packet: index,
                             record: super::RecordRef::Packet,
                         },
