@@ -15,18 +15,7 @@ async fn main() -> Result<(), common::ExampleError> {
         let (_, halo) = common::halo_infinite_client()?;
         let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
         let film = halo.match_film(&match_id).await?;
-        halo.film_chunks(&film)
-            .await?
-            .into_iter()
-            .map(|c| {
-                Ok(InputChunk {
-                    kind: ChunkKind::try_from(c.metadata.chunk_type)?,
-                    index: Some(i64::from(c.metadata.index)),
-                    start_ms: Some(c.metadata.start_time_offset_ms),
-                    data: c.data,
-                })
-            })
-            .collect::<Result<Vec<_>, halo_api::theater::film::ParseError>>()?
+        halo.film_chunks(&film).await?
     };
     let film = Film::parse(input)?;
     let mut resolved = film.resolve();

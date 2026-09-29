@@ -11,9 +11,9 @@ use super::endpoints::HaloEndpoints;
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CareerRanks, CareerRewardTrack, CsrRecords,
     CsrSeason, CsrSeasonCalendar, CurrentUser, CustomizationItemMetadata, EmblemMapping,
-    EmblemMetadata, FilmChunk, FilmChunkData, FilmManifest, GameModeId, GameVariantAsset,
-    HipcSettings, MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill,
-    MatchStats, MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
+    EmblemMetadata, FilmChunkResponse, FilmManifest, GameModeId, GameVariantAsset, HipcSettings,
+    MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill, MatchStats,
+    MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
     PlayerChallengeDecks, PlayerCustomizationCollection, PlayerMatchHistory, PlayerOperationPasses,
     PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
     SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset, UgcAssetKind, UgcSearchResults,
@@ -23,6 +23,7 @@ use super::pager::MatchHistoryPager;
 use super::player::Player;
 use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuthClient, HaloCredentials};
+use crate::theater::film::{ChunkKind, FilmChunk};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 /// Default per-origin request rate.
@@ -482,12 +483,12 @@ impl HaloInfiniteClient {
         .await
     }
 
-    /// Downloads and zlib-decompresses one Theater film chunk.
+    /// Downloads one manifest chunk into the canonical Theater parser input.
     pub async fn film_chunk(
         &self,
         film: &FilmManifest,
-        chunk: &FilmChunk,
-    ) -> Result<FilmChunkData, InfiniteClientError> {
+        chunk: &FilmChunkResponse,
+    ) -> Result<FilmChunk, InfiniteClientError> {
         let base = film.blob_storage_path_prefix.trim_end_matches('/');
         let path = format!("/{}", chunk.file_relative_path.trim_start_matches('/'));
         let compressed = self.get_bytes_with_clearance(base, &path).await?;
@@ -496,17 +497,20 @@ impl HaloInfiniteClient {
         decoder
             .read_to_end(&mut data)
             .map_err(|error| InfiniteClientError::FilmDecompression(Arc::new(error)))?;
-        Ok(FilmChunkData {
-            metadata: chunk.clone(),
+        Ok(FilmChunk {
+            kind: ChunkKind::try_from(chunk.chunk_type)
+                .map_err(|_| InfiniteClientError::FilmChunkKind(chunk.chunk_type))?,
+            index: Some(i64::from(chunk.index)),
+            start_ms: Some(chunk.start_time_offset_ms),
             data,
         })
     }
 
-    /// Downloads and decompresses every retained chunk in a Theater film.
+    /// Downloads every retained chunk as canonical Theater parser inputs.
     pub async fn film_chunks(
         &self,
         film: &FilmManifest,
-    ) -> Result<Vec<FilmChunkData>, InfiniteClientError> {
+    ) -> Result<Vec<FilmChunk>, InfiniteClientError> {
         let mut chunks = Vec::with_capacity(film.custom_data.chunks.len());
         for chunk in &film.custom_data.chunks {
             chunks.push(self.film_chunk(film, chunk).await?);

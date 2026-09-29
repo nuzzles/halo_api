@@ -32,6 +32,9 @@ pub enum InfiniteClientError {
     #[error("failed to decompress Halo Infinite Theater film data: {0}")]
     FilmDecompression(Arc<std::io::Error>),
 
+    #[error("Halo Infinite returned unsupported Theater film chunk kind {0}")]
+    FilmChunkKind(i32),
+
     #[error("no Halo Infinite record found for gamertag \"{0}\"")]
     GamertagNotFound(String),
 

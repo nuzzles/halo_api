@@ -1240,7 +1240,7 @@ pub struct FilmManifest {
 }
 
 impl FilmManifest {
-    pub fn chunk_url(&self, chunk: &FilmChunk) -> String {
+    pub fn chunk_url(&self, chunk: &FilmChunkResponse) -> String {
         format!(
             "{}/{}",
             self.blob_storage_path_prefix.trim_end_matches('/'),
@@ -1254,7 +1254,7 @@ pub struct FilmCustomData {
     #[serde(rename = "FilmLength")]
     pub film_length: i64,
     #[serde(rename = "Chunks")]
-    pub chunks: Vec<FilmChunk>,
+    pub chunks: Vec<FilmChunkResponse>,
     #[serde(rename = "HasGameEnded")]
     pub has_game_ended: bool,
     #[serde(rename = "ManifestRefreshSeconds")]
@@ -1265,8 +1265,10 @@ pub struct FilmCustomData {
     pub film_major_version: i32,
 }
 
+/// Chunk metadata exactly as returned in the film-manifest response.
+/// Downloading it produces the canonical `theater::film::FilmChunk`.
 #[derive(Debug, Clone, Deserialize)]
-pub struct FilmChunk {
+pub struct FilmChunkResponse {
     #[serde(rename = "Index")]
     pub index: i32,
     #[serde(rename = "ChunkStartTimeOffsetMilliseconds")]
@@ -1279,13 +1281,6 @@ pub struct FilmChunk {
     pub file_relative_path: String,
     #[serde(rename = "ChunkType")]
     pub chunk_type: i32,
-}
-
-#[derive(Debug, Clone)]
-pub struct FilmChunkData {
-    pub metadata: FilmChunk,
-    /// Decompressed film data.
-    pub data: Vec<u8>,
 }
 
 /// Response body from the matchmade service record endpoint.

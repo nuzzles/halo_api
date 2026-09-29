@@ -15,9 +15,15 @@ async fn main() -> Result<(), common::ExampleError> {
 
     fs::create_dir_all(&output)?;
     for chunk in chunks {
+        let chunk_type = match chunk.kind {
+            halo_api::theater::film::ChunkKind::Registry => 1,
+            halo_api::theater::film::ChunkKind::Replication => 2,
+            halo_api::theater::film::ChunkKind::Summary => 3,
+        };
         let path = output.join(format!(
             "chunk-{:03}-type-{}.bin",
-            chunk.metadata.index, chunk.metadata.chunk_type
+            chunk.index.unwrap_or_default(),
+            chunk_type
         ));
         fs::write(&path, &chunk.data)?;
         println!("{}: {} bytes", path.display(), chunk.data.len());

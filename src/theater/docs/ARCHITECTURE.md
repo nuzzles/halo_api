@@ -65,3 +65,18 @@ through its section submodules). For example:
 signatures. No second public parsing API or compatibility parser facade is added.
 Native model serialization and packet/source ordering are unchanged by these
 module moves. Source retention and decoding limits are described in FORMAT.md.
+
+The Halo client keeps the manifest's JSON-only chunk entry as
+`clients::hi::models::FilmChunkResponse`. Downloading one or all of those entries
+returns the canonical `theater::film::FilmChunk`, so the common path needs no
+adapter:
+
+```rust,ignore
+let manifest = halo.match_film(match_id).await?;
+let film = Film::parse(halo.film_chunks(&manifest).await?)?;
+```
+
+There is no separate downloaded `FilmChunkData` type. A second
+`FilmChunkMetadata` model is unnecessary because the response DTO already owns
+the service-only duration, size and file-path fields; the canonical chunk retains
+only parsing metadata and bytes.
