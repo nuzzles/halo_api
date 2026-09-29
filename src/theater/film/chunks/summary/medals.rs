@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 /// A known film-code mapping. Metadata fields are absent for medals missing from the CMS snapshot.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FilmMedalDefinition {

@@ -1,17 +1,20 @@
 //! Source-preserving identity-section reads from the pinned film_identity.go map.
 use super::bits::Bits;
-use super::{FilmRegistry, bootstrap::find_identity_build, decode_film_identity};
+use super::{
+    FilmRegistry,
+    bootstrap::{decode_film_identity, find_identity_build},
+};
 
 /// Retain the writer-map fields at the reference-selected identity anchor.
 /// Unknown blocks are opaque, not decoded structures. A truncated identification
 /// preserves earlier fields and the first unavailable range, while retaining the
 /// original projection error. No anchor means no fields are guessed.
-pub(crate) fn read_native_identity(data: &[u8], registry: &FilmRegistry) -> NativeIdentityRead {
+pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistry) -> IdentityRead {
     let (identity, error) = match decode_film_identity(data, registry) {
         Ok(identity) => (identity, None),
         Err(error) => (None, Some(error.to_string())),
     };
-    let mut out = NativeIdentityRead {
+    let mut out = IdentityRead {
         identity,
         error,
         source_bits: data.len() * 8,
@@ -35,19 +38,19 @@ pub(crate) fn read_native_identity(data: &[u8], registry: &FilmRegistry) -> Nati
         let end = at.checked_add(width);
         let value = if end.is_none_or(|end| end > data.len() * 8) {
             stopped = true;
-            NativeIdentityValue::Unavailable
+            IdentityValue::Unavailable
         } else {
             match kind {
-                0 => NativeIdentityValue::Scalar(Bits(data).read(at, width).unwrap()),
-                1 => NativeIdentityValue::Bytes(
+                0 => IdentityValue::Scalar(Bits(data).read(at, width).unwrap()),
+                1 => IdentityValue::Bytes(
                     (0..width / 8)
                         .map(|i| Bits(data).read(at + i * 8, 8).unwrap() as u8)
                         .collect(),
                 ),
-                _ => NativeIdentityValue::Opaque,
+                _ => IdentityValue::Opaque,
             }
         };
-        out.fields.push(NativeIdentityField {
+        out.fields.push(IdentityField {
             name: name.into(),
             bit: at,
             bits: width,
@@ -82,6 +85,4 @@ pub(crate) fn read_native_identity(data: &[u8], registry: &FilmRegistry) -> Nati
     out
 }
 
-use crate::theater::resolved::identity::{
-    NativeIdentityField, NativeIdentityRead, NativeIdentityValue,
-};
+use crate::theater::resolved::identity::{IdentityField, IdentityRead, IdentityValue};

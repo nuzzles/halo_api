@@ -4,10 +4,10 @@
 //! actions, interpolate movement, or promote recovery candidates into entities.
 pub mod interpretation;
 use super::film::{
-    ComponentField, EntityRecord, EntityViewStop, KeyframeRecord, KeyframeStop, NativeControlEntry,
-    NativeEventRecord, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
+    ComponentField, ControlEntry, EntityRecord, EntityViewStop, EventRecord, KeyframeRecord,
+    KeyframeStop, PlayerTableSlot, ProductionFrame, RecordKind, SummaryEvent,
 };
-use super::film::{Film, FilmPacket, FilmPacketBody, NativeContinuationStatePolicy};
+use super::film::{ContinuationStatePolicy, Film, FilmPacket, FilmPacketBody};
 use interpretation::Interpretations;
 use std::{collections::BTreeMap, sync::Arc};
 
@@ -115,6 +115,6 @@ impl<'film> ResolvedFilm<'film> {
 mod tests;
 
 pub use identity::{
-    FilmIdentity, NativeIdentityField, NativeIdentityRead, NativeIdentityValue, PlayerTable,
-    PlayerTableError, PlayerTableReport,
+    FilmIdentity, IdentityField, IdentityRead, IdentityValue, PlayerTable, PlayerTableError,
+    PlayerTableReport,
 };

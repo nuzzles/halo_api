@@ -7,7 +7,7 @@ pub mod records;
 pub use records::{RecordHeader, RecordKind};
 
 pub mod roster_updates;
-pub use roster_updates::{NativeRosterRead, RosterEntry, RosterReport, RosterUpdate};
+pub use roster_updates::{RosterEntry, RosterReport, RosterUpdate};
 
 pub mod datums;
 pub use datums::{DatumEntry, DatumTable};
@@ -17,20 +17,18 @@ pub use production_frame::{ProductionAdmissionDiagnostics, ProductionEntityEnd, 
 
 pub mod kill_event_chain;
 pub use kill_event_chain::{
-    KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
-    NativeEventListRead, NativeEventListStop, NativeEventRecord,
+    EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
+    KillEventFields,
 };
 
 pub mod world;
-pub use world::{FilmViewAdmission, NativeNewBindingRefusal};
+pub use world::{FilmViewAdmission, NewBindingRefusal};
 
 pub mod anticipated_bindings;
 pub use anticipated_bindings::AnticipatedDeclaration;
 
 pub mod player;
-pub use player::{
-    NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTableShorts, PlayerTableSlot,
-};
+pub use player::{PlayerTableShorts, PlayerTableSlot};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FilmPacket {
@@ -43,13 +41,13 @@ pub struct FramePacket {
     /// Generic frame read beginning at the packet's recorded frame boundary.
     pub frame: Result<ProductionFrame, String>,
     /// Sequential event-layout read at payload bit one.
-    pub events: NativeEventListRead,
+    pub events: EventListRead,
     /// Entity/control records following a completed nonempty event list.
-    pub continuation: Option<NativeEventContinuation>,
+    pub continuation: Option<EventContinuation>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeEventContinuation {
+pub struct EventContinuation {
     /// Payload-relative bit immediately after the event-list terminator.
     pub start_bit: usize,
     /// Only the following entity/control views are counted in this result.
@@ -57,11 +55,11 @@ pub struct NativeEventContinuation {
     pub frame: Result<ProductionFrame, String>,
     /// Whether this attempt may update the grammar state used by later packets.
     #[serde(default)]
-    pub state_policy: NativeContinuationStatePolicy,
+    pub state_policy: ContinuationStatePolicy,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub enum NativeContinuationStatePolicy {
+pub enum ContinuationStatePolicy {
     /// Older exports did not report this policy.
     #[default]
     Unknown,
@@ -77,7 +75,7 @@ pub enum FilmPacketBody {
     Frame(Box<FramePacket>),
     Datums(DatumTable),
     Roster(RosterUpdate),
-    Keyframes(NativeKeyframeTable),
+    Keyframes(KeyframeTable),
     /// Guarded captured-layout reads in wire order; intervening state is opaque.
     Summary {
         declared_events: u32,

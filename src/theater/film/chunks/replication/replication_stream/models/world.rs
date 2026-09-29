@@ -1,9 +1,9 @@
-//! Native data models.
+//! Reference data models.
 use crate::theater::film::*;
 /// A decoded NEW contradicted an existing hard parser binding. Its raw record
 /// remains retained; only the proposed binding mutation is refused.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeNewBindingRefusal {
+pub struct NewBindingRefusal {
     pub record_bit: i64,
     pub id: u32,
     pub slot: u32,

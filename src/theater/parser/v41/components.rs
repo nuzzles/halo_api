@@ -3,7 +3,7 @@
 
 pub(crate) use crate::theater::film::chunks::replication::components::field::ComponentField;
 mod cursor;
-use super::{NativeUnitReference, NativeUnitReferenceKind};
+use super::{UnitReference, UnitReferenceKind};
 use cursor::ComponentCursor as Cursor;
 mod ability;
 mod basic;
@@ -32,22 +32,22 @@ pub(crate) use views::*;
 pub(crate) use widths::ComponentWidthOverrides;
 
 #[derive(Clone, Copy)]
-pub(crate) struct NativeComponentWidths<'a> {
-    pub movement: &'a super::NativeMovementProfile,
+pub(crate) struct ComponentWidths<'a> {
+    pub movement: &'a super::MovementProfile,
     pub mpp: super::FilmMppWidths,
     pub maximum: u64,
 }
 struct Reader<'a> {
-    native_widths: Option<NativeComponentWidths<'a>>,
+    reference_widths: Option<ComponentWidths<'a>>,
     width_error: Option<&'static str>,
 
-    live_grammar: Option<super::NativeScanGrammar>,
-    position_capture: Option<super::NativePositionCapture<'a>>,
+    live_grammar: Option<super::ScanGrammar>,
+    position_capture: Option<super::PositionCapture<'a>>,
     position_start: i64,
     position_slot: u32,
     position_fallback: bool,
     movement_slot: Option<u32>,
-    references: Vec<NativeUnitReference>,
+    references: Vec<UnitReference>,
     diagnostics: super::FilmReadDiagnostics,
     cursor: Cursor<'a>,
     fields: Vec<ComponentField>,
@@ -55,25 +55,28 @@ struct Reader<'a> {
 }
 
 impl Reader<'_> {
-    fn native_position_width(&mut self, raw: u64, field: &'static str) -> Option<u64> {
-        self.native_width_limited(raw, field, u64::MAX)
+    fn reference_position_width(&mut self, raw: u64, field: &'static str) -> Option<u64> {
+        self.reference_width_limited(raw, field, u64::MAX)
     }
 
-    fn native_width_limited(&mut self, raw: u64, field: &'static str, limit: u64) -> Option<u64> {
+    fn reference_width_limited(
+        &mut self,
+        raw: u64,
+        field: &'static str,
+        limit: u64,
+    ) -> Option<u64> {
         let maximum = self
-            .native_widths
+            .reference_widths
             .map_or(u64::MAX, |w| w.maximum)
             .min(limit);
         if raw > maximum {
             self.width_error = Some(field);
-            self.diagnostics
-                .width_refusals
-                .push(super::NativeWidthRefusal {
-                    field: field.into(),
-                    bit: self.cursor.position,
-                    raw_width: raw,
-                    maximum,
-                });
+            self.diagnostics.width_refusals.push(super::WidthRefusal {
+                field: field.into(),
+                bit: self.cursor.position,
+                raw_width: raw,
+                maximum,
+            });
             return None;
         }
         Some(raw)
@@ -91,7 +94,7 @@ impl Reader<'_> {
 
     fn publish_movement(
         &mut self,
-        component: crate::theater::parser::v41::NativeMovementComponent,
+        component: crate::theater::parser::v41::MovementComponent,
         values: Vec<u64>,
     ) {
         if let Some(slot) = self.movement_slot {
@@ -116,22 +119,20 @@ impl Reader<'_> {
         }
         Some(mask)
     }
-    fn refuse_read(&mut self, name: &str, width: u64, operation: super::NativeReadOperation) {
-        self.diagnostics
-            .read_refusals
-            .push(super::NativeReadRefusal {
-                field: name.into(),
-                bit: self.cursor.position,
-                width,
-                source_bits: self.cursor.source_bits(),
-                operation,
-            });
+    fn refuse_read(&mut self, name: &str, width: u64, operation: super::ReadOperation) {
+        self.diagnostics.read_refusals.push(super::ReadRefusal {
+            field: name.into(),
+            bit: self.cursor.position,
+            width,
+            source_bits: self.cursor.source_bits(),
+            operation,
+        });
     }
     fn guard_source(&mut self, name: &str, width: i64) -> Option<()> {
         if self.cursor.fits_source(width) {
             return Some(());
         }
-        self.refuse_read(name, width as u64, super::NativeReadOperation::GroupGuard);
+        self.refuse_read(name, width as u64, super::ReadOperation::GroupGuard);
         None
     }
     fn r(&mut self, name: &str, width: usize) -> Option<u64> {
@@ -141,11 +142,11 @@ impl Reader<'_> {
         let bit = self.cursor.position;
         let mut prefix = self.cursor.detached();
         let Some(raw) = self.cursor.read_wide(width) else {
-            self.refuse_read(name, width, super::NativeReadOperation::Scalar);
+            self.refuse_read(name, width, super::ReadOperation::Scalar);
             return None;
         };
         if width > 64 {
-            // Retain information the native numeric accumulator discards.
+            // Retain information the reference numeric accumulator discards.
             // Bound work by actual source size, even for enormous padded reads.
             let mut remaining = (width - 64).min(prefix.remaining_source_bits() as u64);
             let mut index = 0;
@@ -203,14 +204,14 @@ impl Reader<'_> {
         self.r(&format!("{name}.generation"), 2)?;
         Some(())
     }
-    // Same wire shape, used by native inline readers which do not publish UnitRefRead.
+    // Same wire shape, used by reference inline readers which do not publish UnitRefRead.
     fn inline_optional_handle(&mut self, name: &str, category: u8) -> Option<()> {
         if self.bit(&format!("{name}.present"))? {
             self.handle(name, category)?;
         }
         Some(())
     }
-    fn publish_reference(&mut self, reference: NativeUnitReference) {
+    fn publish_reference(&mut self, reference: UnitReference) {
         self.publish_component(super::FilmComponentObservation::UnitReference {
             reference: reference.clone(),
         });
@@ -228,8 +229,8 @@ impl Reader<'_> {
         } else {
             (0, 0)
         };
-        self.publish_reference(NativeUnitReference {
-            kind: NativeUnitReferenceKind::VariableWidth,
+        self.publish_reference(UnitReference {
+            kind: UnitReferenceKind::VariableWidth,
             start_bit,
             end_bit: self.cursor.position,
             present,
@@ -244,8 +245,8 @@ impl Reader<'_> {
         let present = self.bit(&format!("{name}.gate"))?;
         let value = if present { self.r(name, 32)? as u32 } else { 0 };
         if present || emit_absent {
-            self.publish_reference(NativeUnitReference {
-                kind: NativeUnitReferenceKind::GatedWord32,
+            self.publish_reference(UnitReference {
+                kind: UnitReferenceKind::GatedWord32,
                 start_bit,
                 end_bit: self.cursor.position,
                 present,
@@ -259,8 +260,8 @@ impl Reader<'_> {
     fn word_reference(&mut self, name: &str) -> Option<()> {
         let start_bit = self.cursor.position;
         let value = self.r(name, 32)? as u32;
-        self.publish_reference(NativeUnitReference {
-            kind: NativeUnitReferenceKind::Word32,
+        self.publish_reference(UnitReference {
+            kind: UnitReferenceKind::Word32,
             start_bit,
             end_bit: self.cursor.position,
             present: true,
@@ -341,7 +342,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::Probe {
                     archetype,
-                    component: crate::theater::parser::v41::NativeProbeComponent::SplashDynamic,
+                    component: crate::theater::parser::v41::ProbeComponent::SplashDynamic,
                     values: vec![value],
                 },
             );
@@ -361,9 +362,9 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                 values.push(r.r("value", width)?);
             }
             let field = if mode_a {
-                super::NativeManagedPropertyField::Scalar
+                super::ManagedPropertyField::Scalar
             } else {
-                super::NativeManagedPropertyField::PerPlayer
+                super::ManagedPropertyField::PerPlayer
             };
             r.publish_component(super::FilmComponentObservation::ManagedProperty { field, values });
         }
@@ -401,7 +402,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                 let Some(encoding) = r.position_encoding else {
                     return Some(false);
                 };
-                let widths = if let Some(raw) = r.native_widths {
+                let widths = if let Some(raw) = r.reference_widths {
                     raw.movement.world_object.axis_bits
                 } else if let Some(widths) = encoding.world_axis_bits {
                     widths.map(|w| w as u64)
@@ -409,14 +410,14 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                     return Some(false);
                 };
                 if !r.bit("region.gate")? {
-                    let raw = r.native_widths.map_or(encoding.index_bits as u64, |w| {
+                    let raw = r.reference_widths.map_or(encoding.index_bits as u64, |w| {
                         w.movement.world_object.index_bits
                     });
-                    let width = r.native_position_width(raw, "world index")?;
+                    let width = r.reference_position_width(raw, "world index")?;
                     r.r_wide("region", width)?;
                 }
                 for (i, raw) in widths.into_iter().enumerate() {
-                    let width = r.native_position_width(raw, "world axes")?;
+                    let width = r.reference_position_width(raw, "world axes")?;
                     r.r_wide(&format!("position[{i}]"), width)?;
                 }
                 r.r("finite", 2)?;
@@ -506,7 +507,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                 values[3] = second.unwrap_or(0);
             }
             r.publish_movement(
-                crate::theater::parser::v41::NativeMovementComponent::UnitControl,
+                crate::theater::parser::v41::MovementComponent::UnitControl,
                 values,
             );
             r.optional_word_reference("control.reference", true)?;
@@ -528,7 +529,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
                 }
             }
             r.publish_movement(
-                crate::theater::parser::v41::NativeMovementComponent::Velocity,
+                crate::theater::parser::v41::MovementComponent::Velocity,
                 values,
             );
         }
@@ -650,7 +651,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let flag = r.bit("flag")?;
             let progress = r.r("progress", 10)?;
             r.publish_movement(
-                crate::theater::parser::v41::NativeMovementComponent::Crouch,
+                crate::theater::parser::v41::MovementComponent::Crouch,
                 vec![u64::from(flag), progress],
             );
         }
@@ -666,7 +667,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             }
         }
         "unit-active-camo-state-component" => {
-            let mut state = super::NativeCamoState {
+            let mut state = super::CamoState {
                 state: r.r("state", 3)? as u8,
                 flag0: r.bit("flag0")?,
                 ..Default::default()
@@ -771,7 +772,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::Probe {
                     archetype,
-                    component: crate::theater::parser::v41::NativeProbeComponent::HighFrequency,
+                    component: crate::theater::parser::v41::ProbeComponent::HighFrequency,
                     values: vec![value],
                 },
             );
@@ -789,7 +790,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let value = r.r("value", 1)?;
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::Deployed,
+                    field: crate::theater::parser::v41::EquipmentField::Deployed,
                     value,
                     present: true,
                 },
@@ -799,7 +800,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let value = r.r("energy", 14)?;
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::Energy,
+                    field: crate::theater::parser::v41::EquipmentField::Energy,
                     value,
                     present: true,
                 },
@@ -809,7 +810,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let value = r.r("ticks", 10)?;
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::EnergyDelay,
+                    field: crate::theater::parser::v41::EquipmentField::EnergyDelay,
                     value,
                     present: true,
                 },
@@ -819,7 +820,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let value = r.r("charges", 8)?;
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::Charges,
+                    field: crate::theater::parser::v41::EquipmentField::Charges,
                     value,
                     present: true,
                 },
@@ -829,7 +830,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             let value = r.gated_value("creator", 5, false)?;
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::Creator,
+                    field: crate::theater::parser::v41::EquipmentField::Creator,
                     value: value.unwrap_or(0),
                     present: value.is_some(),
                 },
@@ -844,7 +845,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
             };
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::EquipmentState {
-                    field: crate::theater::parser::v41::NativeEquipmentField::Activated,
+                    field: crate::theater::parser::v41::EquipmentField::Activated,
                     value: value.unwrap_or(0),
                     present: value.is_some(),
                 },
@@ -904,7 +905,7 @@ fn component(r: &mut Reader<'_>, name: &str, level: u32, archetype: u32) -> Opti
 }
 
 fn parent(r: &mut Reader<'_>, level: u32, archetype: u32) -> Option<()> {
-    let mut state = super::NativeObjectParentState {
+    let mut state = super::ObjectParentState {
         archetype,
         parameter: level,
         start_bit: r.cursor.position,

@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct UnitEquipmentEntry {
     pub value: u32,

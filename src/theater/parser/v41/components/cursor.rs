@@ -1,9 +1,9 @@
-//! Signed native traversal cursor. Slice addresses remain checked at access.
+//! Signed reference traversal cursor. Slice addresses remain checked at access.
 #[derive(Clone, Copy)]
 pub(super) struct ComponentCursor<'a> {
     data: &'a [u8],
     padded: bool,
-    guarded_native: bool,
+    guarded_reference: bool,
     pub position: i64,
     mirror: Option<&'a std::cell::Cell<i64>>,
 }
@@ -12,7 +12,7 @@ impl<'a> ComponentCursor<'a> {
         (position <= data.len().checked_mul(8)?).then_some(Self {
             data,
             padded: false,
-            guarded_native: false,
+            guarded_reference: false,
             mirror: None,
             position: i64::try_from(position).ok()?,
         })
@@ -25,15 +25,15 @@ impl<'a> ComponentCursor<'a> {
         Self {
             data,
             padded: true,
-            guarded_native: false,
+            guarded_reference: false,
             position,
             mirror,
         }
     }
-    /// Native view guards use signed wrapping position + width before reading.
+    /// Reference view guards use signed wrapping position + width before reading.
     pub(crate) fn guarded(data: &'a [u8], position: i64) -> Self {
         Self {
-            guarded_native: true,
+            guarded_reference: true,
             ..Self::signed(data, position, None)
         }
     }
@@ -50,15 +50,15 @@ impl<'a> ComponentCursor<'a> {
         }
     }
     pub(crate) fn read_wide(&mut self, width: u64) -> Option<u64> {
-        if self.guarded_native && !self.fits_source(width as i64) {
+        if self.guarded_reference && !self.fits_source(width as i64) {
             return None;
         }
         if self.padded {
-            let mut reader = crate::theater::parser::v41::NativeFilmBits::new(self.data);
+            let mut reader = crate::theater::parser::v41::FilmBits::new(self.data);
             reader.set_position(self.position);
-            // Restore the native position even when a read unwinds on the host.
+            // Restore the reference position even when a read unwinds on the host.
             struct CopyBack<'r, 'd> {
-                reader: crate::theater::parser::v41::NativeFilmBits<'d>,
+                reader: crate::theater::parser::v41::FilmBits<'d>,
                 position: &'r mut i64,
                 mirror: Option<&'r std::cell::Cell<i64>>,
             }
@@ -96,15 +96,15 @@ impl<'a> ComponentCursor<'a> {
     pub(crate) fn address(&self) -> Option<usize> {
         usize::try_from(self.position).ok()
     }
-    pub(crate) fn native_header(
+    pub(crate) fn reference_header(
         &mut self,
         width: i64,
         base: u32,
     ) -> crate::theater::parser::v41::RecordHeader {
-        let mut reader = crate::theater::parser::v41::NativeFilmBits::new(self.data);
+        let mut reader = crate::theater::parser::v41::FilmBits::new(self.data);
         reader.set_position(self.position);
         struct CopyBack<'r, 'd> {
-            reader: crate::theater::parser::v41::NativeFilmBits<'d>,
+            reader: crate::theater::parser::v41::FilmBits<'d>,
             cursor: &'r mut ComponentCursor<'d>,
         }
         impl Drop for CopyBack<'_, '_> {
@@ -119,6 +119,6 @@ impl<'a> ComponentCursor<'a> {
             reader,
             cursor: self,
         };
-        crate::theater::parser::v41::decode_native_record_header(&mut guard.reader, width, base)
+        crate::theater::parser::v41::decode_reference_record_header(&mut guard.reader, width, base)
     }
 }

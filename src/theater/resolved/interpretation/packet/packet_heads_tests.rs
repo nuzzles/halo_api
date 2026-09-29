@@ -1,5 +1,7 @@
 use super::*;
-use crate::theater::parser::v41::test_chunks;
+use crate::theater::Film;
+use crate::theater::parser::v41::{FilmSource, FilmSourceMetadata, test_chunks};
+use crate::theater::resolved::interpretation::{PickupOutcome, TranslocatorStop};
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -23,10 +25,10 @@ fn framed(payload: &[u8]) -> Vec<u8> {
     result
 }
 
-pub(crate) fn check_read(read: &NativePacketHeadRead, reference: &Value) {
+pub(crate) fn check_read(read: &PacketHeadRead, reference: &Value) {
     let expected = &reference["event"];
     let end = match read {
-        NativePacketHeadRead::Zoom(read) => {
+        PacketHeadRead::Zoom(read) => {
             assert_eq!(json!(read.is_some()), reference["ok"]);
             read.as_ref().map(|r| {
                 assert_eq!(json!(r.slot), expected["Slot"]);
@@ -35,12 +37,12 @@ pub(crate) fn check_read(read: &NativePacketHeadRead, reference: &Value) {
                 r.head.end_bit
             })
         }
-        NativePacketHeadRead::Pickup(read) => {
+        PacketHeadRead::Pickup(read) => {
             assert_eq!(
-                json!(read.outcome == NativePickupOutcome::Accepted),
+                json!(read.outcome == PickupOutcome::Accepted),
                 reference["ok"]
             );
-            if read.outcome == NativePickupOutcome::Accepted {
+            if read.outcome == PickupOutcome::Accepted {
                 assert_eq!(json!(read.slot()), expected["Slot"]);
                 assert_eq!(json!(read.class), expected["Class"]);
                 assert_eq!(json!(read.catalog_id), expected["CatalogID"]);
@@ -51,7 +53,7 @@ pub(crate) fn check_read(read: &NativePacketHeadRead, reference: &Value) {
             );
             Some(read.end_bit)
         }
-        NativePacketHeadRead::Translocator(read) => {
+        PacketHeadRead::Translocator(read) => {
             assert_eq!(json!(read.is_some()), reference["ok"]);
             read.as_ref().map(|r| {
                 assert_eq!(json!(r.event.slot), expected["Slot"]);
@@ -78,19 +80,19 @@ pub(crate) fn check_read(read: &NativePacketHeadRead, reference: &Value) {
 }
 
 #[test]
-fn native_data_packet_heads_padding_oracles() {
+fn reference_data_packet_heads_padding_oracles() {
     let fixtures: [(u8, &[u8]); 3] = [
         (
             0xca,
-            include_bytes!("../../fixtures/zoom-padding-v41.json.zlib"),
+            include_bytes!("../../../fixtures/zoom-padding-v41.json.zlib"),
         ),
         (
             0xc4,
-            include_bytes!("../../fixtures/pickup-padding-v41.json.zlib"),
+            include_bytes!("../../../fixtures/pickup-padding-v41.json.zlib"),
         ),
         (
             0xfa,
-            include_bytes!("../../fixtures/translocator-padding-v41.json.zlib"),
+            include_bytes!("../../../fixtures/translocator-padding-v41.json.zlib"),
         ),
     ];
     let mut cases = 0;
@@ -106,9 +108,9 @@ fn native_data_packet_heads_padding_oracles() {
             let map: Option<FilmMapBounds> = row
                 .get("map")
                 .and_then(|v| serde_json::from_value(v.clone()).unwrap());
-            let read = read_native_packet_head(0, &payload, map.as_ref());
+            let read = read_packet_head(0, &payload, map.as_ref());
             assert_eq!(read.is_some(), payload.len() >= 2 && payload[0] == prefix);
-            assert!(read_native_packet_head(6, &payload, map.as_ref()).is_none());
+            assert!(read_packet_head(6, &payload, map.as_ref()).is_none());
             let Some(read) = read else { continue };
             selected += 1;
             check_read(&read, row);
@@ -130,7 +132,7 @@ fn native_data_packet_heads_padding_oracles() {
                 .unwrap();
             assert_eq!(
                 interpretation.packet_head,
-                read_native_packet_head(0, &payload, None)
+                read_packet_head(0, &payload, None)
             );
             assert_eq!(
                 serde_json::from_value::<Film>(json!(parsed)).unwrap(),
@@ -143,9 +145,9 @@ fn native_data_packet_heads_padding_oracles() {
 }
 
 #[test]
-fn native_data_packet_heads_context_and_footer_boundaries() {
+fn reference_data_packet_heads_context_and_footer_boundaries() {
     let fixture = inflate(include_bytes!(
-        "../../fixtures/translocator-levelup-v41.json.zlib"
+        "../../../fixtures/translocator-levelup-v41.json.zlib"
     ));
     let row = fixture
         .as_array()
@@ -182,7 +184,7 @@ fn native_data_packet_heads_context_and_footer_boundaries() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let resolved = parsed.resolve();
-    let NativePacketHeadRead::Translocator(Some(read)) = resolved
+    let PacketHeadRead::Translocator(Some(read)) = resolved
         .interpretations()
         .packets
         .iter()

@@ -7,16 +7,14 @@ pub use event_heads::{
     DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
 };
 
-pub mod native_zoom;
-pub use native_zoom::NativeZoomRead;
+pub mod zoom;
+pub use zoom::ZoomRead;
 
-pub mod native_pickups;
-pub use native_pickups::{NativePickupOutcome, NativePickupRead};
+pub mod pickups;
+pub use pickups::{PickupOutcome, PickupRead};
 
 pub mod translocator;
-pub use translocator::{
-    NativeTranslocatorEvent, TeleportPosition, TranslocatorEvent, TranslocatorStop,
-};
+pub use translocator::{TeleportPosition, TranslocatorEvent, TranslocatorRead, TranslocatorStop};
 
 pub mod weapon_hits;
 pub use weapon_hits::WeaponDamage;
@@ -24,8 +22,8 @@ pub use weapon_hits::WeaponDamage;
 pub mod weapon_hit_scan;
 pub use weapon_hit_scan::WeaponDamageRead;
 
-pub mod native_weapon_damage;
-pub use native_weapon_damage::{NativeWeaponDamageField, NativeWeaponDamageRead};
+pub mod weapon_damage;
+pub use weapon_damage::{WeaponDamageField, WeaponDamageTrace};
 
-pub mod native_packet_heads;
-pub use native_packet_heads::NativePacketHeadRead;
+pub mod packet_heads;
+pub use packet_heads::PacketHeadRead;

@@ -3,10 +3,10 @@ use super::{bits::Bits, scan_kill_event_chains};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub enum NativeEventGate15Policy {
-    /// Native pickGate15: compare localized candidate counts; ties select false.
+pub enum EventGate15Policy {
+    /// Reference pickGate15: compare localized candidate counts; ties select false.
     #[default]
-    ReferenceInference,
+    CandidateCountInference,
     /// Caller-supplied grammar configuration, not a recorded film bit.
     Explicit(bool),
     /// Keep the runtime setting unknown and stop at code-15 bodies.
@@ -14,19 +14,19 @@ pub enum NativeEventGate15Policy {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeEventGate15Selection {
-    pub policy: NativeEventGate15Policy,
+pub struct EventGate15Selection {
+    pub policy: EventGate15Policy,
     pub selected: Option<bool>,
     /// Candidate counts for false and true. Not action counts or confidence.
-    /// Some([0, 0]) explicitly retains the native no-evidence tie fallback.
+    /// Some([0, 0]) explicitly retains the reference no-evidence tie fallback.
     pub localized_candidate_counts: Option<[usize; 2]>,
     pub eligible_packets: usize,
 }
 
-impl Default for NativeEventGate15Selection {
+impl Default for EventGate15Selection {
     fn default() -> Self {
         Self {
-            policy: NativeEventGate15Policy::Unknown,
+            policy: EventGate15Policy::Unknown,
             selected: None,
             localized_candidate_counts: None,
             eligible_packets: 0,
@@ -34,26 +34,26 @@ impl Default for NativeEventGate15Selection {
     }
 }
 
-/// Native per-film grammar inference without timestamps, roster resolution or
+/// Reference per-film grammar inference without timestamps, roster resolution or
 /// published outcomes. Input contains only type-0 payloads. Empty event lists
 /// and payloads shorter than 64 bytes do not contribute, exactly as pickGate15.
 /// Explicit/unknown policies do not scan the payloads. The inferred setting
 /// must not be represented as recorded data or an independently proven value.
-pub(crate) fn select_native_event_gate15<'a>(
+pub(crate) fn select_event_gate15<'a>(
     payloads: impl IntoIterator<Item = &'a [u8]>,
-    policy: NativeEventGate15Policy,
-) -> NativeEventGate15Selection {
-    let mut out = NativeEventGate15Selection {
+    policy: EventGate15Policy,
+) -> EventGate15Selection {
+    let mut out = EventGate15Selection {
         policy,
         ..Default::default()
     };
     match policy {
-        NativeEventGate15Policy::Unknown => return out,
-        NativeEventGate15Policy::Explicit(value) => {
+        EventGate15Policy::Unknown => return out,
+        EventGate15Policy::Explicit(value) => {
             out.selected = Some(value);
             return out;
         }
-        NativeEventGate15Policy::ReferenceInference => {}
+        EventGate15Policy::CandidateCountInference => {}
     }
     let mut scores = [0; 2];
     for payload in payloads {

@@ -1,16 +1,17 @@
-//! Native data models.
-use crate::theater::film::*;
+//! Reference data models.
+use super::profile::MovementProfile;
+use super::values::FilmMppWidths;
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
 };
-/// An allocated native calibration map. None at the grammar field represents a
+/// An allocated reference calibration map. None at the grammar field represents a
 /// nil map; clones of this handle share subsequent entry mutations, like Go maps.
 #[derive(Debug, Clone, Default)]
-pub struct NativeSharedWidths(pub(crate) Arc<Mutex<BTreeMap<String, i64>>>);
+pub struct SharedWidths(pub(crate) Arc<Mutex<BTreeMap<String, i64>>>);
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeScanGrammar {
+pub struct ScanGrammar {
     pub corruption_check: bool,
     pub new_record_tail_bits: i64,
     pub default_state_by_archetype: bool,
@@ -20,33 +21,33 @@ pub struct NativeScanGrammar {
     pub mobility_action_body: bool,
     pub ability_anchor_body: bool,
     pub chain_inference: bool,
-    pub calibrated_widths: Option<NativeSharedWidths>,
+    pub calibrated_widths: Option<SharedWidths>,
     pub generation_strict: bool,
     pub view_tables: bool,
     pub view_classes: bool,
-    pub stub_widths: Option<NativeSharedWidths>,
+    pub stub_widths: Option<SharedWidths>,
 }
 
-/// Raw native keyframe dimensions. Header movement is signed; size words are
-/// cast to native uint only when a full-state body actually reads them.
+/// Raw reference keyframe dimensions. Header movement is signed; size words are
+/// cast to reference uint only when a full-state body actually reads them.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
-pub struct NativeKeyframeLayout {
+pub struct KeyframeReadLayout {
     pub header_bits: i64,
     pub size_word_bits: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, Default)]
-pub struct NativeScanProfile {
-    pub movement: NativeMovementProfile,
-    pub keyframe: NativeKeyframeLayout,
+pub struct ScanProfile {
+    pub movement: MovementProfile,
+    pub keyframe: KeyframeReadLayout,
     pub mpp: FilmMppWidths,
-    pub grammar: NativeScanGrammar,
+    pub grammar: ScanGrammar,
 }
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-impl NativeSharedWidths {
+impl SharedWidths {
     pub(crate) fn from_map(values: BTreeMap<String, i64>) -> Self {
         Self(Arc::new(Mutex::new(values)))
     }
@@ -61,24 +62,24 @@ impl NativeSharedWidths {
             .copied()
     }
 }
-impl PartialEq for NativeSharedWidths {
+impl PartialEq for SharedWidths {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.0, &other.0) || self.snapshot() == other.snapshot()
     }
 }
 
-impl Serialize for NativeSharedWidths {
+impl Serialize for SharedWidths {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         self.snapshot().serialize(s)
     }
 }
-impl<'de> Deserialize<'de> for NativeSharedWidths {
+impl<'de> Deserialize<'de> for SharedWidths {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         Ok(Self::from_map(BTreeMap::deserialize(d)?))
     }
 }
 
-impl Default for NativeScanGrammar {
+impl Default for ScanGrammar {
     fn default() -> Self {
         Self {
             corruption_check: false,
@@ -98,7 +99,7 @@ impl Default for NativeScanGrammar {
         }
     }
 }
-impl Default for NativeKeyframeLayout {
+impl Default for KeyframeReadLayout {
     fn default() -> Self {
         Self {
             header_bits: 108,
@@ -107,14 +108,4 @@ impl Default for NativeKeyframeLayout {
     }
 }
 
-#[cfg(test)]
-impl NativeSharedWidths {
-    pub fn insert(&self, name: String, width: i64) -> Option<i64> {
-        self.0
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .insert(name, width)
-    }
-}
-
-impl Eq for NativeSharedWidths {}
+impl Eq for SharedWidths {}

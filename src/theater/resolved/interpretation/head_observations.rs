@@ -6,7 +6,7 @@ pub(crate) struct BipedPickupStats {
     pub packets: usize,
     pub type_9: usize,
     pub type_8: usize,
-    /// Native fallback counter; the 0xC4 packet gate admits only types 8/9.
+    /// Reference fallback counter; the 0xC4 packet gate admits only types 8/9.
     #[serde(default)]
     pub other_type: usize,
     pub published: usize,

@@ -18,15 +18,15 @@ pub enum RecordRef {
     Event(usize),
 }
 
-/// Borrowed native payload. Independent diagnostic projections remain on Packet.
+/// Borrowed reference payload. Independent diagnostic projections remain on Packet.
 #[derive(Debug, Clone, Copy)]
 pub enum Record<'a> {
     Packet(&'a FilmPacket),
     Entity(&'a EntityRecord),
     Keyframe(&'a KeyframeRecord),
-    Control(&'a NativeControlEntry),
+    Control(&'a ControlEntry),
     Summary(&'a SummaryEvent),
-    Event(&'a NativeEventRecord),
+    Event(&'a EventRecord),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -39,7 +39,7 @@ pub enum EventKind {
     Keyframe,
     Control,
     Summary,
-    NativeEvent,
+    RecordedEvent,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -59,12 +59,12 @@ impl EventKind {
             Self::EntityDelta | Self::Keyframe => EventCategory::State,
             Self::Control => EventCategory::Input,
             Self::Summary => EventCategory::Summary,
-            Self::NativeEvent => EventCategory::Action,
+            Self::RecordedEvent => EventCategory::Action,
         }
     }
 }
 
-/// Index entry for a native read, including incomplete reads. This is not a
+/// Index entry for a reference read, including incomplete reads. This is not a
 /// claim that every indexed read describes a successfully completed action.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Event {
@@ -78,12 +78,12 @@ pub struct Event {
     pub entity_id: Option<u32>,
     /// Recorded control/player index, where explicitly present. No guessed attribution.
     pub player_index: Option<usize>,
-    /// State effects are derived by accumulation, separately from the native payload.
+    /// State effects are derived by accumulation, separately from the reference payload.
     pub change: Option<StateChange>,
 }
 
-/// Native read status, independent of the derived state change. A complete
-/// layout can still include explicitly opaque subfields in its native payload.
+/// Reference read status, independent of the derived state change. A complete
+/// layout can still include explicitly opaque subfields in its reference payload.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Provenance {
     RecordedRead,
@@ -186,7 +186,7 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
 
 pub(super) fn index(
     film: &Film,
-    players: Option<&crate::theater::parser::v41::PlayerTable>,
+    players: Option<&crate::theater::resolved::identity::PlayerTable>,
 ) -> Vec<Event> {
     let mut events = Vec::new();
     for chunk in film.chunks() {
@@ -218,7 +218,7 @@ pub(super) fn index(
             // Event lists precede the continuation's entity and control views.
             if let FilmPacketBody::Frame(frame) = &packet.body {
                 for i in 0..frame.events.records.len() {
-                    push(RecordRef::Event(i), EventKind::NativeEvent, None, None);
+                    push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
             }
             for continuation in [false, true] {

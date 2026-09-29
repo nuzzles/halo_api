@@ -1,4 +1,4 @@
-//! Native traversal overrides: calibrated replacements and extra unported tails.
+//! Reference traversal overrides: calibrated replacements and extra unported tails.
 use super::{Reader, component};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -21,13 +21,13 @@ pub(super) fn signed_skip(
     component: &str,
     width: i64,
     calibrated: bool,
-    purpose: Option<crate::theater::parser::v41::NativeWidthPurpose>,
+    purpose: Option<crate::theater::parser::v41::WidthPurpose>,
     fields: (&str, &str),
 ) -> Option<()> {
     let bit = r.cursor.position;
-    let native_end = bit.wrapping_add(width);
-    let end_bit = usize::try_from(native_end).ok();
-    let adjustment = |retained_bits| crate::theater::parser::v41::NativeWidthAdjustment {
+    let reference_end = bit.wrapping_add(width);
+    let end_bit = usize::try_from(reference_end).ok();
+    let adjustment = |retained_bits| crate::theater::parser::v41::WidthAdjustment {
         component: component.into(),
         calibrated,
         purpose,
@@ -36,9 +36,9 @@ pub(super) fn signed_skip(
         retained_bits,
         end_bit,
     };
-    // Native Skip does no reads. Backward/wrapped/non-addressable source ranges
+    // Reference Skip does no reads. Backward/wrapped/non-addressable source ranges
     // are retained as signed adjustments, never synthesized as byte ranges.
-    if width < 0 || bit < 0 || native_end < bit {
+    if width < 0 || bit < 0 || reference_end < bit {
         r.diagnostics.width_adjustments.push(adjustment(None));
         r.cursor.skip_signed(width);
         return Some(());

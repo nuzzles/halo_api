@@ -1,4 +1,4 @@
-//! Native registry models.
+//! Reference registry models.
 
 /// Ordered replication components for one ECS entity archetype.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -29,7 +29,7 @@ pub struct FilmRegistry {
 
 /// Parses decompressed bootstrap bytes using LevelUp's structural registry boundary.
 /// Port source: `docs/VALIDATION.md`; MIT attribution alongside it.
-/// Native ParseRegistryChunk failure, distinct from a truncated registry result.
+/// Reference ParseRegistryChunk failure, distinct from a truncated registry result.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum FilmRegistryReadError {
     #[error("registry chunk is still compressed")]
@@ -39,24 +39,24 @@ pub enum FilmRegistryReadError {
 /// One name read in a candidate registry block. Rejected names do not read a
 /// level. Byte ranges refer to the retained bootstrap, not a recovered schema.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeRegistrySlotRead {
+pub struct RegistrySlotRead {
     pub index: usize,
     pub start_byte: usize,
     /// All 256 bytes, including terminators and otherwise discarded string tails.
     pub name_bytes: Vec<u8>,
     pub name: Option<String>,
-    /// Wire bytes of the level, only when the native name reader accepted.
+    /// Wire bytes of the level, only when the reference name reader accepted.
     pub level_bytes: Option<[u8; 4]>,
 }
 
 /// Ordered attempt to recognize one complete registry block. A rejected block
 /// belongs to the following section; its tentative reads are not archetypes.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeRegistryBlockRead {
+pub struct RegistryBlockRead {
     pub index: usize,
     pub start_byte: usize,
     pub end_byte: usize,
-    pub slots: Vec<NativeRegistrySlotRead>,
+    pub slots: Vec<RegistrySlotRead>,
     pub tail_start_byte: usize,
     /// Exclusive end actually inspected by the zero-tail predicate. It stops
     /// immediately after the first nonzero byte, if any.
@@ -65,7 +65,7 @@ pub struct NativeRegistryBlockRead {
     pub accepted: bool,
 }
 
-/// Complete native registry parse outcome, including truncation information.
+/// Complete reference registry parse outcome, including truncation information.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct FilmRegistryRead {
     pub registry: FilmRegistry,
@@ -74,9 +74,9 @@ pub struct FilmRegistryRead {
     /// compatibility registry's zero version words must not be read as recorded.
     pub header: Option<[u32; 2]>,
     /// None for old exports. Includes the rejected boundary block, if present;
-    /// incomplete trailing blocks are not read by the native grammar.
+    /// incomplete trailing blocks are not read by the reference grammar.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block_reads: Option<Vec<NativeRegistryBlockRead>>,
+    pub block_reads: Option<Vec<RegistryBlockRead>>,
 }
 
 impl FilmRegistry {

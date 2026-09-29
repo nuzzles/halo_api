@@ -1,4 +1,4 @@
-//! Native film chunk containers and their decoded payload models.
+//! Reference film chunk containers and their decoded payload models.
 
 use super::ParseError;
 use serde::{Deserialize, Serialize};

@@ -2,27 +2,27 @@
 use super::*;
 pub(super) fn continue_event_views(
     payload: &[u8],
-    events: &NativeEventListRead,
-    config: &NativeFrameConfig,
+    events: &EventListRead,
+    config: &FrameConfig,
     registry: &FilmRegistry,
     world: &mut FilmWorld,
-) -> Option<NativeEventContinuation> {
+) -> Option<EventContinuation> {
     // Empty lists are already handled by the generic production reader. Never
     // scan for a replacement boundary after an unsupported or truncated body.
-    if events.stop != NativeEventListStop::Terminator || events.records.is_empty() {
+    if events.stop != EventListStop::Terminator || events.records.is_empty() {
         return None;
     }
     let state_policy = if events.records.iter().any(|r| r.code == Some(0)) {
-        NativeContinuationStatePolicy::IsolatedConflictingDamageGrammar
+        ContinuationStatePolicy::IsolatedConflictingDamageGrammar
     } else {
-        NativeContinuationStatePolicy::Applied
+        ContinuationStatePolicy::Applied
     };
-    let frame = if state_policy == NativeContinuationStatePolicy::Applied {
+    let frame = if state_policy == ContinuationStatePolicy::Applied {
         config.decode_production_views(payload, events.end_bit, registry, world)
     } else {
         config.decode_production_views(payload, events.end_bit, registry, &mut world.clone())
     };
-    Some(NativeEventContinuation {
+    Some(EventContinuation {
         start_bit: events.end_bit,
         frame: frame.map_err(|error| error.to_string()),
         state_policy,
@@ -75,12 +75,11 @@ impl V41ChunkReader {
         inputs: impl IntoIterator<Item = FilmChunk>,
     ) -> Result<Film, ParseError> {
         let registry = V41RegistryChunkReader::read(registry_source, registry_data)?;
-        let config = NativeFrameConfig::default();
+        let config = FrameConfig::default();
         // These runtime/build-dependent values are not established by structural
         // registry decoding. Preserve stopped reads instead of choosing a layout.
         let gate15 = None;
-        let personalization_bits: Option<usize> = None;
-        // This accumulator exists solely to select subsequent native grammars.
+        // This accumulator exists solely to select subsequent reference grammars.
         // It is deliberately neither exported nor interpreted as a replay.
         let mut world = FilmWorld::default();
         let mut chunks = Vec::new();
@@ -98,7 +97,7 @@ impl V41ChunkReader {
                 data,
                 packets: Vec::new(),
             };
-            let headers = transport::native_packet_bytes(&chunk.data, chunk_index);
+            let headers = transport::read_packet_headers(&chunk.data, chunk_index);
             let walk_end = headers
                 .last()
                 .map(|header| header.payload_offset + header.payload_size)
@@ -117,19 +116,8 @@ impl V41ChunkReader {
                     &chunk.data[header.payload_offset..header.payload_offset + header.payload_size];
                 let mut event_list = (!footer && header.packet_type == 0).then(|| {
                     // Every event consumes at least eight header bits.
-                    read_native_event_list(payload, 1, gate15, payload.len())
+                    read_reference_event_list(payload, 1, gate15, payload.len())
                 });
-                let roster_read = if !footer && header.packet_type == 8 {
-                    personalization_bits.map(|width| {
-                        read_native_roster_update(
-                            payload,
-                            registry.definition.registry.format_version,
-                            width,
-                        )
-                    })
-                } else {
-                    None
-                };
                 let body = match (footer, header.packet_type) {
                     (true, 9) => summary::read_summary_packet(
                         payload,
@@ -192,12 +180,9 @@ impl V41ChunkReader {
                             },
                         }
                     }
-                    (false, 8) => roster_read
-                        .as_ref()
-                        .map(|read| FilmPacketBody::Roster(read.roster.clone()))
-                        .unwrap_or_else(|| FilmPacketBody::Refused {
-                            message: "unknown build personalization width".into(),
-                        }),
+                    (false, 8) => FilmPacketBody::Refused {
+                        message: "player roster layout is not encoded by the v41 registry".into(),
+                    },
                     _ => FilmPacketBody::Opaque,
                 };
                 chunk.packets.push(FilmPacket {

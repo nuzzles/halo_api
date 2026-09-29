@@ -1,10 +1,10 @@
-//! Kill-event localization grammar from the pinned native killsource decoder.
+//! Kill-event localization grammar from the pinned reference killsource decoder.
 //! A localized event is evidence only; roster resolution and kill-feed matching
 //! must happen before its assistant or damage shares can be published.
 use super::bits::{Bits, Cursor};
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::kill_event_chain::{
-    KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
-    NativeEventListRead, NativeEventListStop, NativeEventRecord,
+    KillEventFields, EventField, EventFieldStage, EventFieldValue,
+    EventListRead, EventListStop, EventRecord,
 };
 use serde::{Deserialize, Serialize};
 
@@ -142,22 +142,22 @@ impl KillEventFields {
 
 /// Walk an event list from an established continuation bit. This reuses the
 /// pinned killsource event *layout* grammar, without localization, filtering or
-/// roster inference. Unlike the native scanner's selected runtime fallback,
+/// roster inference. Unlike the reference scanner's selected runtime fallback,
 /// an unspecified code-15 gate stops before its body. Fixed-size skipped bodies
 /// are retained as opaque ranges, not advertised as interpreted fields.
-pub(crate) fn read_native_event_list(
+pub(crate) fn read_reference_event_list(
     data: &[u8],
     start_bit: usize,
     gate15: Option<bool>,
     limit: usize,
-) -> NativeEventListRead {
-    let mut out = NativeEventListRead {
+) -> EventListRead {
+    let mut out = EventListRead {
         start_bit,
         end_bit: start_bit,
         gate15,
         records: Vec::new(),
         fields: Vec::new(),
-        stop: NativeEventListStop::InvalidStart,
+        stop: EventListStop::InvalidStart,
     };
     let Some(mut r) = Reader::new(data, start_bit) else {
         return out;
@@ -165,26 +165,26 @@ pub(crate) fn read_native_event_list(
     r.trace = Some(Vec::new());
     loop {
         if out.records.len() >= limit {
-            out.stop = NativeEventListStop::RecordLimit;
+            out.stop = EventListStop::RecordLimit;
             break;
         }
         if r.cursor.position >= data.len() * 8 {
-            out.stop = NativeEventListStop::SourceBoundary;
+            out.stop = EventListStop::SourceBoundary;
             break;
         }
         let start = r.cursor.position;
         let field_start = r.trace.as_ref().unwrap().len();
-        r.stage = NativeEventFieldStage::Header;
+        r.stage = EventFieldStage::Header;
         if r.read(1) == 0 {
             out.stop = if r.over {
-                NativeEventListStop::Truncated
+                EventListStop::Truncated
             } else {
-                NativeEventListStop::Terminator
+                EventListStop::Terminator
             };
             break;
         }
         let code = r.read(7) as usize;
-        let mut record = NativeEventRecord {
+        let mut record = EventRecord {
             start_bit: start,
             end_bit: r.cursor.position,
             code: (!r.over).then_some(code as u8),
@@ -194,33 +194,33 @@ pub(crate) fn read_native_event_list(
             kill_fields: None,
         };
         let stop = if r.over {
-            Some(NativeEventListStop::Truncated)
+            Some(EventListStop::Truncated)
         } else if code >= CONFIG.len() {
-            Some(NativeEventListStop::UnsupportedCode)
+            Some(EventListStop::UnsupportedCode)
         } else {
-            r.stage = NativeEventFieldStage::References;
+            r.stage = EventFieldStage::References;
             if !presence(&mut r, code) {
                 Some(if r.over {
-                    NativeEventListStop::Truncated
+                    EventListStop::Truncated
                 } else {
-                    NativeEventListStop::UnsupportedReferences
+                    EventListStop::UnsupportedReferences
                 })
             } else {
                 record.body_start_bit = Some(r.cursor.position);
-                r.stage = NativeEventFieldStage::Body;
+                r.stage = EventFieldStage::Body;
                 if code == 85 {
                     record.kill_fields = read_kill_event_fields(data, r.cursor.position);
                 }
                 if code == 15 && gate15.is_none() {
-                    Some(NativeEventListStop::MissingRuntimeGate15)
+                    Some(EventListStop::MissingRuntimeGate15)
                 } else if body(&mut r, data, code, gate15.unwrap_or(false)) {
                     record.layout_complete = true;
                     None
                 } else {
                     Some(if r.over {
-                        NativeEventListStop::Truncated
+                        EventListStop::Truncated
                     } else {
-                        NativeEventListStop::UnsupportedBody
+                        EventListStop::UnsupportedBody
                     })
                 }
             }
@@ -238,13 +238,13 @@ pub(crate) fn read_native_event_list(
     out
 }
 
-// A failed native read leaves the position unchanged but sticks an overflow flag.
+// A failed reference read leaves the position unchanged but sticks an overflow flag.
 // Later short reads still run. Preserve that behavior for raw truncated fields.
 struct Reader<'a> {
     cursor: Cursor<'a>,
     over: bool,
-    trace: Option<Vec<NativeEventField>>,
-    stage: NativeEventFieldStage,
+    trace: Option<Vec<EventField>>,
+    stage: EventFieldStage,
 }
 impl<'a> Reader<'a> {
     fn new(data: &'a [u8], position: usize) -> Option<Self> {
@@ -252,11 +252,11 @@ impl<'a> Reader<'a> {
             cursor: Cursor::new(data, position)?,
             over: false,
             trace: None,
-            stage: NativeEventFieldStage::Body,
+            stage: EventFieldStage::Body,
         })
     }
     fn read(&mut self, n: usize) -> u64 {
-        // Native wide reads consume all requested bits, even beyond 64 bits.
+        // Reference wide reads consume all requested bits, even beyond 64 bits.
         if n > 64 {
             self.skip(n);
             return 0;
@@ -264,14 +264,11 @@ impl<'a> Reader<'a> {
         let bit = self.cursor.position;
         let value = self.cursor.read(n);
         if let Some(trace) = &mut self.trace {
-            trace.push(NativeEventField {
+            trace.push(EventField {
                 bit,
                 width: n,
                 stage: self.stage,
-                value: value.map_or(
-                    NativeEventFieldValue::Unavailable,
-                    NativeEventFieldValue::Scalar,
-                ),
+                value: value.map_or(EventFieldValue::Unavailable, EventFieldValue::Scalar),
             });
         }
         value.unwrap_or_else(|| {
@@ -283,14 +280,14 @@ impl<'a> Reader<'a> {
         let bit = self.cursor.position;
         let ok = self.cursor.skip(n).is_some();
         if let Some(trace) = &mut self.trace {
-            trace.push(NativeEventField {
+            trace.push(EventField {
                 bit,
                 width: n,
                 stage: self.stage,
                 value: if ok {
-                    NativeEventFieldValue::Opaque
+                    EventFieldValue::Opaque
                 } else {
-                    NativeEventFieldValue::Unavailable
+                    EventFieldValue::Unavailable
                 },
             });
         }

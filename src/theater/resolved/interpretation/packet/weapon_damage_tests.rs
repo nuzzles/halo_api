@@ -1,10 +1,11 @@
+use super::decode_weapon_damage;
 use super::*;
-use crate::theater::parser::v41::test_chunks;
-use crate::theater::parser::v41::weapon_hit_scan::decode_weapon_damage;
+use crate::theater::Film;
+use crate::theater::parser::v41::{FilmSource, FilmSourceMetadata, test_chunks};
 use serde_json::{Value, json};
 use std::io::Read;
 
-pub(crate) fn check_fields(read: &NativeWeaponDamageRead, payload: &[u8]) {
+pub(crate) fn check_fields(read: &WeaponDamageTrace, payload: &[u8]) {
     assert_eq!(read.source_bits, payload.len() * 8);
     let mut end = 0;
     let mut padded = 0;
@@ -34,10 +35,10 @@ pub(crate) fn check_fields(read: &NativeWeaponDamageRead, payload: &[u8]) {
 }
 
 #[test]
-fn native_data_damage_raw_fields_match_reference() {
+fn reference_data_damage_raw_fields_match_reference() {
     let mut raw = Vec::new();
     flate2::read::ZlibDecoder::new(
-        &include_bytes!("../../fixtures/weapon-hit-scan-v41.json.zlib")[..],
+        &include_bytes!("../../../fixtures/weapon-hit-scan-v41.json.zlib")[..],
     )
     .read_to_end(&mut raw)
     .unwrap();
@@ -52,7 +53,7 @@ fn native_data_damage_raw_fields_match_reference() {
             .step_by(2)
             .map(|j| u8::from_str_radix(&hex[j..j + 2], 16).unwrap())
             .collect();
-        let read = read_native_weapon_damage(&payload, i as u64);
+        let read = read_weapon_damage(&payload, i as u64);
         let projection = read.read.as_ref().unwrap();
         let expected: WeaponDamage = serde_json::from_value(case["damage"].clone()).unwrap();
         assert_eq!(projection.damage, expected);
@@ -73,19 +74,19 @@ fn native_data_damage_raw_fields_match_reference() {
             .filter(|f| f.field.name.ends_with(".generation"))
             .count();
         assert_eq!(
-            serde_json::from_value::<NativeWeaponDamageRead>(json!(read)).unwrap(),
+            serde_json::from_value::<WeaponDamageTrace>(json!(read)).unwrap(),
             read
         );
     }
     assert!(padded > 100 && opaque_nonzero > 0 && generations > 0);
-    let refused = read_native_weapon_damage(&[0xc0, 0x80], 0);
+    let refused = read_weapon_damage(&[0xc0, 0x80], 0);
     assert!(refused.read.is_none());
     assert_eq!(refused.end_bit, 9);
     check_fields(&refused, &[0xc0, 0x80]);
 }
 
 #[test]
-fn native_data_damage_admission_and_provenance() {
+fn reference_data_damage_admission_and_provenance() {
     fn packet(kind: u16, payload: &[u8]) -> Vec<u8> {
         let mut data = vec![0; 16];
         data[..2].copy_from_slice(&kind.to_le_bytes());
@@ -96,7 +97,7 @@ fn native_data_damage_admission_and_provenance() {
     }
     let mut stream = packet(0, &[0xc0, 0]); // accepted projection with synthetic tail
     stream.extend(packet(0, &[0xc0, 0x80])); // wrong full event code, selected refusal
-    stream.extend(packet(0, &[0xc0])); // too short for native selection
+    stream.extend(packet(0, &[0xc0])); // too short for reference selection
     stream.extend(packet(6, &[0xc0, 0])); // wrong packet type
     stream.extend(packet(0, &[0x80, 0])); // wrong first byte
     let source = FilmSource::load(

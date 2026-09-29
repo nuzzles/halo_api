@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 #[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct WeaponDamage {

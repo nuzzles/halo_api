@@ -1,8 +1,8 @@
-//! Native data models.
+//! Reference data models.
 /// Recorded action-block fields. Masks number entries from the first wire bit.
 /// Weapon indices: -2 means absent; -1 is the recorded sentinel; 0..3 are indices.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeActionBlock {
+pub struct ActionBlock {
     pub start_bit: i64,
     pub end_bit: i64,
     pub present: bool,

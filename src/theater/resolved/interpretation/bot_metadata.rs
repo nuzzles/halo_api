@@ -1,4 +1,4 @@
-//! Native BOT_METADATA payload scanning and cross-packet deduplication.
+//! Reference BOT_METADATA payload scanning and cross-packet deduplication.
 use super::bits::Bits;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -27,7 +27,7 @@ fn read_name(payload: &[u8], bit: usize) -> Option<(String, usize)> {
 }
 /// A candidate located by printable-name scanning, not a sequential record.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeBotCandidate {
+pub struct BotCandidate {
     pub entry: FilmBotEntry,
     pub slot_bit: usize,
     pub bot_id_bit: usize,
@@ -39,18 +39,18 @@ pub struct NativeBotCandidate {
     pub selected_by_reference: bool,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeBotMetadataRead {
+pub struct BotMetadataRead {
     pub source_bits: usize,
     /// Big-endian count at source bits 0..32; None means it was unavailable.
     pub declared_bots: Option<u32>,
     /// None means missing count or count >64 refused the reference scan.
     /// Some(empty) means scanned with no admitted name/reference candidates.
-    pub candidates: Option<Vec<NativeBotCandidate>>,
+    pub candidates: Option<Vec<BotCandidate>>,
 }
 /// Read a type-12 payload without cross-packet deduplication or player resolution.
 /// Zero count still permits the reference scan. Candidate positions do not
 /// partition the packet: the reference explicitly lacks a multi-entry stride.
-pub(crate) fn read_native_bot_metadata(payload: &[u8]) -> NativeBotMetadataRead {
+pub(crate) fn read_bot_metadata(payload: &[u8]) -> BotMetadataRead {
     let declared_bots = payload
         .get(..4)
         .map(|b| u32::from_be_bytes(b.try_into().unwrap()));
@@ -58,7 +58,7 @@ pub(crate) fn read_native_bot_metadata(payload: &[u8]) -> NativeBotMetadataRead 
         let mut candidates = Vec::new();
         let mut names = BTreeSet::new();
         visit_bot_candidates(payload, |entry, terminator| {
-            candidates.push(NativeBotCandidate {
+            candidates.push(BotCandidate {
                 slot_bit: entry.bit_position - 0x74 * 8,
                 bot_id_bit: entry.bit_position - 0x70 * 8,
                 name_end_bit: terminator + 16,
@@ -69,7 +69,7 @@ pub(crate) fn read_native_bot_metadata(payload: &[u8]) -> NativeBotMetadataRead 
         });
         candidates
     });
-    NativeBotMetadataRead {
+    BotMetadataRead {
         source_bits: payload.len() * 8,
         declared_bots,
         candidates,

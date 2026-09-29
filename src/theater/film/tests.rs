@@ -163,7 +163,7 @@ fn keyframes_stop_without_searching_past_invalid_header() {
 }
 
 #[test]
-fn event_gate_is_unresolved_in_native_film() {
+fn event_gate_is_unresolved_in_reference_film() {
     // Event list: config bit zero, present bit one, event code 15.
     let mut bits = vec![false, true];
     for bit in (0..5).rev() {
@@ -195,7 +195,7 @@ fn event_gate_is_unresolved_in_native_film() {
     let resolved = film.resolve();
     assert_eq!(
         resolved.interpretations().event_gate15.policy,
-        NativeEventGate15Policy::ReferenceInference
+        EventGate15Policy::CandidateCountInference
     );
     assert_eq!(serde_json::to_value(resolved.film()).unwrap(), before);
 }
@@ -262,7 +262,7 @@ fn captured_v41_corpus() {
         let film = Film::parse(input.clone()).unwrap();
         assert_eq!(film.registry.definition.registry.archetypes.len(), 50);
         let mut baseline_world = FilmWorld::default();
-        let baseline_config = NativeFrameConfig::default();
+        let baseline_config = FrameConfig::default();
         for (i, original) in input.iter().enumerate() {
             let chunk = film.chunk(i).unwrap();
             assert_eq!(chunk.source(), original);
@@ -337,4 +337,5 @@ fn captured_v41_corpus() {
     assert_eq!(summaries, 3667);
 }
 
-use crate::theater::parser::v41::{FilmWorld, NativeEventGate15Policy, NativeFrameConfig};
+use crate::theater::parser::v41::{FilmWorld, FrameConfig};
+use crate::theater::resolved::interpretation::EventGate15Policy;

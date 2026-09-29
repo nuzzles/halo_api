@@ -1,6 +1,6 @@
 //! World support for ResolvedFilm.
 use super::*;
-/// Runtime entity view or an independent keyframe namespace. The first native
+/// Runtime entity view or an independent keyframe namespace. The first reference
 /// keyframe namespace seeds the entity view, following the decoder's binding policy.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum EntityDomain {
@@ -29,7 +29,7 @@ pub struct EntityState {
     pub archetype: u32,
     /// NEW timestamp, never a fabricated spawn time for a keyframe observation.
     pub created_at_us: Option<u64>,
-    /// Whether the native baseline reader completed; opaque/skipped component
+    /// Whether the reference baseline reader completed; opaque/skipped component
     /// bodies remain individually marked and do not become decoded values.
     pub baseline_read_complete: bool,
     pub components: BTreeMap<usize, Arc<ComponentState>>,
@@ -74,7 +74,7 @@ pub(super) fn resolve_change(
                     return None;
                 };
                 let continuation = frame.continuation.as_ref()?;
-                if continuation.state_policy != NativeContinuationStatePolicy::Applied {
+                if continuation.state_policy != ContinuationStatePolicy::Applied {
                     return None;
                 }
             }
@@ -107,7 +107,7 @@ pub(super) fn resolve_change(
                 },
                 slot: record.id & 0x3fff_ffff,
             };
-            // Native padded reads remain visible but cannot become recorded state.
+            // Reference padded reads remain visible but cannot become recorded state.
             let packet = &film
                 .chunk(event.source.chunk)
                 .expect("indexed source chunk")
@@ -187,7 +187,7 @@ fn entity_change(
             derivation: "recorded-delete-v1",
         });
     }
-    // Match native admission: an incomplete NEW does not establish a binding.
+    // Match reference admission: an incomplete NEW does not establish a binding.
     if record.header.kind == RecordKind::New && record.stop != EntityViewStop::Complete {
         return None;
     }

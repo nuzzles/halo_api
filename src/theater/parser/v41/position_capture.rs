@@ -1,4 +1,4 @@
-//! Position observations and optional reader-local accumulation from the native i0 reader.
+//! Position observations and optional reader-local accumulation from the reference i0 reader.
 use crate::theater::parser::v41::*;
 use serde::{Deserialize, Serialize};
 
@@ -24,12 +24,8 @@ impl PositionCaptureEncoding {
             region_index_bits: self.region_index_bits,
         }
     }
-    pub(crate) fn reader<'a>(
-        &self,
-        map: &'a FilmMapBounds,
-        slot: u32,
-    ) -> NativePositionCapture<'a> {
-        NativePositionCapture {
+    pub(crate) fn reader<'a>(&self, map: &'a FilmMapBounds, slot: u32) -> PositionCapture<'a> {
+        PositionCapture {
             map,
             slot,
             quantum: f32::from_bits(self.quantum_bits),
@@ -39,10 +35,10 @@ impl PositionCaptureEncoding {
     }
 }
 
-/// Map and reader-local state used by native position publications. Suppressing
+/// Map and reader-local state used by reference position publications. Suppressing
 /// emission still updates an explicitly supplied accumulator, matching LevelUp.
 #[derive(Debug)]
-pub(crate) struct NativePositionCapture<'a> {
+pub(crate) struct PositionCapture<'a> {
     pub map: &'a FilmMapBounds,
     pub quantum: f32,
     pub slot: u32,
@@ -52,6 +48,6 @@ pub(crate) struct NativePositionCapture<'a> {
 
 // Go uint64 shifts yield zero at widths >= 64. A zero delta width
 // subtracts one in unsigned arithmetic, so its half-range is also zero.
-pub(crate) fn native_shift_one(width: u64) -> u64 {
+pub(crate) fn reference_shift_one(width: u64) -> u64 {
     if width < 64 { 1u64 << width } else { 0 }
 }

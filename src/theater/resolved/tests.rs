@@ -92,7 +92,7 @@ fn value(world: &WorldSnapshot) -> u64 {
 }
 
 #[test]
-fn resolved_native_entry_preserves_source_and_decoder_output() {
+fn resolved_reference_entry_preserves_source_and_decoder_output() {
     use std::io::Write;
     let bootstrap = [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat();
     let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
@@ -107,9 +107,9 @@ fn resolved_native_entry_preserves_source_and_decoder_output() {
         &[],
     )
     .unwrap();
-    let native = Film::parse(test_chunks(&source)).unwrap();
+    let reference = Film::parse(test_chunks(&source)).unwrap();
     let film = Film::parse(test_chunks(&source)).unwrap();
-    assert_eq!(film, native);
+    assert_eq!(film, reference);
     assert_eq!(film.registry.source.data, compressed);
     assert_eq!(film.registry.data, bootstrap);
     let json = serde_json::to_vec(&film).unwrap();
@@ -253,12 +253,10 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
 
 #[test]
 fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() {
-    use crate::theater::parser::v41::{
-        KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable,
-    };
+    use crate::theater::parser::v41::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
-    keyframe.body = FilmPacketBody::Keyframes(NativeKeyframeTable {
+    keyframe.body = FilmPacketBody::Keyframes(KeyframeTable {
         records: vec![KeyframeChainAttempt {
             start_bit: 1,
             end_bit: 65,
@@ -316,7 +314,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
             .unwrap()
             .header_diagnostics
             .new_binding_refusals
-            .push(crate::theater::parser::v41::NativeNewBindingRefusal {
+            .push(crate::theater::parser::v41::NewBindingRefusal {
                 record_bit: 2,
                 id,
                 slot: 7,
@@ -342,7 +340,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     if let FilmPacketBody::Frame(frame) = &mut p.body {
         frame.frame.as_mut().unwrap().controls =
             Some(crate::theater::parser::v41::DecodedFrameView {
-                control_entries: vec![NativeControlEntry {
+                control_entries: vec![ControlEntry {
                     start_bit: 2040,
                     end_bit: 2050,
                     index: 2,
@@ -465,7 +463,8 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
 
 #[test]
 fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
-    use crate::theater::parser::v41::{PlayerTable, PlayerTableSlot};
+    use crate::theater::film::PlayerTableSlot;
+    use crate::theater::resolved::PlayerTable;
     use serde_json::json;
     let mut film = Film::parse([
         FilmChunk {

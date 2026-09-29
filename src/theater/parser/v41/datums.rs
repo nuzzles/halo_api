@@ -17,7 +17,7 @@ impl Default for DatumEntry {
     }
 }
 
-/// Native datum-block size refusals, preserving the quantities in each error.
+/// Reference datum-block size refusals, preserving the quantities in each error.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
 pub(crate) enum DatumTableError {
     #[error("bloc de datums : {bytes} octets ne portent aucune entree")]

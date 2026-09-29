@@ -32,7 +32,7 @@ pub(super) fn slide(r: &mut Reader<'_>, level: u32) -> Option<bool> {
     .map(field)
     .to_vec();
     r.publish_movement(
-        crate::theater::parser::v41::NativeMovementComponent::Slide,
+        crate::theater::parser::v41::MovementComponent::Slide,
         values,
     );
     Some(true)
@@ -124,7 +124,7 @@ pub(super) fn posture(r: &mut Reader<'_>) -> Option<bool> {
         word,
     ];
     r.publish_movement(
-        crate::theater::parser::v41::NativeMovementComponent::Posture,
+        crate::theater::parser::v41::MovementComponent::Posture,
         values,
     );
 

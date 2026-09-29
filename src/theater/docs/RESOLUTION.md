@@ -1,7 +1,7 @@
 # Resolution and playback
 
 `Film::resolve(&self)` returns `ResolvedFilm<'_>`, borrowing the recording. It walks
-already decoded native records to build an ordered event stream, query indexes,
+already decoded reference records to build an ordered event stream, query indexes,
 entity/component state and checkpoints. Multiple independent cursors can borrow
 one film. The retained source buffers are neither copied nor decompressed again.
 
@@ -10,13 +10,13 @@ and player-slot searches, event-layout inference, bot metadata, fire-aim reads a
 whole-chunk highlight scans. Those routines may inspect preserved bytes; they do
 not rerun the structural packet parser or mutate Film. An inferred event gate is
 reported as a selection with candidate counts, not a recorded bit, and is not used
-to silently reinterpret the native event stream or apply extra world updates.
+to silently reinterpret the reference event stream or apply extra world updates.
 
 Events use packet wire timestamps except summaries, which use their own recorded
 `time_us`. Ties retain input chunk, packet, and record order. Summary player linkage
 uses a unique XUID match from the bootstrap interpretation; missing or ambiguous
 matches stay unresolved. This is not a guessed player-to-entity ownership mapping.
-Native reads have source references and explicit read provenance. Accumulated state
+Reference reads have source references and explicit read provenance. Accumulated state
 changes retain previous/new shared values and a derivation identifier.
 
 `EventFilter` combines kind, category, entity, player and inclusive time ranges.

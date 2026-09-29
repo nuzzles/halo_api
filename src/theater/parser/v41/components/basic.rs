@@ -39,7 +39,7 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
             }
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                    field: crate::theater::parser::v41::NativePlayerStateField::MalleableProperties,
+                    field: crate::theater::parser::v41::PlayerStateField::MalleableProperties,
                     values,
                     present: true,
                 },
@@ -133,7 +133,7 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
         }
         _ => return Some(false),
     }
-    // Only these native hooks publish here. Other decoded fields intentionally
+    // Only these reference hooks publish here. Other decoded fields intentionally
     // remain raw fields without a fabricated hook emission.
     let values = || {
         r.fields[field_start..]
@@ -144,105 +144,105 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
     let publication = match name {
         "player-soft-kill-timer-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::SoftKill,
+                field: crate::theater::parser::v41::PlayerStateField::SoftKill,
                 values: values(),
                 present: true,
             },
         ),
         "player-target-tracking-detection-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::TargetTracking,
+                field: crate::theater::parser::v41::PlayerStateField::TargetTracking,
                 values: values(),
                 present: true,
             },
         ),
         "player-desired-respawn-player-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::DesiredRespawnPlayer,
+                field: crate::theater::parser::v41::PlayerStateField::DesiredRespawnPlayer,
                 values: values(),
                 present: true,
             },
         ),
         "player-engine-loadout-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::Loadout,
+                field: crate::theater::parser::v41::PlayerStateField::Loadout,
                 values: values(),
                 present: true,
             },
         ),
         "player-lives-remaining-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::Lives,
+                field: crate::theater::parser::v41::PlayerStateField::Lives,
                 values: values(),
                 present: true,
             },
         ),
         "player-last-betrayer-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::LastBetrayer,
+                field: crate::theater::parser::v41::PlayerStateField::LastBetrayer,
                 values: values(),
                 present: true,
             },
         ),
         "player-control-aiming-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::ControlAiming,
+                field: crate::theater::parser::v41::PlayerStateField::ControlAiming,
                 values: values(),
                 present: true,
             },
         ),
         "player-active-in-game-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::ActiveInGame,
+                field: crate::theater::parser::v41::PlayerStateField::ActiveInGame,
                 values: values(),
                 present: true,
             },
         ),
         "player-pending-join-in-progress-spawn-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                field: crate::theater::parser::v41::NativePlayerStateField::PendingJoinInProgress,
+                field: crate::theater::parser::v41::PlayerStateField::PendingJoinInProgress,
                 values: values(),
                 present: true,
             },
         ),
         "game-engine-current-state-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
-                field: crate::theater::parser::v41::NativeGameEngineField::State,
+                field: crate::theater::parser::v41::GameEngineField::State,
                 values: values(),
                 present: true,
             },
         ),
         "game-engine-current-round-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
-                field: crate::theater::parser::v41::NativeGameEngineField::Round,
+                field: crate::theater::parser::v41::GameEngineField::Round,
                 values: r.fields[field_start + 1..].iter().map(|f| f.raw).collect(),
                 present: r.fields[field_start].raw == 0,
             },
         ),
         "game-engine-sudden-death-time-left-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
-                field: crate::theater::parser::v41::NativeGameEngineField::SuddenDeath,
+                field: crate::theater::parser::v41::GameEngineField::SuddenDeath,
                 values: values(),
                 present: true,
             },
         ),
         "game-engine-grace-period-time-left-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
-                field: crate::theater::parser::v41::NativeGameEngineField::GracePeriod,
+                field: crate::theater::parser::v41::GameEngineField::GracePeriod,
                 values: values(),
                 present: true,
             },
         ),
         "game-engine-round-condition-flags-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::GameEngine {
-                field: crate::theater::parser::v41::NativeGameEngineField::RoundConditions,
+                field: crate::theater::parser::v41::GameEngineField::RoundConditions,
                 values: values(),
                 present: true,
             },
         ),
         "managed-object-boundary-visibility-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::ManagedObject {
-                field: crate::theater::parser::v41::NativeManagedObjectField::BoundaryVisibility,
+                field: crate::theater::parser::v41::ManagedObjectField::BoundaryVisibility,
                 values: vec![
                     r.fields[field_start..]
                         .iter()
@@ -253,67 +253,67 @@ pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
         ),
         "managed-object-boundary-color-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::ManagedObject {
-                field: crate::theater::parser::v41::NativeManagedObjectField::BoundaryColor,
+                field: crate::theater::parser::v41::ManagedObjectField::BoundaryColor,
                 values: values(),
             },
         ),
         "managed-object-rtpc-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::ManagedObject {
-                field: crate::theater::parser::v41::NativeManagedObjectField::Rtpc,
+                field: crate::theater::parser::v41::ManagedObjectField::Rtpc,
                 values: values(),
             },
         ),
         "managed-navpoint-radial-progress" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Navpoint {
-                field: crate::theater::parser::v41::NativeNavpointField::RadialProgress,
+                field: crate::theater::parser::v41::NavpointField::RadialProgress,
                 values: values(),
             },
         ),
         "managed-navpoint-manual-timer-initial-duration-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Navpoint {
-                field: crate::theater::parser::v41::NativeNavpointField::ManualTimerInitial,
+                field: crate::theater::parser::v41::NavpointField::ManualTimerInitial,
                 values: values(),
             },
         ),
         "managed-navpoint-manual-timer-current-duration-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Navpoint {
-                field: crate::theater::parser::v41::NativeNavpointField::ManualTimerCurrent,
+                field: crate::theater::parser::v41::NavpointField::ManualTimerCurrent,
                 values: values(),
             },
         ),
         "managed-objective-timers-component" | "managed-navpoint-timers-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::Timers,
+                field: crate::theater::parser::v41::ObjectiveField::Timers,
                 values: values(),
             },
         ),
         "managed-objective-object-reference-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::ObjectReference,
+                field: crate::theater::parser::v41::ObjectiveField::ObjectReference,
                 values: values(),
             },
         ),
         "managed-objective-type-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::Type,
+                field: crate::theater::parser::v41::ObjectiveField::Type,
                 values: values(),
             },
         ),
         "managed-objective-progress-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::Progress,
+                field: crate::theater::parser::v41::ObjectiveField::Progress,
                 values: values(),
             },
         ),
         "managed-objective-required-progress-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::RequiredProgress,
+                field: crate::theater::parser::v41::ObjectiveField::RequiredProgress,
                 values: values(),
             },
         ),
         "managed-objective-state-component" => Some(
             crate::theater::parser::v41::FilmComponentObservation::Objective {
-                field: crate::theater::parser::v41::NativeObjectiveField::State,
+                field: crate::theater::parser::v41::ObjectiveField::State,
                 values: values(),
             },
         ),

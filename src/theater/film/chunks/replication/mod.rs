@@ -1,4 +1,4 @@
-//! Native packet stream, records, and read results.
+//! Reference packet stream, records, and read results.
 use super::*;
 
 pub mod components;

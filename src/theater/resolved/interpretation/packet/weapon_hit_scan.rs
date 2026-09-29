@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use super::*;
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct WeaponDamageRead {

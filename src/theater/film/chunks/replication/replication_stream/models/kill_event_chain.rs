@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct KillEventFields {
     pub killer: i32,
@@ -14,17 +14,17 @@ pub struct KillEventFields {
     pub end: i64,
 }
 
-/// Read order and source ranges from the native event-layout walker. Scalar
+/// Read order and source ranges from the reference event-layout walker. Scalar
 /// values remain unnamed unless their semantics are established elsewhere.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeEventFieldStage {
+pub enum EventFieldStage {
     Header,
     References,
     Body,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeEventFieldValue {
+pub enum EventFieldValue {
     Scalar(u64),
     /// A supported layout skipped this region without interpreting its fields.
     Opaque,
@@ -33,15 +33,15 @@ pub enum NativeEventFieldValue {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeEventField {
+pub struct EventField {
     pub bit: usize,
     pub width: usize,
-    pub stage: NativeEventFieldStage,
-    pub value: NativeEventFieldValue,
+    pub stage: EventFieldStage,
+    pub value: EventFieldValue,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeEventRecord {
+pub struct EventRecord {
     pub start_bit: usize,
     /// Parent reader position on return. A failed nested code-85 read leaves
     /// this at body_start_bit; its attempted fields still remain in field_range.
@@ -56,7 +56,7 @@ pub struct NativeEventRecord {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeEventListStop {
+pub enum EventListStop {
     Terminator,
     SourceBoundary,
     Truncated,
@@ -69,11 +69,11 @@ pub enum NativeEventListStop {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeEventListRead {
+pub struct EventListRead {
     pub start_bit: usize,
     pub end_bit: usize,
     pub gate15: Option<bool>,
-    pub records: Vec<NativeEventRecord>,
-    pub fields: Vec<NativeEventField>,
-    pub stop: NativeEventListStop,
+    pub records: Vec<EventRecord>,
+    pub fields: Vec<EventField>,
+    pub stop: EventListStop,
 }

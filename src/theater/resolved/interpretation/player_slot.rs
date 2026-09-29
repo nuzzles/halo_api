@@ -1,14 +1,37 @@
-//! Bounded native player-slot grammar shared by roster and bootstrap reads.
+//! Bounded reference player-slot grammar shared by roster and bootstrap reads.
 use crate::theater::film::*;
 use crate::theater::parser::bits::Cursor;
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct SlotField {
+    pub name: String,
+    pub bit: usize,
+    pub bits: usize,
+    pub value: SlotValue,
+}
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum SlotValue {
+    Scalar(u64),
+    Opaque,
+    Unavailable,
+}
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct PlayerSlotRead {
+    pub start_bit: usize,
+    pub end_bit: usize,
+    pub source_bits: usize,
+    pub truncated: bool,
+    pub slot: Option<PlayerTableSlot>,
+    pub fields: Vec<SlotField>,
+}
 /// Read an explicitly supplied candidate boundary, without validating its
 /// selection or inferring a vacant slot. The returned rank is not resolved.
-pub(crate) fn read_native_player_slot(
+pub(crate) fn read_player_slot(
     data: &[u8],
     start_bit: usize,
     personalization_bits: usize,
-) -> NativePlayerSlotRead {
-    let mut out = NativePlayerSlotRead {
+) -> PlayerSlotRead {
+    let mut out = PlayerSlotRead {
         start_bit,
         end_bit: start_bit,
         source_bits: data.len() * 8,
@@ -55,11 +78,11 @@ fn slot_read(r: &mut SlotReader<'_>, p: usize, personalization: usize) -> Option
         shorts,
     })
 }
-/// The shared bootstrap/type-8 body uses the native sticky bounded reader.
+/// The shared bootstrap/type-8 body uses the reference sticky bounded reader.
 pub(crate) struct SlotReader<'a> {
     pub cursor: Cursor<'a>,
     pub truncated: bool,
-    pub fields: Option<Vec<NativeSlotField>>,
+    pub fields: Option<Vec<SlotField>>,
 }
 impl<'a> SlotReader<'a> {
     pub(crate) fn new(cursor: Cursor<'a>, trace: bool) -> Self {
@@ -69,9 +92,9 @@ impl<'a> SlotReader<'a> {
             fields: trace.then(Vec::new),
         }
     }
-    fn retain(&mut self, name: &str, bit: usize, bits: usize, value: NativeSlotValue) {
+    fn retain(&mut self, name: &str, bit: usize, bits: usize, value: SlotValue) {
         if let Some(fields) = &mut self.fields {
-            fields.push(NativeSlotField {
+            fields.push(SlotField {
                 name: name.into(),
                 bit,
                 bits,
@@ -90,7 +113,7 @@ impl<'a> SlotReader<'a> {
             name,
             bit,
             n,
-            value.map_or(NativeSlotValue::Unavailable, NativeSlotValue::Scalar),
+            value.map_or(SlotValue::Unavailable, SlotValue::Scalar),
         );
         value
     }
@@ -105,7 +128,7 @@ impl<'a> SlotReader<'a> {
             name,
             bit,
             n,
-            value.map_or(NativeSlotValue::Unavailable, |_| NativeSlotValue::Opaque),
+            value.map_or(SlotValue::Unavailable, |_| SlotValue::Opaque),
         );
         value
     }

@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use super::{FilmReadDiagnostics, KeyframeRecord};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -23,7 +23,7 @@ pub struct KeyframeChainAttempt {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeKeyframeTable {
+pub struct KeyframeTable {
     pub records: Vec<KeyframeChainAttempt>,
     pub stop: KeyframeChainStop,
     pub diagnostics: FilmReadDiagnostics,

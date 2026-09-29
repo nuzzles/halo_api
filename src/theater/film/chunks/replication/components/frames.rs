@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use crate::theater::film::*;
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum BindingOrigin {
@@ -18,7 +18,7 @@ pub enum EntityViewStop {
     Truncated,
     InvalidEncoding,
     InvalidWidthOverride {
-        adjustment: Box<crate::theater::film::NativeWidthAdjustment>,
+        adjustment: Box<crate::theater::film::WidthAdjustment>,
     },
     InvalidArchetype {
         archetype: u32,
@@ -55,7 +55,7 @@ pub struct EntityComponentSpan {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct EntityComponentAttempt {
     pub span: EntityComponentSpan,
-    /// Native returned variant, including zero for a calibrated skip and
+    /// Reference returned variant, including zero for a calibrated skip and
     /// u32::MAX for no variant. None marks an incomplete read or older export.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variant: Option<u32>,
@@ -71,7 +71,7 @@ pub struct EntityComponentAttempt {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct EntityRecord {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub references: Vec<crate::theater::film::NativeUnitReference>,
+    pub references: Vec<crate::theater::film::UnitReference>,
     #[serde(
         default,
         skip_serializing_if = "crate::theater::film::FilmReadDiagnostics::is_empty"
@@ -79,11 +79,11 @@ pub struct EntityRecord {
     pub diagnostics: crate::theater::film::FilmReadDiagnostics,
     pub header: RecordHeader,
     pub archetype: Option<u32>,
-    /// Configured signed width returned as native New Trace.DefaultBits, even
+    /// Configured signed width returned as reference New Trace.DefaultBits, even
     /// when the selected archetype decoder ignores it. This is decoder context,
     /// not a recorded bit length. None denotes an older export, a non-New record,
     /// a traversal that did not reach the default-state trace, or a legacy width
-    /// outside the native signed domain.
+    /// outside the reference signed domain.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_state_bits: Option<i64>,
     /// A disabled/missing default decoder used the configured fallback. Verified
@@ -97,7 +97,7 @@ pub struct EntityRecord {
     #[serde(default)]
     pub attempts: Vec<EntityComponentAttempt>,
     pub end_bit: i64,
-    /// Tail bits supplied by the native padding convention, absent from the payload.
+    /// Tail bits supplied by the reference padding convention, absent from the payload.
     #[serde(default)]
     pub padded_bits: usize,
     pub stop: EntityViewStop,

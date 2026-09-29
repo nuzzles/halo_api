@@ -2,25 +2,25 @@
 use super::Cursor;
 use super::{Reader, control};
 pub(crate) use crate::theater::film::chunks::replication::components::views::{
-    DecodedFrameView, FrameViewStop, NativeControlEntry,
+    ControlEntry, DecodedFrameView, FrameViewStop,
 };
 
-/// Native view A reader with signed positions and wrapping source guards.
-/// Invalid negative reads retain the native panic behavior.
+/// Reference view A reader with signed positions and wrapping source guards.
+/// Invalid negative reads retain the reference panic behavior.
 pub(crate) fn decode_message_view_signed(data: &[u8], bit: i64) -> DecodedFrameView {
     decode_view(data, bit, false, None, None)
 }
 
-/// Native control view with the caller's film precision and lazy native widths.
+/// Reference control view with the caller's film precision and lazy reference widths.
 pub(crate) fn decode_control_view_contextual(
     data: &[u8],
     bit: i64,
     encoding: Option<&super::PositionEncoding>,
-    context: Option<&crate::theater::parser::v41::NativeReaderContext>,
+    context: Option<&crate::theater::parser::v41::ReaderContext>,
 ) -> DecodedFrameView {
-    let default_encoding = crate::theater::parser::v41::NativeScanProfile::default()
+    let default_encoding = crate::theater::parser::v41::ScanProfile::default()
         .component_encoding()
-        .expect("default native widths");
+        .expect("default reference widths");
     decode_view(
         data,
         bit,
@@ -35,7 +35,7 @@ fn decode_view(
     bit: i64,
     is_control: bool,
     encoding: Option<&super::PositionEncoding>,
-    context: Option<&crate::theater::parser::v41::NativeReaderContext>,
+    context: Option<&crate::theater::parser::v41::ReaderContext>,
 ) -> DecodedFrameView {
     let mut out = DecodedFrameView {
         control_entries: Vec::new(),
@@ -49,7 +49,7 @@ fn decode_view(
     };
     let cursor = Cursor::guarded(data, bit);
     let mut r = Reader {
-        native_widths: context.map(|c| super::NativeComponentWidths {
+        reference_widths: context.map(|c| super::ComponentWidths {
             movement: &c.profile.movement,
             mpp: c.profile.mpp,
             maximum: u64::MAX,
@@ -95,7 +95,7 @@ fn walk<'a>(
     r: &mut Reader<'a>,
     is_control: bool,
     kinds: &mut Vec<u8>,
-    entries: &mut Vec<NativeControlEntry>,
+    entries: &mut Vec<ControlEntry>,
     data: &'a [u8],
 ) -> Option<FrameViewStop> {
     for record in 0..64 {
@@ -119,7 +119,7 @@ fn walk<'a>(
         let baseline = r.gated_value("control.baseline", 7, true)?.map(|v| v as u8);
         r.guard_source("control.index_and_input", 6)?;
         let index = r.r("control.index", 5)? as u8;
-        let mut entry = NativeControlEntry {
+        let mut entry = ControlEntry {
             start_bit,
             end_bit: start_bit,
             index,
@@ -135,7 +135,7 @@ fn walk<'a>(
             entry.short = r
                 .gated_value("control.input.second_field", 2, true)?
                 .map(|v| v as u8);
-            // Native consumeCoupleAnalogique guards both scalars and the
+            // Reference consumeCoupleAnalogique guards both scalars and the
             // following presence bit as one 13-bit group.
             r.guard_source("control.input.analog_group", 13)?;
             entry.analog = Some([
@@ -151,7 +151,7 @@ fn walk<'a>(
             if r.bit("control.input.alternate")? {
                 entry.flags = Some(r.r("control.input.flags", 5)? as u8);
             }
-            // The native action decoder guards its first bit, then uses the
+            // The reference action decoder guards its first bit, then uses the
             // zero-tail reader and checks the consumed endpoint afterward.
             r.guard_source("control.actions.first_bit", 1)?;
             r.cursor = Cursor::signed(data, r.cursor.position, None);

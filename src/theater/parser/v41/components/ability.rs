@@ -1,11 +1,11 @@
 //! Predicted ability and non-predicted grapple body grammar.
 use super::Reader;
-use crate::theater::parser::v41::{FilmComponentObservation, NativeAbilityNonPredictedState};
+use crate::theater::parser::v41::{AbilityNonPredictedState, FilmComponentObservation};
 
 pub(super) fn predicted(r: &mut Reader<'_>) -> Option<bool> {
     let tag = r.r("tag", 2)?;
     r.publish_movement(
-        crate::theater::parser::v41::NativeMovementComponent::ActiveAbility,
+        crate::theater::parser::v41::MovementComponent::ActiveAbility,
         vec![tag],
     );
     let mut sub = 0;
@@ -36,14 +36,14 @@ pub(super) fn predicted(r: &mut Reader<'_>) -> Option<bool> {
 }
 
 pub(super) fn non_predicted(r: &mut Reader<'_>, level: u32) -> Option<bool> {
-    let mut state = NativeAbilityNonPredictedState {
+    let mut state = AbilityNonPredictedState {
         tag: r.r("tag", 2)? as u32,
         ..Default::default()
     };
     let status = (|| {
         if state.tag == 3 && r.position_encoding.is_none_or(|e| e.bodies.ability_anchor) {
             let Some(widths) = r
-                .native_widths
+                .reference_widths
                 .map(|w| w.movement.world_object.axis_bits)
                 .or_else(|| {
                     r.position_encoding
@@ -61,7 +61,7 @@ pub(super) fn non_predicted(r: &mut Reader<'_>, level: u32) -> Option<bool> {
                 return Some(false);
             }
             for (i, raw) in widths.into_iter().enumerate() {
-                let width = r.native_position_width(raw, "world axes")?;
+                let width = r.reference_position_width(raw, "world axes")?;
                 state.position[i] = r.r_wide(&format!("position[{i}]"), width)? as u32;
             }
             state.mid = r.r("mid", 7)? as u32;
@@ -101,7 +101,7 @@ pub(super) fn mobility(r: &mut Reader<'_>) -> Option<bool> {
     let flag = r.bit("flag")?;
     r.publish_mobility([active, flag]);
     r.publish_movement(
-        crate::theater::parser::v41::NativeMovementComponent::Mobility,
+        crate::theater::parser::v41::MovementComponent::Mobility,
         vec![u64::from(active), u64::from(flag)],
     );
     if !active {
@@ -143,7 +143,7 @@ fn mobility_extra(r: &mut Reader<'_>, width: i64) -> Option<bool> {
         "biped-mobility-action-component",
         width,
         false,
-        Some(crate::theater::parser::v41::NativeWidthPurpose::MobilityExtra),
+        Some(crate::theater::parser::v41::WidthPurpose::MobilityExtra),
         ("mobility.skipped", "mobility.skipped_tail"),
     )?;
     Some(true)

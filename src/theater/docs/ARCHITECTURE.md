@@ -2,7 +2,7 @@
 
 The public flow remains `Film::parse(chunks)` followed by `film.resolve()`.
 `theater` reexports only `Film` and `ResolvedFilm`; `film`, `parser`, and `resolved`
-are public modules. Native models are declared in `film`, while decoder types and
+are public modules. Reference models are declared in `film`, while decoder types and
 functions are internal.
 
 ```text
@@ -32,14 +32,14 @@ theater/
       mod.rs               V41ChunkReader and kind-specific reader types
       replication.rs       Ordered packet decoding and grammar-state updates
       registry.rs          v41 registry layout
-      player_slot.rs       Bounded roster/bootstrap slot grammar
+      config/              Private fixed and runtime decoding configuration
       components/          v41 component decoding
       summary.rs           v41 summary decoding
   resolved/
     mod.rs                 ResolvedFilm construction and shared indexes
     identity.rs            Identity models and player lookup
-    interpretation/        Bootstrap searches and interpretation evidence
-      packet/              Packet-head, pickup, damage and teleport projections
+    interpretation/        Bootstrap searches, player-slot traces and interpretation evidence
+      packet/              Packet-head, pickup, damage, zoom and teleport decoders/models
     events.rs              Source references, provenance and event indexing
     query.rs               Filters and query indexes
     world.rs               Entity/component models and state accumulation
@@ -57,11 +57,11 @@ the next chunk is one. Additional registry chunks are errors.
 
 The version reader retains grammar state for subsequent records. That state is
 internal decoding context, not a replay world. Resolution separately accumulates
-world state and preserves references to the native recording.
+world state and preserves references to the reference recording.
 
-Packet framing and bounded player-slot reading belong to decoding. Interpretation
-may reuse those readers at a selected candidate boundary, but the native parser
-does not use bootstrap candidate searches to choose an unknown layout.
+Packet framing belongs to structural decoding. Bounded player-slot reads and packet
+projections run only during resolution at selected candidate boundaries. The film
+parser does not use bootstrap searches to choose an unknown layout.
 
 ## Migration
 
@@ -76,7 +76,7 @@ through its section submodules). For example:
 
 `Film::parse`, `film.resolve()`, and the resolved query/playback methods keep their
 signatures. No second public parsing API or compatibility parser facade is added.
-Native model serialization and packet/source ordering are unchanged by these
+Canonical model serialization and packet/source ordering are unchanged by these
 module moves. Source retention and decoding limits are described in FORMAT.md.
 
 The Halo client keeps the manifest's JSON-only chunk entry as

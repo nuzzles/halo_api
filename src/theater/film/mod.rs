@@ -1,7 +1,7 @@
-//! Native film input and the three source-preserving recording sections.
+//! Canonical film input and the three source-preserving recording sections.
 use serde::{Deserialize, Serialize};
 
-/// Structurally decoded native recording. Interpretations belong to ResolvedFilm.
+/// Structurally decoded canonical recording. Interpretations belong to ResolvedFilm.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Film {
     pub registry: RegistryChunk,
@@ -72,15 +72,14 @@ mod tests;
 
 pub mod chunks;
 pub use chunks::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
-    NativeRegistrySlotRead,
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
+    RegistrySlotRead,
 };
 pub use chunks::replication::{
-    AnticipatedDeclaration, DatumEntry, DatumTable, FilmPacket, FilmPacketBody, FilmPacketHeader,
-    FilmViewAdmission, FramePacket, KillEventFields, NativeContinuationStatePolicy,
-    NativeEventContinuation, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
-    NativeEventListRead, NativeEventListStop, NativeEventRecord, NativeNewBindingRefusal,
-    NativeRosterRead, ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
+    AnticipatedDeclaration, ContinuationStatePolicy, DatumEntry, DatumTable, EventContinuation,
+    EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
+    FilmPacket, FilmPacketBody, FilmPacketHeader, FilmViewAdmission, FramePacket, KillEventFields,
+    NewBindingRefusal, ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
     RecordHeader, RecordKind, ReplicationStream, RosterEntry, RosterReport, RosterUpdate,
     SourceSpan,
 };
@@ -90,27 +89,20 @@ pub use chunks::{
 };
 
 pub use chunks::replication::components::{
-    BindingOrigin, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan, EntityRecord,
-    EntityViewStop, FilmComponentObservation, FilmMapBounds, FilmMppWidths, FilmQuantizationRange,
-    FilmReadDiagnostics, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop,
-    KeyframeComponentSpan, KeyframeRecord, KeyframeStop, NativeAbilityNonPredictedState,
-    NativeActionBlock, NativeCamoState, NativeControlEntry, NativeEquipmentCreationField,
-    NativeEquipmentField, NativeGameEngineField, NativeKeyframeLayout, NativeKeyframeTable,
-    NativeManagedObjectField, NativeManagedPropertyField, NativeMovementComponent,
-    NativeMovementProfile, NativeMppField, NativeNavpointField, NativeObjectParentState,
-    NativeObjectiveField, NativePlayerStateField, NativePrecisionDescriptor, NativeProbeComponent,
-    NativeReadOperation, NativeReadRefusal, NativeScanGrammar, NativeScanProfile,
-    NativeSharedWidths, NativeUnitReference, NativeUnitReferenceKind, NativeWidthAdjustment,
-    NativeWidthPurpose, NativeWidthRefusal, UnitEquipmentEntry, UnitEquipmentRead,
+    AbilityNonPredictedState, ActionBlock, BindingOrigin, CamoState, ControlEntry,
+    DecodedFrameView, EntityComponentAttempt, EntityComponentSpan, EntityRecord, EntityViewStop,
+    EquipmentCreationField, EquipmentField, FilmComponentObservation, FilmReadDiagnostics,
+    FrameViewStop, GameEngineField, KeyframeChainAttempt, KeyframeChainStop, KeyframeComponentSpan,
+    KeyframeRecord, KeyframeStop, KeyframeTable, ManagedObjectField, ManagedPropertyField,
+    MovementComponent, MppField, NavpointField, ObjectParentState, ObjectiveField,
+    PlayerStateField, ProbeComponent, ReadOperation, ReadRefusal, UnitEquipmentEntry,
+    UnitEquipmentRead, UnitReference, UnitReferenceKind, WidthAdjustment, WidthPurpose,
+    WidthRefusal,
 };
 
-pub use chunks::replication::player::{
-    NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTableShorts, PlayerTableSlot,
-};
+pub use chunks::replication::player::{PlayerTableShorts, PlayerTableSlot};
 
-pub use chunks::replication::components::position::NativePositionKind;
-
-pub use chunks::replication::components::read_diagnostics::ChainInferenceOutcome;
+pub use chunks::replication::components::position::PositionKind;
 
 pub use chunks::replication::components::field::ComponentField;
 

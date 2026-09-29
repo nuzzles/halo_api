@@ -1,4 +1,4 @@
-//! Native source loading: compressed or clear chunks, indexed once in source order.
+//! Reference source loading: compressed or clear chunks, indexed once in source order.
 use flate2::{Decompress, FlushDecompress, Status};
 use std::borrow::Cow;
 
@@ -16,7 +16,7 @@ fn zlib_header(raw: &[u8]) -> Result<usize, FilmInflateError> {
         return Err(FilmInflateError::Header);
     }
     if h[1] & 32 != 0 {
-        // Native NewReader uses a nil dictionary, whose Adler checksum is one.
+        // Reference NewReader uses a nil dictionary, whose Adler checksum is one.
         if raw.get(2..6) != Some(&[0, 0, 0, 1]) {
             return Err(FilmInflateError::Header);
         }
@@ -63,7 +63,7 @@ fn inflate_body(raw: &[u8], header: usize) -> (Vec<u8>, Result<(), FilmInflateEr
     (out, result)
 }
 
-/// Native `Inflate`: clear/invalid input passes through; a damaged stream keeps
+/// Reference `Inflate`: clear/invalid input passes through; a damaged stream keeps
 /// its decompressed prefix, unless it produced no bytes, in which case raw input survives.
 pub fn inflate_film_chunk(raw: &[u8]) -> Cow<'_, [u8]> {
     if raw.len() < 2 || raw[0] != 0x78 {
@@ -116,7 +116,7 @@ impl FilmSource {
     }
 }
 
-pub(crate) fn native_packet_bytes(
+pub(crate) fn read_packet_headers(
     data: &[u8],
     chunk_index: i32,
 ) -> Vec<crate::theater::film::FilmPacketHeader> {

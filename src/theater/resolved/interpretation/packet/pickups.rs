@@ -1,18 +1,40 @@
-//! Native pickup attempts, including refusal points and synthetic zero-tail reads.
-use super::{BipedPickupStats, bits::Cursor, event_heads};
-pub(crate) use crate::theater::resolved::interpretation::packet::native_pickups::{
-    NativePickupOutcome, NativePickupRead,
-};
+//! Reference data models.
+use super::*;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum PickupOutcome {
+    EmptyList,
+    BoardVehicle,
+    OtherType,
+    NoReference,
+    NoCatalog,
+    Accepted,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct PickupRead {
+    pub config: bool,
+    pub more: bool,
+    pub kind: u8,
+    pub references: Vec<EventReference>,
+    pub class: Option<u8>,
+    pub catalog_id: Option<u32>,
+    pub more_events: Option<bool>,
+    pub source_bits: usize,
+    pub end_bit: usize,
+    pub padded_bits: usize,
+    pub outcome: PickupOutcome,
+}
+
+use super::super::head_observations::BipedPickupStats;
+use super::event_heads;
+use crate::theater::parser::bits::Cursor;
 
 /// Reproduce decodeBipedPickup, including its early returns. Direct decoding
 /// updates only decoder counters; packet, published and off-band counts belong
 /// to the scanner. The config bit is not an admission gate here.
-pub(crate) fn decode_native_biped_pickup(
-    data: &[u8],
-    stats: &mut BipedPickupStats,
-) -> NativePickupRead {
+pub(super) fn decode_biped_pickup(data: &[u8], stats: &mut BipedPickupStats) -> PickupRead {
     let mut r = Cursor::new_padded(data, 0);
-    let mut out = NativePickupRead {
+    let mut out = PickupRead {
         config: r.bit().unwrap(),
         more: r.bit().unwrap(),
         kind: r.read(7).unwrap() as u8,
@@ -23,28 +45,28 @@ pub(crate) fn decode_native_biped_pickup(
         source_bits: data.len() * 8,
         end_bit: 9,
         padded_bits: 0,
-        outcome: NativePickupOutcome::EmptyList,
+        outcome: PickupOutcome::EmptyList,
     };
     out.outcome = (|| {
         if !out.more {
-            return NativePickupOutcome::EmptyList;
+            return PickupOutcome::EmptyList;
         }
         match out.kind {
             9 => stats.type_9 += 1,
             8 => {
                 stats.type_8 += 1;
-                return NativePickupOutcome::BoardVehicle;
+                return PickupOutcome::BoardVehicle;
             }
             _ => {
                 stats.other_type += 1;
-                return NativePickupOutcome::OtherType;
+                return PickupOutcome::OtherType;
             }
         }
         out.references
             .push(event_heads::reference(&mut r, 2).unwrap());
         if out.references[0].value.is_none() {
             stats.refused_no_ref += 1;
-            return NativePickupOutcome::NoReference;
+            return PickupOutcome::NoReference;
         }
         for domain in [8, 7] {
             out.references
@@ -56,14 +78,14 @@ pub(crate) fn decode_native_biped_pickup(
         out.class = Some(r.read(3).unwrap() as u8);
         if !r.bit().unwrap() {
             stats.refused_no_catalog += 1;
-            return NativePickupOutcome::NoCatalog;
+            return PickupOutcome::NoCatalog;
         }
         out.catalog_id = Some(r.read(32).unwrap() as u32);
         out.more_events = Some(r.bit().unwrap());
         if out.more_events == Some(true) {
             stats.multi_event += 1;
         }
-        NativePickupOutcome::Accepted
+        PickupOutcome::Accepted
     })();
     out.end_bit = r.position;
     out.padded_bits = r.position.saturating_sub(out.source_bits);
@@ -71,8 +93,8 @@ pub(crate) fn decode_native_biped_pickup(
 }
 
 #[cfg(test)]
-impl NativePickupRead {
-    /// Native slot, which may include synthetic tail bits. This is not a player identity.
+impl PickupRead {
+    /// Reference slot, which may include synthetic tail bits. This is not a player identity.
     pub fn slot(&self) -> Option<u32> {
         Some(512 + self.references.first()?.value.as_ref()?.index)
     }

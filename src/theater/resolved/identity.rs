@@ -76,7 +76,7 @@ pub struct PlayerTable {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeIdentityValue {
+pub enum IdentityValue {
     /// Bits in wire order. No endian conversion or signed interpretation.
     Scalar(u64),
     /// Fixed-width byte field, including bytes after a string terminator.
@@ -88,21 +88,21 @@ pub enum NativeIdentityValue {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeIdentityField {
+pub struct IdentityField {
     pub name: String,
     /// Bootstrap-relative source coordinates, including the one-bit shift.
     pub bit: usize,
     pub bits: usize,
-    pub value: NativeIdentityValue,
+    pub value: IdentityValue,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeIdentityRead {
+pub struct IdentityRead {
     /// Complete legacy projection only; partial reads live in fields.
     pub identity: Option<FilmIdentity>,
     pub error: Option<String>,
     pub source_bits: usize,
     /// Selected by the reference's bounded HI_ search, not a proven boundary.
     pub build_anchor_byte: Option<usize>,
-    pub fields: Vec<NativeIdentityField>,
+    pub fields: Vec<IdentityField>,
 }

@@ -34,7 +34,7 @@ an error; callers still use the single `Film::parse` entry point. `Film` has exa
 three fields:
 
 - `registry`: component definitions and the complete bootstrap chunk.
-- `replication`: ordered replication chunks and native packet reads.
+- `replication`: ordered replication chunks and reference packet reads.
 - `summaries`: ordered summary chunks and recorded summary entries.
 
 Each section preserves original input, decompressed bytes, source positions and
@@ -44,10 +44,10 @@ A registry-only film is accepted with empty replication and summary sections. Un
 
 `film.resolve()` borrows this recording, builds chronological query indexes and
 playback state, and performs explicitly labeled interpretation. It exposes those
-results through `interpretations()` without changing the native recording.
+results through `interpretations()` without changing the reference recording.
 
-Only `Film` and `ResolvedFilm` are reexported at `theater`'s root. Input and native
-container and native field models live under `film`; decoded registry, replication,
+Only `Film` and `ResolvedFilm` are reexported at `theater`'s root. Input and reference
+container and reference field models live under `film`; decoded registry, replication,
 component and summary models have dedicated submodules. `parser` remains a public
 module with internal implementation modules. Resolved models and interpretation
 evidence live under `resolved`.

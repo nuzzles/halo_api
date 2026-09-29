@@ -1,4 +1,4 @@
-//! Native long fire-event records and modal aim grammar (LevelUp fire_events.go).
+//! Reference long fire-event records and modal aim grammar (LevelUp fire_events.go).
 //! A fire event does not establish a hit or identify a victim.
 use super::bits::{Bits, Cursor};
 use serde::{Deserialize, Serialize};
@@ -32,33 +32,33 @@ pub struct FireUnitReference {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum NativeFireAimMethod {
+pub enum FireAimMethod {
     /// Historical exports only. New reads use the grammar-derived modal offset.
     Fixed,
     Modal,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeFireAimAttempt {
-    pub method: NativeFireAimMethod,
+pub struct FireAimAttempt {
+    pub method: FireAimMethod,
     pub bit: usize,
     pub locator_padding_bits: usize,
     pub raw: Option<u32>,
     pub accepted: bool,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeFireField {
+pub struct FireField {
     pub field: super::ComponentField,
     pub opaque: bool,
     pub padded_bits: usize,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum NativeFireHeaderStop {
+pub enum FireHeaderStop {
     Read,
     Truncated,
     OtherHead,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum NativeFireAimStop {
+pub enum FireAimStop {
     NoHeader,
     Short,
     TimestampBlock,
@@ -67,28 +67,31 @@ pub enum NativeFireAimStop {
     Located,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct NativeFireRead {
+pub struct FireRead {
     pub source_bits: usize,
     pub end_bit: usize,
     pub header_end_bit: Option<usize>,
-    pub header_stop: NativeFireHeaderStop,
-    pub aim_stop: NativeFireAimStop,
+    pub header_stop: FireHeaderStop,
+    pub aim_stop: FireAimStop,
     /// None means a refused/truncated head, never an absent recorded action.
     pub event: Option<FilmFireEvent>,
     /// Ordered header/count/aim fields. Unparsed body bytes stay in the source.
-    pub fields: Vec<NativeFireField>,
-    pub aim_attempts: Vec<NativeFireAimAttempt>,
+    pub fields: Vec<FireField>,
+    pub aim_attempts: Vec<FireAimAttempt>,
 }
 struct FireReader<'a> {
     cursor: Cursor<'a>,
     source_bits: usize,
-    fields: Vec<NativeFireField>,
+    fields: Vec<FireField>,
 }
 impl FireReader<'_> {
     fn read(&mut self, name: &str, width: usize, opaque: bool) -> u64 {
         let bit = self.cursor.position;
-        let raw = self.cursor.read(width).expect("native zero-tail fire read");
-        self.fields.push(NativeFireField {
+        let raw = self
+            .cursor
+            .read(width)
+            .expect("reference zero-tail fire read");
+        self.fields.push(FireField {
             field: super::ComponentField {
                 name: name.into(),
                 bit: bit as i64,
@@ -124,18 +127,18 @@ impl FireReader<'_> {
 
 /// Read the actual optional-field grammar, retaining refusals and zero-tail
 /// provenance. The modal aim locator is accepted only within recorded bytes.
-pub(crate) fn read_native_fire_event(payload: &[u8]) -> NativeFireRead {
+pub(crate) fn read_fire_event(payload: &[u8]) -> FireRead {
     let mut r = FireReader {
         cursor: Cursor::new_padded(payload, 0),
         source_bits: payload.len() * 8,
         fields: vec![],
     };
-    let mut out = NativeFireRead {
+    let mut out = FireRead {
         source_bits: r.source_bits,
         end_bit: 0,
         header_end_bit: None,
-        header_stop: NativeFireHeaderStop::Truncated,
-        aim_stop: NativeFireAimStop::NoHeader,
+        header_stop: FireHeaderStop::Truncated,
+        aim_stop: FireAimStop::NoHeader,
         event: None,
         fields: vec![],
         aim_attempts: vec![],
@@ -147,7 +150,7 @@ pub(crate) fn read_native_fire_event(payload: &[u8]) -> NativeFireRead {
     let more = r.bit("header.continuation");
     let kind = r.read("header.code", 7, false);
     if !more || kind != 36 {
-        out.header_stop = NativeFireHeaderStop::OtherHead;
+        out.header_stop = FireHeaderStop::OtherHead;
     } else {
         let unit = r.reference("unit", true);
         r.reference("reference1", false);
@@ -173,7 +176,7 @@ pub(crate) fn read_native_fire_event(payload: &[u8]) -> NativeFireRead {
         r.read("head.flags_ij", 2, true);
         out.header_end_bit = Some(r.cursor.position);
         if r.cursor.position <= r.source_bits {
-            out.header_stop = NativeFireHeaderStop::Read;
+            out.header_stop = FireHeaderStop::Read;
             let mut event = FilmFireEvent {
                 chunk: 0,
                 packet_index: 0,
@@ -189,12 +192,12 @@ pub(crate) fn read_native_fire_event(payload: &[u8]) -> NativeFireRead {
                 aim: [0.; 3],
             };
             out.aim_stop = locate_after_header(&mut r, short, bloc);
-            if out.aim_stop == NativeFireAimStop::Located {
+            if out.aim_stop == FireAimStop::Located {
                 let bit = r.cursor.position + 2;
                 let raw = Bits(payload).read(bit, 30).map(|v| v as u32);
                 let aim = raw.and_then(fire_aim_vector);
-                out.aim_attempts.push(NativeFireAimAttempt {
-                    method: NativeFireAimMethod::Modal,
+                out.aim_attempts.push(FireAimAttempt {
+                    method: FireAimMethod::Modal,
                     bit,
                     locator_padding_bits: 0,
                     raw,
@@ -216,15 +219,15 @@ pub(crate) fn read_native_fire_event(payload: &[u8]) -> NativeFireRead {
     out.fields = r.fields;
     out
 }
-fn locate_after_header(r: &mut FireReader<'_>, short: bool, bloc: bool) -> NativeFireAimStop {
+fn locate_after_header(r: &mut FireReader<'_>, short: bool, bloc: bool) -> FireAimStop {
     if bloc {
         r.read("body.bloc.flag", 1, true);
         if r.bit("body.bloc.timestamp") {
-            return NativeFireAimStop::TimestampBlock;
+            return FireAimStop::TimestampBlock;
         }
     }
     if short {
-        return NativeFireAimStop::Short;
+        return FireAimStop::Short;
     }
     let (mut targets, mut components) = (0, 0);
     if !r.bit("body.counts.empty") {
@@ -242,15 +245,15 @@ fn locate_after_header(r: &mut FireReader<'_>, short: bool, bloc: bool) -> Nativ
         }
     }
     if targets != 0 || components != 0 {
-        NativeFireAimStop::NonModal
+        FireAimStop::NonModal
     } else if r.cursor.position > r.source_bits {
-        NativeFireAimStop::TruncatedCounts
+        FireAimStop::TruncatedCounts
     } else {
-        NativeFireAimStop::Located
+        FireAimStop::Located
     }
 }
 
-// Preserve the pinned native float32 fused arithmetic and float64 square root.
+// Preserve the pinned reference float32 fused arithmetic and float64 square root.
 fn fire_aim_vector(code: u32) -> Option<[f32; 3]> {
     let face = code / 178_956_970;
     let rem = code % 178_956_970;

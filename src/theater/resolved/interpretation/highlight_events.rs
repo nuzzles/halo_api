@@ -1,10 +1,10 @@
-//! v41 native highlight scanning, independent of the source-attributed summary decoder.
+//! v41 reference highlight scanning, independent of the source-attributed summary decoder.
 use super::bits::Bits;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct NativeHighlightEvent {
+pub struct HighlightEvent {
     #[serde(rename = "XUID")]
     pub xuid: u64,
     pub gamertag: String,
@@ -18,17 +18,17 @@ pub struct NativeHighlightEvent {
 
 /// One tail-marker candidate considered by the reference scanner.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeHighlightTailRead {
+pub struct HighlightTailRead {
     pub marker_bit: usize,
     /// None when fewer than 480 bits separate this marker from the identity.
     pub data_start_bit: Option<usize>,
     /// All 60 bytes, including uninterpreted bytes and raw UTF16 string tails.
     pub data: Option<Vec<u8>>,
-    pub event: Option<NativeHighlightEvent>,
+    pub event: Option<HighlightEvent>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeHighlightIdentityRead {
-    /// The native objective reader only accepts the FIRST tail marker. Raw
+pub struct HighlightIdentityRead {
+    /// The reference objective reader only accepts the FIRST tail marker. Raw
     /// slot/team bytes are exposed without player resolution or action inference.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub objective_fields: Option<super::ObjectiveFooterEvent>,
@@ -37,20 +37,20 @@ pub struct NativeHighlightIdentityRead {
     pub prefix: u8,
     pub window_end_bit: usize,
     /// Stops at the first accepted layout. Rejected tails remain in scan order.
-    pub tails: Vec<NativeHighlightTailRead>,
+    pub tails: Vec<HighlightTailRead>,
 }
 /// Reference highlight scanning on an already decompressed v41 source chunk.
 /// Identity/tail matches are heuristic and do not partition the source chunk.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NativeHighlightScan {
+pub struct HighlightScan {
     pub source_bits: usize,
-    pub identities: Vec<NativeHighlightIdentityRead>,
-    pub events: Vec<NativeHighlightEvent>,
+    pub identities: Vec<HighlightIdentityRead>,
+    pub events: Vec<HighlightEvent>,
 }
-pub(crate) fn read_native_v41_highlights(data: &[u8]) -> NativeHighlightScan {
+pub(crate) fn read_v41_highlights(data: &[u8]) -> HighlightScan {
     let mut identities = Vec::new();
     let events = scan_highlights(data, Some(&mut identities));
-    NativeHighlightScan {
+    HighlightScan {
         source_bits: data.len() * 8,
         identities,
         events,
@@ -59,8 +59,8 @@ pub(crate) fn read_native_v41_highlights(data: &[u8]) -> NativeHighlightScan {
 
 fn scan_highlights(
     data: &[u8],
-    mut trace: Option<&mut Vec<NativeHighlightIdentityRead>>,
-) -> Vec<NativeHighlightEvent> {
+    mut trace: Option<&mut Vec<HighlightIdentityRead>>,
+) -> Vec<HighlightEvent> {
     let bits = Bits(data);
     let mut out = Vec::new();
     if bits.len() < 80 {
@@ -78,7 +78,7 @@ fn scan_highlights(
             continue;
         }
         let end = start.saturating_add(20_000).min(bits.len());
-        let mut identity = trace.as_ref().map(|_| NativeHighlightIdentityRead {
+        let mut identity = trace.as_ref().map(|_| HighlightIdentityRead {
             objective_fields: None,
             identity_bit: start,
             xuid,
@@ -97,7 +97,7 @@ fn scan_highlights(
             }
             if tail < start + 480 {
                 if let Some(identity) = &mut identity {
-                    identity.tails.push(NativeHighlightTailRead {
+                    identity.tails.push(HighlightTailRead {
                         marker_bit: tail,
                         data_start_bit: None,
                         data: None,
@@ -111,9 +111,10 @@ fn scan_highlights(
             let event = decode_event(&block, xuid);
             if let Some(identity) = &mut identity {
                 if identity.tails.is_empty() {
-                    identity.objective_fields = super::decode_objective_footer_block(&block, xuid);
+                    identity.objective_fields =
+                        super::objective_extract::decode_objective_footer_block(&block, xuid);
                 }
-                identity.tails.push(NativeHighlightTailRead {
+                identity.tails.push(HighlightTailRead {
                     marker_bit: tail,
                     data_start_bit: Some(tail - 480),
                     data: Some(block.to_vec()),
@@ -132,7 +133,7 @@ fn scan_highlights(
     out
 }
 
-fn decode_event(b: &[u8; 60], xuid: u64) -> Option<NativeHighlightEvent> {
+fn decode_event(b: &[u8; 60], xuid: u64) -> Option<HighlightEvent> {
     let hint = b[47];
     let is_medal = b[55] == 1;
     let event_type = if is_medal
@@ -170,7 +171,7 @@ fn decode_event(b: &[u8; 60], xuid: u64) -> Option<NativeHighlightEvent> {
         .map(|c| u16::from_le_bytes([c[0], c[1]]))
         .take_while(|&c| c != 0)
         .collect();
-    Some(NativeHighlightEvent {
+    Some(HighlightEvent {
         xuid,
         gamertag: String::from_utf16_lossy(&name),
         event_type: event_type.into(),

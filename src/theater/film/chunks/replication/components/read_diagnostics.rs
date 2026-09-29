@@ -1,8 +1,8 @@
-//! Native data models.
+//! Reference data models.
 use std::collections::BTreeMap;
-/// Native movement-state callback identifiers; velocity uses the native hook label.
+/// Reference movement-state callback identifiers; velocity uses the reference hook label.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeMovementComponent {
+pub enum MovementComponent {
     #[serde(rename = "unit-crouch-component")]
     Crouch,
     #[serde(rename = "biped-slide-component")]
@@ -19,9 +19,9 @@ pub enum NativeMovementComponent {
     ActiveAbility,
 }
 
-/// Native default-state callback fields; labels match the reference reader.
+/// Reference default-state callback fields; labels match the reference reader.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeMppField {
+pub enum MppField {
     #[serde(rename = "mpp-word9")]
     Word9,
     #[serde(rename = "mpp-word32")]
@@ -32,18 +32,18 @@ pub enum NativeMppField {
     TailName,
 }
 
-/// Native default-state callback fields; labels match the reference reader.
+/// Reference default-state callback fields; labels match the reference reader.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeEquipmentCreationField {
+pub enum EquipmentCreationField {
     #[serde(rename = "entity-ref-index5")]
     Reference,
     #[serde(rename = "ability-enabled-id")]
     AbilityId,
 }
 
-/// Native equipment-state callback fields, identified by registry name.
+/// Reference equipment-state callback fields, identified by registry name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeEquipmentField {
+pub enum EquipmentField {
     #[serde(rename = "equipment-deployed-component")]
     Deployed,
     #[serde(rename = "equipment-activated-component")]
@@ -58,9 +58,9 @@ pub enum NativeEquipmentField {
     Charges,
 }
 
-/// Native probe fields. Values remain raw; their gameplay meaning is not inferred.
+/// Reference probe fields. Values remain raw; their gameplay meaning is not inferred.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeProbeComponent {
+pub enum ProbeComponent {
     #[serde(rename = "managed-object-networked-splash-message-static-component")]
     SplashStatic,
     #[serde(rename = "managed-object-networked-splash-message-dynamic-component")]
@@ -71,9 +71,9 @@ pub enum NativeProbeComponent {
     ManagedObjectPropertyName,
 }
 
-/// Native player-state callback fields, identified by registry name.
+/// Reference player-state callback fields, identified by registry name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativePlayerStateField {
+pub enum PlayerStateField {
     #[serde(rename = "player-soft-kill-timer-component")]
     SoftKill,
     #[serde(rename = "player-target-tracking-detection-component")]
@@ -98,9 +98,9 @@ pub enum NativePlayerStateField {
     MalleableProperties,
 }
 
-/// Native game-engine callback fields, identified by registry name.
+/// Reference game-engine callback fields, identified by registry name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeGameEngineField {
+pub enum GameEngineField {
     #[serde(rename = "game-engine-current-state-component")]
     State,
     #[serde(rename = "game-engine-current-round-component")]
@@ -113,9 +113,9 @@ pub enum NativeGameEngineField {
     RoundConditions,
 }
 
-/// Stable native ManagedObject hook fields, serialized using registry names.
+/// Stable reference ManagedObject hook fields, serialized using registry names.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeManagedObjectField {
+pub enum ManagedObjectField {
     #[serde(rename = "managed-object-boundary-visibility-component")]
     BoundaryVisibility,
     #[serde(rename = "managed-object-boundary-color-component")]
@@ -124,9 +124,9 @@ pub enum NativeManagedObjectField {
     Rtpc,
 }
 
-/// Stable native Navpoint hook fields, serialized using registry names.
+/// Stable reference Navpoint hook fields, serialized using registry names.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeNavpointField {
+pub enum NavpointField {
     #[serde(rename = "managed-navpoint-radial-progress")]
     RadialProgress,
     #[serde(rename = "managed-navpoint-manual-timer-initial-duration-component")]
@@ -135,9 +135,9 @@ pub enum NativeNavpointField {
     ManualTimerCurrent,
 }
 
-/// Stable native Objective hook fields, serialized using registry names.
+/// Stable reference Objective hook fields, serialized using registry names.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeObjectiveField {
+pub enum ObjectiveField {
     #[serde(rename = "managed-objective-timers-component")]
     Timers,
     #[serde(rename = "managed-objective-object-reference-component")]
@@ -152,19 +152,19 @@ pub enum NativeObjectiveField {
     State,
 }
 
-/// Stable native ManagedProperty hook fields, serialized using registry names.
+/// Stable reference ManagedProperty hook fields, serialized using registry names.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeManagedPropertyField {
+pub enum ManagedPropertyField {
     #[serde(rename = "managed-object-property-component")]
     Scalar,
     #[serde(rename = "managed-object-player-masked-property-component")]
     PerPlayer,
 }
 
-/// Positional object-parent fields from the native observer; no parent identity
+/// Positional object-parent fields from the reference observer; no parent identity
 /// is inferred from the quantized word or free-reference index.
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeObjectParentState {
+pub struct ObjectParentState {
     pub archetype: u32,
     pub parameter: u32,
     pub start_bit: i64,
@@ -190,7 +190,7 @@ pub struct NativeObjectParentState {
 
 /// Raw camo hook state; absent gated values are distinct from zero.
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeCamoState {
+pub struct CamoState {
     pub state: u8,
     pub flag0: bool,
     pub flag1: Option<bool>,
@@ -198,13 +198,13 @@ pub struct NativeCamoState {
     pub sub: [Option<u16>; 6],
 }
 
-/// Native non-predicted ability publication, including unsupported body prefixes.
+/// Reference non-predicted ability publication, including unsupported body prefixes.
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeAbilityNonPredictedState {
+pub struct AbilityNonPredictedState {
     pub tag: u32,
     pub body_walked: bool,
     pub body_ok: bool,
-    /// None is native Inner=-1: the body was not read.
+    /// None is reference Inner=-1: the body was not read.
     pub inner: Option<u32>,
     pub flags: u32,
     pub position: [u32; 3],
@@ -216,70 +216,70 @@ pub struct NativeAbilityNonPredictedState {
     pub tail: u32,
 }
 
-/// Native component-hook publications. Values describe reads, including padded
+/// Reference component-hook publications. Values describe reads, including padded
 /// and speculative attempts; they are not evidence of accepted gameplay events.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum FilmComponentObservation {
-    /// IEEE-754 bits retain exact native values, including non-finite values.
+    /// IEEE-754 bits retain exact reference values, including non-finite values.
     Position {
-        position_kind: crate::theater::film::NativePositionKind,
+        position_kind: crate::theater::film::PositionKind,
         vector_bits: [u32; 3],
         bit: i64,
         slot: u32,
     },
     UnitReference {
-        reference: crate::theater::film::NativeUnitReference,
+        reference: crate::theater::film::UnitReference,
     },
     MovementState {
-        component: NativeMovementComponent,
+        component: MovementComponent,
         slot: u32,
         values: Vec<u64>,
     },
     Mpp {
-        field: NativeMppField,
+        field: MppField,
         value: u64,
         present: bool,
     },
     EquipmentCreation {
-        field: NativeEquipmentCreationField,
+        field: EquipmentCreationField,
         value: u64,
         present: bool,
     },
     EquipmentState {
-        field: NativeEquipmentField,
+        field: EquipmentField,
         value: u64,
         present: bool,
     },
     Probe {
         archetype: u32,
-        component: NativeProbeComponent,
+        component: ProbeComponent,
         values: Vec<u64>,
     },
     PlayerState {
-        field: NativePlayerStateField,
+        field: PlayerStateField,
         values: Vec<u64>,
         present: bool,
     },
     GameEngine {
-        field: NativeGameEngineField,
+        field: GameEngineField,
         values: Vec<u64>,
         present: bool,
     },
     ManagedObject {
-        field: NativeManagedObjectField,
+        field: ManagedObjectField,
         values: Vec<u64>,
     },
     Navpoint {
-        field: NativeNavpointField,
+        field: NavpointField,
         values: Vec<u64>,
     },
     Objective {
-        field: NativeObjectiveField,
+        field: ObjectiveField,
         values: Vec<u64>,
     },
     ManagedProperty {
-        field: NativeManagedPropertyField,
+        field: ManagedPropertyField,
         values: Vec<u64>,
     },
 
@@ -288,13 +288,13 @@ pub enum FilmComponentObservation {
         id_low: u32,
     },
     ObjectParent {
-        state: Box<NativeObjectParentState>,
+        state: Box<ObjectParentState>,
     },
     UnitEquipment {
         state: Box<crate::theater::film::UnitEquipmentRead>,
     },
     CamoState {
-        state: Box<NativeCamoState>,
+        state: Box<CamoState>,
     },
     SpartanAbility {
         tag: u64,
@@ -303,7 +303,7 @@ pub enum FilmComponentObservation {
         has_reference: bool,
     },
     AbilityNonPredicted {
-        state: Box<NativeAbilityNonPredictedState>,
+        state: Box<AbilityNonPredictedState>,
     },
     AbilityEnergy {
         mask: u32,
@@ -342,39 +342,39 @@ pub enum FilmComponentObservation {
     },
 }
 
-/// Signed native skip that rewinds, compacts padding, or cannot fit the source-offset model.
+/// Signed reference skip that rewinds, compacts padding, or cannot fit the source-offset model.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeWidthAdjustment {
+pub struct WidthAdjustment {
     pub component: String,
     pub calibrated: bool,
     /// None denotes the legacy calibrated/stub override. Mobility and New-record
     /// tails are identified separately rather than reported as unported stubs.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub purpose: Option<NativeWidthPurpose>,
+    pub purpose: Option<WidthPurpose>,
     pub bit: i64,
     pub width: i64,
     /// For a compact positive skip, source bits retained as scalar fields. The
     /// remaining skipped bits are synthetic zero padding, not recorded data.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub retained_bits: Option<usize>,
-    /// Checked address-sized projection of the native wrapping target. None
+    /// Checked address-sized projection of the reference wrapping target. None
     /// includes negative targets and positive targets outside usize; use
-    /// `native_end_bit` rather than treating this as missing native data.
+    /// `reference_end_bit` rather than treating this as missing reference data.
     pub end_bit: Option<usize>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeWidthPurpose {
+pub enum WidthPurpose {
     RecordPrefix,
     MobilityExtra,
     NewRecordTail,
     NewRecordDefault,
 }
 
-/// A native field was reached, but its raw width exceeds this reader's address
+/// A reference field was reached, but its raw width exceeds this reader's address
 /// domain. This is a decoder limitation, not evidence of missing source bytes.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeWidthRefusal {
+pub struct WidthRefusal {
     pub field: String,
     pub bit: i64,
     pub raw_width: u64,
@@ -382,51 +382,43 @@ pub struct NativeWidthRefusal {
 }
 
 /// A bounded operation refused before advancing the cursor. This is not a
-/// fabricated zero-valued field and does not include native padded reads.
+/// fabricated zero-valued field and does not include reference padded reads.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct NativeReadRefusal {
+pub struct ReadRefusal {
     pub field: String,
     pub bit: i64,
     pub width: u64,
     pub source_bits: usize,
-    pub operation: NativeReadOperation,
+    pub operation: ReadOperation,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum NativeReadOperation {
+pub enum ReadOperation {
     /// The scalar cursor returned None (source bounds or bounded width/domain).
     Scalar,
-    /// The native grouped source guard failed before any member was read.
+    /// The reference grouped source guard failed before any member was read.
     GroupGuard,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct FilmReadDiagnostics {
-    /// Native NEW binding refusals, in read order; parsed records are retained.
+    /// Reference NEW binding refusals, in read order; parsed records are retained.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub new_binding_refusals: Vec<crate::theater::film::NativeNewBindingRefusal>,
-    /// Reads assuming vehicle object byte +0x818 is set, as in LevelUp d61443e.
-    /// This byte is runtime state, not a recorded presence bit. Counts include
-    /// refused attempts and are kept separate from raw component fields.
-    #[serde(skip_serializing_if = "is_zero_count")]
-    pub vehicle_type_physics_assumed: u64,
+    pub new_binding_refusals: Vec<crate::theater::film::NewBindingRefusal>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub read_refusals: Vec<NativeReadRefusal>,
+    pub read_refusals: Vec<ReadRefusal>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub width_refusals: Vec<NativeWidthRefusal>,
+    pub width_refusals: Vec<WidthRefusal>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub width_adjustments: Vec<NativeWidthAdjustment>,
-    pub repaired_records: u64,
-    pub validated_resyncs: u64,
+    pub width_adjustments: Vec<WidthAdjustment>,
     pub component_widths: BTreeMap<String, BTreeMap<usize, u64>>,
-    pub chain_outcomes: BTreeMap<crate::theater::film::ChainInferenceOutcome, u64>,
     pub rejected_unbound: u64,
     pub rejected_other_view: u64,
     pub anticipated_bindings: BTreeMap<u32, u64>,
-    /// Native Observation.IndexAbsolus; -1 denotes the build's default region.
+    /// Reference Observation.IndexAbsolus; -1 denotes the build's default region.
     pub absolute_indices: BTreeMap<i32, u64>,
-    /// Ordered native MobilityActionHook flags, including failed/speculative reads.
+    /// Ordered reference MobilityActionHook flags, including failed/speculative reads.
     /// Unlike movement-state capture, this historical hook is never suppressed.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub mobility_actions: Vec<[bool; 2]>,
@@ -435,22 +427,9 @@ pub struct FilmReadDiagnostics {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mobility_offsets: Option<Vec<usize>>,
     /// Ordered publications from named component hooks. Position, movement and
-    /// reference callbacks obey their independent native capture policies.
+    /// reference callbacks obey their independent reference capture policies.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub component_observations: Vec<FilmComponentObservation>,
-}
-
-fn is_zero_count(value: &u64) -> bool {
-    *value == 0
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
-pub enum ChainInferenceOutcome {
-    Immediate,
-    Deep,
-    NoConfirmation,
-    BudgetExhausted,
-    Ambiguous,
 }
 
 impl FilmReadDiagnostics {
@@ -507,15 +486,11 @@ impl FilmReadDiagnostics {
 
     pub(crate) fn is_empty(&self) -> bool {
         self.new_binding_refusals.is_empty()
-            && self.vehicle_type_physics_assumed == 0
             && self.read_refusals.is_empty()
             && self.width_refusals.is_empty()
             && self.width_adjustments.is_empty()
-            && self.repaired_records == 0
-            && self.validated_resyncs == 0
             && self.component_widths.is_empty()
             && self.absolute_indices.is_empty()
-            && self.chain_outcomes.is_empty()
             && self.rejected_unbound == 0
             && self.rejected_other_view == 0
             && self.anticipated_bindings.is_empty()
@@ -525,22 +500,16 @@ impl FilmReadDiagnostics {
     pub(crate) fn merge(&mut self, other: &Self) {
         self.new_binding_refusals
             .extend_from_slice(&other.new_binding_refusals);
-        self.vehicle_type_physics_assumed += other.vehicle_type_physics_assumed;
         self.read_refusals.extend_from_slice(&other.read_refusals);
         self.width_refusals.extend_from_slice(&other.width_refusals);
         self.width_adjustments
             .extend_from_slice(&other.width_adjustments);
         self.merge_publications(other);
-        self.repaired_records += other.repaired_records;
-        self.validated_resyncs += other.validated_resyncs;
         for (name, widths) in &other.component_widths {
             let target = self.component_widths.entry(name.clone()).or_default();
             for (&width, &count) in widths {
                 *target.entry(width).or_default() += count;
             }
-        }
-        for (outcome, count) in &other.chain_outcomes {
-            *self.chain_outcomes.entry(outcome.clone()).or_default() += count;
         }
         self.rejected_unbound += other.rejected_unbound;
         self.rejected_other_view += other.rejected_other_view;

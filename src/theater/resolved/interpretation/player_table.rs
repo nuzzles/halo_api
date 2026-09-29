@@ -11,7 +11,7 @@ fn printable(s: &str) -> bool {
     s.len() >= 3 && s.bytes().all(|c| (32..=126).contains(&c))
 }
 fn vacant(d: &[u8], p: usize) -> bool {
-    // Deliberately matches the native prefix predicate: it does not inspect the
+    // Deliberately matches the reference prefix predicate: it does not inspect the
     // personalization body or require the entire vacant record in the buffer.
     if p.checked_add(VACANT_FIXED)
         .is_none_or(|end| end > d.len() * 8)
@@ -156,7 +156,7 @@ pub(crate) fn decode_player_table(d: &[u8], identity: &FilmIdentity) -> PlayerTa
     out
 }
 
+use super::player_slot::*;
 use crate::theater::film::PlayerTableSlot;
-use crate::theater::parser::v41::player_slot::*;
 
 use crate::theater::resolved::identity::{PlayerTable, PlayerTableError, PlayerTableReport};

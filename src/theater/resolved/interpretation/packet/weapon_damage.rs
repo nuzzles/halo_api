@@ -1,32 +1,46 @@
-//! Direct native damage projection and raw read trace, without actor resolution.
-use super::*;
-pub(crate) use crate::theater::resolved::interpretation::packet::native_weapon_damage::{
-    NativeWeaponDamageField, NativeWeaponDamageRead,
-};
-use crate::theater::resolved::interpretation::packet::{WeaponDamage, WeaponDamageRead};
+//! Reference data models.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct WeaponDamageField {
+    pub field: ComponentField,
+    /// The reference skips these bits; retaining their raw value does not
+    /// assign semantics to the field. Offset names follow the reference reader.
+    pub opaque: bool,
+    /// Synthetic zero tail bits included in this field's raw value.
+    pub padded_bits: usize,
+}
 
-/// Native weapon-statistics damage reader. This is independent of the generic
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct WeaponDamageTrace {
+    pub source_bits: usize,
+    pub end_bit: usize,
+    pub padding_bits: usize,
+    /// None retains a refused fixed-prefix/type read, not an absent action.
+    pub read: Option<WeaponDamageRead>,
+    pub fields: Vec<WeaponDamageField>,
+}
+
+use super::{ComponentField, WeaponDamage, WeaponDamageRead};
+use crate::theater::parser::bits;
+
+/// Reference weapon-statistics damage reader. This is independent of the generic
 /// event-list layout reader: its endpoint must not substitute for a terminated
 /// list. Source/body references, generations, unknown fields and quantized
-/// values remain available even when the native projection omits them.
-pub(crate) fn read_native_weapon_damage(
-    payload: &[u8],
-    timestamp_us: u64,
-) -> NativeWeaponDamageRead {
+/// values remain available even when the reference projection omits them.
+pub(crate) fn read_weapon_damage(payload: &[u8], timestamp_us: u64) -> WeaponDamageTrace {
     decode_with_fields(payload, timestamp_us, true)
 }
 
 struct DamageReader<'a> {
     cursor: bits::Cursor<'a>,
     source_bits: usize,
-    fields: Option<Vec<NativeWeaponDamageField>>,
+    fields: Option<Vec<WeaponDamageField>>,
 }
 impl DamageReader<'_> {
     fn read(&mut self, name: &str, width: usize, opaque: bool) -> Option<u64> {
         let start = self.cursor.position;
         let raw = self.cursor.read(width)?;
         if let Some(fields) = &mut self.fields {
-            fields.push(NativeWeaponDamageField {
+            fields.push(WeaponDamageField {
                 field: ComponentField {
                     name: name.into(),
                     bit: start as i64,
@@ -63,7 +77,7 @@ pub(super) fn decode_with_fields(
     payload: &[u8],
     timestamp_us: u64,
     retain: bool,
-) -> NativeWeaponDamageRead {
+) -> WeaponDamageTrace {
     let mut r = DamageReader {
         cursor: bits::Cursor::new_padded(payload, 0),
         source_bits: payload.len() * 8,
@@ -200,7 +214,7 @@ pub(super) fn decode_with_fields(
             padding_bits: r.cursor.position.saturating_sub(r.source_bits),
         })
     })();
-    NativeWeaponDamageRead {
+    WeaponDamageTrace {
         source_bits: r.source_bits,
         end_bit: r.cursor.position,
         padding_bits: r.cursor.position.saturating_sub(r.source_bits),
@@ -210,5 +224,10 @@ pub(super) fn decode_with_fields(
 }
 
 #[cfg(test)]
-#[path = "native_weapon_damage_tests.rs"]
+#[path = "weapon_damage_tests.rs"]
 pub(crate) mod tests;
+
+#[cfg(test)]
+pub(crate) fn decode_weapon_damage(payload: &[u8], timestamp_us: u64) -> Option<WeaponDamageRead> {
+    decode_with_fields(payload, timestamp_us, false).read
+}

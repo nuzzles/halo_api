@@ -1,4 +1,4 @@
-//! Native footer objective interactions and capture-burst event extraction.
+//! Reference footer objective interactions and capture-burst event extraction.
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -10,7 +10,7 @@ pub struct ObjectiveFooterEvent {
     #[serde(rename = "XUID")]
     pub xuid: u64,
 }
-/// Native v41 mode-footer fields from one complete 60-byte block. Slot and
+/// Reference v41 mode-footer fields from one complete 60-byte block. Slot and
 /// team are raw byte values; no roster, team mapping or objective inference.
 pub(crate) fn decode_objective_footer_block(
     block: &[u8; 60],

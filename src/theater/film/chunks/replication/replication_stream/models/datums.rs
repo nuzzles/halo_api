@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use std::collections::BTreeMap;
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct DatumEntry {

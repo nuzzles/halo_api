@@ -1,11 +1,11 @@
 //! Shared actor/input grammar from LevelUp's unit_control.go.
-//! Native action fields and source ranges follow d61443e bloc_action.go.
+//! Reference action fields and source ranges follow d61443e bloc_action.go.
 use super::Reader;
-pub(crate) use crate::theater::film::chunks::replication::components::control::NativeActionBlock;
+pub(crate) use crate::theater::film::chunks::replication::components::control::ActionBlock;
 
 /// Internal outcome distinct from a failed primitive read (`None`).
 pub(super) enum ActionBlockRead {
-    Decoded(NativeActionBlock),
+    Decoded(ActionBlock),
     MissingPositionContext,
 }
 
@@ -32,7 +32,7 @@ pub(super) fn actor_control(r: &mut Reader<'_>, level: u32) -> Option<bool> {
 
 pub(super) fn actions(r: &mut Reader<'_>) -> Option<ActionBlockRead> {
     let start_bit = r.cursor.position;
-    let mut block = NativeActionBlock {
+    let mut block = ActionBlock {
         start_bit,
         end_bit: start_bit,
         present: r.bit("actions.present")?,
@@ -47,7 +47,7 @@ pub(super) fn actions(r: &mut Reader<'_>) -> Option<ActionBlockRead> {
     Some(ActionBlockRead::Decoded(block))
 }
 
-fn action_body(r: &mut Reader<'_>, block: &mut NativeActionBlock) -> Option<bool> {
+fn action_body(r: &mut Reader<'_>, block: &mut ActionBlock) -> Option<bool> {
     let mut a = [0; 2];
     let mut b = [0; 2];
     if r.bit("actions.a.present")? {

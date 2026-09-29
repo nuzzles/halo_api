@@ -1,4 +1,4 @@
-//! Native Theater recording and resolved query/playback API.
+//! Canonical Theater recording and resolved query/playback API.
 //!
 //! ```no_run
 //! use halo_api::theater::{Film, film::{FilmChunk, ChunkKind}};

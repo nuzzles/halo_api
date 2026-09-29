@@ -1,4 +1,4 @@
-//! Native default production frame policy: message/entity/control classes and world admission.
+//! Reference default production frame policy: message/entity/control classes and world admission.
 use super::*;
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::production_frame::{
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame,
@@ -18,7 +18,7 @@ impl ProductionAdmissionDiagnostics {
 }
 
 pub(crate) struct ProductionReaderContext<'a> {
-    pub reader: Option<&'a NativeReaderContext>,
+    pub reader: Option<&'a ReaderContext>,
     pub preamble_bits: i64,
 }
 
@@ -75,9 +75,9 @@ pub(crate) fn decode_production_frame_contextual(
                 name: "record.prefix".into(),
                 bit: out.end_bit,
                 width: 32,
-                // Native skips this prefix. Retaining its available bits must
+                // Reference skips this prefix. Retaining its available bits must
                 // not introduce a read/panic before a prefix-repaired header.
-                raw: native_bits_tolerant(data, out.end_bit, 32),
+                raw: reference_bits_tolerant(data, out.end_bit, 32),
             });
         }
         let header_bit = out
@@ -136,7 +136,7 @@ pub(crate) fn decode_production_frame_contextual(
             match record.header.kind {
                 RecordKind::New => {
                     if let Some(refusal) =
-                        world.bind_native_new(id, record.archetype?, record.header.start_bit)
+                        world.bind_reference_new(id, record.archetype?, record.header.start_bit)
                     {
                         out.header_diagnostics.new_binding_refusals.push(refusal);
                     }

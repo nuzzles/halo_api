@@ -1,16 +1,16 @@
-//! Native data models.
-use crate::theater::film::*;
+//! Reference data models.
+use super::values::FilmQuantizationRange;
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct NativePrecisionDescriptor {
+pub struct PrecisionDescriptor {
     pub index_bits: u64,
     pub axis_bits: [u64; 3],
     pub region: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct NativeMovementProfile {
-    pub traversal: NativePrecisionDescriptor,
-    pub world_object: NativePrecisionDescriptor,
+pub struct MovementProfile {
+    pub traversal: PrecisionDescriptor,
+    pub world_object: PrecisionDescriptor,
     pub delta_quantum: f32,
     pub delta_axis_width: u64,
     pub range: FilmQuantizationRange,
@@ -20,22 +20,22 @@ pub struct NativeMovementProfile {
     pub mobility_action_extra_bits: i64,
 }
 
-impl Default for NativeMovementProfile {
+impl Default for MovementProfile {
     fn default() -> Self {
         Self {
-            traversal: NativePrecisionDescriptor {
+            traversal: PrecisionDescriptor {
                 index_bits: 1,
                 axis_bits: [6; 3],
                 region: 0,
             },
-            world_object: NativePrecisionDescriptor {
+            world_object: PrecisionDescriptor {
                 index_bits: 1,
                 axis_bits: [13, 13, 14],
                 region: 0,
             },
-            delta_quantum: super::profile_values::NATIVE_DELTA_QUANTUM,
+            delta_quantum: crate::theater::parser::v41::REFERENCE_DELTA_QUANTUM,
             delta_axis_width: 14,
-            range: super::profile_values::NATIVE_QUANT_RANGE_CE_BIPED,
+            range: crate::theater::parser::v41::REFERENCE_QUANT_RANGE_CE_BIPED,
             full_precision: false,
             delta_has_handle_tail: false,
             calibrated_skip: false,

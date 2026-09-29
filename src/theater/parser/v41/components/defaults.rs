@@ -79,7 +79,7 @@ fn projectile_position(r: &mut Reader<'_>) -> Option<bool> {
 /// Entries in LevelUp's defaultStateDeserByTI (plus its special biped path).
 /// Verified zero-bit stubs are intentionally absent: TraverseEntity applies its
 /// configured fallback width to them even though their ordinary default is empty.
-pub(super) fn has_native_deserializer(ti: u32) -> bool {
+pub(super) fn has_reference_deserializer(ti: u32) -> bool {
     matches!(
         ti,
         3 | 5
@@ -200,8 +200,8 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                 } else {
                     0
                 };
-                r.publish_reference(crate::theater::parser::v41::NativeUnitReference {
-                    kind: crate::theater::parser::v41::NativeUnitReferenceKind::GatedWord32,
+                r.publish_reference(crate::theater::parser::v41::UnitReference {
+                    kind: crate::theater::parser::v41::UnitReferenceKind::GatedWord32,
                     start_bit,
                     end_bit: r.cursor.position,
                     present,
@@ -225,13 +225,13 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                     let value = r.gated_value("player_index", 5, false)?;
                     publish_creation(
                         r,
-                        crate::theater::parser::v41::NativeEquipmentCreationField::Reference,
+                        crate::theater::parser::v41::EquipmentCreationField::Reference,
                         value,
                     );
                     let value = r.gated_value("ability_enabled_id", 32, true)?;
                     publish_creation(
                         r,
-                        crate::theater::parser::v41::NativeEquipmentCreationField::AbilityId,
+                        crate::theater::parser::v41::EquipmentCreationField::AbilityId,
                         value,
                     );
                 }
@@ -259,7 +259,7 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
                     let value = r.gated_value("player_index", 5, false)?;
                     publish_creation(
                         r,
-                        crate::theater::parser::v41::NativeEquipmentCreationField::Reference,
+                        crate::theater::parser::v41::EquipmentCreationField::Reference,
                         value,
                     );
                 }
@@ -274,7 +274,7 @@ pub(super) fn state(r: &mut Reader<'_>, ti: u32, widths: [usize; 2]) -> Option<b
 
 fn publish_mpp(
     r: &mut Reader<'_>,
-    field: crate::theater::parser::v41::NativeMppField,
+    field: crate::theater::parser::v41::MppField,
     value: Option<u64>,
 ) {
     r.publish_component(crate::theater::parser::v41::FilmComponentObservation::Mpp {
@@ -286,7 +286,7 @@ fn publish_mpp(
 
 fn publish_creation(
     r: &mut Reader<'_>,
-    field: crate::theater::parser::v41::NativeEquipmentCreationField,
+    field: crate::theater::parser::v41::EquipmentCreationField,
     value: Option<u64>,
 ) {
     r.publish_component(
@@ -298,7 +298,7 @@ fn publish_creation(
     );
 }
 
-/// Native MPP widths are signed profile values cast to uint at the read. Admit
+/// Reference MPP widths are signed profile values cast to uint at the read. Admit
 /// each only when reached, retaining that unsigned value on a domain refusal.
 fn mpp_field(r: &mut Reader<'_>, lead: bool, fallback: usize) -> Option<u64> {
     let (name, field) = if lead {
@@ -306,13 +306,13 @@ fn mpp_field(r: &mut Reader<'_>, lead: bool, fallback: usize) -> Option<u64> {
     } else {
         ("mpp.index", "MPP index")
     };
-    if let Some(native) = r.native_widths {
+    if let Some(native) = r.reference_widths {
         let raw = if lead {
             native.mpp.lead
         } else {
             native.mpp.index
         } as u64;
-        let width = r.native_width_limited(raw, field, u64::MAX)?;
+        let width = r.reference_width_limited(raw, field, u64::MAX)?;
         r.r_wide(name, width)
     } else {
         r.r(name, fallback)
@@ -321,23 +321,15 @@ fn mpp_field(r: &mut Reader<'_>, lead: bool, fallback: usize) -> Option<u64> {
 
 fn multiplayer(r: &mut Reader<'_>, widths: [usize; 2]) -> Option<()> {
     let value = mpp_field(r, true, widths[0])?;
-    publish_mpp(
-        r,
-        crate::theater::parser::v41::NativeMppField::Word9,
-        Some(value),
-    );
+    publish_mpp(r, crate::theater::parser::v41::MppField::Word9, Some(value));
     let value = r.r("mpp.object_tag", 32)?;
     publish_mpp(
         r,
-        crate::theater::parser::v41::NativeMppField::Word32,
+        crate::theater::parser::v41::MppField::Word32,
         Some(value),
     );
     let value = r.gated_value("mpp.variant_name", 32, false)?;
-    publish_mpp(
-        r,
-        crate::theater::parser::v41::NativeMppField::VariantName,
-        value,
-    );
+    publish_mpp(r, crate::theater::parser::v41::MppField::VariantName, value);
     r.gate("mpp.value18", 18, true)?;
     r.gate("mpp.value13", 13, true)?;
     r.r("mpp.kind", 2)?;
@@ -358,17 +350,13 @@ fn multiplayer(r: &mut Reader<'_>, widths: [usize; 2]) -> Option<()> {
         let value = r.r("mpp.tail.name", 32)?;
         publish_mpp(
             r,
-            crate::theater::parser::v41::NativeMppField::TailName,
+            crate::theater::parser::v41::MppField::TailName,
             Some(value),
         );
         r.optional_word_reference("mpp.tail.reference", true)?;
         r.r("mpp.tail.fraction", 14)?;
     } else {
-        publish_mpp(
-            r,
-            crate::theater::parser::v41::NativeMppField::TailName,
-            None,
-        );
+        publish_mpp(r, crate::theater::parser::v41::MppField::TailName, None);
     }
     Some(())
 }

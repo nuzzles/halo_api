@@ -1,8 +1,8 @@
 //! Bootstrap entity-component registry.
 
 pub(crate) use crate::theater::film::chunks::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
-    NativeRegistrySlotRead,
+    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryBlockRead,
+    RegistrySlotRead,
 };
 use std::collections::HashSet;
 use std::sync::{Mutex, OnceLock};
@@ -45,7 +45,7 @@ const REGISTRY_SLOT_SIZE: usize = 260;
 const REGISTRY_BLOCK_SLOTS: usize = 64;
 const REGISTRY_BLOCK_SIZE: usize = REGISTRY_SLOT_SIZE * REGISTRY_BLOCK_SLOTS;
 
-/// Parse already-inflated registry bytes with the native error/truncation contract.
+/// Parse already-inflated registry bytes with the reference error/truncation contract.
 /// Short input succeeds with an empty truncated registry, rather than becoming
 /// indistinguishable from a compressed-input error. This does not enable decoding
 /// earlier film major versions.
@@ -96,10 +96,10 @@ fn registry_looks_compressed(data: &[u8]) -> bool {
 
 fn parse_registry_with_trace(
     data: &[u8],
-    mut trace: Option<&mut Vec<NativeRegistryBlockRead>>,
+    mut trace: Option<&mut Vec<RegistryBlockRead>>,
 ) -> Option<FilmRegistry> {
     if registry_looks_compressed(data) {
-        return None; // Compatibility API intentionally loses the native error category.
+        return None; // Compatibility API intentionally loses the reference error category.
     }
     let header = data.get(..8)?;
     let mut registry = FilmRegistry {
@@ -122,7 +122,7 @@ fn parse_registry_with_trace(
         for (slot_index, slot) in block.as_chunks::<REGISTRY_SLOT_SIZE>().0.iter().enumerate() {
             let name = registry_slot_name(slot);
             if trace.is_some() {
-                slot_reads.push(NativeRegistrySlotRead {
+                slot_reads.push(RegistrySlotRead {
                     index: slot_index,
                     start_byte: start_byte + slot_index * REGISTRY_SLOT_SIZE,
                     name_bytes: slot[..256].to_vec(),
@@ -144,7 +144,7 @@ fn parse_registry_with_trace(
             .position(|b| *b != 0)
             .map(|offset| start_byte + tail_start + offset);
         if let Some(trace) = &mut trace {
-            trace.push(NativeRegistryBlockRead {
+            trace.push(RegistryBlockRead {
                 index,
                 start_byte,
                 end_byte: start_byte + REGISTRY_BLOCK_SIZE,

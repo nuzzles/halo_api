@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use crate::theater::film::*;
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ProductionEntityEnd {
@@ -13,7 +13,7 @@ pub enum ProductionEntityEnd {
     RecordLimit,
 }
 
-/// Native entity-view admission counters for one production frame.
+/// Reference entity-view admission counters for one production frame.
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct ProductionAdmissionDiagnostics {
     pub rejected_unbound: u64,
@@ -23,10 +23,10 @@ pub struct ProductionAdmissionDiagnostics {
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct ProductionFrame {
-    /// Failed native header reads and refused NEW binding mutations.
+    /// Failed reference header reads and refused NEW binding mutations.
     #[serde(default, skip_serializing_if = "FilmReadDiagnostics::is_empty")]
     pub header_diagnostics: FilmReadDiagnostics,
-    /// None in older exports that did not retain these native counters.
+    /// None in older exports that did not retain these reference counters.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub admission_diagnostics: Option<ProductionAdmissionDiagnostics>,
     /// Optional 32-bit per-record words, in read order, including End/rejected
@@ -40,7 +40,7 @@ pub struct ProductionFrame {
     pub entity_end: Option<ProductionEntityEnd>,
     pub views_completed: usize,
     pub end_bit: i64,
-    /// Number of synthetic zero tail bits consumed by the native reader.
+    /// Number of synthetic zero tail bits consumed by the reference reader.
     #[serde(default)]
     pub padded_bits: usize,
 }

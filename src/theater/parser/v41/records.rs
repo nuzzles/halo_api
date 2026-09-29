@@ -57,12 +57,12 @@ pub(crate) fn decode_header_cursor(
     })
 }
 
-/// Decode a native header with signed cursor coordinates and native ID widths.
+/// Decode a reference header with signed cursor coordinates and reference ID widths.
 /// Nonpositive ID widths omit the low-ID read. Positive widths use the pinned
-/// 64-bit width domain, independent of the host pointer size. A native read
+/// 64-bit width domain, independent of the host pointer size. A reference read
 /// panic leaves the caller's reader at its reached position.
-pub(crate) fn decode_native_record_header(
-    reader: &mut super::NativeFilmBits<'_>,
+pub(crate) fn decode_reference_record_header(
+    reader: &mut super::FilmBits<'_>,
     width: i64,
     base: u32,
 ) -> RecordHeader {
@@ -103,11 +103,11 @@ pub(crate) fn decode_frame_header_signed(
     encoding: &super::FrameEncoding,
 ) -> Option<RecordHeader> {
     let width = encoding
-        .native_id_low_bits
+        .reference_id_low_bits
         .or_else(|| i64::try_from(encoding.ids.low_bits).ok())?;
-    let mut reader = super::NativeFilmBits::new(data);
+    let mut reader = super::FilmBits::new(data);
     reader.set_position(bit);
-    Some(decode_native_record_header(
+    Some(decode_reference_record_header(
         &mut reader,
         width,
         encoding.ids.base,

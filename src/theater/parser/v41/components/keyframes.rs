@@ -7,12 +7,12 @@ pub(crate) use crate::theater::film::chunks::replication::components::keyframes:
 };
 use crate::theater::parser::v41::FilmRegistry;
 
-pub(crate) fn decode_native_keyframe_record_contextual(
+pub(crate) fn decode_reference_keyframe_record_contextual(
     data: &[u8],
     bit: impl TryInto<i64>,
     registry: &FilmRegistry,
     encoding: &super::FrameEncoding,
-    context: Option<&crate::theater::parser::v41::NativeReaderContext>,
+    context: Option<&crate::theater::parser::v41::ReaderContext>,
 ) -> Option<KeyframeRecord> {
     decode_keyframe_record_inner(
         data,
@@ -45,7 +45,7 @@ fn decode_keyframe_record_inner(
         Option<&super::ComponentWidthOverrides>,
         bool,
         super::KeyframeLayout,
-        Option<&crate::theater::parser::v41::NativeReaderContext>,
+        Option<&crate::theater::parser::v41::ReaderContext>,
     ),
 ) -> Option<KeyframeRecord> {
     let (padded, capture_encoding, component_widths, simulation_complete, layout, context) = policy;
@@ -65,7 +65,7 @@ fn decode_keyframe_record_inner(
         return None;
     }
     let mut r = Reader {
-        native_widths: context.map(|c| super::NativeComponentWidths {
+        reference_widths: context.map(|c| super::ComponentWidths {
             movement: &c.profile.movement,
             mpp: c.profile.mpp,
             maximum: u64::MAX,
@@ -79,7 +79,7 @@ fn decode_keyframe_record_inner(
         position_start: 0,
         position_slot: 0,
         position_fallback: false,
-        // The native full-state walker creates a fresh reader without setting a slot.
+        // The reference full-state walker creates a fresh reader without setting a slot.
         movement_slot: Some(0),
         references: Vec::new(),
         diagnostics: Default::default(),
@@ -93,8 +93,8 @@ fn decode_keyframe_record_inner(
     };
     let (id, archetype) = if padded {
         let archetype =
-            crate::theater::parser::v41::native_bits_at(data, bit.wrapping_add(58), 6) as u32;
-        let id = crate::theater::parser::v41::native_bits_tolerant(data, bit, 32) as u32;
+            crate::theater::parser::v41::reference_bits_at(data, bit.wrapping_add(58), 6) as u32;
+        let id = crate::theater::parser::v41::reference_bits_tolerant(data, bit, 32) as u32;
         let mut remaining = header_bits.max(64);
         for (name, width) in [
             ("header.id", 32),
@@ -109,7 +109,7 @@ fn decode_keyframe_record_inner(
                     name: name.into(),
                     bit: r.cursor.position,
                     width: width as u64,
-                    raw: crate::theater::parser::v41::native_bits_tolerant(
+                    raw: crate::theater::parser::v41::reference_bits_tolerant(
                         data,
                         r.cursor.position,
                         width,
@@ -204,7 +204,7 @@ fn body(
     policy: (bool, Option<&super::ComponentWidthOverrides>, bool, u64),
 ) -> Option<KeyframeStop> {
     let (components, attempts) = outputs;
-    let (native_policy, component_widths, simulation_complete, size_word_bits) = policy;
+    let (reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
     // The writer omits n1, n2 and the entire body for this sentinel archetype.
     if ti == u32::MAX {
         return Some(KeyframeStop::Complete);
@@ -214,7 +214,7 @@ fn body(
     };
     let n1 = r.r_wide("default_guard", size_word_bits)? as u32 as i32;
     if n1 > 0 {
-        if defaults::has_native_deserializer(ti) && !defaults::state(r, ti, widths)? {
+        if defaults::has_reference_deserializer(ti) && !defaults::state(r, ti, widths)? {
             return Some(KeyframeStop::UnsupportedDefault);
         }
         if check {
@@ -226,7 +226,7 @@ fn body(
         return Some(KeyframeStop::Complete);
     }
     for (index, name) in arch.components.iter().enumerate() {
-        if name.is_empty() && !native_policy && component_widths.is_none() {
+        if name.is_empty() && !reference_policy && component_widths.is_none() {
             continue;
         }
         let start_bit = r.cursor.position;

@@ -63,11 +63,14 @@ pub(super) fn component(
         }
         "managed-object-property-name-component" => {
             let value = r.r("name", 32)?;
-            r.publish_component(crate::theater::parser::v41::FilmComponentObservation::Probe {
-                archetype,
-                component: crate::theater::parser::v41::NativeProbeComponent::ManagedObjectPropertyName,
-                values: vec![value],
-            });
+            r.publish_component(
+                crate::theater::parser::v41::FilmComponentObservation::Probe {
+                    archetype,
+                    component:
+                        crate::theater::parser::v41::ProbeComponent::ManagedObjectPropertyName,
+                    values: vec![value],
+                },
+            );
         }
         "managed-player-forge-weather-effect-overrides-component" => r.words("overrides", 2, 32)?,
         "player-power-frame-points-component" => r.words("points", 2, 16)?,
@@ -128,7 +131,7 @@ pub(super) fn component(
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::Probe {
                     archetype,
-                    component: crate::theater::parser::v41::NativeProbeComponent::SplashStatic,
+                    component: crate::theater::parser::v41::ProbeComponent::SplashStatic,
                     values: vec![value],
                 },
             );
@@ -215,8 +218,7 @@ pub(super) fn component(
             }
             r.publish_component(
                 crate::theater::parser::v41::FilmComponentObservation::PlayerState {
-                    field:
-                        crate::theater::parser::v41::NativePlayerStateField::DesiredRespawnLocation,
+                    field: crate::theater::parser::v41::PlayerStateField::DesiredRespawnLocation,
                     values,
                     present,
                 },

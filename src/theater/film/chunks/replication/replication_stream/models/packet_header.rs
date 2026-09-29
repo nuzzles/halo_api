@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 /// Original location in a decompressed chunk; bits are MSB-first and half-open.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SourceSpan {

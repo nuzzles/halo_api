@@ -16,8 +16,8 @@ recoverable from commit `7eb8e3c`; they are not part of the library API.
 
 | Layer | Checks | Evidence and limits |
 | --- | --- | --- |
-| Source/native structure | Original and decompressed bytes, packet order, fields, masks, terminal reads and source boundaries | Synthetic boundary cases and pinned reference outputs; unknown bytes remain retained |
-| Native readers | Continuation views, padding, position/profile context, packet heads and damage fields | Reference fixtures include accepted reads and negative/refused forms |
+| Source/reference structure | Original and decompressed bytes, packet order, fields, masks, terminal reads and source boundaries | Synthetic boundary cases and pinned reference outputs; unknown bytes remain retained |
+| Reference readers | Continuation views, padding, position/profile context, packet heads and damage fields | Reference fixtures include accepted reads and negative/refused forms |
 | Captured corpus | Reference frame-reader counts/end bits, source retention, registry size, summary timestamps and player links | 32 local v41 recordings; requires separately retained source recordings |
 | Resolution | Borrow identity, source references, chronological ties, generation/lifetime checks, filters and partial states | Independently authored decoded records, including cases that must not create entities |
 | Playback | Selected state, backward seeks, rewind and seek/sequential agreement | Resolution tests exercise the same timestamp through different playback paths |

@@ -8,17 +8,17 @@ use crate::theater::parser::v41::{FilmRegistry, RecordIdLayout, RecordKind, deco
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-/// Native New-record default routing and calibration widths. Neither skip is
+/// Reference New-record default routing and calibration widths. Neither skip is
 /// a component length; terminal bits apply only after a successful New body.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub(crate) struct NewRecordEncoding {
     pub deserialize_defaults: bool,
     pub fallback_default_bits: usize,
-    /// Raw native configuration, converted only if this New uses fallback state.
+    /// Raw reference configuration, converted only if this New uses fallback state.
     /// None preserves the checked legacy encoding contract.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub native_fallback_default_bits: Option<i64>,
+    pub reference_fallback_default_bits: Option<i64>,
     pub terminal_bits: usize,
 }
 impl Default for NewRecordEncoding {
@@ -26,7 +26,7 @@ impl Default for NewRecordEncoding {
         Self {
             deserialize_defaults: true,
             fallback_default_bits: 0,
-            native_fallback_default_bits: None,
+            reference_fallback_default_bits: None,
             terminal_bits: 0,
         }
     }
@@ -66,7 +66,7 @@ impl KeyframeLayout {
 pub(crate) struct FrameEncoding {
     #[serde(default, skip_serializing_if = "KeyframeLayout::is_default")]
     pub keyframe_layout: KeyframeLayout,
-    /// Explicit inherited simulation-state gate for configured native readers. None
+    /// Explicit inherited simulation-state gate for configured reference readers. None
     /// preserves the legacy convenience API's completed-body policy.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub keyframe_simulation_complete: Option<bool>,
@@ -79,11 +79,11 @@ pub(crate) struct FrameEncoding {
     pub new_record: NewRecordEncoding,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position_capture: Option<crate::theater::parser::v41::PositionCaptureEncoding>,
-    /// Original signed native ID width; admitted only after a non-End prefix.
-    /// None uses ids.low_bits. Native readers still use wrapping slot arithmetic;
+    /// Original signed reference ID width; admitted only after a non-End prefix.
+    /// None uses ids.low_bits. Reference readers still use wrapping slot arithmetic;
     /// the public bounded header reader retains its checked contract.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub native_id_low_bits: Option<i64>,
+    pub reference_id_low_bits: Option<i64>,
     pub ids: RecordIdLayout,
     pub mpp_widths: [usize; 2],
     pub position: Option<PositionEncoding>,
@@ -93,7 +93,7 @@ pub(crate) struct FrameEncoding {
 
 impl FrameEncoding {
     pub(in crate::theater) fn valid(&self) -> bool {
-        (self.native_id_low_bits.is_some()
+        (self.reference_id_low_bits.is_some()
             || (self.ids.low_bits <= 30 && self.ids.base <= 0x3fff_ffff))
             && self.mpp_widths.iter().all(|w| (1..=32).contains(w))
             && self.position.as_ref().is_none_or(PositionEncoding::valid)
@@ -141,9 +141,9 @@ impl EntityBindings {
     }
 }
 
-/// Native locator trials suppress movement independently of position capture.
+/// Reference locator trials suppress movement independently of position capture.
 pub(crate) struct RecordCaptureSlots {
-    pub context: Option<crate::theater::parser::v41::NativeReaderContext>,
+    pub context: Option<crate::theater::parser::v41::ReaderContext>,
     pub movement: Option<u32>,
     pub position: Option<u32>,
 }
@@ -169,7 +169,7 @@ pub(crate) fn decode_entity_record_with_capture_slots(
     )
 }
 
-/// Native decodeDelta resolves an archetype by slot, after reading the baseline
+/// Reference decodeDelta resolves an archetype by slot, after reading the baseline
 /// selector. Other record entry points may require a generation admission check.
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn decode_entity_record_with_capture_slots_and_generation_policy(
@@ -188,14 +188,11 @@ pub(crate) fn decode_entity_record_with_capture_slots_and_generation_policy(
     }
     let capture_map = encoding.position_capture.as_ref().map(|c| c.map());
     let mut r = Reader {
-        native_widths: slots
-            .context
-            .as_ref()
-            .map(|c| super::NativeComponentWidths {
-                movement: &c.profile.movement,
-                mpp: c.profile.mpp,
-                maximum: u64::MAX,
-            }),
+        reference_widths: slots.context.as_ref().map(|c| super::ComponentWidths {
+            movement: &c.profile.movement,
+            mpp: c.profile.mpp,
+            maximum: u64::MAX,
+        }),
         width_error: None,
 
         live_grammar: slots.context.as_ref().map(|c| c.profile.grammar.clone()),
@@ -246,31 +243,31 @@ fn read_entity_record(
     registry: &FilmRegistry,
     encoding: &FrameEncoding,
     bindings: &EntityBindings,
-    native_policy: bool,
+    reference_policy: bool,
     policy: ComponentWalkPolicy<'_>,
 ) -> Option<EntityRecord> {
     r.fields.clear();
     if encoding.extra_fields {
-        // Native skips this prefix without reading it. Retain source fields
+        // Reference skips this prefix without reading it. Retain source fields
         // where addressable, but do not turn a negative skip into a read panic.
-        if native_policy && r.cursor.position < 0 {
+        if reference_policy && r.cursor.position < 0 {
             super::widths::signed_skip(
                 r,
                 "record.prefix",
                 32,
                 false,
-                Some(crate::theater::parser::v41::NativeWidthPurpose::RecordPrefix),
+                Some(crate::theater::parser::v41::WidthPurpose::RecordPrefix),
                 ("record.prefix", "record.prefix"),
             )?;
         } else {
             r.r("record.prefix", 32)?;
         }
     }
-    let header = if native_policy {
+    let header = if reference_policy {
         let width = encoding
-            .native_id_low_bits
+            .reference_id_low_bits
             .or_else(|| i64::try_from(encoding.ids.low_bits).ok())?;
-        r.cursor.native_header(width, encoding.ids.base)
+        r.cursor.reference_header(width, encoding.ids.base)
     } else {
         decode_record_header(data, r.cursor.address()?, encoding.ids)?
     };
@@ -278,7 +275,7 @@ fn read_entity_record(
     if let (Some(slot), Some(id)) = (policy.slot_mirror, header.id) {
         slot.set(id & 0x3fff_ffff);
     }
-    if !native_policy || policy.capture_record_slot {
+    if !reference_policy || policy.capture_record_slot {
         // Generic DecodeFrameRecords assigns every record's slot, including New.
         // Production/inference callers instead supply their inherited reader slot.
         r.movement_slot = header.id.map(|id| id & 0x3fff_ffff);
@@ -308,7 +305,7 @@ fn read_entity_record(
         registry,
         encoding,
         bindings,
-        native_policy,
+        reference_policy,
         policy,
     )
     .unwrap_or(EntityViewStop::Truncated);
@@ -327,7 +324,7 @@ fn record_body(
     registry: &FilmRegistry,
     encoding: &FrameEncoding,
     bindings: &EntityBindings,
-    native_policy: bool,
+    reference_policy: bool,
     policy: ComponentWalkPolicy<'_>,
 ) -> Option<EntityViewStop> {
     if rec.header.kind == RecordKind::End {
@@ -347,12 +344,12 @@ fn record_body(
     let ti = if rec.header.kind == RecordKind::New {
         rec.default_state_bits = encoding
             .new_record
-            .native_fallback_default_bits
+            .reference_fallback_default_bits
             .or_else(|| i64::try_from(encoding.new_record.fallback_default_bits).ok());
         r.r("archetype", 6)? as u32
     } else {
         let Some(binding) = bindings.slots.get(&(id & 0x3fff_ffff)) else {
-            if native_policy && !policy.generation_strict {
+            if reference_policy && !policy.generation_strict {
                 r.gate("baseline", 7, true)?;
             }
             return Some(EntityViewStop::MissingBinding { id });
@@ -369,30 +366,30 @@ fn record_body(
     };
     rec.archetype = Some(ti);
     let arch = registry.archetype(ti as usize).filter(|_| ti < 50);
-    if ti >= 50 || (arch.is_none() && !(native_policy && rec.header.kind == RecordKind::New)) {
+    if ti >= 50 || (arch.is_none() && !(reference_policy && rec.header.kind == RecordKind::New)) {
         return Some(EntityViewStop::InvalidArchetype { archetype: ti });
     }
     if rec.header.kind == RecordKind::New {
         let skip_default = ti != 35
             && (!encoding.new_record.deserialize_defaults
-                || !(ti == 41 || defaults::has_native_deserializer(ti)));
+                || !(ti == 41 || defaults::has_reference_deserializer(ti)));
         rec.default_state_fallback = skip_default
             && (!encoding.new_record.deserialize_defaults
                 || encoding
                     .new_record
-                    .native_fallback_default_bits
+                    .reference_fallback_default_bits
                     .map_or(encoding.new_record.fallback_default_bits > 0, |bits| {
                         bits != 0
                     })
                 || matches!(ti, 23 | 41 | 44));
         if skip_default {
-            if let Some(width) = encoding.new_record.native_fallback_default_bits {
-                read_native_new_skip(
+            if let Some(width) = encoding.new_record.reference_fallback_default_bits {
+                read_reference_new_skip(
                     r,
                     width,
                     "new.default_skipped",
                     "new default state",
-                    crate::theater::parser::v41::NativeWidthPurpose::NewRecordDefault,
+                    crate::theater::parser::v41::WidthPurpose::NewRecordDefault,
                 )?;
             } else {
                 read_new_raw_bits(
@@ -412,12 +409,12 @@ fn record_body(
     }
     let mask = r.mask()?;
     rec.mask = Some(mask);
-    // Native NEW reads its default state, gate and mask before registry lookup.
+    // Reference NEW reads its default state, gate and mask before registry lookup.
     let Some(arch) = arch else {
         return Some(EntityViewStop::InvalidArchetype { archetype: ti });
     };
-    // The native registry loop ignores mask bits beyond its component list.
-    let component_count = if native_policy {
+    // The reference registry loop ignores mask bits beyond its component list.
+    let component_count = if reference_policy {
         arch.components.len()
     } else {
         64
@@ -484,7 +481,7 @@ fn record_body(
     if rec.header.kind == RecordKind::New {
         if let Some(grammar) = &r.live_grammar {
             let width = grammar.new_record_tail_bits;
-            read_native_new_tail(r, width)?;
+            read_reference_new_tail(r, width)?;
         } else {
             read_new_raw_bits(r, "new.terminal", encoding.new_record.terminal_bits)?;
         }
@@ -492,25 +489,25 @@ fn record_body(
     Some(EntityViewStop::Complete)
 }
 
-fn read_native_new_tail(r: &mut Reader<'_>, width: i64) -> Option<()> {
+fn read_reference_new_tail(r: &mut Reader<'_>, width: i64) -> Option<()> {
     if width <= 0 {
         return Some(());
     }
-    read_native_new_skip(
+    read_reference_new_skip(
         r,
         width,
         "new.terminal",
         "new record tail",
-        crate::theater::parser::v41::NativeWidthPurpose::NewRecordTail,
+        crate::theater::parser::v41::WidthPurpose::NewRecordTail,
     )
 }
 
-fn read_native_new_skip(
+fn read_reference_new_skip(
     r: &mut Reader<'_>,
     width: i64,
     name: &str,
     _field: &'static str,
-    purpose: crate::theater::parser::v41::NativeWidthPurpose,
+    purpose: crate::theater::parser::v41::WidthPurpose,
 ) -> Option<()> {
     super::widths::signed_skip(
         r,
@@ -534,7 +531,7 @@ fn binding_false(value: &bool) -> bool {
     !value
 }
 
-impl crate::theater::film::NativeKeyframeLayout {
+impl crate::theater::parser::v41::KeyframeReadLayout {
     /// Address-sized representation for legacy consumers; admission remains at use.
     pub(crate) fn bounded(self) -> Option<KeyframeLayout> {
         Some(KeyframeLayout {

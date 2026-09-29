@@ -41,7 +41,7 @@ impl<'a> Bits<'a> {
 }
 
 /// Sequential bounded reader shared by the complete record grammar.
-/// Default construction rejects truncation. The internal native constructor explicitly
+/// Default construction rejects truncation. The internal reference constructor explicitly
 /// opts into the reference's zero-tail convention; its callers retain padding provenance.
 #[derive(Clone, Copy)]
 pub(crate) struct Cursor<'a> {
@@ -74,7 +74,7 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// Bounded reads accept at most 64 bits. Native padded reads consume any
+    /// Bounded reads accept at most 64 bits. Reference padded reads consume any
     /// representable width and return its low 64 bits; address overflow refuses
     /// the read without changing the cursor.
     pub(crate) fn read(&mut self, width: impl TryInto<usize>) -> Option<u64> {
@@ -83,7 +83,7 @@ impl<'a> Cursor<'a> {
             if !self.padded {
                 return None;
             }
-            // Native ReadBits shifts into a u64: only the final 64 bits
+            // Reference ReadBits shifts into a u64: only the final 64 bits
             // survive, while the entire field advances the cursor.
             let end = self.position.checked_add(width)?;
             let mut tail = *self;
@@ -144,8 +144,8 @@ impl Iterator for Windows<'_> {
     }
 }
 
-/// Synthetic tail accounting is zero for negative native cursor positions.
-/// The native signed endpoint remains authoritative on narrower targets.
+/// Synthetic tail accounting is zero for negative reference cursor positions.
+/// The reference signed endpoint remains authoritative on narrower targets.
 pub(crate) fn padded_from_native(bit: i64, source_bits: usize) -> usize {
     if bit < 0 {
         return 0;

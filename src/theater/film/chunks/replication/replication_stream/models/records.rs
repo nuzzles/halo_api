@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum RecordKind {
     End,

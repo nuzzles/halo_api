@@ -1,7 +1,7 @@
 //! Reference world state for production frame walking and rollback.
 use super::{AnticipatedBindings, AnticipatedDeclaration};
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::world::{
-    FilmViewAdmission, NativeNewBindingRefusal,
+    FilmViewAdmission, NewBindingRefusal,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -26,20 +26,20 @@ pub(crate) struct FilmWorld {
     pub anticipations: BTreeMap<u32, usize>,
 }
 impl FilmWorld {
-    /// Native frame_infer.go admission, distinct from unconditional setup/restore.
+    /// Reference frame_infer.go admission, distinct from unconditional setup/restore.
     /// Refusal does not stop the record walk or discard the decoded NEW fields.
-    pub(crate) fn bind_native_new(
+    pub(crate) fn bind_reference_new(
         &mut self,
         id: u32,
         archetype: u32,
         record_bit: i64,
-    ) -> Option<NativeNewBindingRefusal> {
+    ) -> Option<NewBindingRefusal> {
         let slot = id & 0x3fff_ffff;
         if let Some(existing) = self.slots.get(&slot)
             && !existing.soft
             && existing.archetype != archetype
         {
-            return Some(NativeNewBindingRefusal {
+            return Some(NewBindingRefusal {
                 record_bit,
                 id,
                 slot,

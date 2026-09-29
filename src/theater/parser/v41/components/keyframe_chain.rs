@@ -1,19 +1,19 @@
-//! Deterministic native chaining between independently established keyframe boundaries.
-use super::{FrameEncoding, KeyframeStop, decode_native_keyframe_record_contextual};
+//! Deterministic reference chaining between independently established keyframe boundaries.
+use super::{FrameEncoding, KeyframeStop, decode_reference_keyframe_record_contextual};
 pub(crate) use crate::theater::film::chunks::replication::components::keyframe_chain::{
-    KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable,
+    KeyframeChainAttempt, KeyframeChainStop, KeyframeTable,
 };
-use crate::theater::parser::v41::{FilmRegistry, NativeReaderContext, native_bits_at};
+use crate::theater::parser::v41::{FilmRegistry, ReaderContext, reference_bits_at};
 
-fn native_header(data: &[u8], pos: i64) -> Option<(u32, u32)> {
+fn reference_header(data: &[u8], pos: i64) -> Option<(u32, u32)> {
     if pos < 0 || pos.wrapping_add(64) > (data.len() as i64 * 8) {
         return None;
     }
-    let id = native_bits_at(data, pos, 32) as u32;
+    let id = reference_bits_at(data, pos, 32) as u32;
     if id == u32::MAX || id >> 30 == 0 || id & 0x3fff_ffff >= 8192 {
         return None;
     }
-    let archetype = native_bits_at(data, pos.wrapping_add(32), 32) as u32;
+    let archetype = reference_bits_at(data, pos.wrapping_add(32), 32) as u32;
     (archetype < 50 || archetype == u32::MAX).then_some((id, archetype))
 }
 
@@ -32,7 +32,7 @@ fn read_attempt(
     id: u32,
     archetype: u32,
     encoding: &FrameEncoding,
-    context: Option<&NativeReaderContext>,
+    context: Option<&ReaderContext>,
 ) -> Option<KeyframeChainAttempt> {
     if context.is_none() && !encoding.keyframe_layout.valid() {
         return None;
@@ -48,7 +48,7 @@ fn read_attempt(
         )
     } else {
         let record =
-            decode_native_keyframe_record_contextual(data, start, registry, encoding, context)?;
+            decode_reference_keyframe_record_contextual(data, start, registry, encoding, context)?;
         (record.end_bit, Some(record))
     };
     Some(KeyframeChainAttempt {
@@ -60,13 +60,13 @@ fn read_attempt(
     })
 }
 
-pub(crate) fn decode_native_keyframe_table_contextual(
+pub(crate) fn decode_reference_keyframe_table_contextual(
     data: &[u8],
     registry: &FilmRegistry,
     encoding: &FrameEncoding,
-    context: Option<&NativeReaderContext>,
-) -> NativeKeyframeTable {
-    let mut out = NativeKeyframeTable {
+    context: Option<&ReaderContext>,
+) -> KeyframeTable {
+    let mut out = KeyframeTable {
         records: Vec::new(),
         stop: KeyframeChainStop::End,
         diagnostics: Default::default(),
@@ -81,10 +81,10 @@ pub(crate) fn decode_native_keyframe_table_contextual(
         if pos.wrapping_add(64) > (data.len() as i64 * 8) {
             return out;
         }
-        let Some((id, archetype)) = native_header(data, pos) else {
-            // Native table traversal checks the sentinel even after a rejected
+        let Some((id, archetype)) = reference_header(data, pos) else {
+            // Reference table traversal checks the sentinel even after a rejected
             // negative header. This read may panic, unlike chain traversal.
-            if native_bits_at(data, pos, 32) != u32::MAX as u64 {
+            if reference_bits_at(data, pos, 32) != u32::MAX as u64 {
                 out.stop = KeyframeChainStop::Header;
             }
             return out;

@@ -1,10 +1,11 @@
 use super::replication::continue_event_views;
 use super::*;
+use crate::theater::resolved::interpretation::weapon_damage::read_weapon_damage;
 use serde_json::{Value, json};
 use std::io::Read;
 
 #[test]
-fn native_data_event_continuation_reference_oracle() {
+fn reference_data_event_continuation_reference_oracle() {
     let mut raw = Vec::new();
     flate2::read::ZlibDecoder::new(
         &include_bytes!("../../fixtures/event-continuation-v41.json.zlib")[..],
@@ -38,9 +39,9 @@ fn native_data_event_continuation_reference_oracle() {
             .step_by(2)
             .map(|b| u8::from_str_radix(&hex[b..b + 2], 16).unwrap())
             .collect();
-        let events = read_native_event_list(&data, 1, case["gate"].as_bool(), data.len());
+        let events = read_reference_event_list(&data, 1, case["gate"].as_bool(), data.len());
         assert_eq!(
-            json!(events.stop == NativeEventListStop::Terminator),
+            json!(events.stop == EventListStop::Terminator),
             case["terminated"],
             "case {index}"
         );
@@ -49,10 +50,10 @@ fn native_data_event_continuation_reference_oracle() {
             case["count"],
             "case {index}"
         );
-        if events.stop == NativeEventListStop::Terminator {
+        if events.stop == EventListStop::Terminator {
             assert_eq!(json!(events.end_bit), case["event_end"], "case {index}");
         }
-        let mut config = NativeFrameConfig {
+        let mut config = FrameConfig {
             id_low_bits: 5,
             extra_fields: case["extra"].as_bool().unwrap(),
             ..Default::default()
@@ -104,7 +105,7 @@ fn native_data_event_continuation_reference_oracle() {
                 }
             }
             assert_eq!(
-                serde_json::from_value::<NativeEventContinuation>(json!(result)).unwrap(),
+                serde_json::from_value::<EventContinuation>(json!(result)).unwrap(),
                 result
             );
         }
@@ -113,7 +114,7 @@ fn native_data_event_continuation_reference_oracle() {
 }
 
 #[test]
-fn native_data_event_continuation_preserves_original_stop() {
+fn reference_data_event_continuation_preserves_original_stop() {
     // Config=1, code 3 with three absent references, list terminator at bit 12,
     // entity End at bit 13, empty control view at bit 16.
     let payload = [0xc1, 0x80, 0];
@@ -145,7 +146,7 @@ fn native_data_event_continuation_preserves_original_stop() {
 }
 
 #[test]
-fn native_data_damage_grammar_conflict_isolates_binding_effects() {
+fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
     // A zero-filled code-0 body consumes 99 bits under evBody0, but 94 under
     // lot1DecodeDamageAftermath. Neither interpretation may silently win.
     let mut raw = Vec::new();
@@ -177,7 +178,7 @@ fn native_data_damage_grammar_conflict_isolates_binding_effects() {
         end_byte: 0,
         truncated: false,
     };
-    let config = NativeFrameConfig {
+    let config = FrameConfig {
         id_low_bits: 5,
         ..Default::default()
     };
@@ -195,8 +196,8 @@ fn native_data_damage_grammar_conflict_isolates_binding_effects() {
             let dest = prefix_bits + bit - 2;
             payload[dest / 8] |= ((frame[bit / 8] >> (7 - bit % 8)) & 1) << (7 - dest % 8);
         }
-        let events = read_native_event_list(&payload, 1, Some(false), payload.len());
-        assert_eq!(events.stop, NativeEventListStop::Terminator);
+        let events = read_reference_event_list(&payload, 1, Some(false), payload.len());
+        assert_eq!(events.stop, EventListStop::Terminator);
         assert_eq!(events.end_bit, prefix_bits);
         let mut world = FilmWorld::default();
         let before = world.clone();
@@ -204,23 +205,23 @@ fn native_data_damage_grammar_conflict_isolates_binding_effects() {
             continue_event_views(&payload, &events, &config, &registry, &mut world).unwrap();
         assert!(!result.frame.as_ref().unwrap().records.is_empty());
         if damage {
-            assert_eq!(read_native_weapon_damage(&payload, 0).end_bit, 106);
+            assert_eq!(read_weapon_damage(&payload, 0).end_bit, 106);
             assert_eq!(
                 result.state_policy,
-                NativeContinuationStatePolicy::IsolatedConflictingDamageGrammar
+                ContinuationStatePolicy::IsolatedConflictingDamageGrammar
             );
             assert_eq!(world, before);
         } else {
-            assert_eq!(result.state_policy, NativeContinuationStatePolicy::Applied);
+            assert_eq!(result.state_policy, ContinuationStatePolicy::Applied);
             assert_ne!(world, before);
         }
         let mut old = json!(result);
         old.as_object_mut().unwrap().remove("state_policy");
         assert_eq!(
-            serde_json::from_value::<NativeEventContinuation>(old)
+            serde_json::from_value::<EventContinuation>(old)
                 .unwrap()
                 .state_policy,
-            NativeContinuationStatePolicy::Unknown
+            ContinuationStatePolicy::Unknown
         );
     }
 }

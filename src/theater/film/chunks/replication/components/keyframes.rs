@@ -1,4 +1,4 @@
-//! Native data models.
+//! Reference data models.
 use crate::theater::film::*;
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum KeyframeStop {
@@ -11,10 +11,10 @@ pub enum KeyframeStop {
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeComponentSpan {
-    /// Native returned variant; None marks an incomplete read or older export.
+    /// Reference returned variant; None marks an incomplete read or older export.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variant: Option<u32>,
-    /// Native ported result; None marks an incomplete read or older export.
+    /// Reference ported result; None marks an incomplete read or older export.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ported: Option<bool>,
     /// Ordered retained fields, independent of overlapping source bit ranges.
@@ -33,7 +33,7 @@ pub struct KeyframeComponentSpan {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeRecord {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub references: Vec<crate::theater::film::NativeUnitReference>,
+    pub references: Vec<crate::theater::film::UnitReference>,
     #[serde(
         default,
         skip_serializing_if = "crate::theater::film::FilmReadDiagnostics::is_empty"
@@ -42,7 +42,7 @@ pub struct KeyframeRecord {
     pub start_bit: i64,
     pub end_bit: i64,
     pub id: u32,
-    /// Decoded type. The native isolated reader uses six low bits; the complete
+    /// Decoded type. The reference isolated reader uses six low bits; the complete
     /// raw header word remains in fields. Table readers admit the full word first.
     pub archetype: u32,
     pub fields: Vec<ComponentField>,
