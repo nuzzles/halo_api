@@ -9,11 +9,19 @@ functions are internal.
 theater/
   film/
     mod.rs                 Film, ParseError, dispatch and model reexports
-    chunk.rs               FilmChunk, ChunkKind, FilmChunkRef
-    registry.rs            Native component registry and read trace
-    replication/           Packet, record, player-slot and native event models
-    components/            Component fields, read diagnostics and value models
-    summary/               Recorded summaries and medals
+    chunks/
+      mod.rs               Chunk hierarchy and reexports
+      models.rs            FilmChunk, ChunkKind, FilmChunkRef
+      registry/
+        mod.rs             RegistryChunk
+        models.rs          Component registry and read trace
+      replication/
+        mod.rs             ReplicationStreamChunk and focused submodules
+        replication_stream/ Stream and packet envelope models
+        components/        Component fields, diagnostics and value models
+      summary/
+        mod.rs             SummaryChunk and SummaryEvents
+        models.rs          Recorded summary event models
   parser/
     mod.rs                 ChunkReader and registry-first version dispatch
     transport.rs           Decompression and bounded packet framing
@@ -57,9 +65,9 @@ does not use bootstrap candidate searches to choose an unknown layout.
 The former `theater::parser` model imports move to `theater::film` (also exposed
 through its section submodules). For example:
 
-- `parser::FilmRegistry` becomes `film::registry::FilmRegistry`.
-- `parser::ComponentField` becomes `film::components::ComponentField`.
-- `parser::SummaryEvent` becomes `film::summary::SummaryEvent`.
+- `parser::FilmRegistry` becomes `film::chunks::registry::FilmRegistry`.
+- `parser::ComponentField` becomes `film::chunks::replication::components::ComponentField`.
+- `parser::SummaryEvent` becomes `film::chunks::summary::SummaryEvent`.
 - Identity and player-table interpretation models live in `resolved::identity`.
 - Other interpretation outputs live in `resolved::interpretation`.
 

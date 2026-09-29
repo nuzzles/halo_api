@@ -70,16 +70,12 @@ pub enum ParseError {
 #[cfg(test)]
 mod tests;
 
-pub mod chunk;
-pub mod registry;
-pub mod replication;
-pub mod summary;
-pub use chunk::{ChunkKind, FilmChunk, FilmChunkRef};
-pub use registry::{
+pub mod chunks;
+pub use chunks::registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
-    NativeRegistrySlotRead, RegistryChunk,
+    NativeRegistrySlotRead,
 };
-pub use replication::{
+pub use chunks::replication::{
     AnticipatedDeclaration, DatumEntry, DatumTable, DecodedHeadEvent, EventReference,
     EventReferenceValue, FilmPacket, FilmViewAdmission, HeadEventPayload, HeadEventStop,
     KillEventFields, NativeContinuationStatePolicy, NativeEventContinuation, NativeEventField,
@@ -88,13 +84,15 @@ pub use replication::{
     NativePacketHeadRead, NativePickupOutcome, NativePickupRead, NativeRosterRead,
     NativeTranslocatorEvent, NativeWeaponDamageField, NativeWeaponDamageRead, NativeZoomRead,
     ProductionAdmissionDiagnostics, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
-    ReplicationStream, ReplicationStreamChunk, RosterEntry, RosterReport, RosterUpdate, SourceSpan,
-    TeleportPosition, TranslocatorEvent, TranslocatorStop, WeaponDamage, WeaponDamageRead,
+    ReplicationStream, RosterEntry, RosterReport, RosterUpdate, SourceSpan, TeleportPosition,
+    TranslocatorEvent, TranslocatorStop, WeaponDamage, WeaponDamageRead,
 };
-pub use summary::{FilmMedalDefinition, MedalAward, SummaryChunk, SummaryEvents};
+pub use chunks::summary::{FilmMedalDefinition, MedalAward, SummaryEvents};
+pub use chunks::{
+    ChunkKind, FilmChunk, FilmChunkRef, RegistryChunk, ReplicationStreamChunk, SummaryChunk,
+};
 
-pub mod components;
-pub use components::{
+pub use chunks::replication::components::{
     BindingOrigin, DecodedFrameView, EntityComponentAttempt, EntityComponentSpan, EntityRecord,
     EntityViewStop, FilmComponentObservation, FilmMapBounds, FilmMppWidths, FilmQuantizationRange,
     FilmReadDiagnostics, FrameViewStop, KeyframeChainAttempt, KeyframeChainStop,
@@ -109,14 +107,14 @@ pub use components::{
     NativeWidthPurpose, NativeWidthRefusal, UnitEquipmentEntry, UnitEquipmentRead,
 };
 
-pub use replication::player::{
+pub use chunks::replication::player::{
     NativePlayerSlotRead, NativeSlotField, NativeSlotValue, PlayerTableShorts, PlayerTableSlot,
 };
 
-pub use components::position::NativePositionKind;
+pub use chunks::replication::components::position::NativePositionKind;
 
-pub use components::read_diagnostics::ChainInferenceOutcome;
+pub use chunks::replication::components::read_diagnostics::ChainInferenceOutcome;
 
-pub use components::field::ComponentField;
+pub use chunks::replication::components::field::ComponentField;
 
-pub use summary::{SummaryEvent, SummaryKind};
+pub use chunks::summary::{SummaryEvent, SummaryKind};

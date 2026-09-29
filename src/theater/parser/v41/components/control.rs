@@ -1,7 +1,7 @@
 //! Shared actor/input grammar from LevelUp's unit_control.go.
 //! Native action fields and source ranges follow d61443e bloc_action.go.
 use super::Reader;
-pub(crate) use crate::theater::film::components::control::NativeActionBlock;
+pub(crate) use crate::theater::film::chunks::replication::components::control::NativeActionBlock;
 
 /// Internal outcome distinct from a failed primitive read (`None`).
 pub(super) enum ActionBlockRead {

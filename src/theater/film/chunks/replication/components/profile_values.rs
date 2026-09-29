@@ -11,8 +11,8 @@ pub type FilmQuantizationRange = [[f32; 2]; 3];
 impl Default for FilmMppWidths {
     fn default() -> Self {
         Self {
-            lead: crate::theater::film::components::profile::NATIVE_MPP_DEFAULT_WIDTHS[0] as i64,
-            index: crate::theater::film::components::profile::NATIVE_MPP_DEFAULT_WIDTHS[1] as i64,
+            lead: crate::theater::film::chunks::replication::components::profile::NATIVE_MPP_DEFAULT_WIDTHS[0] as i64,
+            index: crate::theater::film::chunks::replication::components::profile::NATIVE_MPP_DEFAULT_WIDTHS[1] as i64,
         }
     }
 }

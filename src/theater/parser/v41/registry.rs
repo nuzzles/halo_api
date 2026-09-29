@@ -1,6 +1,6 @@
 //! Bootstrap entity-component registry.
 
-pub(crate) use crate::theater::film::registry::{
+pub(crate) use crate::theater::film::chunks::registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, NativeRegistryBlockRead,
     NativeRegistrySlotRead,
 };

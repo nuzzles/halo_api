@@ -1,6 +1,6 @@
 //! Deterministic native chaining between independently established keyframe boundaries.
 use super::{FrameEncoding, KeyframeStop, decode_native_keyframe_record_contextual};
-pub(crate) use crate::theater::film::components::keyframe_chain::{
+pub(crate) use crate::theater::film::chunks::replication::components::keyframe_chain::{
     KeyframeChainAttempt, KeyframeChainStop, NativeKeyframeTable,
 };
 use crate::theater::parser::v41::{FilmRegistry, NativeReaderContext, native_bits_at};

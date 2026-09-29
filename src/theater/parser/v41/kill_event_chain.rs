@@ -2,7 +2,7 @@
 //! A localized event is evidence only; roster resolution and kill-feed matching
 //! must happen before its assistant or damage shares can be published.
 use super::bits::{Bits, Cursor};
-pub(crate) use crate::theater::film::replication::kill_event_chain::{
+pub(crate) use crate::theater::film::chunks::replication::kill_event_chain::{
     KillEventFields, NativeEventField, NativeEventFieldStage, NativeEventFieldValue,
     NativeEventListRead, NativeEventListStop, NativeEventRecord,
 };

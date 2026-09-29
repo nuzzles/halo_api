@@ -1,6 +1,6 @@
 //! Native pickup attempts, including refusal points and synthetic zero-tail reads.
 use super::{BipedPickupStats, bits::Cursor, event_heads};
-pub(crate) use crate::theater::film::replication::native_pickups::{
+pub(crate) use crate::theater::film::chunks::replication::native_pickups::{
     NativePickupOutcome, NativePickupRead,
 };
 

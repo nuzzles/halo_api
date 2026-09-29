@@ -62,7 +62,7 @@ pub(crate) mod native_pickups;
 
 pub(crate) mod native_reader;
 
-pub(crate) use crate::theater::film::components::native_scan_profile;
+pub(crate) use crate::theater::film::chunks::replication::components::native_scan_profile;
 
 pub(crate) mod native_weapon_damage;
 
@@ -70,11 +70,11 @@ pub(crate) mod native_zoom;
 
 pub(crate) mod production_frame;
 
-pub(crate) use crate::theater::film::components::profile;
+pub(crate) use crate::theater::film::chunks::replication::components::profile;
 
-pub(crate) use crate::theater::film::components::profile_values;
+pub(crate) use crate::theater::film::chunks::replication::components::profile_values;
 
-pub(crate) use crate::theater::film::components::read_diagnostics;
+pub(crate) use crate::theater::film::chunks::replication::components::read_diagnostics;
 
 pub(crate) mod records;
 
@@ -90,9 +90,9 @@ pub(crate) mod translocator;
 
 pub(crate) mod types;
 
-pub(crate) use crate::theater::film::components::unit_equipment;
+pub(crate) use crate::theater::film::chunks::replication::components::unit_equipment;
 
-pub(crate) use crate::theater::film::components::unit_references;
+pub(crate) use crate::theater::film::chunks::replication::components::unit_references;
 
 pub(crate) mod weapon_hit_scan;
 

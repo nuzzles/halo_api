@@ -1,6 +1,6 @@
 //! Native packet-head events. These readers do not imply complete event-list coverage.
 use super::bits::Cursor;
-pub(crate) use crate::theater::film::replication::event_heads::{
+pub(crate) use crate::theater::film::chunks::replication::event_heads::{
     DecodedHeadEvent, EventReference, EventReferenceValue, HeadEventPayload, HeadEventStop,
 };
 

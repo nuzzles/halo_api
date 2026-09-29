@@ -5,7 +5,7 @@ use super::{
     bits::Cursor,
     player_slot::{SlotReader, slot_body},
 };
-pub(crate) use crate::theater::film::replication::roster_updates::{
+pub(crate) use crate::theater::film::chunks::replication::roster_updates::{
     NativeRosterRead, RosterEntry, RosterReport, RosterUpdate,
 };
 pub(crate) fn read_native_roster_update(

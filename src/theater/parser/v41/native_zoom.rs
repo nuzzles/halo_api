@@ -1,6 +1,6 @@
 //! Native padded zoom-head decoding, separate from bounded gameplay observations.
 use super::{bits::Cursor, event_heads};
-pub(crate) use crate::theater::film::replication::native_zoom::NativeZoomRead;
+pub(crate) use crate::theater::film::chunks::replication::native_zoom::NativeZoomRead;
 
 /// Native decodeZoomHead semantics. The head's references and logical extent
 /// retain provenance for the reader's synthetic zero tail. A missing first

@@ -1,6 +1,6 @@
 //! Reference world state for production frame walking and rollback.
 use super::{AnticipatedBindings, AnticipatedDeclaration};
-pub(crate) use crate::theater::film::replication::world::{
+pub(crate) use crate::theater::film::chunks::replication::world::{
     FilmViewAdmission, NativeNewBindingRefusal,
 };
 use serde::{Deserialize, Serialize};

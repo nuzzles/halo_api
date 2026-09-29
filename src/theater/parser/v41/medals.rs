@@ -1,7 +1,7 @@
 //! Film medal IDs are distinct from the stats API NameId namespace.
 //! Mapping: SPNKr medal_codes.json; the film code and stats NameId namespaces are retained separately.
 
-pub(crate) use crate::theater::film::summary::medals::{FilmMedalDefinition, MedalAward};
+pub(crate) use crate::theater::film::chunks::summary::medals::{FilmMedalDefinition, MedalAward};
 
 /// All 155 published film codes, including all 151 medals in the checked CMS catalog.
 pub const FILM_MEDAL_DEFINITIONS: &[FilmMedalDefinition] = &[

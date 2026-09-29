@@ -9,9 +9,9 @@
 //! ])?;
 //! let mut resolved = film.resolve();
 //! let _: &[halo_api::theater::film::ReplicationStreamChunk] = &film.replication.chunks;
-//! let _: &halo_api::theater::film::registry::FilmRegistry = &film.registry.definition.registry;
-//! let _: Vec<&halo_api::theater::film::summary::SummaryEvent> = film.summaries.events().collect();
-//! let _: Vec<halo_api::theater::film::components::ComponentField> = Vec::new();
+//! let _: &halo_api::theater::film::chunks::registry::FilmRegistry = &film.registry.definition.registry;
+//! let _: Vec<&halo_api::theater::film::chunks::summary::SummaryEvent> = film.summaries.events().collect();
+//! let _: Vec<halo_api::theater::film::chunks::replication::components::ComponentField> = Vec::new();
 //! let _: &[halo_api::theater::resolved::Event] = resolved.events();
 //! assert!(std::ptr::eq(resolved.film(), &film));
 //! let world = resolved.seek(10_000_000);

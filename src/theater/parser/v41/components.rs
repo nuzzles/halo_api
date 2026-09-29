@@ -1,7 +1,7 @@
 //! Component value readers ported from LevelUp. See `docs/CREDIT.md`.
 //! Every primitive read is retained, including unnamed flags and raw quantized values.
 
-pub(crate) use crate::theater::film::components::field::ComponentField;
+pub(crate) use crate::theater::film::chunks::replication::components::field::ComponentField;
 mod cursor;
 use super::{NativeUnitReference, NativeUnitReferenceKind};
 use cursor::ComponentCursor as Cursor;

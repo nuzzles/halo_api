@@ -1,7 +1,7 @@
 //! Sequential replication views and generation-aware entity bindings.
 use super::Cursor;
 use super::{PositionEncoding, Reader, defaults};
-pub(crate) use crate::theater::film::components::frames::{
+pub(crate) use crate::theater::film::chunks::replication::components::frames::{
     BindingOrigin, EntityComponentAttempt, EntityComponentSpan, EntityRecord, EntityViewStop,
 };
 use crate::theater::parser::v41::{FilmRegistry, RecordIdLayout, RecordKind, decode_record_header};
