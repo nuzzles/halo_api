@@ -207,8 +207,9 @@ fn resolved_seek_matches_sequential_across_checkpoints_and_ties() {
             )
         })
         .collect();
-    let mut sequential = ResolvedFilm::from_film(Arc::new(film.clone()));
-    let mut random = sequential.clone();
+    let film = Arc::new(film);
+    let mut sequential = ResolvedFilm::from_film(film.clone());
+    let mut random = ResolvedFilm::from_film(film);
     let mut expected = BTreeMap::new();
     for t in [0, 1, 170, 171, 340, 341, 399, 1000] {
         expected.insert(t, sequential.advance_to(t).clone());

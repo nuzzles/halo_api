@@ -158,7 +158,7 @@ mutates canonical Film. The ordinary suite passes 93 tests plus 10 doctests,
 including compile-fail checks for removed public APIs. Existing world-state,
 lifetime, chronology, query intersection and checkpoint/seek equivalence tests
 remain in place. A runtime ownership test checks shared Film buffers and
-independent cloned playback cursors.
+independent playback cursors in separately loaded runtimes.
 
 | Requirement | Independent expectation or check | Limits |
 | --- | --- | --- |
@@ -183,3 +183,19 @@ The canonical captured regression also passes all 32 films after the runtime
 migration: 403,465 supplied reference contexts and one source-verified runtime
 refusal, with existing source/packet coverage checks retained. This run finished
 in approximately 143 seconds.
+
+The unused whole-chunk highlight scan and its diagnostic objective-footer output
+were subsequently removed after a repository consumer audit. Typed summaries use
+the guarded packet reader; canonical source bytes remain unchanged. The captured
+summary test still checks all 3,667 reference events and independent service counts.
+Its debug test execution time fell from 18.45 seconds to 3.67 seconds in a local
+before/after comparison, excluding compilation. This is a five-film summary-only
+test measurement, not a full-runtime benchmark for an arbitrary film.
+
+The unused runtime code-15 inference and its localized kill-chain search were
+also removed. The canonical sequential code-15 reader still preserves its
+missing-runtime-setting stop. A debug timing of the retained ranked Oddball film
+(314,290 indexed records) measured approximately 6.73 seconds for resolution
+before removal and 1.38 seconds afterwards, excluding parsing and compilation.
+This measures that recording locally, not the user's latest film. The existing
+canonical stop/source-retention and playback consistency tests remain in place.

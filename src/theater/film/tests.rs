@@ -253,10 +253,6 @@ fn event_gate_is_unresolved_in_reference_film() {
     assert_eq!(read.gate15, None);
     let before = serde_json::to_value(&film).unwrap();
     let resolved = crate::theater::TheaterRuntime::load(film.clone());
-    assert_eq!(
-        resolved.interpretations().event_gate15.policy,
-        EventGate15Policy::CandidateCountInference
-    );
     assert_eq!(serde_json::to_value(resolved.film()).unwrap(), before);
 }
 
@@ -633,7 +629,6 @@ fn captured_v41_corpus() {
 }
 
 use crate::theater::parser::v41::{FilmWorld, FrameConfig};
-use crate::theater::runtime::interpretation::EventGate15Policy;
 
 #[test]
 fn packet_payload_rejects_inconsistent_public_envelopes() {

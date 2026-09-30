@@ -1,12 +1,10 @@
-//! Kill-event localization grammar from the pinned reference killsource decoder.
-//! A localized event is evidence only; roster resolution and kill-feed matching
-//! must happen before its assistant or damage shares can be published.
-use super::bits::{Bits, Cursor};
+//! Sequential event-list grammar from the pinned reference killsource decoder.
+//! Unknown runtime settings stop decoding without speculative localization.
+use super::bits::Cursor;
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::kill_event_chain::{
     EventField, EventFieldStage, EventFieldValue,
     EventListRead, EventListStop, EventRecord,
 };
-use serde::{Deserialize, Serialize};
 
 const CONFIG: [[i8; 3]; 123] = [
     [1, 1, 7],    // 0
@@ -147,12 +145,6 @@ pub(crate) struct KillEventFields {
     pub flag: u8,
     /// -1 means a mandatory field exceeded the packet bounds.
     pub end: i64,
-}
-
-impl KillEventFields {
-    pub(crate) fn plausible(&self) -> bool {
-        self.end > 0 && self.killer >= 0 && self.victim >= 0 && self.killer != self.victim
-    }
 }
 
 /// Walk an event list from an established continuation bit. This reuses the
@@ -336,13 +328,6 @@ impl<'a> Reader<'a> {
     }
 }
 
-/// Decode mandatory code-85 body fields at an established bit position.
-/// This does not validate the surrounding chain or assign player identities.
-pub(crate) fn read_kill_event_fields(data: &[u8], body: usize) -> Option<KillEventFields> {
-    let mut r = Reader::new(data, body)?;
-    Some(kill_fields(&mut r))
-}
-
 fn kill_fields(r: &mut Reader<'_>) -> KillEventFields {
     let victim = r.entity5();
     let killer = r.entity5();
@@ -523,66 +508,4 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
         _ => return false,
     }
     !r.over
-}
-/// Number of complete supported events before termination, refusal, or the limit.
-pub(crate) fn kill_event_chain_length(
-    data: &[u8],
-    position: usize,
-    gate15: bool,
-    limit: usize,
-) -> usize {
-    let Some(mut r) = Reader::new(data, position) else {
-        return 0;
-    };
-    let mut count = 0;
-    while count < limit && r.cursor.position < data.len() * 8 {
-        if r.read(1) == 0 {
-            break;
-        }
-        let code = r.read(7) as usize;
-        if r.over
-            || code >= CONFIG.len()
-            || !presence(&mut r, code)
-            || !body(&mut r, data, code, gate15)
-        {
-            break;
-        }
-        count += 1;
-    }
-    count
-}
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct LocalizedKillEvent {
-    /// First code bit; the continuation bit immediately precedes it.
-    pub bit: usize,
-    pub fields: KillEventFields,
-    pub chain: usize,
-}
-/// Scan code-85 candidates, requiring three subsequent supported events.
-/// Unknown bodies stop validation; no guessed boundary or content cap is used.
-pub(crate) fn scan_kill_event_chains(data: &[u8], gate15: bool) -> Vec<LocalizedKillEvent> {
-    let bits = Bits(data);
-    let mut out = Vec::new();
-    for x in 1..bits.len().saturating_sub(7) {
-        if bits.read(x - 1, 1) != Some(1) || bits.read(x, 7) != Some(85) {
-            continue;
-        }
-        let mut r = Reader::new(data, x + 7).unwrap();
-        if !presence(&mut r, 85) {
-            continue;
-        }
-        let fields = read_kill_event_fields(data, r.cursor.position).unwrap();
-        if !fields.plausible() {
-            continue;
-        }
-        let chain = kill_event_chain_length(data, fields.end as usize, gate15, 12);
-        if chain >= 3 {
-            out.push(LocalizedKillEvent {
-                bit: x,
-                fields,
-                chain,
-            });
-        }
-    }
-    out
 }

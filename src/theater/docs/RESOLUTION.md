@@ -44,9 +44,10 @@ predicates. It preserves chronology and does not affect playback. An empty or
 reversed time interval produces no events. Generic `EventFilter` covers the full
 structural/lifecycle/state/input/action/summary stream.
 
-`interpretations()` exposes explicitly labeled bootstrap, player-slot, event-gate,
-bot, packet, fire/aim and whole-chunk evidence. An inferred event-gate selection
-is not a recorded bit and never repairs Film or applies guessed world updates.
+`interpretations()` exposes explicitly labeled bootstrap, player-slot,
+bot, packet, fire/aim and summary evidence. Code-15 layout inference is not run:
+its diagnostic selection had no playback consumers. Canonical decoding still
+stops at an unavailable code-15 runtime setting and retains the remaining bytes.
 
 ## Costs and playback
 
@@ -59,9 +60,9 @@ is not a recorded bit and never repairs Film or applies guessed world updates.
 - `seek(t)` binary-searches event/checkpoint indexes, copies a checkpoint world map,
   and applies at most 1,024 remaining events. Restoration scales with entity count;
   the operation is not O(1).
-- Runtime clones share original Film buffers, event/summary indexes, evidence,
-  reports and checkpoints, and copy the current world map in O(world size).
-  `rewind()` clears that cursor without changing another runtime.
+- Runtime sessions are not cloneable. Loading the same `Arc<Film>` again shares
+  source buffers but rebuilds resolved state, indexes and checkpoints.
+  `rewind()` clears the current session's world and cursor.
 
 Loading leaves an empty current world until advance/seek. Unsupported or partial
 records remain explicit; incomplete NEW records do not establish a lifetime, and

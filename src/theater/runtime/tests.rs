@@ -12,7 +12,7 @@ fn runtime_owns_shared_canonical_film_and_independent_cursor() {
         .unwrap(),
     );
     let mut first = TheaterRuntime::load(film.clone());
-    let second = first.clone();
+    let second = TheaterRuntime::load(film.clone());
     assert!(std::ptr::eq(first.film(), film.as_ref()));
     assert!(std::ptr::eq(first.film(), second.film()));
     first.advance_to(42);

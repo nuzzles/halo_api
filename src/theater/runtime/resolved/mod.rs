@@ -32,7 +32,7 @@ pub use world::*;
 /// Resolved recording, chronological index and independent playback cursor.
 /// Conversion walks decoded records and gathers explicitly marked interpretations
 /// of opaque regions. The Film is retained in shared ownership without copying source buffers.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(super) struct ResolvedFilm {
     film: Arc<Film>,
     interpretations: Arc<Interpretations>,

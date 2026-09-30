@@ -57,8 +57,8 @@ repair canonical records or select speculative layouts in the native parser.
 
 Loading moves a Film into shared ownership, avoiding self-referential borrowed
 storage. Supplying an `Arc<Film>` shares the same recording across runtimes.
-Runtime clones share source buffers, events, indexes, reports and checkpoints;
-cloning the current world map scales with its size. The canonical film is exposed
+Each runtime is a non-cloneable playback session. Loading another runtime from
+the same `Arc<Film>` builds its own resolved state and indexes. The canonical film is exposed
 as a borrowed immutable view. The private resolved model has no public constructor
 or mutable access, so callers cannot invalidate indexes through it.
 

@@ -2,23 +2,13 @@
 use super::SourceRef;
 use crate::theater::Film;
 use crate::theater::film::*;
-use crate::theater::parser::{
-    bits,
-    v41::{DecodeError, scan_kill_event_chains},
-};
+use crate::theater::parser::{bits, v41::DecodeError};
 use bot_metadata::read_bot_metadata;
-use event_gate::select_event_gate15;
 use fire_events::read_fire_event;
-use highlight_events::read_v41_highlights;
 use identity::read_identity;
 use packet::{packet_heads::read_packet_head, weapon_damage::read_weapon_damage};
 use player_table::decode_player_table;
 
-#[derive(Debug, Clone)]
-pub struct ChunkInterpretation {
-    pub source_position: usize,
-    pub highlights: HighlightScan,
-}
 #[derive(Debug, Clone)]
 pub struct PacketInterpretation {
     pub source: SourceRef,
@@ -35,14 +25,12 @@ pub struct SummaryPacketInterpretation {
 }
 
 /// Heuristic evidence is deliberately separate from structurally decoded records.
-/// A selected event gate or bootstrap anchor is not a recorded fact.
+/// A selected bootstrap anchor is not a recorded fact.
 #[derive(Debug, Clone)]
 pub struct Interpretations {
     pub identity: IdentityRead,
     pub player_table: Option<PlayerTable>,
     pub player_slot_reads: Vec<PlayerSlotRead>,
-    pub event_gate15: EventGate15Selection,
-    pub chunks: Vec<ChunkInterpretation>,
     pub packets: Vec<PacketInterpretation>,
     pub summary_packets: Vec<SummaryPacketInterpretation>,
 }
@@ -62,23 +50,6 @@ impl Interpretations {
                     .collect()
             })
             .unwrap_or_default();
-        let event_gate15 = select_event_gate15(
-            film.replication_chunks().flat_map(|c| {
-                c.body
-                    .packets
-                    .iter()
-                    .filter(|p| p.header.packet_type == 0)
-                    .filter_map(move |p| c.payload(p))
-            }),
-            EventGate15Policy::CandidateCountInference,
-        );
-        let chunks = film
-            .summary_chunks()
-            .map(|chunk| ChunkInterpretation {
-                source_position: chunk.source_position,
-                highlights: read_v41_highlights(&chunk.data),
-            })
-            .collect();
         let summary_packets = film
             .summary_chunks()
             .flat_map(|chunk| {
@@ -154,8 +125,6 @@ impl Interpretations {
             identity,
             player_table,
             player_slot_reads,
-            event_gate15,
-            chunks,
             packets,
             summary_packets,
         }
@@ -170,13 +139,7 @@ pub(crate) mod fire_events;
 
 pub(crate) mod head_observations;
 
-pub(crate) mod highlight_events;
-
-pub(crate) mod event_gate;
-
 pub(crate) mod identity;
-
-pub(crate) mod objective_extract;
 
 pub(crate) mod player_table;
 
@@ -188,17 +151,9 @@ pub use packet::*;
 
 pub use bot_metadata::{BotCandidate, BotMetadataRead, FilmBotEntry};
 
-pub use objective_extract::ObjectiveFooterEvent;
-
-pub use event_gate::{EventGate15Policy, EventGate15Selection};
-
 pub use fire_events::{
     FilmFireEvent, FireAimAttempt, FireAimMethod, FireAimStop, FireField, FireHeaderStop, FireRead,
     FireUnitReference,
-};
-
-pub use highlight_events::{
-    HighlightEvent, HighlightIdentityRead, HighlightScan, HighlightTailRead,
 };
 
 use player_slot::read_player_slot;

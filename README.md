@@ -59,6 +59,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+## Latest match example
+
+Print a gamertag's latest match ID, UTC times, duration, outcome, rank, team,
+and available map/mode names:
+
+```sh
+HALO_GAMERTAG="Nuzzles" cargo run --example latest_match
+```
+
+The example uses `XBOX_USERNAME` and `XBOX_PASSWORD` for authentication, prompting
+for missing values. If `HALO_GAMERTAG` is unset, it prompts for the gamertag too.
+For a detailed report, see `post_match_report`; for the signed-in user's
+scoreboard, see `recent_match_scoreboard`.
+
 ## Theater films
 
 Parse v41 recordings once, then borrow an indexed view for queries and playback:

@@ -18,10 +18,9 @@ pub use resolved::{events, identity, interpretation, query, summary, world};
 
 /// An owned canonical film, query indexes, and an independent playback cursor.
 ///
-/// Cloning shares the film, events and checkpoints, but copies the current world
-/// map in O(world size). Original chunk buffers are shared without copying; resolving derived state
-/// can copy its field values.
-#[derive(Debug, Clone)]
+/// A runtime is a stateful session and is not cloneable. Original chunk buffers
+/// are shared without copying; resolving derived state can copy its field values.
+#[derive(Debug)]
 pub struct TheaterRuntime {
     resolved: ResolvedFilm,
 }
