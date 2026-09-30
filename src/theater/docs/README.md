@@ -57,6 +57,7 @@ playback state and source references. `current()` is O(1) borrowed access;
 advancement applies updates, and seeking restores a checkpoint and applies its
 remaining updates. Copying/enumerating a world scales with its size.
 
+- [Detection coverage and remaining replay work](COVERAGE.md)
 - [Architecture and migration](ARCHITECTURE.md)
 - [Canonical format and fidelity](FORMAT.md)
 - [Runtime resolution and playback](RESOLUTION.md)
