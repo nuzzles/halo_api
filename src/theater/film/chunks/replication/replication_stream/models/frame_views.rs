@@ -21,7 +21,6 @@ pub struct ControlEntry {
     pub third_analog: Option<u8>,
     pub extra: Option<u8>,
     pub flags: Option<u8>,
-    pub action: Option<crate::theater::film::ActionBlock>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]

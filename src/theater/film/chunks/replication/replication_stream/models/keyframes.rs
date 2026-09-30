@@ -6,17 +6,21 @@ pub enum KeyframeStop {
     Truncated,
     InvalidArchetype,
     UnsupportedDefault,
-    UnsupportedComponent { index: usize, name: String },
+    UnsupportedComponent {
+        index: usize,
+        name: String,
+    },
+    /// A component layout depends on game state absent from the recording.
+    RuntimeContextUnavailable {
+        index: usize,
+        name: String,
+        field: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeComponentRead {
-    /// Reference returned variant; None marks an incomplete read or older export.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub variant: Option<u32>,
-    /// Reference ported result; None marks an incomplete read or older export.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ported: Option<bool>,
+    pub status: ComponentReadStatus,
     pub index: usize,
     pub name: String,
     pub start_bit: i64,
@@ -27,15 +31,15 @@ pub struct KeyframeComponentRead {
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeRecord {
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub references: Vec<crate::theater::film::UnitReference>,
     pub start_bit: i64,
     pub end_bit: i64,
     pub id: u32,
     /// Decoded type. The reference isolated reader uses six low bits; the complete
     /// raw header word remains in fields. Table readers admit the full word first.
     pub archetype: u32,
+    /// Fields outside the owned default-state and component sections.
     pub fields: Vec<ComponentField>,
+    pub default_state: Option<DefaultState>,
     pub components: Vec<KeyframeComponentRead>,
     pub stop: KeyframeStop,
 }

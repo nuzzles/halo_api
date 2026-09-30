@@ -9,7 +9,7 @@ pub use models::{Chunk, ChunkKind, ChunkTransport, FilmChunk};
 pub mod packet;
 pub use packet::{
     BitRange, ByteRange, FilmPacketHeader, Packet, PacketBody, PacketDecodeError, PacketRead,
-    PacketSource, PacketStream,
+    PacketSource, PacketStream, SourceRegion, SourceRegionKind,
 };
 
 pub mod registry;

@@ -50,6 +50,7 @@ pub(crate) fn decode_header_cursor(
         Some(((r.read(2)? as u32) << 30) | low)
     };
     Some(RecordHeader {
+        prefix: None,
         kind,
         id,
         start_bit: bit as i64,
@@ -90,6 +91,7 @@ pub(crate) fn decode_reference_record_header(
         Some((tag << 30) | low)
     };
     RecordHeader {
+        prefix: None,
         kind,
         id,
         start_bit,
@@ -102,14 +104,14 @@ pub(crate) fn decode_frame_header_signed(
     bit: i64,
     encoding: &super::FrameEncoding,
 ) -> Option<RecordHeader> {
+    if usize::try_from(bit).ok()? >= data.len().checked_mul(8)? {
+        return None;
+    }
     let width = encoding
         .reference_id_low_bits
         .or_else(|| i64::try_from(encoding.ids.low_bits).ok())?;
     let mut reader = super::FilmBits::new(data);
     reader.set_position(bit);
-    Some(decode_reference_record_header(
-        &mut reader,
-        width,
-        encoding.ids.base,
-    ))
+    let header = decode_reference_record_header(&mut reader, width, encoding.ids.base);
+    (usize::try_from(header.end_bit).ok()? <= data.len().checked_mul(8)?).then_some(header)
 }

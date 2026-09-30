@@ -52,8 +52,6 @@ pub enum ParseError {
     UnsupportedVersion(u32),
     #[error(transparent)]
     Registry(#[from] FilmRegistryReadError),
-    #[error("film contains more chunks than this platform can index")]
-    TooManyChunks,
 }
 
 #[cfg(test)]
@@ -65,27 +63,19 @@ pub use chunks::registry::{
     RegistryStop,
 };
 pub use chunks::replication::{
-    ContinuationStatePolicy, ControlEntry, DatumDecodeError, DatumEntry, DatumTable,
-    DecodedFrameView, EntityComponentRead, EntityRecord, EntityViewStop, EventContinuation,
-    EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
-    FrameDecodeError, FramePacket, FrameRead, FrameViewStop, KeyframeChainAttempt,
-    KeyframeChainStop, KeyframeComponentRead, KeyframeRecord, KeyframeStop, KeyframeTable,
-    KillEventFields, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
+    ComponentReadStatus, ControlEntry, DatumComponentMask, DatumDecodeError, DatumEntry,
+    DatumTable, DecodedFrameView, DefaultState, DefaultStateStatus, EntityComponentRead,
+    EntityRecord, EntityViewStop, EventField, EventFieldStage, EventFieldValue, EventListRead,
+    EventListStop, EventRecord, FrameDecodeError, FramePacket, FrameRead, FrameViewStop,
+    KeyframeChainAttempt, KeyframeChainStop, KeyframeComponentRead, KeyframeRecord, KeyframeStop,
+    KeyframeTable, ProductionEntityEnd, ProductionFrame, RecordHeader, RecordKind,
     ReplicationStreamPacket, ReplicationStreamPacketBody,
 };
-pub use chunks::summary::{SummaryPacket, SummaryPacketBody, SummarySegment};
+pub use chunks::summary::{SummaryPacket, SummaryPacketBody};
 pub use chunks::{
     BitRange, ByteRange, Chunk, ChunkKind, ChunkTransport, FilmChunk, FilmPacketHeader, Packet,
     PacketBody, PacketDecodeError, PacketRead, PacketSource, PacketStream, RegistryChunk,
-    ReplicationStreamChunk, SummaryChunk,
+    ReplicationStreamChunk, SourceRegion, SourceRegionKind, SummaryChunk,
 };
-
-pub use chunks::replication::components::{
-    ActionBlock, UnitEquipmentEntry, UnitEquipmentRead, UnitReference, UnitReferenceKind,
-};
-
-pub use chunks::replication::components::position::PositionKind;
 
 pub use chunks::replication::components::field::{ComponentField, RawBits};
-
-pub use chunks::summary::SummaryEvent;

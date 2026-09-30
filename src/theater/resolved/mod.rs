@@ -4,14 +4,13 @@
 //! actions, interpolate movement, or promote recovery candidates into entities.
 pub mod interpretation;
 use super::film::{
-    ComponentField, ControlEntry, EntityRecord, EntityViewStop, EventRecord, KeyframeRecord,
-    KeyframeStop, ProductionFrame, RecordKind, SummaryEvent,
+    ComponentField, ComponentReadStatus, ControlEntry, EntityRecord, EntityViewStop, EventRecord,
+    KeyframeRecord, KeyframeStop, ProductionFrame, RecordKind,
 };
 use super::film::{
-    ContinuationStatePolicy, Film, PacketRead, ReplicationStreamPacket,
-    ReplicationStreamPacketBody, SummaryPacket, SummaryPacketBody, SummarySegment,
+    Film, PacketRead, ReplicationStreamPacket, ReplicationStreamPacketBody, SummaryPacket,
 };
-use interpretation::Interpretations;
+use interpretation::{Interpretations, SummaryEventRead};
 use std::{collections::BTreeMap, sync::Arc};
 
 pub mod events;
@@ -26,10 +25,11 @@ pub use events::*;
 use playback::{CHECKPOINT_INTERVAL, Checkpoint};
 pub use query::EventFilter;
 use query::QueryIndices;
-pub use summary::{ResolvedSummary, SummaryKind};
+pub use summary::{ResolvedSummary, SummaryDerivation, SummaryKind};
 pub use world::*;
 /// Resolved recording, chronological index and independent playback cursor.
-/// Conversion walks decoded records without reparsing or copying source bytes.
+/// Conversion walks decoded records and gathers explicitly marked interpretations
+/// of opaque regions. Source chunk bytes remain borrowed without copying.
 /// The Film must outlive this model.
 #[derive(Debug, Clone)]
 pub struct ResolvedFilm<'film> {
@@ -62,6 +62,12 @@ impl<'film> ResolvedFilm<'film> {
         &self.summaries
     }
     pub fn record(&self, source: SourceRef) -> Option<Record<'_>> {
+        if let RecordRef::Summary(index) = source.record {
+            let packet = self.interpretations.summary_packets.iter().find(|packet| {
+                packet.source.chunk == source.chunk && packet.source.packet == source.packet
+            })?;
+            return Some(Record::Summary(packet.events.get(index)?));
+        }
         record(self.film, source)
     }
 }
@@ -69,8 +75,19 @@ impl<'film> ResolvedFilm<'film> {
 impl<'film> ResolvedFilm<'film> {
     pub(super) fn from_film(film: &'film Film) -> Self {
         let interpretations = Interpretations::from_film(film);
-        let summaries = summary::resolve_summaries(film, interpretations.player_table.as_ref());
-        let mut events = index(film, interpretations.player_table.as_ref());
+        Self::from_interpretations(film, interpretations)
+    }
+
+    fn from_interpretations(film: &'film Film, interpretations: Interpretations) -> Self {
+        let summaries = summary::resolve_summaries(
+            &interpretations.summary_packets,
+            interpretations.player_table.as_ref(),
+        );
+        let mut events = index(
+            film,
+            interpretations.player_table.as_ref(),
+            &interpretations.summary_packets,
+        );
         // Stable sort preserves source chunk/packet/record order for clock ties.
         events.sort_by_key(|e| (e.timestamp_us, e.source.chunk, e.source.packet));
         let mut timestamp = None;

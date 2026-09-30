@@ -22,8 +22,6 @@ impl V41ChunkReader {
 
         for (index, input) in inputs.into_iter().enumerate() {
             let source_position = index + 1;
-            let chunk_index =
-                i32::try_from(source_position).map_err(|_| ParseError::TooManyChunks)?;
             let (data, transport) = transport::inflate_film_chunk(&input.data);
             let data = data.into_owned();
             match input.kind {
@@ -42,15 +40,9 @@ impl V41ChunkReader {
                         ),
                     ));
                 }
-                ChunkKind::Summary => {
-                    chunks.push(FilmDataChunk::Summary(V41SummaryChunkReader::read(
-                        input,
-                        source_position,
-                        chunk_index,
-                        data,
-                        transport,
-                    )))
-                }
+                ChunkKind::Summary => chunks.push(FilmDataChunk::Summary(
+                    V41SummaryChunkReader::read(input, source_position, data, transport),
+                )),
                 ChunkKind::Unknown(_) => chunks.push(FilmDataChunk::Unknown(Chunk {
                     source: input,
                     source_position,

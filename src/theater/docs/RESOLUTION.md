@@ -6,18 +6,22 @@ entity/component state and checkpoints. Multiple independent cursors can borrow
 one film. The retained source buffers are neither copied nor decompressed again.
 
 `interpretations()` exposes separate, source-linked evidence from bootstrap identity
-and player-slot searches, event-layout inference, bot metadata, fire-aim reads and
+and player-slot searches, event-layout inference, guarded summary candidates, bot metadata, fire-aim reads and
 whole-chunk highlight scans. Those routines may inspect preserved bytes; they do
 not rerun the structural packet parser or mutate Film. An inferred event gate is
 reported as a selection with candidate counts, not a recorded bit, and is not used
 to silently reinterpret the reference event stream or apply extra world updates.
 
-Events use packet wire timestamps except summaries, whose recorded milliseconds
-are converted to microseconds. Ties retain input chunk, packet, and record order.
-`summaries()` exposes decoded text and semantic kinds without modifying the
-canonical UTF-16 and raw flags. Summary player linkage
-uses a unique XUID match from the bootstrap interpretation; missing or ambiguous
-matches stay unresolved. This is not a guessed player-to-entity ownership mapping.
+Events use packet wire timestamps except summary candidates, whose source-read
+milliseconds are converted to microseconds. Ties retain input chunk, packet, and
+record order. Canonical summary packets own a count and an opaque record stream.
+Guarded v41 candidate searches live in `interpretation::summary`; their owned
+reads retain all 16 UTF-16 units and raw flags. `summaries()` exposes decoded text
+and semantic kinds with `SummaryDerivation::GuardedV41Layout`. Summary index events
+use `Provenance::DerivedSummary`; candidate association is never advertised as a
+canonical decoded record. Player linkage uses a unique XUID match from bootstrap
+interpretation; missing or ambiguous matches stay unresolved. This is not a
+player-to-entity ownership inference.
 Reference reads have source references and explicit read provenance. Accumulated state
 changes retain previous/new shared values and a derivation identifier.
 
@@ -39,3 +43,8 @@ NEW records do not establish entities. Keyframe data beyond a parsing stop canno
 create world entities. Seeking and sequential playback must agree at the same time.
 
 No visual interpolation or inferred jump/shot/action semantics are added here.
+
+The planned `TheaterRuntime` will own a private resolved representation. That
+architecture and higher-level typed summary-event API are deferred until after
+the canonical-model/parser phases; the existing resolved API only migrates to
+consume the updated canonical hierarchy in this phase.

@@ -3,6 +3,12 @@
 //! state are left unsupported so the enclosing record retains the stop.
 use super::Reader;
 
+/// The pinned reader assumes this vehicle flag is set. It is initialized by
+/// the game when constructing the vehicle, not serialized by this component.
+pub(super) fn required_runtime_field(name: &str) -> Option<&'static str> {
+    (name == "vehicle-type-physics-component").then_some("vehicle+0x818")
+}
+
 pub(super) fn component(r: &mut Reader<'_>, name: &str) -> Option<bool> {
     match name {
         "personal-ai-data-component" => {

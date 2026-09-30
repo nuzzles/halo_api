@@ -13,16 +13,6 @@ fn replication_chunk_mut(film: &mut Film) -> &mut ReplicationStreamChunk {
         .unwrap()
 }
 
-fn summary_chunk_mut(film: &mut Film) -> &mut SummaryChunk {
-    film.chunks
-        .iter_mut()
-        .find_map(|chunk| match chunk {
-            FilmDataChunk::Summary(chunk) => Some(chunk),
-            _ => None,
-        })
-        .unwrap()
-}
-
 fn recording() -> Film {
     let source = FixtureFilmSource::load(
         &[
@@ -38,14 +28,15 @@ fn recording() -> Film {
 // Independently authored decoded-record fixtures test resolution, not decoding.
 fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
     EntityRecord {
-        references: vec![],
+        default_state: None,
         header: RecordHeader {
+            prefix: None,
             kind,
             id: Some(id),
             start_bit: 2,
             end_bit: 36,
         },
-        archetype: Some(3),
+        archetype: (kind == RecordKind::New).then_some(3),
         mask: Some(1),
         fields: vec![],
         components: vec![EntityComponentRead {
@@ -53,8 +44,7 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
             name: "test-component".into(),
             start_bit: 40,
             end_bit: 48,
-            variant: None,
-            status: Some(true),
+            status: ComponentReadStatus::Complete,
             fields: vec![ComponentField {
                 name: "value".into(),
                 bit: 40,
@@ -71,20 +61,17 @@ fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> Replica
     let mut p = film.replication_chunks().next().unwrap().body.packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
-    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body
+    let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body
     else {
         panic!("missing frame packet")
     };
     frame.frame = FrameRead::Decoded(Box::new(ProductionFrame {
-        record_prefixes: vec![],
         messages: None,
         records,
         controls: None,
         entity_end: None,
-        views_completed: 1,
         end_bit: 48,
     }));
-    frame.continuation = None;
     p
 }
 fn key() -> EntityKey {
@@ -241,7 +228,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
     let mut film = recording();
     let id = 0x4000_0007;
     let mut partial = entity(RecordKind::Delta, id, 2);
-    partial.components[0].status = None;
+    partial.components[0].status = ComponentReadStatus::Truncated;
     partial.stop = EntityViewStop::Truncated;
     let mut padded = entity(RecordKind::Delta, id, 99);
     padded.end_bit = 4096;
@@ -273,7 +260,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     use crate::theater::parser::v41::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
-    keyframe.body = PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(
+    keyframe.body = PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(
         Box::new(KeyframeTable {
             records: vec![KeyframeChainAttempt {
                 start_bit: 1,
@@ -281,7 +268,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
                 id: 0x8000_0007,
                 archetype: 3,
                 record: Some(KeyframeRecord {
-                    references: vec![],
+                    default_state: None,
                     start_bit: 1,
                     end_bit: 65,
                     id: 0x8000_0007,
@@ -296,7 +283,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
     ));
     let mut padded = keyframe.clone();
     padded.header.timestamp_us = 30;
-    if let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
+    if let PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
         &mut padded.body
     {
         table.records[0].record.as_mut().unwrap().end_bit = 4096;
@@ -340,7 +327,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     let mut incomplete = entity(RecordKind::New, 0x4000_0007, 99);
     incomplete.stop = EntityViewStop::Truncated;
     let mut p = packet(&film, 10, vec![incomplete]);
-    if let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
+    if let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
         frame.frame.decoded_mut().unwrap().controls =
             Some(crate::theater::parser::v41::DecodedFrameView {
                 control_entries: vec![ControlEntry {
@@ -353,7 +340,6 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
                     third_analog: None,
                     extra: None,
                     flags: None,
-                    action: None,
                 }],
                 start_bit: 2040,
                 end_bit: 2050,
@@ -467,7 +453,7 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
     use crate::theater::resolved::PlayerTable;
     use crate::theater::resolved::PlayerTableSlot;
     use serde_json::json;
-    let mut film = Film::parse([
+    let film = Film::parse([
         FilmChunk {
             kind: ChunkKind::Registry,
             index: None,
@@ -489,9 +475,15 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         },
     ])
     .unwrap();
-    let summary = |time: u64, xuid| SummaryEvent {
+    let summary = |time: u64, xuid| SummaryEventRead {
         xuid,
-        gamertag_utf16: "Recorded player".encode_utf16().collect(),
+        gamertag_utf16: {
+            let mut units = [0; 16];
+            for (slot, unit) in units.iter_mut().zip("Recorded player".encode_utf16()) {
+                *slot = unit;
+            }
+            units
+        },
         timestamp_ms: (time / 1000) as u32,
         metadata: 0,
         medal_flag: 0,
@@ -499,20 +491,33 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         source: BitRange { start: 0, end: 0 },
         identity_source: BitRange { start: 0, end: 0 },
     };
-    summary_chunk_mut(&mut film).body.packets[0].body =
-        PacketRead::Complete(SummaryPacketBody::Events {
-            declared_events: 3,
-            segments: vec![
-                SummarySegment::Event(summary(2000, 42)),
-                SummarySegment::Event(summary(1000, 42)),
-                SummarySegment::Event(summary(3000, 99)),
-            ],
-        });
-    let resolved = film.resolve();
+    // Independent interpretation fixture; these candidates are deliberately not
+    // injected into the canonical Film or generated by the search under test.
+    let mut interpretations = Interpretations::from_film(&film);
+    interpretations.summary_packets = vec![interpretation::SummaryPacketInterpretation {
+        source: SourceRef {
+            chunk: 1,
+            packet: 0,
+            record: RecordRef::Packet,
+        },
+        events: vec![summary(2000, 42), summary(1000, 42), summary(3000, 99)],
+    }];
+    let resolved = ResolvedFilm::from_interpretations(&film, interpretations.clone());
     assert_eq!(resolved.summaries().len(), 3);
     assert_eq!(resolved.summaries()[0].timestamp_us, 2000);
     assert_eq!(resolved.summaries()[0].gamertag, "Recorded player");
     assert_eq!(resolved.summaries()[0].kind, SummaryKind::Kill);
+    assert_eq!(
+        resolved.summaries()[0].derivation,
+        SummaryDerivation::GuardedV41Layout
+    );
+    assert!(
+        resolved
+            .events()
+            .iter()
+            .filter(|event| event.kind == EventKind::Summary)
+            .all(|event| event.provenance == Provenance::DerivedSummary)
+    );
     assert_eq!(resolved.summaries()[0].source.record, RecordRef::Summary(0));
     let times: Vec<_> = resolved
         .query(EventFilter {
@@ -542,7 +547,7 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         report: Default::default(),
         error: None,
     };
-    let actors: Vec<_> = index(&film, Some(&table))
+    let actors: Vec<_> = index(&film, Some(&table), &interpretations.summary_packets)
         .into_iter()
         .filter(|e| e.kind == EventKind::Summary)
         .map(|e| e.player_index)
@@ -553,7 +558,7 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         ..player
     });
     assert!(
-        index(&film, Some(&table))
+        index(&film, Some(&table), &interpretations.summary_packets)
             .iter()
             .filter(|e| e.kind == EventKind::Summary)
             .all(|e| e.player_index.is_none())

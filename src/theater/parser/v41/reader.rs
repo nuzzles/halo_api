@@ -130,6 +130,19 @@ impl FrameConfig {
         .ok_or(ReaderProfileError::Width("frame reader"))
     }
 
+    /// Entity/control views after a message terminator already read on wire.
+    pub(crate) fn decode_entity_control_views(
+        &self,
+        data: &[u8],
+        bit: usize,
+        registry: &FilmRegistry,
+        world: &mut FilmWorld,
+    ) -> Result<ProductionFrame, ReaderProfileError> {
+        let mut config = self.clone();
+        config.packet_preamble_bits = -1;
+        config.decode_production_views(data, bit, registry, world)
+    }
+
     /// Live component reads obtain dimensions from the raw runtime profile.
     /// These representable dimensions carry only position policies through the
     /// checked legacy adapter; they must never be used as consumed widths.

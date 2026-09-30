@@ -1,9 +1,11 @@
 //! Structural v41 component value readers.
 //! Every primitive read is retained, including unnamed flags and raw quantized values.
 
+use crate::theater::film::ComponentReadStatus;
 pub(crate) use crate::theater::film::chunks::replication::components::field::ComponentField;
 mod cursor;
 use super::{UnitReference, UnitReferenceKind};
+pub(crate) use crate::theater::film::{BitRange, DefaultState, DefaultStateStatus};
 use cursor::ComponentCursor as Cursor;
 mod ability;
 mod basic;

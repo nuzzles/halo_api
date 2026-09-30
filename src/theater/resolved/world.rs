@@ -61,21 +61,6 @@ pub(super) fn resolve_change(
 ) -> Option<StateChange> {
     match record(film, event.source)? {
         Record::Entity(record) => {
-            if let RecordRef::Entity {
-                continuation: true, ..
-            } = event.source.record
-            {
-                let body = &replication_packet(film, event.source)?.body;
-                let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) =
-                    body
-                else {
-                    return None;
-                };
-                let continuation = frame.continuation.as_ref()?;
-                if continuation.state_policy != ContinuationStatePolicy::Applied {
-                    return None;
-                }
-            }
             let packet = replication_packet(film, event.source)?;
             if record.end_bit > packet.header.payload_size as i64 * 8 {
                 return None;
@@ -105,7 +90,10 @@ pub(super) fn resolve_change(
                 created_at_us: None,
                 baseline_read_complete: record.stop == KeyframeStop::Complete,
                 components: BTreeMap::new(),
-                initial_fields: Arc::new(record.fields.clone()),
+                initial_fields: Arc::new(baseline_fields(
+                    &record.fields,
+                    record.default_state.as_ref(),
+                )),
                 last_source: event.source,
             };
             for component in &record.components {
@@ -114,7 +102,7 @@ pub(super) fn resolve_change(
                     Arc::new(ComponentState {
                         name: component.name.clone(),
                         fields: component.fields.clone(),
-                        complete: component.ported == Some(true),
+                        complete: component.status == ComponentReadStatus::Complete,
                         source: event.source,
                     }),
                 );
@@ -172,7 +160,10 @@ fn entity_change(
             created_at_us: Some(event.timestamp_us),
             baseline_read_complete: record.stop == EntityViewStop::Complete,
             components: BTreeMap::new(),
-            initial_fields: Arc::new(record.fields.clone()),
+            initial_fields: Arc::new(baseline_fields(
+                &record.fields,
+                record.default_state.as_ref(),
+            )),
             last_source: event.source,
         },
         RecordKind::New => return None,
@@ -196,7 +187,7 @@ fn entity_change(
             Arc::new(ComponentState {
                 name: component.name.clone(),
                 fields: component.fields.clone(),
-                complete: component.status == Some(true),
+                complete: component.status == ComponentReadStatus::Complete,
                 source: event.source,
             }),
         );
@@ -207,4 +198,16 @@ fn entity_change(
         new: Some(Arc::new(state)),
         derivation: "sequential-entity-components-v1",
     })
+}
+
+fn baseline_fields(
+    fields: &[ComponentField],
+    default_state: Option<&crate::theater::film::DefaultState>,
+) -> Vec<ComponentField> {
+    let mut result = fields.to_vec();
+    if let Some(default_state) = default_state {
+        result.extend(default_state.fields.iter().cloned());
+    }
+    result.sort_by_key(|field| field.bit);
+    result
 }

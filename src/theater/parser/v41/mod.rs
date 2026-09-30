@@ -72,10 +72,6 @@ pub(crate) mod summary;
 
 pub(crate) mod types;
 
-pub(crate) use crate::theater::film::chunks::replication::components::unit_equipment;
-
-pub(crate) use crate::theater::film::chunks::replication::components::unit_references;
-
 pub(crate) mod world;
 
 pub(crate) mod position_capture;
@@ -106,10 +102,11 @@ pub(crate) use observations::{
     MovementComponent, MppField, NavpointField, ObjectParentState, ObjectiveField,
     PlayerStateField, ProbeComponent,
 };
+pub(crate) use observations::{
+    PositionKind, UnitEquipmentEntry, UnitEquipmentRead, UnitReference, UnitReferenceKind,
+};
 pub(crate) use production_frame::ProductionFrame;
 pub(crate) use records::{RecordHeader, RecordKind};
 pub(crate) use registry::FilmRegistry;
 #[cfg(test)]
 pub(crate) use transport::{FixtureChunkMetadata, FixtureFilmSource};
-pub(crate) use unit_equipment::UnitEquipmentRead;
-pub(crate) use unit_references::{UnitReference, UnitReferenceKind};

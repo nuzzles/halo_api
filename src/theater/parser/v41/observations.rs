@@ -222,13 +222,13 @@ pub struct AbilityNonPredictedState {
 pub enum FilmComponentObservation {
     /// IEEE-754 bits retain exact reference values, including non-finite values.
     Position {
-        position_kind: crate::theater::film::PositionKind,
+        position_kind: PositionKind,
         vector_bits: [u32; 3],
         bit: i64,
         slot: u32,
     },
     UnitReference {
-        reference: crate::theater::film::UnitReference,
+        reference: UnitReference,
     },
     MovementState {
         component: MovementComponent,
@@ -290,7 +290,7 @@ pub enum FilmComponentObservation {
         state: Box<ObjectParentState>,
     },
     UnitEquipment {
-        state: Box<crate::theater::film::UnitEquipmentRead>,
+        state: Box<UnitEquipmentRead>,
     },
     CamoState {
         state: Box<CamoState>,
@@ -339,4 +339,48 @@ pub enum FilmComponentObservation {
         b: u32,
         c: u32,
     },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum UnitReferenceKind {
+    VariableWidth,
+    GatedWord32,
+    Word32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct UnitReference {
+    pub kind: UnitReferenceKind,
+    pub start_bit: i64,
+    pub end_bit: i64,
+    pub present: bool,
+    /// Raw index or full word; domain-specific bases are not guessed.
+    pub value: u32,
+    pub tail: u32,
+    /// Reference category-one flag; remains true even when the presence gate is closed.
+    pub probe: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct UnitEquipmentEntry {
+    pub value: u32,
+    pub tail: u32,
+    /// A closed entry remains in the list, with value and tail zero.
+    pub present: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct UnitEquipmentRead {
+    pub head: u32,
+    pub entries: Vec<UnitEquipmentEntry>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum PositionKind {
+    /// Reference PosKindRaw: re-emits the saved baseline, never the 96 copied wire bits.
+    Baseline,
+    Absolute,
+    AbsoluteFallback,
+    Delta8,
+    DeltaAxis,
 }

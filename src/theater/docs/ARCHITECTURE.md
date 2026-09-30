@@ -15,6 +15,7 @@ theater/
       packet/
         mod.rs             Shared packet model reexports
         models.rs          Packet<T>, PacketStream<T>, read states and source ranges
+        coverage.rs        Structural source-coverage normalization
       registry/
         mod.rs             RegistryChunk
         models.rs          Archetypes, owned component slots, ranges and read outcome
@@ -22,12 +23,13 @@ theater/
         mod.rs             ReplicationStreamChunk and components
         replication_stream/
           mod.rs           ReplicationStream and ReplicationStreamPacket
-          models/          Frame, view, entity, keyframe, datum and event models
+          models/          Frame, view, entity, default-state, keyframe, datum and event models
+          coverage.rs      Coverage derived from ordered body fields
         components/
-          *.rs             Recorded component fields, controls, position and references
+          field.rs         Source-backed component fields and exact raw bits
       summary/
-        mod.rs             SummaryChunk, packets and ordered opaque/event segments
-        models.rs          Raw recorded summary fields
+        mod.rs             SummaryChunk and packet count/record-stream body
+        models.rs          Opaque SummaryRecordStream with its full source range
   parser/
     mod.rs                 ChunkReader and registry-first version dispatch
     transport.rs           Decompression and bounded packet framing
@@ -41,12 +43,13 @@ theater/
       diagnostics.rs       Private refusal and width traces
       observations.rs      Private decoder callback state
       packets/             Replication packet dispatch and isolated body decoders
-      summary.rs           v41 summary decoding
+      summary.rs           Recorded summary count and opaque stream boundaries
   resolved/
     mod.rs                 ResolvedFilm construction and shared indexes
     identity.rs            Identity/player-table models and player lookup
     interpretation/        Bootstrap searches, player-slot traces and interpretation evidence
       packet/              Packet-head, pickup, damage, zoom and teleport decoders/models
+      summary.rs           Guarded summary candidate fields and associations
     events.rs              Source references, provenance and event indexing
     summary.rs             Decoded text and semantic summary kinds
     query.rs               Filters and query indexes
@@ -80,7 +83,8 @@ through its section submodules). For example:
 
 - `parser::FilmRegistry` becomes `film::chunks::registry::FilmRegistry`.
 - `parser::ComponentField` becomes `film::chunks::replication::components::ComponentField`.
-- `parser::SummaryEvent` becomes `film::chunks::summary::SummaryEvent`.
+- Summary candidate fields live in `resolved::interpretation::summary::SummaryEventRead`.
+  Canonical `film::chunks::summary::SummaryRecordStream` does not infer record boundaries.
 - Identity and player-table interpretation models live in `resolved::identity`.
 - Other interpretation outputs live in `resolved::interpretation`.
 
@@ -89,6 +93,12 @@ signatures. No second public parsing API or compatibility parser facade is added
 Canonical packet headers retain only wire fields; locations live in `PacketSource`.
 Body reads explicitly distinguish complete, partial, and opaque results. Source
 retention and decoding limits are described in FORMAT.md.
+
+Summary marker searches and the observed identity-to-tail offset run only during
+resolution. `ResolvedSummary::derivation` identifies the guarded v41 association;
+the synchronized event index uses `Provenance::DerivedSummary`. Source references
+for those candidates identify their canonical packet and resolve to owned
+interpretation fields, not fabricated canonical records.
 
 The Halo client keeps the manifest's JSON-only chunk entry as
 `clients::hi::models::FilmChunkResponse`. Downloading one or all of those entries
@@ -104,3 +114,11 @@ There is no separate downloaded `FilmChunkData` type. A second
 `FilmChunkMetadata` model is unnecessary because the response DTO already owns
 the service-only duration, size and file-path fields; the canonical chunk retains
 only parsing metadata and bytes.
+
+Default-state sections now own their fields on NEW and keyframe records. Resolved
+baseline storage combines those fields with surrounding record fields in source
+order. Duplicate canonical `UnitReference`, `UnitEquipmentRead`, `PositionKind`,
+and `ActionBlock` projections are removed: reference/equipment/position callback
+traces remain private parser observations, while all recorded action fields stay
+in the canonical control/component field lists. There is no synthetic absent
+weapon index or bit-reversed action mask on a canonical record.

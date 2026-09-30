@@ -3,6 +3,8 @@ use super::*;
 
 mod datums;
 mod frame;
+#[cfg(test)]
+pub(crate) use frame::{ContinuationStatePolicy, EventContinuation};
 mod keyframes;
 mod roster;
 

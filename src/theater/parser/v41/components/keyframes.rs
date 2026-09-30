@@ -66,6 +66,7 @@ fn decode_keyframe_record_inner(
         return None;
     }
     let mut r = Reader {
+        references: Vec::new(),
         reference_widths: context.map(|c| super::ComponentWidths {
             movement: &c.profile.movement,
             mpp: c.profile.mpp,
@@ -82,7 +83,6 @@ fn decode_keyframe_record_inner(
         position_fallback: false,
         // The reference full-state walker creates a fresh reader without setting a slot.
         movement_slot: Some(0),
-        references: Vec::new(),
         diagnostics: Default::default(),
         cursor: if padded {
             Cursor::signed(data, bit, None)
@@ -162,13 +162,14 @@ fn decode_keyframe_record_inner(
         (id, archetype)
     };
     let mut components = Vec::new();
+    let mut default_state = None;
     let mut stop = body(
         &mut r,
         archetype,
         registry,
         mpp_widths,
         corruption_check,
-        &mut components,
+        (&mut components, &mut default_state),
         (
             padded,
             component_widths,
@@ -206,7 +207,7 @@ fn decode_keyframe_record_inner(
         id,
         archetype,
         fields,
-        references: r.references,
+        default_state,
         components,
         stop,
     })
@@ -218,9 +219,13 @@ fn body(
     registry: &FilmRegistry,
     widths: [usize; 2],
     check: bool,
-    components: &mut Vec<KeyframeComponentRead>,
+    sections: (
+        &mut Vec<KeyframeComponentRead>,
+        &mut Option<super::DefaultState>,
+    ),
     policy: (bool, Option<&super::ComponentWidthOverrides>, bool, u64),
 ) -> Option<KeyframeStop> {
+    let (components, default_state) = sections;
     let (_reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
     // The writer omits n1, n2 and the entire body for this sentinel archetype.
     if ti == u32::MAX {
@@ -231,11 +236,33 @@ fn body(
     };
     let n1 = r.r_wide("default_guard", size_word_bits)? as u32 as i32;
     if n1 > 0 {
-        if defaults::has_reference_deserializer(ti) && !defaults::state(r, ti, widths)? {
+        let start = r.cursor.position;
+        let field_start = r.fields.len();
+        let has_reader = defaults::has_reference_deserializer(ti);
+        let result = (|| {
+            if has_reader && !defaults::state(r, ti, widths)? {
+                return Some(false);
+            }
+            if check {
+                r.r_wide("default_corruption_check", size_word_bits)?;
+            }
+            Some(true)
+        })();
+        *default_state = Some(super::DefaultState {
+            source: super::BitRange {
+                start: usize::try_from(start).ok()?,
+                end: usize::try_from(r.cursor.position).ok()?,
+            },
+            fields: r.fields.drain(field_start..).collect(),
+            status: match result {
+                Some(true) if !has_reader => super::DefaultStateStatus::Opaque,
+                Some(true) => super::DefaultStateStatus::Complete,
+                Some(false) => super::DefaultStateStatus::Unsupported,
+                None => super::DefaultStateStatus::Truncated,
+            },
+        });
+        if !result? {
             return Some(KeyframeStop::UnsupportedDefault);
-        }
-        if check {
-            r.r_wide("default_corruption_check", size_word_bits)?;
         }
     }
     let n2 = r.r_wide("components_guard", size_word_bits)? as u32 as i32;
@@ -246,7 +273,6 @@ fn body(
         let name = registry_component.name()?;
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
-        let calibrated = super::widths::is_calibrated(r, name, component_widths);
         let status = super::widths::read_component(
             r,
             name,
@@ -256,9 +282,7 @@ fn body(
             (simulation_complete, None),
         );
         components.push(KeyframeComponentRead {
-            variant: status
-                .map(|_| super::widths::result_variant(name, &r.fields[field_start..], calibrated)),
-            ported: status,
+            status: status.into(),
             index,
             name: name.to_owned(),
             start_bit,
@@ -266,17 +290,30 @@ fn body(
             fields: r.fields[field_start..].to_vec(),
         });
         if !status? {
+            if let Some(field) = super::m4b::required_runtime_field(name) {
+                return Some(KeyframeStop::RuntimeContextUnavailable {
+                    index,
+                    name: name.to_owned(),
+                    field: field.to_owned(),
+                });
+            }
             return Some(KeyframeStop::UnsupportedComponent {
                 index,
                 name: name.to_owned(),
             });
         }
-        if check {
-            r.gate("component_corruption_check", 32, true)?;
-        }
+        let check = if check {
+            r.gate("component_corruption_check", 32, true)
+        } else {
+            Some(())
+        };
         let component = components.last_mut().unwrap();
         component.end_bit = r.cursor.position;
         component.fields = r.fields[field_start..].to_vec();
+        if check.is_none() {
+            component.status = super::ComponentReadStatus::Truncated;
+        }
+        check?;
     }
     Some(KeyframeStop::Complete)
 }

@@ -25,8 +25,8 @@ pub(super) fn signed_skip(
     fields: (&str, &str),
 ) -> Option<()> {
     let bit = r.cursor.position;
-    let reference_end = bit.wrapping_add(width);
-    let end_bit = usize::try_from(reference_end).ok();
+    let reference_end = bit.checked_add(width);
+    let end_bit = reference_end.and_then(|end| usize::try_from(end).ok());
     let adjustment = |retained_bits| crate::theater::parser::v41::WidthAdjustment {
         component: component.into(),
         calibrated,
@@ -36,32 +36,26 @@ pub(super) fn signed_skip(
         retained_bits,
         end_bit,
     };
-    // Reference Skip does no reads. Backward/wrapped/non-addressable source ranges
-    // are retained as signed adjustments, never synthesized as byte ranges.
-    if width < 0 || bit < 0 || reference_end < bit {
+    // A layout adjustment cannot invent source bits or move backwards over fields.
+    // Retain the attempted extent as a diagnostic and stop at the established boundary.
+    if width < 0 || bit < 0 || reference_end.is_none() {
         r.diagnostics.width_adjustments.push(adjustment(None));
-        r.cursor.skip_signed(width);
-        return Some(());
+        return None;
     }
     let available = r
         .cursor
         .remaining_source_bits()
         .min(usize::try_from(width).unwrap_or(usize::MAX));
-    let compact = width > 4096 && (available as u64) < width as u64;
-    let retained = if compact {
-        available
-    } else {
-        usize::try_from(width).ok()?
-    };
+    let retained = available;
     r.words(fields.0, retained / 64, 64)?;
     if !retained.is_multiple_of(64) {
         r.r(fields.1, retained % 64)?;
     }
-    if compact {
-        r.cursor.skip_signed(width - retained as i64);
+    if !r.cursor.fits_source(width - retained as i64) {
         r.diagnostics
             .width_adjustments
             .push(adjustment(Some(retained)));
+        return None;
     }
     Some(())
 }
@@ -80,39 +74,6 @@ fn signed_override(r: &mut Reader<'_>, name: &str, width: i64, calibrated: bool)
         (field, &format!("{field}.tail")),
     )?;
     Some(true)
-}
-
-/// Snapshot before dispatch: live hooks may mutate shared width maps later.
-pub(super) fn is_calibrated(
-    r: &Reader<'_>,
-    name: &str,
-    widths: Option<&ComponentWidthOverrides>,
-) -> bool {
-    if let Some(grammar) = &r.live_grammar {
-        grammar
-            .calibrated_widths
-            .as_ref()
-            .is_some_and(|w| w.get(name).is_some())
-    } else {
-        widths.is_some_and(|w| w.calibrated.contains_key(name))
-    }
-}
-
-pub(super) fn result_variant(
-    name: &str,
-    fields: &[super::ComponentField],
-    calibrated: bool,
-) -> u32 {
-    if calibrated {
-        0
-    } else if name == "weapon-state-type-info" {
-        fields
-            .iter()
-            .find(|f| f.name == "variant")
-            .map_or(u32::MAX, |f| f.raw.low_u64() as u32)
-    } else {
-        u32::MAX
-    }
 }
 
 pub(super) fn read_component(

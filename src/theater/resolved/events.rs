@@ -1,6 +1,7 @@
 //! Events support for ResolvedFilm.
 use super::*;
-/// A stable path into the borrowed Film. Positions are vector positions, not manifest IDs.
+/// A source packet and record/interpretation position. Positions are vector positions,
+/// not manifest IDs. Summary positions address guarded reads owned by resolution.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SourceRef {
     pub chunk: usize,
@@ -11,14 +12,15 @@ pub struct SourceRef {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RecordRef {
     Packet,
-    Entity { continuation: bool, index: usize },
+    Entity { index: usize },
     Keyframe(usize),
-    Control { continuation: bool, index: usize },
+    Control { index: usize },
     Summary(usize),
     Event(usize),
 }
 
-/// Borrowed canonical payload. Independent projections remain in interpretations.
+/// Borrowed canonical payload or explicitly derived summary field read.
+/// Summary candidates remain owned by interpretations, not Film.
 #[derive(Debug, Clone, Copy)]
 pub enum Record<'a> {
     ReplicationPacket(&'a ReplicationStreamPacket),
@@ -26,7 +28,7 @@ pub enum Record<'a> {
     Entity(&'a EntityRecord),
     Keyframe(&'a KeyframeRecord),
     Control(&'a ControlEntry),
-    Summary(&'a SummaryEvent),
+    Summary(&'a SummaryEventRead),
     Event(&'a EventRecord),
 }
 
@@ -91,6 +93,9 @@ pub enum Provenance {
     PartialRead,
     /// Structural packet entry; inspect its body for opaque/refused regions.
     PacketEnvelope,
+    /// Guarded marker association with an observed v41 identity-to-tail offset.
+    /// This is not a structurally decoded summary record.
+    DerivedSummary,
 }
 
 /// A state derivation from a sequential record. Previous/new values share storage.
@@ -103,6 +108,9 @@ pub struct StateChange {
 }
 
 pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
+    if matches!(source.record, RecordRef::Summary(_)) {
+        return Provenance::DerivedSummary;
+    }
     let packet = chunk(film, source.chunk)
         .expect("indexed source chunk")
         .packet(source.packet)
@@ -134,19 +142,12 @@ pub(super) fn provenance(film: &Film, source: SourceRef) -> Provenance {
     }
 }
 
-pub(super) fn frame(
-    packet: &ReplicationStreamPacket,
-    continuation: bool,
-) -> Option<&ProductionFrame> {
-    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body
+pub(super) fn frame(packet: &ReplicationStreamPacket) -> Option<&ProductionFrame> {
+    let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) = &packet.body
     else {
         return None;
     };
-    if continuation {
-        frame.continuation.as_ref()?.frame.decoded()
-    } else {
-        frame.frame.decoded()
-    }
+    frame.frame.decoded()
 }
 
 pub(super) fn replication_packet(
@@ -166,45 +167,22 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
             PacketRef::Replication(packet) => Record::ReplicationPacket(packet),
             PacketRef::Summary(packet) => Record::SummaryPacket(packet),
         },
-        RecordRef::Summary(index) => {
-            let PacketRef::Summary(packet) = packet else {
-                return None;
-            };
-            let PacketRead::Complete(SummaryPacketBody::Events { segments, .. }) = &packet.body
-            else {
-                return None;
-            };
-            Record::Summary(
-                segments
-                    .iter()
-                    .filter_map(|segment| match segment {
-                        SummarySegment::Event(event) => Some(event),
-                        SummarySegment::Opaque { .. } => None,
-                    })
-                    .nth(index)?,
-            )
-        }
+        RecordRef::Summary(_) => return None,
         record => {
             let PacketRef::Replication(packet) = packet else {
                 return None;
             };
             match record {
-                RecordRef::Entity {
-                    continuation,
-                    index,
-                } => Record::Entity(frame(packet, continuation)?.records.get(index)?),
-                RecordRef::Control {
-                    continuation,
-                    index,
-                } => Record::Control(
-                    frame(packet, continuation)?
+                RecordRef::Entity { index } => Record::Entity(frame(packet)?.records.get(index)?),
+                RecordRef::Control { index } => Record::Control(
+                    frame(packet)?
                         .controls
                         .as_ref()?
                         .control_entries
                         .get(index)?,
                 ),
                 RecordRef::Keyframe(index) => {
-                    let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(
+                    let PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(
                         table,
                     )) = &packet.body
                     else {
@@ -213,7 +191,7 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
                     Record::Keyframe(table.records.get(index)?.record.as_ref()?)
                 }
                 RecordRef::Event(index) => {
-                    let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(frame)) =
+                    let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) =
                         &packet.body
                     else {
                         return None;
@@ -229,6 +207,7 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
 pub(super) fn index(
     film: &Film,
     players: Option<&crate::theater::resolved::identity::PlayerTable>,
+    summaries: &[interpretation::SummaryPacketInterpretation],
 ) -> Vec<Event> {
     let mut events = Vec::new();
     for chunk in film.replication_chunks() {
@@ -251,16 +230,15 @@ pub(super) fn index(
                 })
             };
             push(RecordRef::Packet, EventKind::Packet, None, None);
-            if let PacketRead::Complete(ReplicationStreamPacketBody::FramePacketBody(
-                frame_packet,
-            )) = &packet.body
+            if let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame_packet)) =
+                &packet.body
             {
                 for i in 0..frame_packet.events.records.len() {
                     push(RecordRef::Event(i), EventKind::RecordedEvent, None, None);
                 }
             }
-            for continuation in [false, true] {
-                if let Some(frame) = frame(packet, continuation) {
+            {
+                if let Some(frame) = frame(packet) {
                     for (i, record) in frame.records.iter().enumerate() {
                         let kind = match record.header.kind {
                             RecordKind::New => EventKind::EntityNew,
@@ -268,23 +246,12 @@ pub(super) fn index(
                             RecordKind::Delta => EventKind::EntityDelta,
                             RecordKind::End => EventKind::EntityEnd,
                         };
-                        push(
-                            RecordRef::Entity {
-                                continuation,
-                                index: i,
-                            },
-                            kind,
-                            record.header.id,
-                            None,
-                        );
+                        push(RecordRef::Entity { index: i }, kind, record.header.id, None);
                     }
                     if let Some(controls) = &frame.controls {
                         for (i, entry) in controls.control_entries.iter().enumerate() {
                             push(
-                                RecordRef::Control {
-                                    continuation,
-                                    index: i,
-                                },
+                                RecordRef::Control { index: i },
                                 EventKind::Control,
                                 None,
                                 Some(usize::from(entry.index)),
@@ -293,7 +260,7 @@ pub(super) fn index(
                     }
                 }
             }
-            if let PacketRead::Complete(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
+            if let PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
                 &packet.body
             {
                 for (i, attempt) in table.records.iter().enumerate() {
@@ -326,18 +293,12 @@ pub(super) fn index(
                 player_index: None,
                 change: None,
             });
-            let PacketRead::Complete(SummaryPacketBody::Events { segments, .. }) = &packet.body
-            else {
+            let Some(read) = summaries.iter().find(|read| {
+                read.source.chunk == chunk_index && read.source.packet == packet_index
+            }) else {
                 continue;
             };
-            for (i, summary) in segments
-                .iter()
-                .filter_map(|segment| match segment {
-                    SummarySegment::Event(event) => Some(event),
-                    SummarySegment::Opaque { .. } => None,
-                })
-                .enumerate()
-            {
+            for (i, summary) in read.events.iter().enumerate() {
                 let player_index = (|| {
                     let xuid = summary.xuid;
                     let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);

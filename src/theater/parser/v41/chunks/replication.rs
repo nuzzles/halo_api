@@ -23,7 +23,7 @@ impl V41ReplicationStreamChunkReader {
                     event_gate15: None,
                 };
                 let body = match packets::decode(header.packet_type, payload, &mut context) {
-                    Ok(value) => PacketRead::Complete(value),
+                    Ok(value) => PacketRead::Decoded(value),
                     Err(reason) => PacketRead::Opaque { reason },
                 };
                 let packet = ReplicationStreamPacket {
@@ -31,7 +31,7 @@ impl V41ReplicationStreamChunkReader {
                     header,
                     body,
                 };
-                debug_assert!(packet.body_type_matches_header());
+                debug_assert!(packet.payload(&data).is_some());
                 packet
             })
             .collect();

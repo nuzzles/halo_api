@@ -12,7 +12,6 @@ pub type ReplicationStreamChunk = Chunk<PacketStream<ReplicationStreamPacketBody
 impl ReplicationStreamChunk {
     /// Return the packet's retained raw payload when its recorded size agrees.
     pub fn payload(&self, packet: &ReplicationStreamPacket) -> Option<&[u8]> {
-        let range = packet.source.payload;
-        self.data.get(range.start..range.end)
+        packet.payload(&self.data)
     }
 }

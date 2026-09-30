@@ -27,12 +27,10 @@ pub(crate) fn decode_production_frame_contextual(
         body_encoding.to_mut().extra_fields = false;
     }
     let mut out = ProductionFrame {
-        record_prefixes: Vec::new(),
         messages: None,
         records: vec![],
         controls: None,
         entity_end: None,
-        views_completed: 0,
         end_bit: start_bit,
     };
     if start_bit == context.preamble_bits && context.preamble_bits >= 1 {
@@ -43,7 +41,6 @@ pub(crate) fn decode_production_frame_contextual(
         if !complete {
             return Some(out);
         }
-        out.views_completed += 1;
     }
     world.current_view = 0;
     let mut hit_end = false;
@@ -52,18 +49,31 @@ pub(crate) fn decode_production_frame_contextual(
         if out.end_bit >= data.len().saturating_mul(8) as i64 {
             break;
         }
-        if encoding.extra_fields {
-            out.record_prefixes.push(ComponentField {
+        let prefix = if encoding.extra_fields {
+            let start = usize::try_from(out.end_bit).ok()?;
+            let Some(raw) = RawBits::from_source(data, start, 32) else {
+                out.entity_end = Some(ProductionEntityEnd::Truncated);
+                break;
+            };
+            Some(ComponentField {
                 name: "record.prefix".into(),
-                bit: usize::try_from(out.end_bit).ok()?,
+                bit: start,
                 width: 32,
-                raw: RawBits::from_source(data, usize::try_from(out.end_bit).ok()?, 32)?,
-            });
-        }
+                raw,
+            })
+        } else {
+            None
+        };
         let header_bit = out
             .end_bit
             .wrapping_add(if encoding.extra_fields { 32 } else { 0 });
-        let header = super::records::decode_frame_header_signed(data, header_bit, encoding)?;
+        let Some(mut header) =
+            super::records::decode_frame_header_signed(data, header_bit, encoding)
+        else {
+            out.entity_end = Some(ProductionEntityEnd::Truncated);
+            break;
+        };
+        header.prefix = prefix.clone();
         if header.kind == RecordKind::End {
             out.end_bit = header.end_bit;
             out.entity_end = Some(ProductionEntityEnd::Marker(header));
@@ -90,7 +100,7 @@ pub(crate) fn decode_production_frame_contextual(
         if let Some(ti) = world.archetype(id & 0x3fff_ffff) {
             bindings.bind(id, ti);
         }
-        let Some(record) = super::components::decode_entity_record_with_capture_slots(
+        let Some(mut record) = super::components::decode_entity_record_with_capture_slots(
             data,
             header_bit,
             registry,
@@ -108,19 +118,35 @@ pub(crate) fn decode_production_frame_contextual(
             out.entity_end = Some(ProductionEntityEnd::Truncated);
             break;
         };
+        record.header.prefix = prefix;
         out.end_bit = record.end_bit;
         observer(&record, capture_slot, world);
         let complete = record.stop == EntityViewStop::Complete;
-        if complete {
-            match record.header.kind {
-                RecordKind::New => {
-                    let _ =
-                        world.bind_reference_new(id, record.archetype?, record.header.start_bit);
+        // The NEW declaration establishes the grammar for later deltas once
+        // its ID and archetype are recorded. A truncated component/default body
+        // does not erase that declaration or make its missing state complete.
+        // Resolution separately decides whether a lifetime/state is materialized.
+        match record.header.kind {
+            RecordKind::New
+                if matches!(
+                    record.stop,
+                    EntityViewStop::Complete | EntityViewStop::Truncated
+                ) =>
+            {
+                if let Some(archetype) = record
+                    .archetype
+                    .filter(|ti| *ti < 50 && registry.archetype(*ti as usize).is_some())
+                {
+                    let _ = world.bind_reference_new(id, archetype, record.header.start_bit);
                 }
-                RecordKind::Delete => world.unbind(id & 0x3fff_ffff),
-                _ => {}
             }
-        } else {
+            // DELETE's recorded header ends this parser declaration even if
+            // its following metadata word is truncated. Keep that truncation
+            // on the record rather than retaining a stale decoding schema.
+            RecordKind::Delete => world.unbind(id & 0x3fff_ffff),
+            _ => {}
+        }
+        if !complete {
             out.entity_end = Some(ProductionEntityEnd::Failure(record.stop.clone()));
         }
         out.records.push(record);
@@ -129,7 +155,6 @@ pub(crate) fn decode_production_frame_contextual(
         }
     }
     if hit_end {
-        out.views_completed += 1;
         let controls = components::decode_control_view_contextual(
             data,
             out.end_bit,
@@ -137,7 +162,6 @@ pub(crate) fn decode_production_frame_contextual(
             context.reader,
         );
         out.end_bit = controls.end_bit;
-        out.views_completed += usize::from(controls.stop == FrameViewStop::Complete);
         out.controls = Some(controls);
     } else if out.entity_end.is_none() {
         out.entity_end = Some(if out.records.len() == 8192 {
@@ -155,4 +179,23 @@ pub(crate) fn decode_production_frame_contextual(
         }
     }
     Some(out)
+}
+
+/// Derived traversal statistic for pinned reference-oracle checks only.
+#[cfg(test)]
+pub(crate) fn completed_views(frame: &ProductionFrame) -> usize {
+    usize::from(
+        frame
+            .messages
+            .as_ref()
+            .is_some_and(|v| v.stop == FrameViewStop::Complete),
+    ) + usize::from(matches!(
+        frame.entity_end,
+        Some(ProductionEntityEnd::Marker(_) | ProductionEntityEnd::Rejected { .. })
+    )) + usize::from(
+        frame
+            .controls
+            .as_ref()
+            .is_some_and(|v| v.stop == FrameViewStop::Complete),
+    )
 }

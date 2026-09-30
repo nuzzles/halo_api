@@ -47,6 +47,7 @@ fn decode_view(
     };
     let cursor = Cursor::guarded(data, bit);
     let mut r = Reader {
+        references: Vec::new(),
         reference_widths: context.map(|c| super::ComponentWidths {
             movement: &c.profile.movement,
             mpp: c.profile.mpp,
@@ -60,7 +61,6 @@ fn decode_view(
         position_slot: 0,
         position_fallback: false,
         movement_slot: None,
-        references: Vec::new(),
         diagnostics: Default::default(),
         cursor,
         fields: Vec::new(),
@@ -123,7 +123,6 @@ fn walk<'a>(
             third_analog: None,
             extra: None,
             flags: None,
-            action: None,
         };
         if r.bit("control.input.present")? {
             entry.short = r
@@ -153,12 +152,12 @@ fn walk<'a>(
             if r.cursor.position > (data.len() as i64 * 8) {
                 return None;
             }
-            entry.action = Some(match action {
-                control::ActionBlockRead::Decoded(block) => block,
+            match action {
+                control::ActionBlockRead::Decoded => {}
                 control::ActionBlockRead::MissingPositionContext => {
                     return Some(unsupported("action aim position context unavailable"));
                 }
-            });
+            }
             r.cursor = Cursor::guarded(data, r.cursor.position);
         }
         if r.bit("control.secondary.present")? {

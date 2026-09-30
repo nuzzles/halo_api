@@ -56,4 +56,5 @@ evidence live under `resolved`.
 - [Format and fidelity](FORMAT.md)
 - [Resolution and playback](RESOLUTION.md)
 - [Validation and reference provenance](VALIDATION.md)
+- [Canonical audit and fidelity evidence matrix](CANONICAL_AUDIT.md)
 - [Credits](CREDIT.md)

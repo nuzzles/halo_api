@@ -27,6 +27,13 @@ pub struct PacketInterpretation {
     pub packet_head: Option<PacketHeadRead>,
     pub damage: Option<WeaponDamageTrace>,
 }
+/// One summary packet's guarded candidate reads, never canonical records.
+#[derive(Debug, Clone)]
+pub struct SummaryPacketInterpretation {
+    pub source: SourceRef,
+    pub events: Vec<SummaryEventRead>,
+}
+
 /// Heuristic evidence is deliberately separate from structurally decoded records.
 /// A selected event gate or bootstrap anchor is not a recorded fact.
 #[derive(Debug, Clone)]
@@ -37,6 +44,7 @@ pub struct Interpretations {
     pub event_gate15: EventGate15Selection,
     pub chunks: Vec<ChunkInterpretation>,
     pub packets: Vec<PacketInterpretation>,
+    pub summary_packets: Vec<SummaryPacketInterpretation>,
 }
 impl Interpretations {
     pub(super) fn from_film(film: &Film) -> Self {
@@ -69,6 +77,28 @@ impl Interpretations {
             .map(|chunk| ChunkInterpretation {
                 source_position: chunk.source_position,
                 highlights: read_v41_highlights(&chunk.data),
+            })
+            .collect();
+        let summary_packets = film
+            .summary_chunks()
+            .flat_map(|chunk| {
+                chunk
+                    .body
+                    .packets
+                    .iter()
+                    .enumerate()
+                    .filter_map(move |(index, packet)| {
+                        packet.body.decoded()?;
+                        let payload = chunk.payload(packet)?;
+                        Some(SummaryPacketInterpretation {
+                            source: SourceRef {
+                                chunk: chunk.source_position,
+                                packet: index,
+                                record: super::RecordRef::Packet,
+                            },
+                            events: summary::read_summary_candidates(payload),
+                        })
+                    })
             })
             .collect();
         let mut packets = Vec::new();
@@ -127,6 +157,7 @@ impl Interpretations {
             event_gate15,
             chunks,
             packets,
+            summary_packets,
         }
     }
 }
@@ -188,3 +219,7 @@ pub use super::identity::{
     FilmIdentity, IdentityField, IdentityRead, IdentityValue, PlayerTable, PlayerTableError,
     PlayerTableReport,
 };
+
+/// Bounded field reads and guarded associations from summary packet payloads.
+pub mod summary;
+pub use summary::SummaryEventRead;

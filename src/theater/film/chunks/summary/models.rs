@@ -1,20 +1,14 @@
-use super::*;
+//! The v41 summary record grammar is not yet established.
+//! [`SummaryPacketBody`](super::SummaryPacketBody) retains the recorded count and
+//! the entire source range of its record stream. Guarded candidate field reads
+//! belong to the resolved interpretation layer, not canonical record models.
 
-/// A summary event decoded independently from replication records.
+use crate::theater::film::BitRange;
+
+/// The recorded summary stream whose sequential record grammar is unresolved.
+/// Every bit remains available in the enclosing packet payload; no inferred
+/// record boundaries are substituted for this opaque source range.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct SummaryEvent {
-    pub xuid: u64,
-    /// Recorded UTF-16 code units, excluding the zero terminator.
-    pub gamertag_utf16: Vec<u16>,
-    /// Recorded film-relative timestamp in milliseconds.
-    pub timestamp_ms: u32,
-    /// Raw metadata byte (medal code for medal events).
-    pub metadata: u8,
-    /// Raw medal flag.
-    pub medal_flag: u8,
-    pub type_code: u8,
-    /// Exact 60-byte event tail; intervening identity state is not decoded.
+pub struct SummaryRecordStream {
     pub source: BitRange,
-    /// Recorded XUID field, independently of the roster and gamertag.
-    pub identity_source: BitRange,
 }

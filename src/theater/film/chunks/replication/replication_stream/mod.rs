@@ -32,7 +32,13 @@ pub enum ReplicationStreamPacketBody {
     EndPacketBody,
 }
 
+mod coverage;
+
 impl super::PacketBody for ReplicationStreamPacketBody {
+    fn source_regions(&self) -> Vec<super::SourceRegion> {
+        coverage::regions(self)
+    }
+
     fn packet_type(&self) -> u16 {
         match self {
             Self::FramePacketBody(_) => 0,

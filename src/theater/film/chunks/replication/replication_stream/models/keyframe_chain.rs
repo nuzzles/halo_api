@@ -10,6 +10,8 @@ pub enum KeyframeChainStop {
     Slot,
     Budget,
     InvalidEncoding,
+    /// A recognized entry's fixed header extends beyond the packet payload.
+    Truncated,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]

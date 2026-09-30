@@ -3,7 +3,7 @@
 //! must happen before its assistant or damage shares can be published.
 use super::bits::{Bits, Cursor};
 pub(crate) use crate::theater::film::chunks::replication::replication_stream::models::kill_event_chain::{
-    KillEventFields, EventField, EventFieldStage, EventFieldValue,
+    EventField, EventFieldStage, EventFieldValue,
     EventListRead, EventListStop, EventRecord,
 };
 use serde::{Deserialize, Serialize};
@@ -134,6 +134,21 @@ const CONFIG: [[i8; 3]; 123] = [
     [8, 8, 7],    // 122
 ];
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct KillEventFields {
+    pub killer: i32,
+    pub victim: i32,
+    pub assist: i32,
+    /// Raw integer percentage; values above 100 are retained.
+    pub killer_pct: u32,
+    /// Meaningful as a damage share only when assist is present.
+    pub assist_pct: u32,
+    /// Unresolved one-bit field, retained without interpretation.
+    pub flag: u8,
+    /// -1 means a mandatory field exceeded the packet bounds.
+    pub end: i64,
+}
+
 impl KillEventFields {
     pub(crate) fn plausible(&self) -> bool {
         self.end > 0 && self.killer >= 0 && self.victim >= 0 && self.killer != self.victim
@@ -156,7 +171,7 @@ pub(crate) fn read_reference_event_list(
         end_bit: start_bit,
         gate15,
         records: Vec::new(),
-        fields: Vec::new(),
+        terminator: None,
         stop: EventListStop::InvalidStart,
     };
     let Some(mut r) = Reader::new(data, start_bit) else {
@@ -173,9 +188,10 @@ pub(crate) fn read_reference_event_list(
             break;
         }
         let start = r.cursor.position;
-        let field_start = r.trace.as_ref().unwrap().len();
+        debug_assert!(r.trace.as_ref().unwrap().is_empty());
         r.stage = EventFieldStage::Header;
         if r.read(1) == 0 {
+            out.terminator = r.trace.as_mut().unwrap().pop();
             out.stop = if r.over {
                 EventListStop::Truncated
             } else {
@@ -189,9 +205,8 @@ pub(crate) fn read_reference_event_list(
             end_bit: r.cursor.position,
             code: (!r.over).then_some(code as u8),
             body_start_bit: None,
-            field_range: [field_start, 0],
+            fields: Vec::new(),
             layout_complete: false,
-            kill_fields: None,
         };
         let stop = if r.over {
             Some(EventListStop::Truncated)
@@ -208,9 +223,6 @@ pub(crate) fn read_reference_event_list(
             } else {
                 record.body_start_bit = Some(r.cursor.position);
                 r.stage = EventFieldStage::Body;
-                if code == 85 {
-                    record.kill_fields = read_kill_event_fields(data, r.cursor.position);
-                }
                 if code == 15 && gate15.is_none() {
                     Some(EventListStop::MissingRuntimeGate15)
                 } else if body(&mut r, data, code, gate15.unwrap_or(false)) {
@@ -225,21 +237,35 @@ pub(crate) fn read_reference_event_list(
                 }
             }
         };
-        record.end_bit = r.cursor.position;
-        record.field_range[1] = r.trace.as_ref().unwrap().len();
+        record.fields = std::mem::take(r.trace.as_mut().unwrap());
+        record.end_bit = record
+            .fields
+            .iter()
+            .filter(|field| !matches!(field.value, EventFieldValue::Unavailable))
+            .filter_map(|field| field.bit.checked_add(field.width))
+            .max()
+            .unwrap_or(record.start_bit);
         out.records.push(record);
         if let Some(stop) = stop {
             out.stop = stop;
             break;
         }
     }
-    out.end_bit = r.cursor.position;
-    out.fields = r.trace.unwrap();
+    out.end_bit = out
+        .records
+        .last()
+        .map_or(start_bit, |record| record.end_bit)
+        .max(
+            out.terminator
+                .as_ref()
+                .map_or(start_bit, |field| field.bit + field.width),
+        );
     out
 }
 
-// A failed reference read leaves the position unchanged but sticks an overflow flag.
-// Later short reads still run. Preserve that behavior for raw truncated fields.
+// Stop structural field publication at the first failed read. The reference may
+// retry shorter reads at that unchanged cursor; those are not established fields
+// after the missing preceding word, so canonical decoding does not publish them.
 struct Reader<'a> {
     cursor: Cursor<'a>,
     over: bool,
@@ -256,6 +282,9 @@ impl<'a> Reader<'a> {
         })
     }
     fn read(&mut self, n: usize) -> u64 {
+        if self.over {
+            return 0;
+        }
         // Reference wide reads consume all requested bits, even beyond 64 bits.
         if n > 64 {
             self.skip(n);
@@ -277,6 +306,9 @@ impl<'a> Reader<'a> {
         })
     }
     fn skip(&mut self, n: usize) {
+        if self.over {
+            return;
+        }
         let bit = self.cursor.position;
         let ok = self.cursor.skip(n).is_some();
         if let Some(trace) = &mut self.trace {

@@ -200,6 +200,7 @@ pub(crate) fn decode_entity_record_with_capture_slots_and_generation_policy(
     }
     let capture_map = encoding.position_capture.as_ref().map(|c| c.map());
     let mut r = Reader {
+        references: Vec::new(),
         reference_widths: slots.context.as_ref().map(|c| super::ComponentWidths {
             movement: &c.profile.movement,
             mpp: c.profile.mpp,
@@ -218,7 +219,6 @@ pub(crate) fn decode_entity_record_with_capture_slots_and_generation_policy(
         position_slot: 0,
         position_fallback: false,
         movement_slot: slots.movement,
-        references: Vec::new(),
         diagnostics: Default::default(),
         cursor: Cursor::signed(data, bit, None),
         fields: vec![],
@@ -299,11 +299,11 @@ fn read_entity_record(
         }
     }
     let mut rec = EntityRecord {
-        references: Vec::new(),
         header,
         archetype: None,
         mask: None,
         fields: Vec::new(),
+        default_state: None,
         components: Vec::new(),
         end_bit: r.cursor.position,
         stop: EntityViewStop::Truncated,
@@ -342,7 +342,6 @@ fn read_entity_record(
             field.bit >= start && field.bit < end
         })
     });
-    rec.references = std::mem::take(&mut r.references);
     Some(rec)
 }
 
@@ -387,7 +386,7 @@ fn record_body(
         r.gate("baseline", 7, true)?;
         binding.archetype
     };
-    rec.archetype = Some(ti);
+    rec.archetype = (rec.header.kind == RecordKind::New).then_some(ti);
     let arch = registry.archetype(ti as usize).filter(|_| ti < 50);
     if ti >= 50 || (arch.is_none() && !(reference_policy && rec.header.kind == RecordKind::New)) {
         return Some(EntityViewStop::InvalidArchetype { archetype: ti });
@@ -396,27 +395,46 @@ fn record_body(
         let skip_default = ti != 35
             && (!encoding.new_record.deserialize_defaults
                 || !(ti == 41 || defaults::has_reference_deserializer(ti)));
-        if skip_default {
-            if let Some(width) = encoding.new_record.reference_fallback_default_bits {
-                read_reference_new_skip(
-                    r,
-                    width,
-                    "new.default_skipped",
-                    "new default state",
-                    crate::theater::parser::v41::WidthPurpose::NewRecordDefault,
-                )?;
+        let default_start = r.cursor.position;
+        let field_start = r.fields.len();
+        let result = (|| {
+            if skip_default {
+                if let Some(width) = encoding.new_record.reference_fallback_default_bits {
+                    read_reference_new_skip(
+                        r,
+                        width,
+                        "new.default_skipped",
+                        "new default state",
+                        crate::theater::parser::v41::WidthPurpose::NewRecordDefault,
+                    )?;
+                } else {
+                    read_new_raw_bits(
+                        r,
+                        "new.default_skipped",
+                        encoding.new_record.fallback_default_bits,
+                    )?;
+                }
+                Some(true)
+            } else if ti == 41 {
+                defaults::projectile(r, encoding.mpp_widths, true)
             } else {
-                read_new_raw_bits(
-                    r,
-                    "new.default_skipped",
-                    encoding.new_record.fallback_default_bits,
-                )?;
+                defaults::state(r, ti, encoding.mpp_widths)
             }
-        } else if !(if ti == 41 {
-            defaults::projectile(r, encoding.mpp_widths, true)
-        } else {
-            defaults::state(r, ti, encoding.mpp_widths)
-        })? {
+        })();
+        rec.default_state = Some(super::DefaultState {
+            source: super::BitRange {
+                start: usize::try_from(default_start).ok()?,
+                end: usize::try_from(r.cursor.position).ok()?,
+            },
+            fields: r.fields.drain(field_start..).collect(),
+            status: match result {
+                Some(true) if skip_default => super::DefaultStateStatus::Opaque,
+                Some(true) => super::DefaultStateStatus::Complete,
+                Some(false) => super::DefaultStateStatus::Unsupported,
+                None => super::DefaultStateStatus::Truncated,
+            },
+        });
+        if !result? {
             return Some(EntityViewStop::UnsupportedDefault { archetype: ti });
         }
         r.bit("new.component_gate")?;
@@ -443,7 +461,6 @@ fn record_body(
         let name = registry_component.name()?;
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
-        let calibrated = super::widths::is_calibrated(r, name, Some(&encoding.component_widths));
         let status = super::widths::read_component(
             r,
             name,
@@ -457,9 +474,7 @@ fn record_body(
             name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
-            variant: status
-                .map(|_| super::widths::result_variant(name, &r.fields[field_start..], calibrated)),
-            status,
+            status: status.into(),
             fields: r.fields[field_start..].to_vec(),
         };
         rec.components.push(component.clone());
@@ -475,17 +490,30 @@ fn record_body(
             });
         }
         if !status? {
+            if let Some(field) = super::m4b::required_runtime_field(name) {
+                return Some(EntityViewStop::RuntimeContextUnavailable {
+                    index,
+                    name: name.to_owned(),
+                    field: field.to_owned(),
+                });
+            }
             return Some(EntityViewStop::UnsupportedComponent {
                 index,
                 name: name.to_owned(),
             });
         }
-        if encoding.corruption_check {
-            r.gate("component.corruption_check", 32, true)?;
-        }
+        let check = if encoding.corruption_check {
+            r.gate("component.corruption_check", 32, true)
+        } else {
+            Some(())
+        };
         component.end_bit = r.cursor.position;
         component.fields = r.fields[field_start..].to_vec();
+        if check.is_none() {
+            component.status = super::ComponentReadStatus::Truncated;
+        }
         *rec.components.last_mut().unwrap() = component;
+        check?;
     }
     if rec.header.kind == RecordKind::New {
         if let Some(grammar) = &r.live_grammar {

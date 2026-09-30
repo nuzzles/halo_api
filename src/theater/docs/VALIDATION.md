@@ -39,8 +39,8 @@ CARGO_INCREMENTAL=0 cargo check --target wasm32-unknown-unknown --lib
 ```
 
 The corpus compares 403,465 frame-reader boundaries against pinned outputs and
-checks timestamp/source consistency for 3,667 summary records. The frame oracle
-exercises the reference reader traversal separately from Film's continuation-aware
+checks timestamp/source consistency for 3,667 derived summary candidates. The frame oracle
+exercises the reference reader traversal separately from Film's canonical sequential
 decoder; it does not establish field-for-field agreement for every Film record. A negative
 keyframe test puts a plausible header beyond an invalid boundary and verifies that
 parsing stops, preserves the bytes, and creates no resolved entities. Candidate
@@ -63,3 +63,89 @@ The manifest also retains `fire-d61443e`, `highlights-corpus`, `native-damage`,
 reference provenance. Current tests do not consume these five fixtures; they are
 not counted as current coverage. Focused packet-head and damage tests use their
 own cases. Interpretation searches do not have independent semantic action goldens.
+
+## Canonical-model audit
+
+The ordinary tests do not run the captured corpus unless explicitly requested.
+The canonical-model audit rechecks that corpus explicitly. The initial run found
+reference endpoints beyond source bounds (for example 34 bits in a 32-bit payload).
+Bounded decoding intentionally refuses synthetic source values. Because truncation
+can also affect subsequent grammar bindings, exact downstream reference boundary
+agreement requires matching independently captured context; a passing ordinary
+test suite alone cannot establish it. The corpus remains an explicit regression check.
+
+`reference-contexts-d61443e-v41.jsonl.zlib` adds the independently captured Go
+binding context before each frame, represented by 1,241 changed snapshots. All
+403,465 frame boundaries were checked against the unchanged original baseline
+before this supplemental fixture was retained. The corpus comparison restores
+the supplied reference context for each reader invocation; it does not assume
+that earlier bounded Rust reads mutate context identically to padded Go reads.
+The canonical Film pipeline is parsed separately and retains source bytes.
+One reference component-start boundary is also retained: LevelUp assumes the
+unrecorded `vehicle+0x818` flag and reads vehicle physics. Rust reports
+`RuntimeContextUnavailable` at the same independently captured start boundary
+and consumes none of that component. It does not infer a flag from payload shape.
+This distinction is necessary because a reference endpoint inside a later packet
+does not prove that earlier bindings were established without synthetic bits.
+
+The reproducible Go capture harness is retained at
+`src/theater/fixtures/reference-contexts-v41_test.go`. Copy it into the pinned
+reference's `internal/grammar` package, set `HALO_FILM_CORPUS` to the 32-film corpus
+and `HALO_REFERENCE_OUTPUT` to a scratch output path, then run only
+`TestHaloRustReferenceContexts`. The reference's tracked source files were
+unmodified when this fixture was captured; the added harness emits only Go
+reader results and contexts, never Rust output.
+
+Type-0 view ordering is supported by the pinned reference grammar's
+`frame_vue_messages.go`: a configuration bit, the message view, entity view, then
+control view. The former overlapping initial/continuation reader outputs have
+been replaced by one canonical traversal. Runtime-dependent or conflicting
+message boundaries stop traversal rather than selecting a candidate interpretation.
+
+Latest Phase 1/2 checkpoint: 76 ordinary tests and 7 doctests pass. All-feature,
+all-target Clippy with warnings denied, strict Rustdoc, WASM library checking,
+formatting, and diff whitespace checks pass. Independent new cases cover signed
+source-guard failures, truncated no-archetype keyframe headers, and a partial
+component corruption check without duplicated fields.
+
+The separately run captured test passes all 32 films after the summary migration:
+403,465 supplied-context frame-reader checks, one explicitly bounded runtime
+refusal, and 3,667 derived summary candidates. Canonical summary count/stream
+retention and derived provenance have independent synthetic checks. The
+controller/walk-forward context differences and reference vehicle assumption are
+documented in `CANONICAL_AUDIT.md`. No original boundary expectations have been
+replaced. Canonical frame/keyframe extents and source-backed component fields
+are also checked; this does not establish complete field-for-field agreement
+for every unknown layout. Later checkpoints add explicit packet source coverage.
+
+After the declaration and fixed UTF-16 changes, 78 ordinary tests and 7 doctests
+pass. An unrelated backoff timing test failed during a concurrent reference run;
+it passed both in isolation and on the full-suite rerun. Strict Clippy, Rustdoc,
+WASM, formatting, and whitespace checks passed for those implementation changes.
+
+After the runtime refusal and summary interpretation migration, 81 ordinary tests
+and 7 doctests pass. The same unrelated timing assertion failed under the concurrent
+corpus load and passed on the full-suite rerun after the corpus finished. No
+non-Theater code was changed. All-target/all-feature Clippy with warnings denied,
+strict Rustdoc, WASM library checking, formatting, and whitespace checks pass.
+
+## Completed canonical-model/parser checkpoint
+
+After the full source/hierarchy audit, 86 ordinary tests and 7 doctests pass.
+The separately executed 32-film corpus passes 403,465 supplied-context reader
+checks, one source-verified missing-runtime refusal, and 3,667 derived summaries.
+Every captured replication and summary packet passes envelope and source-coverage
+checks. Default-state fields and component fields are checked against retained
+source bytes; masks have an independently authored two-slot datum-layout test.
+Negative tests reject conflicting coverage, invalid public envelopes, partial
+headers/checks, missing runtime gates, and shorter field retries after a failed
+word. All-feature/all-target Clippy with warnings denied, strict Rustdoc, WASM
+library checking, formatting, diff whitespace, and all 14 pinned fixture hashes
+pass. The full ordinary suite was run before the final corpus to avoid unrelated
+timing-test contention. The final corpus completed in approximately 143 seconds.
+
+Phase 1/2 completion means sound structural decoding and source preservation with
+explicit unknown regions. It does not mean all unsupported layouts have a grammar,
+full semantic LevelUp parity is proven, or a byte-for-byte encoder exists. The
+requirement/evidence matrix and deliberate reference differences are recorded in
+`CANONICAL_AUDIT.md`. Runtime/semantic-event redesign remains a follow-on phase.

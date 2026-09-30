@@ -1,11 +1,10 @@
 //! Shared v41 actor/input component grammar.
 //! Reference action fields and source ranges follow d61443e bloc_action.go.
 use super::Reader;
-pub(crate) use crate::theater::film::chunks::replication::components::control::ActionBlock;
 
 /// Internal outcome distinct from a failed primitive read (`None`).
 pub(super) enum ActionBlockRead {
-    Decoded(ActionBlock),
+    Decoded,
     MissingPositionContext,
 }
 
@@ -31,35 +30,23 @@ pub(super) fn actor_control(r: &mut Reader<'_>, level: u32) -> Option<bool> {
 }
 
 pub(super) fn actions(r: &mut Reader<'_>) -> Option<ActionBlockRead> {
-    let start_bit = r.cursor.position;
-    let mut block = ActionBlock {
-        start_bit,
-        end_bit: start_bit,
-        present: r.bit("actions.present")?,
-        triggers: [0; 2],
-        barrels: [0; 2],
-        weapons: [-2; 2],
-    };
-    if block.present && !action_body(r, &mut block)? {
+    if r.bit("actions.present")? && !action_body(r)? {
         return Some(ActionBlockRead::MissingPositionContext);
     }
-    block.end_bit = r.cursor.position;
-    Some(ActionBlockRead::Decoded(block))
+    Some(ActionBlockRead::Decoded)
 }
 
-fn action_body(r: &mut Reader<'_>, block: &mut ActionBlock) -> Option<bool> {
+fn action_body(r: &mut Reader<'_>) -> Option<bool> {
     let mut a = [0; 2];
     let mut b = [0; 2];
     if r.bit("actions.a.present")? {
         for (i, value) in a.iter_mut().enumerate() {
             *value = r.r(&format!("actions.a[{i}]"), 3)?;
-            block.triggers[i] = (*value as u8).reverse_bits() >> 5;
         }
     }
     if r.bit("actions.b.present")? {
         for (i, value) in b.iter_mut().enumerate() {
             *value = r.r(&format!("actions.b[{i}]"), 2)?;
-            block.barrels[i] = (*value as u8).reverse_bits() >> 6;
         }
     }
     if r.bit("actions.aim.present")? {
@@ -88,9 +75,7 @@ fn action_body(r: &mut Reader<'_>, block: &mut ActionBlock) -> Option<bool> {
     r.r("actions.state", 3)?;
     for i in 0..2 {
         if a[i] != 0 || b[i] != 0 {
-            block.weapons[i] = r
-                .gated_value(&format!("actions.slot[{i}]"), 2, false)?
-                .map_or(-1, |v| v as i8);
+            r.gated_value(&format!("actions.slot[{i}]"), 2, false)?;
         }
     }
     if !r.bit("actions.tail.present")? {

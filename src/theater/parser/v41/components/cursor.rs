@@ -24,7 +24,7 @@ impl<'a> ComponentCursor<'a> {
             mirror,
         }
     }
-    /// Reference view guards use signed wrapping position + width before reading.
+    /// Retain the supplied coordinate; source guards validate it before reading.
     pub(crate) fn guarded(data: &'a [u8], position: i64) -> Self {
         Self::signed(data, position, None)
     }
@@ -32,7 +32,12 @@ impl<'a> ComponentCursor<'a> {
         self.data.len().saturating_mul(8)
     }
     pub(crate) fn fits_source(&self, width: i64) -> bool {
-        self.position.wrapping_add(width) <= (self.data.len() as i64).wrapping_mul(8)
+        let Some(end) = self.position.checked_add(width) else {
+            return false;
+        };
+        self.position >= 0
+            && width >= 0
+            && usize::try_from(end).is_ok_and(|end| end <= self.source_bits())
     }
     pub(crate) fn skip_signed(&mut self, width: i64) {
         self.position = self.position.wrapping_add(width);
@@ -79,5 +84,21 @@ impl<'a> ComponentCursor<'a> {
             cursor: self,
         };
         crate::theater::parser::v41::decode_reference_record_header(&mut guard.reader, width, base)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ComponentCursor;
+
+    #[test]
+    fn source_guard_requires_a_nonnegative_nonoverflowing_range() {
+        let bytes = [0u8; 2];
+        for (start, width) in [(-1, 1), (0, -1), (i64::MAX, 1), (15, 2), (17, 0)] {
+            assert!(!ComponentCursor::signed(&bytes, start, None).fits_source(width));
+        }
+        for (start, width) in [(0, 16), (15, 1), (16, 0)] {
+            assert!(ComponentCursor::signed(&bytes, start, None).fits_source(width));
+        }
     }
 }
