@@ -1,4 +1,4 @@
-//! Canonical Theater recording and resolved query/playback API.
+//! Canonical Theater recording and owned runtime API.
 //!
 //! ```no_run
 //! use halo_api::theater::{Film, film::{FilmChunk, ChunkKind}};
@@ -7,14 +7,14 @@
 //!     FilmChunk { kind: ChunkKind::Registry, index: None, start_ms: None, data: registry },
 //!     FilmChunk { kind: ChunkKind::Replication, index: None, start_ms: None, data: replication },
 //! ])?;
-//! let mut resolved = film.resolve();
-//! let _: Vec<&halo_api::theater::film::ReplicationStreamChunk> = film.replication_chunks().collect();
-//! let _: &halo_api::theater::film::chunks::registry::FilmRegistry = &film.registry.body.registry;
-//! let _: &[halo_api::theater::resolved::ResolvedSummary] = resolved.summaries();
+//! let mut runtime = halo_api::theater::TheaterRuntime::load(film);
+//! let _: Vec<&halo_api::theater::film::ReplicationStreamChunk> = runtime.film().replication_chunks().collect();
+//! let _: &halo_api::theater::film::chunks::registry::FilmRegistry = &runtime.film().registry.body.registry;
+//! let _: &[halo_api::theater::runtime::SummaryEvent] = runtime.summary_events();
 //! let _: Vec<halo_api::theater::film::chunks::replication::components::ComponentField> = Vec::new();
-//! let _: &[halo_api::theater::resolved::Event] = resolved.events();
-//! assert!(std::ptr::eq(resolved.film(), &film));
-//! let world = resolved.seek(10_000_000);
+//! let _: &[halo_api::theater::runtime::Event] = runtime.events();
+//!
+//! let world = runtime.seek(10_000_000);
 //! # Ok(())
 //! # }
 //! ```
@@ -31,8 +31,20 @@
 //! use halo_api::theater::parser::FilmSource;
 //! ```
 //! See this module's `docs/` directory for the fidelity and validation contract.
+//! The resolved storage is deliberately private to the runtime.
+//! ```compile_fail
+//! use halo_api::theater::runtime::resolved::ResolvedFilm;
+//! ```
+//! ```compile_fail
+//! use halo_api::theater::ResolvedFilm;
+//! ```
+//! ```compile_fail
+//! # fn old_api(film: halo_api::theater::Film) {
+//! let resolved = film.resolve();
+//! # }
+//! ```
 pub mod film;
 pub mod parser;
-pub mod resolved;
+pub mod runtime;
 pub use film::Film;
-pub use resolved::ResolvedFilm;
+pub use runtime::TheaterRuntime;

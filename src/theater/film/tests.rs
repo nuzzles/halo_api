@@ -137,8 +137,8 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
         vec!["chunks", "registry"]
     );
     assert_eq!(serde_json::from_value::<Film>(json).unwrap(), film);
-    let resolved = film.resolve();
-    assert!(std::ptr::eq(resolved.film(), &film));
+    let resolved = crate::theater::TheaterRuntime::load(film.clone());
+    assert_eq!(resolved.film(), &film);
     assert_eq!(resolved.events().first().unwrap().source.chunk, 2);
 }
 
@@ -212,7 +212,12 @@ fn keyframes_stop_without_searching_past_invalid_header() {
         film.replication_chunks().next().unwrap().data,
         packet(2, &payload, 10)
     );
-    assert!(film.resolve().advance_to(10).entities.is_empty());
+    assert!(
+        crate::theater::TheaterRuntime::load(film.clone())
+            .advance_to(10)
+            .entities
+            .is_empty()
+    );
 }
 
 #[test]
@@ -247,7 +252,7 @@ fn event_gate_is_unresolved_in_reference_film() {
     let read = &frame.events;
     assert_eq!(read.gate15, None);
     let before = serde_json::to_value(&film).unwrap();
-    let resolved = film.resolve();
+    let resolved = crate::theater::TheaterRuntime::load(film.clone());
     assert_eq!(
         resolved.interpretations().event_gate15.policy,
         EventGate15Policy::CandidateCountInference
@@ -587,10 +592,10 @@ fn captured_v41_corpus() {
                 ChunkKind::Unknown(_) => {}
             }
         }
-        let resolved = film.resolve();
+        let resolved = crate::theater::TheaterRuntime::load(film);
         let events: Vec<_> = resolved
-            .query(crate::theater::resolved::EventFilter {
-                kind: Some(crate::theater::resolved::EventKind::Summary),
+            .query(crate::theater::runtime::EventFilter {
+                kind: Some(crate::theater::runtime::EventKind::Summary),
                 ..Default::default()
             })
             .collect();
@@ -604,7 +609,7 @@ fn captured_v41_corpus() {
                 .sum::<usize>()
         );
         for event in events {
-            let Some(crate::theater::resolved::Record::Summary(summary)) =
+            let Some(crate::theater::runtime::Record::Summary(summary)) =
                 resolved.record(event.source)
             else {
                 panic!()
@@ -628,7 +633,7 @@ fn captured_v41_corpus() {
 }
 
 use crate::theater::parser::v41::{FilmWorld, FrameConfig};
-use crate::theater::resolved::interpretation::EventGate15Policy;
+use crate::theater::runtime::interpretation::EventGate15Policy;
 
 #[test]
 fn packet_payload_rejects_inconsistent_public_envelopes() {

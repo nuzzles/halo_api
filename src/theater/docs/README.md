@@ -1,60 +1,65 @@
 # Theater v41
 
-The API has two steps:
+The API has one parsing step and one runtime loading step:
 
 ```rust
-use halo_api::theater::{Film, film::{FilmChunk, ChunkKind}};
+use halo_api::theater::{Film, TheaterRuntime, film::FilmChunk};
+use halo_api::theater::runtime::{SummaryFilter, SummaryKind, SummaryPayload, medals::Medal};
 
-fn inspect(registry_bytes: Vec<u8>, replication_bytes: Vec<u8>, summary_bytes: Vec<u8>)
-    -> Result<(), Box<dyn std::error::Error>>
-{
-    let film = Film::parse([
-        FilmChunk { kind: ChunkKind::Registry, index: None, start_ms: None, data: registry_bytes },
-        FilmChunk { kind: ChunkKind::Replication, index: None, start_ms: None, data: replication_bytes },
-        FilmChunk { kind: ChunkKind::Summary, index: None, start_ms: None, data: summary_bytes },
-    ])?;
-    let mut resolved = film.resolve();
-    println!("{} summaries", resolved.summaries().len());
-    println!("{} entities", resolved.seek(10_000_000).entities.len());
+fn inspect(chunks: Vec<FilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
+    let film = Film::parse(chunks)?;
+    let mut runtime = TheaterRuntime::load(film);
+    for event in runtime.query_summaries(SummaryFilter {
+        kind: Some(SummaryKind::Medal),
+        medal: Some(Medal::Splatter),
+        ..Default::default()
+    }) {
+        assert!(matches!(event.payload, SummaryPayload::Medal(Medal::Splatter)));
+        println!("{event} [{:?}]", event.derivation);
+        // For example: Nuzzles (2535472547643888) received Splatter at 0:10.000
+    }
+    let world = runtime.seek(10_000_000); // microseconds; checkpointed seek
+    println!("{} entities", world.entities.len());
     Ok(())
 }
 ```
 
-A `FilmChunk` combines its category and bytes with optional manifest `index` and
-`start_ms`. Supply real metadata when available; `None` explicitly means it was
-not supplied. Input order defines source positions, independent of manifest
-numbers. Raw and zlib-compressed chunks are accepted. No separate metadata list,
-source loader, or parsing options are part of the public entry point.
+`FilmChunk` combines its category/bytes with optional manifest `index` and
+`start_ms`. `None` means metadata was not supplied. Input order defines source
+positions. Raw and zlib-compressed chunks are accepted. The public parsing entry
+point has no alternate parsing options or heuristic recovery mode.
 
-`Film::parse` requires a registry as the first chunk. `parser::ChunkReader`
-decompresses it, reads the version before version-dependent fields, and selects
-its `V41ChunkReader` variant. That reader dispatches registry, replication, and
-summary chunks to their v41 kind-specific readers. Unsupported versions return
-an error; callers still use the single `Film::parse` entry point. `Film` has two
-fields:
+`Film::parse` requires the first and only registry chunk, reads the version, and
+selects the v41 kind-specific readers. Unsupported versions return an error.
+`Film` owns `registry` and one ordered `chunks` vector containing replication,
+summary, and unknown later chunk kinds. Original input, decompressed buffers,
+source positions, exact known fields, stops, and unknown data remain available.
 
-- `registry`: the required registry chunk, including its source and read result.
-- `chunks`: every later chunk in input order as replication, summary, or unknown.
+`TheaterRuntime::load` takes ownership of a `Film` (or accepts `Arc<Film>`), resolves
+supported state, and builds chronological query indexes/checkpoints. Its
+`ResolvedFilm` is private. There is no public `Film::resolve`, `ResolvedFilm`, or
+`theater::resolved` compatibility API. Only `Film` and `TheaterRuntime` are
+reexported at the Theater root. Supporting models remain public beneath `film`
+and `runtime`; the parser module remains public with internal decoder modules.
 
-Each section preserves original input, decompressed bytes, source positions and
-unparsed data. Replication and summary chunks provide checked borrowed packet payloads.
-Empty input, a non-registry first chunk, or any later registry chunk is an error.
-A registry-only film is accepted. Unknown numeric chunk categories are retained
-as `FilmDataChunk::Unknown` with their source bytes and transport result.
+`summary_events()` returns every guarded summary candidate in chronological
+order. Actors contain the source-read XUID/gamertag and a separate roster-link
+result. Typed payloads distinguish kills, deaths, mode events, known/unknown
+medals, and unsupported categories. Unknown pairs are never assigned a nearby
+medal name. These are explicitly derived summary interpretations, not canonical
+record boundaries or inferred physical actions. `summary_reports()` compares
+candidate counts with recorded counts without claiming matching counts prove a
+complete summary grammar. `record(source)` exposes the associated raw reads.
 
-`film.resolve()` borrows this recording, builds chronological query indexes and
-playback state, and performs explicitly labeled interpretation. It exposes those
-results through `interpretations()` without changing the reference recording.
+`query_summaries()` combines kind, XUID, medal, and inclusive microsecond ranges.
+Generic `query()` filters the full structural/state event stream. Both preserve
+playback state and source references. `current()` is O(1) borrowed access;
+advancement applies updates, and seeking restores a checkpoint and applies its
+remaining updates. Copying/enumerating a world scales with its size.
 
-Only `Film` and `ResolvedFilm` are reexported at `theater`'s root. Input and reference
-container and reference field models live under `film`; decoded registry, replication,
-component and summary models have dedicated submodules. `parser` remains a public
-module with internal implementation modules. Resolved models and interpretation
-evidence live under `resolved`.
-
-- [Module organization and migration](ARCHITECTURE.md)
-- [Format and fidelity](FORMAT.md)
-- [Resolution and playback](RESOLUTION.md)
-- [Validation and reference provenance](VALIDATION.md)
-- [Canonical audit and fidelity evidence matrix](CANONICAL_AUDIT.md)
+- [Architecture and migration](ARCHITECTURE.md)
+- [Canonical format and fidelity](FORMAT.md)
+- [Runtime resolution and playback](RESOLUTION.md)
+- [Validation and provenance](VALIDATION.md)
+- [Completed canonical audit](CANONICAL_AUDIT.md)
 - [Credits](CREDIT.md)

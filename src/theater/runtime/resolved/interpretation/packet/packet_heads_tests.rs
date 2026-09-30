@@ -1,7 +1,7 @@
 use super::*;
 use crate::theater::Film;
 use crate::theater::parser::v41::{FixtureChunkMetadata, FixtureFilmSource, test_chunks};
-use crate::theater::resolved::interpretation::{PickupOutcome, TranslocatorStop};
+use crate::theater::runtime::interpretation::{PickupOutcome, TranslocatorStop};
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -84,15 +84,15 @@ fn reference_data_packet_heads_padding_oracles() {
     let fixtures: [(u8, &[u8]); 3] = [
         (
             0xca,
-            include_bytes!("../../../fixtures/zoom-padding-v41.json.zlib"),
+            include_bytes!("../../../../fixtures/zoom-padding-v41.json.zlib"),
         ),
         (
             0xc4,
-            include_bytes!("../../../fixtures/pickup-padding-v41.json.zlib"),
+            include_bytes!("../../../../fixtures/pickup-padding-v41.json.zlib"),
         ),
         (
             0xfa,
-            include_bytes!("../../../fixtures/translocator-padding-v41.json.zlib"),
+            include_bytes!("../../../../fixtures/translocator-padding-v41.json.zlib"),
         ),
     ];
     let mut cases = 0;
@@ -123,7 +123,9 @@ fn reference_data_packet_heads_padding_oracles() {
             )
             .unwrap();
             let parsed = Film::parse(test_chunks(&source)).unwrap();
-            let resolved = parsed.resolve();
+            let resolved = crate::theater::runtime::resolved::ResolvedFilm::from_film(
+                std::sync::Arc::new(parsed.clone()),
+            );
             let interpretation = resolved
                 .interpretations()
                 .packets
@@ -147,7 +149,7 @@ fn reference_data_packet_heads_padding_oracles() {
 #[test]
 fn reference_data_packet_heads_context_and_footer_boundaries() {
     let fixture = inflate(include_bytes!(
-        "../../../fixtures/translocator-levelup-v41.json.zlib"
+        "../../../../fixtures/translocator-levelup-v41.json.zlib"
     ));
     let row = fixture
         .as_array()
@@ -183,7 +185,9 @@ fn reference_data_packet_heads_context_and_footer_boundaries() {
     )
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let resolved = parsed.resolve();
+    let resolved = crate::theater::runtime::resolved::ResolvedFilm::from_film(std::sync::Arc::new(
+        parsed.clone(),
+    ));
     let PacketHeadRead::Translocator(Some(read)) = resolved
         .interpretations()
         .packets

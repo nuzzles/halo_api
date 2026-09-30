@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "film_version": 41,
+  "expectation_origin": "Hand-authored wire cases; semantic codes checked against pinned LevelUp d61443e. These are not observed physical-action annotations.",
+  "timestamp_tolerance_us": 0,
+  "cases": [
+    {"name":"splatter", "input":{"type":50,"metadata":156,"flag":1,"ms":10000}, "expected":{"kind":"medal","medal":"Splatter","time_us":10000000}},
+    {"name":"double-kill-zero-code", "input":{"type":100,"metadata":0,"flag":1,"ms":1234}, "expected":{"kind":"medal","medal":"Double Kill","time_us":1234000}},
+    {"name":"kill-not-splatter", "input":{"type":50,"metadata":156,"flag":0,"ms":10000}, "expected":{"kind":"kill","medal":null,"time_us":10000000}},
+    {"name":"death", "input":{"type":20,"metadata":0,"flag":0,"ms":2000}, "expected":{"kind":"death","medal":null,"time_us":2000000}},
+    {"name":"mode", "input":{"type":10,"metadata":7,"flag":0,"ms":0}, "expected":{"kind":"mode","medal":null,"time_us":0}},
+    {"name":"unknown-medal-pair", "input":{"type":50,"metadata":255,"flag":1,"ms":3}, "expected":{"kind":"medal","medal":null,"time_us":3000}},
+    {"name":"same-metadata-wrong-type", "input":{"type":100,"metadata":156,"flag":1,"ms":4}, "expected":{"kind":"medal","medal":null,"time_us":4000}},
+    {"name":"unsupported-category", "input":{"type":99,"metadata":156,"flag":1,"ms":5}, "expected":{"kind":"unknown","medal":null,"time_us":5000}},
+    {"name":"invalid-medal-boolean", "input":{"type":50,"metadata":156,"flag":2,"ms":6}, "expected":null},
+    {"name":"broken-tail-marker", "input":{"type":50,"metadata":156,"flag":1,"ms":7,"corrupt":"marker"}, "expected":null},
+    {"name":"invalid-utf16", "input":{"type":50,"metadata":156,"flag":1,"ms":8,"corrupt":"utf16"}, "expected":null},
+    {"name":"reserved-bits", "input":{"type":50,"metadata":156,"flag":1,"ms":9,"corrupt":"reserved"}, "expected":null},
+    {"name":"zero-xuid", "input":{"type":50,"metadata":156,"flag":1,"ms":10,"corrupt":"xuid"}, "expected":null},
+    {"name":"truncated-tail", "input":{"type":50,"metadata":156,"flag":1,"ms":11,"corrupt":"truncated"}, "expected":null}
+  ]
+}

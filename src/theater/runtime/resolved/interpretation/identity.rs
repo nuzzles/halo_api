@@ -87,4 +87,4 @@ pub(crate) fn read_identity(data: &[u8], registry: &FilmRegistryRead) -> Identit
     out
 }
 
-use crate::theater::resolved::identity::{IdentityField, IdentityRead, IdentityValue};
+use crate::theater::runtime::identity::{IdentityField, IdentityRead, IdentityValue};

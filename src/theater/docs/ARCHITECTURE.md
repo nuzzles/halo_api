@@ -1,124 +1,86 @@
-# Module organization
+# Theater architecture
 
-The public flow remains `Film::parse(chunks)` followed by `film.resolve()`.
-`theater` reexports only `Film` and `ResolvedFilm`; `film`, `parser`, and `resolved`
-are public modules. Reference models are declared in `film`, while decoder types and
-functions are internal.
+The public flow is `Film::parse(chunks)` → `TheaterRuntime::load(film)`.
+`theater` reexports only `Film` and `TheaterRuntime`. The canonical `film`, structural
+`parser`, and higher-level `runtime` modules are public; `runtime::resolved` and
+its `ResolvedFilm` type are private. Model modules are publicly reachable as
+`runtime::events`, `identity`, `interpretation`, `query`, `summary`, and `world`.
 
 ```text
 theater/
   film/
-    mod.rs                 Film, ordered FilmDataChunk values and model reexports
+    mod.rs                 Film and ordered FilmDataChunk values
     chunks/
-      mod.rs               Chunk hierarchy and reexports
-      models.rs            FilmChunk and ChunkKind
-      packet/
-        mod.rs             Shared packet model reexports
-        models.rs          Packet<T>, PacketStream<T>, read states and source ranges
-        coverage.rs        Structural source-coverage normalization
-      registry/
-        mod.rs             RegistryChunk
-        models.rs          Archetypes, owned component slots, ranges and read outcome
+      models.rs            Downloaded FilmChunk, ChunkKind and transport containers
+      packet/              Shared packet envelopes, source ranges and coverage
+      registry/            RegistryChunk, ordered archetypes and component slots
       replication/
-        mod.rs             ReplicationStreamChunk and components
+        components/        Exact source-backed fields and raw bits
         replication_stream/
-          mod.rs           ReplicationStream and ReplicationStreamPacket
-          models/          Frame, view, entity, default-state, keyframe, datum and event models
-          coverage.rs      Coverage derived from ordered body fields
-        components/
-          field.rs         Source-backed component fields and exact raw bits
-      summary/
-        mod.rs             SummaryChunk and packet count/record-stream body
-        models.rs          Opaque SummaryRecordStream with its full source range
+          models/          Frames, default states, components, datums and keyframes
+          coverage.rs      Structural coverage from owned fields
+      summary/             Recorded count and complete opaque record stream
   parser/
-    mod.rs                 ChunkReader and registry-first version dispatch
-    transport.rs           Decompression and bounded packet framing
-    bits.rs                Shared bounded bit primitives
+    mod.rs                 Registry-first version dispatch
+    transport.rs           Decompression and packet framing
+    bits.rs                Bounded bit primitives
     v41/
-      mod.rs               V41ChunkReader and kind-specific reader types
-      chunks/              Registry, replication and summary chunk readers
-      registry.rs          v41 registry layout
-      config/              Private fixed and runtime decoding configuration
-      components/          v41 component decoding
-      diagnostics.rs       Private refusal and width traces
-      observations.rs      Private decoder callback state
-      packets/             Replication packet dispatch and isolated body decoders
-      summary.rs           Recorded summary count and opaque stream boundaries
-  resolved/
-    mod.rs                 ResolvedFilm construction and shared indexes
-    identity.rs            Identity/player-table models and player lookup
-    interpretation/        Bootstrap searches, player-slot traces and interpretation evidence
-      packet/              Packet-head, pickup, damage, zoom and teleport decoders/models
-      summary.rs           Guarded summary candidate fields and associations
-    events.rs              Source references, provenance and event indexing
-    summary.rs             Decoded text and semantic summary kinds
-    query.rs               Filters and query indexes
-    world.rs               Entity/component models and state accumulation
-    playback.rs            Current snapshot, advance, seek and checkpoints
-    source.rs              Internal borrowed chunk/packet navigation
-  docs/                    Format, fidelity, architecture and validation
+      chunks/              Kind-specific structural readers
+      packets/             Packet-specific body decoders
+      components/          Component grammar
+      summary.rs           Count/opaque-stream reader, no candidate scans
+  runtime/
+    mod.rs                 TheaterRuntime::load and the public query/playback API
+    medals.rs              Pinned v41 typed medal identities and unknown pairs
+    resolved/              Private resolution and optimized storage
+      mod.rs               Shared Film ownership, event/summary indexes and checkpoints
+      events.rs            Public source/provenance/event models and private indexing
+      identity.rs          Public bootstrap identity models and private lookup
+      summary.rs           Public typed summary payloads, actors, links and reports
+      query.rs             Public filters and private query indexes
+      world.rs             Public snapshots/state models and private accumulation
+      playback.rs          Internal cursor/checkpoint application
+      source.rs            Internal source navigation
+      interpretation/      Public evidence models and internal guarded field reads
+  docs/                    One format, API, fidelity and validation reference
 ```
 
-`ChunkReader` requires the first input to be a registry, decompresses it once,
-and checks its version before decoding version-dependent fields. Its sole
-current variant owns a `V41ChunkReader`, which dispatches each chunk kind to
-`V41RegistryChunkReader`, `V41ReplicationStreamChunkReader`, or
-`V41SummaryChunkReader`.
-Source positions remain positions in the original full input: registry is zero,
-the next chunk is one. Additional registry chunks are errors. Unknown later chunk kinds remain ordered
-and retain their bytes without selecting a v41 body reader.
+`ChunkReader` requires the first registry, decompresses it once, and checks its
+version before a version-dependent reader runs. Its v41 backend dispatches chunk
+kinds to registry, replication, and summary readers. Unknown later kinds retain
+bytes and input order; additional registry chunks are errors.
 
-The version reader retains grammar state for subsequent records. That state is
-internal decoding context, not a replay world. Resolution separately accumulates
-world state and preserves references to the reference recording.
+Structural parsing keeps only recorded/source-backed data and explicit stops.
+Parser schema bindings are private decoding context. Resolution separately
+accumulates state and gathers labeled evidence from retained bytes; it does not
+repair canonical records or select speculative layouts in the native parser.
 
-Packet framing belongs to structural decoding. Bounded player-slot reads and packet
-projections run only during resolution at selected candidate boundaries. The film
-parser does not use bootstrap searches to choose an unknown layout.
+Loading moves a Film into shared ownership, avoiding self-referential borrowed
+storage. Supplying an `Arc<Film>` shares the same recording across runtimes.
+Runtime clones share source buffers, events, indexes, reports and checkpoints;
+cloning the current world map scales with its size. The canonical film is exposed
+as a borrowed immutable view. The private resolved model has no public constructor
+or mutable access, so callers cannot invalidate indexes through it.
 
 ## Migration
 
-The former `theater::parser` model imports move to `theater::film` (also exposed
-through its section submodules). For example:
+- `film.resolve()` becomes `TheaterRuntime::load(film)`.
+- `ResolvedFilm` is no longer a public type.
+- `theater::resolved::*` model imports move to `theater::runtime::*` or its public
+  model modules. No compatibility facade remains.
+- `summaries()` becomes `summary_events()` with typed `SummaryEvent` payloads and
+  actor/roster-link separation, plus `summary_reports()` for count coverage.
+- Query, record, current, advance, seek, rewind and player access are runtime methods.
+- `Film::parse` and the canonical chunk models keep their structural API.
 
-- `parser::FilmRegistry` becomes `film::chunks::registry::FilmRegistry`.
-- `parser::ComponentField` becomes `film::chunks::replication::components::ComponentField`.
-- Summary candidate fields live in `resolved::interpretation::summary::SummaryEventRead`.
-  Canonical `film::chunks::summary::SummaryRecordStream` does not infer record boundaries.
-- Identity and player-table interpretation models live in `resolved::identity`.
-- Other interpretation outputs live in `resolved::interpretation`.
-
-`Film::parse`, `film.resolve()`, and the resolved query/playback methods keep their
-signatures. No second public parsing API or compatibility parser facade is added.
-Canonical packet headers retain only wire fields; locations live in `PacketSource`.
-Body reads explicitly distinguish complete, partial, and opaque results. Source
-retention and decoding limits are described in FORMAT.md.
-
-Summary marker searches and the observed identity-to-tail offset run only during
-resolution. `ResolvedSummary::derivation` identifies the guarded v41 association;
-the synchronized event index uses `Provenance::DerivedSummary`. Source references
-for those candidates identify their canonical packet and resolve to owned
-interpretation fields, not fabricated canonical records.
-
-The Halo client keeps the manifest's JSON-only chunk entry as
-`clients::hi::models::FilmChunkResponse`. Downloading one or all of those entries
-returns the canonical `theater::film::FilmChunk`, so the common path needs no
-adapter:
+The Halo client returns canonical downloaded `FilmChunk` values:
 
 ```rust,ignore
 let manifest = halo.match_film(match_id).await?;
 let film = Film::parse(halo.film_chunks(&manifest).await?)?;
+let runtime = TheaterRuntime::load(film);
 ```
 
-There is no separate downloaded `FilmChunkData` type. A second
-`FilmChunkMetadata` model is unnecessary because the response DTO already owns
-the service-only duration, size and file-path fields; the canonical chunk retains
-only parsing metadata and bytes.
-
-Default-state sections now own their fields on NEW and keyframe records. Resolved
-baseline storage combines those fields with surrounding record fields in source
-order. Duplicate canonical `UnitReference`, `UnitEquipmentRead`, `PositionKind`,
-and `ActionBlock` projections are removed: reference/equipment/position callback
-traces remain private parser observations, while all recorded action fields stay
-in the canonical control/component field lists. There is no synthetic absent
-weapon index or bit-reversed action mask on a canonical record.
+HTTP manifest entries remain `clients::hi::models::FilmChunkResponse`; they are
+not a second downloaded chunk type. Browser visualization, map assets and visual
+interpolation are future consumers of the runtime and are not implemented here.

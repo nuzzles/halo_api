@@ -1,8 +1,7 @@
 # Canonical v41 model and parser audit
 
-This records the completed Phase 1/2 canonical-model/parser audit. Runtime redesign and private resolved
-storage remain follow-on work. Existing resolved consumers migrate only to follow
-canonical structural changes.
+This records the completed Phase 1/2 canonical-model/parser audit. Runtime ownership and typed summary APIs are implemented separately in Phases 3/4,
+following this completed canonical checkpoint.
 
 ## Established changes
 
@@ -135,7 +134,7 @@ unknown rather than inferred.
 | Distinguish inability and absence | Explicit component/event/list stops; unavailable event attempts; negative runtime-gate and truncation tests | Missing game runtime state cannot be reconstructed as recorded data |
 | Preserve all payload bits | Original bytes plus source-coverage partitions for every captured packet; opaque/unparsed gaps stay distinct from padding | Coverage classification does not establish unknown grammar |
 | Keep interpretation out of Film | Summary candidate searches and associations live in resolution with derived provenance; callback traces stay private | Summary sequential record grammar remains unknown |
-| Preserve resolvability during migration | Independent resolved identity/lifetime/query/seek tests; default fields combined in source order | Future `TheaterRuntime` and private resolved storage are deferred |
+| Preserve resolvability during migration | Independent resolved identity/lifetime/query/seek tests; default fields combined in source order | Phases 3/4 introduce an owning runtime and private resolved storage |
 | Reference comparison stays independent | Pinned Go fixtures, original endpoint golden unchanged, supplied reference contexts and source-verified runtime refusal | Padded Go and bounded Rust cumulative contexts intentionally differ |
 
 All known-source fidelity claims are scoped to structural decoding and preservation.

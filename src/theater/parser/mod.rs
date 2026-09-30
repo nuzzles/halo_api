@@ -1,5 +1,5 @@
 //! Decoding implementation behind `Film::parse`.
-//! Canonical models are public under `theater::film`; resolved models under `theater::resolved`.
+//! Canonical models are public under `theater::film`; runtime models under `theater::runtime`.
 pub(crate) mod bits;
 pub(crate) mod transport;
 pub mod v41;

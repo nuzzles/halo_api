@@ -1,4 +1,4 @@
-//! Inspects recorded entity state through Film::parse and Film::resolve.
+//! Inspects recorded entity state through Film::parse and TheaterRuntime::load.
 
 mod common;
 
@@ -18,10 +18,10 @@ async fn main() -> Result<(), common::ExampleError> {
         halo.film_chunks(&film).await?
     };
     let film = Film::parse(input)?;
-    let mut resolved = film.resolve();
+    let mut resolved = halo_api::theater::TheaterRuntime::load(film);
     println!(
         "{} chunks, {} indexed records",
-        1 + film.chunks.len(),
+        1 + resolved.film().chunks.len(),
         resolved.events().len()
     );
     if let Some(end) = resolved.events().last().map(|e| e.timestamp_us) {

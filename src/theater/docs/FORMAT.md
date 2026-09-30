@@ -79,9 +79,9 @@ All remaining bytes/bits stay available through the enclosing chunk payload.
 Summary packets retain their recorded count and the entire opaque record-stream
 range. A sequential summary record grammar is not established, so the canonical
 parser does not invent records by scanning marker patterns or using an observed
-identity-to-tail offset. `ResolvedFilm::summaries()` retains the guarded v41
+identity-to-tail offset. `TheaterRuntime::summary_events()` retains the guarded v41
 candidate search, timestamps, XUIDs, all 16 UTF-16 code units, and raw flags with
-source references. Its associations are marked `GuardedV41Layout` and its event
+source references. Its associations are marked `GuardedV41Layout` and its runtime event
 index entries use `DerivedSummary` provenance, even when individual values were
 read directly from bytes. Text, kinds, and player linkage remain interpretation.
 

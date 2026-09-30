@@ -95,4 +95,4 @@ pub(crate) fn decode_film_identity(
     }))
 }
 
-use crate::theater::resolved::identity::FilmIdentity;
+use crate::theater::runtime::identity::FilmIdentity;

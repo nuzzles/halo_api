@@ -1,7 +1,7 @@
 //! Canonical film input and the three source-preserving recording sections.
 use serde::{Deserialize, Serialize};
 
-/// Structurally decoded canonical recording. Interpretations belong to ResolvedFilm.
+/// Structurally decoded canonical recording. Interpretations belong to TheaterRuntime.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Film {
     pub registry: RegistryChunk,
@@ -20,9 +20,6 @@ impl Film {
         crate::theater::parser::ChunkReader::read(chunks)
     }
 
-    pub fn resolve(&self) -> crate::theater::ResolvedFilm<'_> {
-        crate::theater::ResolvedFilm::from_film(self)
-    }
     pub fn replication_chunks(&self) -> impl Iterator<Item = &ReplicationStreamChunk> {
         self.chunks.iter().filter_map(|chunk| match chunk {
             FilmDataChunk::Replication(chunk) => Some(chunk),

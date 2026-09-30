@@ -8,21 +8,21 @@ pub(super) struct Checkpoint {
 
 pub(super) const CHECKPOINT_INTERVAL: usize = 1024;
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     /// O(1) borrowed access; iterating entities costs O(world size).
     pub fn current(&self) -> &WorldSnapshot {
         &self.world
     }
 }
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     /// None before any seek/advance, including for recordings starting at zero.
     pub fn timestamp_us(&self) -> Option<u64> {
         self.timestamp_us
     }
 }
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     /// Forward advancement applies intervening updates. Earlier timestamps seek.
     pub fn advance_to(&mut self, timestamp_us: u64) -> &WorldSnapshot {
         if self.timestamp_us.is_some_and(|t| timestamp_us < t) {
@@ -37,7 +37,7 @@ impl ResolvedFilm<'_> {
     }
 }
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     /// Restore the nearest checkpoint, then apply at most CHECKPOINT_INTERVAL
     /// indexed events. Lookup is O(log events); restoration is O(entity count).
     pub fn seek(&mut self, timestamp_us: u64) -> &WorldSnapshot {
@@ -53,7 +53,7 @@ impl ResolvedFilm<'_> {
     }
 }
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     pub fn rewind(&mut self) {
         self.world = WorldSnapshot::default();
         self.next_event = 0;
@@ -61,7 +61,7 @@ impl ResolvedFilm<'_> {
     }
 }
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     fn apply_until(&mut self, end: usize) {
         for event in &self.events[self.next_event..end] {
             apply(&mut self.world, event.change.as_ref());

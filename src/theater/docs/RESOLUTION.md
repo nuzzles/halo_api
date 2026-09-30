@@ -1,50 +1,73 @@
-# Resolution and playback
+# Runtime resolution and playback
 
-`Film::resolve(&self)` returns `ResolvedFilm<'_>`, borrowing the recording. It walks
-already decoded reference records to build an ordered event stream, query indexes,
-entity/component state and checkpoints. Multiple independent cursors can borrow
-one film. The retained source buffers are neither copied nor decompressed again.
+`TheaterRuntime::load(film)` owns a canonical Film through `Arc` and constructs a
+private `ResolvedFilm`. Loading indexes supported structural records, resolves
+entity generations and component updates, and creates checkpoints. It also
+associates guarded summary fields into higher-level typed events. It does not
+mutate Film, reread structural packet boundaries, interpolate, or infer physical
+jump/shot actions.
 
-`interpretations()` exposes separate, source-linked evidence from bootstrap identity
-and player-slot searches, event-layout inference, guarded summary candidates, bot metadata, fire-aim reads and
-whole-chunk highlight scans. Those routines may inspect preserved bytes; they do
-not rerun the structural packet parser or mutate Film. An inferred event gate is
-reported as a selection with candidate counts, not a recorded bit, and is not used
-to silently reinterpret the reference event stream or apply extra world updates.
+## Summary events
 
-Events use packet wire timestamps except summary candidates, whose source-read
-milliseconds are converted to microseconds. Ties retain input chunk, packet, and
-record order. Canonical summary packets own a count and an opaque record stream.
-Guarded v41 candidate searches live in `interpretation::summary`; their owned
-reads retain all 16 UTF-16 units and raw flags. `summaries()` exposes decoded text
-and semantic kinds with `SummaryDerivation::GuardedV41Layout`. Summary index events
-use `Provenance::DerivedSummary`; candidate association is never advertised as a
-canonical decoded record. Player linkage uses a unique XUID match from bootstrap
-interpretation; missing or ambiguous matches stay unresolved. This is not a
-player-to-entity ownership inference.
-Reference reads have source references and explicit read provenance. Accumulated state
-changes retain previous/new shared values and a derivation identifier.
+`summary_events()` returns `&[SummaryEvent]`, sorted chronologically. Each event
+has its candidate timestamp, stable order within the complete runtime stream,
+actor, typed payload, original codes, source reference, and derivation.
 
-`EventFilter` combines kind, category, entity, player and inclusive time ranges.
-Queries begin from the smallest applicable bounded index. Continuous component
-updates stay available; filtering does not change playback or the stored events.
+- The actor's XUID and gamertag come from the guarded summary read. A bootstrap
+  roster link is separately `Unique`, `Missing`, or `Ambiguous`. A unique XUID
+  whose roster name differs retains the summary name and flags the mismatch.
+  Duplicate roster indices are never silently selected for lookup/linkage.
+- `SummaryPayload` distinguishes kill, death, mode, medal, and unknown categories.
+  Kill/death payloads do not fabricate an opponent or weapon from an opaque body.
+- Medals resolve by `(type_code, metadata)` using the 124-pair empirical v41 table
+  pinned to LevelUp `d61443ef59268ad734355db8e9974f68db5ca6d0`. The medal flag and
+  supported sorting-weight category select a medal payload. Unknown pairs retain
+  both codes as `Medal::Unknown`; no nearest-code substitution occurs. These
+  byte pairs are not the Halo REST API's medal NameIds.
+- The summary timestamp is the source-read millisecond value converted exactly
+  to microseconds. Packet timestamps remain separate. Semantic meaning and record
+  association use `SummaryDerivation::GuardedV41Layout`; matching full-stream
+  entries use `Provenance::DerivedSummary`, never `RecordedRead`.
 
-- `current()` borrows the already-materialized world in O(1).
-- `advance_to(t)` applies intervening indexed updates. Backward movement seeks.
-- `seek(t)` binary-searches the event/checkpoint indexes, clones a checkpoint world
-  map, and applies at most 1,024 remaining events. Cloning scales with entity count;
-  seeking is not O(1).
-- Iterating/copying the world scales with its size. Checkpoints and historical state
-  use memory even though unchanged entity states share storage.
+The canonical summary body still owns its count and opaque record-stream range.
+No sequential summary grammar has been established. `summary_reports()` retains
+an optional declared count and the candidate count per packet. `count_matches()`
+is `None` when the count is unreadable, `Some(false)` for disagreement, and
+`Some(true)` for agreement. Agreement does not prove grammar completeness.
+`record(event.source)` returns the owned bounded candidate read, including all
+UTF-16 units, codes, and bit ranges. It is not a fabricated Film record.
 
-A new resolved cursor has an empty current world until advanced or sought. Partial
-reads cannot silently promote unknown component values to known state. Incomplete
-NEW records do not establish entities. Keyframe data beyond a parsing stop cannot
-create world entities. Seeking and sequential playback must agree at the same time.
+`SummaryFilter` combines inclusive time ranges, kind, XUID and medal. XUID queries
+work independently of bootstrap linkage. Summary lookup starts with the smallest
+applicable index, binary-searches its time bounds, then intersects the remaining
+predicates. It preserves chronology and does not affect playback. An empty or
+reversed time interval produces no events. Generic `EventFilter` covers the full
+structural/lifecycle/state/input/action/summary stream.
 
-No visual interpolation or inferred jump/shot/action semantics are added here.
+`interpretations()` exposes explicitly labeled bootstrap, player-slot, event-gate,
+bot, packet, fire/aim and whole-chunk evidence. An inferred event-gate selection
+is not a recorded bit and never repairs Film or applies guessed world updates.
 
-The planned `TheaterRuntime` will own a private resolved representation. That
-architecture and higher-level typed summary-event API are deferred until after
-the canonical-model/parser phases; the existing resolved API only migrates to
-consume the updated canonical hierarchy in this phase.
+## Costs and playback
+
+- Loading walks fields/events, sorts chronology, builds indexes, and stores
+  checkpoint snapshots. It is not O(1), and resolved state can copy field values.
+- `current()` borrows the materialized world in O(1). Enumerating/copying that world
+  scales with its size; this method performs no event application.
+- `advance_to(t)` binary-searches the event boundary and applies intervening updates.
+  Moving backward uses checkpoint seeking.
+- `seek(t)` binary-searches event/checkpoint indexes, copies a checkpoint world map,
+  and applies at most 1,024 remaining events. Restoration scales with entity count;
+  the operation is not O(1).
+- Runtime clones share original Film buffers, event/summary indexes, evidence,
+  reports and checkpoints, and copy the current world map in O(world size).
+  `rewind()` clears that cursor without changing another runtime.
+
+Loading leaves an empty current world until advance/seek. Unsupported or partial
+records remain explicit; incomplete NEW records do not establish a lifetime, and
+partial keyframes do not create unsupported state. Playback tests require seeking
+and sequential advancement to yield the same world at selected times and ties.
+
+Browser rendering, map geometry/assets, physical-action annotation and visual
+interpolation remain future work. The runtime provides the typed summary events
+and source-linked state/query interface those consumers can build on.

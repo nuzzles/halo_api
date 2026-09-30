@@ -38,7 +38,7 @@ pub(crate) fn check_fields(read: &WeaponDamageTrace, payload: &[u8]) {
 fn reference_data_damage_raw_fields_match_reference() {
     let mut raw = Vec::new();
     flate2::read::ZlibDecoder::new(
-        &include_bytes!("../../../fixtures/weapon-hit-scan-v41.json.zlib")[..],
+        &include_bytes!("../../../../fixtures/weapon-hit-scan-v41.json.zlib")[..],
     )
     .read_to_end(&mut raw)
     .unwrap();
@@ -127,7 +127,9 @@ fn reference_data_damage_admission_and_provenance() {
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
     let packets = &parsed.replication_chunks().next().unwrap().body.packets;
-    let resolved = parsed.resolve();
+    let resolved = crate::theater::runtime::resolved::ResolvedFilm::from_film(std::sync::Arc::new(
+        parsed.clone(),
+    ));
     let damage = |packet| {
         resolved
             .interpretations()

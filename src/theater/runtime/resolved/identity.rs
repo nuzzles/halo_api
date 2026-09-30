@@ -28,7 +28,7 @@ pub struct PlayerTableShorts {
 
 use super::*;
 
-impl ResolvedFilm<'_> {
+impl ResolvedFilm {
     /// Bootstrap identity by recorded film index. Dynamic roster evidence stays
     /// accessible through packet records; this does not guess entity ownership.
     pub fn player(&self, film_index: usize) -> Option<&PlayerTableSlot> {

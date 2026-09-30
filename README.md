@@ -12,7 +12,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 ## What this crate does
 
-- Parses v41 Theater recordings with `theater::Film` and indexes them with `ResolvedFilm`.
+- Parses v41 Theater recordings with `theater::Film` and loads them into `TheaterRuntime`.
 - Separates authentication (`HaloAuthClient`) from Halo API operations (`HaloInfiniteClient`).
 - Acquires and caches both the Spartan token and Waypoint flight clearance.
 - Covers stats, skill, profile, UGC, progression, career rank, reward tracks, ban, and privacy endpoints.
@@ -64,18 +64,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 Parse v41 recordings once, then borrow an indexed view for queries and playback:
 
 ```rust,no_run
-use halo_api::theater::{Film, film::FilmChunk};
+use halo_api::theater::{Film, TheaterRuntime, film::FilmChunk};
 # fn inspect(chunks: Vec<FilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
 let film = Film::parse(chunks)?;
-let mut resolved = film.resolve();
-let world = resolved.seek(10_000_000); // microseconds
+let mut runtime = TheaterRuntime::load(film);
+let summaries = runtime.summary_events();
+let world = runtime.seek(10_000_000); // microseconds
 # Ok(())
 # }
 ```
 
 `Film` retains the original input and ordered native reads, including unknown
-regions and partial decoding. `ResolvedFilm` indexes those reads and accumulates
-entity state without reparsing. See the [Theater format and API documentation](src/theater/docs/README.md)
+regions and partial decoding. `TheaterRuntime` keeps resolution private, exposes typed summary events, and
+accumulates entity state without changing the canonical model. See the [Theater format and API documentation](src/theater/docs/README.md)
 for the fidelity contract, supported scope, and validation.
 
 ## MSRV

@@ -206,7 +206,7 @@ pub(super) fn record(film: &Film, source: SourceRef) -> Option<Record<'_>> {
 
 pub(super) fn index(
     film: &Film,
-    players: Option<&crate::theater::resolved::identity::PlayerTable>,
+    players: Option<&crate::theater::runtime::identity::PlayerTable>,
     summaries: &[interpretation::SummaryPacketInterpretation],
 ) -> Vec<Event> {
     let mut events = Vec::new();

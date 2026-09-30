@@ -1,7 +1,7 @@
 use super::packets::continue_event_views;
 use super::packets::{ContinuationStatePolicy, EventContinuation};
 use super::*;
-use crate::theater::resolved::interpretation::weapon_damage::read_weapon_damage;
+use crate::theater::runtime::interpretation::weapon_damage::read_weapon_damage;
 use serde_json::{Value, json};
 use std::io::Read;
 

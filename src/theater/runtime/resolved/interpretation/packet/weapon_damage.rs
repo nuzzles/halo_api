@@ -21,7 +21,7 @@ pub struct WeaponDamageTrace {
 
 use super::{WeaponDamage, WeaponDamageRead};
 use crate::theater::parser::bits;
-use crate::theater::resolved::interpretation::ProjectedField;
+use crate::theater::runtime::interpretation::ProjectedField;
 
 /// Reference weapon-statistics damage reader. This is independent of the generic
 /// event-list layout reader: its endpoint must not substitute for a terminated

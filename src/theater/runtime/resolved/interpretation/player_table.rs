@@ -157,6 +157,6 @@ pub(crate) fn decode_player_table(d: &[u8], identity: &FilmIdentity) -> PlayerTa
 }
 
 use super::player_slot::*;
-use crate::theater::resolved::identity::PlayerTableSlot;
+use crate::theater::runtime::identity::PlayerTableSlot;
 
-use crate::theater::resolved::identity::{PlayerTable, PlayerTableError, PlayerTableReport};
+use crate::theater::runtime::identity::{PlayerTable, PlayerTableError, PlayerTableReport};

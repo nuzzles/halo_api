@@ -108,10 +108,10 @@ fn resolved_reference_entry_preserves_source_and_decoder_output() {
     assert_eq!(film.registry.source.data, compressed);
     assert_eq!(film.registry.data, bootstrap);
     let json = serde_json::to_vec(&film).unwrap();
-    let resolved = film.resolve();
-    let second = film.resolve();
-    assert!(std::ptr::eq(resolved.film(), &film));
-    assert!(std::ptr::eq(second.film(), &film));
+    let resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
+    let second = ResolvedFilm::from_film(Arc::new(film.clone()));
+    assert_eq!(resolved.film(), &film);
+    assert_eq!(second.film(), &film);
     assert_eq!(serde_json::to_vec(&film).unwrap(), json);
     assert_eq!(serde_json::to_vec(resolved.film()).unwrap(), json);
     assert!(resolved.current().entities.is_empty());
@@ -134,7 +134,7 @@ fn resolved_chronology_generations_filters_and_source_references() {
         ),
         packet(&film, 30, vec![entity(RecordKind::Delete, id, 0)]), // stale generation
     ];
-    let mut resolved = film.resolve();
+    let mut resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     assert_eq!(resolved.events()[0].source.packet, 1);
     assert_eq!(value(resolved.advance_to(10)), 1);
     assert_eq!(value(resolved.advance_to(20)), 3);
@@ -207,7 +207,7 @@ fn resolved_seek_matches_sequential_across_checkpoints_and_ties() {
             )
         })
         .collect();
-    let mut sequential = film.resolve();
+    let mut sequential = ResolvedFilm::from_film(Arc::new(film.clone()));
     let mut random = sequential.clone();
     let mut expected = BTreeMap::new();
     for t in [0, 1, 170, 171, 340, 341, 399, 1000] {
@@ -242,7 +242,7 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
         packet(&film, 20, vec![partial]),
         packet(&film, 30, vec![padded]),
     ];
-    let mut resolved = film.resolve();
+    let mut resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     assert_eq!(value(resolved.advance_to(30)), 2);
     assert!(!resolved.current().entities[&key()].components[&0].complete);
     assert!(
@@ -293,7 +293,7 @@ fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() 
         packet(&film, 20, vec![entity(RecordKind::Delta, 0x4000_0007, 8)]),
         padded,
     ];
-    let mut resolved = film.resolve();
+    let mut resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     let baseline = &resolved.advance_to(10).entities[&key()];
     assert_eq!(baseline.id, None);
     assert_eq!(baseline.created_at_us, None);
@@ -316,7 +316,7 @@ fn resolved_rejected_new_binding_does_not_replace_existing_entity() {
         packet(&film, 10, vec![entity(RecordKind::New, id, 1)]),
         rejected,
     ];
-    let mut resolved = film.resolve();
+    let mut resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     assert_eq!(value(resolved.advance_to(20)), 1);
     assert!(resolved.events().last().unwrap().change.is_none());
 }
@@ -349,7 +349,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
             });
     }
     replication_chunk_mut(&mut film).body.packets = vec![p];
-    let mut resolved = film.resolve();
+    let mut resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     assert!(resolved.advance_to(10).entities.is_empty());
     for event in resolved
         .events()
@@ -390,7 +390,7 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
         ),
         packet(&film, 30, vec![entity(RecordKind::Delete, 7, 0)]),
     ];
-    let resolved = film.resolve();
+    let resolved = ResolvedFilm::from_film(Arc::new(film.clone()));
     assert_eq!(resolved.query_indices.entities[&7].len(), 3);
     let rows: Vec<_> = resolved
         .query(EventFilter {
@@ -450,8 +450,8 @@ fn resolved_query_indices_intersect_filters_and_preserve_order() {
 
 #[test]
 fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
-    use crate::theater::resolved::PlayerTable;
-    use crate::theater::resolved::PlayerTableSlot;
+    use crate::theater::runtime::PlayerTable;
+    use crate::theater::runtime::PlayerTableSlot;
     use serde_json::json;
     let film = Film::parse([
         FilmChunk {
@@ -502,13 +502,17 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         },
         events: vec![summary(2000, 42), summary(1000, 42), summary(3000, 99)],
     }];
-    let resolved = ResolvedFilm::from_interpretations(&film, interpretations.clone());
-    assert_eq!(resolved.summaries().len(), 3);
-    assert_eq!(resolved.summaries()[0].timestamp_us, 2000);
-    assert_eq!(resolved.summaries()[0].gamertag, "Recorded player");
-    assert_eq!(resolved.summaries()[0].kind, SummaryKind::Kill);
+    let resolved =
+        ResolvedFilm::from_interpretations(Arc::new(film.clone()), interpretations.clone());
+    assert_eq!(resolved.summary_events().len(), 3);
+    assert_eq!(resolved.summary_events()[0].timestamp_us, 1000);
     assert_eq!(
-        resolved.summaries()[0].derivation,
+        resolved.summary_events()[0].actor.gamertag,
+        "Recorded player"
+    );
+    assert_eq!(resolved.summary_events()[0].kind(), SummaryKind::Kill);
+    assert_eq!(
+        resolved.summary_events()[0].derivation,
         SummaryDerivation::GuardedV41Layout
     );
     assert!(
@@ -518,7 +522,10 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
             .filter(|event| event.kind == EventKind::Summary)
             .all(|event| event.provenance == Provenance::DerivedSummary)
     );
-    assert_eq!(resolved.summaries()[0].source.record, RecordRef::Summary(0));
+    assert_eq!(
+        resolved.summary_events()[0].source.record,
+        RecordRef::Summary(1)
+    );
     let times: Vec<_> = resolved
         .query(EventFilter {
             kind: Some(EventKind::Summary),
@@ -553,14 +560,88 @@ fn summaries_use_recorded_times_and_only_unambiguous_player_links() {
         .map(|e| e.player_index)
         .collect();
     assert_eq!(actors, vec![Some(7), Some(7), None]);
+    interpretations.player_table = Some(table.clone());
+    let linked =
+        ResolvedFilm::from_interpretations(Arc::new(film.clone()), interpretations.clone());
+    assert_eq!(
+        linked.summary_events()[0].actor.roster_link,
+        summary::PlayerLink::Unique {
+            film_index: 7,
+            gamertag_matches: true
+        }
+    );
+    assert_eq!(
+        linked.summary_events()[2].actor.roster_link,
+        summary::PlayerLink::Missing
+    );
+    assert!(linked.summary_events().iter().all(|summary| {
+        linked
+            .events()
+            .iter()
+            .find(|event| event.source == summary.source)
+            .unwrap()
+            .order
+            == summary.order
+    }));
+    table.slots[0].gamertag = "Roster alias".into();
+    interpretations.player_table = Some(table.clone());
+    let renamed =
+        ResolvedFilm::from_interpretations(Arc::new(film.clone()), interpretations.clone());
+    assert_eq!(
+        renamed.summary_events()[0].actor.gamertag,
+        "Recorded player"
+    );
+    assert_eq!(
+        renamed.summary_events()[0].actor.roster_link,
+        summary::PlayerLink::Unique {
+            film_index: 7,
+            gamertag_matches: false
+        }
+    );
     table.slots.push(PlayerTableSlot {
         film_index: 8,
         ..player
     });
+    interpretations.player_table = Some(table.clone());
+    let ambiguous =
+        ResolvedFilm::from_interpretations(Arc::new(film.clone()), interpretations.clone());
+    assert_eq!(
+        ambiguous.summary_events()[0].actor.roster_link,
+        summary::PlayerLink::Ambiguous
+    );
+    assert_eq!(
+        ambiguous
+            .query(EventFilter {
+                kind: Some(EventKind::Summary),
+                player_index: Some(7),
+                ..Default::default()
+            })
+            .count(),
+        0
+    );
     assert!(
         index(&film, Some(&table), &interpretations.summary_packets)
             .iter()
             .filter(|e| e.kind == EventKind::Summary)
             .all(|e| e.player_index.is_none())
     );
+}
+
+#[test]
+fn duplicate_roster_indices_are_not_silently_selected() {
+    let film = recording();
+    let mut interpretations = Interpretations::from_film(&film);
+    let player = |xuid| {
+        serde_json::from_value::<crate::theater::runtime::PlayerTableSlot>(serde_json::json!({
+        "film_index":7,"xuid":xuid,"gamertag":"Nuzzles","session_token":0,"bit":0,"total_bits":0,
+        "shorts":{"tete":0,"deux":0,"repr":0,"q64":0,"f10":0,"f14":0,"f6":0,"f8":0,"f7":0,"f1":0}
+    })).unwrap()
+    };
+    interpretations.player_table = Some(crate::theater::runtime::PlayerTable {
+        slots: vec![player(42), player(99)],
+        report: Default::default(),
+        error: None,
+    });
+    let resolved = ResolvedFilm::from_interpretations(Arc::new(film), interpretations);
+    assert!(resolved.player(7).is_none());
 }
