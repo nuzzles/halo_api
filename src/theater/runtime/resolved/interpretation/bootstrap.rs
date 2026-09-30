@@ -1,7 +1,7 @@
 //! Version-41 bootstrap identification;
 //! see `docs/CREDIT.md` and the pinned port manifest.
 
-use super::{DecodeError, FilmRegistryRead, RegistryStop, bits::Bits};
+use super::{BootstrapReadError, FilmRegistryRead, RegistryStop, bits::Bits};
 
 fn field(data: &[u8], offset: usize) -> Option<String> {
     let raw = data.get(offset..offset.checked_add(32)?)?;
@@ -15,10 +15,10 @@ fn field(data: &[u8], offset: usize) -> Option<String> {
 pub(super) fn find_identity_build(
     data: &[u8],
     registry_end_byte: usize,
-) -> Result<Option<usize>, DecodeError> {
+) -> Result<Option<usize>, BootstrapReadError> {
     let start = registry_end_byte
         .checked_add(32)
-        .ok_or_else(|| DecodeError::Inconsistent("bootstrap offset overflow".into()))?;
+        .ok_or_else(|| BootstrapReadError::Inconsistent("bootstrap offset overflow".into()))?;
     let limit = start
         .saturating_add(0x1000)
         .min(data.len().saturating_sub(32));
@@ -32,15 +32,15 @@ pub(super) fn find_identity_build(
 pub(crate) fn decode_film_identity(
     data: &[u8],
     registry: &FilmRegistryRead,
-) -> Result<Option<FilmIdentity>, DecodeError> {
-    let [major_version, format_version] = registry
-        .header
-        .ok_or_else(|| DecodeError::Inconsistent("truncated bootstrap registry header".into()))?;
+) -> Result<Option<FilmIdentity>, BootstrapReadError> {
+    let [major_version, format_version] = registry.header.ok_or_else(|| {
+        BootstrapReadError::Inconsistent("truncated bootstrap registry header".into())
+    })?;
     if major_version != 41 {
-        return Err(DecodeError::UnsupportedVersion(major_version as i32));
+        return Err(BootstrapReadError::UnsupportedVersion(major_version as i32));
     }
     if registry.stop != RegistryStop::BoundaryBlock {
-        return Err(DecodeError::Inconsistent(
+        return Err(BootstrapReadError::Inconsistent(
             "truncated bootstrap registry".into(),
         ));
     }
@@ -53,7 +53,7 @@ pub(crate) fn decode_film_identity(
     let flag_byte = build_offset + 0x48;
     let body_bit = (flag_byte + AFTER_FLAG_BYTES) * 8 + 1;
     if body_bit > data.len().saturating_mul(8) {
-        return Err(DecodeError::Inconsistent(
+        return Err(BootstrapReadError::Inconsistent(
             "truncated bootstrap identification".into(),
         ));
     }

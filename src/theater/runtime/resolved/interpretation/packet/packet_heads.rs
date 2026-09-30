@@ -14,7 +14,7 @@ use super::{PickupRead, TranslocatorRead, ZoomRead};
 use super::{
     pickups::decode_biped_pickup, translocator::decode_translocator_head, zoom::decode_zoom_head,
 };
-use crate::theater::parser::v41::FilmMapBounds;
+use crate::theater::parser::v41::context::map::FilmMapBounds;
 
 /// Apply the pinned reference type, minimum-length and first-byte predicates.
 /// Pickup results are direct decoder attempts, without slot-band publication

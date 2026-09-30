@@ -1,0 +1,319 @@
+//! Full-state keyframe records use signed guards and all named components,
+//! not the presence masks used by delta records.
+use crate::theater::film::chunks::replication::replication_stream::models::keyframes::{
+    KeyframeComponentRead, KeyframeRecord, KeyframeStop,
+};
+use crate::theater::film::{ComponentField, FilmRegistry, RawBits};
+use crate::theater::parser::v41::chunks::replication::components::cursor::ComponentCursor as Cursor;
+use crate::theater::parser::v41::chunks::replication::components::defaults;
+use crate::theater::parser::v41::chunks::replication::components::m4b::required_runtime_field;
+use crate::theater::parser::v41::chunks::replication::components::position::PositionEncoding;
+use crate::theater::parser::v41::chunks::replication::components::reader::{
+    ComponentReader, ComponentWidths,
+};
+use crate::theater::parser::v41::chunks::replication::components::widths::{
+    ComponentWidthOverrides, read_component, signed_skip,
+};
+use crate::theater::parser::v41::context::layout::{KeyframeLayout, RecordLayout};
+use crate::theater::parser::v41::context::profile::DecodeProfile;
+use crate::theater::parser::v41::reference_bits::{reference_bits_at, reference_bits_tolerant};
+
+pub(crate) fn decode_reference_keyframe_record_contextual(
+    data: &[u8],
+    bit: impl TryInto<i64>,
+    registry: &FilmRegistry,
+    encoding: &RecordLayout,
+    context: Option<&DecodeProfile>,
+) -> Option<KeyframeRecord> {
+    decode_keyframe_record_inner(
+        data,
+        bit,
+        registry,
+        encoding.mpp_widths,
+        encoding.position.as_ref(),
+        encoding.corruption_check,
+        (
+            true,
+            Some(&encoding.component_widths),
+            encoding.keyframe_simulation_complete.unwrap_or(true),
+            encoding.keyframe_layout,
+            context,
+        ),
+    )
+}
+
+fn decode_keyframe_record_inner(
+    data: &[u8],
+    bit: impl TryInto<i64>,
+    registry: &FilmRegistry,
+    mpp_widths: [usize; 2],
+    encoding: Option<&PositionEncoding>,
+    corruption_check: bool,
+    policy: (
+        bool,
+        Option<&ComponentWidthOverrides>,
+        bool,
+        KeyframeLayout,
+        Option<&DecodeProfile>,
+    ),
+) -> Option<KeyframeRecord> {
+    let (padded, component_widths, simulation_complete, layout, context) = policy;
+    let bit = bit.try_into().ok()?;
+    if context.is_none() && !layout.valid() {
+        return None;
+    }
+    let header_bits = match context {
+        Some(c) => c.keyframe.header_bits,
+        None => i64::try_from(layout.header_bits).ok()?,
+    };
+    let size_word_bits = context.map_or(layout.size_word_bits as u64, |c| {
+        c.keyframe.size_word_bits as u64
+    });
+    if mpp_widths.iter().any(|w| !(1..=32).contains(w)) || encoding.is_some_and(|e| !e.valid()) {
+        return None;
+    }
+    let mut r = ComponentReader {
+        references: Vec::new(),
+        reference_widths: context.map(|c| ComponentWidths {
+            movement: &c.movement,
+            mpp: c.mpp,
+            maximum: u64::MAX,
+        }),
+        width_error: None,
+
+        live_grammar: context.map(|c| c.grammar.clone()),
+        // The reference full-state walker creates a fresh reader without setting a slot.
+        movement_slot: Some(0),
+        diagnostics: Default::default(),
+        cursor: if padded {
+            Cursor::signed(data, bit, None)
+        } else {
+            Cursor::new(data, usize::try_from(bit).ok()?)?
+        },
+        fields: Vec::new(),
+        position_encoding: encoding,
+    };
+    let (id, archetype) = if padded {
+        let archetype = reference_bits_at(data, bit.wrapping_add(58), 6) as u32;
+        let id = reference_bits_tolerant(data, bit, 32) as u32;
+        let mut remaining = header_bits.max(64);
+        for (name, width) in [
+            ("header.id", 32),
+            ("header.archetype", 32),
+            ("header.word", 32),
+            ("header.kind", 4),
+            ("header.byte", 8),
+        ] {
+            let width = width.min(remaining);
+            if width > 0 {
+                r.fields.push(ComponentField {
+                    name: name.into(),
+                    bit: usize::try_from(r.cursor.position).ok()?,
+                    width: usize::try_from(width).ok()?,
+                    raw: RawBits::from_source(
+                        data,
+                        usize::try_from(r.cursor.position).ok()?,
+                        usize::try_from(width).ok()?,
+                    )?,
+                });
+                r.cursor.skip_signed(width);
+                remaining -= width;
+            }
+        }
+        if remaining > 0 {
+            signed_skip(
+                &mut r,
+                "header.extension",
+                remaining,
+                false,
+                None,
+                ("header.extension", "header.extension.tail"),
+            )?;
+        }
+        if header_bits < 64 {
+            signed_skip(
+                &mut r,
+                "header.layout_adjustment",
+                header_bits.wrapping_sub(64),
+                false,
+                None,
+                ("header.layout_adjustment", "header.layout_adjustment"),
+            )?;
+        }
+        (id, archetype)
+    } else {
+        let id = r.r("header.id", 32)? as u32;
+        let raw_archetype = r.r("header.archetype", 32)? as u32;
+        // WalkKeyframeFullState reads only record+58..64. The sequential table
+        // validates the whole word separately and handles its no-archetype sentinel.
+        let archetype = raw_archetype;
+        let mut remaining = layout.header_bits - 64;
+        for (name, width) in [("header.word", 32), ("header.kind", 4), ("header.byte", 8)] {
+            let width = width.min(remaining);
+            if width > 0 {
+                r.r(name, width)?;
+                remaining -= width;
+            }
+        }
+        r.words("header.extension", remaining / 64, 64)?;
+        if !remaining.is_multiple_of(64) {
+            r.r("header.extension.tail", remaining % 64)?;
+        }
+        (id, archetype)
+    };
+    let mut components = Vec::new();
+    let mut default_state = None;
+    let mut stop = body(
+        &mut r,
+        archetype,
+        registry,
+        mpp_widths,
+        corruption_check,
+        (&mut components, &mut default_state),
+        (
+            padded,
+            component_widths,
+            simulation_complete,
+            size_word_bits,
+        ),
+    )
+    .unwrap_or(KeyframeStop::Truncated);
+    let source_end = i64::try_from(data.len().saturating_mul(8)).ok()?;
+    if r.cursor.position > source_end {
+        stop = KeyframeStop::Truncated;
+    }
+    components.retain_mut(|component| {
+        if component.start_bit >= source_end {
+            return false;
+        }
+        component.end_bit = component.end_bit.min(source_end);
+        true
+    });
+    let mut fields = r.fields;
+    fields.retain(|field| {
+        !components.iter().any(|component: &KeyframeComponentRead| {
+            let Ok(start) = usize::try_from(component.start_bit) else {
+                return false;
+            };
+            let Ok(end) = usize::try_from(component.end_bit) else {
+                return false;
+            };
+            field.bit >= start && field.bit < end
+        })
+    });
+    Some(KeyframeRecord {
+        start_bit: bit,
+        end_bit: r.cursor.position.min(source_end),
+        id,
+        archetype,
+        fields,
+        default_state,
+        components,
+        stop,
+    })
+}
+
+fn body(
+    r: &mut ComponentReader<'_>,
+    ti: u32,
+    registry: &FilmRegistry,
+    widths: [usize; 2],
+    check: bool,
+    sections: (
+        &mut Vec<KeyframeComponentRead>,
+        &mut Option<crate::theater::film::DefaultState>,
+    ),
+    policy: (bool, Option<&ComponentWidthOverrides>, bool, u64),
+) -> Option<KeyframeStop> {
+    let (components, default_state) = sections;
+    let (_reference_policy, component_widths, simulation_complete, size_word_bits) = policy;
+    // The writer omits n1, n2 and the entire body for this sentinel archetype.
+    if ti == u32::MAX {
+        return Some(KeyframeStop::Complete);
+    }
+    let Some(arch) = registry.archetype(ti as usize).filter(|_| ti < 50) else {
+        return Some(KeyframeStop::InvalidArchetype);
+    };
+    let n1 = r.r_wide("default_guard", size_word_bits)? as u32 as i32;
+    if n1 > 0 {
+        let start = r.cursor.position;
+        let field_start = r.fields.len();
+        let has_reader = defaults::has_reference_deserializer(ti);
+        let result = (|| {
+            if has_reader && !defaults::state(r, ti, widths)? {
+                return Some(false);
+            }
+            if check {
+                r.r_wide("default_corruption_check", size_word_bits)?;
+            }
+            Some(true)
+        })();
+        *default_state = Some(crate::theater::film::DefaultState {
+            source: crate::theater::film::BitRange {
+                start: usize::try_from(start).ok()?,
+                end: usize::try_from(r.cursor.position).ok()?,
+            },
+            fields: r.fields.drain(field_start..).collect(),
+            status: match result {
+                Some(true) if !has_reader => crate::theater::film::DefaultStateStatus::Opaque,
+                Some(true) => crate::theater::film::DefaultStateStatus::Complete,
+                Some(false) => crate::theater::film::DefaultStateStatus::Unsupported,
+                None => crate::theater::film::DefaultStateStatus::Truncated,
+            },
+        });
+        if !result? {
+            return Some(KeyframeStop::UnsupportedDefault);
+        }
+    }
+    let n2 = r.r_wide("components_guard", size_word_bits)? as u32 as i32;
+    if n2 <= 0 {
+        return Some(KeyframeStop::Complete);
+    }
+    for (index, registry_component) in arch.components.iter().enumerate() {
+        let name = registry_component.name()?;
+        let start_bit = r.cursor.position;
+        let field_start = r.fields.len();
+        let status = read_component(
+            r,
+            name,
+            registry_component.precision_level,
+            ti,
+            component_widths,
+            (simulation_complete, None),
+        );
+        components.push(KeyframeComponentRead {
+            status: status.into(),
+            index,
+            name: name.to_owned(),
+            start_bit,
+            end_bit: r.cursor.position,
+            fields: r.fields[field_start..].to_vec(),
+        });
+        if !status? {
+            if let Some(field) = required_runtime_field(name) {
+                return Some(KeyframeStop::RuntimeContextUnavailable {
+                    index,
+                    name: name.to_owned(),
+                    field: field.to_owned(),
+                });
+            }
+            return Some(KeyframeStop::UnsupportedComponent {
+                index,
+                name: name.to_owned(),
+            });
+        }
+        let check = if check {
+            r.gate("component_corruption_check", 32, true)
+        } else {
+            Some(())
+        };
+        let component = components.last_mut().unwrap();
+        component.end_bit = r.cursor.position;
+        component.fields = r.fields[field_start..].to_vec();
+        if check.is_none() {
+            component.status = crate::theater::film::ComponentReadStatus::Truncated;
+        }
+        check?;
+    }
+    Some(KeyframeStop::Complete)
+}

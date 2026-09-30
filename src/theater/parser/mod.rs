@@ -1,11 +1,13 @@
 //! Decoding implementation behind `Film::parse`.
 //! Canonical models are public under `theater::film`; runtime models under `theater::runtime`.
 pub(crate) mod bits;
+#[cfg(test)]
+pub(crate) mod test_support;
 pub(crate) mod transport;
 pub mod v41;
 
 use crate::theater::film::{ChunkKind, Film, FilmChunk, ParseError};
-use transport::inflate_film_chunk;
+use transport::PreparedChunk;
 
 /// Version-selected reader used internally by [`Film::parse`].
 ///
@@ -25,9 +27,9 @@ impl ChunkReader {
 
         // The registry version header selects the reader before any
         // version-dependent registry fields are interpreted.
-        let (registry_data, registry_transport) = inflate_film_chunk(&first.data);
-        let registry_data = registry_data.into_owned();
-        let header = registry_data
+        let first = PreparedChunk::new(first, 0);
+        let header = first
+            .data
             .get(..4)
             .ok_or(ParseError::TruncatedRegistryHeader)?;
         let version = u32::from_le_bytes(header.try_into().unwrap());
@@ -37,7 +39,7 @@ impl ChunkReader {
         };
 
         match reader {
-            Self::V41(reader) => reader.read(first, registry_data, registry_transport, chunks),
+            Self::V41(reader) => reader.read(first, chunks),
         }
     }
 }

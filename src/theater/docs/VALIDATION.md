@@ -199,3 +199,30 @@ missing-runtime-setting stop. A debug timing of the retained ranked Oddball film
 before removal and 1.38 seconds afterwards, excluding parsing and compilation.
 This measures that recording locally, not the user's latest film. The existing
 canonical stop/source-retention and playback consistency tests remain in place.
+
+## Parser organization refactor (2026-09-30)
+
+The refactor keeps `Film::parse` and canonical model ownership intact. Shared
+transport prepares each chunk once and frames both packet streams. The v41
+subtree groups registry and summary grammars with their chunk readers, and
+replication grammars by packet, view, record and component family. A borrowed
+record context replaces temporary binding maps and cloned profiles. Disabled
+parser-side position projections were removed while preserving raw reads.
+
+Validation used the existing expectations without regenerating any oracle:
+
+- `cargo test --all-features`: 93 tests passed, two corpus tests explicitly
+  deferred to the separate runs below; all 10 doctests passed.
+- `cargo test --all-features captured_v41_summary_semantics -- --ignored --nocapture`:
+  3,667 pinned reference events across five films, plus independent service counts.
+- `cargo test --all-features captured_v41_corpus -- --ignored --nocapture`:
+  all 32 films passed, including 403,465 reference contexts and the existing
+  source-verified runtime refusal; completed in 72.98 seconds.
+- `cargo clippy --all-features --all-targets -- -D warnings` passed.
+- `RUSTDOCFLAGS='-D warnings' cargo doc --all-features --no-deps` passed.
+- `cargo check --all-features --lib --target wasm32-unknown-unknown` passed.
+- Formatting and diff whitespace checks passed; all 16 fixture lengths and
+  SHA-256 hashes in `fixtures.json` remained unchanged.
+
+This evidence supports preservation of existing decoding behavior and boundaries.
+It does not establish new layouts, physical-action semantics, or browser replay.

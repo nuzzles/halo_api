@@ -45,7 +45,7 @@ pub struct TranslocatorRead {
 }
 
 use crate::theater::parser::bits::Cursor;
-use crate::theater::parser::v41::FilmMapBounds;
+use crate::theater::parser::v41::context::map::FilmMapBounds;
 
 fn decode_translocator_with_cursor(
     data: &[u8],

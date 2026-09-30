@@ -1,7 +1,9 @@
 use super::decode_weapon_damage;
 use super::*;
 use crate::theater::Film;
-use crate::theater::parser::v41::{FixtureChunkMetadata, FixtureFilmSource, test_chunks};
+use crate::theater::parser::test_support::FixtureChunkMetadata;
+use crate::theater::parser::test_support::FixtureFilmSource;
+use crate::theater::parser::test_support::test_chunks;
 use serde_json::{Value, json};
 use std::io::Read;
 

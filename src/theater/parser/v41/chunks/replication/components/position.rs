@@ -1,0 +1,253 @@
+//! v41 position component bit grammar.
+use super::reader::ComponentReader;
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
+
+/// Reference inherited body-reading switches. Defaults match v41 production.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub(crate) struct ComponentBodyPolicy {
+    pub ability_anchor: bool,
+    pub mobility: bool,
+    /// Reference calibration skip used only when an active mobility body is disabled.
+    pub mobility_extra_bits: i64,
+}
+impl Default for ComponentBodyPolicy {
+    fn default() -> Self {
+        Self {
+            ability_anchor: true,
+            mobility: true,
+            mobility_extra_bits: 0,
+        }
+    }
+}
+
+impl ComponentBodyPolicy {
+    fn is_default(&self) -> bool {
+        self == &Self::default()
+    }
+}
+
+/// Precision and dependent component-body context. Widths require film/map
+/// evidence; there is no universal default for a v41 film. World units are separate.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct PositionEncoding {
+    /// Inherited switches for component bodies that consume this precision context.
+    #[serde(default, skip_serializing_if = "ComponentBodyPolicy::is_default")]
+    pub bodies: ComponentBodyPolicy,
+    pub index_bits: usize,
+    /// Explicit map widths for ungated world-object vectors (e.g. grapple anchors).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub world_axis_bits: Option<[usize; 3]>,
+    pub handle_bits: usize,
+    /// Axis widths used by generic e524 traversal (distinct from world-object bounds).
+    pub traversal_axis_bits: [usize; 3],
+    pub default_axis_bits: [usize; 3],
+    pub region_axis_bits: BTreeMap<u32, [usize; 3]>,
+    pub delta_axis_bits: [usize; 3],
+    /// Reference map-specific 47/101-bit calibration path; disabled in production.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub calibrated_skip: bool,
+    /// Reference baseline scope is independent of the global full-precision switch.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub baseline_scope: bool,
+    pub full_precision: bool,
+    pub writer_absolute: bool,
+    pub delta_handle_tail: bool,
+}
+
+impl PositionEncoding {
+    pub(crate) fn full_precision_gate(&self) -> bool {
+        self.baseline_scope || self.full_precision
+    }
+
+    pub(crate) fn valid(&self) -> bool {
+        self.index_bits <= 30
+            && self.handle_bits <= 30
+            && self
+                .default_axis_bits
+                .iter()
+                .chain(self.delta_axis_bits.iter())
+                .chain(self.traversal_axis_bits.iter())
+                .chain(self.region_axis_bits.values().flatten())
+                .chain(self.world_axis_bits.iter().flatten())
+                .all(|w| (1..=32).contains(w))
+    }
+}
+
+pub(crate) fn traversal_payload(r: &mut ComponentReader<'_>) -> Option<()> {
+    let encoding = r.position_encoding?;
+    if !r.bit("traversal.region.gate")? {
+        let raw = r.reference_widths.map_or(encoding.handle_bits as u64, |w| {
+            w.movement.traversal.index_bits
+        });
+        let width = r.reference_position_width(raw, "traversal index")?;
+        r.r_wide("traversal.region", width)?;
+    }
+    let axes = r
+        .reference_widths
+        .map_or(encoding.traversal_axis_bits.map(|v| v as u64), |w| {
+            w.movement.traversal.axis_bits
+        });
+    for (i, raw) in axes.into_iter().enumerate() {
+        let width = r.reference_position_width(raw, "traversal axes")?;
+        r.r_wide(&format!("traversal.position[{i}]"), width)?;
+    }
+    Some(())
+}
+
+pub(crate) fn component(r: &mut ComponentReader<'_>) -> Option<bool> {
+    let Some(encoding) = r.position_encoding else {
+        return Some(false);
+    };
+    let predicted = r.bit("use_prediction")?;
+    if encoding.calibrated_skip {
+        // The reference calibration path reads only the first discriminant. It
+        // publishes neither positions nor references and does not update a world.
+        let remaining = if predicted { 100 } else { 46 };
+        r.words("position.calibrated_skip", remaining / 64, 64)?;
+        if !remaining.is_multiple_of(64) {
+            r.r("position.calibrated_skip_tail", remaining % 64)?;
+        }
+        return Some(true);
+    }
+    let delta = r.bit("delta")?;
+    if predicted {
+        let handle = r.bit("has_handle")?;
+        r.words("baseline_vector_bits", 3, 32)?;
+        handle_tail(r, handle, encoding)?;
+        return Some(true);
+    }
+    if !delta {
+        if encoding.writer_absolute {
+            let handle = r.bit("has_handle")?;
+            if encoding.full_precision_gate() {
+                r.words("vector_bits", 3, 32)?;
+            } else {
+                absolute_payload(r, encoding)?;
+            }
+            handle_tail(r, handle, encoding)?;
+            r.r("finite", 2)?;
+        } else {
+            absolute(r, encoding)?;
+        }
+        return Some(true);
+    }
+    if !r.bit("predicted_absolute")? {
+        if encoding.full_precision_gate() {
+            r.words("baseline_vector_bits", 3, 32)?;
+        } else if r.bit("absolute_fallback")? {
+            absolute(r, encoding)?;
+        } else if r.bit("delta8")? {
+            for i in 0..3 {
+                r.r(&format!("delta_signed8[{i}]"), 8)?;
+            }
+        } else {
+            let axes = r
+                .reference_widths
+                .map_or(encoding.delta_axis_bits.map(|v| v as u64), |w| {
+                    if w.movement.delta_axis_width == 0 {
+                        w.movement.traversal.axis_bits
+                    } else {
+                        [w.movement.delta_axis_width; 3]
+                    }
+                });
+            for (i, raw) in axes.into_iter().enumerate() {
+                let width = r.reference_position_width(raw, "delta axes")?;
+                r.r_wide(&format!("delta[{i}]"), width)?;
+            }
+        }
+    } else {
+        let default = r.bit("default_vector")?;
+        if encoding.full_precision_gate() {
+            r.words("vector_bits", 3, 32)?;
+        } else if !default {
+            absolute_payload(r, encoding)?;
+        }
+    }
+    if encoding.delta_handle_tail {
+        if r.bit("handle_selector")? {
+            r.optional_handle("handle", 0)?;
+        }
+        if r.bit("region_present")? {
+            r.gate("region", 11, true)?;
+        }
+    }
+    Some(true)
+}
+
+fn absolute(r: &mut ComponentReader<'_>, encoding: &PositionEncoding) -> Option<()> {
+    let high = r.bit("precision_high")?;
+    if encoding.full_precision_gate() {
+        r.words("vector_bits", 3, 32)?;
+    } else if !high {
+        absolute_payload(r, encoding)?;
+        r.r("finite", 2)?;
+    }
+    Some(())
+}
+
+pub(crate) fn absolute_payload(
+    r: &mut ComponentReader<'_>,
+    encoding: &PositionEncoding,
+) -> Option<()> {
+    read_absolute_payload(r, encoding).map(|_| ())
+}
+
+fn read_absolute_payload(
+    r: &mut ComponentReader<'_>,
+    encoding: &PositionEncoding,
+) -> Option<(i32, [u64; 3], [u64; 3])> {
+    let mut raw_widths = encoding.default_axis_bits.map(|v| v as u64);
+    let mut region_index = -1;
+    if !r.bit("default_region")? {
+        let raw = r.reference_widths.map_or(encoding.index_bits as u64, |w| {
+            w.movement.world_object.index_bits
+        });
+        let width = r.reference_position_width(raw, "world index")?;
+        let raw_index = r.r_wide("region_index", width)?;
+        let index = raw_index as u32;
+        region_index = index as i32;
+        if let Some(w) = r.reference_widths {
+            // Reference absAxisWFor takes a signed host int. Its negative sentinel
+            // includes wide recorded indices whose low 64-bit word is negative.
+            if raw_index as i64 >= 0 {
+                raw_widths = w.movement.world_object.axis_bits;
+            }
+        } else if let Some(region) = encoding.region_axis_bits.get(&index) {
+            raw_widths = region.map(|v| v as u64);
+        } else if let Some(world) = encoding.world_axis_bits {
+            raw_widths = world.map(|v| v as u64);
+        }
+    }
+    r.record_absolute(region_index);
+    let mut q = [0; 3];
+    let mut widths = [0; 3];
+    for (i, raw) in raw_widths.into_iter().enumerate() {
+        widths[i] = r.reference_position_width(raw, "world axes")?;
+        q[i] = r.r_wide(&format!("position[{i}]"), widths[i])?;
+    }
+    Some((region_index, q, widths))
+}
+
+fn handle_tail(
+    r: &mut ComponentReader<'_>,
+    present: bool,
+    encoding: &PositionEncoding,
+) -> Option<()> {
+    if !present {
+        return Some(());
+    }
+    if r.bit("handle_selector")? && r.bit("handle_present")? {
+        let raw = r.reference_widths.map_or(encoding.handle_bits as u64, |w| {
+            w.movement.traversal.index_bits
+        });
+        let width = r.reference_position_width(raw, "traversal index")?;
+        r.r_wide("handle_value", width)?;
+        r.r("handle_generation", 2)?;
+    }
+    if r.bit("region_present")? {
+        r.gate("region", 11, true)?;
+    }
+    Some(())
+}

@@ -1,86 +1,55 @@
-//! Version-specific readers for the three film chunk kinds.
+//! Version-specific chunk dispatch, preserving source order.
+use crate::theater::film::{ChunkKind, Film, FilmChunk, FilmDataChunk, ParseError};
+use crate::theater::parser::transport::PreparedChunk;
+use crate::theater::parser::v41::context::V41DecodeConfig;
+use registry::V41RegistryChunkReader;
+use replication::{V41ReplicationStreamChunkReader, state::ReplicationDecodeState};
+use summary::V41SummaryChunkReader;
 
-use super::*;
+pub(crate) mod registry;
+pub(crate) mod replication;
+pub(crate) mod summary;
 
-mod registry;
-mod replication;
-mod summary;
+/// v41 backend selected from the first registry's recorded version.
+pub struct V41ChunkReader;
 
 impl V41ChunkReader {
     pub(crate) fn read(
         self,
-        registry_source: FilmChunk,
-        registry_data: Vec<u8>,
-        registry_transport: ChunkTransport,
+        first: PreparedChunk,
         inputs: impl IntoIterator<Item = FilmChunk>,
     ) -> Result<Film, ParseError> {
-        let registry =
-            V41RegistryChunkReader::read(registry_source, registry_data, registry_transport)?;
-        let config = FrameConfig::default();
-        let mut world = FilmWorld::default();
+        let registry = V41RegistryChunkReader::read(first)?;
+        let config = V41DecodeConfig::default();
+        let mut state = ReplicationDecodeState::default();
+        let mut context = replication::replication_stream::DecodeContext {
+            config: &config,
+            registry: &registry.body.registry,
+            state: &mut state,
+            event_gate15: None,
+        };
         let mut chunks = Vec::new();
-
         for (index, input) in inputs.into_iter().enumerate() {
-            let source_position = index + 1;
-            let (data, transport) = transport::inflate_film_chunk(&input.data);
-            let data = data.into_owned();
-            match input.kind {
-                ChunkKind::Registry => return Err(ParseError::MultipleRegistries),
-                ChunkKind::Replication => {
-                    world.current_chunk = input.index.unwrap_or(source_position as i64);
-                    chunks.push(FilmDataChunk::Replication(
-                        V41ReplicationStreamChunkReader::read(
-                            input,
-                            source_position,
-                            data,
-                            transport,
-                            &config,
-                            &registry.body.registry,
-                            &mut world,
-                        ),
-                    ));
-                }
-                ChunkKind::Summary => chunks.push(FilmDataChunk::Summary(
-                    V41SummaryChunkReader::read(input, source_position, data, transport),
-                )),
-                ChunkKind::Unknown(_) => chunks.push(FilmDataChunk::Unknown(Chunk {
-                    source: input,
-                    source_position,
-                    data,
-                    transport,
-                    body: (),
-                })),
+            if input.kind == ChunkKind::Registry {
+                return Err(ParseError::MultipleRegistries);
             }
+            let input = PreparedChunk::new(input, index + 1);
+            chunks.push(match input.source.kind {
+                ChunkKind::Registry => {
+                    unreachable!("additional registry rejected before inflation")
+                }
+                ChunkKind::Replication => {
+                    context.state.current_chunk =
+                        input.source.index.unwrap_or(input.source_position as i64);
+                    FilmDataChunk::Replication(V41ReplicationStreamChunkReader::read(
+                        input,
+                        &mut context,
+                    ))
+                }
+                ChunkKind::Summary => FilmDataChunk::Summary(V41SummaryChunkReader::read(input)),
+                ChunkKind::Unknown(_) => FilmDataChunk::Unknown(input.with_body(())),
+            });
         }
-
         Ok(Film { registry, chunks })
     }
-}
-
-fn packet_headers(
-    data: &[u8],
-    kind: ChunkKind,
-    source_position: usize,
-) -> (Vec<(PacketSource, FilmPacketHeader)>, Vec<ByteRange>) {
-    let headers = transport::read_packet_headers(data);
-    let walk_end = headers
-        .last()
-        .map(|(source, _)| source.payload.end)
-        .unwrap_or(0);
-    let opaque = if walk_end < data.len() {
-        tracing::warn!(
-            ?kind,
-            source_position,
-            byte_offset = walk_end,
-            remaining_bytes = data.len() - walk_end,
-            "stopped parsing film chunk before the end"
-        );
-        vec![ByteRange {
-            start: walk_end,
-            end: data.len(),
-        }]
-    } else {
-        Vec::new()
-    };
-    (headers, opaque)
 }

@@ -1,0 +1,26 @@
+//! Component field grammars, separate from packet and record traversal.
+pub(crate) mod ability;
+pub(crate) mod basic;
+pub(crate) mod biped;
+pub(crate) mod control;
+pub(crate) mod cursor;
+pub(crate) mod defaults;
+pub(crate) mod dispatch;
+pub(crate) mod equipment;
+pub(crate) mod flock;
+pub(crate) mod m4b;
+pub(crate) mod managed;
+pub(crate) mod movement;
+pub(crate) mod navpoint;
+pub(crate) mod object;
+pub(crate) mod orientation;
+pub(crate) mod physics;
+pub(crate) mod position;
+pub(crate) mod projectile;
+pub(crate) mod reader;
+pub(crate) mod scene;
+pub(crate) mod tacmap;
+pub(crate) mod tlv;
+pub(crate) mod unit;
+pub(crate) mod weapon;
+pub(crate) mod widths;

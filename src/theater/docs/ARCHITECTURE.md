@@ -22,13 +22,27 @@ theater/
       summary/             Recorded count and complete opaque record stream
   parser/
     mod.rs                 Registry-first version dispatch
-    transport.rs           Decompression and packet framing
+    transport/             Shared chunk preparation, decompression and packet framing
     bits.rs                Bounded bit primitives
     v41/
-      chunks/              Kind-specific structural readers
-      packets/             Packet-specific body decoders
-      components/          Component grammar
-      summary.rs           Count/opaque-stream reader, no candidate scans
+      context/             Borrowed decode profiles and wire-layout configuration
+      chunks/
+        registry/          Registry reader and ordered registry grammar
+        summary/           Count/opaque-stream reader, no candidate scans
+        replication/
+          state.rs         Schema bindings needed to decode later records
+          bindings.rs      Datum/keyframe declaration handling
+          components/      Shared field reader and component-family grammars
+          replication_stream/
+            mod.rs         Packet-type dispatch and shared decode context
+            datums.rs      Type-1 datum packet and table grammar
+            roster.rs      Explicit unsupported type-8 body
+            frame/         Type-0 events, entities, records, headers and controls
+            keyframes/     Type-2 table traversal and baseline record grammar
+      reference/           Internal reference-reader evidence and diagnostics
+      reference_bits.rs    Pinned signed/padded read semantics
+      tests/               Reference-oracle tests
+    test_support.rs        Test-only fixture adapters
   runtime/
     mod.rs                 TheaterRuntime::load and the public query/playback API
     medals.rs              Pinned v41 typed medal identities and unknown pairs
@@ -49,6 +63,28 @@ theater/
 version before a version-dependent reader runs. Its v41 backend dispatches chunk
 kinds to registry, replication, and summary readers. Unknown later kinds retain
 bytes and input order; additional registry chunks are errors.
+
+`transport::PreparedChunk` owns preparation of a downloaded chunk: it retains
+transport bytes, inflates once, and constructs canonical chunk containers. Its
+shared packet walker frames envelopes and retains any unwalked suffix. Version
+readers only supply body decoders, so summary and replication framing use the
+same boundary rules.
+
+A single `DecodeContext` follows the ordered replication packets. Its state is
+schema context required by the wire grammar, not a replay world: datum tables,
+keyframes, NEW declarations and DELETE records establish which archetype can be
+used for a later delta. Record reads borrow the profile and receive the selected
+binding directly; they do not clone profiles or construct temporary lookup maps.
+`context::layout` owns framing policy; `frame::records` owns record traversal;
+`components::dispatch` selects exact registry names and routes them to component
+families. Unknown names and incomplete reads retain the existing explicit stops.
+
+Disabled position dequantization/accumulation hooks have been removed from the
+parser; quantized coordinate fields and their source ranges remain canonical.
+Reference evidence is isolated from the public canonical models. Test-only
+continuation adapters support the pinned oracle's traversal without exposing a
+second production parsing mode. The refactor preserves the supported grammar;
+it does not fill unsupported layouts or establish new semantic parity claims.
 
 Structural parsing keeps only recorded/source-backed data and explicit stops.
 Parser schema bindings are private decoding context. Resolution separately

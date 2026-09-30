@@ -295,20 +295,19 @@ fn captured_v41_corpus() {
         namespace: i8,
     }
     impl ReferenceContext {
-        fn world(&self) -> FilmWorld {
-            FilmWorld {
+        fn world(&self) -> ReplicationDecodeState {
+            ReplicationDecodeState {
                 slots: self
                     .slots
                     .iter()
                     .map(|(&slot, binding)| {
                         (
                             slot,
-                            crate::theater::parser::v41::FilmWorldSlot {
+                            crate::theater::parser::v41::chunks::replication::state::DecodeBinding {
                                 archetype: binding.archetype,
                                 full_id: binding.full_id,
                                 soft: binding.soft,
                                 generation_any: binding.generation_any,
-                                position: None,
                                 view: (binding.view >= 0).then_some(binding.view),
                             },
                         )
@@ -415,7 +414,7 @@ fn captured_v41_corpus() {
         let film = Film::parse(input.clone()).unwrap();
         assert_eq!(film.registry.body.registry.archetypes.len(), 50);
         let mut reference_context: Option<ReferenceContext> = None;
-        let baseline_config = FrameConfig::default();
+        let baseline_config = V41DecodeConfig::default();
         for (i, original) in input.iter().enumerate() {
             match original.kind {
                 ChunkKind::Registry => assert_eq!(&film.registry.source, original),
@@ -539,14 +538,14 @@ fn captured_v41_corpus() {
                                 assert!(component.fields.is_empty());
                                 assert_eq!(component.status, ComponentReadStatus::Unsupported);
                                 assert!(
-                                    crate::theater::parser::v41::production_frame::completed_views(
+                                    crate::theater::parser::v41::chunks::replication::replication_stream::frame::entities::completed_views(
                                         &baseline
                                     ) <= oracle.0
                                 );
                                 runtime_refusals += 1;
                             } else if oracle.1 <= (payload.len() * 8) as i64 {
                                 assert_eq!(
-                                        (crate::theater::parser::v41::production_frame::completed_views(&baseline), baseline.end_bit),
+                                        (crate::theater::parser::v41::chunks::replication::replication_stream::frame::entities::completed_views(&baseline), baseline.end_bit),
                                         oracle,
                                         "{}:{} actual={:?}",
                                         files[i],
@@ -558,7 +557,7 @@ fn captured_v41_corpus() {
                                 // canonical reader must stay bounded and stop explicitly.
                                 assert!(baseline.end_bit <= (payload.len() * 8) as i64);
                                 assert!(
-                                    crate::theater::parser::v41::production_frame::completed_views(
+                                    crate::theater::parser::v41::chunks::replication::replication_stream::frame::entities::completed_views(
                                         &baseline
                                     ) <= oracle.0,
                                     "{}:{} actual={:?} oracle={:?}",
@@ -628,7 +627,8 @@ fn captured_v41_corpus() {
     assert_eq!(summaries, 3667);
 }
 
-use crate::theater::parser::v41::{FilmWorld, FrameConfig};
+use crate::theater::parser::v41::chunks::replication::state::ReplicationDecodeState;
+use crate::theater::parser::v41::context::V41DecodeConfig;
 
 #[test]
 fn packet_payload_rejects_inconsistent_public_envelopes() {

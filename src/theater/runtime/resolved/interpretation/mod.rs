@@ -2,8 +2,10 @@
 use super::SourceRef;
 use crate::theater::Film;
 use crate::theater::film::*;
-use crate::theater::parser::{bits, v41::DecodeError};
+use crate::theater::parser::bits;
+mod errors;
 use bot_metadata::read_bot_metadata;
+use errors::BootstrapReadError;
 use fire_events::read_fire_event;
 use identity::read_identity;
 use packet::{packet_heads::read_packet_head, weapon_damage::read_weapon_damage};

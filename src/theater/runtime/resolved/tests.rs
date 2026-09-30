@@ -1,7 +1,8 @@
 use super::*;
+use crate::theater::film::RecordHeader;
 use crate::theater::film::*;
-use crate::theater::parser::v41::test_chunks;
-use crate::theater::parser::v41::{FixtureFilmSource, RecordHeader};
+use crate::theater::parser::test_support::FixtureFilmSource;
+use crate::theater::parser::test_support::test_chunks;
 
 fn replication_chunk_mut(film: &mut Film) -> &mut ReplicationStreamChunk {
     film.chunks
@@ -258,7 +259,9 @@ fn resolved_unknowns_partial_updates_and_padding_remain_explicit() {
 
 #[test]
 fn resolved_keyframe_baselines_do_not_invent_runtime_generation_or_spawn_time() {
-    use crate::theater::parser::v41::{KeyframeChainAttempt, KeyframeChainStop, KeyframeTable};
+    use crate::theater::film::KeyframeChainAttempt;
+    use crate::theater::film::KeyframeChainStop;
+    use crate::theater::film::KeyframeTable;
     let mut film = recording();
     let mut keyframe = packet(&film, 10, vec![]);
     keyframe.body = PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(
@@ -330,7 +333,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
     let mut p = packet(&film, 10, vec![incomplete]);
     if let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body {
         frame.frame.decoded_mut().unwrap().controls =
-            Some(crate::theater::parser::v41::DecodedFrameView {
+            Some(crate::theater::film::DecodedFrameView {
                 control_entries: vec![ControlEntry {
                     start_bit: 2040,
                     end_bit: 2050,
@@ -346,7 +349,7 @@ fn resolved_incomplete_new_and_padded_control_are_not_recorded_state() {
                 end_bit: 2050,
                 kinds: vec![0],
                 fields: vec![],
-                stop: crate::theater::parser::v41::FrameViewStop::Truncated,
+                stop: crate::theater::film::FrameViewStop::Truncated,
             });
     }
     replication_chunk_mut(&mut film).body.packets = vec![p];
