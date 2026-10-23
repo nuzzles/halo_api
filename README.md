@@ -18,7 +18,6 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 - Filters service records by season, playlist, mode, and ranked/social via `ServiceRecordFilter`.
 - Paces requests per Halo Waypoint origin so bursts don't trip throttling; configure via
   `HaloInfiniteClient::builder()`.
-- Rotates across multiple accounts with `HaloInfiniteClientPool`.
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 
@@ -58,19 +57,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
-
-## Multiple Halo accounts
-
-Use a pool to rotate among `HaloAuthClient`s:
-
-```rust
-let pool = HaloInfiniteClient::builder().build_pool([first_auth, second_auth])?;
-let client = pool.next_client();
-let stats = client.match_stats(match_id).await?;
-```
-
-Use the selected client throughout an operation. Selection is local to the pool;
-each client retains its own credentials, rate limiter, and 429 retries.
 
 ## MSRV
 
