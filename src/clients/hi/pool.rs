@@ -1,5 +1,3 @@
-//! Best-effort load balancing across independent Halo Infinite accounts.
-
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -12,14 +10,10 @@ struct PoolState {
     next: AtomicUsize,
 }
 
-/// A round-robin pool of independently authenticated Halo Infinite clients.
+/// Selects Halo Infinite clients in round-robin order.
 ///
-/// Call [`Self::next_client`] once per logical operation and use the returned
-/// client throughout that operation. This keeps account-specific responses and
-/// clearance credentials tied to one account. Each client retains its own
-/// request pacing, token cache, and 429 retry state; clones of this pool share
-/// the selection order within one process. Separate processes or Lambda
-/// environments do not coordinate their request rates.
+/// Clones share the selection cursor. Each client retains its own credentials,
+/// rate limiter, and retries.
 #[derive(Clone)]
 pub struct HaloInfiniteClientPool {
     state: Arc<PoolState>,
@@ -33,8 +27,7 @@ pub enum HaloInfiniteClientPoolError {
 }
 
 impl HaloInfiniteClientPool {
-    /// Builds a pool from clients that are interchangeable for the operations
-    /// you intend to distribute. Each client should use a distinct Halo account.
+    /// Creates a nonempty pool of clients for distinct Halo accounts.
     pub fn try_new(
         clients: impl IntoIterator<Item = HaloInfiniteClient>,
     ) -> Result<Self, HaloInfiniteClientPoolError> {
@@ -50,12 +43,8 @@ impl HaloInfiniteClientPool {
         })
     }
 
-    /// Selects the next account and returns a cheap client clone whose token
-    /// cache, pacing, and cooldown remain shared with that account's pool entry.
-    ///
-    /// Selection is round-robin within this process. It does not check whether
-    /// an account is currently waiting on a 429 cooldown; the selected client's
-    /// limiter and retry handling still apply before its outgoing requests.
+    /// Returns the next client. Its clone shares credentials and pacing with
+    /// the pool entry; clients in 429 backoff can still be selected.
     pub fn next_client(&self) -> HaloInfiniteClient {
         let index = self.state.next.fetch_add(1, Ordering::Relaxed) % self.state.clients.len();
         self.state.clients[index].clone()

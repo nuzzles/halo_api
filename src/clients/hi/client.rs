@@ -1211,12 +1211,7 @@ impl HaloInfiniteClientBuilder {
         self.build_with_endpoints(auth, HaloEndpoints::default())
     }
 
-    /// Builds a round-robin pool with the same client settings for every
-    /// account. The pool must contain at least one account.
-    ///
-    /// Each constructed client uses its supplied authentication state and gets
-    /// independent request pacing and 429 retry state. Select a client with
-    /// [`HaloInfiniteClientPool::next_client`] for each logical operation.
+    /// Builds a nonempty pool with these settings for each account.
     pub fn build_pool(
         self,
         accounts: impl IntoIterator<Item = HaloAuthClient>,
