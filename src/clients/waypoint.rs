@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use reqwest::Client;
-use scraper::{Html, Selector};
+use scraper::{ElementRef, Html};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -102,10 +102,13 @@ struct Block {
 
 fn parse_leaderboard(html: &str) -> Result<Vec<HcsLeaderboardEntry>, HcsError> {
     let document = Html::parse_document(html);
-    let selector = Selector::parse("script#__NEXT_DATA__").expect("valid static selector");
     let next_json = document
-        .select(&selector)
-        .next()
+        .tree
+        .nodes()
+        .filter_map(ElementRef::wrap)
+        .find(|element| {
+            element.value().name() == "script" && element.attr("id") == Some("__NEXT_DATA__")
+        })
         .and_then(|element| element.text().next())
         .ok_or(HcsError::MissingPageData)?;
     let next: NextData = serde_json::from_str(next_json)?;
@@ -128,15 +131,24 @@ fn parse_leaderboard(html: &str) -> Result<Vec<HcsLeaderboardEntry>, HcsError> {
     for (index, row) in rows.records().enumerate() {
         let row = row?;
         let row_number = index + 1;
-        if row.len() != 5 || row[2].trim().is_empty() {
+        if row.len() != 5 {
             return Err(HcsError::InvalidRow { row: row_number });
         }
-        let points = row[4].trim().parse().map_err(|_| HcsError::InvalidPoints {
-            row: row_number,
-            value: row[4].to_owned(),
-        })?;
+        let gamertag = row
+            .get(2)
+            .map(str::trim)
+            .filter(|gamertag| !gamertag.is_empty())
+            .ok_or(HcsError::InvalidRow { row: row_number })?;
+        let points_str = row.get(4).ok_or(HcsError::InvalidRow { row: row_number })?;
+        let points = points_str
+            .trim()
+            .parse()
+            .map_err(|_| HcsError::InvalidPoints {
+                row: row_number,
+                value: points_str.to_owned(),
+            })?;
         entries.push(HcsLeaderboardEntry {
-            gamertag: row[2].trim().to_owned(),
+            gamertag: gamertag.to_owned(),
             points,
         });
     }
