@@ -19,6 +19,7 @@ const HALO_RELYING_PARTY: RelyingParty = RelyingParty::new("https://prod.xsts.ha
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub(crate) trait SpartanTokenSource: Send + Sync {
+    #[allow(clippy::double_must_use)]
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError>;
 }
 
