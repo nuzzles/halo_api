@@ -13,7 +13,6 @@ const TIMEOUT: Duration = Duration::from_secs(10);
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub(crate) trait ClearanceTokenSource: Send + Sync {
-    #[allow(clippy::double_must_use)]
     async fn clearance_token(&self, spartan_token: &str) -> Result<CachedToken<String>, AuthError>;
 }
 
