@@ -36,6 +36,7 @@ pub mod clients;
 pub use clients::hi::{
     HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,
 };
+pub use clients::waypoint::{HcsError, HcsLeaderboardEntry, WaypointClient};
 
 #[cfg(test)]
 mod tests;

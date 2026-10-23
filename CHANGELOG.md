@@ -14,6 +14,7 @@ This release has an [MSRV][] of 1.96.
 
 ### Added
 
+- `WaypointClient::hcs_leaderboard` reads Waypoint's public HCS leaderboard and returns gamertags with points.
 - `HaloInfiniteClientPool` and `HaloInfiniteClientBuilder::build_pool` support round-robin
   selection across multiple Halo accounts.
 
