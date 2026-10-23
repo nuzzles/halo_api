@@ -18,6 +18,8 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 - Filters service records by season, playlist, mode, and ranked/social via `ServiceRecordFilter`.
 - Paces requests per Halo Waypoint origin so bursts don't trip throttling; configure via
   `HaloInfiniteClient::builder()`.
+- Distributes operations across multiple independently authenticated accounts with
+  `HaloInfiniteClientPool`.
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 
@@ -57,6 +59,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
+## Multiple Halo accounts
+
+Create one `HaloAuthClient` per account, then build and share a pool across
+tasks. Pick one client for each logical operation so account-specific results
+and credentials stay together:
+
+```rust,no_run
+use halo_api::HaloInfiniteClient;
+use halo_api::auth::HaloAuthClient;
+
+# async fn example() -> Result<(), Box<dyn std::error::Error>> {
+let accounts = [
+    HaloAuthClient::from_tokens("first-spartan", "first-clearance"),
+    HaloAuthClient::from_tokens("second-spartan", "second-clearance"),
+];
+let pool = HaloInfiniteClient::builder().build_pool(accounts)?;
+
+let client = pool.next_client();
+let match_stats = client.match_stats("match-id").await?;
+println!("{match_stats:?}");
+# Ok(())
+# }
+```
+
+Selection is round-robin within a process. Each account has its own local
+per-origin pacing and 429 retries, but separate processes and Lambda environments
+do not share a rate limit. The pool reduces contention; it does not guarantee an
+account-wide request rate across workers. Pool only accounts with equivalent
+access to the operations you distribute. Token-based auth cannot refresh its
+credentials automatically; use `HaloAuthClient::from_xbox_client` for refreshable
+accounts.
 
 ## MSRV
 

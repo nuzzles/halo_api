@@ -22,6 +22,7 @@ use super::models::{
 };
 use super::pager::MatchHistoryPager;
 use super::player::Player;
+use super::pool::{HaloInfiniteClientPool, HaloInfiniteClientPoolError};
 use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuthClient, HaloCredentials};
 
@@ -1208,6 +1209,19 @@ impl HaloInfiniteClientBuilder {
     /// Builds the client against the real Halo Waypoint endpoints.
     pub fn build(self, auth: HaloAuthClient) -> HaloInfiniteClient {
         self.build_with_endpoints(auth, HaloEndpoints::default())
+    }
+
+    /// Builds a round-robin pool with the same client settings for every
+    /// account. The pool must contain at least one account.
+    ///
+    /// Each constructed client uses its supplied authentication state and gets
+    /// independent request pacing and 429 retry state. Select a client with
+    /// [`HaloInfiniteClientPool::next_client`] for each logical operation.
+    pub fn build_pool(
+        self,
+        accounts: impl IntoIterator<Item = HaloAuthClient>,
+    ) -> Result<HaloInfiniteClientPool, HaloInfiniteClientPoolError> {
+        HaloInfiniteClientPool::try_new(accounts.into_iter().map(|auth| self.clone().build(auth)))
     }
 
     pub(crate) fn build_with_endpoints(

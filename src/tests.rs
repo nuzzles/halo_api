@@ -9,7 +9,10 @@ use crate::clients::hi::models::{
     CustomizationItemMetadata, EmblemImageAssets, MatchHistoryType, MatchType, PlaylistId,
     ServiceRecordFilter,
 };
-use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError, Player};
+use crate::clients::hi::{
+    HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,
+    Player,
+};
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
 use wiremock::matchers::{header, method, path, query_param};
@@ -219,6 +222,117 @@ async fn retries_rate_limited_requests_in_the_shared_client() {
 
     assert_eq!(csr.records[0].result.current.value, 1500);
     assert_eq!(attempts.load(Ordering::SeqCst), 2);
+}
+
+#[tokio::test]
+async fn account_pool_balances_distinct_credentials_across_clones() {
+    let server = MockServer::start().await;
+    let endpoints = HaloEndpoints {
+        current_user_url: format!("{}/users/me", server.uri()),
+        ..HaloEndpoints::default()
+    };
+
+    for (token, xuid) in [("spartan-a", "111"), ("spartan-b", "222")] {
+        Mock::given(method("GET"))
+            .and(path("/users/me"))
+            .and(header("X-343-Authorization-Spartan", token))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "xuid": xuid
+            })))
+            .expect(2)
+            .mount(&server)
+            .await;
+    }
+
+    let clients = ["spartan-a", "spartan-b"].map(|token| {
+        HaloInfiniteClient::builder()
+            .requests_per_second(0)
+            .build_with_endpoints(
+                HaloAuthClient::from_tokens(token, "clearance"),
+                endpoints.clone(),
+            )
+    });
+    let pool = HaloInfiniteClientPool::try_new(clients).unwrap();
+    assert_eq!(pool.account_count(), 2);
+
+    let other_handle = pool.clone();
+    for (handle, expected_xuid) in [
+        (&pool, "111"),
+        (&other_handle, "222"),
+        (&pool, "111"),
+        (&other_handle, "222"),
+    ] {
+        assert_eq!(
+            handle.next_client().current_user().await.unwrap().xuid,
+            expected_xuid
+        );
+    }
+}
+
+#[tokio::test]
+async fn account_pool_keeps_429_retries_on_the_selected_account() {
+    let server = MockServer::start().await;
+    let endpoints = HaloEndpoints {
+        skill_base_url: server.uri(),
+        ..HaloEndpoints::default()
+    };
+    let attempts = Arc::new(AtomicUsize::new(0));
+    let csr_path = "/hi/playlist/edfef3ac-9cbe-4fa2-b949-8f29deafd483/csrs";
+
+    Mock::given(method("GET"))
+        .and(path(csr_path))
+        .and(header("X-343-Authorization-Spartan", "spartan-a"))
+        .respond_with(RateLimitThenSuccess {
+            attempts: attempts.clone(),
+        })
+        .expect(2)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path(csr_path))
+        .and(header("X-343-Authorization-Spartan", "spartan-b"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(csr_body(1600)))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let clients = ["spartan-a", "spartan-b"].map(|token| {
+        HaloInfiniteClient::builder()
+            .requests_per_second(0)
+            .build_with_endpoints(
+                HaloAuthClient::from_tokens(token, "clearance"),
+                endpoints.clone(),
+            )
+    });
+    let pool = HaloInfiniteClientPool::try_new(clients).unwrap();
+    let player = Player::xuid("123456789");
+
+    let first = pool
+        .next_client()
+        .playlist_csr(PlaylistId::RANKED_ARENA, &player)
+        .await
+        .unwrap();
+    let second = pool
+        .next_client()
+        .playlist_csr(PlaylistId::RANKED_ARENA, &player)
+        .await
+        .unwrap();
+
+    assert_eq!(first.records[0].result.current.value, 1500);
+    assert_eq!(second.records[0].result.current.value, 1600);
+    assert_eq!(attempts.load(Ordering::SeqCst), 2);
+}
+
+#[test]
+fn account_pool_requires_an_account() {
+    assert!(matches!(
+        HaloInfiniteClientPool::try_new(Vec::new()),
+        Err(HaloInfiniteClientPoolError::Empty)
+    ));
+    assert!(matches!(
+        HaloInfiniteClient::builder().build_pool(Vec::new()),
+        Err(HaloInfiniteClientPoolError::Empty)
+    ));
 }
 
 #[tokio::test]
