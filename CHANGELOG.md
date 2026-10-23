@@ -12,6 +12,11 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 This release has an [MSRV][] of 1.96.
 
+### Added
+
+- `HaloInfiniteClientPool` and `HaloInfiniteClientBuilder::build_pool` support round-robin
+  selection across multiple Halo accounts.
+
 ## [0.3.1] - 2026-09-27
 
 This release has an [MSRV][] of 1.96.

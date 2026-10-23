@@ -33,7 +33,9 @@
 pub mod auth;
 pub mod clients;
 
-pub use clients::hi::{HaloInfiniteClient, InfiniteClientError};
+pub use clients::hi::{
+    HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,
+};
 
 #[cfg(test)]
 mod tests;
