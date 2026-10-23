@@ -1,4 +1,4 @@
-//! Public Halo Championship Series leaderboard published on Halo Waypoint.
+//! Public data published on Halo Waypoint.
 
 use std::time::Duration;
 
@@ -37,13 +37,13 @@ pub enum HcsError {
     InvalidPoints { row: usize, value: String },
 }
 
-/// Client for Waypoint's public HCS leaderboard; no Xbox authentication is required.
+/// Client for public Halo Waypoint data; no Xbox authentication is required.
 #[derive(Clone, Default)]
-pub struct HcsClient {
+pub struct WaypointClient {
     http: Client,
 }
 
-impl HcsClient {
+impl WaypointClient {
     pub fn new() -> Self {
         Self::default()
     }
@@ -53,7 +53,7 @@ impl HcsClient {
     /// The source is a Waypoint web page, so its structure and contents can change independently
     /// of Halo Infinite's authenticated APIs. Rows are returned in the page's order, including
     /// repeated gamertags.
-    pub async fn leaderboard(&self) -> Result<Vec<HcsLeaderboardEntry>, HcsError> {
+    pub async fn hcs_leaderboard(&self) -> Result<Vec<HcsLeaderboardEntry>, HcsError> {
         self.fetch(LEADERBOARD_URL).await
     }
 
@@ -218,7 +218,7 @@ mod tests {
             .expect(1)
             .mount(&server)
             .await;
-        let entries = HcsClient::new()
+        let entries = WaypointClient::new()
             .fetch(&format!("{}/hcs", server.uri()))
             .await
             .unwrap();

@@ -1,8 +1,8 @@
-use halo_api::HcsClient;
+use halo_api::WaypointClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let entries = HcsClient::new().leaderboard().await?;
+    let entries = WaypointClient::new().hcs_leaderboard().await?;
     let mut csv = csv::WriterBuilder::new()
         .has_headers(false)
         .from_writer(std::io::stdout());

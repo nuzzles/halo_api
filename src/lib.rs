@@ -33,10 +33,10 @@
 pub mod auth;
 pub mod clients;
 
-pub use clients::hcs::{HcsClient, HcsError, HcsLeaderboardEntry};
 pub use clients::hi::{
     HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,
 };
+pub use clients::waypoint::{HcsError, HcsLeaderboardEntry, WaypointClient};
 
 #[cfg(test)]
 mod tests;

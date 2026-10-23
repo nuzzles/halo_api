@@ -1,2 +1,2 @@
-pub mod hcs;
 pub mod hi;
+pub mod waypoint;
