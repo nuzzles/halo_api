@@ -21,6 +21,8 @@ use xbox::auth::XblAuthProvider;
 use xbox::cache::CachedToken;
 use xbox::{XboxClient, XboxEndpoints, XboxError};
 
+mod theater_errors;
+
 /// Hands out a fixed, never-expiring user token without touching the network.
 struct FakeAuthProvider;
 
