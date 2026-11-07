@@ -52,30 +52,27 @@ impl Interpretations {
                     .collect()
             })
             .unwrap_or_default();
-        let summary_packets = film
-            .summary_chunks()
-            .flat_map(|chunk| {
-                chunk
-                    .body
-                    .packets
-                    .iter()
-                    .enumerate()
-                    .filter_map(move |(index, packet)| {
-                        packet.body.decoded()?;
-                        let payload = chunk.payload(packet)?;
-                        Some(SummaryPacketInterpretation {
-                            source: SourceRef {
-                                chunk: chunk.source_position,
-                                packet: index,
-                                record: super::RecordRef::Packet,
-                            },
-                            events: summary::read_summary_candidates(payload),
-                        })
-                    })
+        let chunk = &film.summary;
+        let summary_packets = chunk
+            .body
+            .packets
+            .iter()
+            .enumerate()
+            .filter_map(move |(index, packet)| {
+                packet.body.decoded()?;
+                let payload = chunk.payload(packet)?;
+                Some(SummaryPacketInterpretation {
+                    source: SourceRef {
+                        chunk: chunk.source_position,
+                        packet: index,
+                        record: super::RecordRef::Packet,
+                    },
+                    events: summary::read_summary_candidates(payload),
+                })
             })
             .collect();
         let mut packets = Vec::new();
-        for chunk in film.replication_chunks() {
+        for chunk in &film.replication_stream {
             for (index, packet) in chunk.body.packets.iter().enumerate() {
                 let Some(payload) = chunk.payload(packet) else {
                     continue;

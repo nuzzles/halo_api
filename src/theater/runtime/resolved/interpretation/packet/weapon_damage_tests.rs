@@ -37,7 +37,7 @@ pub(crate) fn check_fields(read: &WeaponDamageTrace, payload: &[u8]) {
 }
 
 #[test]
-fn reference_data_damage_raw_fields_match_reference() {
+fn historical_damage_inputs_match_corrected_structural_boundaries() {
     let mut raw = Vec::new();
     flate2::read::ZlibDecoder::new(
         &include_bytes!("../../../../fixtures/weapon-hit-scan-v41.json.zlib")[..],
@@ -58,10 +58,22 @@ fn reference_data_damage_raw_fields_match_reference() {
         let read = read_weapon_damage(&payload, i as u64);
         let projection = read.read.as_ref().unwrap();
         let expected: WeaponDamage = serde_json::from_value(case["damage"].clone()).unwrap();
-        assert_eq!(projection.damage, expected);
-        assert_eq!(json!(projection.secondary_mag_raw), case["secondary"]);
-        assert_eq!(json!(projection.body_victim_idx), case["body_victim"]);
-        assert_eq!(json!(read.end_bit), case["end"]);
+        // The older fixture inverted field_0x10's gate. Its header/source
+        // expectations remain valid; later values and its endpoint do not.
+        assert_eq!(projection.damage.timestamp_us, expected.timestamp_us);
+        assert_eq!(projection.damage.victim_idx, expected.victim_idx);
+        assert_eq!(projection.damage.responsible_idx, expected.responsible_idx);
+        assert_eq!(projection.damage.source, expected.source);
+        assert_eq!(projection.damage.has_source, expected.has_source);
+        // Compare the complete corrected body against the independent structural
+        // implementation, with zero padding explicit for this legacy projection.
+        let mut padded_payload = payload.clone();
+        padded_payload.resize(payload.len().max(read.end_bit.div_ceil(8)) + 1, 0);
+        let structural = crate::theater::parser::v41::chunks::replication::replication_stream::frame::events::read_reference_event_list(
+            &padded_payload, 1, Some(false), 1,
+        );
+        assert!(structural.records[0].layout_complete, "case {i}");
+        assert_eq!(structural.records[0].end_bit, read.end_bit, "case {i}");
         assert_eq!(read.read, decode_weapon_damage(&payload, i as u64));
         check_fields(&read, &payload);
         padded += usize::from(read.padding_bits > 0);
@@ -128,7 +140,7 @@ fn reference_data_damage_admission_and_provenance() {
     )
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let packets = &parsed.replication_chunks().next().unwrap().body.packets;
+    let packets = &parsed.replication_stream.first().unwrap().body.packets;
     let resolved = crate::theater::runtime::resolved::ResolvedFilm::from_film(std::sync::Arc::new(
         parsed.clone(),
     ));
@@ -160,4 +172,94 @@ fn reference_data_damage_admission_and_provenance() {
         serde_json::from_value::<Film>(json!(parsed)).unwrap(),
         parsed
     );
+}
+
+#[test]
+fn damage_absent_flag_preserves_following_fields_and_boundary() {
+    use crate::theater::film::EventListStop;
+    use crate::theater::parser::v41::chunks::replication::replication_stream::frame::events::read_reference_event_list;
+    for absent in [false, true] {
+        let mut fields = vec![
+            (1, 1),
+            (1, 1),
+            (0, 7),
+            (0, 3), // config, event, three absent refs
+            (1, 1),
+            (0x12345678, 32), // damage source
+            (u64::from(absent), 1),
+        ];
+        if !absent {
+            fields.push((21, 5));
+        }
+        fields.extend([
+            (123, 19),
+            (1, 1),
+            (456, 19),
+            (321, 12),
+            (2, 5),
+            (3, 5),
+            (4, 6),
+            (1, 1),
+            (5, 5),
+            (0x1555, 14),
+            (1, 1),
+            (0x87654321, 32),
+            (1, 1),
+            (3, 3),
+            (17, 5),
+            (9, 5),
+            (1, 1),
+            (2, 4),
+            (0, 1),
+            (123, 10),
+            (1, 4),
+            (1, 1),
+            (0x11223344, 32),
+            (0xab, 8),
+            (3, 4),
+            (1, 1),
+            (321, 13),
+            (2, 2),
+        ]);
+        let end: usize = fields.iter().map(|(_, width)| width).sum();
+        fields.push((0, 1)); // event-list terminator
+        let mut bits = Vec::new();
+        for (value, width) in fields {
+            bits.extend((0..width).rev().map(|i| ((value >> i) & 1) as u8));
+        }
+        let mut payload = vec![0; bits.len().div_ceil(8)];
+        for (bit, value) in bits.iter().enumerate() {
+            payload[bit / 8] |= value << (7 - bit % 8);
+        }
+        let read = read_weapon_damage(&payload, 123);
+        let projected = read.read.as_ref().unwrap();
+        assert_eq!(read.end_bit, end);
+        assert_eq!(read.padding_bits, 0);
+        assert_eq!(projected.damage.source, 0x12345678);
+        assert_eq!(projected.damage.mag_raw, 17);
+        assert_eq!(projected.secondary_mag_raw, 9);
+        assert!(projected.damage.negative);
+        assert_eq!(projected.body_victim_idx, Some(321));
+        assert_eq!(
+            read.fields
+                .iter()
+                .any(|f| f.field.name == "body.field_0x10"),
+            !absent
+        );
+        check_fields(&read, &payload);
+        let structural = read_reference_event_list(&payload, 1, None, payload.len());
+        assert_eq!(structural.stop, EventListStop::Terminator);
+        assert_eq!(structural.records[0].end_bit, end);
+        assert_eq!(structural.end_bit, end + 1);
+        for size in 0..(end + 1).div_ceil(8) {
+            let truncated = read_reference_event_list(&payload[..size], 1, None, payload.len());
+            assert_ne!(truncated.stop, EventListStop::Terminator);
+            assert!(
+                truncated
+                    .records
+                    .iter()
+                    .all(|record| record.end_bit <= size * 8)
+            );
+        }
+    }
 }

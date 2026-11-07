@@ -15,6 +15,7 @@ use crate::theater::parser::v41::chunks::replication::components::widths::{
 use crate::theater::parser::v41::context::layout::RecordLayout;
 use crate::theater::parser::v41::context::profile::DecodeProfile;
 use crate::theater::parser::v41::reference::diagnostics::WidthPurpose;
+use crate::theater::parser::v41::reference::observations::FilmComponentObservation;
 
 /// Schema selected by the enclosing chronological traversal for this record.
 #[derive(Clone, Copy)]
@@ -263,13 +264,23 @@ fn record_body(
             Some(&encoding.component_widths),
             (simulation_complete, None),
         );
+        let fields = r.fields[field_start..].to_vec();
+        let weapon_id = if status == Some(true) && name == "weapon-state-type-info" {
+            match r.diagnostics.component_observations.last() {
+                Some(FilmComponentObservation::HeldWeapon { id }) => *id,
+                _ => None,
+            }
+        } else {
+            None
+        };
         let mut component = EntityComponentRead {
             index,
             name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
             status: status.into(),
-            fields: r.fields[field_start..].to_vec(),
+            fields,
+            weapon_id,
         };
         rec.components.push(component.clone());
         if status.is_none()

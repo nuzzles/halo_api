@@ -1,0 +1,486 @@
+[
+  {
+    "name": "body-damage",
+    "start_bit": 0,
+    "bits": 11,
+    "kind": "Health",
+    "q": 204,
+    "decoded": 0.6086956858634949,
+    "fields": [
+      {
+        "name": "health",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            204
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 8,
+      "end_bit": 635,
+      "payload_byte": 521384,
+      "start_bit": 624
+    },
+    "entity_id": 1073742336,
+    "timestamp_us": 148278452,
+    "sha256": "d163e01f4d7afe6cd0db22a4efe8ecfb617b8fb129c152a4cbd742afd6f7ba4b",
+    "chunk_sha256": "c8c65f1dc9fa00307679822a52429d4fdcc191069cb549e93a5415b04c55c9b9"
+  },
+  {
+    "name": "body-full",
+    "start_bit": 3,
+    "bits": 11,
+    "kind": "Health",
+    "q": 254,
+    "decoded": 1.0,
+    "fields": [
+      {
+        "name": "health",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            254
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 18,
+      "end_bit": 190,
+      "payload_byte": 498430,
+      "start_bit": 179
+    },
+    "entity_id": 1073742406,
+    "timestamp_us": 341404710,
+    "sha256": "c5384d00d1d6d12274a3b44d8873c848e484d0a72d2ac592e2ceed31eccba60d",
+    "chunk_sha256": "8baa691c6c2383c77815fbb2421b4c2c172c3d1a5d0499f650763fc4ca29cc3d"
+  },
+  {
+    "name": "shield-damage",
+    "start_bit": 5,
+    "bits": 29,
+    "kind": "Shields",
+    "q": 48,
+    "decoded": 0.748031497001648,
+    "fields": [
+      {
+        "name": "shield",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            48
+          ]
+        }
+      },
+      {
+        "name": "regeneration",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "block64",
+        "width": 16,
+        "raw": {
+          "bit_len": 16,
+          "bytes": [
+            1,
+            43
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[3]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 8,
+      "end_bit": 202,
+      "payload_byte": 511950,
+      "start_bit": 173
+    },
+    "entity_id": 1073742336,
+    "timestamp_us": 146759494,
+    "sha256": "136accfbb2d0dc7d4232591d820846debfa989077437181b4d3761cea806f5c3",
+    "chunk_sha256": "c8c65f1dc9fa00307679822a52429d4fdcc191069cb549e93a5415b04c55c9b9"
+  },
+  {
+    "name": "shield-empty",
+    "start_bit": 7,
+    "bits": 29,
+    "kind": "Shields",
+    "q": 0,
+    "decoded": 0.0,
+    "fields": [
+      {
+        "name": "shield",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "regeneration",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "block64",
+        "width": 16,
+        "raw": {
+          "bit_len": 16,
+          "bytes": [
+            1,
+            44
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[3]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 8,
+      "end_bit": 780,
+      "payload_byte": 518884,
+      "start_bit": 751
+    },
+    "entity_id": 1073742336,
+    "timestamp_us": 147894442,
+    "sha256": "0bc390bb3f1aeddbc68f039847fcbd2b8720e581d9ca482df8af076bbe143a13",
+    "chunk_sha256": "c8c65f1dc9fa00307679822a52429d4fdcc191069cb549e93a5415b04c55c9b9"
+  },
+  {
+    "name": "shield-full",
+    "start_bit": 5,
+    "bits": 29,
+    "kind": "Shields",
+    "q": 64,
+    "decoded": 1.0,
+    "fields": [
+      {
+        "name": "shield",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            64
+          ]
+        }
+      },
+      {
+        "name": "regeneration",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "block64",
+        "width": 16,
+        "raw": {
+          "bit_len": 16,
+          "bytes": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[3]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 22,
+      "end_bit": 202,
+      "payload_byte": 503687,
+      "start_bit": 173
+    },
+    "entity_id": 1073742433,
+    "timestamp_us": 422485715,
+    "sha256": "6b880dbcef39d4772264a6951d38320092ccb2f89c98f35cf7278b2591783330",
+    "chunk_sha256": "b608ce5a3594f856bc1a91c28e9dc97df5b924a38241f8b611be6804f88d9b2c"
+  },
+  {
+    "name": "shield-recovery",
+    "start_bit": 5,
+    "bits": 29,
+    "kind": "Shields",
+    "q": 32,
+    "decoded": 0.4960629940032959,
+    "fields": [
+      {
+        "name": "shield",
+        "width": 8,
+        "raw": {
+          "bit_len": 8,
+          "bytes": [
+            32
+          ]
+        }
+      },
+      {
+        "name": "regeneration",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "block64",
+        "width": 16,
+        "raw": {
+          "bit_len": 16,
+          "bytes": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[0]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "flags[1]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "flags[2]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "flags[3]",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 22,
+      "end_bit": 202,
+      "payload_byte": 496317,
+      "start_bit": 173
+    },
+    "entity_id": 1073742433,
+    "timestamp_us": 421468079,
+    "sha256": "2d46c1629738546efcd1255c1c3d89707217319551b8c6a897d676102cd1bcfe",
+    "chunk_sha256": "b608ce5a3594f856bc1a91c28e9dc97df5b924a38241f8b611be6804f88d9b2c"
+  }
+]

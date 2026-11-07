@@ -210,7 +210,7 @@ pub(super) fn index(
     summaries: &[interpretation::SummaryPacketInterpretation],
 ) -> Vec<Event> {
     let mut events = Vec::new();
-    for chunk in film.replication_chunks() {
+    for chunk in &film.replication_stream {
         let chunk_index = chunk.source_position;
         for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
             let mut push = |record, kind, entity_id, player_index| {
@@ -276,50 +276,50 @@ pub(super) fn index(
             }
         }
     }
-    for chunk in film.summary_chunks() {
-        let chunk_index = chunk.source_position;
-        for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
+    let chunk = &film.summary;
+    let chunk_index = chunk.source_position;
+    for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
+        events.push(Event {
+            timestamp_us: packet.header.timestamp_us,
+            order: 0,
+            provenance: Provenance::PacketEnvelope,
+            kind: EventKind::Packet,
+            source: SourceRef {
+                chunk: chunk_index,
+                packet: packet_index,
+                record: RecordRef::Packet,
+            },
+            entity_id: None,
+            player_index: None,
+            change: None,
+        });
+        let Some(read) = summaries
+            .iter()
+            .find(|read| read.source.chunk == chunk_index && read.source.packet == packet_index)
+        else {
+            continue;
+        };
+        for (i, summary) in read.events.iter().enumerate() {
+            let player_index = (|| {
+                let xuid = summary.xuid;
+                let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
+                let player = matches.next()?;
+                matches.next().is_none().then_some(player.film_index)
+            })();
             events.push(Event {
-                timestamp_us: packet.header.timestamp_us,
+                timestamp_us: u64::from(summary.timestamp_ms) * 1000,
                 order: 0,
                 provenance: Provenance::PacketEnvelope,
-                kind: EventKind::Packet,
+                kind: EventKind::Summary,
                 source: SourceRef {
                     chunk: chunk_index,
                     packet: packet_index,
-                    record: RecordRef::Packet,
+                    record: RecordRef::Summary(i),
                 },
                 entity_id: None,
-                player_index: None,
+                player_index,
                 change: None,
             });
-            let Some(read) = summaries.iter().find(|read| {
-                read.source.chunk == chunk_index && read.source.packet == packet_index
-            }) else {
-                continue;
-            };
-            for (i, summary) in read.events.iter().enumerate() {
-                let player_index = (|| {
-                    let xuid = summary.xuid;
-                    let mut matches = players?.slots.iter().filter(|p| p.xuid == xuid);
-                    let player = matches.next()?;
-                    matches.next().is_none().then_some(player.film_index)
-                })();
-                events.push(Event {
-                    timestamp_us: u64::from(summary.timestamp_ms) * 1000,
-                    order: 0,
-                    provenance: Provenance::PacketEnvelope,
-                    kind: EventKind::Summary,
-                    source: SourceRef {
-                        chunk: chunk_index,
-                        packet: packet_index,
-                        record: RecordRef::Summary(i),
-                    },
-                    entity_id: None,
-                    player_index,
-                    change: None,
-                });
-            }
         }
     }
     events

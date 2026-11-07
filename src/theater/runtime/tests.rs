@@ -1,14 +1,18 @@
 use super::*;
+use crate::theater::parser::test_support::empty_summary;
 
 #[test]
 fn runtime_owns_shared_canonical_film_and_independent_cursor() {
     let film = Arc::new(
-        Film::parse([crate::theater::film::FilmChunk {
-            kind: crate::theater::film::ChunkKind::Registry,
-            index: None,
-            start_ms: None,
-            data: [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
-        }])
+        Film::parse([
+            crate::theater::film::FilmChunk {
+                kind: crate::theater::film::ChunkKind::Registry,
+                index: None,
+                start_ms: None,
+                data: [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
+            },
+            empty_summary(),
+        ])
         .unwrap(),
     );
     let mut first = TheaterRuntime::load(film.clone());

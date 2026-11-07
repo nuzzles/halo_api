@@ -64,6 +64,24 @@ pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str) -> Option<bool>
         "game-engine-round-condition-flags-component" => {
             r.r("flags", 10)?;
         }
+        "managed-engine-timers-component" => {
+            let mut slots = r.r("slots", 64)?;
+            while slots != 0 {
+                let slot = slots.trailing_zeros();
+                slots &= slots - 1;
+                match r.r(&format!("timer[{slot}].tag"), 2)? {
+                    0 => {}
+                    1 => {
+                        r.words(&format!("timer[{slot}].value"), 3, 16)?;
+                        r.r(&format!("timer[{slot}].tail"), 5)?;
+                    }
+                    _ => {
+                        r.words(&format!("timer[{slot}].value"), 2, 16)?;
+                        r.r(&format!("timer[{slot}].tail"), 5)?;
+                    }
+                }
+            }
+        }
         "managed-object-boundary-visibility-component" => r.words("flags", 32, 1)?,
         "managed-object-boundary-color-component" | "managed-objective-color-component" => {
             for name in ["red", "green", "blue", "alpha"] {
@@ -323,4 +341,70 @@ pub(crate) fn formatted_text(r: &mut ComponentReader<'_>) -> Option<()> {
         }
     }
     Some(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::theater::parser::v41::chunks::replication::components::cursor::ComponentCursor;
+
+    fn push_bits(bytes: &mut Vec<u8>, bit_count: &mut usize, value: u64, width: usize) {
+        for bit in (0..width).rev() {
+            if (*bit_count).is_multiple_of(8) {
+                bytes.push(0);
+            }
+            *bytes.last_mut().unwrap() |= (((value >> bit) & 1) as u8) << (7 - *bit_count % 8);
+            *bit_count += 1;
+        }
+    }
+
+    #[test]
+    fn managed_engine_timers_reads_present_slots_in_order_and_by_tag() {
+        let mut bytes = Vec::new();
+        let mut bits = 0;
+        push_bits(&mut bytes, &mut bits, (1_u64 << 63) | 0b11, 64);
+        push_bits(&mut bytes, &mut bits, 0, 2);
+        push_bits(&mut bytes, &mut bits, 2, 2);
+        for value in [11, 12] {
+            push_bits(&mut bytes, &mut bits, value, 16);
+        }
+        push_bits(&mut bytes, &mut bits, 7, 5);
+        push_bits(&mut bytes, &mut bits, 1, 2);
+        for value in [21, 22, 23] {
+            push_bits(&mut bytes, &mut bits, value, 16);
+        }
+        push_bits(&mut bytes, &mut bits, 9, 5);
+        let mut reader = ComponentReader {
+            reference_widths: None,
+            width_error: None,
+            live_grammar: None,
+            movement_slot: None,
+            references: Vec::new(),
+            diagnostics: Default::default(),
+            cursor: ComponentCursor::new(&bytes, 0).unwrap(),
+            fields: Vec::new(),
+            position_encoding: None,
+        };
+        assert_eq!(
+            component(&mut reader, "managed-engine-timers-component"),
+            Some(true)
+        );
+        assert_eq!(reader.cursor.position, bits as i64);
+        assert_eq!(bits, 160);
+        assert_eq!(reader.fields[1].name, "timer[0].tag");
+        assert_eq!(reader.fields[2].name, "timer[1].tag");
+        assert_eq!(reader.fields[6].name, "timer[63].tag");
+        assert_eq!(reader.fields.last().unwrap().raw.low_u64(), 9);
+
+        let mut truncated = ComponentReader {
+            cursor: ComponentCursor::new(&bytes[..19], 0).unwrap(),
+            fields: Vec::new(),
+            ..reader
+        };
+        assert_eq!(
+            component(&mut truncated, "managed-engine-timers-component"),
+            None
+        );
+        assert!(!truncated.diagnostics.read_refusals.is_empty());
+    }
 }

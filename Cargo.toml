@@ -24,6 +24,7 @@ chrono = { version = "0.4.45", features = ["serde"] }
 async-trait = "0.1.91"
 tracing = "0.1.44"
 flate2 = "1.1"
+uuid = "1.24"
 
 [dev-dependencies]
 tokio = { version = "1.53.1", features = ["full"] }

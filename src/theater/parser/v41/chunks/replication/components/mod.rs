@@ -5,6 +5,7 @@ pub(crate) mod biped;
 pub(crate) mod control;
 pub(crate) mod cursor;
 pub(crate) mod defaults;
+pub(crate) mod device;
 pub(crate) mod dispatch;
 pub(crate) mod equipment;
 pub(crate) mod flock;

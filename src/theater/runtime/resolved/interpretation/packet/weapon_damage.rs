@@ -136,7 +136,10 @@ pub(super) fn decode_with_fields(
             damage.source = r.read("body.source.id", 32, false)?;
             damage.has_source = true;
         }
-        if r.bit("body.field_0x10.present")? {
+        // FUN_1407f2058: 1 means absent, 0 carries R(5). The older
+        // weapon_hits reference inverted this gate (LevelUp D-LN-2).
+        // Confirmed by chargeDegatsApres at 413971bcc485be53a2fa8cf229e170539a5146f8.
+        if !r.bit("body.field_0x10.absent")? {
             r.skip("body.field_0x10", 5)?;
         }
         r.skip("body.field_0x14", 19)?;

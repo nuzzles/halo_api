@@ -63,6 +63,27 @@ fn reference_data_event_continuation_reference_oracle() {
             .map(|b| u8::from_str_radix(&hex[b..b + 2], 16).unwrap())
             .collect();
         let events = read_reference_event_list(&data, 1, case["gate"].as_bool(), data.len());
+        // The old oracle assumed fixed projectile payload lengths without map bounds.
+        if let Some(last) = events.records.last()
+            && matches!(last.code, Some(5 | 6))
+            && events.stop == EventListStop::UnsupportedBody
+        {
+            assert!(!last.layout_complete);
+            assert_eq!(Some(last.end_bit), last.body_start_bit);
+            let mut world = ReplicationDecodeState::default();
+            assert!(
+                continue_event_views(
+                    &data,
+                    &events,
+                    &V41DecodeConfig::default(),
+                    &registry,
+                    &mut world
+                )
+                .is_none()
+            );
+            assert_eq!(world, ReplicationDecodeState::default());
+            continue;
+        }
         assert_eq!(
             json!(events.stop == EventListStop::Terminator),
             case["terminated"],
@@ -177,7 +198,7 @@ fn frame_views_follow_message_terminator_once() {
     )
     .unwrap();
     let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let packet = &parsed.replication_chunks().next().unwrap().body.packets[0];
+    let packet = &parsed.replication_stream.first().unwrap().body.packets[0];
     let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(original)) = &packet.body
     else {
         panic!("missing frame")
@@ -194,9 +215,9 @@ fn frame_views_follow_message_terminator_once() {
 }
 
 #[test]
-fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
-    // A zero-filled code-0 body consumes 99 bits under evBody0, but 94 under
-    // lot1DecodeDamageAftermath. Neither interpretation may silently win.
+fn corrected_damage_boundary_applies_following_entities() {
+    // Both readers now consume the 99-bit zero-filled damage body. The old
+    // weapon reader inverted the absent flag and consumed only 94 bits.
     let mut raw = Vec::new();
     flate2::read::ZlibDecoder::new(
         &include_bytes!("../../../fixtures/frames-levelup-v41.json.zlib")[..],
@@ -260,16 +281,10 @@ fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
             continue_event_views(&payload, &events, &config, &registry, &mut world).unwrap();
         assert!(!result.frame.decoded().unwrap().records.is_empty());
         if damage {
-            assert_eq!(read_weapon_damage(&payload, 0).end_bit, 106);
-            assert_eq!(
-                result.state_policy,
-                ContinuationStatePolicy::IsolatedConflictingDamageGrammar
-            );
-            assert_eq!(world, before);
-        } else {
-            assert_eq!(result.state_policy, ContinuationStatePolicy::Applied);
-            assert_ne!(world, before);
+            assert_eq!(read_weapon_damage(&payload, 0).end_bit, 111);
         }
+        assert_eq!(result.state_policy, ContinuationStatePolicy::Applied);
+        assert_ne!(world, before);
         let mut old = json!(result);
         old.as_object_mut().unwrap().remove("state_policy");
         assert_eq!(
@@ -282,7 +297,7 @@ fn reference_data_damage_grammar_conflict_isolates_binding_effects() {
 }
 
 #[test]
-fn frame_stops_when_message_boundary_is_unknown_or_conflicting() {
+fn frame_stops_when_message_boundary_is_unknown_or_truncated() {
     let registry = FilmRegistry {
         archetypes: Vec::new(),
     };
@@ -291,11 +306,11 @@ fn frame_stops_when_message_boundary_is_unknown_or_conflicting() {
         (vec![0xff], FrameDecodeError::IncompleteMessageList),
         (
             {
-                let mut bytes = vec![0; 16];
+                let mut bytes = vec![0; 13];
                 bytes[0] = 0xc0;
                 bytes
             },
-            FrameDecodeError::ConflictingMessageLayout,
+            FrameDecodeError::IncompleteMessageList,
         ),
     ] {
         let mut world = ReplicationDecodeState::default();

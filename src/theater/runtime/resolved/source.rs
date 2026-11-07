@@ -32,12 +32,14 @@ impl<'a> FilmChunkRef<'a> {
 }
 
 pub(super) fn chunk(film: &Film, position: usize) -> Option<FilmChunkRef<'_>> {
-    if position == 0 {
-        return None;
+    if position == film.summary.source_position {
+        return Some(FilmChunkRef::Summary(&film.summary));
     }
-    match film.chunks.get(position - 1)? {
-        FilmDataChunk::Replication(chunk) => Some(FilmChunkRef::Replication(chunk)),
-        FilmDataChunk::Summary(chunk) => Some(FilmChunkRef::Summary(chunk)),
-        FilmDataChunk::Unknown(_) => None,
-    }
+    // The registry occupies position zero; the summary follows all replication.
+    // Manifest indices may be sparse and are not array indices.
+    let index = position.checked_sub(1)?;
+    film.replication_stream
+        .get(index)
+        .filter(|chunk| chunk.source_position == position)
+        .map(FilmChunkRef::Replication)
 }

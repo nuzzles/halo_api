@@ -1,5 +1,5 @@
 //! Version-specific chunk dispatch, preserving source order.
-use crate::theater::film::{ChunkKind, Film, FilmChunk, FilmDataChunk, ParseError};
+use crate::theater::film::{ChunkKind, Film, FilmChunk, ParseError};
 use crate::theater::parser::transport::PreparedChunk;
 use crate::theater::parser::v41::context::V41DecodeConfig;
 use registry::V41RegistryChunkReader;
@@ -28,28 +28,39 @@ impl V41ChunkReader {
             state: &mut state,
             event_gate15: None,
         };
-        let mut chunks = Vec::new();
+        let mut replication_stream = Vec::new();
+        let mut summary = None;
         for (index, input) in inputs.into_iter().enumerate() {
-            if input.kind == ChunkKind::Registry {
-                return Err(ParseError::MultipleRegistries);
+            // Validate cardinality before preparing or decoding duplicate chunks.
+            match input.kind {
+                ChunkKind::Registry => return Err(ParseError::MultipleRegistries),
+                ChunkKind::Summary if summary.is_some() => {
+                    return Err(ParseError::MultipleSummaries);
+                }
+                ChunkKind::Unknown(kind) => return Err(ParseError::UnsupportedChunkKind(kind)),
+                ChunkKind::Replication if summary.is_some() => {
+                    return Err(ParseError::SummaryNotLast);
+                }
+                _ => {}
             }
             let input = PreparedChunk::new(input, index + 1);
-            chunks.push(match input.source.kind {
-                ChunkKind::Registry => {
-                    unreachable!("additional registry rejected before inflation")
-                }
+            match input.source.kind {
                 ChunkKind::Replication => {
                     context.state.current_chunk =
                         input.source.index.unwrap_or(input.source_position as i64);
-                    FilmDataChunk::Replication(V41ReplicationStreamChunkReader::read(
-                        input,
-                        &mut context,
-                    ))
+                    replication_stream
+                        .push(V41ReplicationStreamChunkReader::read(input, &mut context));
                 }
-                ChunkKind::Summary => FilmDataChunk::Summary(V41SummaryChunkReader::read(input)),
-                ChunkKind::Unknown(_) => FilmDataChunk::Unknown(input.with_body(())),
-            });
+                ChunkKind::Summary => summary = Some(V41SummaryChunkReader::read(input)),
+                ChunkKind::Registry | ChunkKind::Unknown(_) => {
+                    unreachable!("unsupported chunk rejected before preparation")
+                }
+            }
         }
-        Ok(Film { registry, chunks })
+        Ok(Film {
+            registry,
+            replication_stream,
+            summary: summary.ok_or(ParseError::MissingSummary)?,
+        })
     }
 }

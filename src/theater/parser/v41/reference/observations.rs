@@ -276,8 +276,7 @@ pub enum FilmComponentObservation {
     },
 
     HeldWeapon {
-        id_high: u32,
-        id_low: u32,
+        id: Option<crate::theater::film::Weapon>,
     },
     ObjectParent {
         state: Box<ObjectParentState>,

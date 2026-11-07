@@ -107,39 +107,34 @@ impl ResolvedFilm {
             .enumerate()
             .map(|(index, packet)| ((packet.source.chunk, packet.source.packet), index))
             .collect();
-        let summary_reports = film
-            .summary_chunks()
-            .flat_map(|chunk| {
-                chunk
-                    .body
-                    .packets
-                    .iter()
-                    .enumerate()
-                    .map(|(packet_index, packet)| {
-                        let declared_events = match &packet.body {
-                            PacketRead::Decoded(
-                                crate::theater::film::SummaryPacketBody::Events {
-                                    declared_events,
-                                    ..
-                                },
-                            ) => Some(*declared_events),
-                            PacketRead::Opaque { .. } => None,
-                        };
-                        let candidate_events = summary_packet_by_source
-                            .get(&(chunk.source_position, packet_index))
-                            .map_or(0, |index| {
-                                interpretations.summary_packets[*index].events.len()
-                            });
-                        summary::SummaryReadReport {
-                            source: SourceRef {
-                                chunk: chunk.source_position,
-                                packet: packet_index,
-                                record: RecordRef::Packet,
-                            },
-                            declared_events,
-                            candidate_events,
-                        }
-                    })
+        let chunk = &film.summary;
+        let summary_reports = chunk
+            .body
+            .packets
+            .iter()
+            .enumerate()
+            .map(|(packet_index, packet)| {
+                let declared_events = match &packet.body {
+                    PacketRead::Decoded(crate::theater::film::SummaryPacketBody::Events {
+                        declared_events,
+                        ..
+                    }) => Some(*declared_events),
+                    PacketRead::Opaque { .. } => None,
+                };
+                let candidate_events = summary_packet_by_source
+                    .get(&(chunk.source_position, packet_index))
+                    .map_or(0, |index| {
+                        interpretations.summary_packets[*index].events.len()
+                    });
+                summary::SummaryReadReport {
+                    source: SourceRef {
+                        chunk: chunk.source_position,
+                        packet: packet_index,
+                        record: RecordRef::Packet,
+                    },
+                    declared_events,
+                    candidate_events,
+                }
             })
             .collect();
         let mut events = index(

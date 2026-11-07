@@ -126,7 +126,7 @@ unknown rather than inferred.
 
 | Requirement | Implementation and evidence | Limit |
 | --- | --- | --- |
-| Preserve supplied chunks and order | Registry-first dispatch; ordered `FilmDataChunk`; transport/source equality tests and 32-film checks | Unsupported versions are errors; unknown later kinds retain bytes |
+| Preserve supported chunks and source positions | Registry-first dispatch; one summary; ordered `replication_stream`; transport/source equality tests and 32-film checks | Unsupported versions and chunk kinds, missing summaries, and duplicate sections are errors |
 | Registry mirrors recorded slots | Archetypes own ordered component names, precision, block and padding ranges; independently authored registry boundary cases | Bootstrap player searches belong to resolution |
 | Preserve packet envelopes | `Packet<T>` retains all four recorded header fields and ranges; payload validation rejects inconsistent public envelopes | Public serde is not a complete nested-model validator |
 | Preserve known hierarchy and fields | One sequential message/entity/control traversal; owned default states/components; separated datum headers and masks | Unsupported layouts stop rather than guess |

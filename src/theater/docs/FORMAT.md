@@ -1,9 +1,14 @@
 # Canonical structure and fidelity
 
 A v41 recording consists of a component registry/bootstrap chunk (type 1),
-replication packet-stream chunks (type 2), and summary chunks (type 3). `Film`
-retains the required registry separately and stores every following chunk in one
-ordered `chunks` vector. Filtering helpers do not create a second ordering.
+replication packet-stream chunks (type 2), and one summary chunk (type 3). `Film`
+stores these as `registry`, `replication_stream`, and `summary`. Parsing requires
+exactly one registry (first) and one summary (last); missing, duplicate, or misplaced sections return
+typed errors. Replication chunks retain their supplied order. Every chunk retains
+its original source position. Replication after the summary returns `SummaryNotLast`.
+All 32 parser corpus manifests and 29 Twin fixture manifests contain a single
+registry, replication chunks, and a single final summary; no captured exceptions
+were found. Packet-level tests explicitly supply empty summaries where appropriate.
 
 The bootstrap begins with version words and archetype/component registry blocks.
 `registry.body` retains the ordered decoded registry, the two recorded header
@@ -94,8 +99,9 @@ are payload-relative; `PacketSource::payload` locates that payload in the chunk.
 All source bytes remain available even when decompression, framing, or body decoding
 is partial.
 
-Byte and bit ranges are half-open. Unknown chunk kinds are retained as
-`FilmDataChunk::Unknown`. Known packet envelopes with unsupported body layouts are
+Byte and bit ranges are half-open. Unknown chunk kinds return
+`ParseError::UnsupportedChunkKind`; they are never silently discarded.
+Known packet envelopes with unsupported body layouts are
 retained as `PacketRead::Opaque`. Typed bodies carry their own ordered stop and
 opaque-region models where decoding can end partway through a known layout. This
 keeps recorded absence distinct from parser inability.

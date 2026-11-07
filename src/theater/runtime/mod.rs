@@ -3,7 +3,9 @@
 //! Load once with [`TheaterRuntime::load`]. The resolved representation is private;
 //! public events, evidence, and world models live in the supporting modules.
 
+pub mod coordinates;
 pub mod medals;
+pub mod replay;
 mod resolved;
 use crate::theater::Film;
 use resolved::ResolvedFilm;

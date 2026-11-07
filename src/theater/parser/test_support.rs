@@ -33,8 +33,18 @@ impl FixtureFilmSource {
     }
 }
 
+/// An explicitly empty summary for synthetic recordings that exercise replication only.
+pub(crate) fn empty_summary() -> FilmChunk {
+    FilmChunk {
+        kind: ChunkKind::Summary,
+        index: None,
+        start_ms: None,
+        data: Vec::new(),
+    }
+}
+
 pub(crate) fn test_chunks(source: &FixtureFilmSource) -> Vec<FilmChunk> {
-    source
+    let mut chunks: Vec<_> = source
         .original_chunks()
         .iter()
         .enumerate()
@@ -54,5 +64,63 @@ pub(crate) fn test_chunks(source: &FixtureFilmSource) -> Vec<FilmChunk> {
                 data: bytes.clone(),
             }
         })
-        .collect()
+        .collect();
+    // Legacy test fixtures often contain only the section under test.
+    if !chunks.iter().any(|chunk| chunk.kind == ChunkKind::Summary) {
+        chunks.push(empty_summary());
+    }
+    chunks
+}
+
+pub(crate) fn recharge_device_baseline() -> crate::theater::film::KeyframeRecord {
+    use crate::theater::parser::v41::{
+        chunks::replication::replication_stream::keyframes::record::decode_reference_keyframe_record_contextual,
+        context::V41DecodeConfig,
+    };
+    let declarations: Vec<(String, u32)> = serde_json::from_str(include_str!(
+        "../fixtures/movement-schema-v41/recharge-device-registry.json"
+    ))
+    .unwrap();
+    let registry = component_registry(&[(43, declarations)]);
+    let mut config = V41DecodeConfig::default();
+    config.profile.grammar.baseline_scope = true;
+    config.profile.grammar.writer_absolute = true;
+    let payload = include_bytes!("../fixtures/movement-schema-v41/recharge-device-keyframe.bin");
+    decode_reference_keyframe_record_contextual(
+        payload,
+        0,
+        &registry,
+        &config.record_layout(),
+        Some(&config.profile),
+    )
+    .unwrap()
+}
+
+pub(crate) fn component_registry(
+    declarations: &[(usize, Vec<(String, u32)>)],
+) -> crate::theater::film::FilmRegistry {
+    use crate::theater::film::{ByteRange, FilmArchetype, FilmRegistry, RegistryComponent};
+    let range = ByteRange { start: 0, end: 0 };
+    FilmRegistry {
+        archetypes: (0..=declarations.iter().map(|(index, _)| *index).max().unwrap())
+            .map(|index| FilmArchetype {
+                index,
+                source: range,
+                padding: range,
+                components: declarations.iter().find(|(i, _)| *i == index).map_or_else(
+                    Vec::new,
+                    |(_, components)| {
+                        components
+                            .iter()
+                            .map(|(name, level)| RegistryComponent {
+                                name_bytes: name.as_bytes().to_vec(),
+                                precision_level: *level,
+                                source: range,
+                            })
+                            .collect()
+                    },
+                ),
+            })
+            .collect(),
+    }
 }

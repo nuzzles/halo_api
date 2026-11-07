@@ -46,6 +46,10 @@ pub struct EntityComponentRead {
     pub end_bit: i64,
     pub status: ComponentReadStatus,
     pub fields: Vec<ComponentField>,
+    /// Typed weapon identity decoded from a complete weapon-state-type-info
+    /// component. None also covers an explicitly empty identity gate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapon_id: Option<Weapon>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]

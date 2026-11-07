@@ -1,8 +1,8 @@
 //! Registry-name dispatch; family modules own the actual component grammars.
 use super::reader::ComponentReader;
 use super::{
-    basic, biped, equipment, flock, m4b, managed, navpoint, object, physics, projectile, scene,
-    tacmap, unit, weapon,
+    basic, biped, device, equipment, flock, m4b, managed, navpoint, object, physics, projectile,
+    scene, tacmap, unit, weapon,
 };
 pub(crate) fn component(
     r: &mut ComponentReader<'_>,
@@ -119,7 +119,10 @@ pub(crate) fn component(
         | "weapon-state-rounds-inventory"
         | "weapon-state-overheated" => weapon::read_primary(r, name, level, archetype),
         _ => {
-            let mut result = basic::component(r, name);
+            let mut result = device::component(r, name);
+            if result == Some(false) {
+                result = basic::component(r, name);
+            }
             if result == Some(false) {
                 result = object::component(r, name, archetype);
             }

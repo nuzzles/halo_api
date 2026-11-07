@@ -1,0 +1,59 @@
+[
+  {
+    "name": "frag-plasma",
+    "start_bit": 0,
+    "source": {
+      "chunk_index": 5,
+      "end_bit": 1547,
+      "payload_byte": 733954,
+      "start_bit": 1512
+    },
+    "entity_id": 1073742351,
+    "timestamp_us": 93871683,
+    "counts": {
+      "dynamo": 0,
+      "frag": 2,
+      "plasma": 1,
+      "spike": 0
+    },
+    "sha256": "1704600a30a2f9885e7194ddcd07893bd5ee914e34f26e47aef1d01060023fbc"
+  },
+  {
+    "name": "outlier-16",
+    "start_bit": 2,
+    "source": {
+      "chunk_index": 56,
+      "end_bit": 1389,
+      "payload_byte": 658586,
+      "start_bit": 1354
+    },
+    "entity_id": 1073742579,
+    "timestamp_us": 1109153765,
+    "counts": {
+      "dynamo": 4,
+      "frag": 16,
+      "plasma": 8,
+      "spike": 0
+    },
+    "sha256": "33066c1f4aaa7aa82f663f0aa046da5d597fb08086020c06240143cc961f66fe"
+  },
+  {
+    "name": "outlier-144",
+    "start_bit": 6,
+    "source": {
+      "chunk_index": 56,
+      "end_bit": 1265,
+      "payload_byte": 658960,
+      "start_bit": 1230
+    },
+    "entity_id": 1073742579,
+    "timestamp_us": 1109170884,
+    "counts": {
+      "dynamo": 8,
+      "frag": 144,
+      "plasma": 8,
+      "spike": 0
+    },
+    "sha256": "60246f52e0c5a7f9a671b260ad2ba92660123ca89b63a6bc7938256e8c2a5a2d"
+  }
+]

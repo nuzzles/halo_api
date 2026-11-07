@@ -180,7 +180,16 @@ fn absolute(r: &mut ComponentReader<'_>, encoding: &PositionEncoding) -> Option<
     let high = r.bit("precision_high")?;
     if encoding.full_precision_gate() {
         r.words("vector_bits", 3, 32)?;
-    } else if !high {
+    } else if high {
+        // The bounded vector uses +/-100 at precision level 16: 14 bits per axis.
+        // Its handle and region precede the finite tail, even outside full-state scope.
+        for i in 0..3 {
+            r.r(&format!("bounded_position[{i}]"), 14)?;
+        }
+        r.optional_handle("position_handle", 0)?;
+        r.gate("position_region", 11, true)?;
+        r.r("finite", 2)?;
+    } else {
         absolute_payload(r, encoding)?;
         r.r("finite", 2)?;
     }
@@ -250,4 +259,53 @@ fn handle_tail(
         r.gate("region", 11, true)?;
     }
     Some(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::theater::parser::v41::{
+        chunks::replication::components::cursor::ComponentCursor, context::V41DecodeConfig,
+    };
+
+    #[test]
+    fn captured_bounded_position_consumes_its_reference_tail() {
+        let payload = include_bytes!(
+            "../../../../../fixtures/movement-schema-v41/recharge-attached-position.bin"
+        );
+        let config = V41DecodeConfig::default();
+        let layout = config.record_layout();
+        let mut reader = ComponentReader {
+            reference_widths: None,
+            width_error: None,
+            live_grammar: None,
+            movement_slot: None,
+            references: vec![],
+            diagnostics: Default::default(),
+            cursor: ComponentCursor::new(payload, 867).unwrap(),
+            fields: vec![],
+            position_encoding: layout.position.as_ref(),
+        };
+        assert_eq!(component(&mut reader), Some(true));
+        assert_eq!(reader.cursor.position, 942);
+        let field = |name: &str| {
+            reader
+                .fields
+                .iter()
+                .find(|f| f.name == name)
+                .unwrap()
+                .raw
+                .low_u64()
+        };
+        assert_eq!(field("bounded_position[0]"), 8288);
+        assert_eq!(field("bounded_position[1]"), 8138);
+        assert_eq!(field("bounded_position[2]"), 8257);
+        assert_eq!(reader.references.len(), 1);
+        assert_eq!(reader.references[0].value, 768);
+        assert_eq!(reader.references[0].tail, 1);
+        assert_eq!(field("position_region"), 1);
+        assert_eq!(field("finite"), 0);
+        reader.cursor = ComponentCursor::new(&payload[..117], 867).unwrap();
+        assert_eq!(component(&mut reader), None);
+    }
 }

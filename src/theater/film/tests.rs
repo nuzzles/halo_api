@@ -1,4 +1,5 @@
 use super::*;
+use crate::theater::parser::test_support::empty_summary;
 use std::io::{BufRead, Write};
 
 fn registry() -> FilmChunk {
@@ -37,8 +38,36 @@ fn dispatch_requires_one_registry_and_rejects_unsupported_versions() {
             Err(ParseError::RegistryNotFirst)
         ));
     }
-    let only_registry = Film::parse([registry()]).unwrap();
-    assert!(only_registry.chunks.is_empty());
+    assert!(matches!(
+        Film::parse([registry()]),
+        Err(ParseError::MissingSummary)
+    ));
+    let film = Film::parse([registry(), empty_summary()]).unwrap();
+    assert!(film.replication_stream.is_empty());
+    assert_eq!(film.summary.source_position, 1);
+    assert!(matches!(
+        Film::parse([registry(), empty_summary(), empty_summary()]),
+        Err(ParseError::MultipleSummaries)
+    ));
+    assert!(matches!(
+        Film::parse([
+            registry(),
+            empty_summary(),
+            FilmChunk {
+                kind: ChunkKind::Replication,
+                ..empty_summary()
+            },
+        ]),
+        Err(ParseError::SummaryNotLast)
+    ));
+    let unknown = FilmChunk {
+        kind: ChunkKind::Unknown(99),
+        ..empty_summary()
+    };
+    assert!(matches!(
+        Film::parse([registry(), unknown, empty_summary()]),
+        Err(ParseError::UnsupportedChunkKind(99))
+    ));
     assert!(matches!(
         Film::parse([registry(), registry()]),
         Err(ParseError::MultipleRegistries)
@@ -81,12 +110,6 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
             data: compressed.clone(),
         },
         FilmChunk {
-            kind: ChunkKind::Summary,
-            index: Some(8),
-            start_ms: Some(-10),
-            data: packet(9, &0u32.to_be_bytes(), 200),
-        },
-        FilmChunk {
             kind: ChunkKind::Replication,
             index: None,
             start_ms: None,
@@ -94,36 +117,29 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
         },
         FilmChunk {
             kind: ChunkKind::Summary,
-            index: None,
-            start_ms: None,
-            data: packet(9, &0u32.to_be_bytes(), 100),
+            index: Some(8),
+            start_ms: Some(-10),
+            data: packet(9, &0u32.to_be_bytes(), 200),
         },
     ];
     let film = Film::parse(chunks.clone()).unwrap();
     assert_eq!(film.registry.source_position, 0);
     assert_eq!(film.registry.source.data, compressed);
     assert_eq!(film.registry.data, bootstrap);
-    assert_eq!(film.replication_chunks().next().unwrap().source_position, 2);
+    assert_eq!(film.replication_stream.first().unwrap().source_position, 1);
     assert!(matches!(
-        film.replication_chunks().next().unwrap().body.packets[0].body,
+        film.replication_stream.first().unwrap().body.packets[0].body,
         PacketRead::Opaque {
             reason: PacketDecodeError::UnsupportedLayout { packet_type: 99 }
         }
     ));
-    assert_eq!(
-        film.summary_chunks()
-            .map(|c| c.source_position)
-            .collect::<Vec<_>>(),
-        vec![1, 3]
-    );
-    for (i, input) in chunks.iter().enumerate() {
+    assert_eq!(film.summary.source_position, 2);
+    for input in &chunks {
         let source = match input.kind {
             ChunkKind::Registry => &film.registry.source,
-            _ => match &film.chunks[i - 1] {
-                FilmDataChunk::Replication(chunk) => &chunk.source,
-                FilmDataChunk::Summary(chunk) => &chunk.source,
-                FilmDataChunk::Unknown(chunk) => &chunk.source,
-            },
+            ChunkKind::Summary => &film.summary.source,
+            ChunkKind::Replication => &film.replication_stream[0].source,
+            ChunkKind::Unknown(_) => unreachable!(),
         };
         assert_eq!(source, input);
     }
@@ -134,12 +150,12 @@ fn sections_preserve_transport_metadata_positions_and_unknown_bytes() {
             .keys()
             .map(String::as_str)
             .collect::<Vec<_>>(),
-        vec!["chunks", "registry"]
+        vec!["registry", "replication_stream", "summary"]
     );
     assert_eq!(serde_json::from_value::<Film>(json).unwrap(), film);
     let resolved = crate::theater::TheaterRuntime::load(film.clone());
     assert_eq!(resolved.film(), &film);
-    assert_eq!(resolved.events().first().unwrap().source.chunk, 2);
+    assert_eq!(resolved.events().first().unwrap().source.chunk, 1);
 }
 
 #[test]
@@ -168,9 +184,10 @@ fn no_archetype_keyframe_header_must_fit_the_payload() {
                 start_ms: None,
                 data: packet(2, &payload, 10),
             },
+            empty_summary(),
         ])
         .unwrap();
-        let chunk = film.replication_chunks().next().unwrap();
+        let chunk = film.replication_stream.first().unwrap();
         let PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
             &chunk.body.packets[0].body
         else {
@@ -199,17 +216,18 @@ fn keyframes_stop_without_searching_past_invalid_header() {
             start_ms: None,
             data: packet(2, &payload, 10),
         },
+        empty_summary(),
     ])
     .unwrap();
     let PacketRead::Decoded(ReplicationStreamPacketBody::KeyframesPacketBody(table)) =
-        &film.replication_chunks().next().unwrap().body.packets[0].body
+        &film.replication_stream.first().unwrap().body.packets[0].body
     else {
         panic!()
     };
     assert_eq!(table.stop, KeyframeChainStop::Header);
     assert!(table.records.is_empty());
     assert_eq!(
-        film.replication_chunks().next().unwrap().data,
+        film.replication_stream.first().unwrap().data,
         packet(2, &payload, 10)
     );
     assert!(
@@ -242,10 +260,11 @@ fn event_gate_is_unresolved_in_reference_film() {
             start_ms: None,
             data: packet(0, &payload, 10),
         },
+        empty_summary(),
     ])
     .unwrap();
     let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) =
-        &film.replication_chunks().next().unwrap().body.packets[0].body
+        &film.replication_stream.first().unwrap().body.packets[0].body
     else {
         panic!("missing frame packet")
     };
@@ -419,10 +438,8 @@ fn captured_v41_corpus() {
             match original.kind {
                 ChunkKind::Registry => assert_eq!(&film.registry.source, original),
                 ChunkKind::Summary => {
-                    let chunk = film
-                        .summary_chunks()
-                        .find(|chunk| chunk.source_position == i)
-                        .unwrap();
+                    let chunk = &film.summary;
+                    assert_eq!(chunk.source_position, i);
                     assert_eq!(&chunk.source, original);
                     for packet in &chunk.body.packets {
                         assert!(packet.source_coverage(&chunk.data).is_some());
@@ -430,7 +447,8 @@ fn captured_v41_corpus() {
                 }
                 ChunkKind::Replication => {
                     let chunk = film
-                        .replication_chunks()
+                        .replication_stream
+                        .iter()
                         .find(|chunk| chunk.source_position == i)
                         .unwrap();
                     assert_eq!(&chunk.source, original);
@@ -671,12 +689,6 @@ fn source_coverage_keeps_opaque_summary_and_unparsed_partial_event_bits() {
     let film = Film::parse([
         registry(),
         FilmChunk {
-            kind: ChunkKind::Summary,
-            index: None,
-            start_ms: None,
-            data: packet(9, &summary_payload, 0),
-        },
-        FilmChunk {
             kind: ChunkKind::Replication,
             index: None,
             start_ms: None,
@@ -684,9 +696,15 @@ fn source_coverage_keeps_opaque_summary_and_unparsed_partial_event_bits() {
             // Its bounded partial body does not establish the remaining layout.
             data: packet(0, &[0x6a, 0x8e], 0),
         },
+        FilmChunk {
+            kind: ChunkKind::Summary,
+            index: None,
+            start_ms: None,
+            data: packet(9, &summary_payload, 0),
+        },
     ])
     .unwrap();
-    let summary = film.summary_chunks().next().unwrap();
+    let summary = &film.summary;
     let coverage = summary.body.packets[0]
         .source_coverage(&summary.data)
         .unwrap();
@@ -703,7 +721,7 @@ fn source_coverage_keeps_opaque_summary_and_unparsed_partial_event_bits() {
             },
         ]
     );
-    let replication = film.replication_chunks().next().unwrap();
+    let replication = film.replication_stream.first().unwrap();
     let coverage = replication.body.packets[0]
         .source_coverage(&replication.data)
         .unwrap();
@@ -730,9 +748,10 @@ fn source_coverage_keeps_opaque_summary_and_unparsed_partial_event_bits() {
             start_ms: None,
             data: packet(0, &[0x6a, 0x8f, 0], 0),
         },
+        empty_summary(),
     ])
     .unwrap();
-    let chunk = film.replication_chunks().next().unwrap();
+    let chunk = film.replication_stream.first().unwrap();
     let coverage = chunk.body.packets[0].source_coverage(&chunk.data).unwrap();
     assert_eq!(
         coverage.last().unwrap(),

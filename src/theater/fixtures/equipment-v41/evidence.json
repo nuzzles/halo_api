@@ -1,0 +1,349 @@
+[
+  {
+    "name": "inventory-single",
+    "kind": "inventory",
+    "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+    "timestamp_us": 3314192,
+    "entity_id": 1073742342,
+    "start_bit": 7,
+    "bits": 22,
+    "fields": [
+      {
+        "name": "head",
+        "width": 3,
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            160
+          ]
+        }
+      },
+      {
+        "name": "count",
+        "width": 3,
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            32
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].present",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].value",
+        "width": 13,
+        "raw": {
+          "bit_len": 13,
+          "bytes": [
+            29,
+            24
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].generation",
+        "width": 2,
+        "raw": {
+          "bit_len": 2,
+          "bytes": [
+            64
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 1,
+      "payload_byte": 557984,
+      "start_bit": 855,
+      "end_bit": 877
+    },
+    "sha256": "f33dead68db68b4cabac35f689600e53193f130cb484be8405946c433a60093c",
+    "chunk_sha256": "fb02a54123a4d1eddfa088aff6caade8696819326c5b1e302fdb2e64599d9f3b"
+  },
+  {
+    "name": "inventory-multiple",
+    "kind": "inventory",
+    "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+    "timestamp_us": 189334131,
+    "entity_id": 1073742368,
+    "start_bit": 7,
+    "bits": 38,
+    "fields": [
+      {
+        "name": "head",
+        "width": 3,
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            192
+          ]
+        }
+      },
+      {
+        "name": "count",
+        "width": 3,
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            64
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].present",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].value",
+        "width": 13,
+        "raw": {
+          "bit_len": 13,
+          "bytes": [
+            37,
+            208
+          ]
+        }
+      },
+      {
+        "name": "equipment[0].generation",
+        "width": 2,
+        "raw": {
+          "bit_len": 2,
+          "bytes": [
+            64
+          ]
+        }
+      },
+      {
+        "name": "equipment[1].present",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "equipment[1].value",
+        "width": 13,
+        "raw": {
+          "bit_len": 13,
+          "bytes": [
+            38,
+            192
+          ]
+        }
+      },
+      {
+        "name": "equipment[1].generation",
+        "width": 2,
+        "raw": {
+          "bit_len": 2,
+          "bytes": [
+            64
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 10,
+      "payload_byte": 687341,
+      "start_bit": 1447,
+      "end_bit": 1485
+    },
+    "sha256": "f0c305764f67436c838bbb3af445817a40f94f2eb2ea72ab11ce0376568c81c7",
+    "chunk_sha256": "7c6f3f356f4a8d754490e684fd7247ff4e16ace88bf545dbd01e84291c6f83d7"
+  },
+  {
+    "name": "object-defaults",
+    "kind": "defaults",
+    "match_id": "4031c1db-2fd5-4a2a-91a1-bed5d0ad3e73",
+    "timestamp_us": 3298854,
+    "entity_id": 1073743267,
+    "start_bit": 6,
+    "bits": 92,
+    "fields": [
+      {
+        "name": "version.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "version.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.lead",
+        "width": 9,
+        "raw": {
+          "bit_len": 9,
+          "bytes": [
+            32,
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.object_tag",
+        "width": 32,
+        "raw": {
+          "bit_len": 32,
+          "bytes": [
+            165,
+            60,
+            209,
+            67
+          ]
+        }
+      },
+      {
+        "name": "mpp.variant_name.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "mpp.value18.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.value13.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.kind",
+        "width": 2,
+        "raw": {
+          "bit_len": 2,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.index",
+        "width": 5,
+        "raw": {
+          "bit_len": 5,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.count",
+        "width": 3,
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.extra.present",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "mpp.tail.present",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "player_index.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "ability_enabled_id.gate",
+        "width": 1,
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            128
+          ]
+        }
+      },
+      {
+        "name": "ability_enabled_id",
+        "width": 32,
+        "raw": {
+          "bit_len": 32,
+          "bytes": [
+            25,
+            66,
+            51,
+            97
+          ]
+        }
+      }
+    ],
+    "source": {
+      "chunk_index": 1,
+      "payload_byte": 557576,
+      "start_bit": 1838,
+      "end_bit": 1930
+    },
+    "sha256": "8287da4c2f3b8df9d5dca3978b2e45e7aa8d5746c52f5b2bbec7e2af6ae5b899",
+    "chunk_sha256": "fb02a54123a4d1eddfa088aff6caade8696819326c5b1e302fdb2e64599d9f3b"
+  }
+]

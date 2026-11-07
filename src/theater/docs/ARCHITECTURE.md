@@ -9,7 +9,7 @@ its `ResolvedFilm` type are private. Model modules are publicly reachable as
 ```text
 theater/
   film/
-    mod.rs                 Film and ordered FilmDataChunk values
+    mod.rs                 Film: registry, replication_stream, summary
     chunks/
       models.rs            Downloaded FilmChunk, ChunkKind and transport containers
       packet/              Shared packet envelopes, source ranges and coverage

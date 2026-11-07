@@ -4,6 +4,10 @@ use crate::theater::film::chunks::replication::replication_stream::models::kill_
     EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop, EventRecord,
 };
 use crate::theater::parser::bits::Cursor;
+use crate::theater::parser::v41::context::movement::PrecisionDescriptor;
+mod fire;
+mod projectile;
+pub(crate) use projectile::ProjectilePositionEncoding;
 
 const CONFIG: [[i8; 3]; 123] = [
     [1, 1, 7],    // 0
@@ -123,7 +127,7 @@ const CONFIG: [[i8; 3]; 123] = [
     [6, 8, 7],    // 114
     [-1, -1, -1], // 115
     [-1, -1, -1], // 116
-    [-1, -1, -1], // 117
+    [2, 0, 7],    // 117
     [1, 8, 7],    // 118
     [2, 0, 7],    // 119
     [8, 8, 7],    // 120
@@ -156,6 +160,21 @@ pub(crate) fn read_reference_event_list(
     start_bit: usize,
     gate15: Option<bool>,
     limit: usize,
+) -> EventListRead {
+    read_contextual_event_list(data, start_bit, gate15, limit, None, None, None)
+}
+
+/// The optional descriptor explicitly selects the quantized map-vector branch
+/// of event 82 property variant 7. `fire_v3` separately selects the v3 fire
+/// layout and its map-vector descriptor. Neither is inferred from following bytes.
+pub(crate) fn read_contextual_event_list(
+    data: &[u8],
+    start_bit: usize,
+    gate15: Option<bool>,
+    limit: usize,
+    event_vector: Option<&PrecisionDescriptor>,
+    fire_v3: Option<&PrecisionDescriptor>,
+    projectile_positions: Option<&ProjectilePositionEncoding>,
 ) -> EventListRead {
     let mut out = EventListRead {
         start_bit,
@@ -216,7 +235,15 @@ pub(crate) fn read_reference_event_list(
                 r.stage = EventFieldStage::Body;
                 if code == 15 && gate15.is_none() {
                     Some(EventListStop::MissingRuntimeGate15)
-                } else if body(&mut r, data, code, gate15.unwrap_or(false)) {
+                } else if body(
+                    &mut r,
+                    data,
+                    code,
+                    gate15.unwrap_or(false),
+                    event_vector,
+                    fire_v3,
+                    projectile_positions,
+                ) {
                     record.layout_complete = true;
                     None
                 } else {
@@ -364,11 +391,17 @@ fn presence(r: &mut Reader<'_>, code: usize) -> bool {
     }
     !r.over
 }
-fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
+fn body(
+    r: &mut Reader<'_>,
+    data: &[u8],
+    code: usize,
+    gate15: bool,
+    event_vector: Option<&PrecisionDescriptor>,
+    fire_v3: Option<&PrecisionDescriptor>,
+    projectile_positions: Option<&ProjectilePositionEncoding>,
+) -> bool {
     let fixed = match code {
         3 | 4 | 23 | 24 | 25 | 26 | 33 | 49 | 54 | 57 | 59 | 92 | 103 => Some(0),
-        5 => Some(111),
-        6 => Some(93),
         7 => Some(118),
         9 => Some(36),
         12 => Some(94),
@@ -376,7 +409,6 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
         34 => Some(59),
         38 => Some(10),
         40 => Some(78),
-        75 => Some(54),
         76 => Some(104),
         _ => None,
     };
@@ -385,6 +417,63 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
         return !r.over;
     }
     match code {
+        5 | 6 => {
+            let Some(encoding) = projectile_positions else {
+                return false;
+            };
+            return projectile::read(r, code, encoding);
+        }
+        39 => {
+            // biped_throw_initiate: LevelUp chargeLancerInitie, FUN_140c6a58c.
+            if r.read(1) != 0 {
+                if r.read(1) != 0 {
+                    r.read(32);
+                }
+                r.read(4);
+            } else {
+                r.read(3);
+            }
+            if r.read(1) == 0 {
+                r.read(5);
+            }
+        }
+        75 => {
+            // AIDialog: LevelUp chargeDialogueIA, FUN_140f2e634.
+            r.read(5);
+            if r.read(1) != 0 {
+                r.read(32);
+            }
+            if r.read(1) == 0 {
+                r.read(12);
+            }
+            if r.read(1) == 0 {
+                r.read(5);
+            }
+            let count = r.read(1) as usize + 1;
+            r.skip(count);
+        }
+        117 => {
+            let Some(encoding) = event_vector else {
+                return false;
+            };
+            // EquipmentTranslocatorTeleportEffects: guarded effect and two map positions.
+            if r.read(1) != 0 {
+                r.read(32);
+            }
+            if !quantized_event_vector(r, encoding) || !quantized_event_vector(r, encoding) {
+                return false;
+            }
+        }
+        36 => {
+            let Some(encoding) = fire_v3 else {
+                return false;
+            };
+            // This layout uses category-relative references (configuration=1).
+            if data.first().is_none_or(|b| b & 0x80 == 0) {
+                return false;
+            }
+            return fire::read(r, encoding);
+        }
         85 => {
             let mut nested = Reader::new(data, r.cursor.position).unwrap();
             nested.trace = r.trace.as_ref().map(|_| Vec::new());
@@ -417,6 +506,9 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
             r.skip(n);
         }
         0 => {
+            // FUN_1407f15a4, confirmed by LevelUp chargeDegatsApres at
+            // 413971bcc485be53a2fa8cf229e170539a5146f8. Its FUN_1407f2058
+            // gate is absent-on-one, unlike the older weapon_hits reader.
             if r.read(1) != 0 {
                 r.read(32);
             }
@@ -475,6 +567,14 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
                         r.read(1);
                     }
                     5 => r.skip(128),
+                    7 => {
+                        let Some(encoding) = event_vector else {
+                            return false;
+                        };
+                        if !quantized_event_vector(r, encoding) {
+                            return false;
+                        }
+                    }
                     _ => return false,
                 }
             }
@@ -507,4 +607,141 @@ fn body(r: &mut Reader<'_>, data: &[u8], code: usize, gate15: bool) -> bool {
         _ => return false,
     }
     !r.over
+}
+
+fn quantized_event_vector(r: &mut Reader<'_>, encoding: &PrecisionDescriptor) -> bool {
+    if encoding.index_bits > 30 || !encoding.axis_bits.iter().all(|w| (1..=32).contains(w)) {
+        return false;
+    }
+    // Absolute payload only: default-region guard, map-region index, three axes.
+    // No dynamic-position precision flag or finite/handle tail belongs here.
+    // Other regions have no supplied bounds and cannot use this region's widths.
+    if r.read(1) != 0 || r.over {
+        return false;
+    }
+    if r.read(encoding.index_bits as usize) != u64::from(encoding.region) || r.over {
+        return false;
+    }
+    for width in encoding.axis_bits {
+        r.read(width as usize);
+    }
+    !r.over
+}
+
+#[cfg(test)]
+mod payload_tests {
+    use super::*;
+
+    fn push(bits: &mut Vec<bool>, value: u64, width: usize) {
+        bits.extend((0..width).rev().map(|shift| value & (1 << shift) != 0));
+    }
+    fn bytes(bits: &[bool]) -> Vec<u8> {
+        let mut bytes = vec![0u8; bits.len().div_ceil(8)];
+        for (i, bit) in bits.iter().enumerate() {
+            if *bit {
+                bytes[i / 8] |= 1 << (7 - i % 8);
+            }
+        }
+        bytes
+    }
+    fn header(code: u64) -> Vec<bool> {
+        let mut bits = vec![false];
+        push(&mut bits, 1, 1);
+        push(&mut bits, code, 7);
+        bits
+    }
+
+    #[test]
+    fn throw_initiate_consumes_both_selector_branches_and_optional_fields() {
+        for (selector, word_present, player_present) in [
+            (false, false, true),
+            (true, true, true),
+            (true, false, false),
+        ] {
+            let mut bits = header(39);
+            push(&mut bits, 0, 3);
+            push(&mut bits, u64::from(selector), 1);
+            if selector {
+                push(&mut bits, u64::from(word_present), 1);
+                if word_present {
+                    push(&mut bits, 0x1234_5678, 32);
+                }
+                push(&mut bits, 9, 4);
+            } else {
+                push(&mut bits, 5, 3);
+            }
+            push(&mut bits, u64::from(!player_present), 1);
+            if player_present {
+                push(&mut bits, 7, 5);
+            }
+            push(&mut bits, 0, 1);
+            let end_bit = bits.len();
+            let bytes = bytes(&bits);
+            let parsed = read_reference_event_list(&bytes, 1, Some(true), bytes.len());
+            assert_eq!(parsed.stop, EventListStop::Terminator);
+            assert_eq!(parsed.records.len(), 1);
+            assert_eq!(parsed.records[0].code, Some(39));
+            assert_eq!(parsed.end_bit, end_bit);
+        }
+    }
+
+    #[test]
+    fn ai_dialogue_uses_conditional_body_width() {
+        let mut bits = header(75);
+        push(&mut bits, 0, 3);
+        push(&mut bits, 17, 5);
+        push(&mut bits, 1, 1);
+        push(&mut bits, 0x1234_5678, 32);
+        push(&mut bits, 0, 1);
+        push(&mut bits, 0xabc, 12);
+        push(&mut bits, 1, 1);
+        push(&mut bits, 1, 1);
+        push(&mut bits, 2, 2);
+        push(&mut bits, 0, 1);
+        let parsed = read_reference_event_list(&bytes(&bits), 1, Some(true), bytes(&bits).len());
+        assert_eq!(parsed.stop, EventListStop::Terminator);
+        assert_eq!(parsed.records[0].code, Some(75));
+        assert_eq!(parsed.end_bit, bits.len());
+    }
+
+    #[test]
+    fn translocator_positions_require_map_widths() {
+        let descriptor = PrecisionDescriptor {
+            index_bits: 2,
+            axis_bits: [12, 12, 11],
+            region: 1,
+        };
+        let mut bits = header(117);
+        push(&mut bits, 1, 1);
+        push(&mut bits, 7, 8);
+        push(&mut bits, 1, 2);
+        push(&mut bits, 0, 2);
+        push(&mut bits, 1, 1);
+        push(&mut bits, 0xa134_4fc2, 32);
+        for raw in [[1000, 2000, 500], [2000, 3000, 600]] {
+            push(&mut bits, 0, 1);
+            push(&mut bits, 1, 2);
+            for (axis, width) in raw.into_iter().zip(descriptor.axis_bits) {
+                push(&mut bits, axis, width as usize);
+            }
+        }
+        push(&mut bits, 0, 1);
+        let payload = bytes(&bits);
+        let parsed = read_contextual_event_list(
+            &payload,
+            1,
+            Some(true),
+            payload.len(),
+            Some(&descriptor),
+            None,
+            None,
+        );
+        assert_eq!(parsed.stop, EventListStop::Terminator);
+        assert_eq!(parsed.records[0].code, Some(117));
+        assert_eq!(parsed.end_bit, bits.len());
+        assert_eq!(
+            read_reference_event_list(&payload, 1, Some(true), payload.len()).stop,
+            EventListStop::UnsupportedBody
+        );
+    }
 }

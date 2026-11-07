@@ -1,6 +1,7 @@
 //! Long fire-event records and modal aim interpretation grammar.
 //! A fire event does not establish a hit or identify a victim.
 use super::bits::{Bits, Cursor};
+use crate::theater::film::{Weapon, WeaponId};
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -17,7 +18,7 @@ pub struct FilmFireEvent {
     pub short: bool,
     pub bloc: bool,
     #[serde(rename = "WeaponID")]
-    pub weapon_id: u64,
+    pub weapon_id: Weapon,
     pub has_aim: bool,
     pub aim: [f32; 3],
 }
@@ -132,6 +133,11 @@ impl FireReader<'_> {
 /// Read the actual optional-field grammar, retaining refusals and zero-tail
 /// provenance. The modal aim locator is accepted only within recorded bytes.
 pub(crate) fn read_fire_event(payload: &[u8]) -> FireRead {
+    read_fire_event_at(payload, 1)
+}
+
+/// Read at a boundary established by the sequential event-list reader.
+pub(crate) fn read_fire_event_at(payload: &[u8], start_bit: usize) -> FireRead {
     let mut r = FireReader {
         cursor: Cursor::new_padded(payload, 0),
         source_bits: payload.len() * 8,
@@ -150,7 +156,11 @@ pub(crate) fn read_fire_event(payload: &[u8]) -> FireRead {
     if payload.len() < 2 {
         return out;
     }
-    r.bit("header.configuration");
+    if start_bit == 1 {
+        r.bit("header.configuration");
+    } else {
+        r.cursor.position = start_bit;
+    }
     let more = r.bit("header.continuation");
     let kind = r.read("header.code", 7, false);
     if !more || kind != 36 {
@@ -191,7 +201,7 @@ pub(crate) fn read_fire_event(payload: &[u8]) -> FireRead {
                 unit,
                 short,
                 bloc,
-                weapon_id: upper << 32 | lower,
+                weapon_id: Weapon::from(WeaponId(upper << 32 | lower)),
                 has_aim: false,
                 aim: [0.; 3],
             };

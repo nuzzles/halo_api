@@ -21,7 +21,7 @@ async fn main() -> Result<(), common::ExampleError> {
     let mut resolved = halo_api::theater::TheaterRuntime::load(film);
     println!(
         "{} chunks, {} indexed records",
-        1 + resolved.film().chunks.len(),
+        2 + resolved.film().replication_stream.len(),
         resolved.events().len()
     );
     if let Some(end) = resolved.events().last().map(|e| e.timestamp_us) {

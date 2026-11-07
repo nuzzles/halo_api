@@ -1,4 +1,5 @@
 //! Packet type 2: keyframe entity baselines.
+pub(crate) mod declarations;
 pub(crate) mod record;
 pub(crate) mod table;
 use crate::theater::film::{PacketDecodeError, ReplicationStreamPacketBody};

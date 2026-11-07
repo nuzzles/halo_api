@@ -1,5 +1,7 @@
 //! Shared v41 decode profiles and explicit structural reader configuration.
-use crate::theater::parser::v41::chunks::replication::replication_stream::frame::entities;
+use crate::theater::parser::v41::chunks::replication::replication_stream::frame::{
+    entities, events::ProjectilePositionEncoding,
+};
 use crate::theater::parser::v41::chunks::replication::replication_stream::keyframes::table::decode_reference_keyframe_table_contextual;
 use crate::theater::parser::v41::context::map::REFERENCE_MPP_DEFAULT_WIDTHS;
 pub(crate) mod layout;
@@ -75,6 +77,11 @@ impl DecodeProfile {
 }
 #[derive(Debug, Clone)]
 pub(crate) struct V41DecodeConfig {
+    /// Contextual interpretation only; canonical parsing leaves this disabled.
+    pub event_quantized_vectors: bool,
+    pub event_fire_v3: bool,
+    pub projectile_event_positions: Option<ProjectilePositionEncoding>,
+    pub guard_rejected_frame_deletes: bool,
     pub extra_fields: bool,
     pub id_low_bits: i64,
     pub id_base: u32,
@@ -86,6 +93,10 @@ pub(crate) struct V41DecodeConfig {
 impl Default for V41DecodeConfig {
     fn default() -> Self {
         Self {
+            event_quantized_vectors: false,
+            event_fire_v3: false,
+            projectile_event_positions: None,
+            guard_rejected_frame_deletes: false,
             extra_fields: false,
             id_low_bits: 13,
             id_base: 0,

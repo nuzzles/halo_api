@@ -1,6 +1,7 @@
 //! Object lifecycle, low-frequency state and weapon identity.
 use super::reader::ComponentReader;
 use super::{orientation, position, tlv};
+use crate::theater::film::{Weapon, WeaponId};
 use crate::theater::parser::v41::reference::observations::{
     FilmComponentObservation, MovementComponent, ObjectParentState,
 };
@@ -59,11 +60,11 @@ fn dead_state(r: &mut ComponentReader<'_>) -> Option<()> {
 }
 
 fn weapon(r: &mut ComponentReader<'_>) -> Option<()> {
-    let mut id_high = u32::MAX;
-    let mut id_low = u32::MAX;
+    let mut id = None;
     if r.bit("present")? {
-        id_high = r.r("id_high", 32)? as u32;
-        id_low = r.r("variant", 32)? as u32;
+        let family = r.r("id_high", 32)? as u32;
+        let variant = r.r("variant", 32)? as u32;
+        id = Some(Weapon::from(WeaponId::from_parts(family, variant)));
         r.r("value_7c", 12)?;
         r.r("value_minus_one", 7)?;
         if r.bit("shot_id_present")? {
@@ -79,7 +80,7 @@ fn weapon(r: &mut ComponentReader<'_>) -> Option<()> {
     r.r("tail_state", 3)?;
     r.gate("tail_a", 2, false)?;
     r.gate("tail_b", 2, false)?;
-    r.publish_component(FilmComponentObservation::HeldWeapon { id_high, id_low });
+    r.publish_component(FilmComponentObservation::HeldWeapon { id });
     Some(())
 }
 
@@ -142,7 +143,15 @@ pub(crate) fn read_primary(
 ) -> Option<bool> {
     match name {
         "object-position-component" => {
-            if r.bit("high_precision")? {
+            if r.position_encoding.is_some_and(|e| e.full_precision_gate()) {
+                let handle = r.bit("high_precision")?;
+                r.words("vector_bits", 3, 32)?;
+                if handle {
+                    r.optional_handle("position_handle", 0)?;
+                    r.gate("position_region", 11, true)?;
+                }
+                r.r("finite", 2)?;
+            } else if r.bit("high_precision")? {
                 r.r("high_precision_body", 59)?;
             } else {
                 let Some(encoding) = r.position_encoding else {

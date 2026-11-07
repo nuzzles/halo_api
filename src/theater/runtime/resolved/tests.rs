@@ -5,13 +5,7 @@ use crate::theater::parser::test_support::FixtureFilmSource;
 use crate::theater::parser::test_support::test_chunks;
 
 fn replication_chunk_mut(film: &mut Film) -> &mut ReplicationStreamChunk {
-    film.chunks
-        .iter_mut()
-        .find_map(|chunk| match chunk {
-            FilmDataChunk::Replication(chunk) => Some(chunk),
-            _ => None,
-        })
-        .unwrap()
+    film.replication_stream.first_mut().unwrap()
 }
 
 fn recording() -> Film {
@@ -24,6 +18,58 @@ fn recording() -> Film {
     )
     .unwrap();
     Film::parse(test_chunks(&source)).unwrap()
+}
+
+#[test]
+fn source_lookup_uses_supplied_positions_with_a_separate_summary() {
+    // Manifest indices are deliberately duplicated. They must never be used as
+    // source positions. Check both an empty stream and multiple stream chunks.
+    for replication_count in [0, 2] {
+        let registry = FilmChunk {
+            kind: ChunkKind::Registry,
+            index: Some(99),
+            start_ms: None,
+            data: [41u32.to_le_bytes(), 27u32.to_le_bytes()].concat(),
+        };
+        let summary_position = replication_count + 1;
+        let mut chunks = vec![registry];
+        for position in 1..=summary_position {
+            let kind = if position == summary_position {
+                ChunkKind::Summary
+            } else {
+                ChunkKind::Replication
+            };
+            chunks.push(FilmChunk {
+                kind,
+                index: Some(99),
+                start_ms: None,
+                data: [
+                    99u16.to_le_bytes().as_slice(),
+                    &[0, 0],
+                    &1u32.to_le_bytes(),
+                    &(position as u64).to_le_bytes(),
+                    &[0xaa],
+                ]
+                .concat(),
+            });
+        }
+        let film = Film::parse(chunks).unwrap();
+        let film: Film = serde_json::from_value(serde_json::to_value(film).unwrap()).unwrap();
+        assert!(source::chunk(&film, 0).is_none());
+        assert!(source::chunk(&film, summary_position + 1).is_none());
+        assert!(source::chunk(&film, usize::MAX).is_none());
+        for position in 1..=summary_position {
+            let chunk = source::chunk(&film, position).unwrap();
+            assert_eq!(
+                matches!(chunk, source::FilmChunkRef::Summary(_)),
+                position == summary_position
+            );
+            assert_eq!(
+                chunk.packet(0).unwrap().header().timestamp_us,
+                position as u64
+            );
+        }
+    }
 }
 
 // Independently authored decoded-record fixtures test resolution, not decoding.
@@ -52,6 +98,7 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
                 width: 8,
                 raw: RawBits::from_low(value, 8),
             }],
+            weapon_id: None,
         }],
         end_bit: 48,
         stop: EntityViewStop::Complete,
@@ -59,7 +106,7 @@ fn entity(kind: RecordKind, id: u32, value: u64) -> EntityRecord {
 }
 fn packet(film: &Film, timestamp_us: u64, records: Vec<EntityRecord>) -> ReplicationStreamPacket {
     // Parse a real packet shell, then substitute explicit resolution fixtures.
-    let mut p = film.replication_chunks().next().unwrap().body.packets[0].clone();
+    let mut p = film.replication_stream.first().unwrap().body.packets[0].clone();
     p.header.timestamp_us = timestamp_us;
     p.header.payload_size = 256;
     let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(frame)) = &mut p.body

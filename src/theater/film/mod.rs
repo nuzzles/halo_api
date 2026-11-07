@@ -4,35 +4,20 @@ use serde::{Deserialize, Serialize};
 /// Structurally decoded canonical recording. Interpretations belong to TheaterRuntime.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Film {
+    /// The recording's sole registry/bootstrap chunk.
     pub registry: RegistryChunk,
-    pub chunks: Vec<FilmDataChunk>,
-}
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum FilmDataChunk {
-    Replication(ReplicationStreamChunk),
-    Summary(SummaryChunk),
-    Unknown(Chunk<()>),
+    /// Replication chunks in their supplied order.
+    pub replication_stream: Vec<ReplicationStreamChunk>,
+    /// The recording's sole summary chunk.
+    pub summary: SummaryChunk,
 }
 impl Film {
     /// Read the registry header, select a supported parser, and decode the chunks.
-    /// The first chunk must be the only registry chunk. Remaining input order is retained.
+    ///
+    /// Requires exactly one registry (first) and one summary (last). Unknown chunk kinds
+    /// are rejected. Each chunk retains its original bytes and source position.
     pub fn parse(chunks: impl IntoIterator<Item = FilmChunk>) -> Result<Self, ParseError> {
         crate::theater::parser::ChunkReader::read(chunks)
-    }
-
-    pub fn replication_chunks(&self) -> impl Iterator<Item = &ReplicationStreamChunk> {
-        self.chunks.iter().filter_map(|chunk| match chunk {
-            FilmDataChunk::Replication(chunk) => Some(chunk),
-            FilmDataChunk::Summary(_) => None,
-            FilmDataChunk::Unknown(_) => None,
-        })
-    }
-    pub fn summary_chunks(&self) -> impl Iterator<Item = &SummaryChunk> {
-        self.chunks.iter().filter_map(|chunk| match chunk {
-            FilmDataChunk::Summary(chunk) => Some(chunk),
-            FilmDataChunk::Replication(_) => None,
-            FilmDataChunk::Unknown(_) => None,
-        })
     }
 }
 #[derive(Debug, thiserror::Error)]
@@ -43,6 +28,14 @@ pub enum ParseError {
     RegistryNotFirst,
     #[error("film contains multiple registry chunks")]
     MultipleRegistries,
+    #[error("film requires a summary chunk")]
+    MissingSummary,
+    #[error("film contains multiple summary chunks")]
+    MultipleSummaries,
+    #[error("the last film chunk must be the summary chunk")]
+    SummaryNotLast,
+    #[error("unsupported film chunk kind {0}")]
+    UnsupportedChunkKind(i32),
     #[error("truncated registry version header")]
     TruncatedRegistryHeader,
     #[error("unsupported film version {0}; supported: 41")]
@@ -55,6 +48,8 @@ pub enum ParseError {
 mod tests;
 
 pub mod chunks;
+pub mod maps;
+pub mod weapon;
 pub use chunks::registry::{
     FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryComponent,
     RegistryStop,
@@ -74,5 +69,6 @@ pub use chunks::{
     PacketBody, PacketDecodeError, PacketRead, PacketSource, PacketStream, RegistryChunk,
     ReplicationStreamChunk, SourceRegion, SourceRegionKind, SummaryChunk,
 };
+pub use weapon::{KnownWeapon, Weapon, WeaponDefinition, WeaponId, known_weapons};
 
 pub use chunks::replication::components::field::{ComponentField, RawBits};
