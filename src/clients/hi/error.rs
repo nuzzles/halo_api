@@ -4,6 +4,19 @@ use thiserror::Error;
 
 use crate::auth::AuthError;
 
+/// Theater-specific failures, distinct from authentication and HTTP transport errors.
+#[derive(Debug, Clone, Error)]
+pub enum TheaterError {
+    /// The match-film endpoint returned 404. LAN/local matches have no downloadable film;
+    /// missing or expired films can produce the same response for other match types.
+    #[error("no Theater film available for match {match_id}")]
+    FilmUnavailable { match_id: String },
+
+    /// Downloaded film data could not be decompressed as zlib.
+    #[error("failed to decompress Halo Infinite Theater film data: {0}")]
+    Decompression(#[source] Arc<std::io::Error>),
+}
+
 /// Errors produced by the Halo Infinite API client.
 #[derive(Debug, Clone, Error)]
 pub enum InfiniteClientError {
@@ -29,8 +42,8 @@ pub enum InfiniteClientError {
         body: String,
     },
 
-    #[error("failed to decompress Halo Infinite Theater film data: {0}")]
-    FilmDecompression(Arc<std::io::Error>),
+    #[error(transparent)]
+    Theater(#[from] TheaterError),
 
     #[error("no Halo Infinite record found for gamertag \"{0}\"")]
     GamertagNotFound(String),

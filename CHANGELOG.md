@@ -10,6 +10,18 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Added
+
+- `TheaterError`, exposed through `InfiniteClientError::Theater`, groups Theater-specific failures.
+- `TheaterError::FilmUnavailable` identifies a match-film 404 without parsing error text.
+  LAN/local games do not have downloadable Theater films; missing or expired recordings can also
+  produce this error. Highlight-event methods propagate the same error.
+
+### Changed
+
+- Film decompression failures now return `InfiniteClientError::Theater(TheaterError::Decompression)`
+  instead of `InfiniteClientError::FilmDecompression`.
+
 ## [0.4.0] - 2026-10-23
 
 This release has an [MSRV][] of 1.96.

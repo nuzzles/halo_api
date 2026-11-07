@@ -6,7 +6,6 @@ use tracing::warn;
 use xbox::models::Xuid;
 use xbox::util::wrap_xuid;
 
-use super::InfiniteClientError;
 use super::endpoints::HaloEndpoints;
 use super::film::{FilmEvent, FilmEventReport, decode_events, decode_players, validate_events};
 use super::models::{
@@ -24,6 +23,7 @@ use super::pager::MatchHistoryPager;
 use super::player::Player;
 use super::pool::{HaloInfiniteClientPool, HaloInfiniteClientPoolError};
 use super::rate_limit::RateLimiter;
+use super::{InfiniteClientError, TheaterError};
 use crate::auth::{HaloAuthClient, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -475,13 +475,42 @@ impl HaloInfiniteClient {
     }
 
     /// Returns the Theater film manifest and chunk inventory for a match.
+    ///
+    /// LAN/local matches are not available from the Theater service. A 404 is returned as
+    /// [`TheaterError::FilmUnavailable`], including for missing or expired recordings of
+    /// other match types. Authentication, network, and other HTTP errors are preserved.
+    ///
+    /// ```no_run
+    /// use halo_api::clients::hi::{HaloInfiniteClient, InfiniteClientError, TheaterError};
+    /// # async fn example(halo: &HaloInfiniteClient) -> Result<(), InfiniteClientError> {
+    /// match halo.match_film("match-id").await {
+    ///     Ok(film) => println!("{} chunks", film.custom_data.chunks.len()),
+    ///     Err(InfiniteClientError::Theater(TheaterError::FilmUnavailable { match_id })) => {
+    ///         println!("No recording available for {match_id}");
+    ///     }
+    ///     Err(error) => return Err(error),
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn match_film(&self, match_id: &str) -> Result<FilmManifest, InfiniteClientError> {
-        self.get_with_clearance(
-            &self.endpoints.ugc_base_url,
-            &format!("/hi/films/matches/{match_id}/spectate"),
-            &[],
-        )
-        .await
+        match self
+            .get_with_clearance(
+                &self.endpoints.ugc_base_url,
+                &format!("/hi/films/matches/{match_id}/spectate"),
+                &[],
+            )
+            .await
+        {
+            Err(InfiniteClientError::HttpStatus {
+                status: StatusCode::NOT_FOUND,
+                ..
+            }) => Err(TheaterError::FilmUnavailable {
+                match_id: match_id.to_owned(),
+            }
+            .into()),
+            result => result,
+        }
     }
 
     /// Downloads and zlib-decompresses one Theater film chunk.
@@ -497,7 +526,7 @@ impl HaloInfiniteClient {
         let mut data = Vec::new();
         decoder
             .read_to_end(&mut data)
-            .map_err(|error| InfiniteClientError::FilmDecompression(Arc::new(error)))?;
+            .map_err(|error| TheaterError::Decompression(Arc::new(error)))?;
         Ok(FilmChunkData {
             metadata: chunk.clone(),
             data,
