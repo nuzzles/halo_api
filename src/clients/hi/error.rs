@@ -30,6 +30,14 @@ pub enum InfiniteClientError {
         body: String,
     },
 
+    /// The server returned 429 on every allowed attempt.
+    #[error("Halo Infinite request to {url} was rate limited after {attempts} attempts: {body}")]
+    RateLimitExhausted {
+        url: String,
+        attempts: u32,
+        body: String,
+    },
+
     #[error("Halo Infinite network error: {0}")]
     Network(Arc<reqwest::Error>),
 
