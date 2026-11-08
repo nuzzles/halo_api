@@ -13,7 +13,7 @@ struct PoolState {
 /// Selects Halo Infinite clients in round-robin order.
 ///
 /// Clones share the selection cursor. Each client retains its own credentials,
-/// rate limiter, and retries.
+/// 429 cooldowns and retries.
 #[derive(Clone)]
 pub struct HaloInfiniteClientPool {
     state: Arc<PoolState>,
@@ -43,7 +43,7 @@ impl HaloInfiniteClientPool {
         })
     }
 
-    /// Returns the next client. Its clone shares credentials and pacing with
+    /// Returns the next client. Its clone shares credentials and 429 cooldowns with
     /// the pool entry; clients in 429 backoff can still be selected.
     pub fn next_client(&self) -> HaloInfiniteClient {
         let index = self.state.next.fetch_add(1, Ordering::Relaxed) % self.state.clients.len();
