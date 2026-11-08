@@ -31,14 +31,29 @@ struct UnusedClearanceTokenSource;
 
 struct RateLimitThenSuccess {
     attempts: Arc<AtomicUsize>,
+    rate_limited_responses: usize,
+}
+
+struct RateLimitThenBytes {
+    attempts: Arc<AtomicUsize>,
 }
 
 impl Respond for RateLimitThenSuccess {
     fn respond(&self, _request: &Request) -> ResponseTemplate {
+        if self.attempts.fetch_add(1, Ordering::SeqCst) < self.rate_limited_responses {
+            ResponseTemplate::new(429).insert_header("Retry-After", "2")
+        } else {
+            ResponseTemplate::new(200).set_body_json(csr_body(1500))
+        }
+    }
+}
+
+impl Respond for RateLimitThenBytes {
+    fn respond(&self, _request: &Request) -> ResponseTemplate {
         if self.attempts.fetch_add(1, Ordering::SeqCst) == 0 {
             ResponseTemplate::new(429).insert_header("Retry-After", "0")
         } else {
-            ResponseTemplate::new(200).set_body_json(csr_body(1500))
+            ResponseTemplate::new(200).set_body_bytes([7, 8, 9])
         }
     }
 }
@@ -212,8 +227,9 @@ async fn retries_rate_limited_requests_in_the_shared_client() {
         ))
         .respond_with(RateLimitThenSuccess {
             attempts: attempts.clone(),
+            rate_limited_responses: 4,
         })
-        .expect(2)
+        .expect(5)
         .mount(&server)
         .await;
 
@@ -223,7 +239,94 @@ async fn retries_rate_limited_requests_in_the_shared_client() {
         .unwrap();
 
     assert_eq!(csr.records[0].result.current.value, 1500);
+    assert_eq!(attempts.load(Ordering::SeqCst), 5);
+}
+
+#[tokio::test]
+async fn retries_rate_limited_binary_requests() {
+    let server = MockServer::start().await;
+    let (halo, _xbox) = test_client(&server).await;
+    let attempts = Arc::new(AtomicUsize::new(0));
+
+    Mock::given(method("GET"))
+        .and(path("/hi/images/file/rank.png"))
+        .respond_with(RateLimitThenBytes {
+            attempts: attempts.clone(),
+        })
+        .expect(2)
+        .mount(&server)
+        .await;
+
+    assert_eq!(halo.rank_icon_image("rank.png").await.unwrap(), [7, 8, 9]);
     assert_eq!(attempts.load(Ordering::SeqCst), 2);
+}
+
+#[tokio::test]
+async fn reports_rate_limit_exhaustion_for_json_requests() {
+    let server = MockServer::start().await;
+    let halo = HaloInfiniteClient::builder()
+        .max_rate_limit_attempts(2)
+        .build_with_endpoints(
+            HaloAuthClient::from_tokens("spartan", "clearance"),
+            HaloEndpoints {
+                skill_base_url: server.uri(),
+                ..HaloEndpoints::default()
+            },
+        );
+    let csr_path = "/hi/playlist/edfef3ac-9cbe-4fa2-b949-8f29deafd483/csrs";
+    Mock::given(method("GET"))
+        .and(path(csr_path))
+        .respond_with(
+            ResponseTemplate::new(429)
+                .insert_header("Retry-After", "2")
+                .set_body_string("slow down"),
+        )
+        .expect(2)
+        .mount(&server)
+        .await;
+
+    let error = halo
+        .playlist_csr(PlaylistId::RANKED_ARENA, &Player::xuid("123456789"))
+        .await
+        .unwrap_err();
+    let InfiniteClientError::RateLimitExhausted {
+        url,
+        attempts,
+        body,
+    } = error
+    else {
+        panic!("expected rate-limit exhaustion, got {error:?}");
+    };
+    assert_eq!(attempts, 2);
+    assert_eq!(body, "slow down");
+    assert!(url.starts_with(&format!("{}{csr_path}", server.uri())));
+}
+
+#[tokio::test]
+async fn reports_rate_limit_exhaustion_for_binary_requests() {
+    let server = MockServer::start().await;
+    let halo = HaloInfiniteClient::builder()
+        .max_rate_limit_attempts(1)
+        .build_with_endpoints(
+            HaloAuthClient::from_tokens("spartan", "clearance"),
+            HaloEndpoints {
+                game_cms_base_url: server.uri(),
+                ..HaloEndpoints::default()
+            },
+        );
+    Mock::given(method("GET"))
+        .and(path("/hi/images/file/rank.png"))
+        .respond_with(ResponseTemplate::new(429).set_body_string("slow down"))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let error = halo.rank_icon_image("rank.png").await.unwrap_err();
+    assert!(matches!(
+        error,
+        InfiniteClientError::RateLimitExhausted { attempts: 1, body, .. }
+            if body == "slow down"
+    ));
 }
 
 #[tokio::test]
@@ -247,12 +350,10 @@ async fn account_pool_balances_distinct_credentials_across_clones() {
     }
 
     let clients = ["spartan-a", "spartan-b"].map(|token| {
-        HaloInfiniteClient::builder()
-            .requests_per_second(0)
-            .build_with_endpoints(
-                HaloAuthClient::from_tokens(token, "clearance"),
-                endpoints.clone(),
-            )
+        HaloInfiniteClient::builder().build_with_endpoints(
+            HaloAuthClient::from_tokens(token, "clearance"),
+            endpoints.clone(),
+        )
     });
     let pool = HaloInfiniteClientPool::try_new(clients).unwrap();
     assert_eq!(pool.account_count(), 2);
@@ -286,6 +387,7 @@ async fn account_pool_keeps_429_retries_on_the_selected_account() {
         .and(header("X-343-Authorization-Spartan", "spartan-a"))
         .respond_with(RateLimitThenSuccess {
             attempts: attempts.clone(),
+            rate_limited_responses: 1,
         })
         .expect(2)
         .mount(&server)
@@ -299,12 +401,10 @@ async fn account_pool_keeps_429_retries_on_the_selected_account() {
         .await;
 
     let clients = ["spartan-a", "spartan-b"].map(|token| {
-        HaloInfiniteClient::builder()
-            .requests_per_second(0)
-            .build_with_endpoints(
-                HaloAuthClient::from_tokens(token, "clearance"),
-                endpoints.clone(),
-            )
+        HaloInfiniteClient::builder().build_with_endpoints(
+            HaloAuthClient::from_tokens(token, "clearance"),
+            endpoints.clone(),
+        )
     });
     let pool = HaloInfiniteClientPool::try_new(clients).unwrap();
     let player = Player::xuid("123456789");

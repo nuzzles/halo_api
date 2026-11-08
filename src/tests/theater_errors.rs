@@ -35,22 +35,14 @@ async fn missing_film_is_typed_and_propagates_to_highlights() {
 }
 
 #[tokio::test]
-async fn film_http_errors_preserve_status_body_and_retries() {
-    for status in [401, 403, 429, 500] {
+async fn film_non_429_http_errors_preserve_status_and_body() {
+    for status in [401, 403, 500] {
         let server = MockServer::start().await;
         let (halo, _) = test_client(&server).await;
-        let attempts = match status {
-            401 => 2,
-            429 => 4,
-            _ => 1,
-        };
+        let attempts = if status == 401 { 2 } else { 1 };
         Mock::given(method("GET"))
             .and(path("/hi/films/matches/test-match/spectate"))
-            .respond_with(
-                ResponseTemplate::new(status)
-                    .insert_header("Retry-After", "0")
-                    .set_body_string("upstream error"),
-            )
+            .respond_with(ResponseTemplate::new(status).set_body_string("upstream error"))
             .expect(attempts)
             .mount(&server)
             .await;

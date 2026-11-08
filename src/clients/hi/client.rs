@@ -27,10 +27,8 @@ use super::{InfiniteClientError, TheaterError};
 use crate::auth::{HaloAuthClient, HaloCredentials};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
-/// Default per-origin request rate.
-const DEFAULT_REQUESTS_PER_SECOND: u32 = 9;
-/// Default number of times a 429 response is retried before giving up.
-const DEFAULT_RATE_LIMIT_RETRIES: u32 = 3;
+const DEFAULT_MAX_RATE_LIMIT_ATTEMPTS: u32 = 20;
+const MAX_FALLBACK_RETRY_DELAY: Duration = Duration::from_secs(60);
 const HALO_PC_USER_AGENT: &str = "SHIVA-2043073184/6.10021.18539.0 (release; PC)";
 const HALO_WAYPOINT_USER_AGENT: &str =
     "HaloWaypoint/2021112313511900 CFNetwork/1327.0.4 Darwin/21.2.0";
@@ -49,25 +47,88 @@ fn origin_of(url: &str) -> &str {
     }
 }
 
-/// Uses Waypoint's `Retry-After` header when present, falling back to exponential backoff that
-/// doubles from 1s on each successive `attempt` (0-indexed).
-fn retry_delay(response: &reqwest::Response, attempt: u32) -> Duration {
-    response
-        .headers()
+/// Uses a credible `Retry-After` value, otherwise doubles the fallback delay after each 429,
+/// starting at two seconds and capping at one minute. HTTP dates and delay-seconds are supported.
+fn retry_delay(headers: &reqwest::header::HeaderMap, attempt: u32) -> Duration {
+    let fallback = Duration::from_secs(1u64 << attempt.min(6)).min(MAX_FALLBACK_RETRY_DELAY);
+    let suggested = headers
         .get(reqwest::header::RETRY_AFTER)
         .and_then(|value| value.to_str().ok())
-        .and_then(|value| value.parse::<u64>().ok())
-        .map(Duration::from_secs)
-        .unwrap_or_else(|| Duration::from_secs(1u64 << attempt.min(63)))
+        .and_then(|value| {
+            value
+                .parse::<u64>()
+                .ok()
+                .map(Duration::from_secs)
+                .or_else(|| {
+                    chrono::DateTime::parse_from_rfc2822(value)
+                        .ok()
+                        .and_then(|date| {
+                            (date.timestamp() - chrono::Utc::now().timestamp())
+                                .try_into()
+                                .ok()
+                                .map(Duration::from_secs)
+                        })
+                })
+        });
+    suggested
+        .filter(|delay| *delay >= Duration::from_secs(2))
+        .unwrap_or(fallback)
+}
+
+#[cfg(test)]
+mod retry_delay_tests {
+    use super::*;
+    use reqwest::header::{HeaderMap, HeaderValue, RETRY_AFTER};
+
+    #[test]
+    fn uses_header_when_credible_and_exponential_fallback_otherwise() {
+        let mut headers = HeaderMap::new();
+        assert_eq!(retry_delay(&headers, 1), Duration::from_secs(2));
+        assert_eq!(retry_delay(&headers, 4), Duration::from_secs(16));
+        assert_eq!(retry_delay(&headers, 20), Duration::from_secs(60));
+
+        headers.insert(RETRY_AFTER, HeaderValue::from_static("1"));
+        assert_eq!(retry_delay(&headers, 4), Duration::from_secs(16));
+        headers.insert(RETRY_AFTER, HeaderValue::from_static("invalid"));
+        assert_eq!(retry_delay(&headers, 4), Duration::from_secs(16));
+        headers.insert(RETRY_AFTER, HeaderValue::from_static("3"));
+        assert_eq!(retry_delay(&headers, 4), Duration::from_secs(3));
+    }
+
+    #[test]
+    fn attempt_limit_defaults_to_twenty_and_has_a_minimum_of_one() {
+        assert_eq!(
+            HaloInfiniteClientBuilder::default().max_rate_limit_attempts,
+            20
+        );
+        assert_eq!(
+            HaloInfiniteClientBuilder::default()
+                .max_rate_limit_attempts(0)
+                .max_rate_limit_attempts,
+            1
+        );
+    }
+
+    #[test]
+    fn accepts_http_date_retry_after() {
+        let date = chrono::Utc::now() + chrono::Duration::seconds(10);
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            RETRY_AFTER,
+            HeaderValue::from_str(&date.format("%a, %d %b %Y %H:%M:%S GMT").to_string()).unwrap(),
+        );
+        let delay = retry_delay(&headers, 1);
+        assert!(delay >= Duration::from_secs(8) && delay <= Duration::from_secs(10));
+    }
 }
 
 /// Halo Infinite API client. Authentication is supplied by a [`HaloAuthClient`].
 ///
 /// Construct one with [`HaloInfiniteClient::new`] for the defaults, or
-/// [`HaloInfiniteClient::builder`] to configure the request timeout and per-origin rate limit.
+/// [`HaloInfiniteClient::builder`] to configure the request timeout, 429 attempt limit, or HTTP client.
 ///
 /// Cloning is cheap: every field is `Arc`-backed or trivially copyable, and clones share the
-/// same credential cache and rate limiter.
+/// same credential cache and per-origin 429 cooldowns.
 #[derive(Clone)]
 pub struct HaloInfiniteClient {
     auth: HaloAuthClient,
@@ -75,7 +136,7 @@ pub struct HaloInfiniteClient {
     endpoints: HaloEndpoints,
     limiter: RateLimiter,
     timeout: Duration,
-    rate_limit_retries: u32,
+    max_rate_limit_attempts: u32,
 }
 
 impl HaloInfiniteClient {
@@ -199,7 +260,7 @@ impl HaloInfiniteClient {
         credentials: &HaloCredentials,
         user_agent: &'static str,
     ) -> Result<T, InfiniteClientError> {
-        let mut attempt = 0;
+        let mut attempt = 1u32;
         loop {
             self.limiter.acquire(origin_of(url)).await;
             let mut request = self
@@ -214,17 +275,22 @@ impl HaloInfiniteClient {
                 request = request.header("343-Clearance", clearance);
             }
             let response = request.send().await?;
-            if response.status() == StatusCode::TOO_MANY_REQUESTS
-                && attempt < self.rate_limit_retries
-            {
-                let delay = retry_delay(&response, attempt);
+            if response.status() == StatusCode::TOO_MANY_REQUESTS {
+                let delay = retry_delay(response.headers(), attempt);
+                self.limiter.backoff(origin_of(url), delay).await;
+                if attempt >= self.max_rate_limit_attempts {
+                    return Err(InfiniteClientError::RateLimitExhausted {
+                        url: response.url().to_string(),
+                        attempts: attempt,
+                        body: response.text().await.unwrap_or_default(),
+                    });
+                }
                 warn!(
                     url = %response.url(),
-                    attempt = attempt + 1,
+                    attempt,
                     retry_after_seconds = delay.as_secs(),
                     "Halo Waypoint request was rate limited; backing off"
                 );
-                self.limiter.backoff(origin_of(url), delay).await;
                 attempt += 1;
                 continue;
             }
@@ -266,7 +332,7 @@ impl HaloInfiniteClient {
         url: &str,
         credentials: &HaloCredentials,
     ) -> Result<Vec<u8>, InfiniteClientError> {
-        let mut attempt = 0;
+        let mut attempt = 1u32;
         loop {
             self.limiter.acquire(origin_of(url)).await;
             let mut request = self
@@ -279,17 +345,22 @@ impl HaloInfiniteClient {
                 request = request.header("343-Clearance", clearance);
             }
             let response = request.send().await?;
-            if response.status() == StatusCode::TOO_MANY_REQUESTS
-                && attempt < self.rate_limit_retries
-            {
-                let delay = retry_delay(&response, attempt);
+            if response.status() == StatusCode::TOO_MANY_REQUESTS {
+                let delay = retry_delay(response.headers(), attempt);
+                self.limiter.backoff(origin_of(url), delay).await;
+                if attempt >= self.max_rate_limit_attempts {
+                    return Err(InfiniteClientError::RateLimitExhausted {
+                        url: response.url().to_string(),
+                        attempts: attempt,
+                        body: response.text().await.unwrap_or_default(),
+                    });
+                }
                 warn!(
                     url = %response.url(),
-                    attempt = attempt + 1,
+                    attempt,
                     retry_after_seconds = delay.as_secs(),
                     "Halo Waypoint request was rate limited; backing off"
                 );
-                self.limiter.backoff(origin_of(url), delay).await;
                 attempt += 1;
                 continue;
             }
@@ -1176,7 +1247,6 @@ impl HaloInfiniteClient {
 ///
 /// let halo = HaloInfiniteClient::builder()
 ///     .timeout(Duration::from_secs(30))
-///     .requests_per_second(3)
 ///     .build(auth);
 /// # let _ = halo;
 /// # }
@@ -1184,8 +1254,7 @@ impl HaloInfiniteClient {
 #[derive(Debug, Clone)]
 pub struct HaloInfiniteClientBuilder {
     timeout: Duration,
-    requests_per_second: u32,
-    rate_limit_retries: u32,
+    max_rate_limit_attempts: u32,
     http: Option<Client>,
 }
 
@@ -1193,8 +1262,7 @@ impl Default for HaloInfiniteClientBuilder {
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,
-            requests_per_second: DEFAULT_REQUESTS_PER_SECOND,
-            rate_limit_retries: DEFAULT_RATE_LIMIT_RETRIES,
+            max_rate_limit_attempts: DEFAULT_MAX_RATE_LIMIT_ATTEMPTS,
             http: None,
         }
     }
@@ -1207,22 +1275,11 @@ impl HaloInfiniteClientBuilder {
         self
     }
 
-    /// Sets the maximum requests per second, enforced independently per Halo Waypoint origin.
-    ///
-    /// Defaults to 9. Pass `0` to disable client-side pacing entirely. This throttles an
-    /// undocumented API, so lowering it is safer than raising it.
-    pub fn requests_per_second(mut self, requests_per_second: u32) -> Self {
-        self.requests_per_second = requests_per_second;
-        self
-    }
-
-    /// Sets how many times a rate-limited (429) response is retried before giving up.
-    ///
-    /// Defaults to 3. Each retry backs off using Waypoint's `Retry-After` header when present,
-    /// falling back to exponential delays starting at 1 second. Pass `0` to disable retries and
-    /// surface the first 429 as an error.
-    pub fn rate_limit_retries(mut self, rate_limit_retries: u32) -> Self {
-        self.rate_limit_retries = rate_limit_retries;
+    /// Sets the maximum total HTTP attempts for a request that receives 429 responses.
+    /// Defaults to 20. Values below 1 are treated as 1. Exhaustion returns
+    /// [`InfiniteClientError::RateLimitExhausted`].
+    pub fn max_rate_limit_attempts(mut self, attempts: u32) -> Self {
+        self.max_rate_limit_attempts = attempts.max(1);
         self
     }
 
@@ -1257,9 +1314,9 @@ impl HaloInfiniteClientBuilder {
             auth,
             http: self.http.unwrap_or_default(),
             endpoints,
-            limiter: RateLimiter::per_second(self.requests_per_second),
+            limiter: RateLimiter::new(),
             timeout: self.timeout,
-            rate_limit_retries: self.rate_limit_retries,
+            max_rate_limit_attempts: self.max_rate_limit_attempts,
         }
     }
 }

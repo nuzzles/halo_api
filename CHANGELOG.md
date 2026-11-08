@@ -21,6 +21,13 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Film decompression failures now return `InfiniteClientError::Theater(TheaterError::Decompression)`
   instead of `InfiniteClientError::FilmDecompression`.
+- Halo Infinite requests are sent without a fixed per-second rate limit. A 429 response pauses
+  requests to the same origin across client clones and retries up to 20 total attempts by default.
+  Exhaustion returns `InfiniteClientError::RateLimitExhausted`; the attempt limit is configurable
+  with `HaloInfiniteClientBuilder::max_rate_limit_attempts`.
+  Credible `Retry-After` delay-seconds and HTTP dates are respected; otherwise the fallback delay
+  doubles from two seconds, up to one minute.
+- Removed the `requests_per_second` and `rate_limit_retries` builder options.
 
 ## [0.4.0] - 2026-10-23
 
