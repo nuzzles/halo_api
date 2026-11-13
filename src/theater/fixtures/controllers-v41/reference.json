@@ -1,0 +1,790 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "components_blob": "6acd5fbb992f7d65ff8fdbd88a6b7b739a88a1a4",
+  "row_parameters": [
+    1,
+    2
+  ],
+  "cases": [
+    {
+      "name": "None/None/None",
+      "end": 2,
+      "complete": true,
+      "player": null
+    },
+    {
+      "name": "None/None/4294967295",
+      "end": 34,
+      "complete": true,
+      "player": null
+    },
+    {
+      "name": "0/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 0
+    },
+    {
+      "name": "0/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 0
+    },
+    {
+      "name": "0/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 0
+    },
+    {
+      "name": "0/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 0
+    },
+    {
+      "name": "1/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 1
+    },
+    {
+      "name": "1/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 1
+    },
+    {
+      "name": "1/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 1
+    },
+    {
+      "name": "1/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 1
+    },
+    {
+      "name": "2/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 2
+    },
+    {
+      "name": "2/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 2
+    },
+    {
+      "name": "2/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 2
+    },
+    {
+      "name": "2/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 2
+    },
+    {
+      "name": "3/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 3
+    },
+    {
+      "name": "3/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 3
+    },
+    {
+      "name": "3/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 3
+    },
+    {
+      "name": "3/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 3
+    },
+    {
+      "name": "4/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 4
+    },
+    {
+      "name": "4/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 4
+    },
+    {
+      "name": "4/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 4
+    },
+    {
+      "name": "4/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 4
+    },
+    {
+      "name": "5/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 5
+    },
+    {
+      "name": "5/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 5
+    },
+    {
+      "name": "5/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 5
+    },
+    {
+      "name": "5/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 5
+    },
+    {
+      "name": "6/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 6
+    },
+    {
+      "name": "6/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 6
+    },
+    {
+      "name": "6/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 6
+    },
+    {
+      "name": "6/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 6
+    },
+    {
+      "name": "7/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 7
+    },
+    {
+      "name": "7/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 7
+    },
+    {
+      "name": "7/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 7
+    },
+    {
+      "name": "7/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 7
+    },
+    {
+      "name": "8/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 8
+    },
+    {
+      "name": "8/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 8
+    },
+    {
+      "name": "8/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 8
+    },
+    {
+      "name": "8/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 8
+    },
+    {
+      "name": "9/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 9
+    },
+    {
+      "name": "9/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 9
+    },
+    {
+      "name": "9/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 9
+    },
+    {
+      "name": "9/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 9
+    },
+    {
+      "name": "10/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 10
+    },
+    {
+      "name": "10/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 10
+    },
+    {
+      "name": "10/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 10
+    },
+    {
+      "name": "10/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 10
+    },
+    {
+      "name": "11/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 11
+    },
+    {
+      "name": "11/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 11
+    },
+    {
+      "name": "11/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 11
+    },
+    {
+      "name": "11/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 11
+    },
+    {
+      "name": "12/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 12
+    },
+    {
+      "name": "12/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 12
+    },
+    {
+      "name": "12/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 12
+    },
+    {
+      "name": "12/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 12
+    },
+    {
+      "name": "13/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 13
+    },
+    {
+      "name": "13/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 13
+    },
+    {
+      "name": "13/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 13
+    },
+    {
+      "name": "13/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 13
+    },
+    {
+      "name": "14/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 14
+    },
+    {
+      "name": "14/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 14
+    },
+    {
+      "name": "14/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 14
+    },
+    {
+      "name": "14/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 14
+    },
+    {
+      "name": "15/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 15
+    },
+    {
+      "name": "15/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 15
+    },
+    {
+      "name": "15/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 15
+    },
+    {
+      "name": "15/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 15
+    },
+    {
+      "name": "16/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 16
+    },
+    {
+      "name": "16/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 16
+    },
+    {
+      "name": "16/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 16
+    },
+    {
+      "name": "16/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 16
+    },
+    {
+      "name": "17/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 17
+    },
+    {
+      "name": "17/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 17
+    },
+    {
+      "name": "17/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 17
+    },
+    {
+      "name": "17/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 17
+    },
+    {
+      "name": "18/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 18
+    },
+    {
+      "name": "18/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 18
+    },
+    {
+      "name": "18/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 18
+    },
+    {
+      "name": "18/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 18
+    },
+    {
+      "name": "19/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 19
+    },
+    {
+      "name": "19/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 19
+    },
+    {
+      "name": "19/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 19
+    },
+    {
+      "name": "19/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 19
+    },
+    {
+      "name": "20/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 20
+    },
+    {
+      "name": "20/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 20
+    },
+    {
+      "name": "20/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 20
+    },
+    {
+      "name": "20/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 20
+    },
+    {
+      "name": "21/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 21
+    },
+    {
+      "name": "21/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 21
+    },
+    {
+      "name": "21/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 21
+    },
+    {
+      "name": "21/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 21
+    },
+    {
+      "name": "22/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 22
+    },
+    {
+      "name": "22/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 22
+    },
+    {
+      "name": "22/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 22
+    },
+    {
+      "name": "22/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 22
+    },
+    {
+      "name": "23/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 23
+    },
+    {
+      "name": "23/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 23
+    },
+    {
+      "name": "23/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 23
+    },
+    {
+      "name": "23/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 23
+    },
+    {
+      "name": "24/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 24
+    },
+    {
+      "name": "24/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 24
+    },
+    {
+      "name": "24/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 24
+    },
+    {
+      "name": "24/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 24
+    },
+    {
+      "name": "25/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 25
+    },
+    {
+      "name": "25/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 25
+    },
+    {
+      "name": "25/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 25
+    },
+    {
+      "name": "25/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 25
+    },
+    {
+      "name": "26/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 26
+    },
+    {
+      "name": "26/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 26
+    },
+    {
+      "name": "26/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 26
+    },
+    {
+      "name": "26/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 26
+    },
+    {
+      "name": "27/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 27
+    },
+    {
+      "name": "27/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 27
+    },
+    {
+      "name": "27/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 27
+    },
+    {
+      "name": "27/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 27
+    },
+    {
+      "name": "28/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 28
+    },
+    {
+      "name": "28/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 28
+    },
+    {
+      "name": "28/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 28
+    },
+    {
+      "name": "28/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 28
+    },
+    {
+      "name": "29/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 29
+    },
+    {
+      "name": "29/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 29
+    },
+    {
+      "name": "29/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 29
+    },
+    {
+      "name": "29/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 29
+    },
+    {
+      "name": "30/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 30
+    },
+    {
+      "name": "30/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 30
+    },
+    {
+      "name": "30/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 30
+    },
+    {
+      "name": "30/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 30
+    },
+    {
+      "name": "31/None/None",
+      "end": 8,
+      "complete": true,
+      "player": 31
+    },
+    {
+      "name": "31/None/4294967295",
+      "end": 40,
+      "complete": true,
+      "player": 31
+    },
+    {
+      "name": "31/63/None",
+      "end": 14,
+      "complete": true,
+      "player": 31
+    },
+    {
+      "name": "31/63/4294967295",
+      "end": 46,
+      "complete": true,
+      "player": 31
+    }
+  ]
+}

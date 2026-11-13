@@ -4,9 +4,10 @@ The parser targets v41 Theater data from
 [JGtm/LevelUp](https://github.com/JGtm/LevelUp/tree/feat/v75), pinned to
 `43a01721e8a02c87c955e175936f0ccf8dd97a81`, with selected reader fixes from
 `d61443ef59268ad734355db8e9974f68db5ca6d0`. It does not claim support for every
-newer recording version or LevelUp's derived analysis/publication APIs.
+newer recording version or LevelUp's derived analysis/publication APIs. The
+control kinds 1/2 and secondary-block extension additionally uses libfilmshell
+`18067987ebc3628ad499c819c6aee814692df43b`, as documented in the latest checkpoint.
 
-Attribution is retained in [CREDIT.md](CREDIT.md).
 [fixtures.json](fixtures.json) versions the retained compressed reference outputs
 with byte lengths and SHA-256 hashes. Names containing `d61443e` identify that
 selected reference; other v41 fixtures originate from the baseline parity work.
@@ -226,3 +227,3990 @@ Validation used the existing expectations without regenerating any oracle:
 
 This evidence supports preservation of existing decoding behavior and boundaries.
 It does not establish new layouts, physical-action semantics, or browser replay.
+
+## libfilmshell control-reader checkpoint (2026-11-09)
+
+The first port adds control kinds 1/2 and the secondary unit block while retaining
+`film` / `parser/v41` / `runtime` ownership. All reads use bounded source fields;
+kind 3 stops after the kind prefix, and missing position context remains explicit.
+`ControlEntry.payload` separates input, commands and the unresolved kind-2 value;
+`ControlEntry::index()` returns `None` for kind 2. This changes the Rust and serde
+shape of `ControlEntry`. No full-format or encoder completion is claimed.
+
+The 17 [control cases](../fixtures/controls-v41/README.md) were authored as wire
+layouts and checked against read/skip traces from the pinned libfilmshell reader.
+The exporter instruments only that upstream reader in a disposable checkout;
+it does not generate expectations from halo_api. Eight focused tests pass:
+primitive boundaries and raw fields, truncation at every bit, raw float/delta
+encodings, kind-3 refusal, missing position context, caller-supplied profile
+widths, integration through Film source coverage and runtime player filters,
+and rejection of an entity body shaped like a valid control list.
+The all-bit truncation test also checks the exact count of complete payloads;
+partial fields remain in the enclosing view without becoming complete entries.
+Canonical traversal now requires the recorded entity terminator before reading
+controls: an unbound/rejected entity header leaves its body unparsed. A synthetic
+negative case appends a valid mixed-kind control fixture after such a header;
+Film retains the unread bytes, and runtime publishes no control records.
+
+The historical `captured_v41_corpus` comparison **fails on the starting commit
+as well as this working tree**. A clean archive of `f2ff6fd` reproduces
+`aim/01-pitch-up/chunk-005-type-2.bin`, payload offset `495359`: the reader reports
+`(3 views, bit 166)` versus the retained oracle's `(3 views, bit 19)`. This is
+not waived or replaced with a new expected endpoint. This checkpoint does not
+claim all 403,465 historical reader comparisons pass. The earlier historical
+checkpoints above describe their respective implementations.
+
+An earlier comparison now legitimately differs because the old oracle refuses
+kind 1. The corpus harness compares its control suffix using a test-only copy
+of the starting commit's control traversal under `parser/v41/reference/controls`.
+That helper preserves the old kind-1/2/secondary stops and kind-3 continuation;
+it is never called by `Film::parse`. New control layouts instead use the separate
+libfilmshell trace. This preserves the old golden expectations and exposes the
+same pre-existing mismatch as the clean starting commit.
+
+`captured_v41_source_coverage` runs the production source checks across every
+recording separately from historical endpoint comparisons. It checks original
+chunk retention, packet coverage, frame/keyframe extents, source-backed fields,
+control payload/range bounds and summary source/timestamp consistency. Passing
+these checks establishes source fidelity under the current traversal, not
+complete structural decoding, gameplay correctness or real-film occurrence of
+every new control branch. The existing summary semantics test remains separate.
+
+Reproduce the independent checks with the separately retained corpus:
+
+```sh
+cargo test --offline --lib frame::controls::tests
+cargo test --offline --lib captured_v41_source_coverage -- --ignored --nocapture
+cargo test --offline --all-features captured_v41_summary_semantics -- --ignored --nocapture
+cargo test --offline --lib captured_v41_corpus -- --ignored --nocapture
+```
+
+The last command retains the failure above. All 18 fixture lengths and SHA-256
+hashes verify; no original LevelUp golden file was regenerated or replaced.
+
+Final ordinary verification: `cargo test --offline --all-features --
+--test-threads=1` passes 193 tests and 10 doctests, with three corpus checks
+explicitly ignored for separate execution. The earlier concurrent full-suite
+run hit the existing backoff timing assertion; the serial rerun passes. The
+summary corpus passes all 3,667 pinned events across five films and independent
+service counts. All-feature/all-target Clippy with warnings denied, strict
+Rustdoc, WASM library checking, formatting and diff whitespace checks pass.
+
+The final source-coverage run passes all 32 films and 403,465 frame packets,
+including the new entity-terminator requirement, in 194.04 seconds (debug test
+execution, excluding compilation). It also retains the 3,667 summary source and
+timestamp checks. Diagnostic counts under the current partial traversal were
+164,334 kind-0, 5,656 kind-1 and 4,652 kind-2 complete payloads, with 4,170 secondary
+blocks. These are emitted-model counts, not independently proven real-film
+occurrences or a field-for-field coverage score. Remaining entity/component
+boundary uncertainty must be resolved before making that stronger claim.
+
+## libfilmshell component-reader checkpoint
+
+Added the 57 missing aliases from the complete 286-alias dispatch inventory,
+including names outside the earlier `*-component` suffix search. Shared navpoint
+filters now preserve legacy value/metadata interleaving and partial-read prefixes.
+The enclosing packet supplies snapshot mode; newly added low-frequency/navpoint
+points retain raw snapshot words and explicit delta quantization separately.
+Snapshot vehicle type state remains a typed missing-runtime-context stop.
+
+The new suite compares 261 authored cases across 60 aliases to independent
+primitive traces from unchanged libfilmshell `1806798`. Five tests cover exact
+boundaries/raw fields, each-bit truncation, legacy ordering, registry versions
+with an independent next component, and keyframe mode/missing-context handling.
+The reference exporter also verifies its inputs' authored status/endpoints.
+The full ordinary suite passes 198 tests and 10 doctests (three corpus tests are
+run separately). Strict Clippy, Rustdoc, WASM, formatting, whitespace and 20
+fixture length/hash checks pass. The original LevelUp golden bytes are unchanged.
+
+This evidence covers these layouts and selected branches. It is not a complete
+shared-reader, snapshot, creation, packet or runtime capability audit. Remaining
+requirements and concrete next readers are in
+[LIBFILMSHELL_ROBUSTNESS.md](LIBFILMSHELL_ROBUSTNESS.md).
+
+The separately run source corpus passes all 32 films / 403,465 frame packets
+and 3,667 summary source/timestamp checks after these component changes. The
+summary semantics corpus also passes 3,667 pinned events across five films plus
+independent service counts. Source fidelity does not prove the remaining opaque
+or inferred layouts. The debug source run took 380.27 seconds; a short CPU sample
+identified the existing unbound-archetype search as a hotspot. Its evidence and
+follow-up are recorded in the robustness ledger rather than hidden by coverage
+counts. Full-goal completion remains unproven.
+
+## Shared snapshot, handle and creation checkpoint
+
+Component comparison now covers 304 authored cases across 68 aliases, extending
+the earlier additions with dynamic/object snapshot positions, present effect,
+crew/respawn/cutscene fields and delta vehicle physics. Snapshot physics/state
+still stop before the body when vehicle construction context is missing; tests
+exercise both zero-filled and one-filled payloads without guessing that flag.
+
+A separate 176-case creation fixture traces the original pinned libfilmshell
+`creation::read`: 96 projectile cases, 32 vehicle cases and 48 common-count
+refusals for other object types. Projectile keyframes now read raw target words
+and positions, while NEW records retain handles/tick positions. Vehicle snapshot
+media-frame positions use raw words. Counts 5–7 stop at the common count field.
+Creation/default status and the following component are checked through actual
+NEW and keyframe entry points, alongside every-bit truncation and raw-field
+serialization. Snapshot float fixture words use little-endian stream order;
+explicit endian assertions verify their intended NaN payload and negative zero.
+Correcting the authored byte order did not change any upstream primitive trace.
+
+Both CI configurations (`--all-features` and `--no-default-features`, serial)
+pass 201 tests and 10 doctests, with three corpus checks separately invoked.
+All-feature/all-target Clippy with warnings denied, strict Rustdoc, all-feature
+WASM library checking, formatting and whitespace checks pass. Fixture manifest
+now contains 22 entries; original LevelUp golden files are unchanged. Independent
+summary semantics/service counts pass all 3,667 reference events across five
+films. This is selected branch evidence, not full format or runtime conformance.
+
+The historical boundary oracle still fails at the previously independently
+reproduced starting-commit mismatch:
+`aim/01-pitch-up/chunk-005-type-2.bin:495359`, actual `(3,166)` versus `(3,19)`.
+No expected boundary was regenerated or waived. The full source-preservation
+corpus passes all 32 films / 403,465 frame packets, including its 3,667 summary
+source/timestamp checks, in 240.79 seconds of debug execution. Corpus execution
+used the tested all-feature binary with the same production parser; subsequent
+endian corrections changed only synthetic fixture bytes and test assertions.
+These source-preservation results do not validate speculative schema choices.
+Both final fixture suites and CI feature configurations were rerun after that
+fixture correction, and all 22 manifest lengths/hashes verify.
+
+## Canonical recovery separation and transport limits
+
+Unbound DELTA archetype search now runs only when contextual replay explicitly
+supplies runtime's recovery hook. Canonical configuration leaves it absent and
+stops at the rejected header, without guessing masks, components or controls.
+Four runtime recovery tests retain the earlier negative captures and add unique
+candidate versus unchanged canonical traversal, ambiguity, generation/soft binding
+and every-bit truncation checks. Recovery diagnostics expose both source extents
+and full IDs; they are not stored in the canonical Film.
+
+The original historical failure at `aim/01-pitch-up:495359` is resolved without
+editing its oracle. The comparison now fails at
+`appearance/01-cadet-blue/chunk-001-type-2.bin:567583`: `(3,4603)` versus `(1,382)`.
+This is the old stop at `device-position-group-component`; current and pinned
+upstream source agree on its 32-bit word and optional eight-bit index. The captured
+presence bit is zero, giving a 33-bit body. This locates the divergence, but does
+not waive the oracle or prove all subsequent records. Investigation remains open.
+
+Transport adds valid RFC 1950 window admission and a 256 MiB output ceiling.
+`ZlibLimitExceeded { limit }` retains the bounded prefix and distinguishes resource
+limits from malformed/checksum failures. Original compressed source survives.
+Five tests cover all windows, stored/fixed/dynamic blocks, empty/exact limits,
+8 KiB decoder boundaries, truncation, missing dictionaries and source/status serde.
+Independent Python Huffman fixtures are also checked against unchanged upstream
+`inflate::zlib` for 16 limit outcomes. All 25 fixture lengths/hashes verify.
+
+Both CI feature configurations pass 208 tests and 10 doctests each; three corpus
+tests are invoked separately. Strict Clippy, Rustdoc, all-feature WASM, formatting
+and whitespace checks pass. Summary semantics passes 3,667 pinned events across
+five films plus independent service counts. The recovery-only source corpus
+passed all 32 films / 403,465 frame packets in 61.60 seconds debug; the final
+post-transport source run is recorded below. Performance observations are not a
+controlled benchmark, and source retention does not prove full format coverage.
+
+Final post-transport source preservation passes all 32 films / 403,465 frame
+packets and summary source/timestamp checks in 58.98 seconds debug. No
+production edits followed this run. The full objective remains active.
+
+
+## Shared point grammar and creation completion audit
+
+Creation traces now cover 436 authored cases across every one of the 23 nonempty
+reader types implemented by pinned upstream: 96 projectile, 32 vehicle, 48
+invalid-common-count, 72 biped, 64 property-manager, 52 other manager and 72
+item-family cases. Each trace comes from the original `creation::read` or
+`creation::manager_end`, with read/skip instrumentation only. New source fixes
+include biped post-reference position/player fields and manager tag/value
+interleaving. The remaining manager/item readers agreed without production edits.
+Three creation tests check exact fields, all-bit truncation, and following
+component boundaries through NEW and keyframe entry points.
+
+Component traces now cover 464 authored cases / 75 aliases. Shared masked property
+tags 12–15 now retain 32-bit values. Desired-respawn, crew-order, flock and
+simulation positions follow snapshot/raw versus delta/box point grammar.
+Simulation bodies are enabled in canonical configuration. A sixth component test
+checks missing-context behavior: default-box and snapshot points decode, while
+indexed points stop after their recorded region gate. All source float words,
+including negative zero and NaN payloads, remain exact.
+
+Source preservation passes all 32 films / 403,465 frame packets in 61.81 seconds
+debug, including summary source/timestamp checks. Summary semantics passes 3,667
+pinned events across five films plus independent service totals. Subsequent edits
+only extended synthetic creation fixtures, tests and documentation; production
+parser code is identical to the corpus-tested code.
+
+The unchanged historical oracle still fails at
+`appearance/01-cadet-blue/chunk-001-type-2.bin:567583`, actual `(3,4603)` versus
+expected `(1,382)`. Its baseline retains the explicit historical simulation
+policy; expected boundaries are not regenerated or waived. These results do not
+establish full semantic traversal or a complete canonical parser.
+
+A separate sequential packet audit covers 483 non-registry chunks across the 32
+films. All 483 type-7 packets are empty and end their chunks; there are no other
+empty packets or packets after type 7. The retained script and aggregate results
+in `research/libfilmshell/packet_inventory.py` and `packet-inventory.json` make the
+measurement reproducible. This corpus does not resolve the permissive-upstream
+versus terminal-local framing difference for unseen inputs.
+
+Final verification passes both feature configurations with 209 ordinary tests
+and 10 doctests each. Strict Clippy (all targets/features), Rustdoc, WASM library
+checking, formatting, whitespace and all 25 fixture lengths/hashes pass. The
+original LevelUp fixtures remain unchanged. The historical comparison failure
+above remains open; neither trace counts nor source preservation establish full
+canonical format completion.
+
+
+## Conditional events and bounded point/string fields
+
+The `events-v41` fixture exports the unchanged pinned upstream event walker and
+all 123 reference-kind rows. Its 243 independent lists cover 14 newly admitted
+body codes, five corrected conditional layouts, bounded NUL-terminated strings,
+selected game-event values/parameters and full-precision points. Four tests
+verify source/serde boundaries, each-bit truncation, unavailable/invalid context,
+and following entity/control views through Film and contextual frame decoding.
+Default-box points retain their fixed 22-bit codes without map interpretation;
+indexed boxes require a matching explicit descriptor. The captured Oddball test
+now retains the independently known region gate before refusing missing context;
+its contextual endpoint and captured bytes stay unchanged.
+
+Both CI feature configurations pass 213 tests and 10 doctests each. Strict
+Clippy passes for all targets/features. The source-preservation corpus passes
+all 32 films / 403,465 frame packets and summary source/timestamp checks in
+68.51 seconds debug. Summary semantics passes 3,667 pinned events across five
+films plus independent service totals. The historical boundary comparison still
+fails at `appearance/01-cadet-blue/chunk-001-type-2.bin:567583`, actual `(3,4603)`
+versus `(1,382)`; no historical fixture or expected boundary was regenerated.
+
+All 27 manifest lengths/hashes and event-generator reproducibility verify.
+Dispatch coverage is not a complete event audit: event 102/action variants,
+fire/projectile branches, region context and versions remain open, alongside
+the wider canonical-format requirements in the robustness ledger.
+
+Final event checkpoint: strict Rustdoc, all-feature WASM library checking,
+formatting and whitespace checks also pass. Production code did not change after
+the corpus run. The full goal remains active and incomplete.
+
+
+## Shared biped and NetworkedActionRequest action grammar
+
+The shared action author produces 113 bodies for variants 0–25, all four
+variant-0 handle generations, the unsupported variant-18 gate and unknown
+variants 26–31. Original upstream biped-component and event-102 entry points are
+traced separately. Component fixtures now total 696 cases / 76 aliases; event
+fixtures total 356. The component cases include snapshot/delta masks, maximum
+mixed lists and refusal after a complete preceding action. Every-bit truncation,
+source-field/serde, next-component and Film/contextual-frame tests cover the new
+cases through the existing differential suites.
+
+Unknown action bodies now stop before sub-states, the list tail or the next
+component/event can be interpreted. Event 102 uses the same grammar as the
+component reader. On upstream's nested variant-18 refusal, `reader_end` remains
+one bit before the furthest traced `end`; both are retained and the canonical
+source extent includes the successfully read flag. The exporters change no
+branches or return values. Original LevelUp oracle files stay unchanged.
+
+Final action checkpoint: both feature configurations pass 213 ordinary tests and
+10 doctests each. Strict Clippy/Rustdoc, all-feature WASM, formatting/whitespace,
+all 27 fixture hashes and both extended generators' reproducibility pass. Source
+preservation passes all 32 films / 403,465 packets in 62.90 seconds debug;
+summary semantics passes 3,667 pinned events across five films plus independent
+service counts. No production code changed after that corpus run. The historical
+oracle remains unchanged and still fails at appearance/01-cadet-blue:567583,
+actual `(3,4603)` versus `(1,382)`. Full canonical parity remains unproven.
+
+
+## Reduced-precision projectile default boxes
+
+The independent event suite now has 388 cases, including 32 projectile lists
+with precision-15 and precision-12 default/indexed points. Five tests cover
+primitive/source/serde boundaries, every-bit truncation, context refusal,
+following entity/control views and runtime projection. Default-box events decode
+without external bounds but cannot become map-region coordinates. The existing
+captured Argyle contextual endpoint remains 535; its no-context prefix now ends
+after the known gate at bit 31. The previous negative test that flipped that gate
+was replaced by independent valid default-box coverage; the unmapped indexed
+region refusal remains checked. Original captured and LevelUp fixture data stay
+unchanged. These traces do not settle the upstream/local 8/19-bit detonation-tail
+disagreement or all fire/region/version requirements.
+
+Final projectile-point verification: both feature configurations pass 214 tests
+and 10 doctests each. Strict Clippy/Rustdoc, all-feature WASM, formatting/whitespace,
+all 27 fixture hashes and event-generator reproducibility pass. Source retention
+passes all 32 films / 403,465 frame packets in 67.49 seconds debug, with summary
+source checks; summary semantics/service totals pass all 3,667 reference events.
+The historical comparison remains at appearance/01-cadet-blue:567583, actual
+`(3,4603)` versus `(1,382)`. No production edits followed the corpus run, and no
+old oracle was regenerated. Full-goal completion remains unproven; fire branch
+traces, the detonation-tail discrepancy, map/build/context, shared components,
+header/Bond and remaining runtime/whole-format requirements stay open.
+
+
+## Fixed bootstrap header and fire admission
+
+The event fixture suite contains 803 independent lists, including 415 fire
+branches traced through the original pinned upstream walker. The fixture prefix
+for fire explicitly supplies configuration 1 before the list. Six tests check
+primitive boundaries, field values, serde, every-bit truncation, version/config
+refusal, map context and entity/control continuation.
+
+Three bootstrap tests check separately authored raw field goldens, truncation at
+every bit, known-layout admission and Film integration under fire versions
+0/1/2/3/4/u32::MAX and complete/truncated headers. The prefix is selected at the
+verified registry endpoint, not through the runtime build-string scan. The
+32-film audit agrees on the fixed 123-word table and fire version 3 in every
+recording; this establishes this supported layout only.
+
+Both feature configurations pass 218 tests and 10 doctests. Source preservation
+passes all 32 films / 403,465 packets in 64.59 seconds debug; the summary check
+passes 3,667 pinned events and independent service totals. The existing historical
+oracle remains unchanged and still fails at appearance/01-cadet-blue:567583,
+actual `(3,4603)` versus `(1,382)`. It is not waived by the preservation result.
+
+Logs: `/private/tmp/halo-bootstrap-{full-tests,no-default-tests,source-corpus,
+summary-corpus,historical-corpus,clippy,rustdoc,wasm}.log`. Fixture provenance and
+limits are in `fixtures/bootstrap-v41/README.md` and `fixtures/events-v41/README.md`.
+
+Strict Clippy with denied warnings, strict Rustdoc, the all-feature WASM library
+check, formatting and whitespace all pass. Both field generators reproduce their
+retained bytes; a fresh independent event export reproduces reference.json; all
+29 manifest lengths/hashes verify. Original LevelUp oracle files were unchanged.
+The last code edit after the full-feature run extended bootstrap test negatives
+only; the no-default-feature suite and strict Clippy include those negatives.
+No production source changed after the corpus run began.
+
+
+## Shifted identification and canonical runtime identity
+
+Four independently authored identification fixtures preserve both flag values,
+zero/nonzero timestamps/GUIDs and arbitrary fixed-buffer/word/block content.
+The original pinned libfilmshell header reader independently confirms the three
+selective timestamp/GUID read locations. Other field widths are attributed to
+the pinned game-writer map in LevelUp film_identity.go. Two parser tests verify
+raw fields, ranges, serde, the following body bits and bounded truncation; two
+runtime tests compare canonical/legacy projections and exercise misleading build
+strings and canonical truncation without search fallback.
+
+Both feature configurations pass 222 tests and 10 doctests. Strict Clippy,
+Rustdoc, WASM, formatting and whitespace pass. The new generator and upstream
+export reproduce exactly, and all 31 fixture hashes verify. Source preservation
+passes all 32 films / 403,465 packets in 66.82 seconds debug. Summary semantics
+passes 3,667 pinned events across five films plus independent service totals.
+The historical oracle remains unchanged and fails at appearance/01-cadet-blue:
+567583, actual `(3,4603)` versus `(1,382)`.
+
+Logs: `/private/tmp/halo-identification-{full-tests,no-default-tests,source-corpus,
+summary-corpus,historical-corpus,clippy,rustdoc,wasm}.log`. No production source
+changed after those checks began. Full canonical format completion is unproven;
+identification establishes a body start, not its game-options/Bond grammar.
+
+## Bond v2, sequential game options and player boundary
+
+Both feature configurations pass 228 ordinary tests and 10 doctests. The first
+all-feature run passed all Theater tests but failed the existing rate-limit
+wall-clock backoff assertion; a full serial retry passed. Strict Clippy, Rustdoc,
+WASM, formatting and whitespace pass. Both new fixture generators and the
+original upstream Bond exporter reproduce exactly; all 34 manifest entries
+verify, with the preceding 31 unchanged.
+
+The independent game-options/legacy-player-search comparison passes all 32
+films and identical projected slots (14.94 seconds debug). Source preservation
+passes all 32 films / 403,465 packets in 71.28 seconds debug. Summary semantics
+passes 3,667 pinned events across five films plus independent service counts.
+The unchanged historical oracle still fails at appearance/01-cadet-blue:567583,
+actual `(3,4603)` versus `(1,382)`; this remains an open format investigation.
+
+Logs: `/private/tmp/halo-bond-{full-tests,full-tests-retry,no-default-tests,
+source-corpus,summary-corpus,historical-corpus,game-options-corpus,clippy,rustdoc,
+wasm}.log`. See `fixtures/bond-v2/README.md` for protocol/writer provenance,
+independent traces and negative/truncation coverage. Generic Bond syntax and the
+player start do not establish complete canonical film or player-record coverage.
+
+## Script v1 recorded simulation admission
+
+Both feature configurations pass 231 ordinary tests and 10 doctests. Strict
+Clippy/Rustdoc, WASM, formatting/whitespace and all 36 fixture hashes pass. The
+script generator and original prefix-present upstream trace export reproduce
+exactly; previous fixtures remain unchanged. The three new tests exercise
+32 lists, both writer forms, all 0–7 simulation encodings, supported/unsupported
+versions, complete/truncated bootstrap context, every-bit body truncation and
+following event/entity/control boundaries.
+
+Source preservation passes 32 films / 403,465 frame packets (59.80 seconds
+debug); summary semantics passes 3,667 pinned events across five films plus
+service counts. The original historical oracle remains at
+appearance/01-cadet-blue:567583, actual `(3,4603)` versus `(1,382)`.
+The independent raw-offset inventory at `/private/tmp/halo-script-context-inventory.json`
+confirms simulation 3 / script version 1 in all 32 captured bootstraps. The
+simulation-2 branch has writer-analysis and synthetic evidence only.
+
+Logs: `/private/tmp/halo-script-{tests,full-tests,no-default-tests,source-corpus,
+summary-corpus,historical-corpus,clippy,rustdoc,wasm}.log`. No production edits
+followed these checks. The full canonical-format objective remains open.
+
+## Variant-dependent event boundaries and replay provenance
+
+Both feature configurations pass 234 ordinary tests and 10 doctests, with six
+separately retained-corpus tests ignored by default. The first regression run
+identified an old event-116 expectation that assumed absent variant context;
+the test now checks the correct earlier refusal and supplies explicit engine
+context when exercising the independently traced supported branch. Original
+fixture data were unchanged.
+
+The 77 new schema envelopes include 66 values independently exported through the
+original LevelUp variant walker, with its source Git blob verified. Generator
+and exporter reproduce; all 38 fixture hashes verify, with the previous 36
+unchanged. All 32 captured bootstraps project engine 2, killcam false and
+play-of-the-game true. The independent original-reader comparisons cover valid
+schema values; ambiguity/inheritance negatives are separate local safeguards.
+
+Source preservation passes 32 films / 403,465 frame packets (58.05 seconds debug).
+Summary semantics passes 3,667 pinned events across five films plus service
+counts. Real replay reports 96 source-linked assumed event lists on Octagon and
+246 on Recharge; neither changes the canonical reads (43.49 seconds debug).
+The original historical oracle still fails at appearance/01-cadet-blue:567583,
+actual `(3,4603)` versus `(1,382)`.
+
+Logs: `/private/tmp/halo-variant-{tests,full-tests,no-default-tests,context-corpus,
+source-corpus,summary-corpus,historical-corpus,replay-corpus,clippy,rustdoc,wasm}.log`.
+The final code-only cleanup moves the same replay configuration values into its
+initializer to satisfy Clippy; it does not change the tested settings or behavior.
+Full canonical parity and the remaining capability audit remain unproven.
+
+Final variant checkpoint static checks: strict Clippy/Rustdoc, all-feature WASM,
+formatting/whitespace and all 38 fixture hashes pass. Both ordinary feature suites
+and the source/summary/replay evidence above exercise the same event policies.
+
+## Build-bound level catalogue and region positions
+
+Both feature configurations pass 242 ordinary tests and 10 doctests; seven
+retained-corpus tests are ignored by default. Strict Clippy/Rustdoc, all-feature
+WASM, formatting and whitespace checks pass. The only Clippy correction was a
+test's range loop, with unchanged assertions. Both fixture generators reproduce,
+and all 41 manifest hashes verify (the previous 38 unchanged).
+
+Independent libfilmshell traces agree on 324 point bodies. Five additional
+mp_02 region-4 bodies use the original exported catalogue because the upstream
+readers' four-slot table cannot represent them. Every-bit truncation, selected
+region codes, source fields, actual DELTA/following-component boundaries,
+detonation/following-zoom boundaries, unknown-region Unsupported stops and
+runtime player/object conversion pass. Default-box positions retain their fixed
+wire widths and are excluded from map-region coordinate conversion.
+
+The retained inventory confirms all 32 films have matching engine BuildId 269225,
+branch HI_1_13_0 and a known level tag. Their product-version string
+6.10026.19225.0 is a different namespace from the catalogue's build label. Summary
+semantics still passes 3,667 events / five films plus independent service counts.
+Replay still reports 96 assumed Octagon event lists and 246 Recharge lists, with
+canonical assumption-free reads unchanged (61.11 seconds debug, concurrent with
+other verification). The historical oracle remains unchanged and still fails at
+appearance/01-cadet-blue:567583, `(3,4603)` versus `(1,382)`.
+
+Logs: `/private/tmp/halo-level-{full-tests,no-default-tests,binding-tests,
+context-corpus,source-corpus,summary-corpus,historical-corpus,replay-corpus,
+clippy,rustdoc,wasm}.log`, with focused region results in
+`/private/tmp/halo-region-tests.log`. Catalogue/point provenance, exact scope and
+reproduction commands are in `fixtures/levels-v41/README.md`. The full
+canonical-format objective remains open.
+
+Final source-retention run passes all 32 films / 403,465 packets and 3,667 summary
+source/timestamp checks, in 221.39 seconds debug. It traverses 564,398 complete
+kind-0 controls, 163 kind-1, 198 kind-2, and 92 secondary blocks. The hour-long
+raid dominates this expanded source walk; one sampled process reading showed
+about 5.7 GiB resident memory. That includes the corpus harness and fully retained
+Film, not an isolated parser benchmark. The one-second sample caught source-
+coverage partitioning after parsing; it is too small to establish a bottleneck.
+The preceding 58.05-second checkpoint had less canonical layout context, and
+this run overlapped feature/static/replay checks, so the timings are not a
+controlled comparison. Keep larger-film CPU/memory costs visible in further work.
+No production source changed after the corpus/static/feature checks began.
+
+
+## Attached positions, frequency routing and engine-1 teleport
+
+Both feature configurations pass 246 ordinary tests and 10 doctests, with seven
+retained-corpus tests ignored by default. Strict Clippy/Rustdoc, all-feature WASM,
+formatting/whitespace and all 45 fixture hashes pass. Generators and the original
+Rust and Go trace exports reproduce exactly. The component suite has 1,157 cases
+across 153 aliases, preserving all original 696 case/trace objects. Separate
+source-specific fixtures validate 32 disputed orientation layouts and the
+orientation subgrammar of 48 composed engine-1 teleport event lists. No captured
+engine-1 film is present; these are source-analysis and synthetic checks.
+
+Summary semantics passes 3,667 events across five films plus service counts.
+Source retention passes 32 films / 403,465 packets (209.91 seconds debug), with
+complete control counts [565950, 147, 179] and 87 secondary blocks. Replay
+provenance remains 96 assumed Octagon event lists and 246 Recharge lists, while
+canonical reads remain assumption-free (56.11 seconds debug). The historical
+oracle still fails unchanged at appearance/01-cadet-blue/chunk-001-type-2.bin:
+567583, actual (3, 4603), expected (1, 382). It was not regenerated or waived.
+
+Logs: /private/tmp/halo-shared-{all-features,no-default-features,clippy,rustdoc,
+wasm,full-focused,tests,source-corpus,summary-corpus,historical-corpus,
+replay-corpus}.log. No production code changed after these checks began.
+This closes the shared-reader checkpoint, not the full canonical-format goal.
+
+
+## Equipment tracked-stack count and handle boundaries
+
+The old inclusive count fails the new empty-stack DELTA regression by consuming
+one bit from the next component (end 87 instead of 86). With exactly n entries,
+all nine component tests pass across 1,523 original-reader cases / 157 aliases,
+including 366 new equipment cases. All prior 1,157 case and trace objects remain
+unchanged; the generator reproduces exactly, and the unchanged libfilmshell
+exporter independently validates all new boundaries. All 45 manifest hashes
+verify, with only the two extended component fixture files changing.
+
+Both feature configurations pass 246 ordinary tests and 10 doctests, with seven
+retained-corpus checks ignored by default. The first sandboxed full-suite attempt
+could not bind the HTTP mock servers' loopback ports; the rerun with local socket
+access passes. Strict Clippy/Rustdoc, all-feature WASM, formatting and whitespace
+checks pass. Production changes are limited to the equipment stack loop; no
+production edits followed verification.
+
+Logs: /private/tmp/halo-equipment-{before,focused,all-features,
+all-features-sandbox,no-default-features,clippy,rustdoc,wasm}.log. The broader
+canonical-format objective remains open.
+
+
+The equipment source-retention run passes all 32 films / 403,465 packets in
+201.18 seconds debug. Complete control counts are now [565396, 205, 210], with
+118 secondary blocks (previously [565950, 147, 179] and 87). Correcting an entity
+component boundary changes downstream traversal; these counts are diagnostics,
+not semantic correctness scores. Source ranges and complete fields remain bounded.
+Summary semantics passes all 3,667 pinned events across five films plus service
+counts (1.83 seconds). The unchanged historical oracle still fails at
+appearance/01-cadet-blue/chunk-001-type-2.bin:567583, actual (3, 4603), expected
+(1, 382); that independent discrepancy was neither regenerated nor waived.
+The corresponding source-corpus, summary-corpus and historical-corpus logs use
+the same /private/tmp/halo-equipment- prefix.
+
+
+Replay provenance also passes: 96 assumed Octagon event lists and 246 Recharge
+lists, with canonical reads unchanged (52.71 seconds debug), logged in
+/private/tmp/halo-equipment-replay-corpus.log. All equipment checkpoint checks
+are complete; the historical oracle remains the known unresolved failure.
+
+
+## Canonical actor positions and unit/weapon branch audit
+
+Both feature configurations pass 246 ordinary tests and 10 doctests, with seven
+retained-corpus checks ignored by default. Strict Clippy/Rustdoc, all-feature
+WASM, formatting/whitespace and all 45 hashes pass. The generator reproduces
+exactly. The original libfilmshell exporter traces 930 additional bodies across
+23 aliases; all prior 1,523 authored cases/trace objects remain unchanged. The
+suite now covers 2,453 cases / 180 aliases and separately retains the 32
+source-specific orientation cases. New actor-state traces use row version 4;
+this does not assert upstream agreement on the local lower-row threshold table.
+
+Two pre-fix tests fail the intended new continuation cases: actor-state default
+position, end 260 instead of 277, and snapshot actor-action position, end 269
+instead of 323. Corrected point reads pass every-bit truncation, complete/raw
+fields, serialization, DELTA/keyframe continuation and missing-context checks.
+Default-box and raw snapshot actor positions need no map widths; missing indexed
+context stops immediately after its recorded gate. No production code changed
+after full verification began.
+
+Logs: /private/tmp/halo-unit-{before,action-before,theater,all-features,
+no-default-features,clippy,rustdoc,wasm}.log. Full canonical parity remains open.
+
+
+The unit/weapon checkpoint source-retention run passes 32 films / 403,465
+packets (206.38 seconds debug). Complete control counts are [565395, 205, 209],
+with 117 secondary blocks (equipment checkpoint: [565396, 205, 210], 118).
+As before, these are traversal diagnostics rather than semantic correctness
+scores; corrected component boundaries can alter downstream parsing. The
+independent summary checks still pass all 3,667 pinned events across five films
+plus service counts (1.79 seconds).
+
+
+Replay provenance passes with 96 Octagon and 246 Recharge assumed event lists;
+canonical reads remain unchanged (50.81 seconds debug). The historical oracle
+still fails at appearance/01-cadet-blue/chunk-001-type-2.bin:567583, actual
+(3, 4603), expected (1, 382). Original historical oracle files/values are
+unchanged. Logs: /private/tmp/halo-unit-{source-corpus,summary-corpus,
+historical-corpus,replay-corpus}.log. All planned checks for this checkpoint
+are complete; the broader goal remains active with that unresolved discrepancy.
+
+
+## Canonical tacmap positions and version tail
+
+Both feature configurations pass 247 ordinary tests and 10 doctests, with seven
+retained-corpus tests ignored by default. Strict Clippy/Rustdoc, all-feature
+WASM, formatting/whitespace and all 47 fixture hashes pass. Both generated case
+files and the original Go snapshot export reproduce exactly. The expanded
+original-libfilmshell suite contains 2,723 cases / 187 aliases; the previous
+2,453 case/trace objects are unchanged. An additional 81 source-specific cases
+cover three aliases absent upstream: 27 original-Go full snapshot traces and
+54 source-composed delta bodies with independently traced point subgrammar.
+The prior 32 source-specific orientation cases remain unchanged.
+
+Ten component tests pass, including the new source-only tacmap evidence check.
+The old tether path fails its default-box continuation by 48 bits (125 vs 173).
+All five corrected position sites pass every-bit truncation, exact source-field
+retention, DELTA/keyframe continuation and missing-context checks. A failed first
+Theater run exposed the snapshot test's hardcoded second-axis NaN assumption;
+the assertion now compares every field with its actual fixture source. Original
+fixture values remain intact, and newly added zero/negative-zero/all-ones/NaN
+patterns retain their exact bits. No production code changed after the full
+verification began.
+
+Logs: /private/tmp/halo-tacmap-{before,theater,focused,all-features,
+no-default-features,clippy,rustdoc,wasm}.log. The full canonical goal remains open.
+
+
+Tacmap source retention passes all 32 films / 403,465 packets in 280.57 seconds
+debug. Complete control counts are [676959, 593, 501], with 439 secondary blocks
+(previous checkpoint: [565395, 205, 209], 117). The corrected position boundaries
+materially change downstream traversal. These counts are not independent
+semantic correctness scores; source bounds/field retention pass, while full
+frame semantics still need broader verification. The longer debug duration also
+includes the expanded traversal and is not a controlled performance comparison.
+Summary checks still match 3,667 pinned events across five films plus service
+counts (1.86 seconds). The historical comparison remains unchanged at
+appearance/01-cadet-blue/chunk-001-type-2.bin:567583, actual (3, 4603), expected
+(1, 382). The original expected values were not regenerated or waived.
+
+
+Replay provenance passes with 96 Octagon and 246 Recharge assumed event lists;
+canonical reads remain unchanged (58.34 seconds debug). Corpus logs use
+/private/tmp/halo-tacmap-{source-corpus,summary-corpus,historical-corpus,
+replay-corpus}.log. All tacmap checkpoint checks are complete; the historical
+oracle failure remains explicitly unresolved pending full device-record evidence.
+
+
+## Device component and captured-record checkpoint (2026-11-10)
+
+Both `cargo test --offline --all-features` and `--no-default-features` pass
+248 ordinary tests and all 10 doctests; seven corpus tests remain ignored in
+those runs. Strict all-target/all-feature Clippy, strict Rustdoc, WASM checking,
+formatting and whitespace checks pass. All 49 fixture manifest byte lengths
+and hashes match. The authored component generator and both original upstream
+exporters reproduce byte-for-byte; all prior 2,723 component case/trace objects
+remain unchanged.
+
+The main component suite now has 3,175 cases for 210 aliases, including 452 new
+device cases. Every new body has upstream primitive-boundary, exact raw-field,
+serialization, every-bit truncation and DELTA/keyframe following-component
+checks. Snapshot monitor counts 9 and 255 refuse after eight bits without
+consuming the following component. Production readers already agreed; the
+snapshot test harness was extended to recognize this refusal separately from
+missing vehicle context.
+
+The separate captured fixture verifies 90 NEW records (one archetype 9,
+52 archetype 43, 37 archetype 38), 775 components and 3,846 primitive reads
+through bit 64496. It runs canonical traversal with the recorded level and
+no schema recovery. The successor DELTA header is retained, its body refused,
+and no controls read. This is agreement on a captured prefix, not a fully
+decoded packet. See [fixture provenance](../fixtures/device-record-v41/README.md).
+
+No production behavior changed during this checkpoint, so the expensive
+32-film source/summary/replay corpus checks were not rerun. Their last verified
+results are the preceding tacmap checkpoint. The historical oracle remains
+unchanged and is not claimed to pass: at the appearance packet it lacks the
+device-position-group dispatch and uses different position context. The new
+independent prefix explains this particular disagreement without replacing or
+waiving the old oracle. Wider format and runtime coverage remains incomplete.
+
+Logs: `/private/tmp/halo-device-{theater,all-features,no-default-features,clippy,
+rustdoc,wasm,format,whitespace,reproduce}.log`.
+
+
+## Rigid-body position and projectile checkpoint (2026-11-10)
+
+The rigid-body reader now uses source-verified precision-16 points instead of
+the dated traversal-width body: raw snapshot words and default/indexed delta
+boxes. The mask and orientation prefix remain available when map context is
+missing. The new independently authored eight-body default-box case fails on
+the previous code at bit 312 against upstream's bit 616, then passes with the
+correction. This is a production parser change, so source/summary/replay corpus
+verification is rerun rather than inherited from the preceding checkpoint.
+
+The expanded component suite has 3,769 cases / 225 aliases, including 432 new
+rigid-body cases and 162 new projectile/velocity/physics cases. All previous
+3,175 authored case and trace objects remain unchanged. Original libfilmshell
+export and the authoring generator reproduce byte-for-byte. Primitive/source,
+serialization, every-bit truncation and DELTA/keyframe following-component
+checks pass. Missing-context checks include empty rigid-body masks and raw,
+default and indexed positions. The prior 90-record captured prefix contains no
+rigid-body components and therefore cannot establish this fix by itself.
+
+Both feature configurations pass 248 ordinary tests + 10 doctests, with seven
+corpus tests ignored in those ordinary runs. Strict Clippy/Rustdoc, WASM,
+formatting/whitespace and 49 fixture hashes pass. Corpus results for this
+checkpoint follow below. Logs use
+`/private/tmp/halo-rigid-{before,theater,all-features,no-default-features,clippy,
+rustdoc,wasm,format,whitespace,reproduce,source-corpus,summary-corpus,
+historical-corpus,replay-corpus}.log`.
+
+
+Source coverage passes all 32 films / 403,465 frame packets (280.21 seconds in
+the debug test build). Complete control kinds 0/1/2 are [676959, 592, 499], with
+439 secondary blocks; the preceding device/tacmap checkpoint was
+[676959, 593, 501], also 439 secondary blocks. The corrected body length changes
+traversal; fewer completed controls is not itself a semantic correctness claim.
+Summary semantics still matches all 3,667 events across five films and the
+independent service counts. Replay provenance passes for Octagon/Recharge (96/246 assumed event lists,
+58.15 seconds); its canonical-read invariance assertions remain satisfied.
+
+The historical oracle fails at the unchanged appearance packet boundary:
+(3, 4603) versus (1, 382). Its fixture has not been changed or waived; the
+separate captured-device investigation above documents the missing historical
+dispatch and different default map context. Source retention, summary agreement
+and independent component traces do not prove full canonical format coverage.
+No production edits followed these checks.
+
+
+## Shared object-state and damage-count checkpoint (2026-11-10)
+
+The object damage-section reader now rejects counts >32 after retaining the
+six-bit count. Original libfilmshell refuses at that boundary; previously the
+local reader tried entry gates and reported Truncated on the independent
+count-33 body. New DELTA/keyframe checks retain the prefix and leave the following
+component unread. This is an upstream admission rule; the exact damage-count
+rejection instruction is not independently established by the LevelUp source.
+Invalid region-state counts are a separate documented issue and remain pending.
+
+Added 2,462 original-reader cases across 13 object-state aliases. The main suite
+now has 6,231 cases / 238 aliases, with all prior 3,769 case/trace objects
+unchanged. Every case participates in upstream primitive-boundary, raw-field,
+serialization, every-bit truncation and DELTA/keyframe following-component
+checks. Both full configurations pass 248 tests + 10 doctests; seven corpus
+tests are ignored in those ordinary runs. Strict Clippy/Rustdoc, WASM, formatting,
+whitespace and 49 fixture hashes pass. Generator and original export reproduce
+byte-for-byte. The separately run corpus results follow below.
+
+Logs use `/private/tmp/halo-object-{before,theater,all-features,no-default-features,
+clippy,rustdoc,wasm,format,whitespace,reproduce,source-corpus,summary-corpus,
+historical-corpus,replay-corpus}.log`.
+
+
+The full source corpus passes all 32 films / 403,465 frame packets (283.41 seconds
+in the debug build). Complete control kinds 0/1/2 are [676954, 592, 499] and
+secondary blocks 438, versus [676959, 592, 499] and 439 at the preceding rigid-body
+checkpoint. Refusing the invalid count changes subsequent traversal; these
+counts do not establish semantic correctness. All 3,667 summary events across
+five films and independent service counts still match. Replay provenance passes
+with 96/246 assumed event lists for Octagon/Recharge and canonical reads unchanged.
+
+The historical oracle fails at the same appearance packet, (3, 4603) versus
+(1, 382). Its expectations have not been rewritten or waived; the prior captured
+device investigation explains that particular dispatch/context discrepancy.
+The broader canonical parser and runtime audit remains incomplete. No production
+edits followed these checks.
+
+
+## Non-predicted ability anchor checkpoint (2026-11-10)
+
+The old two-label approximation is replaced with all eight encoded labels of
+FUN_142f25e90, its category-1 reference/place prefix, six flags and the per-label
+bodies. Row versions 0/1/2/4 retain the outer-tail threshold. The old code
+refuses the new label-1 default-point regression; the corrected code matches
+the original libfilmshell boundary. Original LevelUp reader/writer notes and
+three verified source blobs independently establish the grammar and explain
+the old combined fields; the fixture README records their identities.
+
+Added 920 original-reader cases (896 active / 24 inactive), keeping all prior
+6,231 case/trace objects unchanged. The main suite totals 7,151 cases / 239
+aliases. Primitive/raw-field/serialization, every-bit truncation and actual
+DELTA/keyframe following-component checks apply to all new cases. A separate
+test checks all 920 internal observation objects against independently authored
+reference values and position extents, both with and without map context.
+Refusal at an indexed prefix or a later destination keeps prior known fields,
+and never publishes missing flags or coordinates as zeros. No current runtime
+consumer relies on the replaced internal observation structure.
+
+Both feature configurations pass 249 ordinary tests + 10 doctests, with seven
+corpus tests ignored in those ordinary runs. Strict Clippy/Rustdoc, WASM,
+formatting/whitespace and 49 fixture hashes pass. Generator and original export
+reproduce byte-for-byte. The separately run corpus results follow below.
+Logs use `/private/tmp/halo-anchor-{before,observations,theater,all-features,
+no-default-features,clippy,rustdoc,wasm,format,whitespace,reproduce,source-corpus,
+summary-corpus,historical-corpus,replay-corpus}.log`.
+
+
+The full source corpus passes 32 films / 403,465 frame packets (282.97 seconds
+in the debug build). Complete control kinds 0/1/2 are [676954, 593, 499], with
+438 secondary blocks, versus [676954, 592, 499] and 438 before this upgrade.
+That additional completed control list is a traversal measurement, not proof of
+semantic accuracy. All 3,667 summary events across five films and independent
+service counts still match. Replay provenance passes for Octagon/Recharge,
+remaining at 96/246 assumed event lists with canonical reads unchanged.
+
+The historical oracle fails at the unchanged appearance boundary: (3, 4603)
+versus (1, 382). Its expectations remain intact; the captured-device audit above
+explains that specific dispatch/context discrepancy. These checks do not settle
+predicted-ability source disagreements, unrecorded game context, other build/
+version admission, or complete packet and runtime coverage. No production edits
+followed these checks; the full objective remains active.
+
+
+## Biped point and predicted-ability source validation
+
+The main component suite now has 8,859 cases /254 aliases, adding 1,708 biped
+cases with the previous 7,151 cases/traces unchanged. An additional 140
+predicted-ability cases exercise the source conflict independently. The
+blob-checked exporter extracts original LevelUp branch/point functions and
+injects only external context and bounded primitive reads. See the component
+fixture README for source identities and reproduction commands.
+
+A pre-fix mobility snapshot ended at 450 instead of 525 bits. Both mobility
+sites now select raw snapshots. Mobility/posture/predicted ability accept
+self-contained points without map context and retain indexed-point refusal
+prefixes. All additions have raw-field/serialization, every-bit truncation,
+DELTA/keyframe continuation and applicable missing-context checks. Explicit
+full-precision/baseline overrides and the distinct control-context gate are
+covered. The original predicted tag-3 structure remains source-supported;
+libfilmshell's contradictory extra-target/version branches are not imported.
+
+Both feature configurations pass 251 tests +10 doctests, with seven corpus
+tests ignored ordinarily. Strict Clippy/Rustdoc, WASM, formatting/whitespace and
+51 fixture hashes pass. Both generators and both reference exports reproduce
+exactly. Clippy requested only a semantics-preserving collapse of a nested if;
+the final form passes strict linting. Summary coverage remains 3,667 events
+across five films plus independent service counts. Replay retains 96/246 event
+assumptions with canonical reads unchanged (82.14 seconds under concurrent
+checks). The historical appearance oracle still fails at payload567583 with
+(3, 4603) versus (1, 382); its expectations remain unchanged.
+
+Logs: /private/tmp/halo-biped-{before,components,all-features,no-default-features,
+clippy,rustdoc,wasm,format,whitespace,source-corpus,summary-corpus,
+historical-corpus,replay-corpus}.log. The full robustness objective remains
+active; alias counts do not establish complete branch or semantic coverage.
+
+
+Final biped source retention passes 32 films / 403,465 frame packets
+(294.96 seconds under concurrent verification). Complete control kinds 0/1/2
+remain [676954, 593, 499], secondary blocks 438. The final component
+suite also passes all 23 tests after the lint-only conditional cleanup. These
+checks preserve raw source coverage; they do not establish complete semantic
+format coverage or resolve the unchanged historical appearance oracle.
+
+
+## Manager/source conflicts and TLV resource refusal
+
+Added 3,152 original-libfilmshell layouts (12,011 total /284 aliases), retaining
+all preceding 8,859 case/trace objects unchanged. Added 4,024 original LevelUp
+source traces for the remaining timer/alliance aliases plus disputed music,
+splash and multiplayer TLV branches. Every one of the 286 upstream aliases now
+has some fixture evidence across the suites; this is not complete branch or
+format coverage. The component README records five pinned source blobs and the
+original-function/dispatch-arm exporter, with no replacement grammar.
+
+The timer source test failed at boundary103 before correcting tag1 to
+R16/R16/R5/R16. Its independent per-slot values also check exact field order.
+The other source-conflict layouts retain their existing source-supported
+structure. TLV resource/overflow refusals now preserve the exact parsed prefix
+without clamping or claiming a terminator. Twenty small DELTA/snapshot refusal
+cases participate in every-bit truncation and following-component checks.
+A separate test proves that opaque stubs cannot bypass these refusals and
+checks exhausted message fields, u64 maximum values, legal maximum collection
+counts, and an empty list at the depth limit. Malformed-input refusal is an
+explicit local policy; original source traces cover legal bounded bodies only.
+
+All 25 component tests pass, including every-bit truncation (82.97 seconds in
+the concurrent verification run). Original case generation, original libfilmshell
+export and source export reproduce byte-for-byte; all 53 fixture hashes pass.
+Both feature configurations pass 253 tests +10 doctests, with seven corpus
+tests ignored ordinarily. Strict Clippy/Rustdoc, WASM, formatting and whitespace pass.
+No production edits followed the verification run.
+
+All 3,667 pinned summary events across five films and independent service counts
+still match. Replay reports the same 96/246 assumed event lists with canonical
+reads unchanged (76.06 seconds). The historical appearance oracle remains
+unchanged at payload567583: (3, 4603) versus (1, 382). Its expectations were not
+rewritten. The final source-retention result follows below.
+
+Logs: /private/tmp/halo-managed-{before,components,all-features,
+no-default-features,clippy,rustdoc,wasm,format,whitespace,source-corpus,
+summary-corpus,historical-corpus,replay-corpus}.log. The full goal stays active.
+
+
+Final manager/TLV verification: both feature configurations pass 253 tests +10
+doctests; strict Clippy/Rustdoc, WASM, formatting/whitespace, all 53 fixture hashes
+and exact generator/original-export reproduction pass. Source retention passes
+32 films / 403,465 packets (291.59 seconds). Complete control kinds 0/1/2
+are [676954, 593, 499], secondary blocks 438. Summary events remain 3,667;
+replay remains 96/246 assumptions with canonical reads unchanged. The historical
+appearance oracle remains (3, 4603) versus (1, 382). These results certify this
+checkpoint, not completion of the full canonical format or capability audit.
+
+## Event flag boundaries and original-source projectile branches
+
+Added 691 independently authored/libfilmshell-traced event lists: 1,494 main
+cases now cover 42 upstream body codes, retaining all previous 803 case/trace
+objects unchanged. Script and kill keep their separate context tests. The
+damage test failed before the production fix at primitive endpoint51; retaining
+the fourteen independent flags separately now preserves each complete flag on
+truncation without changing the complete event's size.
+
+Added 144 original LevelUp projectile traces (96 detonation, 48 impact), with
+four source blobs verified before extracting unchanged functions/constants.
+Explicit delta and precision-table context is injected; observation callbacks
+consume no bits. Both 8/19-bit detonation tails are independently verified.
+This establishes the source-supported branch that disagrees with libfilmshell's
+fixed eight-bit tail. The fixture README gives source identities and commands.
+
+All 1,638 main/source event cases participate in every-bit truncation, source
+field/serde checks and actual event/entity/control continuation where applicable.
+Projectile cases also verify missing/invalid map context and default-box versus
+map-region runtime projection. The focused filter passes ten tests, including
+the three existing script-context tests. Both generators and both exporters
+reproduce exactly, and all 55 fixture hashes match.
+
+Both feature configurations pass 254 ordinary tests and ten doctests each,
+with seven corpus tests ordinarily ignored. Strict Clippy/Rustdoc, WASM,
+formatting and whitespace pass. Summary semantics remain 3,667 pinned events
+across five films plus independent service counts. Replay retains 96/246
+assumed event lists with canonical reads unchanged (76.88 seconds).
+
+The historical appearance oracle still fails at payload567583 with (3, 4603)
+versus (1, 382). Its expectations remain unchanged. Source retention passes all
+32 films /403,465 frame packets (293.33 seconds). Complete control kinds 0/1/2
+remain [676954, 593, 499], with 438 secondary blocks.
+
+The initial public runtime/catalogue comparison is in
+[LIBFILMSHELL_CAPABILITIES.md](LIBFILMSHELL_CAPABILITIES.md). It separates
+already retained source fields from missing typed projections and records the
+upstream proximity/scanning assumptions that cannot become canonical facts.
+This checkpoint does not complete full wire/context or runtime parity.
+
+Logs: /private/tmp/halo-events-{before,focused,all-features,no-default-features,
+clippy,rustdoc,wasm,format,whitespace,source-corpus,summary-corpus,
+historical-corpus,replay-corpus}.log. No production edits followed verification.
+
+## Statborg runtime source validation
+
+The scoreboard view reads established canonical component fields only. Seven
+ordinary tests include real Film keyframe/DELTA byte fixtures, signed width
+boundaries, both extras, sparse finalized masks, all two-bit outcome codes,
+initial zeros/repeated values, unknown/changed/duplicate owners, generation reuse
+and deletes, partial baselines and unread packets. A timestamp-tie test proves
+that a gap follows its complete prefix before the next packet. Queries do not
+move the playback cursor or modify Film serialization. Malformed field storage,
+duplicate fields and unsupported schemas refuse projection.
+
+All 216 independently authored and upstream-traced version-1 current/finalized
+stat fixtures project to exact source bits, with signed conversion checked in a
+wider integer domain. The first synthetic run exposed an outcome field-width
+mistake and a deletion fixture missing its mandatory metadata word; both were
+corrected before broader verification.
+
+The additional ignored captured check passes (26.20 seconds):
+
+| Film | Statborg updates | Exact source integers | Explicit gaps |
+| --- | ---: | ---: | ---: |
+| octagon/03-first-to-50 | 1,160 | 64,616 | 35,879 |
+| ranked-arena/02-oddball | 12,128 | 214,517 | 137,892 |
+
+Every projected integer is checked against the original packet bit range.
+Canonical buffers remain shared unchanged. Gap counts reflect existing unread
+canonical regions; this test is not a final-score or full semantic parity oracle.
+
+Strict Clippy/Rustdoc, WASM, formatting/whitespace and all 55 unchanged fixture
+hashes pass. Independent summary semantics retain 3,667 events across five films
+plus service counts. Replay retains 96/246 assumptions with canonical reads
+unchanged (83.63 seconds). Historical comparison still fails at the unchanged
+appearance payload567583: (3, 4603) versus (1, 382). Its oracle is untouched.
+Both feature configurations pass 261 ordinary tests and ten doctests each;
+eight corpus tests are ordinarily ignored. Source retention passes all 32 films
+/403,465 packets (299.79 seconds); complete control kinds 0/1/2 remain
+[676954, 593, 499], secondary blocks 438. No production edits followed the final
+regression run.
+
+Logs: /private/tmp/halo-scoreboard-{focused,captured,all-features,
+no-default-features,clippy,rustdoc,wasm,format,whitespace,source-corpus,
+summary-corpus,historical-corpus,replay-corpus}.log. The new public API is
+documented in [SCOREBOARD.md](SCOREBOARD.md); broader runtime parity remains open.
+
+## Engine clock and player-state source validation
+
+Six new ordinary tests exercise the engine view through actual Film bytes and
+source references. They cover phase/round gates, raw timer/respawn/lives/active
+fields, both default-version gates, six-bit player indices, missing/replaced/
+competing identities, generation reuse and deletion, partial baselines, malformed
+fields, independent schema admission, timestamp ties and gap invalidation.
+Canonical serialization and playback position remain unchanged.
+
+The independent timer exporter verifies three LevelUp blobs at
+413971bcc485be53a2fa8cf229e170539a5146f8 and runs the unchanged reader/helper/
+quantizer for every u16 quantum in both words and all 32 tail states. It pins
+amd64/v1 scalar rounding after investigating ARM64 Go FMA contraction (21,018
+word differences, first at quantum 8). The retained 262,144-byte oracle agrees
+with Rust for every quantum in both debug and optimized release builds. This
+checks source conversion, not execution of the Halo game binary. Elapsed versus
+remaining roles and respawn time units remain unassigned.
+
+The extended captured check passes in 37.27 seconds under concurrent checks:
+
+| Film | Engine updates | Source rows | Complete default identities |
+| --- | ---: | ---: | ---: |
+| octagon/03-first-to-50 | 1,239 | 2,693 | 704 |
+| ranked-arena/02-oddball | 5,385 | 9,419 | 1,952 |
+
+Every projected row/default identity resolves to its canonical record and
+packet bits, and every projected round timer matches the conversion oracle.
+Existing statborg counts remain 13,288 updates /279,133 exact integers; gap
+counts remain 35,879 and 137,892. Gaps are shared and remain explicit. These
+are observed records, not whole-match or final-score coverage.
+
+Both feature configurations pass 267 ordinary tests and ten doctests, with
+eight corpus tests ordinarily ignored (78.67 seconds all-features; 91.76 seconds
+no-default-features). Strict Clippy across all targets, strict Rustdoc, WASM,
+formatting/whitespace and all 56 fixture hashes pass. The original-source timer
+export reproduces the fixture byte for byte. The initial round gate name,
+synthetic generation-reuse lifecycle and truncated-row fixture boundary were
+corrected before this final checkpoint; no expectations were relaxed to accept
+an incorrect projection.
+
+This change adds runtime interpretation and does not change parser grammar.
+The larger source/summary/replay/historical corpus runs recorded in the preceding
+checkpoint were not repeated here; the captured engine/statborg check above was
+extended and rerun. The historical appearance discrepancy remains unresolved
+and its oracle remains untouched. Full canonical format coverage is not claimed.
+
+Logs: /private/tmp/halo-engine-{focused,captured,all-features,
+no-default-features,clippy,rustdoc,wasm,release-timer,format,whitespace}.log.
+API and source limits: [SCOREBOARD.md](SCOREBOARD.md). Fixture provenance:
+[engine-v41/README.md](../fixtures/engine-v41/README.md).
+
+## Direct event-body source validation
+
+`runtime/actions` projects canonical EventRecord fields without rereading packet
+bytes or importing scanned/inferred events. Six new ordinary tests compare all
+18 typed libfilmshell body families and their outer references, exercise exact
+strings and duplicate keys, preserve parameter widths and raw percentage words,
+refuse incomplete/malformed records, retain source-supported projectile/teleport
+forms, and verify public queries without changing Film or cursor state.
+
+The semantic reference contains 1,475 complete outputs from unchanged pinned
+libfilmshell readers: all 1,473 complete main fixtures plus two authored kill
+boundary cases. Serialization derives and a test harness are the only additions
+in the temporary upstream checkout. Tests normalize only the upstream subset;
+local source words/widths, exact text lengths and parameters remain intact.
+The exporter reproduces the reference byte for byte. Both new fixture files
+are recorded in the manifest, and all 58 hashes verify.
+
+The new ignored captured check passes in 29.49 seconds:
+
+| Film | Complete records | Incomplete records | Exact source scalars |
+| --- | ---: | ---: | ---: |
+| octagon/03-first-to-50 | 2,084 | 96 | 58,398 |
+| ranked-arena/02-oddball | 28,626 | 246 | 543,432 |
+
+The complete column includes Other bodies with explicitly unnamed fields, not
+just typed actions. All incomplete records remain visible and refused as typed
+bodies. Source pointers and all scalar values resolve to the original packet
+bits. These counts do not establish actor attribution or complete match coverage.
+
+Both feature configurations pass 273 ordinary tests and ten doctests; nine
+corpus tests are ordinarily ignored (80.06 seconds all-features, 76.31 seconds
+no-default-features). Strict all-target Clippy, strict Rustdoc, WASM, formatting
+and whitespace pass. This checkpoint changes runtime projections and exposes the
+existing reference-kind table; it does not change event wire grammar. The larger
+source/summary/replay/historical corpus runs were not repeated. The previously
+recorded historical appearance discrepancy remains open with its oracle untouched.
+
+Logs: /private/tmp/halo-actions-{focused,captured,all-features,
+no-default-features,clippy,rustdoc,wasm,format,whitespace,export,reproduce}.log.
+The API and limitations are documented in [ACTIONS.md](ACTIONS.md). Full public
+runtime event parity and canonical format completion remain unproven.
+
+## Count-driven roster and bot metadata
+
+Type-8/type-12 canonical readers now share a bounded player-body reader, keeping
+raw fields, exact boundaries, original timestamps and explicit partial stops.
+The format gate is taken from the registry, and personalization width from the
+structurally established BuildBranch field. Models and coverage remain in Film;
+the reader remains in parser/v41; ownership remains a runtime concern.
+
+Five new ordinary tests cover independent Go values/closure, every-byte
+truncation, limits and missing contexts, recorded profile binding and scoreboard
+gaps. Thirty authored original-source cases span all seven personalization
+profiles, both optional-word forms, format 20/21 behavior, maximum masks/lists,
+invalid counts, exact UTF-16 units, nonzero padding and differing tail rules.
+The exporter verifies source Git blobs and reproduces the committed reference
+byte for byte; all 59 fixture-manifest hashes verify.
+
+The new retained-corpus test passes across 32 films (145.02 seconds). Separately
+running the pinned Go readers on each retained packet agrees for all 1,018:
+
+| Kind | Complete packets | Partial packets | Entries | Nonempty packets |
+| --- | ---: | ---: | ---: | ---: |
+| Roster/type 8 | 509 | 0 | 5,347 | 509 |
+| Bots/type 12 | 509 | 0 | 0 | 0 |
+
+All captures in this comparison are HI_1_13_0. **The corpus has no nonempty bot
+packet**; nonempty bot bodies and older builds have authored fixture evidence
+only. Complete reads agree on source-backed identities, options, names, short
+values, counts, entry boundaries and packet closure. Raw field ranges/values
+and packet source coverage are separately checked against original payloads.
+
+Both feature configurations pass 278 ordinary tests and ten doctests, with ten
+corpus tests normally ignored. Initial sandbox runs failed 24 unrelated REST
+mock-server tests because local port binding was denied; reruns with loopback
+access pass. Strict all-target Clippy, strict Rustdoc, WASM, formatting and
+whitespace checks pass. The first Clippy run flagged a test-only constant-sized
+chunks iterator; it was corrected before the successful final run.
+
+Captured scoreboard/engine regressions pass (37.04 seconds): 13,288 statborg
+updates /279,133 exact integers, plus 6,624 engine updates /12,112 source rows
+and 2,656 complete-default identities. Bot metadata still invalidates uncertain
+ownership. Captured replay passes (75.19 seconds), retaining 96 Octagon and 246
+Recharge event assumptions without changing canonical reads. Summary validation
+passes for 3,667 reference events across five films (1.88 seconds).
+
+The full source-coverage run also passes across all 32 films and 403,465 frame
+packets (315.67 seconds). Its current complete control-kind counts are
+676,954 /593 /499 for kinds 0/1/2, with 438 secondary blocks. These are the current
+run's traversal counts; earlier checkpoint counts are retained as historical
+results, not substituted for this run.
+
+The historical frame oracle was rerun and still fails at
+`appearance/01-cadet-blue/chunk-001-type-2.bin:567583`, `(3, 4603)` versus
+`(1, 382)`, exactly the preceding discrepancy. Its expected values are unchanged.
+This remains an open issue, not an accepted new baseline.
+
+Logs: `/private/tmp/halo-roster-{focused,captured,all-features-verified,
+no-default-verified,clippy-verified,rustdoc,wasm,replay-corpus,scoreboard-corpus,
+summary-corpus,historical-corpus,source-corpus,format,whitespace}.log`.
+Captured oracle inputs/outputs are `/private/tmp/halo-roster-corpus-{input,go}.json`.
+Source reproduction and limits: [roster fixtures](../fixtures/roster-v41/README.md).
+API and remaining ownership work: [ROSTER.md](ROSTER.md).
+
+## Runtime roster observations and replay migration
+
+The new runtime roster API uses a private index of canonical type-8/type-12
+packet events. It projects listing members, independent human/bot population
+snapshots and per-participant presence/absence/unknown history. It retains field
+pointers and original units without assigning engine ownership. Bot team/mirror
+bytes use the pinned build profile; unknown locations and conflicting bytes stay
+explicit. Replay consumes the canonical fields and exposes its remaining
+option-to-index hypothesis in source-linked diagnostics.
+
+Five new tests replace the old duplicate-reader tail test, for a net gain of four:
+282 ordinary tests and ten doctests pass in both feature configurations; ten
+corpus tests remain ordinarily ignored. Tests cover 35 complete original-Go entry
+projections from the existing 30-case reference, strict UTF-16 handling, preserved
+identity disagreements, bot team offsets, malformed fields, partial/opaque lists,
+duplicate participants, domain independence, reappearance, same-time ordering,
+canonical-tail acceptance, required replay options and unchanged Film/cursor state.
+The new event-offset index passes the same synthetic and captured checks.
+
+The captured indexed replay regression passes in 65.15 seconds:
+
+| Film | Roster member observations | Explicit replay index assumptions | Existing event assumptions |
+| --- | ---: | ---: | ---: |
+| Octagon first-to-50 | 48 | 42 | 96 |
+| Recharge Oddball | 496 | 496 | 246 |
+
+Roster observations include every packet timestamp; replay assumptions include
+only packets within the resolver's relative clock range. These are repeated
+observations, not distinct-player counts. Assumptions resolve to the exact
+canonical entry span and five-bit option field. Both captures have empty bot
+lists; nonempty bot projection evidence remains synthetic. Original canonical
+reads and runtime event assumptions remain unchanged.
+
+Strict all-target Clippy, strict Rustdoc, WASM, formatting, whitespace and all 59
+fixture hashes pass. No event/component/packet wire grammar changed in this
+checkpoint. The preceding 32-film source and independent metadata differential
+results remain the source-layer evidence; those larger checks were not repeated.
+The historical appearance oracle discrepancy remains open with its expectations
+unchanged. Full holder attribution and dynamic ownership reuse remain unimplemented.
+
+Logs: `/private/tmp/halo-roster-runtime-{focused,indexed,all-features-final,
+no-default,captured-indexed,clippy-final,rustdoc,wasm,format,whitespace}.log`.
+
+
+## Native keyframe slot-table checkpoint
+
+Canonical traversal now uses the native 8,191-entry table instead of the old
+ID-sentinel chain. Twenty-four independently authored original-Go cases exercise
+vacant/interleaved/last-live slots, arbitrary fixed words, nonmonotonic and
+all-ones IDs, signed nonpositive guards, invalid headers, short tables and tails.
+Successful Go/Rust ends match exactly; Rust additionally preserves failed-prefix
+fields. The source fixture and harness limits are documented in
+[the fixture README](../fixtures/keyframe-slots-v41/README.md).
+
+Five new tests bring both feature configurations to 287 ordinary tests and ten
+doctests. Ten corpus tests remain normally ignored. Source-bit/serde and coverage
+checks include the new fixed headers. Synthetic scoreboard tests now contain all
+physical entries; the historical reference expectations remain unchanged.
+
+Strict all-target Clippy, strict Rustdoc, WASM, formatting, whitespace, all 60
+fixture hashes and exact Go export reproduction pass. The captured replay
+regression passes in 91.35 seconds under concurrent verification: 48/496 roster
+member observations, 42/496 explicit index assumptions and 96/246 event
+assumptions in Octagon/Recharge, with canonical reads unchanged by replay.
+The captured scoreboard/engine check passes in 44.47 seconds:
+
+| Film | Statborg updates | Exact integers | Engine updates | Engine source rows | Default identities | Explicit gaps |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon first-to-50 | 1,160 | 64,616 | 1,239 | 2,693 | 704 | 35,486 |
+| Recharge Oddball | 12,128 | 214,517 | 5,385 | 9,419 | 1,952 | 110,664 |
+
+Prior gaps were 35,879/137,892. The smaller gap counts reflect deeper canonical
+traversal, not final-score recovery or proven ownership through every gap.
+Unsupported snapshot bodies still stop without scans or branch guesses. The
+historical appearance comparison remains a separate unchanged oracle; this
+checkpoint does not certify full-format or runtime capability parity.
+
+Logs: `/private/tmp/halo-slots-{all-features,no-default,corpus,captured-replay,
+captured-scoreboard,clippy,rustdoc,wasm,format,whitespace}.log`.
+
+The extended full source check passes all 32 films /403,465 frame packets in
+352.50 seconds. Each newly retained fixed header is compared against its exact
+packet bits. Of 451 tables, 243 close after all 8,191 entries; 208 stop with
+Desync and retain the nested body reason. There are 2,068,021 vacant headers and
+35,634 live headers after a vacant entry. This verifies source accounting and
+native table traversal, not complete semantic decoding of those 208 tables.
+
+Current complete-control counters are [1,063,261, 263, 243] for kinds 0/1/2 and
+167 secondary blocks, versus the preceding [676,954, 593, 499] and 438. More
+keyframe schema declarations change reachable frame boundaries, so these are
+measurements rather than frozen parity expectations. The authored independent
+control/body suites still pass. A field-for-field current-reader differential
+over every newly reachable captured frame remains broader work; the historical
+d61443e oracle is intentionally unchanged. No production changes followed the
+final no-default, captured replay/scoreboard and strict-check runs.
+
+
+## Snapshot refusal classification and item catalogue
+
+The new snapshot-only ignored audit passes all 451 type-2 packets in 41.87 seconds. It
+uses the original registry and production Film configuration, retaining original
+packet envelopes while excluding unrelated frame packets. It reproduces 243 closed
+tables and 208 stopped tables: 207 unavailable vehicle-type-state flags and one
+object-damage-sections refusal. The optional JSON export retains the original
+file/payload coordinates and each table's last record for inspection.
+
+The independent captured refusal fixture invokes the unchanged libfilmshell
+snapshot/component readers with trace callbacks. At Recharge Oddball
+`chunk-057-type-2.bin:343051`, both readers reach record 226358 and component 226997,
+consume count 39 through 227003, and refuse the >32 count. Eight component spans
+and every consumed component source bit agree. The exporter asserts there were
+no vehicle entities, excluding its branch-probing path as a possible boundary
+source. The test preserves this shared stop rather than normalizing it away.
+
+The reference item catalogue contains 2,001 tags and 40 variant hashes. Every
+name, kind, item classification, parent/part link and power-weapon flag agrees
+with independently executed original upstream lookups. There are 45 parent and 16
+part links. Explicit revision selection reports the missing game-build provenance;
+no automatic parser or runtime selection was added. Namespace/unknown/ordering
+and enum/ID serialization tests pass. The data generator and both new exporters
+reproduce exactly; all 63 fixture hashes pass. Strict Clippy, Rustdoc, WASM,
+formatting and whitespace pass.
+
+This checkpoint changes reference metadata and tests, not production wire
+readers. The preceding 32-film /403,465-frame source check remains the wire
+checkpoint; the new snapshot-only audit independently classifies its stops.
+Logs: `/private/tmp/halo-items-{all-features,no-default,clippy,rustdoc,wasm,format,
+whitespace}.log`, `/private/tmp/halo-keyframe-stops.log`, and
+`/private/tmp/halo-snapshot-refusal-{export,test}.log`.
+
+Final ordinary-suite verification: 290 tests and ten doctests pass in both
+all-features and no-default-features configurations, with eleven ignored corpus
+tests. The snapshot-only audit above was run explicitly. No production edits
+followed these final checks. The full canonical-format and runtime parity goal
+remains incomplete.
+
+
+## Damage and sandbox reference metadata
+
+The new whole-catalogue tests compare 468 damage effects, 151 firing entries,
+294 projectile entries and 64 vehicle bounds with independently executed original
+libfilmshell lookups. All f64 values are compared as IEEE754 bit patterns; this
+preserves the source's decimal constants, not unprovided original game float words.
+All 32 individual flags, fixed-amount results, reference vitality/constants,
+optional values/links and projectile ordering are covered. Unknown IDs and sorted
+lookup keys remain explicit.
+
+The first concurrent stdout exporter omitted one damage row (tag 91016796). The
+comparison caught 468 local versus 467 exported entries. The exporter now writes
+separate files per source suite, and every previously exported value is unchanged.
+The repaired export and both data generators reproduce exactly. All 64 fixture
+hashes, strict Clippy/Rustdoc, WASM, formatting and whitespace pass.
+
+No production wire reader changed, so the preceding 32-film source and snapshot
+stop audits remain the parser evidence. Build applicability and use of this
+reference data in typed runtime views remain unproven. New logs are
+`/private/tmp/halo-damage-sandbox-{tests-fixed,all-features-final,no-default,clippy,
+rustdoc,wasm,format,whitespace,export-fixed}.log`.
+
+Final verification passes 292 ordinary tests and ten doctests in both supported
+feature configurations, with eleven normally ignored corpus tests. The repaired
+all-features run took 81.73 seconds and no-default-features 78.72 seconds under concurrent checks.
+No production edits followed final validation. Full format/context, runtime
+capabilities, remaining catalogues and build applicability are still incomplete.
+
+## Recorded corruption-check checkpoint
+
+Added five ordinary tests for bootstrap flag overrides and absence, original-Go
+message/component/default guard envelopes, every event-prefix/component-trailer
+truncation, recognized-registry Film/replay propagation, and action projection.
+The independently exported fixture has 44 cases and checks six pinned source
+blobs. Its 32 event cases cover all 13 native empty descriptors and nonempty zoom
+with both guard values and arbitrary sentinels; callbacks and limits are documented
+in fixtures/corruption-v41/README.md. All 65 fixture hashes match, and the exporter
+reproduces reference.json exactly.
+
+Both feature configurations pass 297 ordinary tests and ten doctests, with eleven
+normally ignored corpus tests. All-features takes 84.01 seconds; no-default-features
+81.26 seconds under concurrent verification. Strict Clippy, strict Rustdoc, WASM,
+formatting and whitespace pass. The public integration uses recorded flags false
+and true, a complete physical snapshot table, an event, NEW and DELTA components,
+then contextual replay. Missing bootstrap data preserves the profile fallback
+and remains an explicit limitation rather than proof of recorded false.
+
+Captured replay passes in 79.22 seconds: Octagon preserves 96 event assumptions
+and 42 roster-index assumptions; Recharge preserves 246 and 496 respectively.
+Roster member observations remain 48/496. These are regression/evidence counts,
+not complete semantic decoding or newly established identity ownership.
+
+Logs use `/private/tmp/halo-corruption-` with suffixes `targeted-final.log`,
+`all-features.log`, `no-default.log`, `clippy.log`, `rustdoc.log`, `wasm.log`,
+`format.log`, `whitespace.log`, `replay.log`, and `corpus.log`. The earlier
+`targeted.log` contains an initial synthetic replay-prerequisite failure and
+interleaved output from two runs; only `targeted-final.log` is the final targeted
+result. The final integration supplies complete identification/options and an
+explicitly vacant bootstrap player table rather than bypassing replay admission.
+
+Full source-corpus verification passes in 345.98 seconds: 32 films and 403,465
+frame packets. Every captured bootstrap records corruption checks disabled;
+enabled-policy evidence comes from the separate original-source and Film/replay
+fixtures. Counts remain unchanged: 451 snapshot tables, 243 closed /208 Desync,
+2,068,021 vacant headers, 35,634 live headers after vacancies, complete control
+kinds [1,063,261, 263, 243], and 167 secondary blocks. No historical appearance
+oracle expectation was rewritten. Source coverage and unchanged counts do not
+independently prove all frame semantics or resolve the 208 snapshot stops.
+
+This checkpoint changes production guard propagation/event traversal and runtime
+action trailer validation. No commit or push was made. The broader canonical
+parser/capability goal remains active.
+
+## Missing corruption-policy admission checkpoint
+
+Public Film and replay no longer replace an unavailable corruption policy with
+profile false. They retain the known prefix and report MissingCorruptionCheckContext
+at the first affected event/default/component boundary. Sections whose trailers
+cannot be established carry ContextUnavailable. Four added tests cover exact
+prefixes against the original native fixture, truncated/unsupported-bootstrap
+public admission, snapshot default/component locality and replay admission.
+Existing tests cover both recorded values, override persistence, truncation and
+source preservation. The full goal remains active.
+
+Toy scoreboard registries now use an explicit internal configured reader; their
+runtime/grammar assertions are not evidence that public Film admits invented
+bootstrap layouts. Public event-admission fixtures instead supply a recognized
+registry and recorded flag. The isolated replay test supplies an empty test roster
+as a prerequisite, not as a new source-backed roster fact. The initial 14 failures
+exposed those old implicit fixture defaults; their expectations were preserved
+under explicit fixture configuration. Captured-source tests still use Film::parse.
+
+Both feature configurations pass 301 ordinary tests and ten doctests, with eleven
+normally ignored corpus tests. All-features took 85.11 seconds; no-default-features
+82.07 seconds under concurrent verification. Strict Clippy/Rustdoc, WASM, formatting,
+whitespace, all 65 fixture hashes and exact native exporter reproduction pass.
+Captured replay passes in 77.15 seconds: Octagon retains 96 event assumptions /42
+roster-index assumptions, and Recharge 246/496. Roster observations remain 48/496.
+These counts do not establish complete semantic decoding or identity ownership.
+
+Logs: `/private/tmp/halo-guard-context-{targeted-final,all-features,no-default,clippy,rustdoc,wasm,format,whitespace,replay,corpus}.log`.
+Initial/intermediate logs are not the final result. No commit or push was made.
+
+Independent read-only admission probes: all 32 recorded 123-word event-version
+tables match the pinned native string, and all 403,465 frame headers use
+configuration one (344,468 empty message lists /58,997 nonempty heads). Reports
+are `/private/tmp/halo-event-version-audit.json` and
+`/private/tmp/halo-event-configuration-audit.json`. This identifies corpus limits;
+event-table admission and configuration-zero reference grammar remain pending.
+
+Full source coverage passes all 32 films /403,465 frame packets in 345.94 seconds.
+Counts remain unchanged: 451 snapshot tables, 243 closed /208 Desync, 2,068,021
+vacant headers, 35,634 live headers after vacancies, complete control kinds
+[1,063,261, 263, 243], and 167 secondary blocks. Every captured bootstrap records
+the corruption policy false. Missing/true policy behavior is verified separately
+by source-prefix fixtures and public/configured integration tests; corpus success
+is not evidence of unrepresented builds or configurations. The historical
+appearance oracle and 208 snapshot-body stops remain unresolved; no expectation
+was rewritten to hide them.
+
+## Native event-table and configuration admission checkpoint
+
+Public Film and replay now require the recorded native 123-word table before
+nonempty message references/bodies and refuse configuration-zero messages at the
+same header boundary. Empty lists remain readable. Known table words do not
+require unrelated later bootstrap fields; missing corruption policy still stops
+at its own boundary. Raw source bytes, partial headers and opaque suffixes remain
+retained, with no reference/body read or following view after an admission stop.
+
+The new event-admission oracle verifies six pinned native blobs. Its 503 table
+cases cover lengths, per-entry mismatches and major-version classification; its
+87 frames cover empty/zoom messages, unsupported codes, both configuration and
+corruption bits, and partial headers. Rust compares the complete native table,
+371 applicable exact-count/major-41 cases and every truncated source table. Four
+upstream shorter-table frame cases are explicitly refused instead of adopting
+the reference reader's numbering/closure hypothesis. Other cardinalities/majors
+are reference classifications, not claimed support by the fixed v41/27 bootstrap.
+The exporter reproduces exactly and all 66 manifest lengths/hashes match.
+
+Three added parser tests cover those native cases, public source coverage,
+serialization and refusal boundaries. The replay-admission regression now covers
+missing/mismatched tables and configuration zero, alongside missing/false/true
+corruption policy. Its supplied empty roster is only a test prerequisite. Public
+body fixtures now supply native tables from the independent oracle; malformed
+bootstrap goldens and historical oracle expectations remain unchanged.
+
+Both feature configurations pass 304 ordinary tests and ten doctests, with eleven
+normally ignored corpus tests. All-features took 86.18 seconds; no-default-features
+86.16 seconds under concurrent verification. Strict Clippy/Rustdoc, WASM,
+formatting and whitespace pass. Captured replay passes in 77.19 seconds: Octagon
+retains 96 event assumptions /42 roster-index assumptions, Recharge 246/496, and
+roster observations remain 48/496. These are regression counts, not complete
+semantic decoding or proven ownership.
+
+Logs: `/private/tmp/halo-event-admission-{targeted,all-features,no-default,clippy,rustdoc,wasm,format,whitespace,replay,corpus}.log`.
+The initial/intermediate logs are not final verification. No commit or push was
+made; the complete canonical-parser/capability objective remains active.
+
+Full source coverage passes 32 films /403,465 frame packets in 339.94 seconds.
+Counts are unchanged: 451 snapshot tables, 243 closed /208 Desync, 2,068,021
+vacant headers, 35,634 live headers reached after vacancies, complete control
+kinds [1,063,261, 263, 243], and 167 secondary blocks. All captured version tables
+are native; all frame and all 451 snapshot configuration flags are one. The
+separate snapshot-flag audit is `/private/tmp/halo-keyframe-configuration-audit.json`.
+Unsupported table/configuration behavior has authored source/integration evidence;
+corpus success does not certify those unrepresented layouts. The 208 snapshot
+body stops and historical appearance oracle remain unresolved and unchanged.
+
+## Shared reference-configuration checkpoint
+
+Packet configuration now reaches shared handles in NEW/DELTA/default/snapshot
+and control bodies, including the separate legacy position handle tail. A
+configuration-zero handle stops after known presence/category-1 probe fields,
+before the unknown global-range value/generation. Record sections carry
+ContextUnavailable and an explicit UnsupportedReferenceConfiguration stop.
+Fixed R15 posture words and other unaffected/empty sections remain readable.
+Replay now records incomplete control-view reasons at their exact prefix end.
+
+Four tests cover 49 original-Go native handle cases, all prefix cuts, component
+and default envelopes through NEW/DELTA/snapshot, the position path and fixed
+posture distinction, and public Film/replay with a retained NEW schema and later
+empty DELTA. The independent exporter verifies five blobs, including original
+observation types/enum constants. An initial harness used a placeholder numeric
+reference-kind constant; the audit replaced it with the unchanged native enum.
+Only that unused observation metadata changed (1 to native 0); every value,
+presence/probe and endpoint remained identical. The final export reproduces
+exactly, and the test now also checks the native enum value.
+
+The theater suite passed 256 tests with the long exhaustive component test
+excluded during iteration. Both final serial feature suites then passed all
+308 ordinary tests and ten doctests, with eleven corpus tests normally ignored:
+124.99 seconds all-features and 124.97 seconds no-default-features. The concurrent
+all-features run had one failure in the existing 50ms backoff timing test; the
+same unchanged test passes in the serial run. No rate-limit code or assertion
+was changed. Strict Clippy/Rustdoc, WASM, formatting and whitespace pass.
+
+Final targeted and serial logs use `/private/tmp/halo-reference-configuration-`
+with `targeted-final.log`, `all-features-serial.log`, `no-default-serial.log`,
+`clippy-verified.log`, `rustdoc-final.log`, `wasm-final.log`, `format.log` and
+`whitespace.log`. Earlier logs include intermediate builds and the timing failure;
+they are not substituted for final verification.
+
+Final captured replay passes in 72.63 seconds. Octagon retains 96 event assumptions
+and 42 roster-index assumptions; Recharge retains 246 and 496. Roster observations
+remain 48/496. Canonical reads remain unchanged. This proves regression boundaries,
+not complete semantic decoding or roster ownership. Final replay/source logs are
+`replay-final.log` and `corpus-final.log` under the same prefix. The first corpus
+run passed in 373.44 seconds before the final legacy-position gate was added;
+final-build source coverage passed in 343.91 seconds: all 32 films and 403,465
+frame packets. Counts are unchanged: 451 snapshot tables, 243 closed /208 Desync,
+2,068,021 vacant headers and 35,634 live headers reached after vacancies.
+Complete controls remain [1,063,261, 263, 243], with 167 secondary blocks.
+This run includes the final legacy-position reference gate. The subsequently
+added catalogue APIs do not change packet readers or runtime admission.
+
+Separate follow-up preparation: `game-catalogues-v41/reference.json` is reproduced
+through original libfilmshell medal/options APIs, with four blob checks. It
+contains 157 medals, 98 option hashes, seven scripts /104 options and 261 hash
+vectors. This was initially an independently generated baseline for pending local
+imports; the next checkpoint records implementation parity. The 124 empirical medal pairs
+all match native sorting-weight/index pairs; 33 native definitions are additional.
+The full robustness/canonical-parser objective remains active; no commit or push
+was made.
+
+## Medal and option catalogue checkpoint
+
+The prepared independent oracle now verifies the implemented `film/medals` and
+`film/options` APIs. Four new tests cover all 157 medal definitions and every
+metadata field, all 98 option names and seven scripts /104 ordered entries with
+exact f64 default bits, 261 original binary hash vectors, and all 65,536 possible
+empirical summary byte pairs. The same 124 pairs are admitted; 33 other native
+definitions remain reference-only. Medal lookup holes and large unknown indices,
+unknown hashes, source alias order and absent/nonliteral defaults remain explicit.
+
+The exporter and separate two-blob data importer reproduce exactly. The fixture
+continues to verify four original source blobs and does not derive expectations
+from local Rust. See GAME_CATALOGUES.md for API and namespace boundaries.
+The all-features serial suite passes 312 ordinary tests and ten doctests, with
+eleven corpus tests normally ignored (131.61 seconds for ordinary tests). This
+run preceded the Clippy-driven `chunks_exact(4)` to `as_chunks::<4>()` hash-loop
+adaptation. All 261 original hash vectors pass after that change; the final
+no-default suite also passes 312 ordinary tests and ten doctests (122.99 seconds
+for ordinary tests). Strict Clippy, strict Rustdoc, WASM, formatting, whitespace
+and all 68 fixture lengths/hashes pass.
+
+Logs are `/private/tmp/halo-game-catalogues-` with `all-features.log`,
+`hash-final.log`, `clippy-final.log`, `rustdoc-final.log`, `wasm-final.log`, and
+`no-default-final.log`. `tests-final.log` records the passing catalogue comparisons.
+Earlier logs contain intermediate verification and are not final results.
+
+The full canonical-parser objective remains active. Snapshot physics context,
+the shared damage-count refusal, historical appearance oracle, broader writer/
+build support and remaining runtime projections are not resolved by catalogue
+metadata parity. No commit or push was made.
+
+## Recorded variant runtime view checkpoint
+
+Three ordinary tests pass over 31 authored Bond trees through public Film/runtime
+entrypoints. They verify 24 named scalar paths, ten flag meanings, both flag
+container kinds, separate loadout/weapon entries, exact option bytes, duplicate
+hashes, missing row members, every numeric representation, inherited/duplicate
+field scope, malformed shapes, ambiguous instances and message/tail truncation
+boundaries. The independent exporter verifies four original libfilmshell blobs
+and invokes original value/option readers, path constants, flag mappings and
+stat/playback projection. Its artificial anchor framing is only an adapter for
+the upstream projection, never the local runtime's boundary source.
+
+The first corpus audit found that the captured flags are Bond sets (type 12),
+not only lists (type 11). Both now preserve bit-index entries and exact source
+containers. The final captured test passes all 32 films in 5.17 seconds, with
+221 named setting occurrences, 325 option rows, 32 loadouts and 96 weapon entries.
+Original upstream traversal of the exported canonical spans independently matches
+all 325 option hashes/eight-byte values in order and all 32 base endpoints.
+Source Film and playback position remain unchanged. This does not prove unobserved
+builds, script/default semantics or whole-format completion.
+
+The fixture reproduces exactly; all 70 fixture lengths/hashes pass. Targeted and
+corpus logs are `/private/tmp/halo-variant-view-tests-final.log` and
+`/private/tmp/halo-variant-corpus-final.log`. Scratch source/native captures are
+`/private/tmp/halo-variant-captured.json` and `halo-variant-native-captured.json`;
+the checked-in verifier reproduces the comparison. The temporary inspection
+example was removed.
+
+Both full serial feature suites pass 315 ordinary tests and ten doctests, with
+twelve corpus tests normally ignored: 125.50 seconds all-features and 123.21
+seconds no-default-features. Strict Clippy/Rustdoc, WASM, formatting and whitespace
+also pass. Final logs use `/private/tmp/halo-variant-` with
+`all-features-final.log`, `no-default-final.log`, `clippy-final.log`,
+`rustdoc-final.log` and `wasm-final.log`. The original failed corpus log records
+the subsequently fixed list-versus-set distinction; it is not the final result.
+No packet parser changed in this checkpoint. Full format/runtime parity remains
+unproven, and the broader goal remains active. No commit or push was made.
+
+## Variant stat definitions and column mapping checkpoint
+
+Two new tests exercise 16 additional authored trees (47 variant trees total).
+They compare the original stat-definition/column/spawn-settings projection and
+retain exact unsigned IDs, signed/unsigned attributes, raw invalid UTF-8/NULs,
+absent/empty names and full-width precision values. Missing or malformed IDs,
+same-layer duplicates, inherited IDs, absent/empty definition containers and
+unknown column IDs remain explicit. Repeated ambiguous columns share candidate
+arrays; matching uses one index instead of rescanning every definition per column.
+The borrowed-byte helper now checks dynamic byte-to-bit multiplication.
+
+The captured view test passes all 32 films in 5.23 seconds: 1,324 definitions,
+130 uniquely resolved column references, and the unchanged 221 settings /325
+option rows /32 loadouts /96 weapon entries. Original upstream projections agree
+on every recorded metadata property, column mapping and spawn override. The
+comparison separately counts 5,876 omitted fields where the original API supplies
+defaults; none are inserted into the local view. The first capture harness assumed
+signed stat attributes; unsigned captured attributes exposed that assumption.
+The runtime representation already preserved signedness, and the final harness
+and an added unsigned fixture verify both forms.
+
+The expanded four-blob original-source fixture reproduces exactly; all 70 fixture
+hashes/lengths pass. Targeted tests pass. Corpus log:
+`/private/tmp/halo-variant-stats-corpus-verified.log`; native comparison:
+`/private/tmp/halo-variant-stats-native-check.log`. Scratch local/native exports
+are `halo-variant-stats-captured.json` and `halo-variant-stats-native.json` under
+the same directory. Earlier corpus logs are intermediate harness failures and
+are not final verification.
+
+Both full serial feature suites pass 317 ordinary tests and ten doctests, with
+twelve corpus tests normally ignored: 123.58 seconds all-features and 122.67
+seconds no-default-features. Strict Clippy/Rustdoc, WASM, formatting, whitespace
+and all 70 fixture hashes/lengths pass. Logs use `/private/tmp/halo-variant-stats-`
+with `all-features.log`, `no-default.log`, `clippy-final.log`, `rustdoc.log`,
+`wasm.log` and `tests-final.log`. No packet parser or recorded statborg state
+changed. The broader robustness/canonical-format objective remains active;
+no commit or push was made.
+
+## Indexed variant strings checkpoint
+
+Three new tests cover string-table offsets, raw bytes/source ranges, malformed
+or missing fields and unchanged upstream text projection. Fifteen new authored
+cases bring variant-view-v41 to 62 trees. Both authored and original-source
+exports reproduce exactly, and all 70 fixture lengths/hashes pass.
+
+The expanded captured test passes all 32 films in 5.58 seconds, checking 1,639
+entry flags and 29,502 localized values. Every text and NUL range agrees with the
+canonical Film bytes. Independent original callbacks match every offset/flag;
+original text extraction matches every name/description pair and all 1,323
+native label texts occur in the table. Label availability is not stat-slot
+mapping. Alpha is an indexed row with 18 shared offsets, correcting the earlier
+unreferenced-text hypothesis. The 1,324 stat definitions, 130 column references,
+325 option rows and 5,876 absent/default distinctions still match.
+
+`cargo test --offline --all-features -- --test-threads=1` passes 320 ordinary
+tests and ten doctests; the ordinary suite took 122.17 seconds. Twelve corpus
+tests are normally ignored; the expanded variant corpus was run separately.
+Strict all-target Clippy, Rustdoc, WASM, formatting and whitespace checks pass.
+No packet reader changed. This checkpoint ran the full all-features suite;
+no-default-features was last run at the preceding stat-definition checkpoint.
+
+Logs under `/private/tmp/halo-variant-strings-`: `all-features.log`,
+`clippy-final.log`, `rustdoc.log`, `wasm.log`, `corpus.log` and
+`native-check.log`. Independent corpus inputs/results are `captured.json` and
+`native.json` with the same prefix. The earlier targeted log predates the third
+string test; the full all-features suite covers all three final tests. The first
+Clippy log reports collapsible-if style issues corrected before the final pass.
+Canonical completeness, broader writer support and the outstanding context and
+runtime semantics remain open. No commit or push was made.
+
+## Bounded script evidence and inferred mode checkpoint
+
+The new script-evidence-v41 fixture independently authors 272 Bond trees,
+including all 256 combinations of upstream's eight mode-trigger filenames.
+Four pinned source blobs are verified before compiling the unchanged native
+script and mode modules with a harness. Two tests check native name/precedence
+agreement, exact source spans, duplicate/case retention, conflicting rules,
+unrecognized sets, search scope and missing/malformed/inherited fields. Authored
+and native fixtures reproduce exactly; all 72 manifest lengths/hashes pass.
+
+The expanded captured test passes all 32 films in 7.65 seconds. It retains 4,463
+filename occurrences and 3,336 per-film distinct names. The independent native
+search over the bounded blob and over each actual whole registry returns the
+same sets and mode choices. Every local occurrence range matches Film bytes;
+neither canonical Film nor playback is modified. Captured choices are Slayer,
+Strongholds and Oddball; other rules have authored/native-code evidence only.
+Mode results remain hypotheses; script archive/bytecode grammar and actual
+loading/declaration semantics are not established.
+
+The captured BaseVariantData bytes are identical to the preceding string-view
+export, so its independently computed native traces were reused to verify all
+existing views: 325 option rows, 1,324 definitions, 130 column references, 5,876
+omitted/default distinctions, 1,639 string flags and 29,502 offsets still match.
+
+The full serial all-features suite passes 322 ordinary tests and ten doctests
+(124.53 seconds for ordinary tests). Twelve corpus tests are normally ignored;
+the expanded variant corpus was run separately. Strict Clippy/Rustdoc, WASM,
+formatting and whitespace checks pass. The no-default-features suite was not
+repeated at this checkpoint. Packet grammar and parser admission are unchanged.
+
+Logs under `/private/tmp/halo-script-`: `tests-final.log`, `corpus.log`,
+`native-check.log`, `existing-views-check.log`, `all-features.log`,
+`clippy-final.log`, `rustdoc.log`, and `wasm.log`. Corpus export/oracle output are
+`captured.json` and `native.json` with the same prefix. The initial authored test
+failure was a wrong string length in the outside-blob fixture; it was corrected
+before the successful run. Initial Clippy failures concerned byte-array test
+style and were corrected before the final pass. No commit or push was made.
+The full canonical-format/robustness goal remains active.
+
+## Reference option-rule evaluation checkpoint
+
+Three tests cover 227 authored Bond trees: all 104 default metadata entries,
+all 200 aliases (each asserted to match its actual wire row), and twenty
+precedence, ambiguity, missing/invalid/unknown-value, container, applicability
+and raw-float/bool cases. Four pinned blobs supply unchanged original option
+decoding, `GameVariant::rules` and `Rule::effective`. The final comparison uses
+native decoder output by source row; no local rounding generates expected data.
+Authored/native fixtures reproduce exactly and all 74 lengths/hashes pass.
+
+The expanded corpus test passes 32 films in 7.85 seconds. Independent native
+rule/default/effective projection matches 465 evidenced rules: 285 exact
+recorded overrides, 60 explicitly hypothetical reference defaults and 120 absent
+literal defaults. Alias membership/precedence, source rows and full eight-byte
+values are checked separately from original numeric normalization. No unresolved
+captured state is silently treated as a default by the verifier.
+
+BaseVariantData/script blobs and registry paths are identical to the preceding
+export. Reusing its independent original traces verifies all prior option/stat/
+string/script results against the new capture. Film and playback remain unchanged.
+
+The full serial all-features suite passes 325 ordinary tests and ten doctests
+(131.46 seconds for ordinary tests). Twelve corpus tests are normally ignored;
+the expanded variant corpus was run separately. Strict all-target Clippy,
+Rustdoc, WASM, formatting and whitespace pass. No-default-features was not
+repeated at this checkpoint. No packet grammar or parser admission changed.
+
+Logs under `/private/tmp/halo-rules-`: `all-features.log`, `clippy-final.log`,
+`rustdoc.log`, `wasm.log`, `corpus.log`, `native-check.log`,
+`existing-views-check.log`, and `existing-scripts-check.log`. The final full suite
+covers the stronger per-alias/default-count assertions and native-row comparison
+added after the initial targeted `tests.log`. Captured/original rule exports are
+`captured.json` and `native.json` with the same prefix. No commit or push was made.
+Actual script loading/default applicability, remaining runtime semantics and
+broader canonical-format/context requirements remain open; the goal stays active.
+
+## Recorded stat-text checkpoint
+
+Twenty authored trees and two tests check recorded fields 8–11, shared/reordered
+references, missing/invalid indices, conflicting references and exact source
+ranges. The unchanged original reader agrees on all 5,296 indices across 1,324
+definitions. The 32-film corpus passes in 8.75 seconds: all 23,832 localized
+stat-text values resolve through recorded string entries. All 1,323 English
+labels emitted by the original scanner agree. Oddball definitions 45 and 46
+share entry 55 (Carry Time); this adds an association, not a unique string.
+Field-specific label roles and equal units are not inferred.
+
+The final full suite passes 327 ordinary tests (129.51 seconds) and ten doctests.
+Twelve corpus tests are normally ignored; the variant corpus ran separately.
+Strict all-target Clippy, Rustdoc and WASM checks passed on the final source.
+All prior independent view/script/rule comparisons and all 76 fixture lengths
+and hashes pass. The no-default-features suite was not repeated.
+
+The first full-suite attempt failed linking `position_probe` because the disk
+was full (`ld: write() failed, errno=28`). After the other Cargo jobs finished,
+`cargo clean --offline --package halo_api --profile dev` removed only generated
+package caches. Fixture hashes were rechecked, and the successful rerun used
+`cargo test --offline --config build.incremental=false --all-features -- --test-threads=1`.
+No packet grammar changed and no commit or push was made.
+
+Logs under `/private/tmp/halo-stat-text-`: `all-features-final.log`,
+`tests-final.log`, `corpus.log`, `native-check.log`, `clippy.log`, `rustdoc.log`,
+`wasm.log`, and `existing-{views,scripts,rules}-check.log`. `all-features.log`
+retains the disk-full failure. `captured.json` and `native.json` retain corpus
+and original per-row exports. Full canonical-format coverage remains unfinished.
+
+## HUD splash-text checkpoint
+
+Four tests cover 35 independently authored static-component bodies at all eight
+bit alignments, every mixed-body truncation point, malformed field shape/padding,
+all eight argument kinds, signed/real boundaries, unsupported/ambiguous schemas,
+duplicate rows, and actual Film baseline/DELTA/repetition/clear/partial behavior.
+Unchanged pinned `splash.rs` and `bits.rs` provide independent text/numeric
+results. Authored and native outputs reproduce exactly; all 78 fixture lengths
+and hashes pass. Unknown argument kinds retain their original tags and words.
+
+The expanded captured scoreboard/engine/HUD test passes in 38.76 seconds. HUD
+fields match their canonical packet source bits. All 541 complete observations
+match independent original reads: 37 absent texts in Octagon and 504 observations
+in Recharge, including 488 present texts with 488 numeric arguments under one
+key. Other argument kinds and partial HUD observations have authored evidence
+only. No viewer identity/count, screen-state duration or original game real
+quantizer is established. Existing statborg and engine source checks also pass.
+
+`cargo test --offline --config build.incremental=false --all-features -- --test-threads=1`
+passes 331 ordinary tests in 129.85 seconds and ten doctests. Twelve corpus tests
+are normally ignored; the two-film check above was run separately. The final
+four HUD tests also pass separately after strengthening duplicate-row refusal
+to mutate a real Film keyframe rather than constructing its expected error.
+Strict all-target Clippy passed again on that final test source. Strict Rustdoc,
+WASM, formatting and whitespace checks pass. No-default-features was not repeated.
+
+Logs under `/private/tmp/halo-hud-`: `tests-final.log`, `all-features.log`,
+`corpus.log`, `clippy-final.log`, `rustdoc.log`, `wasm.log`, and
+`{octagon,recharge}-native-check.log`. Source captures are in `halo-hud-capture/`;
+the independent native results are `halo-hud-{octagon,recharge}-native.json`.
+The initial targeted failure was a test helper confusing source chunk position
+with replication-vector index; source-position lookup corrected it before the
+passing checks. No production wire reader changed. No commit or push was made.
+The wider canonical-format/robustness objective remains active.
+
+## Vehicle-context evidence and upstream refresh checkpoint
+
+The new ignored `captured_vehicle_masks_audit_prior_asset_gate_evidence` audit
+passes all 32 films in 133.56 seconds. It inventories 451 snapshot tables,
+207 vehicle-context stops, 130 vehicle NEW records and seven masked type-state/
+physics records. A focused raid rerun passes in 86.56 seconds after retaining
+full IDs/masks/parameters and correcting an audit-only row-parameter filter.
+Six selections have complete rows; none has a complete asset tag in the same
+NEW. Two DELTAs have earlier same-full-ID NEW candidates, but lifetime continuity
+is unproven. These do not enable a gate or remove a stop.
+
+The sealed [research report](research/libfilmshell/vehicle-context-20261110.md)
+retains every source span, checks packet envelopes/timestamps independently and
+hashes referenced chunks, registries and manifests. It is an observation report,
+not a golden oracle for speculative asset context. All production grammar and
+admission are unchanged.
+
+Strict all-target Clippy passes on the final audit source; formatting and
+whitespace checks pass. The preceding 331-test/ten-doctest full suite remains
+the latest production regression run; it was not repeated for this ignored
+research test and documentation. There are now thirteen normally ignored corpus
+tests. Existing 78 fixture files are unchanged.
+
+GitHub HEAD was refreshed independently to
+`8f0f8d078e513c800baa21fac416fd4c0c127d03`. Its new listing assignments,
+controller ownership and parent-state rides are audited in
+[LIBFILMSHELL_UPDATE_20261110.md](LIBFILMSHELL_UPDATE_20261110.md); old fixtures
+and catalogues retain `1806798`. New direct-field semantics and fallback policies
+are distinguished. These capabilities remain implementation work, not verified
+parity. Logs: `/private/tmp/halo-vehicle-context-{audit,raid-final,clippy-final}.log`.
+No commit or push was made. The full objective remains active.
+
+## Listing assignment / holder-history checkpoint
+
+The new `runtime/roster/assignments.rs` view uses an explicit v41/27 reference
+schema pinned to libfilmshell `8f0f8d078e513c800baa21fac416fd4c0c127d03`.
+Eight authored packet cases contain 117 records and exercise all entry bit
+alignments. Unchanged original roster scanners agree on 108 present assignment
+values. Eight absent session options remain absent locally despite numeric
+scanner output. One complete short-21 record reproduces the scanner's omission
+when its hardcoded inner marker 183 is absent. Bot slot words preserve all 32
+bits separately from the scanner's plausibility range.
+
+Four new tests (eight total roster tests) cover the source comparison, missing
+IDs/populations, partial/opaque/duplicate lists, source-field identity, explicit
+schema admission, independent human/bot claims, departures, slot changes/reuse,
+same-time ordering, repeated listings and unchanged Film/playback. No wire reader
+or existing consumer attribution changed.
+
+The expanded existing metadata corpus test passes all 32 films in 199.39 seconds.
+It now constructs the actual runtime and exports assignments from listing events.
+The corpus has 509 complete session packets with 5,347 assignments and 509 complete
+empty bot packets. The original native scanner emits 5,333 assignments, all of
+which agree. It misses 14 entries, each with first short 21 rather than its
+required marker 183. These are 14 record occurrences, not 14 new participants.
+The source bit checks retain matching identity/join words, the explicit option,
+short value and entry range. Source packet names and payload hashes are recorded
+in [captured-comparison.json](../fixtures/assignments-v41/captured-comparison.json).
+
+As a separate structural check, all 5,347 identity/option pairs agree with the
+retained original LevelUp outputs from the earlier metadata checkpoint. The
+verifier first requires identical payload bytes, format and build for every
+packet. That Go reader was not rerun here. Its source pin and reproduction
+instructions remain in roster-v41/README.md. Nonempty bots and absent options
+still have authored evidence only. These checks do not establish controller or
+continuous-lifetime ownership.
+
+The full all-features suite passes 335 ordinary tests and ten doctests, with
+13 corpus tests normally ignored (133.90 seconds ordinary). The final short-21
+fixture was added after that run; all eight roster tests pass again on the final
+fixture in 0.21 seconds. Production code is identical to the full-suite run.
+Strict all-target Clippy, strict Rustdoc, WASM, formatting and whitespace checks
+pass. All 81 fixture lengths/hashes verify, and the final native fixture exporter
+reproduces byte for byte. No-default-features was not repeated. Canonical packet
+readers and the historical appearance oracle remain unchanged.
+
+Logs: `/private/tmp/halo-assignments-{focused-final,final-regression,
+all-features,corpus,clippy-final,rustdoc,wasm}.log`.
+Captured inputs/output: `/private/tmp/halo-assignments-{captured,native}.json`;
+comparison reproduction and limits are in assignments-v41/README.md. The larger
+controller/attachment, downstream attribution, writer/context and round-trip
+requirements remain open. No commit or push was made; the full goal stays active.
+
+## Unit-controller observation / holder-link checkpoint
+
+Six controller tests and one exact-event roster test were added. The 130 authored
+bodies cover all optional branches and five-bit player IDs, every bit alignment,
+every-bit truncation of the longest body, source-field checks, malformed fields,
+corruption trailers, schemas/duplicate rows, clears/changes, missing populations,
+keyframe/runtime domains and lifecycle boundaries. Public record mutations are
+explicitly separate from the authored wire evidence. `roster.at_event` rejects
+foreign/cloned events and excludes later same-timestamp listings.
+
+The new native exporter verifies libfilmshell `components.rs` blob
+`6acd5fbb992f7d65ff8fdbd88a6b7b739a88a1a4` at commit
+`8f0f8d078e513c800baa21fac416fd4c0c127d03`. It appends a test that invokes the
+unchanged UnitControl block in a disposable source archive. Row parameters 1/2
+produce equal values and endpoints before each authored case is exported. The
+harness lockfile is regenerated offline against cached dependencies; no original
+reader body is patched. Existing earlier fixtures retain their original pins.
+
+The expanded two-film scoreboard/engine/HUD test passes in 36.73 seconds. It
+adds 135 Octagon and 728 Recharge controller observations, all complete. Separate
+original-native comparison agrees on all 863 values and endpoints: 725 present
+controllers and 138 clears. All present controllers have a Unique holder at the
+exact recorded event in these two captures. Unobserved/ambiguous attribution,
+partial controller records and lifecycle boundaries have authored evidence.
+Controller fields are separately checked against original packet payload bits.
+An initial export failed to create nested output directories; the corrected
+export and full corpus rerun passed. Existing scoreboard/HUD counts are unchanged.
+
+The full all-features suite passes 342 ordinary tests and ten doctests, with
+13 corpus tests normally ignored (134.21 seconds ordinary). The final native
+fixture adds an assertion that parameters 1/2 agree; the production code and
+per-case values are unchanged from that full-suite run. The final controller
+suite is rerun separately. Strict Clippy, Rustdoc and WASM checks pass. Final
+fixture reproduction, manifest hashes and formatting/whitespace checks are
+recorded with the checkpoint below. No-default-features and the all-32-film
+source suite were not repeated; no canonical packet reader changed.
+
+Logs: `/private/tmp/halo-controller-{focused-final,final-regression,all-features,
+corpus-final,clippy,rustdoc,wasm}.log`.
+Captured inputs are in `/private/tmp/halo-controller-capture/`; the combined
+native input/output and check are `/private/tmp/halo-controller-{captured-combined,
+native,native-check}.json`. See controllers-v41/README.md for commands and scope.
+CONTROLLERS.md distinguishes source observations from unproven continuous
+life ownership. No commit or push was made; the broader goal remains active.
+
+Final controller verification: all six controller tests pass in 0.27 seconds
+with the final parameter-1/2 fixture. Final strict all-target Clippy, Rustdoc,
+WASM, formatting and whitespace pass. All 83 fixture lengths/hashes verify;
+the final native exporter reproduces reference.json byte for byte. No live
+verification jobs remain at this checkpoint.
+
+## Attachment snapshot and native comparison checkpoint
+
+Nine attachment tests cover 150 original-source bodies, parameters 0–4,
+archetypes 35/40/47, every alignment, all optional branches/generations,
+every-bit truncation and malformed fields. Snapshot policies cover ten-node
+chains, cycles, source gaps, exact-event ordering, generations/namespaces,
+deletes/reuse, missing baselines and schema/partial/unbound refusals. Public
+record mutations are separately identified as policy tests, not wire proof.
+
+The native exporter pins commit `8f0f8d078e513c800baa21fac416fd4c0c127d03` and
+components blob `6acd5fbb992f7d65ff8fdbd88a6b7b739a88a1a4`. It archives original
+source and appends a test invoking the unchanged ParentState block; the disposable
+lockfile is regenerated offline. Final export reproduces reference.json byte for
+byte. All 85 manifest lengths and SHA-256 hashes verify.
+
+The final captured run passes in 36.05 seconds. All 8,525 admitted observations
+(1,457 Octagon, 7,068 Recharge) match native parent/index/generation/node/seat and
+endpoint values. There are 2,039 attached and 6,486 detached observations, with
+881 Unit and 1,158 Object handles, and no present captured seats. Source fields
+are independently checked against actual packet bits. Two complete-field
+Recharge DELTAs remain unbound: chunk 60, packet 1448, entity record 9, runtime
+ID 2147484775; and chunk 60, packet 1764, entity record 8, ID 2147484777. Neither
+has an established archetype, so neither is supplied to the native comparison
+with a guessed one. Captured root samples are two Root/one Unresolved for Octagon
+and three Root for Recharge; they are samples, not all-root parity.
+
+The final snapshot all-features suite passes 351 ordinary tests and ten doctests,
+13 corpus tests normally ignored, in 131.37 seconds ordinary. Strict Clippy,
+Rustdoc, WASM, formatting and whitespace pass. No-default-features and the
+all-32-film source suite were not repeated; canonical wire readers are unchanged.
+
+Logs: `/private/tmp/halo-attachment-{final-regression,all-features-final,
+corpus-final,clippy-final,rustdoc,wasm}.log`. Capture inputs/refusals are under
+`/private/tmp/halo-attachment-capture/`; combined inputs/native output/check are
+`/private/tmp/halo-attachment-{captured-combined,native,native-check}.json`.
+The final authored reproduction is
+`/private/tmp/halo-attachment-reference-reproduced.json`. Reproduction commands
+and scope are in attachments-v41/README.md. Object mapping, ride spans, continuous
+ownership and whole-format completion remain unproven.
+
+## Direct attachment history/span checkpoint
+
+Added `runtime/attachments/history.rs` and a shared transition visitor for history
+and snapshot queries. Three additional policy tests bring the attachment suite
+to twelve passing tests (0.22 seconds). They retain repeated values, same-time
+ordering, detached observations, open recording ends, keyframe/runtime separation,
+packet-end suffixes, recovery, truncated final chunks, deletes, generations,
+missing baselines and component errors. An ancestor changing a root does not
+silently change the child's direct component span. Film and playback stay unchanged.
+
+The initial lifecycle test incorrectly expected an unbound DELTA after deletion
+to reestablish state. It failed as intended by admission policy. The corrected
+model fixture declares a NEW and archetype for recovery; production admission
+was not weakened. Synthetic lifecycle mutations remain distinct from wire proof.
+
+The expanded two-film check passes in 51.53 seconds, retaining all earlier native
+observation counts and the two unbound refusals. Three sampled history queries
+per film retain 45 reads /28,362 unknown boundaries for Octagon and 27 reads
+/116,109 unknown boundaries for Recharge. These totals count query results,
+including repeated global gaps across queries; they are not unique gaps or
+entity counts. Each query's admitted reads match the original observation sequence
+and source pointers, and its final evidence agrees with the full snapshot. This
+is a sampled consistency check, not an independent native history/ride oracle.
+
+Logs: `/private/tmp/halo-attachment-history-{focused,corpus,all-features,clippy,
+rustdoc,wasm}.log`. Native reader fixtures and all 85 manifest entries remain
+unchanged from the preceding byte-identical reproduction. No canonical packet
+reader or catalogue pin changed. Ride projections and continuous life ownership
+remain subsequent work.
+
+Final history/span verification passes 354 ordinary tests and ten doctests,
+with 13 corpus tests normally ignored (78.98 seconds ordinary). Strict all-target
+Clippy, Rustdoc, WASM, formatting and whitespace checks pass. The twelve attachment
+tests and expanded two-film corpus pass. All verification jobs have completed.
+No commit or push was made; the broader canonical-format goal remains active.
+
+## Controller-holder continuity checkpoint
+
+The six new ownership tests and six existing controller tests pass in 0.46
+seconds. They combine the existing independent controller/assignment wire
+fixtures with explicitly labeled source-model lifecycle/error mutations. Tests
+cover changing and repeated controllers, clears, roster reassignment without
+another controller update, human/bot conflicts, missing IDs and populations,
+malformed/opaque lists, complete/incomplete deletes, missing baselines,
+other generations, partial/duplicate fields, exact-event ordering, foreign-event
+refusal, keyframe/runtime separation and recovery after source gaps. Playback
+and canonical Film remain unchanged. After extracting shared packet-boundary
+handling, all twelve attachment tests pass in 0.23 seconds.
+
+The first two-film run passes in 44.25 seconds. Arbitrary first/middle/last
+controller observations selected several singleton histories, so the final run
+selects the busiest history in each identity domain and the busiest remaining
+entity. It compares every selected controller read/source pointer to the direct
+observations, verifies event-time holder agreement where no population gap exists,
+and compares final query evidence with the full history. These are consistency
+checks over native-validated direct fields, not an independent native oracle for
+the local continuity policy. Existing direct-value fixtures/native output are
+unchanged. Lifecycle policy does not adopt upstream's first-controller/first-end
+or first-later-holder aggregation.
+
+An initial test export tried to serialize SourceRef, which does not implement
+Serialize; it was corrected to retain its debug source coordinates. An earlier
+synthetic chunk-tail test used a Rust Range where the model requires ByteRange;
+that fixture type was corrected. Neither required production admission changes.
+Logs: `/private/tmp/halo-ownership-{focused,attachment-regression,all-features,
+corpus,corpus-final,clippy-final,rustdoc,wasm}.log`. Final selected-history exports
+are under `/private/tmp/halo-ownership-capture-final/`. Corpus counts and final
+checks are recorded below when completed. Eventless replication chunks and full
+life/consumer integration remain open; whole-format completion is unproven.
+
+The final selected-history corpus passes in 46.35 seconds. Octagon's three
+queries retain nine direct reads, 27 Unique states and 28,512 Unresolved states.
+Recharge retains fourteen direct reads, 35 Unique, three Uncontrolled, one Deleted
+and 117,098 Unresolved states. Counts are history entries across three queries,
+including repeated shared gaps; they are not unique players, lives, deaths or
+unique gap counts. Admitted reads and final query/history states agree. The
+863 controller and 8,525 admitted parent observations retain their prior direct
+values and source checks; two parent DELTAs remain unbound. All 85 fixture hashes
+verify. Strict final Clippy, Rustdoc, WASM, formatting and whitespace pass.
+
+Final controller-continuity regression passes 360 ordinary tests and ten
+doctests, with 13 corpus tests normally ignored (78.40 seconds ordinary). Final
+strict Clippy, Rustdoc, WASM, formatting/whitespace and all 85 fixture hashes
+pass; the expanded captured-film run also passes. All verification jobs have
+completed. No commit or push was made. The broader robustness goal remains active,
+including the identified eventless-chunk gap and life/consumer integration.
+
+## Unframed chunk continuity checkpoint
+
+Six new boundary tests pass in the focused runs: three eventless tests in 0.17
+seconds, plus three unframed tests and the existing chunk-tail regression in 0.09
+seconds. The previous twelve attachment tests also pass before adding these new
+cases. Tests use actual short unframed input and truncated zlib source bytes;
+complete empty clear/zlib inputs are negative controls. They verify source-pointer
+and raw-byte preservation, absent packet timestamps, preceding exact-event state,
+leading/trailing/internal and adjacent chunks, recordings with no packet events,
+reversed source clocks, fresh controller/population recovery and attachment
+root/span invalidation. Manifest offsets are deliberately unrelated to packet time.
+
+The source-boundary API now returns Option from event(), exposes unframed_chunk(),
+and retains a boundary in unknown attachment evidence. Existing captured checks
+compare either actual event pointers or actual source-chunk pointers. No recorded
+Event is fabricated. Existing native component/listing values and all fixture
+payloads remain unchanged; no original-source oracle was retargeted.
+
+Logs: `/private/tmp/halo-eventless-{attachment,focused,all-features,corpus,clippy,
+rustdoc,wasm}.log`. Ownership export sources are under
+`/private/tmp/halo-eventless-ownership-capture/`. Final regression results follow
+below. The larger canonical-format objective remains active; this checkpoint
+addresses a concrete source-coverage gap rather than claiming whole-format parity.
+
+The two-film regression passes in 48.29 seconds. All previous direct-source
+counts and sampled attachment/controller histories remain unchanged: 863
+controller observations, 8,525 admitted parent observations and two unbound
+parent DELTAs. The sampled ownership queries still retain nine Octagon and
+fourteen Recharge controller reads; this regression does not replace authored
+unframed-chunk evidence with a claim of naturally captured cases. Strict Clippy,
+Rustdoc, WASM, formatting/whitespace and all 85 fixture lengths/hashes pass.
+No-default-features and the all-32-film source corpus were not repeated; packet
+and component readers were unchanged.
+
+Final unframed-chunk regression passes 366 ordinary tests and ten doctests,
+with 13 corpus tests normally ignored (79.73 seconds ordinary). The two-film
+corpus, strict Clippy, Rustdoc, WASM, formatting/whitespace and all 85 fixture
+hashes pass. All verification jobs have completed. No commit or push was made;
+the full robustness goal remains active, including the separate scoreboard/replay
+source-gap audit, life integration and unresolved writer/format proof.
+
+## Scoreboard/engine source continuity checkpoint
+
+All 22 scoreboard/engine tests pass in 0.25 seconds. Eight new tests cover
+untimed chunks, complete empty inputs, truncated zlib checksums and unframed
+tails, packet/chunk discontinuity, fresh identity requirements, same-time source
+ordering, global keyframe omissions and exclusion of future reset boundaries.
+Authored table helpers now place genuinely coexisting entities in the same full
+keyframe table. Native scalar/component fixtures remain unchanged.
+
+Initial testing exposed that Event.order is timestamp-local. The implementation
+now uses absolute event_index and before_event fields, and shares the immutable
+event timestamp index between scoreboard and engine histories. A new test checks
+source references at those indices and distinct values at successive timestamps.
+The timed-gap filter additionally prevents the next keyframe reset from being
+applied to an earlier timestamp at the same prefix boundary.
+
+One recovery fixture supplied NEW while a preceding DELTA still established the
+slot as occupied. The original sequential model correctly refused it. The final
+fixture checks that refusal, then supplies a recorded DELETE and a new complete
+creation before expecting restored identity. No inference from missing data
+was substituted for the deletion; production entity admission is unchanged.
+
+Captured checks now verify every projected update's absolute source index and
+every gap's actual packet timestamp or untimed chunk source, plus monotonic gap
+positions. They retain the existing full scalar/source checks. Logs are
+`/private/tmp/halo-score-source-{regression-final,all-features,corpus,clippy,
+rustdoc,wasm}.log`. Final results and scope follow below. Replay's separate
+continuity model and the broader canonical proof remain open.
+
+The expanded two-film corpus passes in 49.58 seconds. Source values are unchanged:
+1,160 Octagon and 12,128 Recharge statborg updates retain 64,616 and 214,517 exact
+integers respectively. The engine checks retain 1,239/5,385 updates, 2,693/9,419
+rows and 704/1,952 default identities. Every new update event_index and gap source
+reference validates against the original runtime events or source chunks.
+
+Gap boundary counts are now 35,604 Octagon (22 keyframe resets, 26,122 opaque,
+9,432 unread frame and 28 unresolved bot-population boundaries) and 110,971
+Recharge (61 keyframe resets, one incomplete keyframe, 72,206 opaque, 38,641 unread
+frame and 62 unresolved bot-population boundaries). These count boundary
+observations, including valid resets and multiple boundaries for an unread
+packet; they are not counts of newly corrupt packets. Untimed source chunks and
+transport refusal/recovery retain authored regression evidence. Existing controller
+and attachment source counts and sampled histories also pass unchanged.
+
+Strict Clippy, Rustdoc, WASM, formatting/whitespace and all 85 fixture lengths/
+SHA-256 hashes pass. Native field readers/catalogues and fixture payloads are
+unchanged. No-default-features and the full 32-film corpus were not repeated.
+
+Final scoreboard/engine source-continuity verification passes 374 ordinary
+tests and ten doctests, with 13 corpus tests normally ignored (79.57 seconds
+ordinary). The two-film corpus, strict Clippy, Rustdoc, WASM, formatting/whitespace
+and all 85 fixture hashes pass. All verification jobs have completed. No commit
+or push was made. PlayerReplay source continuity and life/holder integration,
+remaining writer/physics context and full canonical-format proof keep the broader
+goal active.
+
+## Contextual replay continuity checkpoint
+
+Eight new replay tests cover unread suffix ordering, same-clock spawn/recovery,
+raw prefix observation retention across visibility cutoffs, sparse inventory and
+HUD invalidation, population uncertainty, reference-transform invalidation,
+packetless bytes, truncated zlib checksums, complete empty chunks, absent/skipped
+manifest indices, keyframe reset timing, leading/adjacent/tailing source loss,
+requested duration bounds and nonmonotonic clocks. Authored transport cases use
+nonempty type-1 packet envelopes; type 7 terminates framing and cannot serve as an
+intermediate packet. The focused replay suite passes 59 tests with one retained
+corpus test normally ignored.
+
+The retained Octagon and Recharge replay test passes (75.76 seconds):
+
+| Capture | Continuity gaps | Supported pose observations | Life intervals |
+| --- | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 29 | 22,739 | 100 |
+| Recharge `02-oddball` | 76 | 124,273 | 264 |
+
+These gap counts include normal keyframe resets and contextual reader stops;
+they are neither canonical corruption counts nor evidence of full life coverage.
+The test verifies manifest chunk indices/packet clocks for every gap, monotonic
+pose/team timelines and interruption bounds, while preserving existing checks that
+contextual event/roster assumptions do not enter canonical reads. Raw observations
+can remain at a visibility cutoff even when a timestamp sample must be unknown.
+No new native wire-decoder parity is claimed: parser readers and fixture bytes
+are unchanged. The full 32-film corpus was not rerun for this replay-only change.
+
+Strict all-feature Clippy (library, tests and examples), Rustdoc with warnings
+denied, WASM library compilation, formatting and whitespace checks pass.
+
+Final all-feature regression passes 382 ordinary tests and ten doctests, with 13
+corpus tests normally ignored (78.53 seconds ordinary). The two-film replay check
+was run explicitly as recorded above. All verification jobs completed. No commit
+or push was made; controller/holder integration, remaining writer/physics context
+and full canonical field/round-trip proof keep the broader goal active.
+
+## Replay controller/holder integration
+
+Eight authored integration tests replace the old replay option-equals-index test.
+They consume canonical type-8/type-12 assignment fixtures and controller fields
+from the independent native-body fixtures, rather than introducing another wire
+reader. They cover nonmatching bootstrap/output/engine indices, reassignment,
+bots and cross-population conflicts, unobserved/missing-ID/empty populations,
+complete controller DELTAs, repeats and explicit clears, competing bipeds,
+partial/duplicate/malformed/unsupported control, missing/incomplete creation
+context, same-clock transfers, source-loss recovery and independent population
+continuity across unread frame bodies. The malformed-control test also verifies
+one diagnostic per affected entity when other controlled bipeds are present.
+A final focused rerun of the strengthened population-gap test passes.
+
+The full all-feature regression passes **389 ordinary tests and ten doctests**,
+with 13 corpus tests normally ignored (78.98 seconds ordinary). The focused replay
+suite passes 66 tests plus one normally ignored corpus test. These counts include
+the existing native controller/assignment tests; this checkpoint does not claim
+new wire-field coverage solely from derived ownership output.
+
+The final all-feature Octagon/Recharge replay test passes in 69.93 seconds:
+
+| Capture | Continuity gaps | Ownership reevaluations | Supported pose observations | Supported intervals |
+| --- | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 25 | 1,140 | 22,739 | 100 |
+| Recharge `02-oddball` | 76 | 10,321 | 124,273 | 264 |
+
+Pose coverage is unchanged from the preceding checkpoint. Octagon no longer
+counts normal roster membership changes as global source gaps. Reevaluations can
+reuse a still-current controller source when another controller or population
+changes; they are not counts of distinct controller bodies or complete lives.
+Every interval's evidence identifies its participant, entity and opening time;
+all trigger/controller/population/assignment spans are checked against original
+input positions, packet byte bounds and clocks. Existing canonical event-assumption
+checks remain in place. These captures contain no nonempty bot population; bot
+and reassignment behavior is proven by authored source fixtures, not claimed as a
+captured-game outcome.
+
+Strict all-feature Clippy (library/tests/examples), warnings-denied Rustdoc, WASM,
+formatting and whitespace checks pass. No wire fixtures or canonical Film parser
+readers were changed. The full 32-film corpus was not repeated for this runtime
+integration. Full-life/ride reconstruction, wider writer/physics contexts,
+remaining semantic projections and complete canonical round-trip proof remain
+open. No commit or push was made.
+
+## Source-linked ride histories
+
+The full all-feature regression passes **400 ordinary tests and ten doctests**,
+with 13 corpus tests normally ignored. Existing attachment and controller tests
+pass alongside the new ride tests after the shared walks were refactored.
+
+Eleven authored integration tests pass (0.23 seconds). They use native
+packet/table/component bodies under an explicitly configured synthetic registry
+and existing canonical human/bot assignment fixtures. They cover source-retained
+seats, exact-event versus same-time queries, eight-observation parent paths,
+missing ancestors and cycles, nonvehicle classes, unsupported Object handles,
+detached values with present seats, current human/bot ownership, reassignment,
+ambiguity, missing populations, explicit clears, unrelated records, unread
+entity/transport/chunk suffixes, sequence gaps, deletion and keyframe/runtime
+domains. Labelled public-model mutations separately test reused incarnations,
+other generations, missing parent baselines and partial/duplicate components;
+they are policy tests, not new independent wire-creation oracles. A source and
+serialization check proves the query leaves Film and playback unchanged.
+
+The expanded all-feature Octagon/Recharge source audit passes (57.68 seconds),
+including existing engine, HUD, controller, attachment and scoreboard checks.
+For each film, ride auditing selects the busiest biped in each identity domain
+and one additional busy subject. It checks all retained path fields against the
+original packet bits, final paths against attachment snapshots and every merged
+ownership boundary/status against the independent controller history.
+
+| Capture | Sampled subjects | Detached entries | Unobserved entries | Unresolved entries | Retained field checks |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 3 | 31 | 1,163 | 27,345 | 124 |
+| Recharge `02-oddball` | 3 | 52 | 42,647 | 73,800 | 208 |
+
+These sampled histories contain no proven rides. The field-check counts include
+repeated references, not distinct component bodies. Positive ride/seat, bot and
+transfer behavior is proven by the authored fixtures; it is not presented as a
+captured-game result. The existing independent parent/controller fixtures retain
+their own original-reader provenance and larger corpus counts.
+
+Strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM and formatting
+checks pass. Logs are `/private/tmp/halo-rides-{targeted,all-features,corpus,clippy,
+rustdoc,wasm}.log`. No canonical Film models, wire readers or fixture files changed
+in this checkpoint. Contextual ride/replay integration, vehicle tracks, full
+lives, wider writer/physics context and complete field-driven round-trip proof
+remain open; this does not establish complete libfilmshell or format parity.
+
+## Contextual replay ride integration
+
+The full all-feature regression passes **409 ordinary tests and ten doctests**,
+with 13 corpus tests normally ignored (81.40 seconds ordinary). The earlier focused replay
+suite passed 74 tests with one normally ignored corpus test (0.65 seconds); the
+additional life-filter regression is included in the final full run.
+Nine new ride tests exercise contextual parent decoding, declared classes,
+current human/bot attribution, source ranges/fields, same-clock transfers,
+explicit clears, long/missing/cyclic paths, unread entity/transport recovery,
+reused incarnations, generation changes, malformed/duplicate components,
+unsupported schemas and keyframe namespace/duplicate-header refusal. The final
+full run includes the regression that a later snapshot cannot change the selected
+namespace. A further life-filter regression requires the original entity and
+opening ownership evidence, covering same-clock respawn/summary-death boundaries
+and reuse of the same raw entity ID. Existing canonical attachment tests pass
+after sharing schema/value
+admission with contextual replay.
+
+End-to-end authored fixtures use native packet bodies under a synthetic registry.
+That registry has no publicly admitted bootstrap; a separately parsed
+no-corruption-check bootstrap is supplied as an explicit test model policy.
+These tests do not claim new public build admission or bootstrap-source proof.
+Other labelled model mutations test lifecycle and malformed-field policy.
+Retained-game audits use unmodified public Film parsing instead.
+
+The final expanded Octagon/Recharge replay audit passes in 75.92 seconds:
+
+| Capture | Contextual parent reads | Ride boundaries | Player-attributed observations | Proven rides | Pose observations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 100 | 1,988 | 853 | 0 | 22,739 |
+| Recharge `02-oddball` | 617 | 29,174 | 5,782 | 0 | 124,273 |
+
+Ride boundaries include unknown paths, deletion and ownership reevaluations; they
+are not vehicle trips. Both films lack positive rides in this admitted contextual
+projection. Positive seat/vehicle/bot/transfer evidence comes from authored
+fixtures. Parent-read counts exclude unsupported declarations and differ from
+canonical attachment counts. The audit checks each retained parent field against
+original packet bits, component/declaration source bounds and ordering, every
+player's current unique ownership evidence, and original gap references. Existing
+pose counts, ownership interval counts and canonical event assumptions remain
+unchanged. None of this supplies seated-player poses or complete life histories.
+
+Strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting
+and whitespace checks pass. Logs are
+`/private/tmp/halo-contextual-rides-verified-{tests,corpus,clippy,rustdoc,wasm}.log`.
+All final checks ran after the ownership-bound life-filter change and completed.
+The full 32-film source corpus was not repeated for this runtime integration.
+No canonical wire readers or fixture bytes changed. The shared runtime parent
+admission helper and replay additions preserve film / parser/v41 / runtime.
+Vehicle tracks, seated poses, full lives, remaining semantic projections,
+writer/physics context and complete field-driven round-trip proof remain open.
+
+## Source-linked replay vehicle checkpoint
+
+Seven new vehicle tests cover authored native position bodies at all eight bit
+alignments, little-endian snapshot floats and signed zero, quantized world
+coordinates, explicit refusal/clears, sparse/same-clock ordering, generation zero,
+NEW/delete/reuse, partial prefixes, untimed gaps and tag isolation. Tags consume
+an existing independently traced native creation fixture. The end-to-end native
+packet fixture uses a synthetic class40 registry with an explicitly supplied
+no-check bootstrap model; it is not evidence of new public bootstrap admission.
+Model-policy mutations are separate from native reader evidence. VEHICLES.md
+records all supported and refused projection branches.
+
+The expanded unmodified Octagon/Recharge replay audit passes in 82.85 seconds.
+Both captures produce zero admitted vehicle tracks, runtime positions and vehicle
+snapshots. This checks compatibility and source invariants, not positive captured
+vehicle-motion coverage. Positive evidence remains authored. Pose counts remain
+22,739 and 124,273, with 1,140 and 10,321 controller/holder observations respectively.
+The retained 32-film corpus was not repeated for this runtime-only checkpoint.
+
+Strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting
+and whitespace checks pass. Logs are
+`/private/tmp/halo-vehicles-{full-tests,corpus,clippy,rustdoc,wasm}.log`.
+Canonical Film models, parser readers and fixture bytes were not changed by this
+vehicle checkpoint. Wider vehicle position branches, seated poses, full lives,
+ground objects/zones, unresolved writer/physics context and field-driven whole-film
+round-trip proof remain open. No commit or push was made.
+
+Final full regression passes **416 ordinary tests and ten doctests**, with 13
+corpus tests normally ignored (79.11 seconds ordinary). The separately invoked
+two-film replay audit passes as above. All verification jobs completed.
+
+## Mode-qualified zone event checkpoint
+
+The new `runtime/zones` API shares canonical `runtime/actions` reads. Its explicit
+mode/schema qualification adds 23 native table rows and Strongholds' separately
+named capture broadcast. Seven tests cover public native packets, exact field
+sources, all recipient bits, same-clock repetition, mode collisions, unknown IDs,
+absent/repeated/wrong/marked target values, all keyed points, partial messages and
+no target borrowing from simultaneous or later messages. The unsupported-header
+case is a labelled model-policy mutation.
+
+The independent oracle verifies source blob
+`4701db66d587260404006301be25b4fb2ae1931f`, executes the unchanged upstream
+Mode/About/table/ZONED section and compares all 4,096 mode/ID combinations.
+Its output reproduces byte-for-byte. All **86 fixture hashes** pass. The existing
+independent native code-82 body traces are unchanged; this new oracle establishes
+semantic table parity, not new wire decoding or general mode applicability.
+
+The expanded direct-action capture audit passes in **37.52 seconds**. Mode is an
+explicit Oddball analysis choice, not inferred from path names or script scans:
+
+| Capture | Code-82 records | Known under Oddball | Unknown IDs | Keyed points |
+| --- | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 263 | 0 | 263 | 0 |
+| Recharge `02-oddball` | 14,138 | 1,718 | 12,420 | 1,800 |
+
+Recharge's known records comprise 1,580 score messages (0x320), 58 skull-grab
+messages (0x339), and 80 skull-spawn messages (0x344). These are original message
+counts, not deduplicated gameplay actions, distinct scores or proof of actors.
+All code-82 messages in these captures are complete; authored fixtures provide
+truncation/negative evidence. Every retained scalar agrees with original packet
+bits. The broader action audit retains its existing 96/246 incomplete events.
+Skull/object keys never become zone references under the Oddball interpretation.
+Captured Strongholds, Firefight and PvP KOTH semantics remain unverified here.
+
+ZONES.md records limits: zone geometry, manager/navpoint relationships, continuous
+owner/contest state, hill scores, recipient-holder/team joins, world location
+resolution, ground objects and complete-life/writer/format proof remain open.
+No canonical models/readers or existing golden bytes changed for this checkpoint.
+The full goal remains active; no commit or push was made.
+
+Final verification passes **423 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored (76.64 seconds ordinary), plus the separately invoked
+two-film direct-action/zone audit. Strict all-feature/all-target Clippy,
+warnings-denied Rustdoc, WASM, formatting and whitespace checks pass. Logs are
+`/private/tmp/halo-zones-{full-tests,corpus,clippy,rustdoc,wasm}.log`.
+All verification jobs completed.
+
+## Navpoint source-state checkpoint
+
+Five new navpoint tests verify 56 existing independent native component fixtures
+at all eight bit alignments, all 256 radial codes, sparse/negated/conflicting
+filters, default and per-item visual states, repeated order words, every truncation
+of an authored group, malformed retained fields, duplicate/unsupported schema
+refusal, keyframe/runtime identity separation, same-clock clears and unrelated
+updates. Existing reference fixtures retain their original revision and bytes.
+The native packet fixture uses a synthetic class12 registry with explicit internal
+decode configuration; it does not establish new public bootstrap admission.
+
+The retained unmodified direct-action/zone audit passes in **37.46 seconds**:
+
+| Capture | Navpoint observations | Docking filters | Radial progress | Present groups | Conditional items | Explicit group clears |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 0 | 0 | 0 | 0 | 0 | 0 |
+| Recharge `02-oddball` | 4,851 | 407 | 620 | 1,757 | 865 | 2,067 |
+
+All observed navpoint components have admitted schemas and complete bodies in
+these two captures; malformed/partial/schema-negative cases are authored. Every
+retained field equals the original packet bits. These are component occurrences,
+not zone lifetimes or distinct viewers. Existing direct-action and zone-message
+counts remain unchanged. No player/zone owner, inside-player set or continuous
+contest state is inferred from the filters. The conditional state/order evidence
+that upstream's zone view skips is retained here.
+
+Strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting
+and whitespace checks pass. Logs are
+`/private/tmp/halo-navpoint-{full-tests,corpus,clippy,rustdoc,wasm}.log`.
+No existing fixture, canonical model or parser reader changed for this checkpoint.
+Geometry's nested Bond adapter, manager/navpoint/zone relationships, viewer
+condition evaluation, continuous state, hill scoring and the broader full-format
+proof remain open. ZONES.md records the API and interpretation limits.
+
+Final full regression passes **428 ordinary tests and ten doctests**, with 13
+corpus tests normally ignored (76.70 seconds ordinary). The separately invoked
+expanded two-film audit and strict checks above pass. All verification jobs
+completed. No commit or push was made; the full robustness goal remains active.
+
+## Bounded crate geometry checkpoint
+
+Five runtime tests and one shared Bond boundary test exercise the existing
+canonical component reader plus bounded nested interpretation. Seventeen authored
+bodies run through unchanged pinned libfilmshell Bits/Bond/shape_at source.
+Comparisons preserve deliberate differences: all items and geometry entries,
+unknown shape codes, missing dimensions, recorded cylinder right extent, empty
+integer wrappers, duplicate/inherited-field refusal and strict lengths. Tests
+cover eight bit alignments, every truncated box prefix, following bytes outside
+the declared envelope, source mismatch, corruption trailers, native packets,
+schema/duplicate refusal, distinct namespaces and same-clock absent updates.
+
+The retained-film audit validates every component field and retained nested Bond
+atom against the original packet bytes. It observes:
+
+| Capture | Candidate components | Unsupported schema | Absent properties | Items | Geometry entries | Numeric dimensions | Empty right wrappers |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 1,457 | 357 | 0 | 1,100 | 352 | 1,408 | 0 |
+| Recharge `02-oddball` | 6,778 | 3,391 | 63 | 3,324 | 369 | 1,412 | 64 |
+
+These counts describe component occurrences, not distinct zones or lifetimes.
+Each geometry entry has a decoded shape code. Recharge's 64 nonnumeric right
+fields contain present empty integer wrappers, now explicitly distinguished as
+`MissingWrappedValue`; they are not fabricated zeros or malformed Bond reads.
+The wrapper remains in the source tree. There are no partial Bond reads among
+admitted captured components; malformed/truncated evidence is authored. Schema
+refusals remain visible and cannot publish crate geometry. Existing direct-action,
+zone-event and navpoint audit counts are unchanged.
+
+The fixture generator and independent oracle reproduce exactly; all 88 fixture
+lengths and hashes pass. ZONES.md documents API limits and provenance. Orientation,
+manager/navpoint/zone joins, condition evaluation, lifecycle state, hill scores and
+whole-format canonical round-trip proof remain open. No commit or push was made.
+
+Final verification passes **434 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored. The separately invoked expanded two-film audit passes in
+41.53 seconds. Strict all-feature/all-target Clippy, warnings-denied Rustdoc,
+WASM, formatting and whitespace checks pass. Logs are
+`/private/tmp/halo-geometry-final-{full-tests,focused,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. The full robustness and canonical-format goal remains active.
+
+## Crate orientation source/projection checkpoint
+
+Four new runtime tests cover 23 authored orientation bodies and 29 existing
+independent parameter2 component cases at eight bit alignments. They exercise
+config overriding raw/delta, nominal absolute/default/nondefault forms, every
+direction/roll-increment gate branch, six raw vector words, every truncated new
+body, exact packet-source validation, corruption trailers, registry/duplicate
+refusal and native keyframe/same-clock runtime updates. Synthetic packet tests
+use explicit internal configuration; captured audits use unmodified Film parsing.
+
+The unchanged pinned libfilmshell Bits/angle_at helper runs on all 23 cases.
+Compatible config/default-up reference angles agree bit-for-bit. Raw and
+config-overridden helper discrepancies remain in the oracle and are not copied
+into canonical parsing. An independent unchanged LevelUp RollAngleFromRaw plus
+dequantMidpoint oracle supplies eight f32 roll projections; the labelled local
+f64 formula agrees within 1e-6 radians. Raw engine-memory vector tests use authored
+cardinal headings and reject NaN, parallel and vertical-forward vectors. The
+existing instruction-backed orientation parser remains unchanged.
+
+The expanded direct-action audit passes in **45.65 seconds**:
+
+| Capture | Candidate orientations | Admitted absolute forms | Unsupported schema | Projectable config/default-up | Nominal heading unresolved | Nondefault-up unresolved |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 1,100 | 1,100 | 0 | 726 | 374 | 0 |
+| Recharge `02-oddball` | 5,609 | 4,401 | 1,208 | 1,207 | 2,402 | 792 |
+
+Every captured field matches original packet bits. No admitted raw or incremental
+orientation occurs in these captures; those branches have authored/source-trace
+evidence. The two angle helpers use different conventions, so matching counts do
+not mean matching angles. These are component occurrences, not unique objects or
+continuous poses. No geometry join, first-heading choice, held state, later-value
+fallback or default orientation is added. Existing action, zone, navpoint and
+geometry audit counts are unchanged.
+
+All 91 fixture lengths/hashes pass; the case generator and both independent
+oracles reproduce exactly. ZONES.md documents schema and projection limits.
+General orientation reconstruction, manager/navpoint/zone/lifecycle joins, hill
+scores and whole-format field-driven round-trip proof remain open.
+
+Final verification passes **438 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored, plus the expanded captured-film audit. Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. Logs are
+`/private/tmp/halo-orientation-{full-tests,final-focused,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. The full robustness and canonical-format objective remains
+active; no commit or push was made.
+
+## Manager reference-state checkpoint
+
+Six manager tests add source-checked class10 target/default and sixteen-row
+navpoint interpretation, plus lifecycle-aware point queries. Four existing
+independent creation cases and two component cases across all16 rows provide
+36 case/row combinations at eight bit alignments and every-bit truncation.
+Authored cases preserve all generation values and the high bits discarded by
+upstream's low16 projection. Native keyframe/NEW/DELTA/DELETE packets test repeated
+names, equal-clock clears/replacements, independent matching rows, partial reads,
+gaps, generation mismatch and same-ID reuse. Exact-event queries reject cloned
+Events; untimed source gaps supply no fabricated timestamp.
+
+An additional native checked-keyframe/DELTA fixture exposed distinct canonical
+trailer names: keyframes emit `component_corruption_check`, while DELTAs emit
+`component.corruption_check`. Manager decoding accepts each exact gate/value pair
+and retains the original names. The fixture exercises present/absent gates and
+the separate default-state check. No source field or parser boundary is renamed.
+Other runtime consumers of corruption trailers still need the same audit.
+
+The expanded retained-film audit passes in **40.82 seconds**:
+
+| Capture | Manager observations | Targets | Navpoint rows | Explicit clears | Reference-index projections | Uninterpreted words |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 0 | 0 | 0 | 0 | 0 | 0 |
+| Recharge `02-oddball` | 11,359 | 798 | 10,561 | 10,188 | 373 | 0 |
+
+All targets are present in this sample, and all manager reads have admitted
+schemas and complete bodies. Missing/partial/clear-target and schema refusal
+coverage is authored. Every retained field equals the original packet bits.
+The counts describe source occurrences, not unique managers or resolved zone
+relationships. Existing action, zone, navpoint, geometry and orientation counts
+remain unchanged. Native state tests exercise lifecycle semantics separately;
+the capture audit does not prove lossy identity joins.
+
+The category-zero handle base and the navpoint word's full identity domain remain
+unresolved. The view retains complete words and generation evidence; labelled
+reference projections are not admitted entity IDs. No idle-zone state is inferred
+from a clear. Proven manager/zone/navpoint joins, viewer-condition evaluation,
+zone timelines and the broader canonical-format proof remain open.
+
+Final verification passes **444 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored (78.57 seconds ordinary), plus the separately invoked
+expanded captured-film audit. Strict all-feature/all-target Clippy,
+warnings-denied Rustdoc, WASM, formatting and whitespace checks pass. All91
+fixture lengths/hashes pass. Logs are
+`/private/tmp/halo-managers-final-{full-tests,focused,clippy,rustdoc,wasm}.log`
+and `/private/tmp/halo-managers-corpus.log`. All jobs completed. The full goal
+remains active; no commit or push was made.
+
+## Shared component-check trailer checkpoint
+
+Native checked-keyframe tests first reproduced refusals in all six older
+consumers: controller state, attachments, crate geometry, crate orientation,
+navpoints and vehicle snapshot positions. The source parser emits underscore
+`component_corruption_check` names in keyframes and dotted
+`component.corruption_check` names in DELTAs. The older consumers recognized only
+the latter. Before-fix evidence is in `/private/tmp/halo-component-checks-before.log`.
+
+The readers now share runtime/component_checks for exact trailer validation;
+manager rows use the same helper. It accepts either matching gate/value pair,
+requires correct bit widths/raw sizes/padding and contiguous endpoints, and
+rejects missing check values, unrelated names, extra words and trailing data after
+an absent gate. Source fields are not renamed. This validates structure; the
+stored32-bit value is retained without claiming to verify its checksum algorithm.
+Default-state checks remain a separate grammar.
+
+A new authored native packet fixture covers four archetypes and the actual
+keyframe/DELTA readers with checks disabled, enabled/absent-value, and
+enabled/present-value. It verifies controller secondary/reference values,
+detachment, bounded Bond geometry, config-mode angles, filters/groups/progress,
+all source bits and unchanged serialized Film. A separate test uses its native
+vehicle snapshot fields to verify position [1,2,3] under both gate values. A third
+test checks malformed suffix refusal. The synthetic registry uses explicit
+internal configuration, not new public bootstrap admission. Existing independent
+component/corruption fixture bytes remain unchanged.
+
+Controllers' and attachments' captured-oracle adapters now stop at either gate
+name. The full source-linked manager/zone objective remains open beyond this
+specific corrected boundary. Identity mappings, zone joins/conditions/timelines,
+hill scores, general orientation, ground objects, full lives, wider contexts and
+whole-format field-driven round-trip proof are not established by these tests.
+
+Final verification passes **447 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored (81.71 seconds ordinary). Three targeted retained-film
+audits pass: canonical controller/attachment/ride/scoreboard evidence (56.67s),
+contextual replay/vehicle evidence (81.96s), and direct actions plus all zone views
+(38.50s). Captures provide regression checks; positive checked-trailer coverage is
+authored native data. Strict all-feature/all-target Clippy, warnings-denied
+Rustdoc, WASM, formatting and whitespace checks pass. All91 fixture lengths/hashes
+remain valid. Logs are `/private/tmp/halo-component-checks-*.log`.
+All jobs completed. The full robustness and canonical-format goal remains active;
+no commit or push was made.
+
+## Navpoint history checkpoint
+
+Added three tests for `runtime.navpoint_history(schema)` using authored native
+keyframe/NEW/DELTA/DELETE packets and explicitly labelled canonical-model mutation
+for duplicate/schema refusal. All eight groups retain independent source state,
+even with the same name hash and repeated order words. Tests verify explicit clears,
+same-clock event order, zero progress versus missing baseline, complete prefixes
+inside partial records, unread suffix boundaries, generation changes, deletion,
+same-ID reuse and replacement by a new keyframe. Exact-event queries reject cloned
+and foreign Events; unframed gaps carry no fabricated clocks. Original Film bytes
+and source fields remain unchanged. Existing component grammar oracles are reused;
+no new production bootstrap admission or identity mapping is claimed.
+
+The focused navpoint suite passes all eight tests. The expanded two-film direct
+action and zone audit passes in **44.62 seconds**, including sampled
+navpoint history queries that recover the exact original Event, source extent and
+value result. Captured counts remain unchanged: Octagon has zero navpoint
+observations; Recharge has 4,851 (407 filters, 620 progress, 1,757 present groups
+with 865 conditional items, and 2,067 explicit clears). Source clocks, actors and
+zone relationships are not inferred from these counts. Lifecycle refusal evidence
+is authored; captures provide source regression checks.
+
+Final verification passes **450 ordinary tests and ten doctests**, with 13 corpus
+tests normally ignored (80.34 seconds ordinary). Strict all-feature/all-target
+Clippy, warnings-denied Rustdoc, WASM, formatting and whitespace checks pass.
+All91 fixture lengths/hashes remain valid. Logs are
+`/private/tmp/halo-navpoint-history-{focused,full-tests,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. Viewer filtering, proven manager/zone identities and joins,
+hill scoring and the broader whole-format proof remain open. No commit or push
+was made; the full goal remains active.
+
+## Native masked-property enum-width checkpoint
+
+A new test over pinned LevelUp captured vectors reproduced the earlier parser's
+36-versus-8-bit endpoint mismatch on a masked tag 12 value (`01e1f945`, chunk 22,
+packet 590, bit 435). Before-fix output is `/private/tmp/halo-property-before.log`.
+The shared component/default helper now reads the native four-bit enum body for
+all tags 11–15, preserving distinct tags and codes. Source Go functions and the
+instruction analysis identify the same switch default. No runtime score meaning
+or wider class 13 NEW-envelope admission is inferred from this correction.
+
+Three added tests cover 33 original captured vectors (including five source-marked
+chained cases for tags 12–15), 128 authored component bodies and 128 default bodies.
+The exporter verifies source Git blobs and runs original Go readers unchanged.
+All authored branches run at eight bit alignments; the existing exhaustive
+truncation and NEW/DELTA/keyframe following-component tests now include these
+native bodies. Exact bytes, primitive boundaries and serialized fields agree.
+The two original unchained scalar vectors retain that limitation explicitly.
+
+Original libfilmshell fixtures remain unchanged. Four component cases assert the
+36-versus-8-bit disagreement directly; 32 masked default bodies retain their
+original 612-bit layout/oracle and are replaced in canonical traversal tests by
+source-backed native bodies. The focused new tests pass; independently rerunning
+the Go exporter reproduces source-reference.json byte for byte. The expanded zone
+capture audit passes in 51.93 seconds with existing observation counts unchanged.
+
+Final verification passes **453 ordinary tests and ten doctests** (85.11 seconds
+ordinary; 13 corpus tests normally ignored). Source preservation passes all 32 films
+and 403,465 frame packets in 353.57 seconds, including the hour-long raid capture.
+The 451 keyframe tables retain 243 complete traversals and 208 explicit body stops;
+this remains a source-preservation result, not complete decoding of those stops.
+The scoreboard/controller/attachment/ride audit passes in 61.46 seconds; contextual
+replay/vehicle audit passes in 80.71 seconds. Existing captured counts are unchanged.
+Strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting,
+whitespace and all 94 fixture lengths/hashes pass. All jobs completed. Logs are
+`/private/tmp/halo-property-{focused,full-tests,source-corpus,zones-corpus,scoreboard-corpus,replay-corpus,clippy,rustdoc,wasm}.log`.
+No commit or push was made. Hill-score implementation and the broader canonical
+format/robustness objective remain active.
+
+## Networked-property history checkpoint
+
+Four new tests cover source-linked property occurrences and lifecycle state.
+The runtime reader consumes all 256 independent property-v41 authored bodies and
+every-bit truncation; full reads verify source extents and deliberate source-byte
+mismatch refusal. Native configured keyframe/NEW/DELTA/DELETE packets verify all 32
+viewer slots, scalar/array defaults, recorded name changes, same-record overrides,
+explicit clears, same-clock order, partial reads, generation changes, deletes and
+same-ID reuse. Both checked trailer forms and default-state checks retain original
+source bytes. No query mutates serialized Film or moves its playhead. Cloned
+Events refuse; opaque source gaps carry no invented timestamp.
+
+Schema mismatch, extra declared/duplicate record rows and partial default models
+have separate labelled policy tests. A partial default cannot supply a name or
+zero-valued baseline; unknown or opposite-domain payloads remain absent. Runtime
+IDs keep their generations and keyframe IDs remain a separate namespace. These
+fixtures do not expand public bootstrap or class 13 NEW-envelope admission.
+
+The expanded captured action/zone/property audit passes in **47.30 seconds**:
+
+| Capture | Defaults | Names | Scalars | Viewer rows | Total observations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 169 | 168 | 170 | 5,632 | 6,139 |
+| Recharge `02-oddball` | 931 | 926 | 2,026 | 32,811 | 36,694 |
+
+All captured property candidates have admitted schemas and complete source reads.
+Four sampled exact-event history queries per film retain the original Event,
+source range and decode result. Every field matches original packet bits. These
+are source-occurrence counts, not unique properties, viewers, teams or scores.
+Negative/schema/partial/lifecycle cases use the separately authored native and
+model-policy fixtures. Existing action and zone-view counts remain unchanged.
+
+Final verification passes **457 ordinary tests and ten doctests** (80.62 seconds
+ordinary; 13 corpus tests normally ignored), the expanded two-film capture audit,
+strict all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting
+and whitespace checks. All 94 fixture lengths/hashes remain unchanged. Logs are
+`/private/tmp/halo-properties-{focused,full-tests,final-corpus,final-clippy,rustdoc,wasm}.log`.
+All jobs completed. No parser/Film behavior changed, so the prior 32-film source
+preservation evidence remains separate from this runtime checkpoint. Hill-score
+attribution/timelines, broader identity and writer contexts, and complete canonical
+format proof remain open. No commit or push was made; the full goal stays active.
+
+## Hill input ledger and reference arithmetic checkpoint
+
+Six new tests validate ordered hill-property bindings and source-bound point
+projections. The independent exporter executes the unchanged pinned libfilmshell
+hill reader for 60 limit/quantum cases and reproduces reference.json byte for byte.
+Native configured keyframe/NEW/DELTA packets carry those same values through the
+local parser with unchecked and both checked trailer gates. Every resulting point
+agrees with the original arithmetic; all name/value fields match original source
+bits and Film serialization/playhead remain unchanged.
+
+Other authored native cases verify same-clock ordering, repeated and changed
+names, within-record default/name ordering, no earlier-value backfill, missing and
+invalid limits, tag clears, duplicate bank/limit entities, independent scalar/viewer
+scopes, generation reuse, deletion, future keyframe boundaries, partial prefixes,
+packet-end resets and untimed opaque tails. Exact-event queries reject cloned
+events. Separate model-policy mutations verify name/source mismatch, duplicate
+value rows, invalid extents and partial defaults cannot preserve stale success.
+
+The expanded retained-film audit passes in **49.00 seconds**:
+
+| Capture | Ledger changes | Named inputs | Bank projections | Typed limits | Invalid reads |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 11,178 | 1,365 | 0 | 1,344 | 0 |
+| Recharge `02-oddball` | 44,458 | 3,835 | 0 | 3,776 | 0 |
+
+These are occurrence counts, not unique entities, viewer/team identities or game
+scores. Every input retains a source-validated recognized name and its own value
+decode result. Neither capture supplies supported hill banks. Therefore these
+captures verify source handling/refusal, not real KOTH score parity; arithmetic
+evidence comes from the separate original-reader and authored native fixtures.
+Existing property, zone and action counts remain unchanged.
+
+Final verification passes **463 ordinary tests and ten doctests** (81.63 seconds
+ordinary; 13 corpus tests normally ignored), the expanded capture audit, strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks. All prior 94 fixture lengths/hashes are preserved; the new
+reference JSON is fixture 95. Logs are
+`/private/tmp/halo-hill-{focused,full-tests,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. No parser/Film behavior changed in this checkpoint, so the
+earlier 32-film source-preservation audit is separate evidence. Viewer/team joins,
+team score timelines, unresolved writer contexts and full canonical format proof
+remain open. No commit or push was made; the full objective remains active.
+
+## Snapshot-object and stationary-reference checkpoint
+
+Seven tests validate source-linked equipment, vehicle, weapon and device snapshot
+observations and the explicit stationary reference projection. Nine authored
+sequences reproduce results from unchanged libfilmshell world.rs and
+snapshot::raw_position at 8f0f8d0. The harness supplies model inputs rather than
+native parsing; local tests serialize the same inputs through source-traced
+creation bodies, authored position rows and all 8,191 native keyframe slots.
+Upstream equal-tag/equal-position output ties are nondeterministic; the exporter
+normalizes record order and tests compare result multisets without changing any
+reader body or result value. Regeneration agrees byte for byte.
+
+Native fixtures exercise singleton/open runs, first-anchor drift, absence and
+reappearance, tag/class changes, all four selected archetypes, namespace changes,
+zero/nonfinite positions, checked trailers, source retention and playhead/Film
+immutability. Separate cases verify catalogue-part and attached-position exclusions,
+duplicate identities, reclassified addresses, incomplete tables, untimed gaps and
+unread framed tick tails. Model-policy mutations cover malformed source fields,
+schema/extent/default errors and inconsistent table completeness metadata.
+
+Unread tick-entity regions cannot hide another snapshot packet; the projection
+retains those warnings in each run while comparing complete snapshots. Missing
+chunks, source discontinuities and incomplete snapshot tables break comparison
+support without declaring an object absent. Candidates do not prove continuous
+rest, physical identity, ownership, pickup or destruction.
+
+The expanded captured audit passes in **52.17 seconds**:
+
+| Capture | Snapshot records | Tags | World positions | Runs | Confirmed reference candidates | Excluded |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 223 | 222 | 222 | 142 | 43 | 36 |
+| Recharge `02-oddball` | 2,612 | 2,605 | 2,605 | 581 | 165 | 552 |
+
+One Octagon and seven Recharge records have no default or position; their errors
+remain explicit. Other successful tag/position reads validate their original
+packet bits and source extents. Counts describe observations and reference
+candidates, not unique physical objects or validated lifetimes. Existing action,
+zone, property and hill-input counts remain unchanged.
+
+Final verification passes **470 ordinary tests and ten doctests** (83.32 seconds
+ordinary; 13 corpus tests normally ignored), the expanded captured audit, strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks. The seven focused tests also pass against the final normalized
+oracle. All prior 95 fixture lengths/hashes are unchanged; the new reference JSON
+is fixture 96. Logs are `/private/tmp/halo-objects-{full-tests,final-focused,final-corpus,final-clippy,rustdoc,wasm}.log`.
+All jobs completed. No parser/Film behavior changed; earlier whole-corpus source
+preservation remains separate evidence. Ground-weapon tick histories and pickup
+association, remaining identity/writer contexts and whole-format proof remain
+open. No commit or push was made; the full objective remains active.
+
+## Tick weapon-object history checkpoint
+
+Nine focused tests validate source-linked class-42 tick histories, initial NEW
+positions, unknown/current-only tags, exact same-clock event ordering, all four
+position domains, signed zero/nonfinite refusal, generations, partial prefixes,
+source/schema/default/extent mutations, snapshot/gap boundaries and pickup
+ambiguity. Seven original inventory.rs scenarios reproduce tag, last position,
+start/end and candidate evidence. The original reader assigns one same-tag pickup
+to one object; local history deliberately retains the candidate for both objects.
+The exporter reproduces the retained reference JSON byte for byte.
+
+The expanded captured audit passes in **50.56 seconds**:
+
+| Capture | Tracks | Tagged | Positions | Position errors | Pickups | Candidate pairs | Missing tags |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 84 | 0 | 557 | 0 | 57 | 0 | 84 |
+| Recharge `02-oddball` | 4,367 | 119 | 9,790 | 0 | 456 | 13 | 4,248 |
+
+Counts describe source intervals/occurrences and candidate relations, not unique
+physical objects or verified pickups. Existing action, zone, property, hill-input
+and snapshot-object counts remain unchanged.
+
+Final verification passes **479 ordinary tests and ten doctests** (81.00 seconds
+ordinary; 13 corpus tests normally ignored), captured audit, strict all-feature/
+all-target Clippy, warnings-denied Rustdoc, WASM, formatting and whitespace. The
+final nine focused tests pass in 0.91 seconds after candidate indexing. All prior
+96 fixture lengths/hashes are unchanged; the new reference JSON is fixture 97.
+Logs: `/private/tmp/halo-ground-verified-tests.log`,
+`/private/tmp/halo-ground-verified-corpus.log`,
+`/private/tmp/halo-ground-verified-clippy.log`,
+`/private/tmp/halo-ground-rustdoc.log`, `/private/tmp/halo-ground-wasm.log`, and
+`/private/tmp/halo-ground-final-focused.log`. Regenerated reference:
+`/private/tmp/halo-ground-reference.json`. All jobs completed. No parser/Film
+behavior changed; the earlier 32-film source-preservation audit remains separate
+evidence. Recorded rest-state projection, default-domain coordinates, parent/world
+transforms, physical pickup identity and full format proof remain open. No commit
+or push was made; the full objective remains active.
+
+## Recorded weapon item-rest checkpoint
+
+Four new tests extend the weapon suite to 13 passing tests (1.75 seconds).
+Existing original libfilmshell one-bit fixtures supply both flag values; authored
+native registry-parameter-1 packets verify no-check and both check-trailer gates,
+initial NEW flags, omitted/false/true distinctions, same-clock order, original
+observation timestamps, deletion/reuse, readable partial prefixes, opaque gaps
+and snapshot separation. Nine model mutations verify source, extent, field/check
+names, component name/status, duplicates, row parameter and header refusals. An
+invalid observation replaces prior success with its own error. Film serialization
+and runtime playhead remain unchanged.
+
+The captured audit passes in **49.18 seconds**:
+
+| Capture | Recorded true | Recorded false | Read/schema errors | Exact-event queries |
+| --- | ---: | ---: | ---: | ---: |
+| Octagon `03-first-to-50` | 0 | 0 | 0 | 0 |
+| Recharge `02-oddball` | 52 | 0 | 0 | 4 |
+
+Every successful observation validates the original component bits and retains its
+one-bit field. Counts describe flag occurrences, not unique physical objects,
+rest durations or pickup identity. Absence/false handling is proved by authored
+native tests; these captures contain no false flag. Existing weapon tag, position,
+pickup-candidate, snapshot-object, hill-input, property, zone and action counts
+remain unchanged.
+
+Final verification passes **483 ordinary tests and ten doctests** (83.96 seconds
+ordinary; 13 corpus tests normally ignored), the expanded captured audit, strict all-feature/all-target Clippy, warnings-denied Rustdoc,
+WASM, formatting and whitespace. All 97 fixture lengths/hashes remain unchanged.
+Logs are `/private/tmp/halo-rest-{focused,full-tests,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. No parser/Film behavior changed; the earlier 32-film source
+preservation audit remains separate evidence. The existing film / parser/v41 /
+runtime organization is preserved. Wider format/runtime obligations remain in
+LIBFILMSHELL_ROBUSTNESS.md; no complete canonical-format claim, commit or push
+was made.
+
+## Fixed-domain reference position checkpoint
+
+Four new tests validate explicit fixed-domain midpoint projection. The independent
+fixture executes original LevelUp bound/width functions and unchanged libfilmshell
+LevelBox::engine over 150 vectors, retaining exact bound/width/f64 result bits.
+Native packet tests serialize all vectors as source-linked NEW/DELTA object
+positions in unchecked and both checked-trailer forms. Tests retain original
+codes, domain, event ordering and Film/playhead immutability, and reject altered
+word shapes, wrong widths, out-of-range codes and indexed/raw domain mixing.
+The focused filter passes six tests (four new plus two existing) in 0.98 seconds.
+The reference exporter regenerates the retained JSON byte for byte.
+
+The expanded capture audit passes in **48.68 seconds**. Recharge supplies **one
+parent-local** weapon position, which remains in its local domain. Octagon
+supplies no fixed-domain weapon position; neither capture supplies default-world
+positions. All earlier weapon/rest/snapshot/property/hill/zone/action counts
+remain unchanged. This verifies recorded branch handling and source-linked
+projection, not a known physical world coordinate or f32 engine rounding.
+
+Final verification passes **487 ordinary tests and ten doctests** (81.45 seconds
+ordinary; 13 corpus tests normally ignored), captured audit, strict all-feature/
+all-target Clippy, warnings-denied Rustdoc, WASM, formatting and whitespace. The
+new reference JSON is fixture 98; all prior 97 fixture lengths/hashes remain
+unchanged. Logs: `/private/tmp/halo-fixed-{focused,full-tests,corpus,clippy,rustdoc,wasm}.log`.
+Regeneration: `/private/tmp/halo-fixed-regenerated.json`. All jobs completed.
+No parser/Film behavior changed, so the prior whole-corpus source-preservation
+audit remains separate evidence. Reference selection is explicit; automatic
+build admission, parent/world transforms and wider canonical-format obligations
+remain open. No commit or push was made.
+
+## Zero-bit position-axis checkpoint
+
+The original width law and indexed point reader supply 80 independent cases:
+eight boxes, five precision levels and two code patterns. Inputs cover all-zero
+and mixed-width axes, nonzero centers, neighboring f32 values at the single-bin
+threshold, large ranges and the precision cap. Both original Git blobs are
+verified before execution. Regeneration agrees byte for byte.
+
+Seven new tests validate width derivation, exact primitive traces including R(0),
+named empty component fields, following DELTA components, event points and
+every-bit truncation. Native detonation lists preserve ActionPoint field indices
+and the following zoom event. Complete weapon NEW/DELTA packets exercise unchecked
+and both check-trailer forms, source words, timestamp/exact-event queries and
+Film/playhead immutability. Missing fields, invalid raw shapes, nonzero codes for
+zero-width axes, unknown regions and absent context remain distinct refusals.
+The seven focused tests pass in 13.95 seconds.
+
+A regression test exposed that a removed zero-width detonation axis could shift
+an unnamed direction word into a generic point. The action view now validates
+the known suffix shape without consuming its public `remaining_fields` range.
+Two older event tests used zero widths as invalid-context examples; they now use
+33-bit axes. Explicit zero widths are additionally tested in both complete region
+tables and the legacy single-region descriptor. No production behavior was
+changed to satisfy the old expectation.
+
+Final ordinary verification passes **494 tests and ten doctests** (85.43 seconds
+ordinary; 13 corpus tests normally ignored), strict all-feature/all-target Clippy,
+warnings-denied Rustdoc, WASM, formatting and whitespace. The retained Octagon /
+Recharge runtime audit passes in **59.89 seconds**, with prior action/zone/property/
+hill/snapshot/weapon/rest/fixed-domain counts unchanged. These captures are
+regression evidence; the authored/original-source cases prove the zero-axis forms.
+All 99 fixture lengths/hashes pass; prior 98 fixtures remain unchanged.
+
+Logs: `/private/tmp/halo-zero-focused.log`,
+`/private/tmp/halo-zero-final-tests.log`,
+`/private/tmp/halo-zero-runtime-corpus.log`,
+`/private/tmp/halo-zero-final-clippy.log`, `/private/tmp/halo-zero-rustdoc.log`,
+`/private/tmp/halo-zero-wasm.log`. Regeneration is
+`/private/tmp/halo-zero-regenerated.json`. The whole-corpus source audit is tracked
+separately in `/private/tmp/halo-zero-source-corpus.log` because this checkpoint
+changes canonical width admission and field boundaries.
+
+The full source-preservation audit passes all **32 films / 403,465 frame packets**
+in **368.93 seconds**, including the hour-long raid. It retains all raw source
+coverage and explicit partial stops. Keyframe counts remain 451 tables, 243
+closed, 208 explicit Desync stops, 2,068,021 vacant headers and 35,634 live headers
+after vacant slots. Complete control counts remain [1,063,261, 263, 242] for kinds
+0/1/2, with 168 secondary blocks. This is source-preservation evidence, not proof
+that the partial keyframe bodies are fully decoded. All jobs completed. The
+film / parser/v41 / runtime organization is unchanged; no commit or push was made.
+
+## Scoreboard holder checkpoint
+
+Six authored integration tests verify source-time statborg and engine/player
+joins using the existing canonical packet readers and explicit fixture profile.
+They cover same-timestamp slot reuse, retained zeros/repetitions, independent
+human/bot populations, conflicting claims, missing IDs, duplicate statborg
+entities, unknown/team identities, partial identity fields, deletion and
+re-establishment after gaps. Missing chunk sequences, unread chunk tails and
+unframed chunks require fresh observations from both populations. Exact update,
+event, identity and listing references remain inspectable; Film and playhead
+immutability are checked. The focused suite passes in 0.19 seconds.
+
+The retained Octagon/Recharge audit passes in 62.74 seconds. Each observation
+borrows the original update/event. Supported claims retain their engine ID and
+are no later than the update; intact source sequences agree with the roster's
+independent exact-event query. The missing-source refusal policy has authored
+evidence above. Outcome counts are record occurrences, not distinct players or
+complete match coverage:
+
+| Capture / updates | No established player slot | Unique | Unassigned | Ambiguous | Unknown |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon statborg | 1,123 | 37 | 0 | 0 | 0 |
+| Octagon engine/player | 535 | 36 | 636 | 0 | 32 |
+| Recharge statborg | 11,624 | 504 | 0 | 0 | 0 |
+| Recharge engine/player | 3,433 | 480 | 1,440 | 0 | 32 |
+
+No-slot observations include engine-wide fields, teams, unknown identities and
+removals. Unique identifies the latest supported population observation; it does
+not establish continuous ownership, retrospective finalized-round attribution
+or participant score totals. The other runtime audits retain their prior counts.
+
+Final focused/capture logs: `/private/tmp/halo-score-holders-gap-focused.log` and
+`/private/tmp/halo-score-holders-final-corpus.log`. Clippy, warnings-denied Rustdoc,
+WASM, formatting and whitespace checks pass; logs are
+`/private/tmp/halo-score-holders-final-{clippy,rustdoc,wasm}.log`. No fixture bytes
+or parser/Film readers changed, so the preceding 32-film source-preservation
+audit remains the applicable wire-level checkpoint.
+
+Final all-feature ordinary verification passes **500 tests and ten doctests**
+(83.44 seconds ordinary; 13 corpus tests normally ignored). Log:
+`/private/tmp/halo-score-holders-final-tests.log`. All jobs completed. The 24
+existing named capture-audit lines are byte-identical to the preceding zero-axis
+checkpoint. No commit or push was made. Timer roles, participant score
+aggregation, recovered final-score coverage and the wider canonical-format
+obligations remain open.
+
+## Timer semantics audit
+
+The opt-in engine test export and [captured report](research/libfilmshell/TIMER_AUDIT.md)
+retain 1,335 round-timer and 5,217 respawn-timer observations, with exact source
+references and hashed capture inputs. Octagon's changing second words increase;
+Recharge's mostly decrease. All changing positive-time pairs cross scoreboard
+gaps/resets, so no continuous countdown or time unit is inferred. Opaque packet
+types 10 and 6 are the primary next format investigation, with unread entity
+suffixes a separate issue. The final captured source audit passes in 57.88
+seconds; strict all-target Clippy, formatting and whitespace pass. Production
+behavior and fixture bytes are unchanged; the preceding 500-test/ten-doctest
+checkpoint remains the full-suite evidence. Logs and reproduction commands are
+in the linked report. No commit or push was made.
+
+## Outer packet-body inventory
+
+The [packet-body investigation](research/libfilmshell/PACKET_BODIES.md) walks all
+32 retained films to exact chunk closure and retains manifest/chunk hashes plus
+source-linked payload examples. It agrees with the independent envelope counts:
+451 type-6 bodies (four zero bytes each) and 403,465 variable-size type-10 bodies.
+Deterministic regeneration passes. Pinned source inspection supplies framing
+but no native body grammar/effect proof, so canonical admission and continuity
+remain unchanged. This research adds no production code or fixtures.
+
+## Movement-input replay checkpoint
+
+Four tests exercise unchanged-reference projection and local source/holder
+policies: all 57 fixture cases, duplicate retention, neutral versus absent
+analog, absent stance, slot reuse, human/bot conflicts, independently refreshed
+populations after source loss, complete prefixes before partial controls,
+timed/untimed opaque packets, replay endpoint invalidation and unchanged
+Film/playhead state. The focused suite passes in 0.40 seconds.
+
+The contextual replay audit passes in 194.22 seconds. It verifies original
+control field bytes and bit ranges, packet clocks/addresses, population source
+order, assignment packet links, holder indices and sample references:
+
+| Capture | Input observations | Unique recorded holders | Explicit input gaps |
+| --- | ---: | ---: | ---: |
+| Octagon | 36,469 | 36,469 | 26,123 |
+| Recharge | 421,569 | 421,568 | 72,206 |
+
+These counts include repeated equal inputs and absent analog blocks. They are
+not distinct players, proven continuous controls or complete match coverage.
+Input-specific gaps count unread control views and opaque packets; general
+source/lifecycle/population boundaries additionally clear samples.
+
+Full verification passes **504 ordinary tests and ten doctests** (86.44 seconds
+ordinary, 13 corpus tests normally ignored), strict all-feature/all-target
+Clippy, warnings-denied Rustdoc and WASM. Reference regeneration is
+byte-identical; fixture 100 is registered and the preceding 99 hashes are
+unchanged. Formatting and whitespace checks pass. Logs:
+`/private/tmp/halo-input-focused-final.log`,
+`/private/tmp/halo-input-final-{tests,corpus,clippy,rustdoc,wasm}.log` and
+`/private/tmp/halo-input-regenerated.{json,log}`.
+
+No canonical reader changed in this checkpoint; the previous 32-film wire
+preservation audit remains applicable. The film / parser/v41 / runtime
+organization is preserved. All jobs completed; no commit or push was made.
+Equipment energy/recharge and reserve-ammunition projections remain specific
+runtime gaps; opaque packet bodies and wider canonical proof remain open.
+
+## Reserve-ammunition replay checkpoint
+
+Four new tests cover the unchanged pinned component/ammo-reader reference and
+local reserve policies. Nine authored updates contain twelve complete reserve
+components, including all four independent registry ranks, zero, 2047, absence
+and repeats. Local observations retain both repeats discarded by upstream.
+Other tests cover selected/hidden weapons, identity-only replacement, full life
+and source gaps, same-clock ordering, missing/complete corruption trailers,
+invalid registry counts, reserve-only packet boundaries, and untimed support
+bounds. All fourteen focused weapon tests pass in 0.01 seconds.
+
+Final all-feature verification passes **508 ordinary tests and ten doctests**
+(84.41 seconds ordinary; 13 corpus tests normally ignored). Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. The reference sequence regenerates byte-identically as
+fixture **101**; all preceding 100 fixture hashes are unchanged.
+
+The retained contextual replay audit passes in **108.84 seconds**. Every reserve
+observation agrees with its original eleven source bits, component range,
+packet address and recorded clock. Every reserve-only gap refers to its
+original non-frame packet, retaining absent clocks when applicable:
+
+| Capture | Reserve observations | Explicit zero observations | Reserve packet gaps |
+| --- | ---: | ---: | ---: |
+| Octagon | 252 | 0 | 151 |
+| Recharge | 328 | 0 | 327 |
+
+Zero behavior is verified by the authored reference/policy cases; neither capture
+supplies that evidence. Counts are observations and boundaries, not complete
+match ammunition coverage. The twelve other named capture lines remain identical
+to the preceding run. The input-index audit now uses a set instead of repeated
+linear searches, checks the same source links, and also rejects duplicate indices.
+
+Final logs are `/private/tmp/halo-reserves-gap-{focused,tests,corpus,clippy,rustdoc,wasm}.log`.
+Reference generation is `/private/tmp/halo-reserves-reference.{json,log}` and
+`/private/tmp/halo-reserves-regenerated.{json,log}`. Earlier `final-*` logs predate
+the added reserve-only boundaries and are superseded by the `gap-*` results.
+All jobs completed. No canonical reader changed, so the prior 32-film wire
+preservation audit remains applicable. No commit or push was made. Equipment
+energy/recharge, legacy-channel opaque-packet continuity and wider canonical
+format obligations remain unfinished; this is not a full-parity checkpoint.
+
+## Equipment energy/delay source-view checkpoint
+
+Four authored native-packet tests cover 26 unchanged-reference updates / 49
+scalar components, exact quantizer f64 bits, percentage rounding, independent
+energy/delay updates, retained countdown-like repetitions and zero. Source-time
+holder tests cover later same-clock reassignment, human/bot conflicts, bot
+resolution after independent human removal, deleted parent support and fresh
+parent/controller evidence after opaque packets. Other checks cover partial
+prefix retention, unread-suffix invalidation, missing-source gaps, foreign event
+refusal, keyframe/runtime separation, original-byte mismatch, late-zero/backwards
+clock refusal, and unchanged Film/playhead state. Focused tests pass in 0.43s.
+
+The final all-feature suite passes **512 ordinary tests and ten doctests**
+(88.62 seconds ordinary; 13 corpus tests normally ignored). Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. The reference fixture regenerates byte-identically as
+fixture **102**; all preceding 101 fixture hashes are unchanged.
+
+The retained canonical runtime audit passes in **60.40 seconds**. Every admitted
+scalar is checked against its exact original field bytes and component extent:
+
+| Capture | Energy observations | Delay observations | Scalar-read refusals |
+| --- | ---: | ---: | ---: |
+| Octagon | 35 | 135 | 0 |
+| Recharge | 967 | 1,796 | 0 |
+
+These are source occurrence counts, not distinct equipment objects, continuous
+recharge intervals or complete holder coverage. Holder/clock refusal policies
+have the authored native tests above; the capture audit only claims scalar/source
+validation. All 24 prior named capture-audit lines are unchanged.
+
+Logs: `/private/tmp/halo-equipment-focused-final.log`,
+`/private/tmp/halo-equipment-final-{tests,corpus,clippy,rustdoc,wasm}.log`, and
+`/private/tmp/halo-equipment-{reference,regenerated}.{json,log}`. All jobs completed.
+The prior 32-film wire-level source-preservation audit remains applicable because
+no canonical reader changed. The existing film / parser/v41 / runtime split is
+preserved. No commit or push was made. Cached contextual PlayerReplay equipment
+energy, physical delay units/recharge semantics and the broader canonical-format
+obligations remain open. See EQUIPMENT.md for the on-demand API and its limits.
+
+## Contextual equipment energy/delay checkpoint
+
+Five contextual integration tests pass in **0.47 seconds**, reusing the existing
+26-update / 49-field unchanged-reader oracle. They check exact energy f64 bits,
+raw delays and repetitions, multiple independent objects, source-time attribution
+versus later current ownership, human/bot conflicts, partial-record prefixes,
+unread control suffixes, timed/untimed opaque packets, missing-source restoration,
+generation reuse and unchanged Film/playhead state. Small authored registries
+use an explicit bootstrap policy; these tests do not establish public bootstrap
+admission. Fresh evidence in the first packet after a source discontinuity is
+accepted because that boundary precedes the packet, unlike unread suffix gaps.
+
+The final all-feature suite passes **517 ordinary tests and ten doctests**
+(85.81 seconds ordinary; 13 corpus tests normally ignored). Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. All **102** registered fixture lengths and SHA-256 hashes
+match; no new reference bytes were introduced.
+
+The retained contextual replay audit passes in **127.55 seconds**:
+
+| Capture | Runtime scalar readings | Snapshot scalar readings | Scalar refusals | Source-attributed readings |
+| --- | ---: | ---: | ---: | ---: |
+| Octagon | 100 | 70 | 0 | 0 |
+| Recharge | 1,887 | 1,892 | 0 | 0 |
+
+These counts belong to the contextual decoder and must not be substituted for
+the preceding canonical source-view counts. Every retained scalar is checked
+against its original payload bits and clock. Authored tests establish positive
+holder attribution and sampled ownership/life links; these two captures provide
+no positively attributed equipment readings under the required current-path and
+freshness rules. Zero attribution is explicit missing support, not an empty
+inventory or evidence of complete recharge coverage. All **14** prior named
+contextual capture lines remain identical.
+
+Final logs: `/private/tmp/halo-replay-energy-focused-check.log` and
+`/private/tmp/halo-replay-energy-final-{tests,corpus,clippy,rustdoc,wasm}.log`.
+All jobs completed. No Film/parser reader changed, so the prior full 32-film
+wire-preservation audit remains applicable. The film / parser/v41 / runtime
+organization is preserved. No commit or push was made. Physical delay meanings,
+legacy-channel opaque continuity, unresolved contexts and full canonical-format
+proof remain unfinished; this checkpoint closes the cached energy API gap only.
+
+## Exact weapon charge/heat reference checkpoint
+
+The new oracle executes unchanged pinned components.rs and ammo.rs, checking
+their Git blobs before running. It parses all **4,096** charge codes and **128**
+heat codes with all four flag combinations (**512** heat bodies), retaining
+exact f64 result bits and rounded percentages. Nine further native updates carry
+**19** components across independently ranked ammo/heat families and exercise
+endpoints, interior codes, separate updates, repeats, open zero words and closed
+gates. A preassigned-life adapter isolates scalar/history behavior and is not
+owner or lifetime proof. The fixture regenerates byte-for-byte as fixture **103**;
+all preceding 102 fixture hashes remain unchanged.
+
+Three focused tests pass in **0.01 seconds**. They compare the full scalar
+domains, all flag combinations, original native field bytes and component
+boundaries, source-linked observations, original history output, invalid model
+words, sparse sample accessors and unchanged source serialization. Closed charge
+gates retain native zero semantics rather than upstream's absent fraction;
+repeated observations remain retained. Existing sample fields are unchanged and
+baseline variants never become transmitted observations through the new API.
+
+The final all-feature suite passes **520 ordinary tests and ten doctests**
+(88.28 seconds ordinary; 13 corpus tests normally ignored). Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. All **103** registered fixture lengths and SHA-256 hashes
+match with no duplicate manifest entries.
+
+The retained contextual replay audit passes in **127.99 seconds**:
+
+| Capture | Charge readings | Heat readings | Closed charge gates |
+| --- | ---: | ---: | ---: |
+| Octagon | 200 | 0 | 200 |
+| Recharge | 1,352 | 0 | 1,352 |
+
+These are transmitted component observations, excluding empty-slot baselines.
+Every word is checked against the original packet bytes/clock and the exhaustive
+reference conversion. These captures establish closed-gate zeros only;
+nonzero charge, heat and flag behavior have the authored native/oracle evidence
+above. All **16** prior named capture-audit lines remain identical. Neither
+conversion establishes heat-flag gameplay meanings, physical temperature,
+remaining battery, engine f32 arithmetic or complete timeline continuity.
+
+Final logs: `/private/tmp/halo-weapon-quantization-focused-final.log`,
+`/private/tmp/halo-weapon-quantization-final-{tests,corpus,clippy,rustdoc,wasm}.log`,
+and `/private/tmp/halo-weapon-quantization-{reference,regenerated}.{json,log}`.
+All jobs completed. No canonical reader changed; the prior full 32-film source
+preservation audit remains applicable. The existing organization is retained.
+Snapshot/writer contexts, older replay-channel opaque continuity, remaining
+semantic joins and whole-format proof remain open. No commit or push was made.
+
+## General opaque-packet/control-suffix continuity checkpoint
+
+Three new tests verify that unread non-frame bodies and unread control suffixes
+end all held player channels and current ownership, as well as vehicle track
+support. Native packets cover types 6/10, an unknown type, unsupported control
+kind 3, fresh parent-versus-controller ordering, independent vehicle restoration,
+late zero clocks and later same-clock recovery. Direct state tests cover pose,
+aim, magazine, charge, heat, reserves, grenade/vitality/equipment/camouflage/team
+clears and repeated gaps without duplicate player/ride transitions. Existing
+readable-prefix and contextual energy tests continue to pass. The native small
+registry uses an explicit bootstrap policy and does not certify public admission.
+
+The focused replay suite passes **102 tests** (one normally ignored capture test)
+in **1.99 seconds**. The all-feature suite passes **523 ordinary tests and ten
+doctests** (87.63 seconds ordinary; 13 corpus tests normally ignored). Strict
+all-feature/all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. All **103** fixture lengths and SHA-256 hashes remain
+unchanged; this checkpoint adds no wire fixture or canonical reader.
+
+The initial contextual capture audit passes in **128.45 seconds**. The stronger
+audit additionally checks that no ownership interval contains any general gap
+strictly inside its support bounds; it passes in **107.71 seconds**. Equal-clock
+source-order restoration remains legal. All 18 capture summaries agree between
+these runs. Compared with the prior checkpoint:
+
+| Capture | Prior supported poses | Current supported poses | General gaps | Ownership intervals | Controller/holder observations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Octagon | 22,739 | 100 | 26,148 | 100 | 399 |
+| Recharge | 131,844 | 264 | 72,281 | 264 | 1,118 |
+
+This is a substantial reduction in supported contextual attribution, not lost
+canonical source bytes. Old ownership no longer spans opaque per-tick packets.
+Fresh recorded evidence can restore support; an unread body does not become an
+observed death or state change. The established reason-specific roster population
+policy is unchanged. Broader coverage requires native evidence for packet-body
+effects or additional contemporaneous ownership evidence, not weaker assertions.
+
+Ride diagnostics now contain 794 Octagon / 19,418 Recharge boundaries, with
+297 / 779 source-attributed observations and no riding samples in these captures.
+Reserves retain 200 / 264 attributed readings and 100 / 264 live reserve packet
+gaps. Charge retains 200 / 264 readings, all closed-gate zero; heat remains absent.
+The eight vehicle/input/equipment-energy/event source-summary lines are unchanged.
+In particular all 100 / 1,887 runtime and 70 / 1,892 snapshot energy/delay readings
+remain, and canonical Film serialization is unchanged in both captures.
+
+Logs: `/private/tmp/halo-replay-opaque-focused-verified.log`,
+`/private/tmp/halo-replay-opaque-final-{tests,corpus,intervals,clippy,rustdoc,wasm}.log`,
+and `/private/tmp/halo-replay-opaque-intervals-clippy.log`. The last Clippy run
+includes the strengthened ignored-audit assertion. All jobs completed. The prior
+full 32-film wire audit still applies because Film/parser code did not change.
+The existing organization is preserved. Packet grammar, snapshot/writer contexts,
+remaining semantic relationships and complete canonical-format proof remain
+unfinished. No commit or push was made.
+
+
+## Nonempty replication end-packet admission
+
+Only an empty type-7 payload now admits `EndPacketBody`. A nonempty payload
+retains the original envelope and bytes under the existing `UnsupportedLayout`
+error. Coverage classifies those bytes as opaque; previously they were unparsed
+under a successful empty-body variant. Contextual replay consequently invokes its
+existing unread-packet interruption and requires fresh evidence to resume held
+support. Transport framing, parser state layout and public organization are
+unchanged. This is an unsupported-layout policy, not proof of malformed input.
+
+Two focused tests pass. Public parsing covers four payloads (empty, one zero
+byte, one nonzero byte and a complete header-shaped payload), each with/without
+a packet-shaped suffix. Assertions check exact source storage, unknown header
+bytes, timestamps, payload access, coverage, opaque suffixes and serialized Film
+round trips. The runtime test uses native fixture bodies and explicit synthetic
+registry policy to compare empty/nonempty markers, close ownership at the exact
+boundary, and resume with fresh evidence in the next chunk without changing Film.
+
+The ordinary all-feature suite passes **525 tests and ten doctests** (84.18
+seconds ordinary, 13 corpus tests normally ignored). Strict all-target Clippy,
+warnings-denied Rustdoc, WASM, formatting and whitespace checks pass. All Cargo
+checks use `--config build.incremental=false`.
+
+A targeted current corpus audit walks every replication and summary envelope:
+32 films, 451 replication chunks/end markers and 32 summary chunks/end markers.
+All 483 markers are empty and terminal, and no other zero-size packets occur.
+Thus none of the 451 captured replication markers takes the changed branch.
+The expensive whole-field source audit was not rerun for this guard; its prior
+results remain separate. All 103 registered fixture lengths/hashes are unchanged.
+
+Logs: `/private/tmp/halo-end-packet-{focused,tests,clippy,rustdoc,wasm,corpus}.log`.
+All jobs completed. Snapshot construction context, opaque type-6/type-10 grammar,
+writer/build context and complete canonical-format proof remain open. No commit
+or push was made, and the full objective remains active.
+
+
+## Explicit vehicle fixed-domain position reads
+
+Vehicle replay now retains complete ordinary default-world and parent-local
+position branches as `VehiclePositionRead::Fixed { domain, codes }`.
+`VehicleTrack::position_read_at` exposes the latest supported read with the same
+source order and exclusive bounds as world-position sampling. Converting fixed
+codes requires an explicit `FixedPositionSchema::Reference413971b`; both raw codes
+and their domain survive conversion. Ordinary `position_at` stays unknown for
+fixed reads, so no parent-local pose or externally selected bounds silently
+become an admitted world coordinate. Unknown regions do not become defaults.
+
+The projection validates the newly admitted branches through their finite field
+and corruption suffix. The local optional handle and region are retained and
+checked but never used to invent a transform or entity owner. No Film or parser
+reader changed. FixedPositionDomain adds serialization for the typed replay read;
+the existing film / parser/v41 / runtime organization is retained.
+
+The existing independent fixed-positions-v41 oracle supplies 150 vectors with
+original-Go bounds/widths and original-Rust f64 midpoint bits. Authored native
+vehicle components exercise each at all eight alignments and all four local
+handle/region combinations (4,800 cases; default cases repeat across those
+irrelevant local flags). Three new tests verify source preservation, conversion,
+missing/malformed fields, raw-word/extent errors, invalid public codes, complete
+corruption trailers, sparse holds, same-clock replacement and source gaps.
+Trailers and malformed models are explicit policy cases, not new native oracle
+claims. The expanded native packet test covers indexed, default-world and
+parent-local DELTAs through replay/DELETE while preserving Film serialization,
+snapshot separation and absence of player-pose substitution.
+
+The ordinary all-feature suite passes **528 tests and ten doctests** (85.34
+seconds ordinary, 13 capture tests normally ignored). Strict all-target Clippy,
+warnings-denied Rustdoc and WASM checks pass. All Cargo commands disable
+incremental compilation. All 103 registered fixture lengths/hashes remain
+unchanged. No whole-corpus canonical field audit is needed for this runtime-only
+projection; earlier canonical source-audit results remain separate.
+
+Logs: `/private/tmp/halo-vehicle-fixed-{verified,tests,clippy,rustdoc,wasm,corpus}.log`.
+The final capture comparison and completed-job status are recorded below.
+
+
+Final verification also passes all **11 focused vehicle tests** and the
+retained Octagon/Recharge replay audit (114.84 seconds). All 18 prior contextual
+capture summary lines match `/private/tmp/halo-replay-opaque-final-intervals.log`
+exactly. Neither capture contains vehicle tracks, runtime vehicle positions or
+vehicle snapshots, so both newly reported fixed-domain counts are zero. Positive
+branch/source evidence is supplied by the authored native integration and the
+independent scalar oracle, not by those captures. Formatting/whitespace checks
+pass, and all jobs completed. No commit or push was made. Full canonical-format
+proof and the remaining context/packet/relationship requirements stay open.
+
+
+## Projectile source observations versus bounded sampling
+
+Projectile history now retains all admitted positions: singletons, zero-length
+support intervals and every equal-clock read. Queries still use the last read
+at a timestamp, the exclusive support end and the 100 ms age limit. The age
+limit no longer closes a track or discards a later complete sparse DELTA; queries
+remain unknown in the unsampled interval until the later observation. Actual
+source gaps, refused records, replacement and deletion still close tracks, and
+a DELTA alone cannot restart one after a source gap. Complete creation, known
+tag and current owner-reference admission is unchanged.
+
+This addresses source-history differences visible in pinned libfilmshell's
+`grenades.rs::reader`: it appends its accepted DELTA path entries rather than
+replacing equal frames or imposing our old wall-clock expiry. Its throw-window
+filter, proximity pairing and inferred owner/lifetime behavior are not adopted.
+No Film reader or canonical field changes in this checkpoint. The existing
+projectile freshness metadata remains a sampling policy, not a wire invariant.
+
+Three new tests build native archetype-41 NEW/DELTA records using the independent
+creation fixture's `tick/target-0/True/False` body shape. They substitute a known
+frag tag at the original fixed-width tag field, append native object-position
+components, and check complete parsing, exact endpoints and every retained raw
+field against authored bytes. Explicit test owner bindings isolate history
+policy; this is not automatic ownership admission evidence. Eight alignments and
+equal timestamps, same-ID replacement, singleton/zero-length support, sparse
+expiry and source-gap refusal are covered. Source records serialize identically
+before and after projection. All seven focused projectile tests pass.
+
+The captured audit now verifies each retained projectile's packet timestamp,
+position source span, raw indexed-region codes and dequantized coordinates. It
+checks source ordering, nonempty observation histories, exclusive support bounds
+and absence of a general gap strictly inside supported intervals. New output
+counts distinguish tracks, observations, singletons and zero-length support.
+All 103 registered fixture lengths/hashes remain unchanged.
+
+Logs: `/private/tmp/halo-projectile-history-{focused-final,tests,clippy,rustdoc,wasm,corpus}.log`.
+Final suite/capture results and completed-job status are recorded below.
+
+
+Final verification passes **531 ordinary tests and ten doctests** (88.49
+seconds ordinary, 13 capture tests normally ignored), all seven focused projectile
+tests, strict all-target Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks. All Cargo commands disable incremental compilation. The
+retained capture audit passes in 121.48 seconds, with all 20 prior contextual
+summary lines identical to `/private/tmp/halo-vehicle-fixed-corpus.log`.
+
+Both Octagon and Recharge currently have zero admitted projectile tracks under
+the existing canonical/contextual support rules. Their new counts are all zero;
+therefore the new per-projectile capture assertions have no positive captured
+instances. The native-record tests supply positive history/retention evidence.
+This checkpoint does not recover missing captured owner/creation/position support
+or establish complete flight coverage. All 103 fixture hashes remain unchanged,
+all jobs completed, and no commit or push was made. The full objective remains
+active; snapshot/writer contexts, opaque packet grammar, actor relationships and
+complete canonical-format proof remain open.
+
+
+## Control-list continuation before the resource-budget check
+
+The control reader now reads the next presence/termination bit after its 64th
+record. A zero closes the view, unavailable input returns Truncated, and one is
+retained before RecordLimit stops ahead of the next kind/body. Previously all
+three cases returned RecordLimit before inspecting that bit. The public model
+now documents RecordLimit as a resource policy, not a wire-format maximum.
+No control payload layout, kind-3 policy or organization changed.
+
+The new control-limit-v41 fixture contains 24 independently authored lists:
+0/1/63/64/65/128 records of kind 0, kind 1, kind 2 and mixed kinds. Original
+libfilmshell control_view at 18067987ebc3628ad499c819c6aee814692df43b provides
+read/skip traces and all closed endpoints. Local tests compare the retained
+primitive boundaries at eight alignments; 65/128-record fixtures deliberately
+retain a local budget refusal rather than copying upstream's unbounded loop.
+Exact-end truncation has no readable alignment-padding bits. Public Film tests
+check prefix entries, raw bytes, coverage/unparsed suffix, serialization and
+runtime access to the 64 complete control records.
+
+Native-source commentary at LevelUp 413971b/frame_vue_controle.go separately
+places the continuation read before the game's runtime budget and calls its
+offline 64-iteration cap a policy rather than grammar. That is source-analysis
+evidence, not an executed native engine or a proof of a universal record count.
+The original 17-case control oracle still regenerates byte-identically. Its
+exporter now accepts an optional cases file and resolves offline dependencies
+only inside the disposable harness. All Cargo commands disable incremental
+compilation. The original 103 fixture hashes are unchanged; the two new registered
+case/reference files bring the manifest to 105, all verified.
+
+All **11 focused control tests**, **534 ordinary tests and ten doctests** pass
+(86.84 seconds ordinary, 13 normally ignored corpus tests). Strict all-target
+Clippy and formatting/whitespace checks pass. The complete 32-film source audit
+is repeated because this changes a canonical reader; it now counts maximum
+control-list length and budget stops. Final corpus/static results are below.
+
+Logs: `/private/tmp/halo-control-limit-{focused,tests,clippy,rustdoc,wasm,corpus}.log`;
+original oracle regeneration: `/private/tmp/halo-control-original-{reference.json,export.log}`.
+
+Final verification passes warnings-denied Rustdoc and WASM in addition to the
+suite and static checks above. The complete source audit passes in **354.58
+seconds** across **32 films / 403,465 frame packets**. Its 451 keyframe tables
+retain 243 closed tables and 208 explicit partial stops, with 2,068,021 vacant
+headers and 35,634 live headers after vacancies. Control-kind counts remain
+`[1063261, 263, 242]`, with 168 secondary blocks. The largest decoded control
+view contains **20 records**, and there are **zero control-budget stops**.
+
+The captures therefore do not exercise the changed 64-record boundary. Positive
+boundary evidence comes from the independent oracle fixtures and public Film
+integration tests; the corpus verifies source preservation without extending
+that evidence to unseen list lengths. All jobs completed. No commit or push was
+made. Longer-than-budget control lists, missing snapshot construction context,
+opaque packet bodies and broader writer/build support remain explicit limits;
+this checkpoint does not establish full capability parity or canonical-format
+completion.
+
+## Source-time kill and game-event participant joins
+
+`runtime/actions/holders.rs` adds explicit assignment-schema links for the
+player domains mapped by pinned libfilmshell 8f0f8d0 `assemble.rs`: the three
+kill roles, MSB-first game-event recipients and player-typed extra arguments.
+The complete action and its source fields stay attached. Present zero, absent
+indices, unassigned/unknown/ambiguous holders, repeated arguments and every set
+recipient bit are preserved. No future listing, life-path inference, raw-index
+fallback, mask folding or mode-role inference enters this view.
+
+The existing scoreboard holder cursor was moved into `runtime/roster/cursor.rs`
+and reused without changing its policy. It excludes future same-time listings,
+clears both independent populations at source loss that can hide listing packets,
+and retains missing-domain evidence until fresh data arrives. The five new
+native-packet tests cover all 32 mask bits, zero/31/absent indices, argument
+positions, repeated same-time events, slot reuse, human/bot conflicts, missing
+IDs, partial populations, three transport-gap forms, source-field/pointer
+checks and unchanged Film/cursor state. Synthetic parser context supplies the
+listing build and disabled kill-tail settings. Existing original-reader event
+and assignment oracles remain unchanged; these are new joins over established
+fields, not new wire grammars.
+
+The retained canonical action audit passes in **73.51 seconds**. It compares the
+advancing population cursor with an independent bounded listing scan at each
+source event, including claim pointers, uncertainty and status. Counts are:
+
+| Capture | Kill / game / other / error bodies | Unique / unassigned / ambiguous / unknown holder readings |
+| --- | --- | --- |
+| Octagon | 0 / 263 / 1,821 / 96 | 264 / 0 / 0 / 0 |
+| Recharge | 0 / 14,138 / 14,488 / 246 | 15,546 / 0 / 0 / 0 |
+
+The previous action summaries remain 2,084 complete /96 incomplete with 58,398
+exact source scalars, and 28,626 /246 with 543,432 scalars. No complete canonical
+kill body is admitted in either capture; positive kill-join evidence is from
+native fixtures, not these captures. The local view continues to refuse partial
+kills whose playback settings are unavailable.
+
+The all-feature suite passes **539 ordinary tests and ten doctests** (80.84
+seconds ordinary, 13 normally ignored capture tests). Strict Clippy identified
+an oversized result enum; its kill payload now uses one boxed struct. Final
+focused tests pass after that allocation-only change. No join, parser or cursor
+logic changed after the capture run. Strict all-target Clippy, warnings-denied
+Rustdoc and WASM pass on the final code. All 105 registered fixture lengths and
+hashes are unchanged. All Cargo commands disable incremental compilation.
+
+Logs: `/private/tmp/halo-action-holders-{focused-final,tests,corpus,clippy-final,rustdoc,wasm,no-default}.log`.
+The final no-default-feature suite and job status are recorded below.
+
+The final no-default-feature suite passes **539 ordinary tests and ten
+doctests** (78.28 seconds ordinary, 13 capture tests normally ignored).
+Formatting and whitespace checks pass. All validation jobs completed; no
+background test remains running. No commit or push was made. Full capability
+parity and canonical-format proof remain open, including other event actor
+domains, snapshot construction context and opaque packet grammar.
+
+## New upstream event bodies at f050371
+
+A fresh remote query and separate checkout establish upstream revision
+f050371a6cda83b9887eeb83a1884336fce28e53, superseding 8f0f8d0 for this new
+comparison only. LIBFILMSHELL_UPDATE_F050371.md inventories its new wire,
+resource-policy and runtime work. The old source trees/oracles remain pinned.
+
+Canonical event readers now handle codes 2, 8, 12, 13, 14, 80, 104, 105 and 106.
+Code 12 replaces the fixed 94-bit skip with its actual conditional body. Code
+117 was already supported. The existing film/parser/v41/runtime organization,
+version/reference/corruption admission and exact field representation remain.
+No new actor/weapon/damage interpretation is inferred from these bodies.
+
+The independently authored events-f050371-v41 fixture has **162 cases**, covering
+presence combinations, all AI-effect forms, zero/max words, default/indexed
+precision-12/16 points and three reference forms. Its oracle executes original
+upstream events.rs with primitive-only tracing. All eight focused event tests
+pass, including comparison at eight alignments, every-bit truncation, invalid
+or missing indexed context, following events, source scalars/serde and public
+Film/entity/control integration. The new two fixture files bring the manifest
+to 107; old fixture contents remain unchanged.
+
+The original 1,494-case event oracle regenerates byte-identically. Its six
+references-only fixtures for codes 14/104/106 now check those same original
+reference prefixes; the new complete-body fixtures supply body/continuation
+expectations. The historical 2,560-case continuation suite deliberately used
+code 14 as unsupported in mode 6. Its 128 such cases retain that original
+expectation as historical data, while the test now checks the new exact 32-bit
+body, raw source words and refusal to continue incomplete lists. No golden bytes
+or oracle outcomes were regenerated to match the implementation.
+
+The retained direct-action capture audit passes in **73.19 seconds**. Both prior
+action summaries remain unchanged: Octagon 2,084 complete /96 incomplete records
+and 58,398 exact scalars; Recharge 28,626 /246 and 543,432 scalars. These films
+have no newly admitted bodies from this extension; positive branch evidence is
+provided by the native wire fixtures, not the capture counts.
+
+Strict Clippy, warnings-denied Rustdoc and WASM passed. Initial full suites
+identified the historical code-14 unsupported expectation described above; the
+final focused historical check and repeated suites are recorded below. The
+32-film canonical source audit also runs for this wire-reader change.
+
+Logs: `/private/tmp/halo-events-f050-{focused,historical,tests,tests-final,no-default,no-default-final,corpus,actions-corpus,clippy,rustdoc,wasm}.log`.
+
+Final verification passes **540 ordinary tests and ten doctests in both CI
+feature configurations** (92.01 seconds all features, 92.56 seconds no default
+features; 13 capture tests normally ignored). The focused historical continuation
+check passes all 2,560 inputs, including the explicit 128-case supersession.
+Strict all-target Clippy passes after the test update; Rustdoc, WASM, formatting
+and whitespace checks pass. All **107** fixture lengths/hashes verify, with the
+original 105 contents unchanged. All jobs completed.
+
+The full source audit passes in **374.77 seconds** across **32 films and 403,465
+frame packets**. It retains 451 keyframe tables (243 closed, 208 explicit partial
+stops), 2,068,021 vacant headers and 35,634 live headers after vacancies. Complete
+control counts remain `[1063261, 263, 242]`, with 168 secondary blocks, a maximum
+20 retained records per view and zero control-budget stops. These are source
+preservation/count results, not proof that all remaining opaque data is decoded.
+
+No production code changed after the audits began. No commit or push was made.
+Full canonical-format completion remains open; next work includes the newly
+identified upstream resource budgets and component corrections, alongside the
+existing missing snapshot construction context and packet-body evidence.
+
+
+## Film byte and packet budgets
+
+`Film::parse` applies internal resource limits: 256 MiB per input/decoded
+chunk, 1 GiB per input/decoded film, and 65,536 packet envelopes per replay or
+summary chunk. These are resource policies, not wire-format maxima. Source and
+decoded bytes are counted separately during parsing; the compressed input is
+dropped when inflation succeeds. Damaged zlib, inflation exhaustion and packet
+exhaustion return errors instead of a partial `Film`. Malformed packet suffixes
+remain inspectable as opaque inflated bytes. The focused parser tests cover
+these boundaries and strict error behavior.
+
+Both CI feature configurations pass **548 ordinary tests and ten doctests**
+(83.27 seconds all features, 81.45 seconds no default features; 13 capture tests
+normally ignored). Strict all-target Clippy, warnings-denied Rustdoc, WASM,
+formatting and whitespace checks pass. All **107** registered fixture lengths
+and hashes remain valid. All Cargo commands disable incremental compilation.
+The source audit additionally asserts that no retained replication/summary
+capture hits the packet policy; its final results follow below.
+
+Logs: `/private/tmp/halo-budgets-{focused,continuity,tests,no-default,corpus,clippy,rustdoc,wasm}.log`.
+The f050371 audit now distinguishes already supported orientation/command-tick/
+Bond safeguards from the pending secondary-control corrections, raw-position
+closure questions and predicted-grapple source conflict. Full canonical-format
+completion and complete upstream capability parity remain open.
+
+
+Final source audit passes in **354.61 seconds**: **32 films and 403,465 frame
+packets**, with no packet-policy stops in any replication or summary chunk.
+The original sources and prior counts remain: 451 keyframe tables (243 closed,
+208 explicit partial), 2,068,021 vacant headers, 35,634 live headers after
+vacancies; complete control kinds `[1063261, 263, 242]`, 168 secondary blocks,
+maximum 20 control records per view and zero control-budget stops. Successful
+source retention is not proof that the remaining opaque bits are decoded.
+All validation jobs completed. No production code changed after these full
+checks began. No commit or push was made; the overall goal remains active.
+
+
+## Secondary-control branches at f050371
+
+`frame/controls/secondary.rs` now follows the upstream corrections for the second
+optional reference (category 1), the local-position selector (three 14-bit words
+instead of a point), and the target suffix (handle plus 11-bit raw word on
+presence, neither on absence). The existing shared point reader also admits
+self-contained default-box positions without map context. Indexed boxes and
+present reference handles retain their explicit context requirements. Complete
+records retain their source ranges; partial bodies do not enter the complete
+record list. No new actor, coordinate or physical-input interpretation is added.
+
+The new controls-f050371-v41 fixture contains **336 independently authored views**
+(48 short, 288 full), each with a following kind-2 record and terminator. Its
+original-reader oracle agrees with all endpoints and primitive traces. All
+**15 focused control tests** pass, including eight alignments, every-bit
+truncation, exact raw fields, all four generations, both category-1 forms,
+absent references, local/default/indexed/region-3 points, optional target words,
+unknown reference domains, unknown indexed regions, caller precision and public
+Film/runtime coverage and source order. The ordinary no-context helper proves
+only map-independent points; present handles still need configuration one.
+An initial integration fixture used configuration zero with present handles;
+it correctly refused. The final fixture supplies the recorded configuration
+flag rather than weakening reference admission.
+
+The old 17-case control oracle regenerates byte-for-byte. Its three full-body
+fixtures encode the older conflicting branches; their original traces are
+explicitly retained as historical evidence. The other 14 remain current tests.
+The new authoring generator also reproduces exactly. All **107** older fixture
+lengths/hashes are unchanged; the new case and oracle files bring the manifest
+to **109**. Strict Clippy, warnings-denied Rustdoc, WASM, formatting and
+whitespace checks pass. The full suites and source-corpus outcomes follow below.
+
+Logs: `/private/tmp/halo-controls-f050-{export,focused-verified,tests,no-default,corpus,clippy,rustdoc,wasm}.log`;
+old-oracle reproduction: `/private/tmp/halo-controls-original-export.log`.
+Initial focused logs are superseded by `focused-verified` (the first failure was
+fixture metadata deserialization; the second was the configuration flag above).
+The final production reader did not change between these focused runs.
+
+
+Both full feature configurations pass **552 ordinary tests and ten doctests**
+(83.18 seconds all features, 80.82 seconds no default features; 13 capture tests
+normally ignored). All Cargo commands disable incremental compilation. The
+corpus audit additionally counts full secondary bodies, local positions and
+present targets within complete records, so positive branch evidence can be
+distinguished from source retention. Its final outcome follows below.
+
+The source audit passes in **354.73 seconds**, retaining all **32 films and
+403,465 frame packets**. Keyframes remain 451 tables (243 closed, 208 partial),
+2,068,021 vacant headers and 35,634 live headers after vacancies. Complete control
+kinds are now **[1063258, 260, 231]**, with **166 secondary blocks**, a maximum
+of 20 records per view and zero control-budget stops. Those control counts are
+lower than the previous [1063261, 263, 242] /168 blocks; they are not unchanged.
+Within complete records, 70 full secondary bodies include 28 local positions
+and 27 present targets.
+
+To investigate the changed boundaries, an ignored extractor retained 72 exact
+control slices (including partial views) in 136.02 seconds. All are from the
+hour-long raid, with configuration one and registry-derived boxes. Both original
+1806798 and corrected f050371 upstream readers were executed on those excerpts.
+**All 47 complete views match f050371's endpoint; 46 differ from the old reader.**
+The other 25 retain 19 kind-3 refusals and six truncations. The comparison supports
+the corrected boundaries without claiming an individual explanation of all 17
+fewer complete records in the whole-corpus count. The external oracle's padded
+partial views are never used to enlarge the canonical source boundary.
+
+The new ordinary captured regression checks all 72 views, exact retained fields,
+oracle primitive boundaries in the consumed prefix, stop/entry counts, logical
+truncation boundaries and the 70/28/27 complete-body branch counts. It passes.
+All 109 prior fixture hashes remain unchanged; three retained capture/oracle
+files bring the manifest to **112**. The ignored extractor raises the normal
+ignored count to 14. No production logic changed after the full source audit.
+
+Additional logs: `/private/tmp/halo-controls-f050-capture-export.log`,
+`/private/tmp/halo-controls-f050-captured-test.log`,
+`/private/tmp/halo-controls-f050-captured-reference.log` and
+`/private/tmp/halo-controls-old-captured-reference-final.log`.
+
+Final suites pass **553 ordinary tests and ten doctests in both feature
+configurations** (78.89 seconds all features, 79.41 seconds no default features;
+14 ignored corpus tests). Strict all-target Clippy, formatting and whitespace
+checks pass. Clippy requested the array-chunk iterator in the new test's hex
+decoder; after that test-only change, strict Clippy and the captured regression
+were rerun successfully. Production code remains the version validated by the
+full suites, source audit, Rustdoc and WASM checks above. All 112 fixture hashes
+validate, and the three captured files exactly match their external exports.
+Final logs: `/private/tmp/halo-controls-f050-final-{tests,no-default,clippy}.log`.
+All jobs completed. No commit or push was made. Full canonical format completion
+remains open; the next scoped work is the separately audited raw-position tail.
+
+## Raw-position nonfinite closure
+
+The dynamic snapshot, writer-absolute/full-scope and raw object-position readers
+now retain three original 32-bit words and test their byte-reversed IEEE-754
+exponents. A NaN or infinity refuses the component after the words and leaves
+the two closing bits unread; signed zero, subnormals and finite values continue
+through the footer. The refusal survives the component dispatch layer even with
+an opaque stub configured. No runtime coordinate is published from the partial
+component. The focused source-derived test checks wire boundaries, raw fields,
+the successor byte and all six finite/nonfinite classes.
+
+Seven original component snapshot cases carried a NaN but the older libfilmshell
+reader treated them as complete. Their bytes and original oracle remain intact;
+those outcomes are now explicitly historical. The old world-reader oracle's
+nonfinite runtime case is likewise retained while its parsed-film assertion
+expects an incomplete table. A synthetic weapon NaN no longer yields a complete
+weapon position. The vehicle runtime still refuses a malformed externally
+supplied complete view. The other captured/reference branches remain covered.
+
+A proposed blanket refusal on a set parent gate was reverted after conflicting
+captured evidence. In `snapshot-refusal-v41/packet.bin`, the dynamic position at
+bit 226696 has a set gate, finite raw words and an independently pinned endpoint
+at 226797. The native full-scope tail rule needs call-site/engine reconciliation
+before changing that captured snapshot branch. The parent-tail gap remains open.
+
+The **32-film /403,465-frame** source audit passes in **352.30 seconds** with
+the same 451 keyframe tables, 243 closed/208 partial, 2,068,021 vacant headers,
+35,634 live after vacancy, control kinds [1063258, 260, 231], 166 secondary
+blocks and zero control-budget stops. It finds no aggregate boundary regression
+from the raw finite predicate. Focused component and three affected runtime
+checks pass. Final full-suite outcomes are recorded below.
+
+Log: `/private/tmp/halo-position-finite-final-corpus.log`. The earlier
+`halo-position-finite-final-tests.log` and `final-no-default.log` captured the
+three stale runtime expectations before they were corrected; they are not final
+passing checks.
+
+Final verification passes **556 ordinary tests and ten doctests in each feature
+configuration** (78.34 seconds all features, 77.66 seconds no default features;
+14 ignored corpus tests). Strict all-target Clippy, formatting and whitespace
+checks pass. The source audit's 32 films, 403,465 frames and aggregate counts
+remain as above. Logs: `/private/tmp/halo-position-finite-verified-{tests,no-default,clippy}.log`.
+All jobs completed. No commit or push was made. Parent-tail reconciliation and
+the broader canonical/parser parity objective remain open.
+
+## Managed-player creation participant
+
+The existing type-9 default reader preserves the six-bit `player_index` word.
+Complete NEW and keyframe records now provide a typed participant accessor that
+admits only 0–31, matching the new f050371 upstream function. Replay uses it
+for managed team-controller registration; 32–63 stay raw in canonical fields.
+This closes a real domain error: the four older type-9 creation fixtures carry
+value 51, which the previous replay path could treat as an engine player.
+
+The independent original-function oracle has **1,024 cases** (all 64 values,
+both version forms, all eight starting alignments). Rust checks every admitted
+value, exact six-bit field and following successor byte. Complete NEW/keyframe
+integration checks 0, 31, 32 and 63 in both version forms, and partial records
+cannot publish a participant. The two new fixture hashes bring the manifest
+to **114**, with all prior 112 unchanged. Focused tests pass.
+
+Final verification passes **558 ordinary tests and ten doctests in both feature
+configurations** (81.44 seconds all features, 81.67 seconds no default features;
+14 ignored corpus tests). Strict all-target Clippy, formatting, whitespace and
+all 114 fixture hashes pass. The retained Octagon and Recharge contextual replay
+check passes in 116.83 seconds with canonical reads unchanged. The 32-film source
+audit from the preceding raw-position checkpoint remains applicable to parsing:
+this change adds a model accessor and narrows one runtime interpretation without
+changing any wire reader or source boundary. Logs:
+`/private/tmp/halo-managed-participant-{focused,tests,no-default,clippy,replay-corpus}.log`.
+All jobs completed. No commit or push was made. Managed life/team joins beyond
+this recorded participant, parent-tail reconciliation and full parser parity
+remain open.
+
+## Latest source-preservation and runtime lookup checkpoint
+
+After the f050371 event-handle/controller join and the replay vehicle lookup,
+both feature configurations passed 565 ordinary tests each (14 intentionally
+ignored). Strict all-target/all-feature Clippy, formatting and whitespace checks
+passed. A native controller/listing/event packet test verifies exact equal-time
+holder changes and explicit other-generation uncertainty. Native vehicle packets
+and segmented replacement/gap tracks verify the full-ID lookup's exclusive
+support interval, including a zero-length truncated replacement.
+
+The separately run captured source audit passed all **32 films / 403,465 frame
+packets** in 341.37 seconds. It reached 451 keyframe tables (243 closed, 208
+stopped), preserved 35,634 live headers after vacant slots and reported zero
+control-budget stops. This verifies source retention with those runtime changes;
+it does not establish complete field decoding or historical reader parity.
+
+A further bot-only cold-start test, added after that audit process started,
+passes in both feature configurations. It uses a native type-12 bot listing and
+recorded controller without human bootstrap identities. Ownership is unknown
+until an explicit empty type-8 human listing arrives, then uniquely identifies
+the bot. A later controller clear ends its ownership-started life without
+claiming a death. It changes only test evidence; no production parser or runtime code
+changed after the source audit began. Complete bot lives, timer roles, snapshot
+parent context and full canonical format coverage remain open.
+
+The subsequent transport checkpoint removes the previous zero-size/type-7
+envelope stop rules. Synthetic tests cover exact boundaries, opaque bodies,
+unread suffixes, packet limits and a runtime continuity gap after type 7. The
+captured inventory has no post-type-7 or other empty-envelope examples; corpus
+agreement does not prove their writer semantics. After this production parser
+change, the separately run release-mode source audit passed all 32 films and
+403,465 frame packets in 69.22 seconds; it reached 451 keyframe tables and
+reported zero control-budget stops. This confirms existing corpus behavior,
+not the legality of unobserved envelope sequences.
+
+The separately rerun historical reader comparison still fails at its previously
+documented first mismatch,
+`appearance/01-cadet-blue/chunk-001-type-2.bin:567583`:
+`(3, 4603)` versus `(1, 382)`. This mismatch predates the envelope change and
+remains a field/boundary parity gap; the source audit must not be described as
+full 1:1 reader agreement.
+
+The recorded vehicle-part carrier accessor is runtime-only. Both feature
+configurations passed 519 Theater tests each (14 intentionally ignored) after
+its first implementation. Subsequent path-consistency and same-clock source-order guards passed
+the focused native-packet carrier test in default mode, and strict Clippy passed
+with all and no default features; formatting and whitespace checks passed.
+The test uses synthetic catalogue-tag injection to isolate the join, so captured
+part-tag and attachment availability remain unverified. No canonical packet,
+component or frame reader changed after the passing source audit above.
+
+The subsequent `theater_vehicle_inventory` release example ran over all 32
+retained films. It counted 451 keyframe tables, 207 vehicle-class snapshot
+headers and reached bodies, 207 tag fields, 38 catalogue part tags, and 207
+complete position components. All 207 vehicle records stop at
+`vehicle+0x818`; none completes, and no decoded table contains two vehicles.
+This is a current-parser inventory, not an upstream endpoint oracle or proof
+that no further vehicle records exist after those stops.
+
+The subsequent 32-film dynamic-position prefix inventory found 2,534,142
+complete ordinary `00` components and 50 reached non-`00` components, all
+in the raid film. Two 160-bit raid snippets were re-extracted after checking
+their full chunk SHA-256 hashes. The f050371 original component reader's
+instrumented trace regenerates byte-identically: it stops after two bits on
+`11` and ends at 101 bits on `10`; the independently sourced local reader ends
+both keep-baseline forms at 99 bits. A focused local test passes for the exact
+captured fields and endpoints. This records a source conflict, not a complete
+packet oracle or a reason to discard the native prediction branch.
+The two new JSON fixtures are registered in `fixtures.json`. A full current-
+worktree integrity scan also found nine pre-existing manifest entries with
+stale lengths or SHA-256 hashes; those entries were refreshed to their present
+files without changing any fixture bytes. All 118 listed files now match the
+manifest. Hash agreement does not independently validate their reader claims.
+
+The life-bounded contextual playback extension adds `life_at`, `sample_at`,
+`alive_at` and replay-set `samples_at` without changing Film or wire decoding.
+An authored two-player test covers sparse pose hold, a gap at the first life's
+exclusive end, a second player starting at that same clock with unknown pose,
+film end, overlapping public life intervals and stale pre-life sample refusal.
+The replay-focused tests pass 12/12 in both feature configurations (one existing
+capture-dependent test ignored); strict all-feature/all-target Clippy,
+formatting and whitespace checks pass. This verifies the query contract, not
+complete captured-life reconstruction or same-clock source ordering.
+
+The current-source motion encoding diagnostic compares its label against the
+unmodified a13efb3 `container::detect_encoding_mode` on all 32 retained films:
+29 per-entity and three multiplayer-composite labels agree. The one new
+`encoding-a13efb/reference.json` fixture regenerates byte-identically and its
+32 manifest hashes verify. Focused threshold, span and player-count tests pass;
+the all-feature Theater suite passes 540 tests with 18 ignored, and strict
+all-target Clippy, formatting and whitespace checks pass. Vote counts and
+source examples remain diagnostic marker evidence; this validation does not
+establish a canonical motion encoding discriminator or complete motion grammar.
+
+The carrier-position query combines existing native ride and vehicle evidence
+without modifying parser fields or player pose samples. The direct/part and
+continuity tests pass; the all-feature Theater suite passes 541 cases with 18
+ignored. Strict all-target Clippy, formatting and whitespace checks pass. Its
+positive world points in the ride tests are explicit model fixtures, not
+independent captured seated-player positions. The result exposes a vehicle
+center and source observation, leaving seat transforms and complete ride motion
+unverified.
+
+## Exact-site DELTA schema context
+
+An authored indexed type-0 packet tests the private parser with supplied writer context and
+an empty-mask generation-1 DELTA. The default stops unbound. An exact key reads
+one record with `archetype: None` and external-context provenance; a following
+unprovided DELTA still stops unbound. Wrong chunk, packet, bit, and ID keys do
+not match, and an invalid registry archetype returns a typed parse error. This
+proves record-local admission for this authored layout only.
+The all-feature library suite passed 606 tests with 21 ignored. Strict
+all-feature/all-target Clippy, formatting and `git diff --check` passed.
+
+# Configurable control-list budget (current worktree)
+
+`ParseLimits.max_control_records` now defaults to 65,536 instead of the
+previous fixed 64. The existing independent 24-case control oracle verifies
+the 64-record configured boundary at eight bit alignments, including an
+exact-limit terminator, missing terminator and present successor. Authored
+65- and 128-record lists complete through public `Film::parse`, retaining
+their full control fields, endpoints, source bytes and packet coverage.
+
+The ordinary library suite passed 604 tests with 21 ignored; the focused
+long-list case also passed without default features. Strict all-feature,
+all-target Clippy with denied warnings, formatting and whitespace checks
+passed. The earlier 32-film source audit found at most 20 control records, so
+that corpus does not independently exercise the raised default. This change
+does not prove the remaining film grammar or runtime capability parity.
+
+## Vehicle snapshot successor hint (current upstream)
+
+The current libfilmshell HEAD is `a13efb323b230c96b59685defbc376720043240f`;
+its `src/snapshot.rs` blob remains
+`94c02bfe1f0c5dfa629d56e6ce9bb7f6f8eef1e3`. The runtime now reports
+source-bounded next-slot evidence for both candidate vehicle snapshot branches.
+Authored cases cover vacant and live successors, a misordered ID, incomplete
+header words, the near-end rule, an incomplete branch, and ambiguous/default-
+first hints. The retained Cadet Blue case gives `VacantHeader` for the
+no-type branch and `Rejected` for the typed branch, while both explicit
+private parser reads with supplied writer context retain their previously verified field/end
+agreement. The canonical default still stops at `vehicle+0x818`.
+
+The ordinary library suite passed 605 tests with 21 ignored before the final
+incomplete-branch guard; the focused guard and retained captured test passed
+afterward. A plausible next slot remains a runtime recovery hint and cannot
+establish the writer's vehicle construction flag.

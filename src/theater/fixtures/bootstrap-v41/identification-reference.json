@@ -1,0 +1,93 @@
+{
+  "commit": "18067987ebc3628ad499c819c6aee814692df43b",
+  "cases": [
+    {
+      "name": "flag/False/zero-False",
+      "build": "6.10026.18411.0",
+      "branch": "HI_1_13_0",
+      "timestamp": 4275878552,
+      "asset": "0123456789abcdef0123456789abcdef",
+      "version": "fedcba9876543210fedcba9876543210",
+      "trace": [
+        [
+          8865,
+          32
+        ],
+        [
+          107297,
+          128
+        ],
+        [
+          107425,
+          128
+        ]
+      ]
+    },
+    {
+      "name": "flag/True/zero-False",
+      "build": "6.10026.18411.0",
+      "branch": "HI_1_13_0",
+      "timestamp": 4275878552,
+      "asset": "0123456789abcdef0123456789abcdef",
+      "version": "fedcba9876543210fedcba9876543210",
+      "trace": [
+        [
+          8865,
+          32
+        ],
+        [
+          107297,
+          128
+        ],
+        [
+          107425,
+          128
+        ]
+      ]
+    },
+    {
+      "name": "flag/False/zero-True",
+      "build": "6.10026.18411.0",
+      "branch": "HI_1_13_0",
+      "timestamp": null,
+      "asset": null,
+      "version": null,
+      "trace": [
+        [
+          8865,
+          32
+        ],
+        [
+          107297,
+          128
+        ],
+        [
+          107425,
+          128
+        ]
+      ]
+    },
+    {
+      "name": "flag/True/zero-True",
+      "build": "6.10026.18411.0",
+      "branch": "HI_1_13_0",
+      "timestamp": null,
+      "asset": null,
+      "version": null,
+      "trace": [
+        [
+          8865,
+          32
+        ],
+        [
+          107297,
+          128
+        ],
+        [
+          107425,
+          128
+        ]
+      ]
+    }
+  ]
+}

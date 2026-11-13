@@ -1,0 +1,171 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blob": "4701db66d587260404006301be25b4fb2ae1931f",
+  "queried_ids": [
+    0,
+    1024
+  ],
+  "rows": [
+    {
+      "mode": "Strongholds",
+      "id": 798,
+      "kind": 0,
+      "audience": "Player",
+      "names_zone": true
+    },
+    {
+      "mode": "Strongholds",
+      "id": 821,
+      "kind": 1,
+      "audience": "Player",
+      "names_zone": true
+    },
+    {
+      "mode": "Strongholds",
+      "id": 829,
+      "kind": 2,
+      "audience": "Team",
+      "names_zone": false
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 786,
+      "kind": 3,
+      "audience": "Match",
+      "names_zone": true
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 787,
+      "kind": 4,
+      "audience": "Match",
+      "names_zone": true
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 790,
+      "kind": 5,
+      "audience": "Match",
+      "names_zone": true
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 809,
+      "kind": 6,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 819,
+      "kind": 8,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 828,
+      "kind": 7,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "FirefightKingOfTheHill",
+      "id": 830,
+      "kind": 7,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "Oddball",
+      "id": 800,
+      "kind": 2,
+      "audience": "Team",
+      "names_zone": false
+    },
+    {
+      "mode": "Oddball",
+      "id": 825,
+      "kind": 9,
+      "audience": "Player",
+      "names_zone": false
+    },
+    {
+      "mode": "Oddball",
+      "id": 836,
+      "kind": 10,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 796,
+      "kind": 3,
+      "audience": "Match",
+      "names_zone": true
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 797,
+      "kind": 4,
+      "audience": "Match",
+      "names_zone": true
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 800,
+      "kind": 0,
+      "audience": "Team",
+      "names_zone": true
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 802,
+      "kind": 15,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 803,
+      "kind": 1,
+      "audience": "Team",
+      "names_zone": true
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 805,
+      "kind": 14,
+      "audience": "Team",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 807,
+      "kind": 12,
+      "audience": "Match",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 808,
+      "kind": 13,
+      "audience": "Team",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 817,
+      "kind": 16,
+      "audience": "Team",
+      "names_zone": false
+    },
+    {
+      "mode": "KingOfTheHill",
+      "id": 820,
+      "kind": 11,
+      "audience": "Team",
+      "names_zone": true
+    }
+  ]
+}

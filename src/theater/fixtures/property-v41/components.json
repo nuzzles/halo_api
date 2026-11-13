@@ -1,0 +1,1282 @@
+[
+  {
+    "name": "property/False/False/0/False",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/0/True",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/1/False",
+    "hex": "10",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/1/True",
+    "hex": "1f",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/2/False",
+    "hex": "20",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/2/True",
+    "hex": "28",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/3/False",
+    "hex": "30000000",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/3/True",
+    "hex": "3ffffff0",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/4/False",
+    "hex": "4000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/4/True",
+    "hex": "4ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/5/False",
+    "hex": "5000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/5/True",
+    "hex": "5ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/6/False",
+    "hex": "6000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/6/True",
+    "hex": "6ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/7/False",
+    "hex": "70",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/7/True",
+    "hex": "70",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/8/False",
+    "hex": "80",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/8/True",
+    "hex": "80",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/9/False",
+    "hex": "90",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/9/True",
+    "hex": "90",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/10/False",
+    "hex": "a0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/10/True",
+    "hex": "a0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/11/False",
+    "hex": "b0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/11/True",
+    "hex": "b0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/12/False",
+    "hex": "c0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/12/True",
+    "hex": "c0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/13/False",
+    "hex": "d0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/13/True",
+    "hex": "d0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/14/False",
+    "hex": "e0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/14/True",
+    "hex": "e0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/15/False",
+    "hex": "f0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/False/15/True",
+    "hex": "f0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/0/False",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/0/True",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/1/False",
+    "hex": "10",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/1/True",
+    "hex": "10",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/2/False",
+    "hex": "20",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/2/True",
+    "hex": "20",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/3/False",
+    "hex": "30",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/3/True",
+    "hex": "30",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/4/False",
+    "hex": "40",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/4/True",
+    "hex": "40",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/5/False",
+    "hex": "50",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/5/True",
+    "hex": "50",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/6/False",
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/6/True",
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/7/False",
+    "hex": "70000000",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/7/True",
+    "hex": "7ffffff0",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/8/False",
+    "hex": "8000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/8/True",
+    "hex": "8ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/9/False",
+    "hex": "9000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/9/True",
+    "hex": "9ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/10/False",
+    "hex": "a0",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/10/True",
+    "hex": "a8",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/11/False",
+    "hex": "b0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/11/True",
+    "hex": "bf",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/12/False",
+    "hex": "c0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/12/True",
+    "hex": "cf",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/13/False",
+    "hex": "d0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/13/True",
+    "hex": "df",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/14/False",
+    "hex": "e0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/14/True",
+    "hex": "ef",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/15/False",
+    "hex": "f0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/False/True/15/True",
+    "hex": "ff",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": false
+  },
+  {
+    "name": "property/True/False/0/False",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/0/True",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/1/False",
+    "hex": "10",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/1/True",
+    "hex": "1f",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/2/False",
+    "hex": "20",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/2/True",
+    "hex": "28",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/3/False",
+    "hex": "30000000",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/3/True",
+    "hex": "3ffffff0",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/4/False",
+    "hex": "4000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/4/True",
+    "hex": "4ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/5/False",
+    "hex": "5000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/5/True",
+    "hex": "5ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/6/False",
+    "hex": "6000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/6/True",
+    "hex": "6ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/7/False",
+    "hex": "70",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/7/True",
+    "hex": "70",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/8/False",
+    "hex": "80",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/8/True",
+    "hex": "80",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/9/False",
+    "hex": "90",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/9/True",
+    "hex": "90",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/10/False",
+    "hex": "a0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/10/True",
+    "hex": "a0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/11/False",
+    "hex": "b0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/11/True",
+    "hex": "b0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/12/False",
+    "hex": "c0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/12/True",
+    "hex": "c0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/13/False",
+    "hex": "d0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/13/True",
+    "hex": "d0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/14/False",
+    "hex": "e0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/14/True",
+    "hex": "e0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/15/False",
+    "hex": "f0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/False/15/True",
+    "hex": "f0",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/0/False",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/0/True",
+    "hex": "00",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/1/False",
+    "hex": "10",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/1/True",
+    "hex": "10",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/2/False",
+    "hex": "20",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/2/True",
+    "hex": "20",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/3/False",
+    "hex": "30",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/3/True",
+    "hex": "30",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/4/False",
+    "hex": "40",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/4/True",
+    "hex": "40",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/5/False",
+    "hex": "50",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/5/True",
+    "hex": "50",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/6/False",
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/6/True",
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/7/False",
+    "hex": "70000000",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/7/True",
+    "hex": "7ffffff0",
+    "bit_len": 28,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/8/False",
+    "hex": "8000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/8/True",
+    "hex": "8ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/9/False",
+    "hex": "9000000000",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/9/True",
+    "hex": "9ffffffff0",
+    "bit_len": 36,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/10/False",
+    "hex": "a0",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/10/True",
+    "hex": "a8",
+    "bit_len": 5,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/11/False",
+    "hex": "b0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/11/True",
+    "hex": "bf",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/12/False",
+    "hex": "c0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/12/True",
+    "hex": "cf",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/13/False",
+    "hex": "d0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/13/True",
+    "hex": "df",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/14/False",
+    "hex": "e0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/14/True",
+    "hex": "ef",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/15/False",
+    "hex": "f0",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  },
+  {
+    "name": "property/True/True/15/True",
+    "hex": "ff",
+    "bit_len": 8,
+    "complete": true,
+    "component": "managed-object-player-masked-property-component",
+    "version": 1,
+    "archetype": 13,
+    "snapshot": true
+  }
+]

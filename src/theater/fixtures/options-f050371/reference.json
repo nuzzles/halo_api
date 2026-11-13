@@ -1,0 +1,2707 @@
+{
+  "commit": "f050371a6cda83b9887eeb83a1884336fce28e53",
+  "blobs": {
+    "options.rs": "43ade2aafef5f38ca492b507e7adce03cc4be38d",
+    "options_data.rs": "021e911b805a2b74c24321c7209462a76bd0a708"
+  },
+  "option_names": [
+    {
+      "hash": 19080245,
+      "name": "FirefightOptions_AutoReviveTimerSec"
+    },
+    {
+      "hash": 56164937,
+      "name": "FirefightOptions_customSquadSelectionOrder"
+    },
+    {
+      "hash": 84292501,
+      "name": "StrongholdsOptions_suddenDeathTrailingScoreThreshold"
+    },
+    {
+      "hash": 163997374,
+      "name": "StrongholdsOptions_scoreIntervalSec"
+    },
+    {
+      "hash": 201779232,
+      "name": "FirefightOptions_BonusLivesPerSet"
+    },
+    {
+      "hash": 248994034,
+      "name": "BastionOptions_controlAreaAttributeShieldRechargeRate"
+    },
+    {
+      "hash": 317049948,
+      "name": "SlayerOptions_BeatdownBonus"
+    },
+    {
+      "hash": 342627772,
+      "name": "MinigameOptions_scorePerKill"
+    },
+    {
+      "hash": 358533035,
+      "name": "FirefightOptions_LimitEagleRespawns"
+    },
+    {
+      "hash": 390975935,
+      "name": "StrongholdsOptions_DenySpawningWithinStrongholds"
+    },
+    {
+      "hash": 408897392,
+      "name": "SlayerOptions_scorePerKill"
+    },
+    {
+      "hash": 474165530,
+      "name": "OddballOptions_scoreIntervalSec"
+    },
+    {
+      "hash": 540894454,
+      "name": "CTFOptions_flagCarrierSpottedOnMotionTrackerReveal"
+    },
+    {
+      "hash": 600425608,
+      "name": "MinigameOptions_scorePerBetrayal"
+    },
+    {
+      "hash": 684313565,
+      "name": "BastionOptions_controlAreaAttributeShieldMultiplier"
+    },
+    {
+      "hash": 702361646,
+      "name": "StrongholdsOptions_minCapturedStrongholdsToScore"
+    },
+    {
+      "hash": 722909039,
+      "name": "CTFOptions_FlagReturnTime"
+    },
+    {
+      "hash": 742051686,
+      "name": "BastionOptions_legacyScorePerInterval"
+    },
+    {
+      "hash": 786263818,
+      "name": "SlayerOptions_ScorePerAssist"
+    },
+    {
+      "hash": 832496554,
+      "name": "FirefightOptions_PreventItemRespawns"
+    },
+    {
+      "hash": 839131303,
+      "name": "MinigameOptions_maxSpawnVehiclesPerTeam"
+    },
+    {
+      "hash": 861805591,
+      "name": "CTFOptions_FlagCarrierShieldPercent"
+    },
+    {
+      "hash": 906923708,
+      "name": "FirefightOptions_overrideAIPlacementsSource"
+    },
+    {
+      "hash": 915727150,
+      "name": "MinigameOptions_MinigameIncludeLabel2"
+    },
+    {
+      "hash": 922926466,
+      "name": "FirefightOptions_setsAreSequential"
+    },
+    {
+      "hash": 959122958,
+      "name": "FirefightOptions_fixedSetCount"
+    },
+    {
+      "hash": 966960789,
+      "name": "CTFOptions_FlagCarrierGravityScalarPercent"
+    },
+    {
+      "hash": 1011340547,
+      "name": "StrongholdsOptions_initialStrongholdOwnership"
+    },
+    {
+      "hash": 1017699394,
+      "name": "StrongholdsOptions_captureTimeSec"
+    },
+    {
+      "hash": 1073629331,
+      "name": "SpartanChatterDisabledByVariant"
+    },
+    {
+      "hash": 1208133331,
+      "name": "FirefightOptions_AutoReviveTimerEnabled"
+    },
+    {
+      "hash": 1214724320,
+      "name": "CTFOptions_flagCarrierMovespeedPercent"
+    },
+    {
+      "hash": 1230382817,
+      "name": "BastionOptions_LegacyScoringEnabled"
+    },
+    {
+      "hash": 1280244725,
+      "name": "SlayerOptions_scorePerBetrayal"
+    },
+    {
+      "hash": 1286751629,
+      "name": "MinigameOptions_ScorePerAssist"
+    },
+    {
+      "hash": 1305696182,
+      "name": "BastionOptions_strongholdLifetimeSec"
+    },
+    {
+      "hash": 1324096971,
+      "name": "SlayerOptions_ScorePerDeath"
+    },
+    {
+      "hash": 1379349691,
+      "name": "FirefightOptions_allySecureScalarEnabled"
+    },
+    {
+      "hash": 1435711246,
+      "name": "CTFOptions_numberOfFlagsPerTeam"
+    },
+    {
+      "hash": 1472894990,
+      "name": "CTFOptions_FlagCarrierHealthPercent"
+    },
+    {
+      "hash": 1506916070,
+      "name": "BastionOptions_controlAreaAttributeMovementSpeed"
+    },
+    {
+      "hash": 1520835029,
+      "name": "FirefightOptions_SkullStreakType"
+    },
+    {
+      "hash": 1742820186,
+      "name": "SlayerOptions_splatterBonus"
+    },
+    {
+      "hash": 1754081597,
+      "name": "MinigameOptions_spawnInVehicleFillType"
+    },
+    {
+      "hash": 1834581369,
+      "name": "CTFOptions_instantTouchReturnEnabled"
+    },
+    {
+      "hash": 1852203362,
+      "name": "FirefightOptions_LimitOtherRespawns"
+    },
+    {
+      "hash": 1858897850,
+      "name": "FirefightOptions_AllySecureAccelerationScalar"
+    },
+    {
+      "hash": 1859876632,
+      "name": "MinigameOptions_scorePerSuicide"
+    },
+    {
+      "hash": 1871881244,
+      "name": "BastionOptions_controlAreaAttributeBodyRechargeRate"
+    },
+    {
+      "hash": 1884397142,
+      "name": "StrongholdsOptions_multipleCapturerBehavior"
+    },
+    {
+      "hash": 1885472063,
+      "name": "StrongholdsOptions_pointsPerScore"
+    },
+    {
+      "hash": 1899584745,
+      "name": "FirefightOptions_setDefaultTeamOnJoin"
+    },
+    {
+      "hash": 1953512427,
+      "name": "BastionOptions_controlAreaAttributeSprintEnabled"
+    },
+    {
+      "hash": 1961395520,
+      "name": "MinigameOptions_minigameIncludeLabel4"
+    },
+    {
+      "hash": 1980781361,
+      "name": "MinigameOptions_splatterBonus"
+    },
+    {
+      "hash": 1981137010,
+      "name": "FirefightOptions_ReviveEnabled"
+    },
+    {
+      "hash": 2039328773,
+      "name": "MinigameOptions_SpawnInVehicleCreation"
+    },
+    {
+      "hash": 2075077865,
+      "name": "BastionOptions_controlAreaAttributeMeleeDamageMultiplier"
+    },
+    {
+      "hash": 2081644706,
+      "name": "SlayerOptions_scorePerSuicide"
+    },
+    {
+      "hash": 2096153338,
+      "name": "MinigameOptions_BeatdownBonus"
+    },
+    {
+      "hash": 2121522639,
+      "name": "MinigameOptions_StickyBonus"
+    },
+    {
+      "hash": 2152645149,
+      "name": "FirefightOptions_overrideMapAIPlacements"
+    },
+    {
+      "hash": 2153175091,
+      "name": "SlayerOptions_HeadshotBonus"
+    },
+    {
+      "hash": 2158594703,
+      "name": "CTFOptions_flagCarrierSpottedOnDamage"
+    },
+    {
+      "hash": 2231569496,
+      "name": "CTFOptions_flagMustBeHomeToScoreOnFlagSpawn"
+    },
+    {
+      "hash": 2643670936,
+      "name": "StrongholdsOptions_StrongholdContestType"
+    },
+    {
+      "hash": 2745542211,
+      "name": "FirefightOptions_useResupplyDrops"
+    },
+    {
+      "hash": 3116009941,
+      "name": "FirefightOptions_skullStreakPenaltyType"
+    },
+    {
+      "hash": 3118585047,
+      "name": "MinigameOptions_spawnInVehicleType"
+    },
+    {
+      "hash": 3220553899,
+      "name": "BastionOptions_controlAreaAttributeWeaponDamageMultiplier"
+    },
+    {
+      "hash": 3245593576,
+      "name": "MinigameOptions_MaxSpawnPlayersPerVehicle"
+    },
+    {
+      "hash": 3313442854,
+      "name": "MinigameOptions_minigameIncludeLabel3"
+    },
+    {
+      "hash": 3364036252,
+      "name": "StrongholdsOptions_ContestingPausesScoring"
+    },
+    {
+      "hash": 3372185417,
+      "name": "BastionOptions_scoreTickIntervalSec"
+    },
+    {
+      "hash": 3378333763,
+      "name": "FirefightOptions_SaveReviveInteractProgress"
+    },
+    {
+      "hash": 3441970922,
+      "name": "CTFOptions_scorePerFlagCap"
+    },
+    {
+      "hash": 3577170342,
+      "name": "CompetitiveBattleRifleWeaponRackOverride"
+    },
+    {
+      "hash": 3603201991,
+      "name": "FirefightOptions_HillIncomingTimer"
+    },
+    {
+      "hash": 3612324837,
+      "name": "FirefightOptions_reviveGrantsOvershield"
+    },
+    {
+      "hash": 3654097628,
+      "name": "FirefightOptions_HillCaptureDuration"
+    },
+    {
+      "hash": 3714768836,
+      "name": "MinigameOptions_minigameIncludeLabel1"
+    },
+    {
+      "hash": 3743710679,
+      "name": "CTFOptions_navpointVisTypeEnum"
+    },
+    {
+      "hash": 3792826798,
+      "name": "BastionOptions_controlAreaAttributeSlideDurationScalar"
+    },
+    {
+      "hash": 3814637546,
+      "name": "SlayerOptions_StickyBonus"
+    },
+    {
+      "hash": 3846585192,
+      "name": "OddballOptions_oddballIncomingTime"
+    },
+    {
+      "hash": 3874782145,
+      "name": "CTFOptions_flagSightSpottedDuration"
+    },
+    {
+      "hash": 4032968502,
+      "name": "CTFOptions_flagCarrierCanSprint"
+    },
+    {
+      "hash": 4061573258,
+      "name": "OddballOptions_ballCarrierCanSprint"
+    },
+    {
+      "hash": 4063834998,
+      "name": "StrongholdsOptions_suddenDeathRespawnPenaltySeconds"
+    },
+    {
+      "hash": 4085141222,
+      "name": "OddballOptions_scoreIncrement"
+    },
+    {
+      "hash": 4085699532,
+      "name": "BastionOptions_controlAreaAttributeSlideSpeedScalar"
+    },
+    {
+      "hash": 4133742588,
+      "name": "BastionOptions_controlAreaAttributeSprintFullSpeed"
+    },
+    {
+      "hash": 4172266252,
+      "name": "MinigameOptions_HeadshotBonus"
+    },
+    {
+      "hash": 4176129988,
+      "name": "MinigameOptions_minigameIncludeLabel5"
+    },
+    {
+      "hash": 4240370692,
+      "name": "FirefightOptions_teamRespawnCount"
+    },
+    {
+      "hash": 4262442364,
+      "name": "MinigameOptions_ScorePerDeath"
+    },
+    {
+      "hash": 4265136574,
+      "name": "BastionOptions_controlAreaAttributeHealthMultiplier"
+    },
+    {
+      "hash": 4284148492,
+      "name": "FirefightOptions_reviveTimeSec"
+    }
+  ],
+  "modes": [
+    {
+      "prefix": "AttritionOptions",
+      "script": "attritionoptions.lua",
+      "options": [
+        {
+          "name": "AttritionOptions_NumberOfRespawns",
+          "keys": [
+            "AttritionOptions_NumberOfRespawns",
+            "AttritionOptions_lifepoolSizePerTeam"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_ReviveTime",
+          "keys": [
+            "AttritionOptions_ReviveTime",
+            "AttritionOptions_reviveTimeSec"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_CaptureZoneTimeBeforeIncoming",
+          "keys": [
+            "AttritionOptions_CaptureZoneTimeBeforeIncoming",
+            "AttritionOptions_timeToInitializeOvertimeZone"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_CaptureZoneIncomingTime",
+          "keys": [
+            "AttritionOptions_CaptureZoneIncomingTime",
+            "AttritionOptions_incomingTimeSeconds"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_CaptureZoneCaptureTime",
+          "keys": [
+            "AttritionOptions_CaptureZoneCaptureTime",
+            "AttritionOptions_timeToCaptureSeconds"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DangerZoneTimeBeforeShrink",
+          "keys": [
+            "AttritionOptions_DangerZoneTimeBeforeShrink",
+            "AttritionOptions_deathZoneShrinkDelaySec"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DangerZoneRadiusShrinkPerPhase",
+          "keys": [
+            "AttritionOptions_DangerZoneRadiusShrinkPerPhase",
+            "AttritionOptions_deathZoneRadiusShrinkPercentPerPhase"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DangerZoneFinalRadius",
+          "keys": [
+            "AttritionOptions_DangerZoneFinalRadius",
+            "AttritionOptions_deathZoneFinalRadius"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DangerZoneDamagePerSecond",
+          "keys": [
+            "AttritionOptions_DangerZoneDamagePerSecond",
+            "AttritionOptions_deathZoneDamagePerSecond"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DangerZoneProtectedDamagePerSecond",
+          "keys": [
+            "AttritionOptions_DangerZoneProtectedDamagePerSecond",
+            "AttritionOptions_deathZoneProtectedDamagePerSecond"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_ReviveEnabled",
+          "keys": [
+            "AttritionOptions_ReviveEnabled",
+            "AttritionOptions_reviveEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_DodgeballEnabled",
+          "keys": [
+            "AttritionOptions_DodgeballEnabled",
+            "AttritionOptions_useDodgeball"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_UseCaptureZone",
+          "keys": [
+            "AttritionOptions_UseCaptureZone",
+            "AttritionOptions_useOvertimeZone"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_UseDangerZone",
+          "keys": [
+            "AttritionOptions_UseDangerZone",
+            "AttritionOptions_deathVolumeEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "AttritionOptions_EnableProtectedPlayerStatus",
+          "keys": [
+            "AttritionOptions_EnableProtectedPlayerStatus",
+            "AttritionOptions_protectPlayersWhoZoneSpawn"
+          ],
+          "default": null
+        }
+      ]
+    },
+    {
+      "prefix": "BastionOptions",
+      "script": "bastionoptions.lua",
+      "options": [
+        {
+          "name": "BastionOptions_legacyScorePerInterval",
+          "keys": [
+            "BastionOptions_ScorePerInterval",
+            "BastionOptions_legacyScorePerInterval"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_scoreTickIntervalSec",
+          "keys": [
+            "BastionOptions_ScoreIntervalTickSeconds",
+            "BastionOptions_scoreTickIntervalSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeBodyRechargeRate",
+          "keys": [
+            "BastionOptions_AttributeBodyRechargeRate",
+            "BastionOptions_controlAreaAttributeBodyRechargeRate"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeShieldRechargeRate",
+          "keys": [
+            "BastionOptions_AttributeShieldRechargeRate",
+            "BastionOptions_controlAreaAttributeShieldRechargeRate"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeHealthMultiplier",
+          "keys": [
+            "BastionOptions_AttributeHealthMultiplier",
+            "BastionOptions_controlAreaAttributeHealthMultiplier"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeShieldMultiplier",
+          "keys": [
+            "BastionOptions_AttributeShieldMultiplier",
+            "BastionOptions_controlAreaAttributeShieldMultiplier"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeSlideDurationScalar",
+          "keys": [
+            "BastionOptions_AttributeSlideDurationScalar",
+            "BastionOptions_controlAreaAttributeSlideDurationScalar"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_strongholdLifetimeSec",
+          "keys": [
+            "BastionOptions_ZoneMoveTimeSeconds",
+            "BastionOptions_strongholdLifetimeSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeWeaponDamageMultiplier",
+          "keys": [
+            "BastionOptions_AttributeWeaponDamageMultiplier",
+            "BastionOptions_controlAreaAttributeWeaponDamageMultiplier"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeMeleeDamageMultiplier",
+          "keys": [
+            "BastionOptions_AttributeMeleeDamageMultiplier",
+            "BastionOptions_controlAreaAttributeMeleeDamageMultiplier"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeMovementSpeed",
+          "keys": [
+            "BastionOptions_AttributeMovementSpeed",
+            "BastionOptions_controlAreaAttributeMovementSpeed"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeSprintFullSpeed",
+          "keys": [
+            "BastionOptions_AttributeSprintFullSpeed",
+            "BastionOptions_controlAreaAttributeSprintFullSpeed"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeSlideSpeedScalar",
+          "keys": [
+            "BastionOptions_AttributeSlideSpeedScalar",
+            "BastionOptions_controlAreaAttributeSlideSpeedScalar"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4024000000000000"
+          }
+        },
+        {
+          "name": "BastionOptions_controlAreaAttributeSprintEnabled",
+          "keys": [
+            "BastionOptions_AttributeSprintEnabled",
+            "BastionOptions_controlAreaAttributeSprintEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "BastionOptions_LegacyScoringEnabled",
+          "keys": [
+            "BastionOptions_LegacyScoringEnabled",
+            "BastionOptions_legacyScoringEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "CTFOptions",
+      "script": "ctfoptions.lua",
+      "options": [
+        {
+          "name": "CTFOptions_scorePerFlagCap",
+          "keys": [
+            "CTFOptions_ScorePerFlagCap",
+            "CTFOptions_scorePerFlagCap"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_numberOfFlagsPerTeam",
+          "keys": [
+            "CTFOptions_NumberOfFlagsPerTeam",
+            "CTFOptions_numberOfFlagsPerTeam"
+          ],
+          "default": null
+        },
+        {
+          "name": "CTFOptions_FlagReturnTime",
+          "keys": [
+            "CTFOptions_FlagReturnTime",
+            "CTFOptions_flagReturnTime"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4038000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_navpointVisTypeEnum",
+          "keys": [
+            "CTFOptions_FlagCarrierNavPoint",
+            "CTFOptions_navpointVisTypeEnum"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_flagSightSpottedDuration",
+          "keys": [
+            "CTFOptions_FlagCarrierSpottedDuration",
+            "CTFOptions_flagSightSpottedDuration"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_flagCarrierMovespeedPercent",
+          "keys": [
+            "CTFOptions_FlagCarrierMovespeedPercent",
+            "CTFOptions_flagCarrierMovespeedPercent"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4059000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_FlagCarrierGravityScalarPercent",
+          "keys": [
+            "CTFOptions_FlagCarrierGravityScalarPercent",
+            "CTFOptions_flagCarrierGravityScalarPercent"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4059000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_FlagCarrierShieldPercent",
+          "keys": [
+            "CTFOptions_FlagCarrierShieldPercent",
+            "CTFOptions_flagCarrierShieldPercent"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_FlagCarrierHealthPercent",
+          "keys": [
+            "CTFOptions_FlagCarrierHealthPercent",
+            "CTFOptions_flagCarrierHealthPercent"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "CTFOptions_instantTouchReturnEnabled",
+          "keys": [
+            "CTFOptions_TouchReturnEnabled",
+            "CTFOptions_instantTouchReturnEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "CTFOptions_flagMustBeHomeToScoreOnFlagSpawn",
+          "keys": [
+            "CTFOptions_FlagAtHomeScoring",
+            "CTFOptions_flagMustBeHomeToScoreOnFlagSpawn"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "CTFOptions_flagCarrierCanSprint",
+          "keys": [
+            "CTFOptions_FlagCarrierCanSprint",
+            "CTFOptions_flagCarrierCanSprint"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "CTFOptions_flagCarrierSpottedOnDamage",
+          "keys": [
+            "CTFOptions_FlagCarrierSpottedOnDamage",
+            "CTFOptions_flagCarrierSpottedOnDamage"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "CTFOptions_flagCarrierSpottedOnMotionTrackerReveal",
+          "keys": [
+            "CTFOptions_FlagCarrierSpottedWhenSprinting",
+            "CTFOptions_flagCarrierSpottedOnMotionTrackerReveal"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "ExtractionOptions",
+      "script": "extractionoptions.lua",
+      "options": [
+        {
+          "name": "ExtractionOptions_ConcurrentActiveSites",
+          "keys": [
+            "ExtractionOptions_ConcurrentActiveSites",
+            "ExtractionOptions_concurrentActiveSites"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_SiteOrdering",
+          "keys": [
+            "ExtractionOptions_SiteOrdering",
+            "ExtractionOptions_siteOrdering"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_SiteOwnership",
+          "keys": [
+            "ExtractionOptions_SiteOwnership",
+            "ExtractionOptions_siteOwnershipEnum"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_CheckpointIncrements",
+          "keys": [
+            "ExtractionOptions_CheckpointIncrements",
+            "ExtractionOptions_checkpointIncrements"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_NearCompletionMessageTime",
+          "keys": [
+            "ExtractionOptions_NearCompletionMessageTime",
+            "ExtractionOptions_nearCompletionMessageTime"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_DeploymentTime",
+          "keys": [
+            "ExtractionOptions_DeploymentTime",
+            "ExtractionOptions_extractionInitializationTimeSec"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_ConversionTime",
+          "keys": [
+            "ExtractionOptions_ConversionTime",
+            "ExtractionOptions_extractionConversionTimeSec"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_IncomingTime",
+          "keys": [
+            "ExtractionOptions_IncomingTime",
+            "ExtractionOptions_siteIncomingTime"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_TimerPause",
+          "keys": [
+            "ExtractionOptions_TimerPause",
+            "ExtractionOptions_pauseTimeWhenObjectiveActive"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_ConversionPausesExtraction",
+          "keys": [
+            "ExtractionOptions_ConversionPausesExtraction",
+            "ExtractionOptions_conversionPausesExtraction"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_RetainExtractionProgress",
+          "keys": [
+            "ExtractionOptions_RetainExtractionProgress",
+            "ExtractionOptions_retainExtractionProgress"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_SimultaneousExtractions",
+          "keys": [
+            "ExtractionOptions_SimultaneousExtractions",
+            "ExtractionOptions_simultaneousExtractions"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_SitesSpawnInSets",
+          "keys": [
+            "ExtractionOptions_SitesSpawnInSets",
+            "ExtractionOptions_sitesSpawnInSets"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_DiscloseInteractions",
+          "keys": [
+            "ExtractionOptions_DiscloseInteractions",
+            "ExtractionOptions_discloseInteractions"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_AlternateSiteOwnership",
+          "keys": [
+            "ExtractionOptions_AlternateSiteOwnership",
+            "ExtractionOptions_alternateSiteOwnership"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_NearCompletionMessageEnabled",
+          "keys": [
+            "ExtractionOptions_NearCompletionMessageEnabled",
+            "ExtractionOptions_nearCompletionMessageEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "ExtractionOptions_ConversionProgressAudio",
+          "keys": [
+            "ExtractionOptions_ConversionProgressAudio",
+            "ExtractionOptions_conversionProgressAudio"
+          ],
+          "default": null
+        }
+      ]
+    },
+    {
+      "prefix": "FirefightOptions",
+      "script": "firefightoptions.lua",
+      "options": [
+        {
+          "name": "FirefightOptions_overrideAIPlacementsSource",
+          "keys": [
+            "FirefightOptions_OverrideAIPlacementsSource",
+            "FirefightOptions_overrideAIPlacementsSource"
+          ],
+          "default": null
+        },
+        {
+          "name": "FirefightOptions_customSquadSelectionOrder",
+          "keys": [
+            "FirefightOptions_CustomSquadSelectionOrder",
+            "FirefightOptions_customSquadSelectionOrder"
+          ],
+          "default": null
+        },
+        {
+          "name": "FirefightOptions_reviveTimeSec",
+          "keys": [
+            "FirefightOptions_ReviveTime",
+            "FirefightOptions_reviveTimeSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "400c000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_AutoReviveTimerSec",
+          "keys": [
+            "FirefightOptions_AutoReviveTimerSec",
+            "FirefightOptions_autoReviveTimerSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "403e000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_AllySecureAccelerationScalar",
+          "keys": [
+            "FirefightOptions_AllySecureAccelerationScalar",
+            "FirefightOptions_allySecureAccelerationScalar"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4062c00000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_SkullStreakSpoilerType",
+          "keys": [
+            "FirefightOptions_SkullStreakSpoilerType",
+            "FirefightOptions_skullStreakSpoilerType"
+          ],
+          "default": null
+        },
+        {
+          "name": "FirefightOptions_skullStreakPenaltyType",
+          "keys": [
+            "FirefightOptions_SkullStreakPenaltyType",
+            "FirefightOptions_skullStreakPenaltyType"
+          ],
+          "default": null
+        },
+        {
+          "name": "FirefightOptions_SkullStreakType",
+          "keys": [
+            "FirefightOptions_SkullStreakType",
+            "FirefightOptions_skullStreakType"
+          ],
+          "default": null
+        },
+        {
+          "name": "FirefightOptions_SetIncomingPhaseDurationSeconds",
+          "keys": [
+            "FirefightOptions_SetIncomingPhaseDurationSeconds",
+            "FirefightOptions_setIncomingPhaseDurationSeconds"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_setsAreSequential",
+          "keys": [
+            "FirefightOptions_SetsAreSequential",
+            "FirefightOptions_setsAreSequential"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "FirefightOptions_overrideMapAIPlacements",
+          "keys": [
+            "FirefightOptions_OverrideMapAIPlacements",
+            "FirefightOptions_overrideMapAIPlacements"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_PreventItemRespawns",
+          "keys": [
+            "FirefightOptions_PreventItemRespawns",
+            "FirefightOptions_preventItemRespawns"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_useResupplyDrops",
+          "keys": [
+            "FirefightOptions_UseResupplyDrops",
+            "FirefightOptions_useResupplyDrops"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_fixedSetCount",
+          "keys": [
+            "FirefightOptions_FixedSetCount",
+            "FirefightOptions_fixedSetCount"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_setDefaultTeamOnJoin",
+          "keys": [
+            "FirefightOptions_MoveToDefaultTeamOnJoin",
+            "FirefightOptions_setDefaultTeamOnJoin"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_ReviveEnabled",
+          "keys": [
+            "FirefightOptions_ReviveEnabled",
+            "FirefightOptions_reviveEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_reviveGrantsOvershield",
+          "keys": [
+            "FirefightOptions_ReviveGrantsOvershield",
+            "FirefightOptions_reviveGrantsOvershield"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_AutoReviveTimerEnabled",
+          "keys": [
+            "FirefightOptions_AutoReviveTimerEnabled",
+            "FirefightOptions_autoReviveTimerEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_SaveReviveInteractProgress",
+          "keys": [
+            "FirefightOptions_SaveReviveInteractProgress",
+            "FirefightOptions_saveReviveInteractProgress"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_LimitEagleRespawns",
+          "keys": [
+            "FirefightOptions_LimitEagleRespawns",
+            "FirefightOptions_limitEagleRespawns"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_LimitOtherRespawns",
+          "keys": [
+            "FirefightOptions_LimitOtherRespawns",
+            "FirefightOptions_limitOtherRespawns"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "FirefightOptions_teamRespawnCount",
+          "keys": [
+            "FirefightOptions_TeamRespawnCount",
+            "FirefightOptions_teamRespawnCount"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_BonusLivesPerSet",
+          "keys": [
+            "FirefightOptions_BonusLivesPerSet",
+            "FirefightOptions_bonusLivesPerSet"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_HillIncomingTimer",
+          "keys": [
+            "FirefightOptions_HillIncomingTimer",
+            "FirefightOptions_hillIncomingTimer"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4034000000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_HillCaptureDuration",
+          "keys": [
+            "FirefightOptions_HillCaptureDuration",
+            "FirefightOptions_hillCaptureDuration"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4056800000000000"
+          }
+        },
+        {
+          "name": "FirefightOptions_allySecureScalarEnabled",
+          "keys": [
+            "FirefightOptions_AllySecureScalarEnabled",
+            "FirefightOptions_allySecureScalarEnabled"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "GunGameOptions",
+      "script": "gungameoptions.lua",
+      "options": [
+        {
+          "name": "GunGameOptions_ExperienceIncrementPerLevel",
+          "keys": [
+            "GunGameOptions_ExperienceIncrementPerLevel",
+            "GunGameOptions_experienceIncrementPerLevel"
+          ],
+          "default": null
+        },
+        {
+          "name": "GunGameOptions_BelowLevelModifier",
+          "keys": [
+            "GunGameOptions_BelowLevelModifier",
+            "GunGameOptions_belowLevelModifierPercent"
+          ],
+          "default": null
+        },
+        {
+          "name": "GunGameOptions_TeamLeveling",
+          "keys": [
+            "GunGameOptions_TeamLeveling",
+            "GunGameOptions_teamLeveling"
+          ],
+          "default": null
+        },
+        {
+          "name": "GunGameOptions_EnableBelowLevelModifier",
+          "keys": [
+            "GunGameOptions_EnableBelowLevelModifier",
+            "GunGameOptions_enableBelowLevelModifier"
+          ],
+          "default": null
+        },
+        {
+          "name": "GunGameOptions_BackSmackDelevel",
+          "keys": [
+            "GunGameOptions_BackSmackDelevel",
+            "GunGameOptions_backsmackDelevel"
+          ],
+          "default": null
+        },
+        {
+          "name": "GunGameOptions_IgnoreMeleeKills",
+          "keys": [
+            "GunGameOptions_IgnoreMeleeKills",
+            "GunGameOptions_ignoreMeleeKills"
+          ],
+          "default": null
+        }
+      ]
+    },
+    {
+      "prefix": "InfectionOptions",
+      "script": "infectionoptions.lua",
+      "options": [
+        {
+          "name": "InfectionOptions_StartingInfectedCount",
+          "keys": [
+            "InfectionOptions_StartingInfectedCount",
+            "InfectionOptions_startingInfectedCount"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_LastSpartanStandingCount",
+          "keys": [
+            "InfectionOptions_LastSpartanStandingCount",
+            "InfectionOptions_lastSpartanCount"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_LastSpartanStandingWinTimer",
+          "keys": [
+            "InfectionOptions_LastSpartanStandingWinTimer",
+            "InfectionOptions_lastSpartanStandingWinTimer"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_SpartanPrimaryInitialRounds",
+          "keys": [
+            "InfectionOptions_SpartanPrimaryInitialRounds",
+            "InfectionOptions_spartanPrimaryInitialRounds"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_SpartanSecondaryInitialRounds",
+          "keys": [
+            "InfectionOptions_SpartanSecondaryInitialRounds",
+            "InfectionOptions_spartanSecondaryInitialRounds"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueSpartanBetrayalPenalty",
+          "keys": [
+            "InfectionOptions_ScoreValueSpartanBetrayalPenalty",
+            "InfectionOptions_scoreValueSpartanBetrayalPenalty"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreLastSpartanStanding",
+          "keys": [
+            "InfectionOptions_ScoreLastSpartanStanding",
+            "InfectionOptions_scoreLastSpartanStanding"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreSecondSurvivor",
+          "keys": [
+            "InfectionOptions_ScoreSecondSurvivor",
+            "InfectionOptions_scoreSecondSurvivor"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreThirdSurvivor",
+          "keys": [
+            "InfectionOptions_ScoreThirdSurvivor",
+            "InfectionOptions_scoreThirdSurvivor"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreTickTime",
+          "keys": [
+            "InfectionOptions_ScoreTickTime",
+            "InfectionOptions_scoreTickTime"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreTickAmount",
+          "keys": [
+            "InfectionOptions_ScoreTickAmount",
+            "InfectionOptions_scoreTickAmount"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanOvershieldDecay",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanOvershieldDecay",
+            "InfectionOptions_traitLastSpartanOvershieldDecay"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneTimeBeforeShrink",
+          "keys": [
+            "InfectionOptions_DangerZoneTimeBeforeShrink",
+            "InfectionOptions_deathZoneShrinkDelaySec"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneRadiusShrinkPerPhase",
+          "keys": [
+            "InfectionOptions_DangerZoneRadiusShrinkPerPhase",
+            "InfectionOptions_deathZoneRadiusShrinkPercentPerPhase"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneFinalRadius",
+          "keys": [
+            "InfectionOptions_DangerZoneFinalRadius",
+            "InfectionOptions_deathZoneFinalRadius"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneDamagePerSecond",
+          "keys": [
+            "InfectionOptions_DangerZoneDamagePerSecond",
+            "InfectionOptions_deathZoneDamagePerSecond"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneProtectedDamagePerSecond",
+          "keys": [
+            "InfectionOptions_DangerZoneProtectedDamagePerSecond",
+            "InfectionOptions_deathZoneProtectedDamagePerSecond"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_EnableAlphaZombies",
+          "keys": [
+            "InfectionOptions_EnableAlphaZombies",
+            "InfectionOptions_enableAlphaZombies"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_SetInfectOnAnyDeath",
+          "keys": [
+            "InfectionOptions_SetInfectOnAnyDeath",
+            "InfectionOptions_infectOnAnyDeath"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorInfiniteAmmo",
+          "keys": [
+            "InfectionOptions_TraitSurvivorInfiniteAmmo",
+            "InfectionOptions_traitSurvivorInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorActiveCamouflageIntensity",
+          "keys": [
+            "InfectionOptions_TraitSurvivorActiveCamouflageIntensity",
+            "InfectionOptions_traitSurvivorActiveCamouflageIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorMovementSpeed",
+          "keys": [
+            "InfectionOptions_TraitSurvivorMovementSpeed",
+            "InfectionOptions_traitSurvivorMovementSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorJumpScalar",
+          "keys": [
+            "InfectionOptions_TraitSurvivorJumpScalar",
+            "InfectionOptions_traitSurvivorJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorGravityScalar",
+          "keys": [
+            "InfectionOptions_TraitSurvivorGravityScalar",
+            "InfectionOptions_traitSurvivorGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorShieldEffectsEnabled",
+          "keys": [
+            "InfectionOptions_TraitSurvivorShieldEffectsEnabled",
+            "InfectionOptions_traitSurvivorShieldEffectsEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorShieldMultiplier",
+          "keys": [
+            "InfectionOptions_TraitSurvivorShieldMultiplier",
+            "InfectionOptions_traitSurvivorShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorSprintEnabled",
+          "keys": [
+            "InfectionOptions_TraitSurvivorSprintEnabled",
+            "InfectionOptions_traitSurvivorSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitSurvivorSprintFullSpeed",
+          "keys": [
+            "InfectionOptions_TraitSurvivorSprintFullSpeed",
+            "InfectionOptions_traitSurvivorSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueKillAsSpartan",
+          "keys": [
+            "InfectionOptions_ScoreValueKillAsSpartan",
+            "InfectionOptions_scoreValueKillAsSpartan"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueKillAsLastSpartan",
+          "keys": [
+            "InfectionOptions_ScoreValueKillAsLastSpartan",
+            "InfectionOptions_scoreValueKillAsLastSpartan"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueKillAsInfected",
+          "keys": [
+            "InfectionOptions_ScoreValueKillAsInfected",
+            "InfectionOptions_scoreValueKillAsInfected"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueKillAsInfectedOnLastSpartan",
+          "keys": [
+            "InfectionOptions_ScoreValueKillAsInfectedOnLastSpartan",
+            "InfectionOptions_scoreValueKillAsInfectedOnLastSpartan"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueSpartanVictory",
+          "keys": [
+            "InfectionOptions_ScoreValueSpartanVictory",
+            "InfectionOptions_scoreValueSpartanVictory"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_ScoreValueInfectedVictory",
+          "keys": [
+            "InfectionOptions_ScoreValueInfectedVictory",
+            "InfectionOptions_scoreValueInfectedVictory"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_UseLastSpartanStandingNavpoints",
+          "keys": [
+            "InfectionOptions_UseLastSpartanStandingNavpoints",
+            "InfectionOptions_useLastSpartanStandingNavpoints"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_LastSpartanStandingNavpointIgnoresCamo",
+          "keys": [
+            "InfectionOptions_LastSpartanStandingNavpointIgnoresCamo",
+            "InfectionOptions_lastSpartanStandingNavpointIgnoresCamo"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanMovementSpeed",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanMovementSpeed",
+            "InfectionOptions_traitLastSpartanMovementSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanJumpScalar",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanJumpScalar",
+            "InfectionOptions_traitLastSpartanJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanGravityScalar",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanGravityScalar",
+            "InfectionOptions_traitLastSpartanGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanInfiniteAmmo",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanInfiniteAmmo",
+            "InfectionOptions_traitLastSpartanInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanActiveCamouflageIntensity",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanActiveCamouflageIntensity",
+            "InfectionOptions_traitLastSpartanActiveCamouflageIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanShieldEffectsEnabled",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanShieldEffectsEnabled",
+            "InfectionOptions_traitLastSpartanShieldEffectsEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanShieldMultiplier",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanShieldMultiplier",
+            "InfectionOptions_traitLastSpartanShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanSprintEnabled",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanSprintEnabled",
+            "InfectionOptions_traitLastSpartanSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitLastSpartanSprintFullSpeed",
+          "keys": [
+            "InfectionOptions_TraitLastSpartanSprintFullSpeed",
+            "InfectionOptions_traitLastSpartanSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedMovementSpeed",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedMovementSpeed",
+            "InfectionOptions_traitBetaInfectedMovementSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedJumpScalar",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedJumpScalar",
+            "InfectionOptions_traitBetaInfectedJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedGravityScalar",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedGravityScalar",
+            "InfectionOptions_traitBetaInfectedGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedShieldHUDEnabled",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedShieldHUDEnabled",
+            "InfectionOptions_traitBetaInfectedShieldHUDEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedShieldEffectsEnabled",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedShieldEffectsEnabled",
+            "InfectionOptions_traitBetaInfectedShieldEffectsEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedShieldMultiplier",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedShieldMultiplier",
+            "InfectionOptions_traitBetaInfectedShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedSprintEnabled",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedSprintEnabled",
+            "InfectionOptions_traitBetaInfectedSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedSprintFullSpeed",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedSprintFullSpeed",
+            "InfectionOptions_traitBetaInfectedSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedInfiniteAmmo",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedInfiniteAmmo",
+            "InfectionOptions_traitBetaInfectedInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedCanOnlyEnterPassengerSeats",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedCanOnlyEnterPassengerSeats",
+            "InfectionOptions_traitBetaInfectedCanOnlyEnterPassengerSeats"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedCanWeaponsPersistAfterBeingDropped",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedCanWeaponsPersistAfterBeingDropped",
+            "InfectionOptions_traitBetaInfectedCanWeaponsPersistAfterBeingDropped"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedItemPickupAllowed",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedItemPickupAllowed",
+            "InfectionOptions_traitBetaInfectedItemPickupAllowed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitBetaInfectedActiveCamouflageIntensity",
+          "keys": [
+            "InfectionOptions_TraitBetaInfectedActiveCamouflageIntensity",
+            "InfectionOptions_traitBetaInfectedActiveCamouflageIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedMovementSpeed",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedMovementSpeed",
+            "InfectionOptions_traitAlphaInfectedMovementSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedJumpScalar",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedJumpScalar",
+            "InfectionOptions_traitAlphaInfectedJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedGravityScalar",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedGravityScalar",
+            "InfectionOptions_traitAlphaInfectedGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedShieldHUDEnabled",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedShieldHUDEnabled",
+            "InfectionOptions_traitAlphaInfectedShieldHUDEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedShieldEffectsEnabled",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedShieldEffectsEnabled",
+            "InfectionOptions_traitAlphaInfectedShieldEffectsEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedShieldMultiplier",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedShieldMultiplier",
+            "InfectionOptions_traitAlphaInfectedShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedSprintEnabled",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedSprintEnabled",
+            "InfectionOptions_traitAlphaInfectedSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedSprintFullSpeed",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedSprintFullSpeed",
+            "InfectionOptions_traitAlphaInfectedSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedInfiniteAmmo",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedInfiniteAmmo",
+            "InfectionOptions_traitAlphaInfectedInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedCanOnlyEnterPassengerSeats",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedCanOnlyEnterPassengerSeats",
+            "InfectionOptions_traitAlphaInfectedCanOnlyEnterPassengerSeats"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedCanWeaponsPersistAfterBeingDropped",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedCanWeaponsPersistAfterBeingDropped",
+            "InfectionOptions_traitAlphaInfectedCanWeaponsPersistAfterBeingDropped"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedItemPickupAllowed",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedItemPickupAllowed",
+            "InfectionOptions_traitAlphaInfectedItemPickupAllowed"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_TraitAlphaInfectedActiveCamouflageIntensity",
+          "keys": [
+            "InfectionOptions_TraitAlphaInfectedActiveCamouflageIntensity",
+            "InfectionOptions_traitAlphaInfectedActiveCamouflageIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_UseInfectedVfx",
+          "keys": [
+            "InfectionOptions_UseInfectedVfx",
+            "InfectionOptions_useInfectedVFX"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_UseInfectedScreenVFX",
+          "keys": [
+            "InfectionOptions_UseInfectedScreenVFX",
+            "InfectionOptions_useInfectedScreenVFX"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_UseIratusAnnouncer",
+          "keys": [
+            "InfectionOptions_UseIratusAnnouncer",
+            "InfectionOptions_useIratusAnnouncer"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_UseDangerZone",
+          "keys": [
+            "InfectionOptions_UseDangerZone",
+            "InfectionOptions_useDangerZone"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_DangerZoneInfectedImmunity",
+          "keys": [
+            "InfectionOptions_DangerZoneInfectedImmunity",
+            "InfectionOptions_deathZoneInfectedImmune"
+          ],
+          "default": null
+        },
+        {
+          "name": "InfectionOptions_EnableProtectedPlayerStatus",
+          "keys": [
+            "InfectionOptions_EnableProtectedPlayerStatus",
+            "InfectionOptions_protectPlayersWhoZoneSpawn"
+          ],
+          "default": null
+        }
+      ]
+    },
+    {
+      "prefix": "MinigameOptions",
+      "script": "minigameoptions.lua",
+      "options": [
+        {
+          "name": "MinigameOptions_spawnInVehicleType",
+          "keys": [
+            "MinigameOptions_SpawnInVehicleType",
+            "MinigameOptions_spawnInVehicleType"
+          ],
+          "default": null
+        },
+        {
+          "name": "MinigameOptions_SpawnInVehicleCreation",
+          "keys": [
+            "MinigameOptions_SpawnInVehicleCreation",
+            "MinigameOptions_spawnInVehicleCreation"
+          ],
+          "default": null
+        },
+        {
+          "name": "MinigameOptions_maxSpawnVehiclesPerTeam",
+          "keys": [
+            "MinigameOptions_MaxSpawnVehiclesPerTeam",
+            "MinigameOptions_maxSpawnVehiclesPerTeam"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_MaxSpawnPlayersPerVehicle",
+          "keys": [
+            "MinigameOptions_MaxSpawnPlayersPerVehicle",
+            "MinigameOptions_maxSpawnPlayersPerVehicle"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_spawnInVehicleFillType",
+          "keys": [
+            "MinigameOptions_SpawnInVehicleFillType",
+            "MinigameOptions_spawnInVehicleFillType"
+          ],
+          "default": null
+        },
+        {
+          "name": "MinigameOptions_BeatdownBonus",
+          "keys": [
+            "MinigameOptions_BeatdownBonus",
+            "MinigameOptions_beatdownBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_HeadshotBonus",
+          "keys": [
+            "MinigameOptions_HeadshotBonus",
+            "MinigameOptions_headshotBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_MinigameIncludeLabel2",
+          "keys": [
+            "MinigameOptions_MinigameIncludeLabel2",
+            "MinigameOptions_minigameIncludeLabel2"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "MinigameOptions_ScorePerAssist",
+          "keys": [
+            "MinigameOptions_ScorePerAssist",
+            "MinigameOptions_scorePerAssist"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_ScorePerDeath",
+          "keys": [
+            "MinigameOptions_ScorePerDeath",
+            "MinigameOptions_scorePerDeath"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_StickyBonus",
+          "keys": [
+            "MinigameOptions_StickyBonus",
+            "MinigameOptions_stickyBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_minigameIncludeLabel1",
+          "keys": [
+            "MinigameOptions_minigameIncludeLabel1"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "MinigameOptions_minigameIncludeLabel3",
+          "keys": [
+            "MinigameOptions_minigameIncludeLabel3"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "MinigameOptions_minigameIncludeLabel4",
+          "keys": [
+            "MinigameOptions_minigameIncludeLabel4"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "MinigameOptions_minigameIncludeLabel5",
+          "keys": [
+            "MinigameOptions_minigameIncludeLabel5"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        },
+        {
+          "name": "MinigameOptions_scorePerBetrayal",
+          "keys": [
+            "MinigameOptions_scorePerBetrayal"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_scorePerKill",
+          "keys": [
+            "MinigameOptions_scorePerKill"
+          ],
+          "default": null
+        },
+        {
+          "name": "MinigameOptions_scorePerSuicide",
+          "keys": [
+            "MinigameOptions_scorePerSuicide"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "MinigameOptions_splatterBonus",
+          "keys": [
+            "MinigameOptions_splatterBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "OddballOptions",
+      "script": "oddballoptions.lua",
+      "options": [
+        {
+          "name": "OddballOptions_scoreIncrement",
+          "keys": [
+            "OddballOptions_ScorePerInterval",
+            "OddballOptions_scoreIncrement"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "OddballOptions_scoreIntervalSec",
+          "keys": [
+            "OddballOptions_ScoreIntervalTime",
+            "OddballOptions_scoreIntervalSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "OddballOptions_oddballIncomingTime",
+          "keys": [
+            "OddballOptions_InitialIncomingTime",
+            "OddballOptions_oddballIncomingTime"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "name": "OddballOptions_ballCarrierCanSprint",
+          "keys": [
+            "OddballOptions_CarrierCanSprint",
+            "OddballOptions_ballCarrierCanSprint"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "SlayerOptions",
+      "script": "slayeroptions.lua",
+      "options": [
+        {
+          "name": "SlayerOptions_scorePerKill",
+          "keys": [
+            "SlayerOptions_ScorePerKill",
+            "SlayerOptions_scorePerKill"
+          ],
+          "default": null
+        },
+        {
+          "name": "SlayerOptions_TeamScorePerKill",
+          "keys": [
+            "SlayerOptions_TeamScorePerKill",
+            "SlayerOptions_teamScorePerKill"
+          ],
+          "default": null
+        },
+        {
+          "name": "SlayerOptions_scorePerSuicide",
+          "keys": [
+            "SlayerOptions_ScorePerSuicide",
+            "SlayerOptions_scorePerSuicide"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_TeamScorePerSuicide",
+          "keys": [
+            "SlayerOptions_TeamScorePerSuicide",
+            "SlayerOptions_teamScorePerSuicide"
+          ],
+          "default": null
+        },
+        {
+          "name": "SlayerOptions_scorePerBetrayal",
+          "keys": [
+            "SlayerOptions_ScorePerBetrayal",
+            "SlayerOptions_scorePerBetrayal"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_TeamScorePerBetrayal",
+          "keys": [
+            "SlayerOptions_TeamScorePerBetrayal",
+            "SlayerOptions_teamScorePerBetrayal"
+          ],
+          "default": null
+        },
+        {
+          "name": "SlayerOptions_ScorePerAssist",
+          "keys": [
+            "SlayerOptions_ScorePerAssist",
+            "SlayerOptions_scorePerAssist"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_ScorePerDeath",
+          "keys": [
+            "SlayerOptions_ScorePerDeath",
+            "SlayerOptions_scorePerDeath"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_TeamScorePerAssist",
+          "keys": [
+            "SlayerOptions_TeamScorePerAssist",
+            "SlayerOptions_teamScorePerAssist"
+          ],
+          "default": null
+        },
+        {
+          "name": "SlayerOptions_HeadshotBonus",
+          "keys": [
+            "SlayerOptions_HeadshotBonus",
+            "SlayerOptions_headshotBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_BeatdownBonus",
+          "keys": [
+            "SlayerOptions_BeatdownBonus",
+            "SlayerOptions_beatdownBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_splatterBonus",
+          "keys": [
+            "SlayerOptions_SplatterBonus",
+            "SlayerOptions_splatterBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_StickyBonus",
+          "keys": [
+            "SlayerOptions_StickyBonus",
+            "SlayerOptions_stickyBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_SpreeBonus",
+          "keys": [
+            "SlayerOptions_SpreeBonus",
+            "SlayerOptions_spreeBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "SlayerOptions_MultiKillBonus",
+          "keys": [
+            "SlayerOptions_MultiKillBonus",
+            "SlayerOptions_multiKillBonus"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "StrongholdsOptions",
+      "script": "strongholdsoptions.lua",
+      "options": [
+        {
+          "name": "StrongholdsOptions_pointsPerScore",
+          "keys": [
+            "StrongholdsOptions_VictoryPointsPerScore",
+            "StrongholdsOptions_pointsPerScore"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_scoreIntervalSec",
+          "keys": [
+            "StrongholdsOptions_TimeToVictoryPoint",
+            "StrongholdsOptions_scoreIntervalSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_minCapturedStrongholdsToScore",
+          "keys": [
+            "StrongholdsOptions_StrongholdsScoringThreshold",
+            "StrongholdsOptions_minCapturedStrongholdsToScore"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "bff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_captureTimeSec",
+          "keys": [
+            "StrongholdsOptions_TimeToCapture",
+            "StrongholdsOptions_captureTimeSec"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_multipleCapturerBehavior",
+          "keys": [
+            "StrongholdsOptions_MultipleCapturerBehavior",
+            "StrongholdsOptions_multipleCapturerBehavior"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_initialStrongholdOwnership",
+          "keys": [
+            "StrongholdsOptions_InitialStrongholdOwnership",
+            "StrongholdsOptions_initialStrongholdOwnership"
+          ],
+          "default": null
+        },
+        {
+          "name": "StrongholdsOptions_suddenDeathTrailingScoreThreshold",
+          "keys": [
+            "StrongholdsOptions_TrailingScoreThreshold",
+            "StrongholdsOptions_suddenDeathTrailingScoreThreshold"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "bff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_suddenDeathRespawnPenaltySeconds",
+          "keys": [
+            "StrongholdsOptions_SuddenDeathRespawnPenalty",
+            "StrongholdsOptions_suddenDeathRespawnPenaltySeconds"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "0000000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_StrongholdContestType",
+          "keys": [
+            "StrongholdsOptions_StrongholdContestType",
+            "StrongholdsOptions_strongholdContestType"
+          ],
+          "default": {
+            "kind": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "name": "StrongholdsOptions_DenySpawningWithinStrongholds",
+          "keys": [
+            "StrongholdsOptions_DenySpawningWithinStrongholds",
+            "StrongholdsOptions_denySpawningWithinStrongholds"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        },
+        {
+          "name": "StrongholdsOptions_ContestingPausesScoring",
+          "keys": [
+            "StrongholdsOptions_ContestingPausesScoring",
+            "StrongholdsOptions_contestingPausesScoring"
+          ],
+          "default": {
+            "kind": "bool",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "prefix": "VIPOptions",
+      "script": "vipoptions.lua",
+      "options": [
+        {
+          "name": "VIPOptions_ScorePerNonVIPKill",
+          "keys": [
+            "VIPOptions_ScorePerNonVIPKill",
+            "VIPOptions_scorePerNonVIPKill"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_ScorePerVIPKill",
+          "keys": [
+            "VIPOptions_ScorePerVIPKill",
+            "VIPOptions_scorePerVIPKill"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_ScorePerKillAsVIP",
+          "keys": [
+            "VIPOptions_ScorePerKillAsVIP",
+            "VIPOptions_scorePerKillAsVIP"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_ScorePerVIPKillAsVIP",
+          "keys": [
+            "VIPOptions_ScorePerVIPKillAsVIP",
+            "VIPOptions_scorePerVIPKillAsVIP"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitInfiniteAmmo",
+          "keys": [
+            "VIPOptions_VIPTraitInfiniteAmmo",
+            "VIPOptions_vipTraitInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitBottomlessClip",
+          "keys": [
+            "VIPOptions_VIPTraitBottomlessClip",
+            "VIPOptions_vipTraitBottomlessClip"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitCamoIntensity",
+          "keys": [
+            "VIPOptions_VIPTraitCamoIntensity",
+            "VIPOptions_vipTraitCamoIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitJumpScalar",
+          "keys": [
+            "VIPOptions_VIPTraitJumpScalar",
+            "VIPOptions_vipTraitJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitGravityScalar",
+          "keys": [
+            "VIPOptions_VIPTraitGravityScalar",
+            "VIPOptions_vipTraitGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitMovementSpeedScalar",
+          "keys": [
+            "VIPOptions_VIPTraitMovementSpeedScalar",
+            "VIPOptions_vipTraitMovementSpeedScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitShieldMultiplier",
+          "keys": [
+            "VIPOptions_VIPTraitShieldMultiplier",
+            "VIPOptions_vipTraitShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitSprintEnabled",
+          "keys": [
+            "VIPOptions_VIPTraitSprintEnabled",
+            "VIPOptions_vipTraitSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitSprintFullSpeed",
+          "keys": [
+            "VIPOptions_VIPTraitSprintFullSpeed",
+            "VIPOptions_vipTraitSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPTraitItemPickupAllowed",
+          "keys": [
+            "VIPOptions_VIPTraitItemPickupAllowed",
+            "VIPOptions_vipTraitItemPickupAllowed"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitInfiniteAmmo",
+          "keys": [
+            "VIPOptions_NonVIPTraitInfiniteAmmo",
+            "VIPOptions_nonVIPTraitInfiniteAmmo"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitBottomlessClip",
+          "keys": [
+            "VIPOptions_NonVIPTraitBottomlessClip",
+            "VIPOptions_nonVIPTraitBottomlessClip"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitCamoIntensity",
+          "keys": [
+            "VIPOptions_NonVIPTraitCamoIntensity",
+            "VIPOptions_nonVIPTraitCamoIntensity"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitJumpScalar",
+          "keys": [
+            "VIPOptions_NonVIPTraitJumpScalar",
+            "VIPOptions_nonVIPTraitJumpScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitGravityScalar",
+          "keys": [
+            "VIPOptions_NonVIPTraitGravityScalar",
+            "VIPOptions_nonVIPTraitGravityScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitMovementSpeedScalar",
+          "keys": [
+            "VIPOptions_NonVIPTraitMovementSpeedScalar",
+            "VIPOptions_nonVIPTraitMovementSpeedScalar"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitShieldMultiplier",
+          "keys": [
+            "VIPOptions_NonVIPTraitShieldMultiplier",
+            "VIPOptions_nonVIPTraitShieldMultiplier"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitSprintEnabled",
+          "keys": [
+            "VIPOptions_NonVIPTraitSprintEnabled",
+            "VIPOptions_nonVIPTraitSprintEnabled"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitSprintFullSpeed",
+          "keys": [
+            "VIPOptions_NonVIPTraitSprintFullSpeed",
+            "VIPOptions_nonVIPTraitSprintFullSpeed"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NonVIPTraitItemPickupAllowed",
+          "keys": [
+            "VIPOptions_NonVIPTraitItemPickupAllowed",
+            "VIPOptions_nonVIPTraitItemPickupAllowed"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_UseVIPScreenVFX",
+          "keys": [
+            "VIPOptions_UseVIPScreenVFX",
+            "VIPOptions_useVIPScreenVFX"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_NavpointOcclusion",
+          "keys": [
+            "VIPOptions_NavpointOcclusion",
+            "VIPOptions_occludeVIPNavpoint"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_VIPNavpointIgnoresCamo",
+          "keys": [
+            "VIPOptions_VIPNavpointIgnoresCamo",
+            "VIPOptions_vipNavpointIgnoresCamo"
+          ],
+          "default": null
+        },
+        {
+          "name": "VIPOptions_AutomaticVIPSelectionEnabled",
+          "keys": [
+            "VIPOptions_AutomaticVIPSelectionEnabled",
+            "VIPOptions_automaticVIPSelectionEnabled"
+          ],
+          "default": null
+        }
+      ]
+    }
+  ]
+}

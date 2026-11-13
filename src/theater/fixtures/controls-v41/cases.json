@@ -1,0 +1,242 @@
+[
+  {
+    "name": "empty",
+    "hex": "00",
+    "bit_len": 1,
+    "kinds": [],
+    "command_counts": [],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "kind2-absent",
+    "hex": "c0",
+    "bit_len": 6,
+    "kinds": [
+      2
+    ],
+    "command_counts": [],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "kind2-present",
+    "hex": "dffd5e00",
+    "bit_len": 26,
+    "kinds": [
+      2
+    ],
+    "command_counts": [],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "commands-absent",
+    "hex": "a880",
+    "bit_len": 11,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      null
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "commands-zero-count",
+    "hex": "a8c0",
+    "bit_len": 13,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      0
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "command-absolute-short",
+    "hex": "a8dfedcba98ab0",
+    "bit_len": 53,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      1
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "command-absolute-full",
+    "hex": "a8d102030401800000000200000001ff048d14fe000003fffffffc0000000200000001ff048d14fe000003fffffffc0000000200000001ff048d14fe000003ffffffff5b3f5000",
+    "bit_len": 561,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      1
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "command-relative-minimal",
+    "hex": "b01eb00000",
+    "bit_len": 34,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      1
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "command-relative-full",
+    "hex": "bffea89abcdefbf60083e9cb7837ab6fbbff8c567837ab6fbbff8c567837ab6fbbff8c567837ab6fbbff8c567837ab6fbbff8c567600",
+    "bit_len": 425,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      1
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "three-commands-baselines",
+    "hex": "afffedcba98abe5513579bdf7ec0107d396f06f56df77ff18acf06f56df77ff18acf06f56df77ff18acf06f56df77ff18acf06f56df77ff18acec0",
+    "bit_len": 468,
+    "kinds": [
+      1
+    ],
+    "command_counts": [
+      3
+    ],
+    "secondary": [],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-short-none",
+    "hex": "8aa0f0d43579a0",
+    "bit_len": 53,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-short-object",
+    "hex": "8aa0f0d43579b6d600",
+    "bit_len": 69,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-short-unit",
+    "hex": "8aa0f0d43579bfd300",
+    "bit_len": 65,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-full-default",
+    "hex": "8aa2f0d43579bcb0c00eaaf987a43cf72df5b8c000018d159ffffff5abcdaa23456eac48d176bfff3280",
+    "bit_len": 330,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-full-world",
+    "hex": "8aa2f0d43579bcb0c00eaaf987a43cf72df5b89c48d1a2c8d1637b83a300",
+    "bit_len": 233,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  },
+  {
+    "name": "secondary-full-region3",
+    "hex": "8aa2f0d43579bcb0c00eaaf987a43cf72df5b8be24688d15848d237b83a300",
+    "bit_len": 241,
+    "kinds": [
+      0
+    ],
+    "command_counts": [],
+    "secondary": [
+      true
+    ],
+    "index_bits": 2,
+    "region_widths": {
+      "3": [
+        19,
+        19,
+        16
+      ]
+    }
+  },
+  {
+    "name": "mixed-wire-order",
+    "hex": "c887ea37fb72ea62ae0800",
+    "bit_len": 82,
+    "kinds": [
+      2,
+      1,
+      0
+    ],
+    "command_counts": [
+      1
+    ],
+    "secondary": [
+      false
+    ],
+    "index_bits": 1,
+    "region_widths": {}
+  }
+]

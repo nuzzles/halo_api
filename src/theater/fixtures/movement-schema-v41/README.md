@@ -5,10 +5,12 @@ replication chunk 13, packet 2254, decompressed payload byte 833439,
 relative timestamp 258775387 us. This file is the complete 196-byte frame payload.
 
 A misaligned walk encounters a supposed NEW at bit 1061 for full ID
-1073742495, archetype 21. Its mask is 25770065923, but that registry
-archetype has only 18 components. Although the permissive component reader
-can finish the two in-range components, this cannot establish a schema.
-The actual biped NEW for that ID is recorded at 728678769 us.
+1073742495, archetype 21. Its clear initial-component gate at bit 1103 means
+there is no mask in the captured bytes. A historical misread of the following
+bits yielded mask 25770065923, beyond that registry archetype's 18 components;
+it cannot establish a schema. The actual biped NEW for that ID is recorded at
+728678769 us. The out-of-schema-mask unit test sets only bit 1103 in a derived
+in-memory copy to exercise the guard; the captured fixture remains unchanged.
 
 Payload SHA-256: `1ba355a65297c633256f52abedac8ece13f6eed37ff3b40eead6048fbc7d7970`.
 

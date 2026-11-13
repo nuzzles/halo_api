@@ -1,0 +1,2742 @@
+[
+  {
+    "bit_len": 807,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 292,
+    "canonical_entries": 1,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8fb7f81c7b10fff36321681a15150200031eae11821071fa0e0449ffa06100df9b21203bf464240b407c103df9f04137d88105df962820fb11a0846baf8213a02a5042b7e4810bd72504337e8410dd7df043b5f3810fd7fe04435f7c112d18121227b10000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:145:748:3593",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 958,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 315,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "88a31d7b6aea2c9f88d808f7b0607875fb359440010831118e3c66d5b8680b70d86fe6c35f32ff8fab84210fd0702080680d90901df5c040b7e00103dfa604137ea8105df9f2820fb1800846be010909d00e28215be844242f5f9010cdfa52121bafbe0876813021faffc0886bef8225af3e4244f7e84000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:145:796:3954",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1583,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 318,
+    "canonical_entries": 3,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "c46d58d11b55116e6e0445ed8bb007323d89b1e200084188d1719cb6a8027846946b514258b6ca1ff364c200110401bff6d5d47e4833066ca840022077b825daaf0f79e0604d97080043fb26d13b52d1d98548c9b32100087f46da6b6ac8375d1919367420010ff29b516d4c80f3a52ae6d0840021fd9b69ada958ecf564175708820c7e83812201bf4a080efc710902df9f21207bf560826fb0020bafbe5041b7e7c108df98042b7e4c10bde0021219a880086ef20821db5fc087efcf8223bf1c0896d1f000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:146:236:3361",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1903,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 220,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "c46d38d19b5500722302c4a4b45545784b09b190b40d0a8a810002e4d8f1000420c46558d03b53d12e1409c5e7d2425ed79ff9b26200084188224dfbf6a5224f69872d9b547ec54ed233654400108310409c1eed4586adf70acb6100a15fce2526cb84087cd991000420c3f896d33b51b17500c2130cfc850b3d5679b3a1800841ff936afda8b8142aa320ef39ea4da11000420c3fb76d3bb51618cef8111f32b850e2dc7feae11821071fa0e048806fd50203bf424840b7e7c8481efdc10904dc400417517ca0836fcf8211bf340856bef8217b2e60866fc79090dd809043b7ec010fdf9f04477e78112d7df000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:146:268:3353",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1890,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 243,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "c46d38d23b54e07cca42f49b5fc049804bb9b1e200084188c7b1a076a7824dce136c4b881ac1469ff364c40010831042dbf7ed4a04993c0b5e3a78f183b49f66ca880021062080b83eda8b95164e4614919459b32200084187f14da5b6a3e3f35584e6931c844feb2cd367440010830fffdb586d4580ae02184770f72c7df53da6d0880021061fdbb69cda8b04e9b2028f514c92976428d1fa85a068545408000bbab8460841c7e8381127fe8184037ea8101df9f040b7e7c8481efda0209bd80082ebcf94106df9f04237e9410adfa221217b77c0866fab9090dd7de043b6d9010fdf9f04477e6c112d700000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:146:282:3238",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1745,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 245,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "c46d38d27b54e07755c3348214e048ff7c19b1e180084231b4681da9e092ba44e2fd11474d931000420c41086fdfb526124d08317ebad3c60ed2969b2a200084188202e0fb6a2c54597110508a8ca6cc880021061fc5b695da91008cd40e9b3ad2029bf638cd9d1000420c40036d61b51602e5f4611eb45111ec5bf19b42200084187f6eda776a2c119b001a3cd432c9ccb0ddd5c230420e3f41c09100dfa304077d70102df9f21207bf620826f00020bafbe5041b7e7c108dfa5042b7e888485ed7f0219bf10086ebee821da524087efcf8223bf340896bc60000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:146:286:3127",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 134,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 130,
+    "canonical_entries": 0,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "86fd192111d357044b5f7c8489ebef8000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:149:1086:5498",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 751,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 315,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "87d98ddaf6d5e2f5770fb3efc20010fb09bb9edac047ead22bab84210fd07020806bef8205bf00082efd014106df9f041f7ea8a0846b400213bf360856fc90217bf60086efce021dbf4a087ebe00221af80088eb4b0225a982089efcf800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:64:3289",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 861,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 312,
+    "canonical_entries": 3,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "841888e8d56f6cf8007c40e44d8944051da9ff3f4c400108310fadb0d6dbbca5aed5725949904fd7042236d366eae110418fd070244037e4c101dfa0040b7e7c105d3fe2820dbf3e083efd694908d14004277e1410adf9f04377eb010fdf9f04474c04112d7df28227bf5600",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:212:3003",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 899,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 283,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "841888eed55f6cf800e100e67a10f047c175ff3f4c400108310fadb0d6dbbca5a5a58258b68dcfd70820c8db51988fc2403ab8441063f41c09100df9b04077e78102df9f04174bf4a0836fcf820fbed852423607c109df84042b7e7c10ddfac043f7e7c111d30121225afbe089efb60000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:216:3021",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 999,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 335,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "841888f2d55b6cf8010ec8e427c35c85191bff3f4c400108310fadb0d6dbbca59c758258238c4fd70820c8db51988f78c03ab8441063f41c0942b4c000000011bb600000000100df9e04077d70102df9f04174af8a0836fcf820fbf5a524236188109df84042b7e7c10ddfab043f7e7c111d30021225afbe089efd6000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:218:5241",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 934,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 329,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "841888f8d54b6cf82f1ba89e6f25296173d3c33f4c400108310fadb0d6dbbca593458a5790884fd70820c8db519c8fc2403ab8460841c7e83812201bf32080efab8205bf3e0826fd0820ba5fa5041b7e7c107de7d29211b6fc084efa20215bf3e086efd6021fbf00088e9400225afbe5044f7eb000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:224:3186",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 898,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 397,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "841888f8d5436cfa2f1108906e1a53a19d37cd3f4c400108310fadb0d6dbbca58a159256fd86cfd7042236d467eae11821071fa0e048806fca8203bf300816fcf8209bf42082eadf14106df9f041f76f4a4846dbf0213bf0a0856fcf821bbf58087efc00223a4800896bef94113dfac000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:226:3118",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 906,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 906,
+    "canonical_entries": 3,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "841888f8d53b6cfa2e3b68907d40fa213ccfcb3f4c400108310fadb0d6dbbca58a159256fd85cfd7042236d467eae110418fd070244037e3c101df98040b7e7c104dfa1041777f8a0836fcf820fb97c524236df8109df47042b7e7c10ddfaf2121fbf00088e92010912d7df28227bee64200",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:230:3142",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 943,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 312,
+    "canonical_entries": 3,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "841888f6d5336cf82e27f096084b9e4105cfd13f4c400108310fadb0d6dbbca58a159a56fd854fd70820c8db519c8f78c03ab8441063f41c09100df8e04077d60102df9f04137e84105dfab2820dbf3e083ee3e94908db7e04277e2410adf9f04377ebc8487efc00223a4804244b5e7ca089efba9080",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:152:232:2945",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 969,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 290,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "86d541954326934c99d94a0da200084188563286f6a902290a0182c0082ecd30ae1d5c220831fa0e048806fcc0203bf4a0816fcf8207bf684241377f4105d7fe2820fafbe504235f88109d7df042b7e8c10bd7de1c0616cee0bc26942010dd6be043b5d0410fd00004437e8c8488ebef90912df56044f5d68000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:153:1000:3575",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1167,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 274,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "9010545af7e502d0730c00421166a3636d5207ee2d160507dace83b86002108a431c1f6a940be680fa9e17fbb41ec4001083115b23726d51421ddc0c957229ed212d63fab8441063f41c09100dfa004077e6c84816fcf90903d00e04137e28105d7c02820fb5d4504237e98109d2bd042b6e0010bd7de1c0604375e788487efdf0221bcd6424475f7c84896fca8227ac7c00",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:153:1088:3121",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1266,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 252,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "90104c52f6bf01d0730c1083941755e683b88002106228cc712daa402d57c32ad7f640a0bc076507b1000420c456c8dcfb54605b87011570928b4143579a0fe100087f48da076aea397ec8cfd5c230420e3f41c0894bdc1e201bf40080efc890902df9f21207a0980826fc7820bafca5041f5f7ca0846fd28213b4be0856abf0217afbc380c086eb909090fdfbe0443607c111d7df21225bf26089eb000000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:153:1100:3270",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1858,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 386,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac824add013dab10497d029f4990017845f58c0059039b09cdbb5480c6416455e11a8a5001083640e5be10f6d564110972964d68a117bbc881806446101bc23544a002106c81d44cd5ddaa408352e70a6f098b10b40d0a8a810002dd3311000420c400c70bfb5171803400e389cb420b3b255a66618210736b0a830b97809a6761800841f0db679db6b830e582715ba4e675708820c7e83812201bf260816fcf8207bf4e0826fd010905d4502820dafbe0846fd38213bf464242b7e7410bdfa4043371f410ddabe043b7e9c10fdf9f1c0516f0e03c210000510dc8e04476c04112df62044f7ec8000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:932:2558",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1570,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 300,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac824954fd4daa605de573c36b0fed9645f5900055640e71e70bed514325421d7c6b7f4cb23514a002106c81cbf42c0daae02022d3c09ac1bf0977c127004b4ec059646a89400420d903a899abbb548106a5ce14e5931621681a1515020005ca66618210736b09830b9780aeae110418fd070244035800102df9f040f4ff4104df9d2120bafbe5041b5f7c108dfa604277ef410adfa321217bf4e0866d1e821bbf464843b5f7c10fd01f1c0516f0e0202103c1910df6104477e6484896fb08227bf3a0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:962:2430",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1535,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 412,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "aac824944fc6daa585e45339b6fcfdd9a45f5900055640e73a705ed5143370f1d9cde7eacd23514a002106c81cbf42cddaae81fd953549ac18ae9789ae9001c7de019a46a89400420d903a899abbb548106a5ce14e694ccc40010830ff79c31ed4509b583c1859dd0675708820c7e83812201a6800816fdf0207a7fa0826fce10905d7fe2820dafbe0846fd38213bc7a0856fd19090bdfa704337d9c10ddfab2421db13c087e80f8e028b787027ab23510dfa104477e6084896fb08227bf3800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:966:2521",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1423,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 278,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "9bffffff81822f9c6002c82491cf82daa805eea73af5c8beb2000aac81d00cddbdab303dd7b45bb72fb5ae46a29400420d90397e85cbb55c0855dc0b1358315e5019cc600d34c8bb5c8d512800841b20751335776a9220d4b9c29d73ab8441063f41c09100dfb3040b7e7c103d62804135f7c105d7c02820dafbe0846fd310909de3d042b7e8410bdfa8043361f410ddfb5043b670410fd01f1c0516f0e1242e78a2110dfa104477e7c112dfaa044f7e8400",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:986:2505",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1453,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 417,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8248ecf3ddaab05ed943af730fd5c245f5900055640e8de6db6d690026491c5ddb7ace123514a002106c81cc3c2c7daad861b6024c9a8279d48dcb170068a1053c246a88c10d95e126c042d0342a2a04000894d2420010f815b336dc3860c4731fab8441063f41c09100df9f040b7e7c103d27604137cf8105da1f2820dafbe0846fd510909dfae24215bf3e085eb5f0219ba3c0876d20021fafbe380a2de1c0784c9a84221bf42088e8278225bf4e089efce8000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1006:2323",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1850,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 590,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8248d4f06dab205f3523af72cfcdd245f589567b96f55d246a29400420d9039878585b55702b02c36134a4354929e67e00d0a4c4fa48d511821b2bd24c5885a068545408001769a4880021061f043643db7b8bdd4a4819f8e0d340d246534b0800438ec87bdb5741332585ba69a1000871b30fdf6aee2a7ea9c94d4420010e3ee1f26d5d02801b19e9aa840021c7643e7dab90302523ef5708820c7e83812201bf3e0816fcf8207b37c0826fbd10905d9582820dafbe0846fd690909dfaa042b7e888485eb7f0219a8440876da0021fbf3e380a2de1c1a22a8a4437e88112dfa5044f7d780000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1022:2094",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1829,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 335,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8248cceffdab205f45f3b372cfcdd445f589567b82f55d446a29400420d9039858589b55602d7504113498c7452a764c00d5dc05fa88d51200086c81d44cd5ddaa48bd453491000420c3e086c81b6f717ba6090323751d676298ca6961000871d70f7b6ae4266390c74d3420010e3521fe6d5d854fcb3969a8840021c7e43e6dab904fff03753550800438eb87d3b56f06043c83eae110418fd070244037e7c102df9f040f69f4104df7d2120bafbe5041b5f7c108dfad21213bed40856fd11090bd73e04335f7c10edd00043f7e7c70145bc38745d91a886fd10225bf4a089efcf0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1024:2043",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1830,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 320,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "aac8248c4eeadaae85ec463cb726fcdda45f589567b02f4dda46a29400420d90397f859db5550307a65c934880a1d2b63cc00e3fb83bb48d511821b2bda4d6885a068545408002329a4880021061f03b637db7a8bd84649abf391632b0148534b0800438e787bfb56a1bb7a881a69a10008718f102b6ade2a7d59d34d4420010e3fe1f56d5a87a3a421e9aa840021c73c3eedab30df3784cf5708c10838fd0702252f7078806fcf8205bf3e081ee9f0209bcfa424175f7ca0836bef8211beda424277eac10adfa1042f5f7c10cdf97043b7e2c10fdf9f1c0504437e88112dfa7044f7e7400",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1030:1954",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1926,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 462,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac824804e8ddae005b1e939b5aef89f645f589567a60f45f646a29400420d9039468665b5580383b89c134cc9df915106401d67709fec8d51202106ca0d4b9c29fb29a486002107c04d8736dcc39b8192085c46414d2c40010830e36a1efed51c306fb0750ac0cf99cf61f69a68600210713110d76aac26f211029821aa94d4440010830e42e1fced52021ca908c255a025325f64a9aa880021061c6d4400daa48325f20c3917470a258b39f5708421fa0e04100d400040b7e7c103dfb804135f7c105d90f2820dafbe0846fd50213bf4c0856fd21090bd7df04337e5810edf6a043f7e7c110df8e044b7e94113df9b00",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1058:2090",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1966,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 323,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8247ece87dae085ad4739759cf89f845f589567a24f49f846a29400420d903942867db5580393cc9e934c5ad8912c78e01d5e5c9ff08d511821b2bf84d6885a068545408002429a486002107c04d86b6dc439d3f132875783d4d2c40010830e36a1efed520328500390abb8e99cad9769a68600210712b10db6ab026f18102df2caad4d4440010830e42e1fced5242034a08c1d9980d2b7b6469aa880021061c6d4400daa48333a00a397bd70a27d33575708421fa0e04100d380040b7e7c103dfb804135f7c105da0c2820dafbe0846fd48213bf460856fd00217afbe0866fab021dbf58087efcf8221bf1a0896fd28227bf3800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1060:2090",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 2013,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 386,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "aac8247ace77dae1859bed39f58ef89fe45f5895679d6f75fe46a29400420d90393886c7b55803b88aa1934f77ab90dbc9a01d30cc73fc8d511821b2bfe4d8085a0685454080012e9a486002107c02d8536da63a0279668c3602f4d2c40010830e36a1efed51c776970510abe4f0621bdc69a68600210711310e76ab026efb912fd99ab14d4440010830e42e1fded5201ccf50bc0ab9fa91a41eaa9aa880021061c6cc401daa4836a8606ba32851a3220ad75708c10838fd0702252f7078806be00205bf3e081efdc0209afbe082ec4e14106d7df04237ea4109df9f042b7e7c10bd81f04337d6010edfb4043f7e7c110df4c044b7e90113df5b2100",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1066:2131",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1802,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 325,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "aac8246d4e52dad7856a373cb58cf890c45f589567990fa10c46a29400420d90392a8787b55903cd38a59353728ff0af1a000d520016188d511821b2b0c5319054060320014d243001083dfd6c0fb69c1d1d1ce56b36509a69a2000841870f111036a8e283888cc19c2a783d6a53f4d4440010830e42e1ff6d52426aae0581097e91454d61e9aa880021061c6cc402daa483daae0cbac29f62476dbb75708820c7e83812201bf2c0816fcf8207afbc0826bef820bb1c25041b5f7c108dfa204277e7010adf9e042f5f7c10cdf53043b7d8810fdf9f04437e50112dfa3044f7e7c000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1080:2102",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1882,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 401,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac82468ce47dad2057a3d3f358ef891045f589567946fc51046a29400420d90392687bdb55903d668a593520b57f08532c01d87b02e208d51106cb1053491000420c3dfa6c09b68c1b5f98ae6fcd5065e7f6a0a69a2000841870eb11076a8c2784d83c1bc7c8070eb2394d4440010830e4321ffed52413fc506015be660584f22a9aa880021061c6cc403daa483e842123028a77a4ae5c6f5708c10838fd070224ffd030806fcc0205bf00081ebef8209b03e082ed1214106d7df04237e78109df5c042b7e7c9085ebef8e028b7a704010c381a866fab821dbe20087efcf8221bf320896fd28227bebc0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1084:2062",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1717,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 639,
+    "canonical_entries": 5,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8245dce24daba06f55344b58ef891c45f589567938fc11c46a29400420d903920886db55903eb10ac93546ac4f046f2001d071c1a388d51102cb1c4d8085a0685454080013e9a4880021061ef8b601db408bc1c807bac5d208513ba7534d043d3511000420c390e8801b54809c63c18037827a51c318fa6aa2000841871b3101b6a920ef5c020bedd7e891b88e3d5c220831fa0e048806fd40205bf3e081e8150209afbe082ec3114106d7df04237e78109df9c042b7e8c8485ebef8219bec44243b5f8410fdf9ffd4110df9f044b7e84113df97000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1096:2027",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1721,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 244,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac824554e04daa305a2bc403590f892645f589567948fb52646a29400420d90391d890db55803f1f4b1935415da70254ae0073dec0e4c8d511821b2b264efc89867fffffffffffffffe9a4880021061ef8b5fedb400bef460c3aed020051403a53511000420c390f8805b548049edc176816dbf17e1892a6aa2000841871b1101f6a92280ec804bb4edeeb431475d5c230420e3f41c09100dfb0040b7e7c103d99f04135f7c105d7fe2820dafbe0846fce90909df5c042b7e8810bd7df04337e6c84876d5f021fbf3ffa8221bf440896fcd0227bf2e0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1106:3935",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1533,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 282,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "a548beb12acf2fdf4a548d452800841b207239129b6ab007e8816726a8bb67201ea1800f05801ca91aa240420d941a9738532a53491000420c3df16bf9b67e1d412c25209cc400a3a396a6a2200084187221100b6a900873902ecc4df6032eb9254d5440010830e362203ed52447a3b01172e1fe58c00107ab8441063f41c09100df75040b7e7c103dc5104135a7c9082ebff14106d7df04237e5c8484efce0215afbe085ebef8219bbb60876dff021fbf3ffa8221bf440896fcd0227bf2e000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1110:2187",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1618,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 377,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8244f4de5daa285bd423af5a4f8d3045f589567a22f893046a29400420d90391b89b3b55803f442b69354b9241014cf200d48d016608d511821b2b3053491000420c3df16bf7b6780824500320b5c3f3742708a6a2200084187223100f6a900772502ec7b6f3236f09234d5440010830e362203ed52440f530316df7bf9a6b6d93ab8441063f41c09100de7e040b7e7c103da41041363849082ebff14106d7df04237e5c8484efcc8215afbe085ebef8219afbe0876edf021fbf3ffa8221bf440896fcd0227bf2e0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1116:2022",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1574,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 308,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "aac824364af0daab849eff3baf6f0156645f3900055641217a69a6d5142dfc720dafd7c4b322fac4ab3fa07c2b323514a002106c81cabc6f0daac8225c56449ae6b05a76cafd006ca92256649968c00420f9d1aec6d9f86112e5f9a1265fe9a8860841d78300e087254129aa880021061c6b4405daa415b7631e5ad2e05eae110418fd070244037e68102dfbe040f7d04104df7d04176af8a0836fcf8211bf4e084efac0215bf62085ebef8219bf0c0876920021fbf3ffa8221bec44244b7d70113dfb4000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1170:2090",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1599,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 301,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8242bcaf2daa904b2823aefaf01d6c45f3900055641215a68eed5142e05a201a897d4b622fac4ab3f9f7c2b623514a002106c81cb24730daac82148b63c9ae12d9a7b19ff006b14e656c49968c00420f9e9ad06da24611265f4f06fa229a884106bc180704392a094d5440010830e35a202ed520adbb18f2d72a01f5708c10838fd070224ffd030806fcf8205bf7c081efa08209bbfc082ecff14106df9f04237ea4109df58042b7e9410bd7df04337d2810ed4c02121fbf3ffa8221bdbc0896fc70227bee200",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1176:1985",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1697,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 259,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "aac8241bcae7daa68444463bb3d6ff97645f3900055641212267aed5142e1802078c57e2bb22fac4ab3f6e7c4bb23514a002106c81cb6c799daad01f58963c9ab47aeb8282920069e96457649968c00420fa15aa16da40611195f4892b1fa6c042d0342a2a04000b54d4430020c39168807b548177e68dc87b840e9aa860041871ad10176a902dc448fad7bd0175708820c7e83812201bf3e0816fdf0207bc800826e9f020bae005041b7e7c108dfa604277e5410adfa1042f5f7c10cdf4e043b5f0010fdf9ffd4110d326044b7d28113dfa600000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:160:1186:2135",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 339,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 333,
+    "canonical_entries": 0,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "907df9c04237eac109df9f04335ff88486efce821da580087efcf8221bebc088efd78225bf3e089efd6800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:161:354:3397",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 289,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 277,
+    "canonical_entries": 0,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "909df5e043360f88486efcf021dad824243f7e7c110dfa604477ea8112dfa021227bf6a000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:161:368:3455",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 157,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 155,
+    "canonical_entries": 0,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "8df9884437e84111df6d044b7100113df9f21000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:161:970:3923",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1038,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 360,
+    "canonical_entries": 1,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "9613da030c807065b969cf88002106204dbddada8a833a780084f7433225029ed3a31000420c40db7af1b518074c300b0cbaf4147c966ceae110418fd070244035300101df5821205a07c081ef1f0209afbe082ebe014106d7fe041f7e80108dfae04277e3810cd7162121bbf480876bef821fbf7c444437e84111dfa6044b7ea000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:161:1200:3250",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 92,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 92,
+    "canonical_entries": 0,
+    "canonical_stop": "Truncated",
+    "configuration": true,
+    "hex": "8efc38225afbe089ec6c1080",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:162:974:3860",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 359,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 287,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "90adfa204337e988486efd59090edb00043f5f7c7014580480f09daa8844341a0111df95044b5f7c113dac1000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:162:982:3873",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 752,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 271,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "9c7e4d376a2a88002106219acbb8daa4118f32a8664e527a8ae087eae110418fd070244037e50102df8021207ab800826fa1020baa025041b7e7c108d06904277ea010adf6c042f7ee810dd01304437e38111df9d21225bb6c089efd0800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:163:682:3848",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1376,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 311,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "86b32e936a90055d786cbfad1803f4578f5154400108310cd25dc6d5208c9e4d1b302b13545b0800443b76cffb6b102ea94dba8ba20008480875ad9f76d5e04a6191869ca5d44a8c218008a21dc3679db5800d6ba7480000002a3286002288766d9ef6d60039219600000000eae11821071fa0e048806fc90205bf004240f5f84105d5802820dbf3e0846baf0213bee00856fd58217bf26086e80c0221a502088efce90912d9be044f7d8000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:163:692:3512",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 906,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 239,
+    "canonical_entries": 3,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8aaa2610008881d282f6b4610a29101545c200110ff25016d6f04a02430fab8441063f41c094a158000000004035ff8101dfaf040f4024104df9104175f7ca0836fcf820fa0360846bef8213a87a085ee6c0219ae00086ef80821dafbe087efc00221a100088ee9a0225b04e4244f7e5c000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:166:88:4446",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 962,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 294,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "882728cf6a9e0a7070a86ed3cb4a73ed5d545c200110ea64ff6d5946cb5e3f6a8c840022102b51cdae10eeec25975708c10838fd0702440355f8101d02a040f59f8104da010417667ca0836fcf820fbf6e0846bef8213a03a085eb628219befa086ee60021dbf24087efcf8221a0100896b6010913df9c0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:166:122:3710",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 862,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 208,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "8a22993a34daa70353804980000002aed86002288a64e8c76a9a2743b0b80000000eae110418fd070244037e7c101dfac040b7e008481efd08209bc800836fcf820fa05a0846fd19090adbfd042f7e5410cdfa0043766f810fdf9f21221bafc088eaae0225bf64089ef7e800",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:167:1006:3106",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1420,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 424,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8293d79783c46b235a0c400108310411eeeed458417711a93797b21a062bc6b438800210620af3d12da8c0b9610319700564039b072d6891000420c42b76a59b7a223c402801507c015a2c2043eb4788002106215db546dbb8833a361ba32bdc0232cf64f5708c10838fd070224ffd03080ea5e8205bf3e081eb600209a0d6082efcf820dbf3e083efd18213bf64085efc98219bf32086ece0021db87c4243f7e7c110df8a04474478112d7df044f7e88000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:169:586:3668",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 985,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 337,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "b08896b7c8ca32f2b598800210622a13ce3da8a0e47ee13000d4212b01e4856b71000420c45357999b515034f801f6336d1f1d1eda4100df91040767a0102df9f040f7e64104d00c04177ee0106df9f041f41c4108debe21213a6fa4842b7e9c10bdf9f04377e8010fdf9f04437ee0111dfa0044b4e00113dfa30000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:169:1106:3455",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 893,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 288,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "8a3b90b0735f9c30014040ee6a8fb84419a4b473257e90c005a103d1aa2ee12c5c61528800100d017040b7e7c103dc7e04137ed8105dfb3dd4106d03e041f660084846bae8213a0d60856fd48217ae7c0866cbf021bbf1c0876fd9821fbf3e424434df4111d380044b7db0113dfa4000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:172:334:3731",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 861,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 774,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "863b5008935f9c2001103bdaa36e10c669111e6bf4840022079b542dc240b8c0a5388068098205bf3e081edff0209bf6e082efda14106d03e041f5e0084846a000213a0560856fd30217ae7c0866c7f021bbf120876fd9021fbf3e4244347f8111d340044b7dac113df66000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:172:336:4291",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 857,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 275,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "823b2b10b15f9c2001103c1aa26e100668f5202bf4840022079353fdc220b8bea5688068080205bf3e081ed9f0209bf6e082efd9820da07c083eb6010908d500042740ac10adfa4042f5cf810cd77e04377e1c10edf71043f7e7c848868378223a4800896fd38227bed20000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:172:338:3671",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 938,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 202,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "c411d6b1fb51607b44c444aca7186e750ebb20a100087f66dfc36b50030dd14b642420010ff1dbf6ed68007b2a3c840b7ef8103d02b04137e88105d0291c06041b7e7c107df9b0423454c109df99042b7ea810bdfa104337e448486efd0021dbf3e087efcf8221b1bc088efd30225beac089efc98000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:448:4118",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 815,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 316,
+    "canonical_entries": 1,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8226d6976a2c40de1834111506ac84880021062047b7a4da8b81171834106f8c290ca3fb0816fdf0207a37c082efce820dbf3e083efcd8211b03e084efdb8215bf68085efc98219bec0424377e9c10edf632421fbf000886fac8223bf3a0896fd40227bf2600",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:570:4193",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 825,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 320,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "8226d6936a2c40e7483811a8012c8488002106204bb7a3da8b013e1633102368f904057f8816fcf8207a6fc082efc9020dbf3e083efcd0211b03e084efda0215bf54085efcf8219bf3e424377e9c90876fb1821fbf3e0886fcc10911dfa0044b7d6c113df9a00000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:578:3559",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 821,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 818,
+    "canonical_entries": 18,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "8226d6936a2c40ebe03811f1806c8488002106205237a4da8b0180ac330f7e3938f3f3ff0816fcf90903d0232120bbf2c0836bff020fbf1a0846c100213bf4e0856cbf0217bf540866fae021bbf500876fd19090fdf9f04437e04111dfa4044b7e44113df9e000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:592:3947",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 682,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 296,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "84188156de9b6a2e24b8e0224f3e1eac1b42e8205bf3e081ec4f020bbf400836fcf820fbf280846b708213bf060856fd28217bf540866bef821bbf565043b7d7010fdf9f04437c00111df9e044b7e7c8489efce80000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:632:3398",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 861,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 337,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "83102a9bd36d45c180490448d40b7d09e3dcec858800210620ccb440dad081b17e5d8ef17a226433d70816fcf8207b432082efd092106dfbe041f7e58108d6e104277e4010adf9e042f7e8410cda8004377deca0876fcf9090fdf8004437b00111dfa3044b7d44113df9d000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:174:644:3491",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 994,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 311,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "c449b6f25b67b26559fe29dc961172e4400108311221bd8ed9f022a570d8274d9e1aedb38ae5e88002106224ab781db3d8b3c2202226c44202475a50806fd08205bf7c081efa08209beb8082ebe7820dbf3e083efcb8211bf7a0856fba0217befa0866b75021bbb100876ac0821fbf3e0886e5f0223bf2a089ec5f0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:183:516:3822",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 890,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 341,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "8311f6dd5f6d694475ab24dda23d458806346fee8800210624183ad9dadb8b716c031d48d14032dba50806fcb0203a2fc0816bef8209afbe082eb40020daffc083ebbf0211b0bc084efc18215abfc085efd38219afbe504377e7c10ed7df21221afbe088ebef8225b360089efc880000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:193:956:2926",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 716,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 507,
+    "canonical_entries": 4,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8418905eeb5f6b6e2d5fd8106f7ebe00a6b4a0201bf08080efd78205affc0826bef820bafbe0836be0020faf7c0846c0f8213b68e0856c9f0217ace80866bef9410ddfa3043b502484886bcf8223afbe0896c7f0227bf3642000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:193:986:2932",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 3586,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 686,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "90b19cb38172113304001559044516ae5b825035d88765a35a039089f82000aac8225137dbdbed85fd922cecb8f05c8450614004555903ea370f5b67708bd7a2a96801c42784f95c8450a1400455590401f6f5fb67901507c44148038c3880fadc8450c100055640f6e1c2f6d9dc05cbc1c90fe7d4e422870a0022aac82229371adb5105f462250c0018617da7e6e4228804ab344a79ee4228d08002ab208356e2336dac1422048cb363b67211490400155903ca97159b6db08a8ce28c901ff3908a502000aac82095b435daca84a83d28e755039c8453a100055640f965ad2ed9a837a4806741d8c2e422a208002ab208782dba76cee178808b8bd83fa7211518500115564107c9fb56dbfc0da0d04a6000d80e9c3df72115285001155641112e4816d5c032a7c9ce7c0000ce9b3db72115302559e67bf67211b3a5001083641174a34ced53c3225ab344d66dfe1069776701399d1fe4236a480021b20884f377f6a8c2f2181443001403e626b51b6a307d69cc420806bef8203bea40816bef8207ac3a424137e90105df58041b7e7c107d03204234ad4109d2f9042b6c0010bd4a804335f7ca086ec1f1090edba204437ebbf504475f7c112d5e3044f7e30000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:195:484:358",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 953,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 323,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "9d4f88f82bdf26c9e10c004210b11a8f6d8685018a36cf3d738efaa88002106216ab54adb14096dc41b829341f97f89108806fd890901df54040b5f00103d02904137ea0105dfb7042368f8109d560042b5a0010bd013043362f4a086e8089090edcbe043f7ef8110d77e04475e84112d7df21227bf42000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:196:838:3479",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1271,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 364,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "803effc17cc93be180084211d351cdb1089d4b0979203855c9e10c004210abda94ed8244f4e5260980aef24f18800210a1fcbb74edb5909807cc63e4a17b00000002faa880021062168b54adb1209870813845571f97f892b0806dbf0203bf1e0816be00207a05c0826fd1820bafbe0846d400213a04c0856be00217a0220866c5f1410dd0102121db8fc087efcf8221a06a088ee7d0225afbe4244f7e7c00",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:196:850:3433",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1207,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 432,
+    "canonical_entries": 1,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "9809aa985767a449e50c00420fc45b96ed9f04273f395fb5c58262c42d0342a2a04001097d4c400108310cbda69ed9b44b3640297e87f4833ed89afaa8800210621723552db2287ce188124120020ee097f8806b4010901df88040b5f00103d0290413417c105dcdd042374f4109d022042b401810bd01204336204a086efc9821dbf72087e80f8221ab7c088ebef8225a0d8089efcf80",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:196:890:3465",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1086,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 353,
+    "canonical_entries": 2,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "9808caa01290a149e50c00420fc31b94ed9ec427b9280d8c1032fa988002106219734d3db3695fb45d22fdec01beaa18008421773551db2887f08a7c9c524600806b4010901df48040b5f007004903d02b0413407c105dd58042373f8109d061042b403410bd01504336400a086efc9021dbeec087e80f8221b2fc088ebf00225a0d2089efae0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:196:894:3490",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 1092,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 427,
+    "canonical_entries": 3,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "c431bcd03748b937f182ec3001083f836f5bb6b01cc8cc57220bcbac1822000841881acdd1f6cf639f65876b4f8b640735521830c40010830fdd9b9ceda1c075a9244f576e18c4025204035fbc101d02d040f7e70105dbbe041b5f7c107dfa104236090109df9e042b650010bd1a304335f00a086eae01090fd7fe21223b26a0896fcc0227b37c0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:197:184:2884",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 682,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 204,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "8da2b54b068880021062186b5f2dabf8eacee5e10eec83343c7af8806ea00203bf7a081efcb020dafbe083efcf8211afb6084ebef8215a06a085efcb8219b17c5043f5ff884886fd08223b4bc0896fb10227afbe0000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:197:580:2614",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 511,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 352,
+    "canonical_entries": 1,
+    "canonical_stop": "Complete",
+    "configuration": true,
+    "hex": "97ecf1584077b58102dfbe040f7ea8104df5f04177e7c84836fcf820fafbe08568198217bf120866e601410edf9c2121fbf000886fae10912d10d21227becc00",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:197:1056:3401",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  },
+  {
+    "bit_len": 582,
+    "boxes": [
+      [
+        15,
+        15,
+        17
+      ],
+      [
+        18,
+        18,
+        18
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "canonical_end": 509,
+    "canonical_entries": 2,
+    "canonical_stop": {
+      "Unsupported": {
+        "reason": "control handler kind 3"
+      }
+    },
+    "configuration": true,
+    "hex": "88b30dfd76d683c4601a784bc400108311565c256db4c190491c5305b0bd0ff33dc40b7e7c104df9d04177e68107df9d042b5f7c10cd7df2821dbe9a0886bef8225bf38089efc68000",
+    "index_bits": 1,
+    "name": "raids/01-hour-long-raid/film.json:198:160:1626",
+    "widths": [
+      15,
+      15,
+      17
+    ]
+  }
+]

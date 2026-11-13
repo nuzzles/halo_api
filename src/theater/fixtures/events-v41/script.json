@@ -1,0 +1,530 @@
+[
+  {
+    "name": "script/False/0/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      0
+    ],
+    "bit_len": 49,
+    "record_end": 35,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a0012a200"
+  },
+  {
+    "name": "script/False/0/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      0
+    ],
+    "bit_len": 94,
+    "record_end": 80,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d000951000"
+  },
+  {
+    "name": "script/False/1/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      1
+    ],
+    "bit_len": 50,
+    "record_end": 36,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a00295100"
+  },
+  {
+    "name": "script/False/1/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      1
+    ],
+    "bit_len": 95,
+    "record_end": 81,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d0014a8800"
+  },
+  {
+    "name": "script/False/7/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      7
+    ],
+    "bit_len": 56,
+    "record_end": 42,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a00e9254400"
+  },
+  {
+    "name": "script/False/7/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      7
+    ],
+    "bit_len": 101,
+    "record_end": 87,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d007492a2000"
+  },
+  {
+    "name": "script/False/8/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      8
+    ],
+    "bit_len": 57,
+    "record_end": 43,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a010932a200"
+  },
+  {
+    "name": "script/False/8/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      8
+    ],
+    "bit_len": 102,
+    "record_end": 88,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d00849951000"
+  },
+  {
+    "name": "script/False/31/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      31
+    ],
+    "bit_len": 80,
+    "record_end": 66,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a03e9249249254400"
+  },
+  {
+    "name": "script/False/31/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      31
+    ],
+    "bit_len": 125,
+    "record_end": 111,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d01f492492492a2000"
+  },
+  {
+    "name": "script/False/64/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      64
+    ],
+    "bit_len": 113,
+    "record_end": 99,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a08092492492492492492a200"
+  },
+  {
+    "name": "script/False/64/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      64
+    ],
+    "bit_len": 158,
+    "record_end": 144,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d0404924924924924924951000"
+  },
+  {
+    "name": "script/False/511/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      511
+    ],
+    "bit_len": 560,
+    "record_end": 546,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a3fe9249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249254400"
+  },
+  {
+    "name": "script/False/511/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      511
+    ],
+    "bit_len": 605,
+    "record_end": 591,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d1ff492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492a2000"
+  },
+  {
+    "name": "script/False/1023/False",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 12,
+    "body_widths": [
+      13,
+      10,
+      1023
+    ],
+    "bit_len": 1072,
+    "record_end": 1058,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7891a7fe924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924a54400"
+  },
+  {
+    "name": "script/False/1023/True",
+    "code": 15,
+    "script_prefix": false,
+    "body_start": 57,
+    "body_widths": [
+      13,
+      10,
+      1023
+    ],
+    "bit_len": 1117,
+    "record_end": 1103,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8748d3ff49249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249249252a2000"
+  },
+  {
+    "name": "script/True/0/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      0
+    ],
+    "bit_len": 64,
+    "record_end": 50,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad5723400254400"
+  },
+  {
+    "name": "script/True/0/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      0
+    ],
+    "bit_len": 109,
+    "record_end": 95,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a0012a2000"
+  },
+  {
+    "name": "script/True/1/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      1
+    ],
+    "bit_len": 65,
+    "record_end": 51,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad572340052a200"
+  },
+  {
+    "name": "script/True/1/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      1
+    ],
+    "bit_len": 110,
+    "record_end": 96,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a002951000"
+  },
+  {
+    "name": "script/True/7/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      7
+    ],
+    "bit_len": 71,
+    "record_end": 57,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad5723401d24a8800"
+  },
+  {
+    "name": "script/True/7/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      7
+    ],
+    "bit_len": 116,
+    "record_end": 102,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a00e925440"
+  },
+  {
+    "name": "script/True/8/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      8
+    ],
+    "bit_len": 72,
+    "record_end": 58,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad572340212654400"
+  },
+  {
+    "name": "script/True/8/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      8
+    ],
+    "bit_len": 117,
+    "record_end": 103,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a010932a2000"
+  },
+  {
+    "name": "script/True/31/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      31
+    ],
+    "bit_len": 95,
+    "record_end": 81,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad5723407d24924924a8800"
+  },
+  {
+    "name": "script/True/31/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      31
+    ],
+    "bit_len": 140,
+    "record_end": 126,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a03e924924925440"
+  },
+  {
+    "name": "script/True/64/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      64
+    ],
+    "bit_len": 128,
+    "record_end": 114,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad57234101249249249249249254400"
+  },
+  {
+    "name": "script/True/64/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      64
+    ],
+    "bit_len": 173,
+    "record_end": 159,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a08092492492492492492a2000"
+  },
+  {
+    "name": "script/True/511/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      511
+    ],
+    "bit_len": 575,
+    "record_end": 561,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad572347fd24924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924a8800"
+  },
+  {
+    "name": "script/True/511/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      511
+    ],
+    "bit_len": 620,
+    "record_end": 606,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a3fe924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924925440"
+  },
+  {
+    "name": "script/True/1023/False",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 12,
+    "body_widths": [
+      15,
+      13,
+      10,
+      1023
+    ],
+    "bit_len": 1087,
+    "record_end": 1073,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c78ad57234ffd2492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492492494a8800"
+  },
+  {
+    "name": "script/True/1023/True",
+    "code": 15,
+    "script_prefix": true,
+    "body_start": 57,
+    "body_widths": [
+      15,
+      13,
+      10,
+      1023
+    ],
+    "bit_len": 1132,
+    "record_end": 1118,
+    "start_bit": 1,
+    "complete": true,
+    "hex": "c7fe827e84fe8756ab91a7fe924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924924a5440"
+  }
+]

@@ -83,6 +83,595 @@
       "file": "zoom-padding-v41.json.zlib",
       "bytes": 18786,
       "sha256": "a31c718814e0efc2dc4c69ee278dfcd03d6bd2735e15406fa7aa93173c3c9217"
+    },
+    {
+      "file": "controls-v41/cases.json",
+      "bytes": 4378,
+      "sha256": "c1e090d081eca71677ac0d72025dd22bfd961a13e636e5ca185b7e1f002d8071",
+      "source": "Independently authored synthetic wire layouts; controls-v41/wire_cases.py"
+    },
+    {
+      "file": "controls-v41/reference.json",
+      "bytes": 19855,
+      "sha256": "01f91db633de1c306eb0b332b760fffde931bb706aaa762642278f6fd094882c",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "components-v41/cases.json",
+      "bytes": 3696700,
+      "sha256": "6cbfc2e3186d322751afcd8b80783e5506930988b8402e435a05eebc03c885f5",
+      "source": "Independently authored synthetic wire layouts; components-v41/wire_cases.py"
+    },
+    {
+      "file": "components-v41/reference.json",
+      "bytes": 10139299,
+      "sha256": "01cc4404fd6604d549c91f7e06a2c8c28f36485ebf60f812c689fe0978ed17ca",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "creation-v41/cases.json",
+      "source": "Independently authored synthetic wire layouts; creation-v41/wire_cases.py",
+      "bytes": 94225,
+      "sha256": "f3b7ef821e365d3acd5f60348e2b0f6e81ba86dfc8dc0ab83c2a0fe76d364128"
+    },
+    {
+      "file": "creation-v41/reference.json",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b",
+      "bytes": 699653,
+      "sha256": "45f49a402d72ca8449acb3e2349fcbed595fa7c037207f1d7ec07cb13a8d04fb"
+    },
+    {
+      "file": "transport-v41/fixed.zlib",
+      "bytes": 249,
+      "sha256": "a8bca70965573aef661ce06c1752159930db3180b056a7101b5a1bee4aceda1a",
+      "source": "Python zlib, independently encoded; transport-v41/wire_cases.py"
+    },
+    {
+      "file": "transport-v41/dynamic.zlib",
+      "bytes": 96,
+      "sha256": "13c42f0a11361eb5990cdb0570df522c3b70367d81183daf7858fbc7bca50ee0",
+      "source": "Python zlib, independently encoded; transport-v41/wire_cases.py"
+    },
+    {
+      "file": "transport-v41/reference.json",
+      "bytes": 1457,
+      "sha256": "930331625a0408b588a060f51f33acc0e7c3954e9f02d75d9970406e35f4bc7b",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "events-v41/cases.json",
+      "bytes": 335392,
+      "sha256": "bdc1b688323a088ccce858a609f601e2f148f0dd37f2e3b7e20327abe512ec3a",
+      "source": "Independently authored synthetic event layouts; events-v41/wire_cases.py"
+    },
+    {
+      "file": "events-v41/reference.json",
+      "bytes": 3216269,
+      "sha256": "bc72e5ba0dadbe03280c9a4a4195b33c1ab3929b52466350f1f095a0ed57f449",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "bootstrap-v41/cases.json",
+      "bytes": 39426,
+      "sha256": "e3d492c88719a79fbd0ba123fc4b551d0f0b6bdf9238df371370a78abf0913cb",
+      "source": "Independently authored fixed bootstrap field goldens; bootstrap-v41/wire_cases.py"
+    },
+    {
+      "file": "bootstrap-v41/registry-prefix.bin.zlib",
+      "bytes": 6554,
+      "sha256": "29bf91686b9fe6f6003845efcf66b1a3f8df1c6b04eefada28647b7c9ae31f60",
+      "source": "Original 832008-byte version/registry prefix from controller/01-stick-circles; bootstrap-v41/README.md"
+    },
+    {
+      "file": "bootstrap-v41/identification.json",
+      "bytes": 217145,
+      "sha256": "46745800403dbd0681c894f2295853edac2ba1b95f830556cd1c70098a8d952a",
+      "source": "Independent shifted identification field goldens; bootstrap-v41/identification_cases.py"
+    },
+    {
+      "file": "bootstrap-v41/identification-reference.json",
+      "bytes": 1660,
+      "sha256": "5f36335f980295f9c47298942253600b7e119798c63e82846bab4b3d49e0a986",
+      "source": "Original libfilmshell 18067987 header::read timestamp/GUID traces; bootstrap-v41/export_identification.py"
+    },
+    {
+      "file": "bond-v2/cases.json",
+      "bytes": 22148,
+      "sha256": "3d40504e392f77d92414f3b2b9a2100c986444c8a22c0ff4b66228c8d5078ca3",
+      "source": "Independent synthetic Bond/game-options wire layouts; bond-v2/README.md"
+    },
+    {
+      "file": "bond-v2/reference.json",
+      "bytes": 50647,
+      "sha256": "e4445c008b857bbfd81b4f47209f812d3e233f875b1111343886be5f0a3b13c0",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "bond-v2/game-options.json",
+      "bytes": 30951,
+      "sha256": "4096865bb8e0b26e7e8baab7634f192700f28df79efc595115961f642cc607b1",
+      "source": "Independent synthetic Bond/game-options wire layouts; bond-v2/README.md"
+    },
+    {
+      "file": "events-v41/script.json",
+      "bytes": 11006,
+      "sha256": "995fa186bc24c0d4855f3ee25089cd78fb918b392ccfedeb51cf0c8241599959",
+      "source": "Independent script writer layouts for both prefix forms; events-v41/script_cases.py"
+    },
+    {
+      "file": "events-v41/script-reference.json",
+      "bytes": 21149,
+      "sha256": "9161de7304dbd4f1585a09e2a7d1aa22cf56673f69064d39f9373557cd8efc41",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b",
+      "source": "Original script prefix-present branch only; export_script.py"
+    },
+    {
+      "file": "bond-v2/variants.json",
+      "bytes": 76499,
+      "sha256": "331cc85b3edc33ba3341c5ac478cb65d7920e545d774f2107be789f7d44d4c4c",
+      "source": "77 independent full game-options/variant cases; bond-v2/variant_cases.py"
+    },
+    {
+      "file": "bond-v2/variants-reference.json",
+      "bytes": 7284,
+      "sha256": "f72cc225265fe5be8a6d50178d8a893b2bc9beb99956f5470a810d1ea9ba28c6",
+      "reference_repository": "https://github.com/JGtm/LevelUp",
+      "reference_commit": "413971bcc485be53a2fa8cf229e170539a5146f8",
+      "source": "66 original variant-walker projections; verified source blob; bond-v2/export_variants.py"
+    },
+    {
+      "file": "levels-v41/catalogue.json",
+      "bytes": 35922,
+      "sha256": "fc9e90bf66f6b16674ddf810598cbe099db20372d5cb21e15ab739621a2f4506"
+    },
+    {
+      "file": "levels-v41/points.json",
+      "bytes": 101095,
+      "sha256": "eef0ed4a92f00faeb69a593e209853ff75d13882fdaf9b914193f47b5222dde1"
+    },
+    {
+      "file": "levels-v41/reference.json",
+      "bytes": 122535,
+      "sha256": "b91e483d6fbe7fa9bff112fdb6c24a9d1ebeb23f0d9fa169329e949b9ddc3c50"
+    },
+    {
+      "file": "components-v41/orientation-source.json",
+      "bytes": 6887,
+      "sha256": "b3c93815621f9a65ed1a41abaa29e9685ed613dbb70c0a7b9213d66249341966"
+    },
+    {
+      "file": "components-v41/orientation-source-reference.json",
+      "bytes": 11530,
+      "sha256": "8330084070a3c5303838868f0f7b753f569efcccd1f4f7624d1d08466458734f"
+    },
+    {
+      "file": "events-v41/teleport-engine-one.json",
+      "bytes": 9719,
+      "sha256": "c3e515a7718e10e48cbebcaae23a5c333452bbd08399385725b92cddb35ec01d"
+    },
+    {
+      "file": "events-v41/teleport-engine-one-reference.json",
+      "bytes": 9878,
+      "sha256": "7dacc0d837f7e4407fe86ed6b5da3f4484c821986b0a52a10ac8223c8438a92d"
+    },
+    {
+      "file": "components-v41/tacmap-source.json",
+      "bytes": 29514,
+      "sha256": "bcc43bd9212c05de657f665900b475256bd51788768f0c71b48c6e68f38ac21f"
+    },
+    {
+      "file": "components-v41/tacmap-source-reference.json",
+      "bytes": 15421,
+      "sha256": "026a8bc68b6d6beef85ba31261f8464b30f43d25e0bda355de853cf1d729ad39"
+    },
+    {
+      "file": "device-record-v41/packet.bin",
+      "bytes": 8647,
+      "sha256": "3bad5fbb505b03f9963a44e58144d0c7b6beb2987412fb5f774f6b66061d98ab"
+    },
+    {
+      "file": "device-record-v41/reference.json",
+      "bytes": 420219,
+      "sha256": "a9b362ed3ae8b09fe3ce0cd54ad8af43d7bda82051f8cefd8c4c0dac0adcf024"
+    },
+    {
+      "file": "components-v41/predicted-ability-source.json",
+      "bytes": 30839,
+      "sha256": "6a265eddce2da2255b5df4467e58d5c134f8199cd53f1e55663227dc155e723b",
+      "source": "Independently authored synthetic tag-3 wire layouts; biped_cases.py; versions 0/1/2/4"
+    },
+    {
+      "file": "components-v41/predicted-ability-source-reference.json",
+      "bytes": 53191,
+      "sha256": "d11e5685824f53f087d7ccefc5118ff898f9c6116b7759ba1af591eaa4c6238e",
+      "source": "Unchanged LevelUp predicted-ability and point readers at 413971bcc485be53a2fa8cf229e170539a5146f8; verified source blobs; injected external precision/table context"
+    },
+    {
+      "file": "components-v41/managed-source.json",
+      "bytes": 1315291,
+      "sha256": "ca0287cfafb28c800d840c4c33f866ab17915d0e1bab71b3d4bba2ad4bc27c4a",
+      "source": "Independently authored manager, music, splash and TLV layouts; managed_cases.py"
+    },
+    {
+      "file": "components-v41/managed-source-reference.json",
+      "bytes": 3520552,
+      "sha256": "90a53535268c526615a73cda81f5c209060fa96d57408e5be109d32e4e85e897",
+      "source": "Unchanged LevelUp functions/constants and two dispatch arms at 413971bcc485be53a2fa8cf229e170539a5146f8; five verified source blobs; bounded primitive reads"
+    },
+    {
+      "file": "events-v41/projectile-source.json",
+      "bytes": 41487,
+      "sha256": "eb72e092ad28aba9ac67bacabee396f8a27e794481414f370461f83e2a50d1b0",
+      "source": "Independent delta projectile layouts including both direction tails; events-v41/projectile_source.py"
+    },
+    {
+      "file": "events-v41/projectile-source-reference.json",
+      "bytes": 119047,
+      "sha256": "1c42015956ac81459ffb7c77afa211f4fc0022c70da0f1f1ff2956ae199b830f",
+      "source": "Unchanged LevelUp projectile/point/tag readers at 413971bcc485be53a2fa8cf229e170539a5146f8; four verified source blobs; bounded primitives and explicit external delta/table context"
+    },
+    {
+      "file": "engine-v41/timer.f32le",
+      "bytes": 262144,
+      "sha256": "70ca0c72a1ac3b2e44c0e0acf1b59ff826c22a9218af19b25e75f8058538a52d",
+      "source": "Unchanged LevelUp round timer reader/helper/quantizer at 413971bcc485be53a2fa8cf229e170539a5146f8; three verified blobs; all u16 quanta; amd64/v1 separate float32 operations"
+    },
+    {
+      "file": "events-v41/semantic-extra.json",
+      "bytes": 375,
+      "sha256": "1538f046770b1e54d081868b8a0a230116188e767518d92af42a75ada754e2a8",
+      "source": "Independently authored player-killed boundary bodies; absent/present player gates and full u32 percentage words"
+    },
+    {
+      "file": "events-v41/semantics-reference.json",
+      "bytes": 719113,
+      "sha256": "3042aa732fdb7009a22fe3a015aedc582b3992fbd2bbb7d1af1f198e1ef7ad5f",
+      "source": "Unchanged libfilmshell events::walk/body at 18067987ebc3628ad499c819c6aee814692df43b; serialization derives and test exporter only; 1475 complete bodies"
+    },
+    {
+      "file": "roster-v41/reference.json",
+      "bytes": 197913,
+      "sha256": "8435fbf88acc1f6e7b6830dc2c1f49f7327ac590aff85f1199df7d3a074b2d1f"
+    },
+    {
+      "file": "keyframe-slots-v41/reference.json",
+      "bytes": 7063,
+      "sha256": "1e5c201a0093cac2ee474013c584bfab8514f0b63a00257f2663795412bb58a2"
+    },
+    {
+      "file": "items-v41/reference.json",
+      "bytes": 439298,
+      "sha256": "e27533bf95554165fb422500b6e7b227d6bc408a476a7ef540572bef65eae43c"
+    },
+    {
+      "file": "snapshot-refusal-v41/packet.bin",
+      "bytes": 147358,
+      "sha256": "786bb2f7fea9a1d8ac22ff0a43e6a21c98aef5491ba86508033b7d1caa77aa32"
+    },
+    {
+      "file": "snapshot-refusal-v41/reference.json",
+      "bytes": 6403,
+      "sha256": "5950bbcd3686953ea18b74dca402336cc8fd91f5326950f58b2fac6f82bdfecc"
+    },
+    {
+      "file": "damage-sandbox-v41/reference.json",
+      "bytes": 510891,
+      "sha256": "37a7020629a357f98828b49a1f08a1475088de3ce9a5ca2e1fd992d615346fd8"
+    },
+    {
+      "file": "corruption-v41/reference.json",
+      "bytes": 10974,
+      "sha256": "426176544cdf5324327530d3fa0e0b66e3fc073b259d50f62a7f81cc503b3075"
+    },
+    {
+      "file": "event-admission-v41/reference.json",
+      "bytes": 107326,
+      "sha256": "5766e544045f345a561b806c464d125d9ec4cd26c4b6746c7135522ea660bdcd",
+      "source": "Unchanged LevelUp event-version classification and list/head readers at 413971bcc485be53a2fa8cf229e170539a5146f8; six verified blobs; 503 table cases and 87 frame cases; absent references and empty/zoom bodies only"
+    },
+    {
+      "file": "reference-configuration-v41/reference.json",
+      "bytes": 20762,
+      "sha256": "7477c7b8db958fa0650cca5792cde275b118c1d7c5db08de8f4e5416215f6863",
+      "source": "Unchanged LevelUp shared handle/range/bit readers at 413971bcc485be53a2fa8cf229e170539a5146f8; five verified blobs; 49 native category-table cases; configuration-zero tests verify prefixes/refusal only"
+    },
+    {
+      "file": "game-catalogues-v41/reference.json",
+      "bytes": 192493,
+      "sha256": "54883d7569649f4d8b5552b5cbd21ca1eb6ab8c6ee20f7d6931fa84429dd5017",
+      "source": "Original libfilmshell medal/options APIs at 18067987ebc3628ad499c819c6aee814692df43b; four verified blobs; 157 medals, 98 hash/name entries, seven scripts /104 options and 261 binary hash vectors; reference metadata parity only"
+    },
+    {
+      "file": "variant-view-v41/cases.json",
+      "bytes": 24734,
+      "sha256": "2518ea09624b20f3d57fb52f030a09b043a149a466d95866216bf2463e3db120",
+      "source": "47 authored Bond trees and original libfilmshell variant/variant_stats readers at 18067987ebc3628ad499c819c6aee814692df43b; four pinned blobs; exact runtime/stat views without anchor searches, default filling or first-match column resolution"
+    },
+    {
+      "file": "variant-view-v41/reference.json",
+      "bytes": 99424,
+      "sha256": "06fe74574c25f16c76f2f767f370fda83f059ef65fc22886a3019f7a8b96fb3a",
+      "source": "47 authored Bond trees and original libfilmshell variant/variant_stats readers at 18067987ebc3628ad499c819c6aee814692df43b; four pinned blobs; exact runtime/stat views without anchor searches, default filling or first-match column resolution"
+    },
+    {
+      "file": "script-evidence-v41/cases.json",
+      "bytes": 125796,
+      "sha256": "5c02e991dbd2efdb5d2377f4717433421219ef32cb0ebcf501b9792abb7018f0"
+    },
+    {
+      "file": "script-evidence-v41/reference.json",
+      "bytes": 64740,
+      "sha256": "08d9459f5f18e4315585d10245bde79afd4ca98bde53f43a034dc24fd22ac45b"
+    },
+    {
+      "file": "script-modes-f050371/cases.json",
+      "bytes": 1209236,
+      "sha256": "20a054fed94e8b05cca6503ad5cecbb60a78c8ebd6de2bb3b785c978edb547b5",
+      "source": "2,048 independently authored combinations of eleven f050371 mode-script filenames"
+    },
+    {
+      "file": "script-modes-f050371/reference.json",
+      "bytes": 586226,
+      "sha256": "60175925e859d78c489fe40258b286578bf2b50e709020ac019056b449ba9bf7",
+      "source": "Original libfilmshell scripts.rs and model/variant.rs at f050371a6cda83b9887eeb83a1884336fce28e53; exact blob verification and unchanged classifier"
+    },
+    {
+      "file": "variant-rules-v41/cases.json",
+      "bytes": 265105,
+      "sha256": "35979332912bb87db83a80cd4b045c5b914c0aed9eada830602becc2bfc65738"
+    },
+    {
+      "file": "variant-rules-v41/reference.json",
+      "bytes": 3165410,
+      "sha256": "623c9e93d3384e3865ad000b6ec6100d53e59e2c166d70f009f3a67c652ee328"
+    },
+    {
+      "file": "stat-text-v41/cases.json",
+      "bytes": 10848,
+      "sha256": "78d1a94b8d3b1accbdb2d8c22a18093531cc782b8d22f095a8262fb2598c1fed"
+    },
+    {
+      "file": "stat-text-v41/reference.json",
+      "bytes": 3201,
+      "sha256": "d91f6e0802257bd3f782bfb2f2978117be26fa879929e63047b13fe0d076e5d5"
+    },
+    {
+      "file": "hud-v41/cases.json",
+      "bytes": 4091,
+      "sha256": "a39dddd7ed5b8611f460b8abbacf038c9eb9f369662a33d1b37e5bbdf00d357a"
+    },
+    {
+      "file": "hud-v41/reference.json",
+      "bytes": 7647,
+      "sha256": "0016c72b16be881f0010a54540a0c747fdb79d1c30c579e646536db14b13457a"
+    },
+    {
+      "file": "assignments-v41/cases.json",
+      "bytes": 494804,
+      "sha256": "066e820a10d7eb2475a849cba52eee498119b7e26289670463ed66ab08851f33"
+    },
+    {
+      "file": "assignments-v41/reference.json",
+      "bytes": 9789,
+      "sha256": "5fd3515b19c68ab3a839cc126642ebb7d864ae770bc48d957972163b82f0bbc3"
+    },
+    {
+      "file": "assignments-v41/captured-comparison.json",
+      "bytes": 4428,
+      "sha256": "d8048eea1e67dc79cb2e812ad3c8cbd89d4a29f62cbba699ba8e8a4d222ebbc9"
+    },
+    {
+      "file": "controllers-v41/cases.json",
+      "bytes": 18750,
+      "sha256": "0e21fcaa078a57578f3b85ae7c8b9a65a628f5f937f818baad07518e0ebee08c"
+    },
+    {
+      "file": "controllers-v41/reference.json",
+      "bytes": 13728,
+      "sha256": "eca69e3f2229c47e4b65ac3a6db8d572abeeddcf744241797499c4456fb6688f"
+    },
+    {
+      "file": "attachments-v41/cases.json",
+      "bytes": 34099,
+      "sha256": "48e6aa21d9589fe6b5c9d011eb132869e8ec92882ebfea50ba0cc680133eddd4"
+    },
+    {
+      "file": "attachments-v41/reference.json",
+      "bytes": 28757,
+      "sha256": "3c8b336820d2f65557f3c04f1a3c1129730e733209df9ce1e0e5407969ed86e5"
+    },
+    {
+      "file": "zones-v41/reference.json",
+      "bytes": 3213,
+      "sha256": "115bbb2a8ffce88957d9bb033181f665a66571fcd21bdec900c477478b6587f9"
+    },
+    {
+      "file": "geometry-v41/cases.json",
+      "bytes": 4213,
+      "sha256": "ff0d3884ce06e7bce1bc805e8e6eaa5f76b3e3ed86c1ca511396bcc22762bd8a"
+    },
+    {
+      "file": "geometry-v41/reference.json",
+      "bytes": 4138,
+      "sha256": "41f54fa4092b2a8957d82bcebd050268f62a2aada09c0d7bc1a60e1df2ff7acd"
+    },
+    {
+      "file": "orientation-v41/cases.json",
+      "bytes": 3099,
+      "sha256": "55583b1d92e3fc9ad57fee9a7cbd5b040d85f3d4fcc08e4ebccf2487d1f983b5"
+    },
+    {
+      "file": "orientation-v41/reference.json",
+      "bytes": 1963,
+      "sha256": "e6c2cc6ffbe330fff75a1e54f47f6f6980762d5fbd23a1471fb20afa44ea4046"
+    },
+    {
+      "file": "orientation-v41/engine-reference.json",
+      "bytes": 835,
+      "sha256": "dca94effe374b2416ec7247a6249a13cd70fc5483356f8e300c8f4afa6974a1d"
+    },
+    {
+      "file": "property-v41/components.json",
+      "bytes": 29727,
+      "sha256": "3a06ceae2bfdb8685f413cecad35c7c6395aa7863c7ed63f12e9367685921963"
+    },
+    {
+      "file": "property-v41/defaults.json",
+      "bytes": 27635,
+      "sha256": "63bcc0e2ac65a8eb3aa6f1f45852b97fa9be2f31fdec8041e4374050671d2892"
+    },
+    {
+      "file": "property-v41/source-reference.json",
+      "bytes": 224454,
+      "sha256": "4e0f2b55449ebc55f6f3a212ffacf5d45bf0edff6d638eb63a656cc7653a1fc5"
+    },
+    {
+      "file": "hill-score-v41/reference.json",
+      "bytes": 4709,
+      "sha256": "05f7d392a02e088bd6a78ae8705e58949aa58fe046b29f47f39d4d537262d988"
+    },
+    {
+      "file": "objects-v41/reference.json",
+      "bytes": 14037,
+      "sha256": "379124cbf53a3aa6f9a265284370bff4d6d5727309f93c784b8fcab6bb698723"
+    },
+    {
+      "file": "ground-weapons-v41/reference.json",
+      "bytes": 5556,
+      "sha256": "bc4aa8e3259116031667b0570aec3a71d4dafa093fb010314e423a5a75299931"
+    },
+    {
+      "file": "fixed-positions-v41/reference.json",
+      "bytes": 50897,
+      "sha256": "ed47610f11e4b9077bc4899b42f1df2fbc77cfa95942db5e4362e5d387b298a7"
+    },
+    {
+      "file": "zero-position-axes-v41/reference.json",
+      "bytes": 51728,
+      "sha256": "1e7b3304a1d981adf72251933f245fcfb54150a2b4b02808e0111a66058a59cd"
+    },
+    {
+      "file": "inputs-v41/reference.json",
+      "bytes": 20078,
+      "sha256": "31e1aab2c599bea836d2612d9180c1b40ae878256b3d95bb4e0f57f9de8e8157"
+    },
+    {
+      "file": "reserves-v41/reference.json",
+      "bytes": 3499,
+      "sha256": "a1f69b0dafc308f0f6d33737e5047b1c1b425766a7af59692b544abe702f72eb"
+    },
+    {
+      "file": "equipment-energy-v41/reference.json",
+      "bytes": 7965,
+      "sha256": "5d70d619e67a1ae6b8682fdb4a4556bf210a7c3f06755efe715bf4e634d11b5d"
+    },
+    {
+      "file": "weapon-quantization-v41/reference.json",
+      "bytes": 214609,
+      "sha256": "7bf69b9eb0647f937ca0ed232ff377e02e3ce244b85565afe66cfcdd4c5c2a43"
+    },
+    {
+      "file": "control-limit-v41/cases.json",
+      "bytes": 29495,
+      "sha256": "8ad6e3c7eebd6ecacd8647486ad0efc7da9300c94ded6ab3a8645685589beae1",
+      "source": "Independently authored control-list lengths; control-limit-v41/wire_cases.py",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "control-limit-v41/reference.json",
+      "bytes": 310890,
+      "sha256": "74afcf7e95d137254baad6598dc624e3dee5456b09c5bed1011796ee8c1504d6",
+      "source": "Original libfilmshell control_view read/skip traces",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "18067987ebc3628ad499c819c6aee814692df43b"
+    },
+    {
+      "file": "events-f050371-v41/cases.json",
+      "bytes": 32402,
+      "sha256": "40d00f5122c1619bf418d3a5412480e5be19dc1635eb30aa020153db95f15771"
+    },
+    {
+      "file": "events-f050371-v41/reference.json",
+      "bytes": 199927,
+      "sha256": "88e440c25e1eb3cd0ed08a74231ec888b95a33db6ade98717ddf03b1cb2234bf"
+    },
+    {
+      "file": "controls-f050371-v41/cases.json",
+      "bytes": 153993,
+      "sha256": "6ab9f5eb3258732168dbdff16482161a277f8d46b3229b3ed9a4164fec81bf71"
+    },
+    {
+      "file": "controls-f050371-v41/reference.json",
+      "bytes": 746981,
+      "sha256": "e1fc110749a2b66320e8e81bdf9adc62697f546fad1477882b02ffede840a9a8"
+    },
+    {
+      "file": "controls-f050371-v41/captured-cases.json",
+      "bytes": 59797,
+      "sha256": "fe2fca60a798deb5f0b241c279e86a0b5c8bc7679f3b4b6a8bb33daac88e67e1"
+    },
+    {
+      "file": "controls-f050371-v41/captured-reference.json",
+      "bytes": 233635,
+      "sha256": "55797ba9472fa00339b8f0db7326ea95ebcf32d21b1884e4994d3ca321fab096"
+    },
+    {
+      "file": "controls-f050371-v41/captured-original-reference.json",
+      "bytes": 241544,
+      "sha256": "a533387e521f6bb5916bf5fcfb71fa1ce262c769cd7d76e3ffabada74546ad99"
+    },
+    {
+      "file": "managed-participant-v41/cases.json",
+      "bytes": 117699,
+      "sha256": "b6368d598b1e6d09535fed09a5e00dea1ff9f09bb99492dc7ee4c860e72c3317"
+    },
+    {
+      "file": "managed-participant-v41/reference.json",
+      "bytes": 64331,
+      "sha256": "454fc2b78f1feeafef1924cb8fa47398b926009fef5730994e42670f768c986b"
+    },
+    {
+      "file": "position-prefix-f050371-v41/cases.json",
+      "bytes": 954,
+      "sha256": "501b6d498d38379cc885f875356a5eeebd7a85fe662523f3aa2ac63956929721"
+    },
+    {
+      "file": "position-prefix-f050371-v41/reference.json",
+      "bytes": 826,
+      "sha256": "edec124d8ac59d4215e4a938dcc1e7785ebc9c8270a413c606a8850700e5b1f1",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "f050371a6cda83b9887eeb83a1884336fce28e53"
+    },
+    {
+      "file": "variant-icon-a13efb/reference.json",
+      "bytes": 8379,
+      "sha256": "75302b1b18d904e0363c6791cbe35ab0ece497dc3c1fbef770828d1655f92226",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "a13efb323b230c96b59685defbc376720043240f",
+      "reference_blob": "51c7626e939444345753f366b3eb1177980d9034"
+    },
+    {
+      "file": "clock-a13efb/reference.bin.zlib",
+      "bytes": 739511,
+      "sha256": "43b7834cfb0d64d1f72e7dff280236b22474303b7ed62c6ca1e6d3358c3a011c",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "a13efb323b230c96b59685defbc376720043240f"
+    },
+    {
+      "file": "encoding-a13efb/reference.json",
+      "bytes": 5662,
+      "sha256": "daf3f0435e71d93e5e6456177c3a1557a9705e4d0370690596e2677201aa3a84",
+      "reference_repository": "https://github.com/OpenSpartan/libfilmshell",
+      "reference_commit": "a13efb323b230c96b59685defbc376720043240f",
+      "reference_blob": "068885d8c5fdc790ea8efd86e5e4e82873ab97f4"
     }
   ]
 }

@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct AnticipatedDeclaration {
-    pub chunk_index: i64,
+    pub chunk_index: usize,
     pub archetype: u32,
 }
 
@@ -19,7 +19,7 @@ pub(crate) struct AnticipatedBindings {
 }
 impl AnticipatedBindings {
     /// First declaration strictly after the current chunk. Earlier declarations do not qualify.
-    pub(crate) fn after(&self, id: u32, chunk_index: i64) -> Option<AnticipatedDeclaration> {
+    pub(crate) fn after(&self, id: u32, chunk_index: usize) -> Option<AnticipatedDeclaration> {
         let values = self.entries.get(&id)?;
         values
             .get(values.partition_point(|d| d.chunk_index <= chunk_index))

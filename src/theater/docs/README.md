@@ -1,66 +1,60 @@
 # Theater v41
 
-The API has one parsing step and one runtime loading step:
+`Film::parse` consumes downloaded zlib chunks and returns a finished film. The
+private parser inflates and decodes each chunk, then discards packet buffers and
+source locations after projecting the supported values.
 
 ```rust
-use halo_api::theater::{Film, TheaterRuntime, film::FilmChunk};
-use halo_api::theater::runtime::{SummaryFilter, SummaryKind, SummaryPayload, medals::Medal};
+use halo_api::clients::hi::models::RawFilmChunk;
+use halo_api::theater::{Film, TheaterRuntime};
 
-fn inspect(chunks: Vec<FilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
+fn inspect(chunks: Vec<RawFilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
     let film = Film::parse(chunks)?;
-    let mut runtime = TheaterRuntime::load(film);
-    for event in runtime.query_summaries(SummaryFilter {
-        kind: Some(SummaryKind::Medal),
-        medal: Some(Medal::Splatter),
-        ..Default::default()
-    }) {
-        assert!(matches!(event.payload, SummaryPayload::Medal(Medal::Splatter)));
-        println!("{event} [{:?}]", event.derivation);
-        // For example: Nuzzles (2535472547643888) received Splatter at 0:10.000
+    println!("{:?}", film.registry.version);
+    for highlight in &film.summary.highlights {
+        println!("{}: {:?}", highlight.gamertag, highlight.payload);
     }
-    let world = runtime.seek(10_000_000); // microseconds; checkpointed seek
-    println!("{} entities", world.entities.len());
+    let mut runtime = TheaterRuntime::load(film);
+    println!("{} entities", runtime.seek(10_000_000).entities.len());
     Ok(())
 }
 ```
 
-`FilmChunk` combines its category/bytes with optional manifest `index` and
-`start_ms`. `None` means metadata was not supplied. Input order defines source
-positions. Raw and zlib-compressed chunks are accepted. The public parsing entry
-point has no alternate parsing options or heuristic recovery mode.
+A `RawFilmChunk` has a manifest kind, index, start time,
+and downloaded zlib bytes. The parser sorts chunks by index and requires a
+registry first, at least one replication chunk, and a summary last. A complete
+film is passed directly to `Film::parse(chunks)`, which requires contiguous
+indices and a recorded tick marker. Damaged zlib and unsupported
+versions return errors.
 
-`Film::parse` requires the first and only registry chunk, reads the version, and
-selects the v41 kind-specific readers. Unsupported versions return an error.
-`Film` owns `registry` and one ordered `chunks` vector containing replication,
-summary, and unknown later chunk kinds. Original input, decompressed buffers,
-source positions, exact known fields, stops, and unknown data remain available.
+The resulting `Film` has three sections:
 
-`TheaterRuntime::load` takes ownership of a `Film` (or accepts `Arc<Film>`), resolves
-supported state, and builds chronological query indexes/checkpoints. Its
-`ResolvedFilm` is private. There is no public `Film::resolve`, `ResolvedFilm`, or
-`theater::resolved` compatibility API. Only `Film` and `TheaterRuntime` are
-reexported at the Theater root. Supporting models remain public beneath `film`
-and `runtime`; the parser module remains public with internal decoder modules.
+- `registry` contains the recorded version, named component definitions and
+  their encoding parameters, decoded game option values, and map IDs when
+  available.
+- `replication_stream.observations` contains timestamped entity changes,
+  component updates, controls, keyframes, and recorded events. Several
+  observations can share a packet timestamp. Only completely decoded changes
+  are projected; the parser does not invent values for opaque fields.
+- `summary.highlights` contains guarded typed kill, death, medal, mode, and
+  unknown candidates with gamertag, XUID, timestamp, and payload. The summary
+  record grammar does not yet prove that this list is complete.
 
-`summary_events()` returns every guarded summary candidate in chronological
-order. Actors contain the source-read XUID/gamertag and a separate roster-link
-result. Typed payloads distinguish kills, deaths, mode events, known/unknown
-medals, and unsupported categories. Unknown pairs are never assigned a nearby
-medal name. These are explicitly derived summary interpretations, not canonical
-record boundaries or inferred physical actions. `summary_reports()` compares
-candidate counts with recorded counts without claiming matching counts prove a
-complete summary grammar. `record(source)` exposes the associated raw reads.
+`TheaterRuntime` is an independent playback cursor over the typed observation
+list. `current()`, `advance_to()`, `seek()`, and `rewind()` expose state at a
+film-relative microsecond timestamp. `summary_highlights()` borrows the film's
+highlight feed.
 
-`query_summaries()` combines kind, XUID, medal, and inclusive microsecond ranges.
-Generic `query()` filters the full structural/state event stream. Both preserve
-playback state and source references. `current()` is O(1) borrowed access;
-advancement applies updates, and seeking restores a checkpoint and applies its
-remaining updates. Copying/enumerating a world scales with its size.
+The detailed source and fixture notes in this directory record parser research;
+source ranges and diagnostic packet structures are not part of the finished
+`Film` API.
 
-- [Detection coverage and remaining replay work](COVERAGE.md)
-- [Architecture and migration](ARCHITECTURE.md)
-- [Canonical format and fidelity](FORMAT.md)
-- [Runtime resolution and playback](RESOLUTION.md)
-- [Validation and provenance](VALIDATION.md)
-- [Completed canonical audit](CANONICAL_AUDIT.md)
-- [Credits](CREDIT.md)
+The [film world inspector](../../../examples/film_world_inspector.rs) is a
+read-only egui example. Run `cargo run --example film_world_inspector` for the
+bundled film, or pass a directory of compressed chunks saved by
+`download_film` after `--`.
+
+- [Architecture](ARCHITECTURE.md)
+- [Format findings](FORMAT.md)
+- [Coverage and limitations](COVERAGE.md)
+- [Validation](VALIDATION.md)

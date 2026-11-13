@@ -1,5 +1,5 @@
 //! Projectile event readers from FUN_1408096f8 and FUN_1410f03b4.
-use super::{PrecisionDescriptor, Reader, quantized_event_vector};
+use super::{EventPoint, EventRecord, PrecisionDescriptor, Reader, read_event_point};
 
 #[derive(Debug, Clone)]
 pub(crate) struct ProjectilePositionEncoding {
@@ -22,14 +22,17 @@ fn variant(r: &mut Reader<'_>) {
     }
 }
 
-pub(super) fn read(r: &mut Reader<'_>, code: usize, encoding: &ProjectilePositionEncoding) -> bool {
+pub(super) fn read(
+    r: &mut Reader<'_>,
+    code: usize,
+    encoding: Option<&ProjectilePositionEncoding>,
+) -> Option<EventPoint> {
+    let position;
     if code == 5 {
         r.read(6);
         variant(r);
         optional(r, 32);
-        if !quantized_event_vector(r, &encoding.detonation) {
-            return false;
-        }
+        position = read_event_point(r, encoding.map(|e| &e.detonation), 21)?;
         r.read(19);
         r.read(5);
         r.read(1);
@@ -42,37 +45,139 @@ pub(super) fn read(r: &mut Reader<'_>, code: usize, encoding: &ProjectilePositio
         variant(r);
         r.read(14);
         r.read(19);
-        if !quantized_event_vector(r, &encoding.impact) {
-            return false;
-        }
+        position = read_event_point(r, encoding.map(|e| &e.impact), 18)?;
         r.read(19);
         r.read(9);
         r.read(1);
     }
-    !r.over
+    (!r.over).then_some(position)
+}
+
+/// Interpret only a complete, sequentially located detonation body.
+#[cfg(test)]
+pub(crate) fn detonation_position(
+    data: &[u8],
+    event: &EventRecord,
+    encoding: &ProjectilePositionEncoding,
+) -> Option<[u32; 3]> {
+    let (region, codes) = detonation_region_position(data, event, encoding)?;
+    (region == encoding.detonation.region).then_some(codes)
+}
+
+pub(crate) fn detonation_region_position(
+    data: &[u8],
+    event: &EventRecord,
+    encoding: &ProjectilePositionEncoding,
+) -> Option<(u32, [u32; 3])> {
+    if event.code != Some(5) || !event.layout_complete {
+        return None;
+    }
+    let mut reader = Reader::new(data, event.body_start_bit?)?;
+    let EventPoint::Map { region, codes } = read(&mut reader, 5, Some(encoding))? else {
+        return None;
+    };
+    (reader.cursor.position == event.end_bit).then_some((region, codes))
+}
+
+/// The first reference of event 5 is in projectile domain 5 (base 1024),
+/// including its two generation bits. Only use after validating the full body.
+pub(crate) fn detonation_projectile_id(data: &[u8], event: &EventRecord) -> Option<u32> {
+    if event.code != Some(5) || !event.layout_complete {
+        return None;
+    }
+    let mut reader = Reader::new(data, event.start_bit.checked_add(8)?)?;
+    if reader.read(1) == 0 {
+        return None;
+    }
+    let index = reader.read(8) as u32;
+    let generation = reader.read(2) as u32;
+    (!reader.over && reader.cursor.position <= event.body_start_bit?)
+        .then_some((index + 1024) | (generation << 30))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theater::film::EventListStop;
     use crate::theater::parser::v41::chunks::replication::replication_stream::frame::events::{
         kill_fields, read_contextual_event_list, read_reference_event_list,
     };
+    use crate::theater::parser::v41::chunks::replication::source::EventListStop;
 
     fn encoding() -> ProjectilePositionEncoding {
         ProjectilePositionEncoding {
             detonation: PrecisionDescriptor {
+                regions: Default::default(),
                 region: 0,
                 index_bits: 1,
                 axis_bits: [14, 14, 16],
             },
             impact: PrecisionDescriptor {
+                regions: Default::default(),
                 region: 0,
                 index_bits: 1,
                 axis_bits: [11, 11, 13],
             },
         }
+    }
+
+    #[test]
+    fn captured_streets_detonations_preserve_projectile_generation() {
+        let data =
+            include_bytes!("../../../../../../../fixtures/streets-projectile-detonations.bin");
+        let event = EventRecord {
+            start_bit: 1,
+            end_bit: 129,
+            code: Some(5),
+            body_start_bit: Some(22),
+            fields: vec![],
+            layout_complete: true,
+        };
+        assert_eq!(detonation_projectile_id(data, &event), Some(0xc000_0429));
+        let next = EventRecord {
+            start_bit: 129,
+            end_bit: 257,
+            body_start_bit: Some(150),
+            ..event.clone()
+        };
+        assert_eq!(detonation_projectile_id(data, &next), Some(0xc000_042a));
+        assert_eq!(detonation_projectile_id(&data[..2], &event), None);
+        assert_eq!(
+            detonation_projectile_id(
+                data,
+                &EventRecord {
+                    layout_complete: false,
+                    ..event
+                }
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn live_fire_detonation_has_recorded_position_without_a_track() {
+        let data = include_bytes!("../../../../../../../fixtures/koth-live-fire-detonation.bin");
+        let mut encoding = encoding();
+        encoding.detonation = PrecisionDescriptor {
+            regions: Default::default(),
+            region: 1,
+            index_bits: 2,
+            axis_bits: [11, 11, 10],
+        };
+        let event = EventRecord {
+            start_bit: 1,
+            end_bit: 129,
+            code: Some(5),
+            body_start_bit: Some(22),
+            fields: vec![],
+            layout_complete: true,
+        };
+        assert_eq!(
+            detonation_position(data, &event, &encoding),
+            Some([757, 1374, 502])
+        );
+        assert!(detonation_position(&data[..16], &event, &encoding).is_none());
+        encoding.detonation.region = 0;
+        assert!(detonation_position(data, &event, &encoding).is_none());
     }
 
     #[test]
@@ -100,6 +205,21 @@ mod tests {
             [Some(5), Some(1), Some(85), Some(0)]
         );
         assert_eq!(events.records[0].end_bit, 140);
+        let event = &events.records[0];
+        let raw = detonation_position(data, event, &encoding).unwrap();
+        assert!(
+            raw.into_iter()
+                .zip(encoding.detonation.axis_bits)
+                .all(|(q, bits)| u64::from(q) < 1 << bits)
+        );
+        let mut partial = event.clone();
+        partial.layout_complete = false;
+        assert!(detonation_position(data, &partial, &encoding).is_none());
+        partial = event.clone();
+        partial.end_bit += 1;
+        assert!(detonation_position(data, &partial, &encoding).is_none());
+        assert!(detonation_position(&data[..17], event, &encoding).is_none());
+        assert!(detonation_position(data, &events.records[1], &encoding).is_none());
         let death = &events.records[2];
         let fields = kill_fields(&mut Reader::new(data, death.body_start_bit.unwrap()).unwrap());
         assert_eq!((fields.victim, fields.killer, fields.assist), (2, 4, 1));
@@ -111,17 +231,18 @@ mod tests {
                 "prefix {end}"
             );
         }
-        for bit in [30, 31] {
-            let mut changed = data.to_vec();
-            changed[bit / 8] |= 1 << (7 - bit % 8);
-            let refused = parse(&changed);
-            assert_eq!(refused.stop, EventListStop::UnsupportedBody);
-            assert_eq!(refused.records.len(), 1);
-            assert!(refused.end_bit <= 32);
-        }
+        // The default-box gate selects a legal fixed-width layout. Only the
+        // unmapped indexed region is invalid with this single-region context.
+        let bit = 31;
+        let mut changed = data.to_vec();
+        changed[bit / 8] |= 1 << (7 - bit % 8);
+        let refused = parse(&changed);
+        assert_eq!(refused.stop, EventListStop::UnsupportedBody);
+        assert_eq!(refused.records.len(), 1);
+        assert!(refused.end_bit <= 32);
         let no_map = read_reference_event_list(data, 1, Some(false), data.len());
         assert_eq!(no_map.stop, EventListStop::UnsupportedBody);
-        assert_eq!(no_map.end_bit, 22);
+        assert_eq!(no_map.end_bit, 31);
     }
 
     #[test]

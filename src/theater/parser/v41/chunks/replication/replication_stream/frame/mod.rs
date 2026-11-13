@@ -1,56 +1,68 @@
 //! Packet type 0: incremental frame, event, entity, and control records.
 #[cfg(test)]
-use crate::theater::film::EventListRead;
+use crate::theater::parser::v41::chunks::replication::source::EventListRead;
 pub(crate) mod controls;
 pub(crate) mod entities;
 pub(crate) mod events;
 pub(crate) mod header;
 pub(crate) mod records;
-use crate::theater::film::{
-    EventListStop, FrameDecodeError, FramePacket, FrameRead, FrameViewStop, PacketDecodeError,
-    ProductionEntityEnd, ReplicationStreamPacketBody,
-};
+use crate::theater::parser::packet::PacketDecodeError;
 use crate::theater::parser::v41::chunks::replication::replication_stream::DecodeContext;
 use crate::theater::parser::v41::chunks::replication::replication_stream::frame::events::{
-    read_contextual_event_list, read_reference_event_list,
+    EventLayout, FireV3, read_event_list,
+};
+use crate::theater::parser::v41::chunks::replication::source::{
+    EventListStop, FrameDecodeError, FramePacket, FrameRead, FrameViewStop, ProductionEntityEnd,
+    ReplicationStreamPacketBody,
 };
 
 pub(crate) fn decode(
     payload: &[u8],
     context: &mut DecodeContext<'_>,
+    delta_schema: &dyn Fn(i64, u32) -> Option<u32>,
 ) -> Result<ReplicationStreamPacketBody, PacketDecodeError> {
     if context.config.guard_rejected_frame_deletes {
         context.state.begin_frame_deletes();
     }
-    let events = if context.config.event_quantized_vectors
-        || context.config.event_fire_v3
-        || context.config.projectile_event_positions.is_some()
-    {
-        read_contextual_event_list(
-            payload,
-            1,
-            context.event_gate15,
-            payload.len(),
-            context
+    let events = read_event_list(
+        payload,
+        1,
+        payload.len(),
+        EventLayout {
+            versions: context.config.event_versions,
+            category_references: payload.first().is_some_and(|b| b & 0x80 != 0),
+            corruption_check: context.config.corruption_check(),
+            gate15: context.event_gate15,
+            script_prefix_context: context.config.event_script_prefix,
+            variant: context.config.event_variant,
+            runtime_defaults: context.config.event_runtime_defaults,
+            kill_tail: context.config.event_kill_tail,
+            event_vector: context
                 .config
                 .event_quantized_vectors
                 .then_some(&context.config.profile.movement.world_object),
-            context
-                .config
-                .event_fire_v3
-                .then_some(&context.config.profile.movement.world_object),
-            context.config.projectile_event_positions.as_ref(),
-        )
-    } else {
-        read_reference_event_list(payload, 1, context.event_gate15, payload.len())
-    };
+            fire_v3: context.config.event_fire_v3.then_some(FireV3 {
+                position: context
+                    .config
+                    .event_quantized_vectors
+                    .then_some(&context.config.profile.movement.world_object),
+            }),
+            projectile_positions: context.config.projectile_event_positions.as_ref(),
+        },
+    );
     let configuration = payload.first().map(|byte| byte & 0x80 != 0);
     let frame = if events.stop != EventListStop::Terminator {
         FrameRead::Refused(FrameDecodeError::IncompleteMessageList)
     } else {
         context
             .config
-            .decode_entity_control_views(payload, events.end_bit, context.registry, context.state)
+            .decode_entity_control_views_with_schemas(
+                payload,
+                events.end_bit,
+                context.registry,
+                context.state,
+                Some(delta_schema),
+            )
             .map(|frame| FrameRead::Decoded(Box::new(frame)))
             .unwrap_or_else(|error| FrameRead::Refused(error.into()))
     };
@@ -78,7 +90,7 @@ pub(crate) fn frame_closed(frame: &FrameRead, payload: &[u8]) -> bool {
 }
 
 pub(super) fn production_frame_closed(
-    frame: &crate::theater::film::ProductionFrame,
+    frame: &crate::theater::parser::v41::chunks::replication::source::ProductionFrame,
     payload: &[u8],
 ) -> bool {
     if !matches!(frame.entity_end, Some(ProductionEntityEnd::Marker(_)))
@@ -111,7 +123,8 @@ pub(crate) fn suspect_delete(frame: &FrameRead) -> Option<u32> {
         return None;
     }
     frame.records.last().and_then(|record| {
-        (record.header.kind == crate::theater::film::RecordKind::Delete)
+        (record.header.kind
+            == crate::theater::parser::v41::chunks::replication::source::RecordKind::Delete)
             .then_some(record.header.id)
             .flatten()
     })
@@ -163,7 +176,10 @@ pub(crate) fn continue_event_views(
 #[cfg(test)]
 mod closure_tests {
     use super::*;
-    use crate::theater::film::{ByteRange, FilmArchetype, FilmRegistry, RegistryComponent};
+    use crate::theater::parser::packet::ByteRange;
+    use crate::theater::parser::v41::chunks::registry::source::{
+        FilmArchetype, FilmRegistry, RegistryComponent,
+    };
     use crate::theater::parser::v41::{
         chunks::replication::state::ReplicationDecodeState, context::V41DecodeConfig,
     };
@@ -226,7 +242,7 @@ mod closure_tests {
                 event_gate15: Some(true),
             };
             let ReplicationStreamPacketBody::FramePacketBody(frame) =
-                decode(payload, &mut context).unwrap()
+                decode(payload, &mut context, &|_, _| None).unwrap()
             else {
                 unreachable!()
             };

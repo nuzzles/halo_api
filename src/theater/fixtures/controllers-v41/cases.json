@@ -1,0 +1,1042 @@
+[
+  {
+    "name": "None/None/None",
+    "player": null,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 2,
+    "hex": "00"
+  },
+  {
+    "name": "None/None/4294967295",
+    "player": null,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 34,
+    "hex": "7fffffffc0"
+  },
+  {
+    "name": "0/None/None",
+    "player": 0,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "80"
+  },
+  {
+    "name": "0/None/4294967295",
+    "player": 0,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "81ffffffff"
+  },
+  {
+    "name": "0/63/None",
+    "player": 0,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "83f8"
+  },
+  {
+    "name": "0/63/4294967295",
+    "player": 0,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "83fffffffffc"
+  },
+  {
+    "name": "1/None/None",
+    "player": 1,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "84"
+  },
+  {
+    "name": "1/None/4294967295",
+    "player": 1,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "85ffffffff"
+  },
+  {
+    "name": "1/63/None",
+    "player": 1,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "87f8"
+  },
+  {
+    "name": "1/63/4294967295",
+    "player": 1,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "87fffffffffc"
+  },
+  {
+    "name": "2/None/None",
+    "player": 2,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "88"
+  },
+  {
+    "name": "2/None/4294967295",
+    "player": 2,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "89ffffffff"
+  },
+  {
+    "name": "2/63/None",
+    "player": 2,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "8bf8"
+  },
+  {
+    "name": "2/63/4294967295",
+    "player": 2,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "8bfffffffffc"
+  },
+  {
+    "name": "3/None/None",
+    "player": 3,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "8c"
+  },
+  {
+    "name": "3/None/4294967295",
+    "player": 3,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "8dffffffff"
+  },
+  {
+    "name": "3/63/None",
+    "player": 3,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "8ff8"
+  },
+  {
+    "name": "3/63/4294967295",
+    "player": 3,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "8ffffffffffc"
+  },
+  {
+    "name": "4/None/None",
+    "player": 4,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "90"
+  },
+  {
+    "name": "4/None/4294967295",
+    "player": 4,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "91ffffffff"
+  },
+  {
+    "name": "4/63/None",
+    "player": 4,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "93f8"
+  },
+  {
+    "name": "4/63/4294967295",
+    "player": 4,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "93fffffffffc"
+  },
+  {
+    "name": "5/None/None",
+    "player": 5,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "94"
+  },
+  {
+    "name": "5/None/4294967295",
+    "player": 5,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "95ffffffff"
+  },
+  {
+    "name": "5/63/None",
+    "player": 5,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "97f8"
+  },
+  {
+    "name": "5/63/4294967295",
+    "player": 5,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "97fffffffffc"
+  },
+  {
+    "name": "6/None/None",
+    "player": 6,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "98"
+  },
+  {
+    "name": "6/None/4294967295",
+    "player": 6,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "99ffffffff"
+  },
+  {
+    "name": "6/63/None",
+    "player": 6,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "9bf8"
+  },
+  {
+    "name": "6/63/4294967295",
+    "player": 6,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "9bfffffffffc"
+  },
+  {
+    "name": "7/None/None",
+    "player": 7,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "9c"
+  },
+  {
+    "name": "7/None/4294967295",
+    "player": 7,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "9dffffffff"
+  },
+  {
+    "name": "7/63/None",
+    "player": 7,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "9ff8"
+  },
+  {
+    "name": "7/63/4294967295",
+    "player": 7,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "9ffffffffffc"
+  },
+  {
+    "name": "8/None/None",
+    "player": 8,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "a0"
+  },
+  {
+    "name": "8/None/4294967295",
+    "player": 8,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "a1ffffffff"
+  },
+  {
+    "name": "8/63/None",
+    "player": 8,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "a3f8"
+  },
+  {
+    "name": "8/63/4294967295",
+    "player": 8,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "a3fffffffffc"
+  },
+  {
+    "name": "9/None/None",
+    "player": 9,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "a4"
+  },
+  {
+    "name": "9/None/4294967295",
+    "player": 9,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "a5ffffffff"
+  },
+  {
+    "name": "9/63/None",
+    "player": 9,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "a7f8"
+  },
+  {
+    "name": "9/63/4294967295",
+    "player": 9,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "a7fffffffffc"
+  },
+  {
+    "name": "10/None/None",
+    "player": 10,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "a8"
+  },
+  {
+    "name": "10/None/4294967295",
+    "player": 10,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "a9ffffffff"
+  },
+  {
+    "name": "10/63/None",
+    "player": 10,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "abf8"
+  },
+  {
+    "name": "10/63/4294967295",
+    "player": 10,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "abfffffffffc"
+  },
+  {
+    "name": "11/None/None",
+    "player": 11,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "ac"
+  },
+  {
+    "name": "11/None/4294967295",
+    "player": 11,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "adffffffff"
+  },
+  {
+    "name": "11/63/None",
+    "player": 11,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "aff8"
+  },
+  {
+    "name": "11/63/4294967295",
+    "player": 11,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "affffffffffc"
+  },
+  {
+    "name": "12/None/None",
+    "player": 12,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "b0"
+  },
+  {
+    "name": "12/None/4294967295",
+    "player": 12,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "b1ffffffff"
+  },
+  {
+    "name": "12/63/None",
+    "player": 12,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "b3f8"
+  },
+  {
+    "name": "12/63/4294967295",
+    "player": 12,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "b3fffffffffc"
+  },
+  {
+    "name": "13/None/None",
+    "player": 13,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "b4"
+  },
+  {
+    "name": "13/None/4294967295",
+    "player": 13,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "b5ffffffff"
+  },
+  {
+    "name": "13/63/None",
+    "player": 13,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "b7f8"
+  },
+  {
+    "name": "13/63/4294967295",
+    "player": 13,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "b7fffffffffc"
+  },
+  {
+    "name": "14/None/None",
+    "player": 14,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "b8"
+  },
+  {
+    "name": "14/None/4294967295",
+    "player": 14,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "b9ffffffff"
+  },
+  {
+    "name": "14/63/None",
+    "player": 14,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "bbf8"
+  },
+  {
+    "name": "14/63/4294967295",
+    "player": 14,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "bbfffffffffc"
+  },
+  {
+    "name": "15/None/None",
+    "player": 15,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "bc"
+  },
+  {
+    "name": "15/None/4294967295",
+    "player": 15,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "bdffffffff"
+  },
+  {
+    "name": "15/63/None",
+    "player": 15,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "bff8"
+  },
+  {
+    "name": "15/63/4294967295",
+    "player": 15,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "bffffffffffc"
+  },
+  {
+    "name": "16/None/None",
+    "player": 16,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "c0"
+  },
+  {
+    "name": "16/None/4294967295",
+    "player": 16,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "c1ffffffff"
+  },
+  {
+    "name": "16/63/None",
+    "player": 16,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "c3f8"
+  },
+  {
+    "name": "16/63/4294967295",
+    "player": 16,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "c3fffffffffc"
+  },
+  {
+    "name": "17/None/None",
+    "player": 17,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "c4"
+  },
+  {
+    "name": "17/None/4294967295",
+    "player": 17,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "c5ffffffff"
+  },
+  {
+    "name": "17/63/None",
+    "player": 17,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "c7f8"
+  },
+  {
+    "name": "17/63/4294967295",
+    "player": 17,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "c7fffffffffc"
+  },
+  {
+    "name": "18/None/None",
+    "player": 18,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "c8"
+  },
+  {
+    "name": "18/None/4294967295",
+    "player": 18,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "c9ffffffff"
+  },
+  {
+    "name": "18/63/None",
+    "player": 18,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "cbf8"
+  },
+  {
+    "name": "18/63/4294967295",
+    "player": 18,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "cbfffffffffc"
+  },
+  {
+    "name": "19/None/None",
+    "player": 19,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "cc"
+  },
+  {
+    "name": "19/None/4294967295",
+    "player": 19,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "cdffffffff"
+  },
+  {
+    "name": "19/63/None",
+    "player": 19,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "cff8"
+  },
+  {
+    "name": "19/63/4294967295",
+    "player": 19,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "cffffffffffc"
+  },
+  {
+    "name": "20/None/None",
+    "player": 20,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "d0"
+  },
+  {
+    "name": "20/None/4294967295",
+    "player": 20,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "d1ffffffff"
+  },
+  {
+    "name": "20/63/None",
+    "player": 20,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "d3f8"
+  },
+  {
+    "name": "20/63/4294967295",
+    "player": 20,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "d3fffffffffc"
+  },
+  {
+    "name": "21/None/None",
+    "player": 21,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "d4"
+  },
+  {
+    "name": "21/None/4294967295",
+    "player": 21,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "d5ffffffff"
+  },
+  {
+    "name": "21/63/None",
+    "player": 21,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "d7f8"
+  },
+  {
+    "name": "21/63/4294967295",
+    "player": 21,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "d7fffffffffc"
+  },
+  {
+    "name": "22/None/None",
+    "player": 22,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "d8"
+  },
+  {
+    "name": "22/None/4294967295",
+    "player": 22,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "d9ffffffff"
+  },
+  {
+    "name": "22/63/None",
+    "player": 22,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "dbf8"
+  },
+  {
+    "name": "22/63/4294967295",
+    "player": 22,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "dbfffffffffc"
+  },
+  {
+    "name": "23/None/None",
+    "player": 23,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "dc"
+  },
+  {
+    "name": "23/None/4294967295",
+    "player": 23,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "ddffffffff"
+  },
+  {
+    "name": "23/63/None",
+    "player": 23,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "dff8"
+  },
+  {
+    "name": "23/63/4294967295",
+    "player": 23,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "dffffffffffc"
+  },
+  {
+    "name": "24/None/None",
+    "player": 24,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "e0"
+  },
+  {
+    "name": "24/None/4294967295",
+    "player": 24,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "e1ffffffff"
+  },
+  {
+    "name": "24/63/None",
+    "player": 24,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "e3f8"
+  },
+  {
+    "name": "24/63/4294967295",
+    "player": 24,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "e3fffffffffc"
+  },
+  {
+    "name": "25/None/None",
+    "player": 25,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "e4"
+  },
+  {
+    "name": "25/None/4294967295",
+    "player": 25,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "e5ffffffff"
+  },
+  {
+    "name": "25/63/None",
+    "player": 25,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "e7f8"
+  },
+  {
+    "name": "25/63/4294967295",
+    "player": 25,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "e7fffffffffc"
+  },
+  {
+    "name": "26/None/None",
+    "player": 26,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "e8"
+  },
+  {
+    "name": "26/None/4294967295",
+    "player": 26,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "e9ffffffff"
+  },
+  {
+    "name": "26/63/None",
+    "player": 26,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "ebf8"
+  },
+  {
+    "name": "26/63/4294967295",
+    "player": 26,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "ebfffffffffc"
+  },
+  {
+    "name": "27/None/None",
+    "player": 27,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "ec"
+  },
+  {
+    "name": "27/None/4294967295",
+    "player": 27,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "edffffffff"
+  },
+  {
+    "name": "27/63/None",
+    "player": 27,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "eff8"
+  },
+  {
+    "name": "27/63/4294967295",
+    "player": 27,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "effffffffffc"
+  },
+  {
+    "name": "28/None/None",
+    "player": 28,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "f0"
+  },
+  {
+    "name": "28/None/4294967295",
+    "player": 28,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "f1ffffffff"
+  },
+  {
+    "name": "28/63/None",
+    "player": 28,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "f3f8"
+  },
+  {
+    "name": "28/63/4294967295",
+    "player": 28,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "f3fffffffffc"
+  },
+  {
+    "name": "29/None/None",
+    "player": 29,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "f4"
+  },
+  {
+    "name": "29/None/4294967295",
+    "player": 29,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "f5ffffffff"
+  },
+  {
+    "name": "29/63/None",
+    "player": 29,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "f7f8"
+  },
+  {
+    "name": "29/63/4294967295",
+    "player": 29,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "f7fffffffffc"
+  },
+  {
+    "name": "30/None/None",
+    "player": 30,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "f8"
+  },
+  {
+    "name": "30/None/4294967295",
+    "player": 30,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "f9ffffffff"
+  },
+  {
+    "name": "30/63/None",
+    "player": 30,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "fbf8"
+  },
+  {
+    "name": "30/63/4294967295",
+    "player": 30,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "fbfffffffffc"
+  },
+  {
+    "name": "31/None/None",
+    "player": 31,
+    "secondary": null,
+    "reference": null,
+    "bit_len": 8,
+    "hex": "fc"
+  },
+  {
+    "name": "31/None/4294967295",
+    "player": 31,
+    "secondary": null,
+    "reference": 4294967295,
+    "bit_len": 40,
+    "hex": "fdffffffff"
+  },
+  {
+    "name": "31/63/None",
+    "player": 31,
+    "secondary": 63,
+    "reference": null,
+    "bit_len": 14,
+    "hex": "fff8"
+  },
+  {
+    "name": "31/63/4294967295",
+    "player": 31,
+    "secondary": 63,
+    "reference": 4294967295,
+    "bit_len": 46,
+    "hex": "fffffffffffc"
+  }
+]

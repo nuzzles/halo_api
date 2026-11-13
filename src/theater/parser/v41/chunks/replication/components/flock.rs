@@ -24,9 +24,8 @@ pub(crate) fn read_primary(
         }
         "flock-destination-component" => {
             r.bit("flag")?;
-            if !r.bit("default_vector")? {
-                r.gate("region", 1, false)?;
-                r.words("position", 3, (u64::from(level) + 6).min(26) as usize)?;
+            if !super::position::point(r, "position")? {
+                return Some(false);
             }
             if level > 1 {
                 r.r("tail", 2)?;

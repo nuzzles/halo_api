@@ -1,8 +1,9 @@
 //! Sequential replication views and generation-aware entity bindings.
-use crate::theater::film::chunks::replication::replication_stream::models::entity_records::{
+use crate::theater::parser::v41::chunks::replication::source::replication_stream::models::entity_records::{
     EntityComponentRead, EntityRecord, EntityViewStop,
 };
-use crate::theater::film::{FilmRegistry, RecordKind};
+use crate::theater::parser::v41::chunks::registry::source::{FilmRegistry};
+use crate::theater::parser::v41::chunks::replication::source::{RecordKind};
 use crate::theater::parser::v41::chunks::replication::components::cursor::ComponentCursor as Cursor;
 use crate::theater::parser::v41::chunks::replication::components::defaults;
 use crate::theater::parser::v41::chunks::replication::components::m4b::required_runtime_field;
@@ -44,6 +45,8 @@ pub(crate) fn decode_entity_record(
         return None;
     }
     let mut r = ComponentReader {
+        category_references: encoding.category_references,
+        snapshot: false,
         references: Vec::new(),
         reference_widths: slots.context.as_ref().map(|c| ComponentWidths {
             movement: &c.movement,
@@ -51,6 +54,7 @@ pub(crate) fn decode_entity_record(
             maximum: u64::MAX,
         }),
         width_error: None,
+        context_error: None,
 
         live_grammar: slots.context.as_ref().map(|c| c.grammar.clone()),
         movement_slot: slots.movement,
@@ -220,34 +224,46 @@ fn record_body(
                 defaults::state(r, ti, encoding.mpp_widths)
             }
         })();
-        rec.default_state = Some(crate::theater::film::DefaultState {
-            source: crate::theater::film::BitRange {
+        rec.default_state = Some(crate::theater::parser::v41::chunks::replication::source::DefaultState {
+            source: crate::theater::parser::packet::BitRange {
                 start: usize::try_from(default_start).ok()?,
                 end: usize::try_from(r.cursor.position).ok()?,
             },
             fields: r.fields.drain(field_start..).collect(),
             status: match result {
-                Some(true) if skip_default => crate::theater::film::DefaultStateStatus::Opaque,
-                Some(true) => crate::theater::film::DefaultStateStatus::Complete,
-                Some(false) => crate::theater::film::DefaultStateStatus::Unsupported,
-                None => crate::theater::film::DefaultStateStatus::Truncated,
+                Some(true) if skip_default => crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::Opaque,
+                Some(true) => crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::Complete,
+                Some(false) => crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::Unsupported,
+                None => crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::Truncated,
             },
         });
+        if r.reference_configuration_unavailable() {
+            rec.default_state.as_mut().unwrap().status =
+                crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::ContextUnavailable;
+            return Some(EntityViewStop::UnsupportedReferenceConfiguration);
+        }
         if !result? {
             return Some(EntityViewStop::UnsupportedDefault { archetype: ti });
         }
-        r.bit("new.component_gate")?;
     }
-    let mask = r.mask()?;
-    rec.mask = Some(mask);
-    // Reference NEW reads its default state, gate and mask before registry lookup.
+    // A clear creation gate ends the optional initial-component section. Some
+    // creation types omit the gate itself; neither form carries a mask.
+    let has_components = rec.header.kind != RecordKind::New
+        || (creation_has_component_gate(ti) && r.bit("new.component_gate")?);
+    let mask = if has_components {
+        Some(r.mask()?)
+    } else {
+        None
+    };
+    rec.mask = mask;
+    // The recorded NEW archetype is checked even when it has no components.
     let Some(arch) = arch else {
         return Some(EntityViewStop::InvalidArchetype { archetype: ti });
     };
     // The reference registry loop ignores mask bits beyond its component list.
     let component_count = arch.components.len();
     for index in 0..component_count {
-        if mask & (1 << (index & 63)) == 0 {
+        if mask.unwrap_or(0) & (1 << (index & 63)) == 0 {
             continue;
         }
         let Some(registry_component) = arch.components.get(index) else {
@@ -283,6 +299,20 @@ fn record_body(
             weapon_id,
         };
         rec.components.push(component.clone());
+        if r.reference_configuration_unavailable() {
+            rec.components.last_mut().unwrap().status =
+                crate::theater::parser::v41::chunks::replication::source::ComponentReadStatus::ContextUnavailable;
+            return Some(EntityViewStop::UnsupportedReferenceConfiguration);
+        }
+        if let Some(field) = r.runtime_context_unavailable() {
+            rec.components.last_mut().unwrap().status =
+                crate::theater::parser::v41::chunks::replication::source::ComponentReadStatus::ContextUnavailable;
+            return Some(EntityViewStop::RuntimeContextUnavailable {
+                index,
+                name: name.to_owned(),
+                field: field.to_owned(),
+            });
+        }
         if status.is_none()
             && let Some(adjustment) = r
                 .diagnostics
@@ -307,7 +337,12 @@ fn record_body(
                 name: name.to_owned(),
             });
         }
-        let check = if encoding.corruption_check {
+        let Some(check) = encoding.corruption_check else {
+            rec.components.last_mut().unwrap().status =
+                crate::theater::parser::v41::chunks::replication::source::ComponentReadStatus::ContextUnavailable;
+            return Some(EntityViewStop::MissingCorruptionCheckContext);
+        };
+        let check = if check {
             r.gate("component.corruption_check", 32, true)
         } else {
             Some(())
@@ -315,7 +350,7 @@ fn record_body(
         component.end_bit = r.cursor.position;
         component.fields = r.fields[field_start..].to_vec();
         if check.is_none() {
-            component.status = crate::theater::film::ComponentReadStatus::Truncated;
+            component.status = crate::theater::parser::v41::chunks::replication::source::ComponentReadStatus::Truncated;
         }
         *rec.components.last_mut().unwrap() = component;
         check?;
@@ -329,6 +364,11 @@ fn record_body(
         }
     }
     Some(EntityViewStop::Complete)
+}
+
+/// These v41 creation forms have no initial-component section or gate.
+fn creation_has_component_gate(archetype: u32) -> bool {
+    !matches!(archetype, 7 | 13 | 14 | 20 | 23 | 28 | 29 | 46 | 47 | 49)
 }
 
 fn read_reference_new_tail(r: &mut ComponentReader<'_>, width: i64) -> Option<()> {

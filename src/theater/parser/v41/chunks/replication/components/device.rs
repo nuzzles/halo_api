@@ -105,8 +105,11 @@ mod tests {
 
     fn reader(bytes: &[u8]) -> ComponentReader<'_> {
         ComponentReader {
+            category_references: true,
+            snapshot: false,
             reference_widths: None,
             width_error: None,
+            context_error: None,
             live_grammar: None,
             movement_slot: None,
             references: Vec::new(),

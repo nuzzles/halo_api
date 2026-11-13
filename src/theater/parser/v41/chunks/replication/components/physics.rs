@@ -11,15 +11,16 @@ pub(crate) fn read_primary(
 ) -> Option<bool> {
     match name {
         "generic-rigid-body-transforms" | "generic-rigid-body-transforms-component" => {
-            if r.position_encoding.is_none() {
-                return Some(false);
-            }
             let mask = r.r("mask", 8)?;
             for i in 0..8 {
                 if mask & (1 << i) != 0 {
                     r.gate(&format!("body[{i}].direction"), 19, false)?;
                     r.r(&format!("body[{i}].magnitude"), 8)?;
-                    position::traversal_payload(r)?;
+                    // FUN_142f036f0 calls the precision-16 point reader:
+                    // raw snapshot words, or a delta's default/indexed box.
+                    if !position::point(r, &format!("body[{i}].position"))? {
+                        return Some(false);
+                    }
                 }
             }
         }

@@ -1,0 +1,122 @@
+[
+  {
+    "film": "controller/01-stick-circles",
+    "replay": "chunk-001-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "deaf9ff3a0cb31d66875c52fcb6b371ef27c6995456b535338d89a292668ac8b",
+      "replay.bin": "0294a1344a2872a1ae0998ff3f1abd64f36e6ae9c9cde2a63ec28305e2623c03"
+    }
+  },
+  {
+    "film": "controller/01-stick-circles",
+    "replay": "chunk-003-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "deaf9ff3a0cb31d66875c52fcb6b371ef27c6995456b535338d89a292668ac8b",
+      "replay.bin": "b2dd59a8caef3c53ba7f943d86aa562612cd498fb5daea6115878e028b4f2525"
+    }
+  },
+  {
+    "film": "controller/01-stick-circles",
+    "replay": "chunk-005-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "deaf9ff3a0cb31d66875c52fcb6b371ef27c6995456b535338d89a292668ac8b",
+      "replay.bin": "0172243fbb0c411816e648d5cdcf4be2af675e6867c1176dc1b5dbae2a92d9b8"
+    }
+  },
+  {
+    "film": "octagon/02-ar-kill",
+    "replay": "chunk-001-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "d2fe6da26366155b81c97fec8bf70c4d25ecb32d0f030b154bb49b6bf7ba306b",
+      "replay.bin": "25a84d8ada17a29ec408b8ee83a38f1dc898ae492ae1e857687565948dc497b5"
+    }
+  },
+  {
+    "film": "octagon/02-ar-kill",
+    "replay": "chunk-003-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "d2fe6da26366155b81c97fec8bf70c4d25ecb32d0f030b154bb49b6bf7ba306b",
+      "replay.bin": "32fa0f42aa07cd5ba329550da9b66c73ebbb9522443c4ccb334583aa0dea8d25"
+    }
+  },
+  {
+    "film": "octagon/02-ar-kill",
+    "replay": "chunk-005-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "d2fe6da26366155b81c97fec8bf70c4d25ecb32d0f030b154bb49b6bf7ba306b",
+      "replay.bin": "1a17e76c27522a3eacf7d94d08166fcbcdde22b17e27ec715a9b92a06110a4ef"
+    }
+  },
+  {
+    "film": "ranked-arena/02-oddball",
+    "replay": "chunk-001-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c",
+      "replay.bin": "fb02a54123a4d1eddfa088aff6caade8696819326c5b1e302fdb2e64599d9f3b"
+    }
+  },
+  {
+    "film": "ranked-arena/02-oddball",
+    "replay": "chunk-031-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c",
+      "replay.bin": "250032a5722aeb8f80e2020024a98edf7eac17e37332f3b29b63e78303517761"
+    }
+  },
+  {
+    "film": "ranked-arena/02-oddball",
+    "replay": "chunk-061-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c",
+      "replay.bin": "d78e23760a9c788609b342f14cf7ffefb899e107e74a382a63d16b31057520dc"
+    }
+  },
+  {
+    "film": "maps/01-bazaar-idle",
+    "replay": "chunk-001-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "9895f10b150fdb75bfdb0ab8f1976e4302bf1f4c1ab7b8703c8bde8dfc49edaf",
+      "replay.bin": "47ef696732586c4fd2fa465f8ba648c91f3fab108fa43d43b3444c864e8d1715"
+    }
+  },
+  {
+    "film": "maps/01-bazaar-idle",
+    "replay": "chunk-002-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "9895f10b150fdb75bfdb0ab8f1976e4302bf1f4c1ab7b8703c8bde8dfc49edaf",
+      "replay.bin": "e3c9a688c5a7f0b82b699c0d0f8dd4c1c462016c3838071e652bc460c82dceb9"
+    }
+  },
+  {
+    "film": "maps/01-bazaar-idle",
+    "replay": "chunk-003-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "9895f10b150fdb75bfdb0ab8f1976e4302bf1f4c1ab7b8703c8bde8dfc49edaf",
+      "replay.bin": "17928dc052ea79aee0086ac1dce6fc80962d7daab82c4c281074bc7a3934bdf8"
+    }
+  },
+  {
+    "film": "raids/01-hour-long-raid",
+    "replay": "chunk-001-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "badf4b2c42d87d9cd11055c31e88e571debb4c337f9054dcc408fe45b20b1621",
+      "replay.bin": "fbcd9047d1279228ad6f68f3799eceb39c4f3da18050a561dbd5fdbf586d032f"
+    }
+  },
+  {
+    "film": "raids/01-hour-long-raid",
+    "replay": "chunk-100-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "badf4b2c42d87d9cd11055c31e88e571debb4c337f9054dcc408fe45b20b1621",
+      "replay.bin": "a37a49547e338bb35b5f3699b5b8f3ce12432ca46061c5e41fa137fdd9271b17"
+    }
+  },
+  {
+    "film": "raids/01-hour-long-raid",
+    "replay": "chunk-198-type-2.bin",
+    "sha256_inflated": {
+      "header.bin": "badf4b2c42d87d9cd11055c31e88e571debb4c337f9054dcc408fe45b20b1621",
+      "replay.bin": "65bf7e9398649f90804b32e38e4bbc8219697f2dc1fef10f719243f0f1cfd685"
+    }
+  }
+]

@@ -1,0 +1,278 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "ammo": [
+    [
+      0,
+      0,
+      -1,
+      0
+    ],
+    [
+      0,
+      1,
+      -1,
+      17
+    ],
+    [
+      0,
+      2,
+      -1,
+      1024
+    ],
+    [
+      0,
+      3,
+      -1,
+      2047
+    ],
+    [
+      2,
+      1,
+      -1,
+      0
+    ],
+    [
+      3,
+      3,
+      -1,
+      1
+    ],
+    [
+      5,
+      0,
+      -1,
+      2047
+    ],
+    [
+      7,
+      2,
+      -1,
+      0
+    ],
+    [
+      8,
+      1,
+      -1,
+      2047
+    ],
+    [
+      8,
+      3,
+      -1,
+      0
+    ]
+  ],
+  "cases": [
+    {
+      "bit_len": 44,
+      "end": 44,
+      "frame": 0,
+      "hex": "000046007ff0",
+      "list": [
+        1,
+        2,
+        4,
+        6
+      ],
+      "reserve": [
+        0,
+        17,
+        1024,
+        2047
+      ],
+      "starts": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          4,
+          22
+        ],
+        [
+          6,
+          33
+        ]
+      ]
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 1,
+      "hex": "0220",
+      "list": [
+        2
+      ],
+      "reserve": [
+        null,
+        17,
+        null,
+        null
+      ],
+      "starts": [
+        [
+          2,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 2,
+      "hex": "0000",
+      "list": [
+        2
+      ],
+      "reserve": [
+        null,
+        0,
+        null,
+        null
+      ],
+      "starts": [
+        [
+          2,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 3,
+      "hex": "0020",
+      "list": [
+        6
+      ],
+      "reserve": [
+        null,
+        null,
+        null,
+        1
+      ],
+      "starts": [
+        [
+          6,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 0,
+      "end": 0,
+      "frame": 4,
+      "hex": "",
+      "list": [],
+      "reserve": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "starts": []
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 5,
+      "hex": "ffe0",
+      "list": [
+        1
+      ],
+      "reserve": [
+        2047,
+        null,
+        null,
+        null
+      ],
+      "starts": [
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 6,
+      "hex": "ffe0",
+      "list": [
+        1
+      ],
+      "reserve": [
+        2047,
+        null,
+        null,
+        null
+      ],
+      "starts": [
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 11,
+      "end": 11,
+      "frame": 7,
+      "hex": "0000",
+      "list": [
+        4
+      ],
+      "reserve": [
+        null,
+        null,
+        0,
+        null
+      ],
+      "starts": [
+        [
+          4,
+          0
+        ]
+      ]
+    },
+    {
+      "bit_len": 22,
+      "end": 22,
+      "frame": 8,
+      "hex": "ffe000",
+      "list": [
+        2,
+        6
+      ],
+      "reserve": [
+        null,
+        2047,
+        null,
+        0
+      ],
+      "starts": [
+        [
+          2,
+          0
+        ],
+        [
+          6,
+          11
+        ]
+      ]
+    }
+  ],
+  "rows": [
+    "weapon-state-ammo",
+    "weapon-state-rounds-inventory",
+    "weapon-state-rounds-inventory",
+    "weapon-state-overheated",
+    "weapon-state-rounds-inventory",
+    "weapon-state-ammo",
+    "weapon-state-rounds-inventory"
+  ]
+}

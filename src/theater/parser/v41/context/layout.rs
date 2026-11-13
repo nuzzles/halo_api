@@ -60,12 +60,20 @@ impl KeyframeLayout {
 /// Values sourced from bootstrap/map context, not guessed from record contents.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct RecordLayout {
+    /// Packet configuration selects category ranges. False requires an
+    /// unestablished global range at the first present variable-width handle.
+    #[serde(default = "category_references_default")]
+    pub category_references: bool,
     #[serde(default, skip_serializing_if = "KeyframeLayout::is_default")]
     pub keyframe_layout: KeyframeLayout,
     /// Explicit inherited simulation-state gate for configured reference readers. None
     /// uses the completed-body policy.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub keyframe_simulation_complete: Option<bool>,
+    /// External vehicle construction state, only for an explicitly selected
+    /// keyframe record. None preserves the canonical missing-context stop.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub snapshot_vehicle_type_gate: Option<bool>,
     #[serde(default, skip_serializing_if = "ComponentWidthOverrides::is_empty")]
     pub component_widths: ComponentWidthOverrides,
     #[serde(default, skip_serializing_if = "NewRecordLayout::is_default")]
@@ -78,7 +86,12 @@ pub(crate) struct RecordLayout {
     pub mpp_widths: [usize; 2],
     pub position: Option<PositionEncoding>,
     pub extra_fields: bool,
-    pub corruption_check: bool,
+    /// None stops at the first boundary requiring the recorded guard policy.
+    pub corruption_check: Option<bool>,
+}
+
+fn category_references_default() -> bool {
+    true
 }
 
 impl RecordLayout {

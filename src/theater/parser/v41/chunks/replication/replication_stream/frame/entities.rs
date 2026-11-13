@@ -1,13 +1,18 @@
 //! Reference default production frame policy: message/entity/control classes and world admission.
-use crate::theater::film::{
-    ComponentField, EntityRecord, EntityViewStop, FilmRegistry, FrameViewStop, RawBits, RecordKind,
-};
+use crate::theater::parser::v41::chunks::registry::source::FilmRegistry;
 use crate::theater::parser::v41::chunks::replication::replication_stream::frame::controls::{
-    decode_control_view_contextual, decode_message_view_signed,
+    decode_control_view_with_limit, decode_message_view_signed,
 };
 use crate::theater::parser::v41::chunks::replication::replication_stream::frame::header::decode_frame_header_signed;
 use crate::theater::parser::v41::chunks::replication::replication_stream::frame::records::{
     RecordBinding, RecordReadContext, decode_entity_record,
+};
+use crate::theater::parser::v41::chunks::replication::source::components::field::{
+    ComponentField, RawBits,
+};
+use crate::theater::parser::v41::chunks::replication::source::{
+    DeltaRejectionReason, EntityRecord, EntityViewStop, ExternalDeltaSchemaUse, FrameViewStop,
+    RecordKind,
 };
 use crate::theater::parser::v41::chunks::replication::state::{
     DeltaAdmission, ReplicationDecodeState,
@@ -15,14 +20,42 @@ use crate::theater::parser::v41::chunks::replication::state::{
 use crate::theater::parser::v41::context::layout::RecordLayout;
 use crate::theater::parser::v41::context::profile::DecodeProfile;
 
-use crate::theater::film::chunks::replication::replication_stream::models::production_frame::{
+use crate::theater::parser::v41::chunks::replication::source::replication_stream::models::production_frame::{
     ProductionEntityEnd, ProductionFrame,
 };
+
+/// Optional contextual recovery supplied by runtime; canonical parsing supplies none.
+pub(crate) type SchemaRecoveryReader = fn(SchemaRecoveryRequest<'_>) -> Option<RecoveredSchema>;
+
+pub(crate) struct SchemaRecoveryRequest<'a> {
+    pub data: &'a [u8],
+    pub start_bit: i64,
+    pub id: u32,
+    pub registry: &'a FilmRegistry,
+    pub encoding: &'a RecordLayout,
+    pub world: &'a ReplicationDecodeState,
+    pub context: Option<&'a DecodeProfile>,
+}
+
+/// Hypothesis and corroborating successor extents, never a recorded declaration.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct RecoveredSchema {
+    pub archetype: u32,
+    pub end_bit: i64,
+    pub successor_id: u32,
+    pub successor_start_bit: i64,
+    pub successor_end_bit: i64,
+}
 
 #[derive(Clone, Copy)]
 pub(crate) struct ProductionReaderContext<'a> {
     pub reader: Option<&'a DecodeProfile>,
+    pub schema_recovery: Option<SchemaRecoveryReader>,
     pub preamble_bits: i64,
+    pub control_record_limit: usize,
+    pub explicit_delta_schema: Option<&'a dyn Fn(i64, u32) -> Option<u32>>,
+    /// Only the historical reference traversal reads controls after rejection.
+    pub reference_controls_after_rejection: bool,
 }
 
 pub(crate) fn decode_production_frame_contextual(
@@ -67,6 +100,7 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
         controls: None,
         entity_end: None,
         end_bit: start_bit,
+        external_delta_schemas: Vec::new(),
     };
     if start_bit == context.preamble_bits && context.preamble_bits >= 1 {
         let messages = decode_message_view_signed(data, context.preamble_bits - 1);
@@ -114,34 +148,63 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
             break;
         }
         let id = header.id?;
-        if header.kind == RecordKind::Delta {
+        let explicit_archetype = (header.kind == RecordKind::Delta)
+            .then(|| {
+                context
+                    .explicit_delta_schema
+                    .and_then(|select| select(header_bit, id))
+            })
+            .flatten()
+            .filter(|archetype| {
+                *archetype < 50 && registry.archetype(*archetype as usize).is_some()
+            });
+        if header.kind == RecordKind::Delta && explicit_archetype.is_none() {
+            // A missed NEW may have reused this slot with another archetype.
+            // Contextual replay may test that hypothesis against a complete
+            // successor; the canonical reader has no recovery hook and keeps
+            // its ordinary source walk unchanged.
+            let generation_changed = world
+                .slots
+                .get(&(id & 0x3fff_ffff))
+                .is_some_and(|binding| !binding.generation_any && binding.full_id != id);
             let mut reason = world.admit_delta(id, true);
-            if matches!(reason, DeltaAdmission::Unbound)
-                && let Some(archetype) = infer_unbound_archetype(
+            if (matches!(reason, DeltaAdmission::Unbound) || generation_changed)
+                && let Some(recover) = context.schema_recovery
+                && let Some(recovered) = recover(SchemaRecoveryRequest {
                     data,
-                    header_bit,
+                    start_bit: header_bit,
                     id,
                     registry,
-                    &body_encoding,
+                    encoding: &body_encoding,
                     world,
-                    context.reader,
-                )
+                    context: context.reader,
+                })
             {
-                world.bind_inferred(id, archetype);
+                world.bind_inferred(id, recovered.archetype);
+                world.schema_recoveries.push((id, header_bit, recovered));
                 reason = world.admit_delta(id, true);
             }
             if matches!(reason, DeltaAdmission::Unbound | DeltaAdmission::OtherView) {
                 out.end_bit = header.end_bit;
-                out.entity_end = Some(ProductionEntityEnd::Rejected { header });
-                hit_end = true;
+                out.entity_end = Some(ProductionEntityEnd::Rejected {
+                    header,
+                    reason: match reason {
+                        DeltaAdmission::Unbound => DeltaRejectionReason::Unbound,
+                        DeltaAdmission::OtherView => DeltaRejectionReason::OtherView,
+                        _ => unreachable!("only refused admissions reach this branch"),
+                    },
+                });
+                // Rejection gives no boundary for the unread entity body.
+                // Canonical controls require the recorded entity terminator.
+                hit_end = context.reference_controls_after_rejection;
                 break;
             }
         }
         if header.kind == RecordKind::Delta {
             capture_slot = id & 0x3fff_ffff;
         }
-        let binding = world
-            .archetype(id & 0x3fff_ffff)
+        let binding = explicit_archetype
+            .or_else(|| world.archetype(id & 0x3fff_ffff))
             .map(|archetype| RecordBinding { id, archetype });
         let Some(mut record) = decode_entity_record(
             data,
@@ -160,6 +223,13 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
         };
         record.header.prefix = prefix;
         out.end_bit = record.end_bit;
+        if let Some(archetype) = explicit_archetype {
+            out.external_delta_schemas.push(ExternalDeltaSchemaUse {
+                start_bit: header_bit,
+                id,
+                archetype,
+            });
+        }
         observer(&record, capture_slot, world);
         let complete = record.stop == EntityViewStop::Complete;
         // The NEW declaration establishes the grammar for later deltas once
@@ -170,7 +240,10 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
             RecordKind::New
                 if matches!(
                     record.stop,
-                    EntityViewStop::Complete | EntityViewStop::Truncated
+                    EntityViewStop::Complete
+                        | EntityViewStop::Truncated
+                        | EntityViewStop::MissingCorruptionCheckContext
+                        | EntityViewStop::UnsupportedReferenceConfiguration
                 ) =>
             {
                 if let Some(archetype) = record
@@ -182,7 +255,7 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
                     && complete
                     && !record.components.is_empty()
                     && record.default_state.as_ref().is_some_and(|defaults| {
-                        defaults.status == crate::theater::film::DefaultStateStatus::Complete
+                        defaults.status == crate::theater::parser::v41::chunks::replication::source::DefaultStateStatus::Complete
                     })
                     && ALLOW_REPLACEMENT
                     && world
@@ -225,11 +298,13 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
         }
     }
     if hit_end {
-        let controls = decode_control_view_contextual(
+        let controls = decode_control_view_with_limit(
             data,
             out.end_bit,
             encoding.position.as_ref(),
             context.reader,
+            encoding.category_references,
+            context.control_record_limit,
         );
         out.end_bit = controls.end_bit;
         out.controls = Some(controls);
@@ -252,7 +327,11 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
 }
 
 // Out-of-range mask bits may be traversable, but cannot establish a schema.
-fn mask_matches_schema(record: &EntityRecord, archetype: u32, registry: &FilmRegistry) -> bool {
+pub(crate) fn mask_matches_schema(
+    record: &EntityRecord,
+    archetype: u32,
+    registry: &FilmRegistry,
+) -> bool {
     registry
         .archetype(archetype as usize)
         .is_some_and(|schema| {
@@ -261,89 +340,6 @@ fn mask_matches_schema(record: &EntityRecord, archetype: u32, registry: &FilmReg
                     || mask >> schema.components.len() == 0
             })
         })
-}
-
-/// A single valid body or apparent packet closure is not enough: the next
-/// record must be a clean delta with a known schema and an increasing slot.
-fn infer_unbound_archetype(
-    data: &[u8],
-    start_bit: i64,
-    id: u32,
-    registry: &FilmRegistry,
-    encoding: &RecordLayout,
-    world: &ReplicationDecodeState,
-    context: Option<&DecodeProfile>,
-) -> Option<u32> {
-    let mut inferred = None;
-    for archetype in 0..registry.archetypes.len().min(50) {
-        let Some(record) = decode_entity_record(
-            data,
-            start_bit,
-            registry,
-            encoding,
-            Some(RecordBinding {
-                id,
-                archetype: archetype as u32,
-            }),
-            context.is_none_or(|c| c.grammar.simulation_complete),
-            RecordReadContext {
-                context,
-                movement: None,
-            },
-        ) else {
-            continue;
-        };
-        if record.stop != EntityViewStop::Complete
-            || record.components.is_empty()
-            || !mask_matches_schema(&record, archetype as u32, registry)
-        {
-            continue;
-        }
-        let successor_bit = record.end_bit + if encoding.extra_fields { 32 } else { 0 };
-        let Some(successor) = decode_frame_header_signed(data, successor_bit, encoding) else {
-            continue;
-        };
-        let Some(next_id) = successor.id.filter(|_| successor.kind == RecordKind::Delta) else {
-            continue;
-        };
-        // FUN_142f2e174 emits deltas in strictly increasing slot order.
-        if next_id & 0x3fff_ffff <= id & 0x3fff_ffff {
-            continue;
-        }
-        let Some(binding) = world.slots.get(&(next_id & 0x3fff_ffff)).filter(|binding| {
-            !binding.soft && (binding.generation_any || binding.full_id == next_id)
-        }) else {
-            continue;
-        };
-        let Some(next_record) = decode_entity_record(
-            data,
-            successor_bit,
-            registry,
-            encoding,
-            Some(RecordBinding {
-                id: next_id,
-                archetype: binding.archetype,
-            }),
-            context.is_none_or(|c| c.grammar.simulation_complete),
-            RecordReadContext {
-                context,
-                movement: None,
-            },
-        ) else {
-            continue;
-        };
-        if next_record.stop != EntityViewStop::Complete
-            || next_record.components.is_empty()
-            || !mask_matches_schema(&next_record, binding.archetype, registry)
-        {
-            continue;
-        }
-        if inferred.is_some() {
-            return None;
-        }
-        inferred = Some(archetype as u32);
-    }
-    inferred
 }
 
 /// Derived traversal statistic for pinned reference-oracle checks only.
@@ -368,7 +364,8 @@ pub(crate) fn completed_views(frame: &ProductionFrame) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theater::film::{ByteRange, FilmArchetype, RegistryComponent};
+    use crate::theater::parser::packet::ByteRange;
+    use crate::theater::parser::v41::chunks::registry::source::{FilmArchetype, RegistryComponent};
     use crate::theater::parser::v41::context::V41DecodeConfig;
 
     #[test]
@@ -410,12 +407,14 @@ mod tests {
             if archetype == 21 {
                 put(18, 0);
             }
-            put(1, 0); // NEW component gate
-            put(1, 0); // sparse mask
-            put(3, u64::from(has_component));
             if has_component {
+                put(1, 1); // NEW component gate
+                put(1, 0); // sparse mask
+                put(3, 1);
                 put(6, 0);
                 put(1, 1);
+            } else {
+                put(1, 0); // no initial components or mask
             }
             if closed {
                 put(4, 0);
@@ -438,8 +437,12 @@ mod tests {
                 &config.record_layout(),
                 &mut world,
                 ProductionReaderContext {
+                    schema_recovery: None,
                     reader: Some(&config.profile),
                     preamble_bits: 2,
+                    control_record_limit: config.control_record_limit,
+                    explicit_delta_schema: None,
+                    reference_controls_after_rejection: false,
                 },
                 |_, _, _| observed += 1,
             )
@@ -453,9 +456,14 @@ mod tests {
 
     #[test]
     fn out_of_schema_mask_cannot_poison_a_later_player_declaration() {
-        let payload = include_bytes!(
+        let mut payload = include_bytes!(
             "../../../../../../fixtures/movement-schema-v41/invalid-flock-declaration.bin"
-        );
+        )
+        .to_vec();
+        // The captured walk is misaligned and has a clear NEW gate at bit 1103.
+        // Set that one bit in a derived fixture to exercise the out-of-schema
+        // mask guard under the corrected creation grammar.
+        payload[1103 / 8] |= 1 << (7 - 1103 % 8);
         let range = ByteRange { start: 0, end: 0 };
         let mut registry = FilmRegistry {
             archetypes: (0..22)
@@ -481,14 +489,18 @@ mod tests {
         let config = V41DecodeConfig::default();
         let mut world = ReplicationDecodeState::default();
         let frame = decode_production_frame_contextual(
-            payload,
+            &payload,
             1061,
             &registry,
             &config.record_layout(),
             &mut world,
             ProductionReaderContext {
+                schema_recovery: None,
                 reader: Some(&config.profile),
                 preamble_bits: 2,
+                control_record_limit: config.control_record_limit,
+                explicit_delta_schema: None,
+                reference_controls_after_rejection: false,
             },
             |_, _, _| {},
         )
@@ -501,120 +513,173 @@ mod tests {
         assert_eq!(world.archetype(671), Some(35));
     }
 
-    #[test]
-    fn inferred_schema_cannot_use_an_earlier_slot_as_its_successor() {
-        let payload = include_bytes!(
-            "../../../../../../fixtures/movement-schema-v41/empyrean-false-successor.bin"
-        );
+    fn live_fire_region_fixture() -> (FilmRegistry, V41DecodeConfig) {
         let declarations: Vec<(usize, Vec<(String, u32)>)> = serde_json::from_str(include_str!(
-            "../../../../../../fixtures/movement-schema-v41/empyrean-false-successor-registry.json"
+            "../../../../../../fixtures/live-fire-region-3/registry.json"
         ))
         .unwrap();
         let registry = crate::theater::parser::test_support::component_registry(&declarations);
-        let config = V41DecodeConfig::default();
-        let layout = config.record_layout();
-        let mut world = ReplicationDecodeState::default();
-        world.bind_full(1073742339, 35);
-        let guessed = decode_entity_record(
-            payload,
-            1252,
-            &registry,
-            &layout,
-            Some(RecordBinding {
-                id: 1073743428,
-                archetype: 13,
-            }),
-            false,
-            RecordReadContext {
-                context: Some(&config.profile),
-                movement: None,
-            },
-        )
-        .unwrap();
-        assert_eq!(guessed.stop, EntityViewStop::Complete);
-        assert_eq!(guessed.end_bit, 1341);
-        let successor = decode_entity_record(
-            payload,
-            1341,
-            &registry,
-            &layout,
-            Some(RecordBinding {
-                id: 1073742339,
-                archetype: 35,
-            }),
-            false,
-            RecordReadContext {
-                context: Some(&config.profile),
-                movement: None,
-            },
-        )
-        .unwrap();
-        assert_eq!(successor.stop, EntityViewStop::Complete);
-        assert!(mask_matches_schema(&successor, 35, &registry));
-        assert_eq!(
-            infer_unbound_archetype(
-                payload,
-                1252,
-                1073743428,
-                &registry,
-                &layout,
-                &world,
-                Some(&config.profile)
-            ),
-            None
-        );
-        assert!(world.archetype(1604).is_none());
+        let mut config = V41DecodeConfig::default();
+        config.profile.movement.world_object.axis_bits = [12, 12, 11];
+        config.profile.movement.world_object.index_bits = 2;
+        config.profile.movement.world_object.region = 1;
+        let map: crate::theater::film::catalog::maps::MapDetails =
+            crate::theater::film::catalog::maps::known_maps::LIVE_FIRE.into();
+        config.profile.movement.opaque_position_region_bits = map.opaque_position_region_bits;
+        (registry, config)
     }
 
     #[test]
-    fn apparent_packet_closure_does_not_establish_an_unbound_schema() {
-        let registry = FilmRegistry {
-            archetypes: vec![FilmArchetype {
-                index: 0,
-                components: vec![RegistryComponent {
-                    name_bytes: b"game-engine-round-condition-flags-component\0".to_vec(),
-                    precision_level: 0,
-                    source: ByteRange { start: 0, end: 0 },
-                }],
-                source: ByteRange { start: 0, end: 0 },
-                padding: ByteRange { start: 0, end: 0 },
-            }],
-        };
-        let mut bits = Vec::new();
-        for (width, value) in [
-            (1, 1_u64), // delta header
-            (13, 17),
-            (2, 0),
-            (1, 0), // no baseline
-            (1, 0), // sparse component mask
-            (3, 1),
-            (6, 0),
-            (10, 0x155),
-            (3, 0), // entity terminator
-            (1, 0), // empty control view
+    fn live_fire_region_three_preserves_the_packet_boundary_without_a_team_update() {
+        let payload =
+            include_bytes!("../../../../../../fixtures/live-fire-region-3/false-team-packet.bin");
+        let (registry, config) = live_fire_region_fixture();
+        let mut world = ReplicationDecodeState::default();
+        for (slot, archetype) in [
+            (123, 4),
+            (558, 35),
+            (559, 35),
+            (562, 35),
+            (566, 35),
+            (567, 35),
+            (568, 35),
+            (569, 35),
+            (769, 40),
+            (1962, 37),
+            (1965, 42),
+            (1967, 37),
+            (1969, 37),
+            (5365, 9),
         ] {
-            bits.extend((0..width).rev().map(|shift| value & (1 << shift) != 0));
+            world.bind_full((1 << 30) | slot, archetype);
         }
-        let mut packet = vec![0_u8; bits.len().div_ceil(8)];
-        for (bit, set) in bits.into_iter().enumerate() {
-            if set {
-                packet[bit / 8] |= 1 << (7 - bit % 8);
-            }
-        }
-        let config = V41DecodeConfig::default();
-        let layout = config.record_layout();
-        let world = ReplicationDecodeState::default();
-        assert_eq!(
-            infer_unbound_archetype(
-                &packet,
-                0,
-                17,
-                &registry,
-                &layout,
-                &world,
-                Some(&config.profile)
-            ),
-            None
+        let original = world.clone();
+        let frame = decode_production_frame_contextual(
+            payload,
+            2,
+            &registry,
+            &config.record_layout(),
+            &mut world,
+            ProductionReaderContext {
+                schema_recovery: None,
+                reader: Some(&config.profile),
+                preamble_bits: 2,
+                control_record_limit: config.control_record_limit,
+                explicit_delta_schema: None,
+                reference_controls_after_rejection: false,
+            },
+            |_, _, _| {},
+        )
+        .unwrap();
+        assert!(super::super::production_frame_closed(&frame, payload));
+        assert_eq!(frame.end_bit, 1891);
+        assert_eq!(frame.records.len(), 13);
+        assert!(
+            frame
+                .records
+                .iter()
+                .all(|r| r.header.id != Some(1073747189))
         );
+        let vehicle = &frame.records[8];
+        assert_eq!(vehicle.end_bit, 1242);
+        let position = &vehicle.components[0];
+        let raw = position
+            .fields
+            .iter()
+            .find(|f| f.name == "position.opaque_region_bits")
+            .unwrap();
+        assert_eq!((raw.bit, raw.width), (1145, 54));
+        assert!(
+            !position
+                .fields
+                .iter()
+                .any(|f| f.name.starts_with("position["))
+        );
+        assert_eq!(
+            vehicle.components[2]
+                .fields
+                .iter()
+                .find(|f| f.name == "tick")
+                .unwrap()
+                .raw
+                .low_u64(),
+            39
+        );
+        // The old world-region fallback manufactured the team record even with
+        // the correct managed-player binding. No runtime team guard is involved.
+        let mut legacy = config.clone();
+        legacy.profile.movement.opaque_position_region_bits.clear();
+        let mut world = original;
+        let old = decode_production_frame_contextual(
+            payload,
+            2,
+            &registry,
+            &legacy.record_layout(),
+            &mut world,
+            ProductionReaderContext {
+                schema_recovery: None,
+                reader: Some(&legacy.profile),
+                preamble_bits: 2,
+                control_record_limit: legacy.control_record_limit,
+                explicit_delta_schema: None,
+                reference_controls_after_rejection: false,
+            },
+            |_, _, _| {},
+        )
+        .unwrap();
+        assert!(!super::super::production_frame_closed(&old, payload));
+        let team = old
+            .records
+            .iter()
+            .find(|r| r.header.id == Some(1073747189))
+            .unwrap();
+        assert_eq!(team.components[0].fields[0].raw.low_u64(), 6);
+    }
+
+    #[test]
+    fn live_fire_region_three_keeps_command_ticks_aligned_across_component_masks() {
+        #[derive(serde::Deserialize)]
+        struct Sample {
+            file: String,
+            start_bit: i64,
+            counter: u64,
+        }
+        let samples: Vec<Sample> = serde_json::from_str(include_str!(
+            "../../../../../../fixtures/live-fire-region-3/samples.json"
+        ))
+        .unwrap();
+        let (registry, config) = live_fire_region_fixture();
+        for sample in samples {
+            let payload = std::fs::read(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("src/theater/fixtures/live-fire-region-3")
+                    .join(&sample.file),
+            )
+            .unwrap();
+            let record = decode_entity_record(
+                &payload,
+                sample.start_bit,
+                &registry,
+                &config.record_layout(),
+                Some(RecordBinding {
+                    id: 1073742593,
+                    archetype: 40,
+                }),
+                false,
+                RecordReadContext {
+                    context: Some(&config.profile),
+                    movement: None,
+                },
+            )
+            .unwrap();
+            assert_eq!(record.stop, EntityViewStop::Complete, "{}", sample.file);
+            let tick = record
+                .components
+                .iter()
+                .flat_map(|c| &c.fields)
+                .find(|f| f.name == "tick")
+                .unwrap();
+            assert_eq!(tick.raw.low_u64(), sample.counter, "{}", sample.file);
+        }
     }
 }

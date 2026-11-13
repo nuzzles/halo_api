@@ -1,0 +1,1186 @@
+{
+  "commit": "413971bcc485be53a2fa8cf229e170539a5146f8",
+  "blobs": {
+    "varwidth.go": "ed8ddb806fc86634d87fd68490eb47d3c96b5f8d",
+    "bit_leaf_readers.go": "a0bbe36af9f333cc35d5b9f3cd42307097ccb0e2",
+    "quantize.go": "66dc765b8189a00a5cc86b09e1a7294605a645b5",
+    "unit_ref_probe.go": "60a564eb1f31363f7fa33c29f1aae8058f404a57",
+    "source/bits.go": "2951f8428d6228a7de607a8f1c1d062b7475da4d"
+  },
+  "cases": [
+    {
+      "category": 0,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 1,
+      "bits": 15,
+      "hex": "0000"
+    },
+    {
+      "category": 0,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 1,
+      "bits": 15,
+      "hex": "7fff"
+    },
+    {
+      "category": 0,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 0,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 0,
+      "bits": 16,
+      "hex": "8000"
+    },
+    {
+      "category": 0,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 0,
+      "bits": 16,
+      "hex": "ffff"
+    },
+    {
+      "category": 1,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 0,
+      "bits": 16,
+      "hex": "0000"
+    },
+    {
+      "category": 1,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 0,
+      "bits": 16,
+      "hex": "7fff"
+    },
+    {
+      "category": 1,
+      "optional": false,
+      "present": true,
+      "probe": true,
+      "value": 0,
+      "tail": 0,
+      "start": 4,
+      "bits": 12,
+      "hex": "0800"
+    },
+    {
+      "category": 1,
+      "optional": false,
+      "present": true,
+      "probe": true,
+      "value": 511,
+      "tail": 3,
+      "start": 4,
+      "bits": 12,
+      "hex": "0fff"
+    },
+    {
+      "category": 1,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 1,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 17,
+      "hex": "010000"
+    },
+    {
+      "category": 1,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 7,
+      "bits": 17,
+      "hex": "017fff"
+    },
+    {
+      "category": 1,
+      "optional": true,
+      "present": true,
+      "probe": true,
+      "value": 0,
+      "tail": 0,
+      "start": 3,
+      "bits": 13,
+      "hex": "1800"
+    },
+    {
+      "category": 1,
+      "optional": true,
+      "present": true,
+      "probe": true,
+      "value": 511,
+      "tail": 3,
+      "start": 3,
+      "bits": 13,
+      "hex": "1fff"
+    },
+    {
+      "category": 2,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 6,
+      "bits": 10,
+      "hex": "0000"
+    },
+    {
+      "category": 2,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 6,
+      "bits": 10,
+      "hex": "03ff"
+    },
+    {
+      "category": 2,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 2,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 5,
+      "bits": 11,
+      "hex": "0400"
+    },
+    {
+      "category": 2,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 5,
+      "bits": 11,
+      "hex": "07ff"
+    },
+    {
+      "category": 3,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 6,
+      "bits": 10,
+      "hex": "0000"
+    },
+    {
+      "category": 3,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 6,
+      "bits": 10,
+      "hex": "03ff"
+    },
+    {
+      "category": 3,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 3,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 5,
+      "bits": 11,
+      "hex": "0400"
+    },
+    {
+      "category": 3,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 5,
+      "bits": 11,
+      "hex": "07ff"
+    },
+    {
+      "category": 4,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 5,
+      "bits": 11,
+      "hex": "0000"
+    },
+    {
+      "category": 4,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 511,
+      "tail": 3,
+      "start": 5,
+      "bits": 11,
+      "hex": "07ff"
+    },
+    {
+      "category": 4,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 4,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 4,
+      "bits": 12,
+      "hex": "0800"
+    },
+    {
+      "category": 4,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 511,
+      "tail": 3,
+      "start": 4,
+      "bits": 12,
+      "hex": "0fff"
+    },
+    {
+      "category": 5,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 6,
+      "bits": 10,
+      "hex": "0000"
+    },
+    {
+      "category": 5,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 6,
+      "bits": 10,
+      "hex": "03ff"
+    },
+    {
+      "category": 5,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 5,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 5,
+      "bits": 11,
+      "hex": "0400"
+    },
+    {
+      "category": 5,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 255,
+      "tail": 3,
+      "start": 5,
+      "bits": 11,
+      "hex": "07ff"
+    },
+    {
+      "category": 6,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 5,
+      "bits": 11,
+      "hex": "0000"
+    },
+    {
+      "category": 6,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 511,
+      "tail": 3,
+      "start": 5,
+      "bits": 11,
+      "hex": "07ff"
+    },
+    {
+      "category": 6,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 6,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 4,
+      "bits": 12,
+      "hex": "0800"
+    },
+    {
+      "category": 6,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 511,
+      "tail": 3,
+      "start": 4,
+      "bits": 12,
+      "hex": "0fff"
+    },
+    {
+      "category": 7,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 1,
+      "bits": 15,
+      "hex": "0000"
+    },
+    {
+      "category": 7,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 1,
+      "bits": 15,
+      "hex": "7fff"
+    },
+    {
+      "category": 7,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 7,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 0,
+      "bits": 16,
+      "hex": "8000"
+    },
+    {
+      "category": 7,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 0,
+      "bits": 16,
+      "hex": "ffff"
+    },
+    {
+      "category": 8,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 1,
+      "bits": 15,
+      "hex": "0000"
+    },
+    {
+      "category": 8,
+      "optional": false,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 1,
+      "bits": 15,
+      "hex": "7fff"
+    },
+    {
+      "category": 8,
+      "optional": true,
+      "present": false,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 7,
+      "bits": 1,
+      "hex": "00"
+    },
+    {
+      "category": 8,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 0,
+      "tail": 0,
+      "start": 0,
+      "bits": 16,
+      "hex": "8000"
+    },
+    {
+      "category": 8,
+      "optional": true,
+      "present": true,
+      "probe": false,
+      "value": 8191,
+      "tail": 3,
+      "start": 0,
+      "bits": 16,
+      "hex": "ffff"
+    }
+  ],
+  "results": [
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 8191,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": true
+        }
+      ]
+    },
+    {
+      "End": 24,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 24,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": true
+        }
+      ]
+    },
+    {
+      "End": 24,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 24,
+          "Present": true,
+          "Val": 8191,
+          "Tail": 3,
+          "Probe": true
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 3,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": true
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 3,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 511,
+          "Tail": 3,
+          "Probe": true
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 255,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 255,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 4,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 4,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 511,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 255,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 5,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 255,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 4,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 511,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 4,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 511,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 8191,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": null
+    },
+    {
+      "End": 8,
+      "Value": 0,
+      "Tail": 0,
+      "Present": false,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 7,
+          "EndBit": 8,
+          "Present": false,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 0,
+      "Tail": 0,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 0,
+          "Tail": 0,
+          "Probe": false
+        }
+      ]
+    },
+    {
+      "End": 16,
+      "Value": 8191,
+      "Tail": 3,
+      "Present": true,
+      "Refs": [
+        {
+          "Kind": 0,
+          "StartBit": 0,
+          "EndBit": 16,
+          "Present": true,
+          "Val": 8191,
+          "Tail": 3,
+          "Probe": false
+        }
+      ]
+    }
+  ]
+}

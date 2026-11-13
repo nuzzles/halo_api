@@ -1,6 +1,6 @@
 //! Record headers and registry-driven delta traversal. The caller supplies a checked
 //! boundary and entity binding; this layer never searches for a plausible header.
-use crate::theater::film::chunks::replication::replication_stream::models::records::{
+use crate::theater::parser::v41::chunks::replication::source::replication_stream::models::records::{
     RecordHeader, RecordKind,
 };
 use crate::theater::parser::v41::context::layout::RecordLayout;

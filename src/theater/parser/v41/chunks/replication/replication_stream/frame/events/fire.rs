@@ -1,8 +1,6 @@
 //! Contextual action_weapon_fire v3 (FUN_14080c1f8, film param_5=1).
-//! Ported from LevelUp 413971bcc485be53a2fa8cf229e170539a5146f8,
-//! vue_a_charges_tir.go, bloc_action.go and default_state_ti41.go.
 //! No event-local corruption trailer is assumed. Unknown map regions stop the read.
-use super::{PrecisionDescriptor, Reader, quantized_event_vector};
+use super::{PrecisionDescriptor, Reader, event_point};
 
 fn optional(r: &mut Reader<'_>, width: usize) {
     if r.read(1) != 0 {
@@ -70,7 +68,7 @@ fn counts(r: &mut Reader<'_>) -> (usize, usize) {
     (components, targets)
 }
 
-pub(super) fn read(r: &mut Reader<'_>, encoding: &PrecisionDescriptor) -> bool {
+pub(super) fn read(r: &mut Reader<'_>, encoding: Option<&PrecisionDescriptor>) -> bool {
     let short = r.read(1) != 0;
     let block = r.read(1) != 0;
     r.read(7);
@@ -134,7 +132,7 @@ pub(super) fn read(r: &mut Reader<'_>, encoding: &PrecisionDescriptor) -> bool {
     if block {
         match r.read(2) {
             0 => {
-                if !quantized_event_vector(r, encoding) {
+                if !event_point(r, encoding) {
                     return false;
                 }
             }
@@ -155,7 +153,7 @@ pub(super) fn read(r: &mut Reader<'_>, encoding: &PrecisionDescriptor) -> bool {
     }
     r.read(6);
     optional(r, 7);
-    if r.read(1) != 0 && !quantized_event_vector(r, encoding) {
+    if r.read(1) != 0 && !event_point(r, encoding) {
         return false;
     }
     !r.over
@@ -168,6 +166,7 @@ mod tests {
     #[test]
     fn short_timestamp_and_long_optional_tails_have_exact_extents() {
         let encoding = PrecisionDescriptor {
+            regions: Default::default(),
             index_bits: 1,
             axis_bits: [18, 18, 15],
             region: 0,
@@ -233,11 +232,11 @@ mod tests {
                     data[i / 8] |= b << (7 - i % 8);
                 }
                 let mut r = Reader::new(&data, 0).unwrap();
-                assert!(read(&mut r, &encoding));
+                assert!(read(&mut r, Some(&encoding)));
                 assert_eq!(r.cursor.position, expected, "short={short} block={block}");
                 for end in 0..expected.div_ceil(8) {
                     let mut r = Reader::new(&data[..end], 0).unwrap();
-                    assert!(!read(&mut r, &encoding), "truncated {end}");
+                    assert!(!read(&mut r, Some(&encoding)), "truncated {end}");
                 }
             }
         }

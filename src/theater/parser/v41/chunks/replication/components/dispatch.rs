@@ -2,7 +2,7 @@
 use super::reader::ComponentReader;
 use super::{
     basic, biped, device, equipment, flock, m4b, managed, navpoint, object, physics, projectile,
-    scene, tacmap, unit, weapon,
+    scene, tacmap, unit, vehicle, weapon,
 };
 pub(crate) fn component(
     r: &mut ComponentReader<'_>,
@@ -43,7 +43,11 @@ pub(crate) fn component(
         | "object-multiplayer-properties-component" => {
             object::read_primary(r, name, level, archetype)
         }
-        "tacmap-queuedreplaymission"
+        "tacmap-backmenulocked-state"
+        | "tacmap-mapdismissallock"
+        | "tacmap-playercontrol"
+        | "tacmap-tooltip-state"
+        | "tacmap-queuedreplaymission"
         | "tacmap-backmenu-openoverride"
         | "tacmap-cooptetherarea"
         | "tacmap-displayasset"
@@ -105,7 +109,8 @@ pub(crate) fn component(
         | "projectile-deceleration-disabled-state"
         | "item-at-rest-component"
         | "tacmap-fasttravelstate" => projectile::read_primary(r, name, level, archetype),
-        "managed-player-team-designator-component"
+        "managed-radialmenu-visibility-component"
+        | "managed-player-team-designator-component"
         | "managed-object-networked-splash-message-dynamic-component"
         | "managed-object-property-component"
         | "managed-object-player-masked-property-component" => {
@@ -131,6 +136,9 @@ pub(crate) fn component(
             }
             if result == Some(false) {
                 result = navpoint::component(r, name, level);
+            }
+            if result == Some(false) {
+                result = vehicle::component(r, name);
             }
             if result == Some(false) {
                 result = m4b::component(r, name);

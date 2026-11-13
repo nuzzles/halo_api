@@ -1,0 +1,463 @@
+{
+  "commit": "18067987ebc3628ad499c819c6aee814692df43b",
+  "source_blobs": {
+    "splash.rs": "76549535b70693bac166a8f4ee961b2b99a5800e",
+    "bits.rs": "5d1a69e536e63ce03c366aee8ee144c8ed48ee72"
+  },
+  "cases": [
+    {
+      "name": "absent",
+      "message": null
+    },
+    {
+      "name": "empty",
+      "message": {
+        "key": 4275878552,
+        "arguments": []
+      }
+    },
+    {
+      "name": "zero-key",
+      "message": {
+        "key": 0,
+        "arguments": []
+      }
+    },
+    {
+      "name": "empty-argument",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "player-None",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "player-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "player",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "player-1",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "player",
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "name": "player-15",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "player",
+            15
+          ]
+        ]
+      }
+    },
+    {
+      "name": "player-31",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "player",
+            31
+          ]
+        ]
+      }
+    },
+    {
+      "name": "int-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "int-1",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            4607182418800017408
+          ]
+        ]
+      }
+    },
+    {
+      "name": "int-2147483647",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            4746794007244308480
+          ]
+        ]
+      }
+    },
+    {
+      "name": "int-2147483648",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            13970166044103278592
+          ]
+        ]
+      }
+    },
+    {
+      "name": "int-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            13830554455654793216
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            13886691121322524672
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-1",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            13886691120536092672
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-8388607",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            13783108329893003264
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-8388608",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-8388609",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            4559736293038227456
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-16777214",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            4663319082894884864
+          ]
+        ]
+      }
+    },
+    {
+      "name": "real-16777215",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "number",
+            4663319083681316864
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-3-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "text",
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-3-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "text",
+            4294967295
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-4-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-4-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-5-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-5-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-6-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-6-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-7-0",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "kind-7-4294967295",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "mixed-seven",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ],
+          [
+            "player",
+            31
+          ],
+          [
+            "unknown",
+            null
+          ],
+          [
+            "number",
+            13970166044103278592
+          ],
+          [
+            "number",
+            4663319083681316864
+          ],
+          [
+            "text",
+            0
+          ],
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "repeated-players",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ],
+          [
+            "player",
+            7
+          ]
+        ]
+      }
+    },
+    {
+      "name": "all-unknown",
+      "message": {
+        "key": 4275878552,
+        "arguments": [
+          [
+            "unknown",
+            null
+          ],
+          [
+            "unknown",
+            null
+          ],
+          [
+            "unknown",
+            null
+          ],
+          [
+            "unknown",
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "name": "absent-with-body",
+      "message": null
+    }
+  ]
+}

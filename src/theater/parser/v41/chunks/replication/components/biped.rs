@@ -51,7 +51,7 @@ pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str) -> Option<bool>
                 r.words("state", 2, 32)?;
             }
         }
-        "biped-action" | "biped-action-component" => action(r)?,
+        "biped-action" | "biped-action-component" => return action(r),
         "spawn-filter-weight-component" => {
             r.r("weight", 16)?;
         }
@@ -111,7 +111,7 @@ fn signed(r: &mut ComponentReader<'_>, name: &str) -> Option<()> {
     Some(())
 }
 
-fn action(r: &mut ComponentReader<'_>) -> Option<()> {
+fn action(r: &mut ComponentReader<'_>) -> Option<bool> {
     let a = r.r("mask[0]", 32)? as u32;
     let b = r.r("mask[1]", 32)? as u32;
     let c = r.r("mask[2]", 32)? as u32;
@@ -119,41 +119,8 @@ fn action(r: &mut ComponentReader<'_>) -> Option<()> {
     for i in 0..count {
         r.r(&format!("action[{i}].index"), 7)?;
         let tag = r.r(&format!("action[{i}].tag"), 5)?;
-        match tag {
-            0 => {
-                r.optional_handle("reference", 0)?;
-                r.gate("value", 8, true)?;
-            }
-            1 => {
-                r.gate("value", 8, true)?;
-                r.words("bytes", 2, 8)?;
-                r.r("word", 32)?;
-                r.r("value15", 15)?;
-            }
-            2 => {
-                r.r("byte", 8)?;
-                r.gate("value", 8, true)?;
-                r.r("word", 16)?;
-            }
-            3 => {
-                r.r("enum", 2)?;
-                r.r("value15", 15)?;
-            }
-            4 => {
-                r.r("variant", 32)?;
-                r.r("byte", 8)?;
-                r.r("value15", 15)?;
-                r.direction(10)?;
-                r.gate("value", 8, true)?;
-                r.r("word", 16)?;
-            }
-            5 => {
-                r.r("variant", 32)?;
-                r.gate("value", 8, true)?;
-                r.r("word", 16)?;
-                r.r("byte", 8)?;
-            }
-            _ => {}
+        if !super::actions::read(r, tag)? {
+            return Some(false);
         }
     }
     let count = a.count_ones() + b.count_ones() + (c & 0x1ff).count_ones();
@@ -161,7 +128,7 @@ fn action(r: &mut ComponentReader<'_>) -> Option<()> {
         r.gate(&format!("states[{i}]"), 2, true)?;
     }
     r.words("tail_mask", 3, 32)?;
-    Some(())
+    Some(true)
 }
 
 pub(crate) fn read_primary(

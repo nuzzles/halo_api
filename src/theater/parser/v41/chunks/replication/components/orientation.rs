@@ -39,6 +39,10 @@ pub(crate) fn dynamic(r: &mut ComponentReader<'_>, level: u32) -> Option<()> {
 }
 
 pub(crate) fn media_frame(r: &mut ComponentReader<'_>) -> Option<()> {
+    if r.snapshot {
+        r.words("media_frame.vector_bits", 3, 32)?;
+        return Some(());
+    }
     let encoding = r.position_encoding?;
     if encoding.full_precision_gate() {
         r.words("media_frame.vector_bits", 3, 32)?;
@@ -49,9 +53,6 @@ pub(crate) fn media_frame(r: &mut ComponentReader<'_>) -> Option<()> {
 }
 
 pub(crate) fn simulation(r: &mut ComponentReader<'_>) -> Option<bool> {
-    if r.position_encoding.is_none() {
-        return Some(false);
-    }
     if !r.bit("present")? {
         return Some(true);
     }
@@ -62,6 +63,5 @@ pub(crate) fn simulation(r: &mut ComponentReader<'_>) -> Option<bool> {
     r.words("state_b", 4, 16)?;
     r.gate("direction", 19, false)?;
     r.r("magnitude", 8)?;
-    media_frame(r)?;
-    Some(true)
+    position::point(r, "position")
 }

@@ -1,0 +1,534 @@
+{
+  "commit": "413971bcc485be53a2fa8cf229e170539a5146f8",
+  "blob": "13179ea7149628e9c31c6fe827bbaec005111ab1",
+  "cases": [
+    {
+      "name": "valid/0/0/0/0",
+      "value": [
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/0/0/1",
+      "value": [
+        0,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/0/1/0",
+      "value": [
+        0,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/0/1/1",
+      "value": [
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/1/0/0",
+      "value": [
+        1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/1/0/1",
+      "value": [
+        1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/1/1/0",
+      "value": [
+        1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/1/1/1",
+      "value": [
+        1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/2/0/0",
+      "value": [
+        2,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/2/0/1",
+      "value": [
+        2,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/2/1/0",
+      "value": [
+        2,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/2/1/1",
+      "value": [
+        2,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/-1/0/0",
+      "value": [
+        -1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/-1/0/1",
+      "value": [
+        -1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/0/-1/1/0",
+      "value": [
+        -1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/0/-1/1/1",
+      "value": [
+        -1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/0/0/0",
+      "value": [
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/0/0/1",
+      "value": [
+        0,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/0/1/0",
+      "value": [
+        0,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/0/1/1",
+      "value": [
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/1/0/0",
+      "value": [
+        1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/1/0/1",
+      "value": [
+        1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/1/1/0",
+      "value": [
+        1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/1/1/1",
+      "value": [
+        1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/2/0/0",
+      "value": [
+        2,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/2/0/1",
+      "value": [
+        2,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/2/1/0",
+      "value": [
+        2,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/2/1/1",
+      "value": [
+        2,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/-1/0/0",
+      "value": [
+        -1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/-1/0/1",
+      "value": [
+        -1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/1/-1/1/0",
+      "value": [
+        -1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/1/-1/1/1",
+      "value": [
+        -1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/0/0/0",
+      "value": [
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/0/0/1",
+      "value": [
+        0,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/0/1/0",
+      "value": [
+        0,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/0/1/1",
+      "value": [
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/1/0/0",
+      "value": [
+        1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/1/0/1",
+      "value": [
+        1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/1/1/0",
+      "value": [
+        1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/1/1/1",
+      "value": [
+        1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/2/0/0",
+      "value": [
+        2,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/2/0/1",
+      "value": [
+        2,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/2/1/0",
+      "value": [
+        2,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/2/1/1",
+      "value": [
+        2,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/-1/0/0",
+      "value": [
+        -1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/-1/0/1",
+      "value": [
+        -1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/2/-1/1/0",
+      "value": [
+        -1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/2/-1/1/1",
+      "value": [
+        -1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/0/0/0",
+      "value": [
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/0/0/1",
+      "value": [
+        0,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/0/1/0",
+      "value": [
+        0,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/0/1/1",
+      "value": [
+        0,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/1/0/0",
+      "value": [
+        1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/1/0/1",
+      "value": [
+        1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/1/1/0",
+      "value": [
+        1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/1/1/1",
+      "value": [
+        1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/2/0/0",
+      "value": [
+        2,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/2/0/1",
+      "value": [
+        2,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/2/1/0",
+      "value": [
+        2,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/2/1/1",
+      "value": [
+        2,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/-1/0/0",
+      "value": [
+        -1,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/-1/0/1",
+      "value": [
+        -1,
+        false,
+        true
+      ]
+    },
+    {
+      "name": "valid/3/-1/1/0",
+      "value": [
+        -1,
+        true,
+        false
+      ]
+    },
+    {
+      "name": "valid/3/-1/1/1",
+      "value": [
+        -1,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "defaults",
+      "value": [
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "name": "nonzero-bool",
+      "value": [
+        2,
+        true,
+        true
+      ]
+    }
+  ]
+}

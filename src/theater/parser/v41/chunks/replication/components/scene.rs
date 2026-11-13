@@ -44,6 +44,72 @@ pub(crate) fn component(
     archetype: u32,
 ) -> Option<bool> {
     match name {
+        "low-frequency" => {
+            if !position::point(r, "position")? {
+                return Some(false);
+            }
+            low_frequency_orientation(r, "orientation")?;
+            r.r("value16", 16)?;
+            r.r("value8", 8)?;
+            r.r("value2", 2)?;
+            let count = r.r("entries.count", 6)?;
+            for i in 0..count {
+                let name = format!("entries[{i}]");
+                let flags = r.r(&format!("{name}.flags"), 3)?;
+                if flags & 1 != 0 && !position::point(r, &format!("{name}.position"))? {
+                    return Some(false);
+                }
+                if flags & 2 != 0 {
+                    low_frequency_orientation(r, &format!("{name}.orientation"))?;
+                }
+                r.r(&format!("{name}.value16"), 16)?;
+                r.r(&format!("{name}.value5"), 5)?;
+            }
+        }
+        "game-engine-disabled-kill-volume-flags-component" => {
+            let count = r.r("count", 13)?;
+            r.r_wide("flags", count)?;
+        }
+        "GameEngineComposerLetterboxComponent" => {
+            r.bit("flag")?;
+            r.r("value", 16)?;
+            for i in 0..4 {
+                r.gate(&format!("indices[{i}]"), 7, false)?;
+            }
+            for i in 0..4 {
+                r.gate(&format!("values[{i}]"), 16, true)?;
+            }
+        }
+        "scenario-intro-component" => {
+            r.r("value", 7)?;
+            r.bit("flag")?;
+        }
+        "sound-placement-state-data-component" => {
+            r.gate("value", 20, false)?;
+            r.bit("flag")?;
+        }
+        "powerframe-player-selection-data-component" => {
+            let count = r.r("count", 6)?;
+            for i in 0..count {
+                r.gate(&format!("entries[{i}].player"), 5, false)?;
+                r.r(&format!("entries[{i}].bits"), 256)?;
+            }
+        }
+        "supply-lines-blocked-status-component" => {
+            r.r("state", 2)?;
+        }
+        "supply-lines-busy-state-component" => {
+            let count = r.r("count_minus_one", 5)? + 1;
+            r.r_wide("flags", count)?;
+        }
+        "matchflow-sequence-data-component" => {
+            r.r("state", 4)?;
+            r.words("values", 4, 32)?;
+        }
+        "matchflow-focus-data-component" => {
+            r.r("value6", 6)?;
+            r.r("value4", 4)?;
+        }
         "asset-transform-component" => {
             for i in 0..5 {
                 r.gate(&format!("transform[{i}].index"), 1, false)?;
@@ -92,7 +158,9 @@ pub(crate) fn component(
             r.r("kind", 3)?;
             r.words("assets", 2, 32)?;
             r.words("values", 2, 9)?;
-            quant_vector(r, level)?;
+            if !position::point(r, "position")? {
+                return Some(false);
+            }
             r.r("string", 32)?;
             r.bit("tail_flag")?;
             r.words("color", 4, 8)?;
@@ -138,11 +206,12 @@ pub(crate) fn component(
         "effect-state-data-component" => {
             r.gate("tag", 32, true)?;
             if r.bit("marker_a_present")? {
-                return Some(false);
+                r.handle("marker_a", 0)?;
             }
             r.r("marker_name", 32)?;
             if r.bit("marker_b_present")? {
-                return Some(false);
+                r.inline_optional_handle("marker_b", 0)?;
+                r.r("marker_b.name", 32)?;
             }
         }
         "flock-destroying-component"
@@ -190,31 +259,45 @@ pub(crate) fn component(
                 }
             }
         }
-        "crew-marked-objects-component"
-        | "nav-cutscene-flag-component"
-        | "player-primary-respawn-object-component"
-        | "player-desired-respawn-seat-component" => {
+        "crew-marked-objects-component" => {
+            r.inline_optional_handle("reference", 0)?;
+        }
+        "player-primary-respawn-object-component" => {
+            r.inline_optional_handle("reference", 8)?;
+        }
+        "player-desired-respawn-seat-component" => {
+            r.inline_optional_handle("reference", 3)?;
+            r.r("seat", 7)?;
+        }
+        "nav-cutscene-flag-component" => {
             if r.bit("present")? {
-                return Some(false);
-            }
-            if name == "player-desired-respawn-seat-component" {
-                r.r("seat", 7)?;
+                r.gate("index", 16, false)?;
+                if !position::point(r, "position")? {
+                    return Some(false);
+                }
+                r.words("values32", 2, 32)?;
+                r.r("value16", 16)?;
+                r.r("value8", 8)?;
+                r.r("value2", 2)?;
+                r.r("tail", 32)?;
             }
         }
         "player-desired-respawn-location-component" => {
-            let mut values = Vec::new();
-            let mut present = false;
-            if r.bit("present")? {
-                let vector = quant_vector_values(r, level)?;
-                let id = r.r("id", 19)?;
-                if let Some(vector) = vector {
-                    values.extend(vector);
-                    values.extend([id, u64::from(level)]);
-                    present = true;
-                } else {
-                    values.push(id);
+            let field_start = r.fields.len();
+            let present = r.bit("present")?;
+            if present {
+                if !position::point(r, "position")? {
+                    return Some(false);
                 }
+                r.r("id", 19)?;
             }
+            // Retain recorded gates/codes/words, not a fabricated precision level
+            // or the former generic-vector interpretation. Runtime has no consumer
+            // of the old quantized-vector diagnostic shape.
+            let values = r.fields[field_start..]
+                .iter()
+                .map(|f| f.raw.low_u64())
+                .collect();
             r.publish_component(FilmComponentObservation::PlayerState {
                 field: PlayerStateField::DesiredRespawnLocation,
                 values,
@@ -222,14 +305,7 @@ pub(crate) fn component(
             });
         }
 
-        "flock-position-component" => {
-            if r.position_encoding.is_some_and(|p| p.full_precision_gate()) {
-                r.words("vector_bits", 3, 32)?;
-            } else {
-                r.gate("index", 1, false)?;
-                r.words("axis", 3, (6_u64 + u64::from(level)).min(26) as usize)?;
-            }
-        }
+        "flock-position-component" => return position::point(r, "position"),
         "music-state-component" => {
             r.bit("flag")?;
             r.r("value", 32)?;
@@ -278,7 +354,9 @@ pub(crate) fn component(
         "tacmap-areaofinterest" => {
             r.r("id", 32)?;
             r.r("kind", 3)?;
-            position::traversal_payload(r)?;
+            if !position::point(r, "position")? {
+                return Some(false);
+            }
             r.r("value", 12)?;
         }
         "spawn-filter-type-component" => match r.r("tag", 2)? {
@@ -305,7 +383,7 @@ pub(crate) fn component(
 pub(crate) fn read_primary(
     r: &mut ComponentReader<'_>,
     name: &str,
-    level: u32,
+    _level: u32,
     archetype: u32,
 ) -> Option<bool> {
     match name {
@@ -316,9 +394,8 @@ pub(crate) fn read_primary(
         "simulation-state" | "simulation-state-component" => return orientation::simulation(r),
         "crew-order-component" => {
             r.r("order", 3)?;
-            if r.bit("vector_present")? && !r.bit("vector_default")? {
-                r.gate("index", 1, false)?;
-                r.words("axis", 3, (6_u64 + u64::from(level)).min(26) as usize)?;
+            if r.bit("vector_present")? && !position::point(r, "position")? {
+                return Some(false);
             }
         }
         "music-variables-component" => {
@@ -333,14 +410,24 @@ pub(crate) fn read_primary(
             r.r("index", 6)?;
             r.r("value", 32)?;
         }
-        "high-frequency" => {
-            let value = r.r("counter", 8)?;
-            r.publish_component(FilmComponentObservation::Probe {
-                archetype,
-                component: ProbeComponent::HighFrequency,
-                values: vec![value],
-            });
-        }
+        "high-frequency" => match archetype {
+            3 => {
+                // FUN_142ed4880, shared fields of archetype 3's frequency state.
+                r.r("value16", 16)?;
+                r.r("value8", 8)?;
+                r.r("value2", 2)?;
+            }
+            4 => {
+                // FUN_14076d034 is a different descriptor with the same name.
+                let value = r.r("counter", 8)?;
+                r.publish_component(FilmComponentObservation::Probe {
+                    archetype,
+                    component: ProbeComponent::HighFrequency,
+                    values: vec![value],
+                });
+            }
+            _ => return Some(false),
+        },
         "animated-mesh-dynamic-state-component" => {
             r.r("state", 8)?;
             r.bit("flag")?;
@@ -366,4 +453,10 @@ pub(crate) fn read_primary(
         _ => return Some(false),
     }
     Some(true)
+}
+
+fn low_frequency_orientation(r: &mut ComponentReader<'_>, name: &str) -> Option<()> {
+    r.gate(&format!("{name}.forward"), 19, false)?;
+    r.r(&format!("{name}.roll"), 8)?;
+    Some(())
 }

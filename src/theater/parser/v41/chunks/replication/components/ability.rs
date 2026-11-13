@@ -1,11 +1,11 @@
 //! Predicted ability and non-predicted grapple body grammar.
-use super::orientation::media_frame;
-use super::position::absolute_payload;
+use super::position;
 use super::reader::ComponentReader;
 use super::widths::signed_skip;
+use crate::theater::parser::packet::BitRange;
 use crate::theater::parser::v41::reference::diagnostics::WidthPurpose;
 use crate::theater::parser::v41::reference::observations::{
-    AbilityNonPredictedState, FilmComponentObservation, MovementComponent,
+    AbilityNonPredictedState, FilmComponentObservation, MovementComponent, UnitReference,
 };
 
 pub(crate) fn predicted(r: &mut ComponentReader<'_>) -> Option<bool> {
@@ -19,12 +19,12 @@ pub(crate) fn predicted(r: &mut ComponentReader<'_>) -> Option<bool> {
             reference = r.r("reference", 24)?;
         }
         3 => {
+            // FUN_140f03dfc clears dst[2]/dst[3] before FUN_142f262d4
+            // tests them. The six-bit value does not enable extra target
+            // fields; both row-version paths reach this same body.
             r.gate("value", 6, true)?;
-            if r.bit("position.present")? {
-                if r.position_encoding.is_none() {
-                    return Some(false);
-                }
-                media_frame(r)?;
+            if r.bit("position.present")? && !position::contextual_point(r, "position")? {
+                return Some(false);
             }
         }
         _ => {}
@@ -45,44 +45,9 @@ pub(crate) fn non_predicted(r: &mut ComponentReader<'_>, level: u32) -> Option<b
     };
     let status = (|| {
         if state.tag == 3 && r.position_encoding.is_none_or(|e| e.bodies.ability_anchor) {
-            let Some(widths) = r
-                .reference_widths
-                .map(|w| w.movement.world_object.axis_bits)
-                .or_else(|| {
-                    r.position_encoding
-                        .and_then(|e| e.world_axis_bits)
-                        .map(|w| w.map(|v| v as u64))
-                })
-            else {
-                return Some(false);
-            };
             state.body_walked = true;
-            let inner = r.r("inner", 3)? as u32;
-            state.inner = Some(inner);
-            state.flags = r.r("flags", 3)? as u32;
-            if state.flags != 0 {
+            if !anchor_body(r, &mut state)? {
                 return Some(false);
-            }
-            for (i, raw) in widths.into_iter().enumerate() {
-                let width = r.reference_position_width(raw, "world axes")?;
-                state.position[i] = r.r_wide(&format!("position[{i}]"), width)? as u32;
-            }
-            state.mid = r.r("mid", 7)? as u32;
-            state.value8 = r.gated_value("value8", 8, true)?.map(|v| v as u32);
-            match inner {
-                1 => {}
-                2 => {
-                    for i in 0..3 {
-                        if !r.bit(&format!("vector[{i}].constant"))? {
-                            let direction = r.r(&format!("vector[{i}].direction"), 24)? as u32;
-                            let magnitude = r.r(&format!("vector[{i}].magnitude"), 12)? as u32;
-                            state.vectors[i] = Some([direction, magnitude]);
-                        }
-                    }
-                    state.packed = r.r("packed", 24)? as u32;
-                    state.tail = r.r("tail9", 9)? as u32;
-                }
-                _ => return Some(false),
             }
             state.body_ok = true;
         }
@@ -99,6 +64,93 @@ pub(crate) fn non_predicted(r: &mut ComponentReader<'_>, level: u32) -> Option<b
     status
 }
 
+/// FUN_142f25e90: encoded label, optional source attachment and place, six
+/// recorded flags, then one of eight bodies. Labels 7/8 have no extra body.
+fn anchor_body(r: &mut ComponentReader<'_>, state: &mut AbilityNonPredictedState) -> Option<bool> {
+    let inner = r.r("inner", 3)? as u32;
+    state.inner = Some(inner);
+    let reference = anchor_reference(r, "reference", 1)?;
+    let attached = reference.present;
+    state.reference = Some(reference);
+    let start = usize::try_from(r.cursor.position).ok()?;
+    if attached {
+        // FUN_142f04664 uses this parent-local form even in snapshots.
+        r.r("position.local_region", 2)?;
+        r.words("position.local_axes", 3, 13)?;
+        r.gate("position.local_extra", 16, true)?;
+    } else if !position::point(r, "position")? {
+        return Some(false);
+    }
+    state.position = Some(BitRange {
+        start,
+        end: usize::try_from(r.cursor.position).ok()?,
+    });
+    state.flags = Some(r.r("flags", 6)? as u32);
+    match inner + 1 {
+        1 => state.value8 = r.gated_value("value8", 8, true)?.map(|v| v as u32),
+        2 => {
+            state.source = Some(anchor_reference(r, "source", 5)?);
+            state.value8 = r.gated_value("value8", 8, true)?.map(|v| v as u32);
+        }
+        3 => {
+            state.target = Some(anchor_reference(r, "target", 0)?);
+            state.source = Some(anchor_reference(r, "source", 5)?);
+            for i in 0..3 {
+                state.vectors[i] = anchor_vector(r, i)?;
+            }
+            state.packed = Some(r.r("packed", 24)? as u32);
+            state.tail = Some(r.r("tail9", 9)? as u32);
+        }
+        4 | 5 => {
+            state.source = Some(anchor_reference(r, "source", 5)?);
+            state.vectors[0] = anchor_vector(r, 0)?;
+            let start = usize::try_from(r.cursor.position).ok()?;
+            if !position::point(r, "destination")? {
+                return Some(false);
+            }
+            state.destination = Some(BitRange {
+                start,
+                end: usize::try_from(r.cursor.position).ok()?,
+            });
+            state.packed = Some(r.r("packed", 24)? as u32);
+            state.tail = Some(r.r("tail9", 9)? as u32);
+        }
+        6 => {
+            state.value8 = r.gated_value("value8", 8, true)?.map(|v| v as u32);
+            if state.value8.is_none() {
+                state.source = Some(anchor_reference(r, "source", 5)?);
+            }
+            state.target = Some(anchor_reference(r, "target", 0)?);
+            for i in 0..2 {
+                state.vectors[i] = anchor_vector(r, i)?;
+            }
+            state.flag = Some(r.bit("flag")?);
+            state.packed = Some(r.r("packed", 24)? as u32);
+        }
+        _ => {}
+    }
+    Some(true)
+}
+
+fn anchor_reference(
+    r: &mut ComponentReader<'_>,
+    name: &str,
+    category: u8,
+) -> Option<UnitReference> {
+    r.optional_handle(name, category)?;
+    r.references.last().cloned()
+}
+
+fn anchor_vector(r: &mut ComponentReader<'_>, index: usize) -> Option<Option<[u32; 2]>> {
+    if r.bit(&format!("vector[{index}].constant"))? {
+        return Some(None);
+    }
+    Some(Some([
+        r.r(&format!("vector[{index}].direction"), 24)? as u32,
+        r.r(&format!("vector[{index}].magnitude"), 12)? as u32,
+    ]))
+}
+
 pub(crate) fn mobility(r: &mut ComponentReader<'_>) -> Option<bool> {
     let active = r.bit("active")?;
     let flag = r.bit("flag")?;
@@ -110,22 +162,24 @@ pub(crate) fn mobility(r: &mut ComponentReader<'_>) -> Option<bool> {
     if !active {
         return Some(true);
     }
-    if r.position_encoding.is_none() {
-        return Some(false);
-    }
     r.optional_handle("reference", 0)?;
-    let bodies = &r.position_encoding?.bodies;
-    if !bodies.mobility {
-        return mobility_extra(r, bodies.mobility_extra_bits);
+    if let Some(encoding) = r.position_encoding
+        && !encoding.bodies.mobility
+    {
+        return mobility_extra(r, encoding.bodies.mobility_extra_bits);
     }
     r.gate("index", 10, true)?;
     if !r.bit("keep_transform")? {
-        mobility_position(r)?;
+        if !position::contextual_point(r, "transform.position")? {
+            return Some(false);
+        }
         r.gate("direction", 19, false)?;
         r.r("roll", 8)?;
     }
     r.words("vector_bits", 3, 32)?;
-    mobility_position(r)?;
+    if !position::contextual_point(r, "position")? {
+        return Some(false);
+    }
     r.words("matrix", 9, 12)?;
     r.words("packed", 2, 24)?;
     r.words("vector", 3, 12)?;
@@ -152,14 +206,5 @@ fn mobility_extra(r: &mut ComponentReader<'_>, width: i64) -> Option<bool> {
     Some(true)
 }
 
-fn mobility_position(r: &mut ComponentReader<'_>) -> Option<()> {
-    let encoding = r.position_encoding?;
-    if encoding.full_precision_gate() {
-        r.words("mobility.position_bits", 3, 32)?;
-    } else {
-        // Both sites pass level 0x10: absolute world-position widths,
-        // including build-default widths when the region gate is set.
-        absolute_payload(r, encoding)?;
-    }
-    Some(())
-}
+#[cfg(test)]
+mod tests;

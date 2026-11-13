@@ -1,0 +1,561 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "cases": [
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 0,
+      "frame": 0,
+      "hex": "000000",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        0,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 0,
+      "frame": 1,
+      "hex": "0003ff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        0,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4539628974212390913,
+      "frame": 2,
+      "hex": "000400",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        1,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4539628974212390913,
+      "frame": 3,
+      "hex": "0007ff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        1,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4546384648564912130,
+      "frame": 4,
+      "hex": "000800",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        2,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4546384648564912130,
+      "frame": 5,
+      "hex": "000bff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        2,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4572315397634140225,
+      "frame": 6,
+      "hex": "014400",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        81,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4572315397634140225,
+      "frame": 7,
+      "hex": "0147ff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        81,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4572385774969301185,
+      "frame": 8,
+      "hex": "014800",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        82,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4572385774969301185,
+      "frame": 9,
+      "hex": "014bff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        82,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4602678269349715967,
+      "frame": 10,
+      "hex": "7ffc00",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 50,
+      "values": [
+        8191,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4602678269349715967,
+      "frame": 11,
+      "hex": "7fffff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 50,
+      "values": [
+        8191,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4602679094084112385,
+      "frame": 12,
+      "hex": "800000",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 50,
+      "values": [
+        8192,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4602679094084112385,
+      "frame": 13,
+      "hex": "8003ff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 50,
+      "values": [
+        8192,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4607181594065620991,
+      "frame": 14,
+      "hex": "fff400",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16381,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4607181594065620991,
+      "frame": 15,
+      "hex": "fff7ff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16381,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4607182143888551936,
+      "frame": 16,
+      "hex": "fff800",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16382,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4607182143888551936,
+      "frame": 17,
+      "hex": "fffbff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16382,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 4607182418800017408,
+      "frame": 18,
+      "hex": "fffc00",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16383,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 1023,
+      "end": 24,
+      "energy_bits": 4607182418800017408,
+      "frame": 19,
+      "hex": "ffffff",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 100,
+      "values": [
+        16383,
+        1023
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 10,
+      "end": 24,
+      "energy_bits": 4602679094084112385,
+      "frame": 20,
+      "hex": "80000a",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 50,
+      "values": [
+        8192,
+        10
+      ]
+    },
+    {
+      "bit_len": 10,
+      "delay": 9,
+      "end": 10,
+      "energy_bits": null,
+      "frame": 21,
+      "hex": "0240",
+      "list": [
+        1
+      ],
+      "percent": null,
+      "values": [
+        null,
+        9
+      ]
+    },
+    {
+      "bit_len": 10,
+      "delay": 8,
+      "end": 10,
+      "energy_bits": null,
+      "frame": 22,
+      "hex": "0200",
+      "list": [
+        1
+      ],
+      "percent": null,
+      "values": [
+        null,
+        8
+      ]
+    },
+    {
+      "bit_len": 14,
+      "delay": null,
+      "end": 14,
+      "energy_bits": 4602679094084112385,
+      "frame": 23,
+      "hex": "8000",
+      "list": [
+        0
+      ],
+      "percent": 50,
+      "values": [
+        8192,
+        null
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 0,
+      "frame": 24,
+      "hex": "000000",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        0,
+        0
+      ]
+    },
+    {
+      "bit_len": 24,
+      "delay": 0,
+      "end": 24,
+      "energy_bits": 0,
+      "frame": 25,
+      "hex": "000000",
+      "list": [
+        0,
+        1
+      ],
+      "percent": 0,
+      "values": [
+        0,
+        0
+      ]
+    }
+  ],
+  "equipment": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1023
+    ],
+    [
+      2,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      1023
+    ],
+    [
+      4,
+      0,
+      0
+    ],
+    [
+      5,
+      0,
+      1023
+    ],
+    [
+      6,
+      0,
+      0
+    ],
+    [
+      7,
+      0,
+      1023
+    ],
+    [
+      8,
+      0,
+      0
+    ],
+    [
+      9,
+      0,
+      1023
+    ],
+    [
+      10,
+      50,
+      0
+    ],
+    [
+      11,
+      50,
+      1023
+    ],
+    [
+      12,
+      50,
+      0
+    ],
+    [
+      13,
+      50,
+      1023
+    ],
+    [
+      14,
+      100,
+      0
+    ],
+    [
+      15,
+      100,
+      1023
+    ],
+    [
+      16,
+      100,
+      0
+    ],
+    [
+      17,
+      100,
+      1023
+    ],
+    [
+      18,
+      100,
+      0
+    ],
+    [
+      19,
+      100,
+      1023
+    ],
+    [
+      20,
+      50,
+      10
+    ],
+    [
+      23,
+      50,
+      8
+    ],
+    [
+      24,
+      0,
+      0
+    ]
+  ]
+}

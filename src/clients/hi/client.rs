@@ -1,4 +1,4 @@
-use std::{io::Read, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
@@ -16,14 +16,13 @@ use super::models::{
     MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
     PlayerChallengeDecks, PlayerCustomizationCollection, PlayerMatchHistory, PlayerOperationPasses,
     PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
-    SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset, UgcAssetKind, UgcSearchResults,
-    UserInfo,
+    RawChunkKind, RawFilmChunk, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset,
+    UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use super::pager::MatchHistoryPager;
 use super::player::Player;
 use super::rate_limit::RateLimiter;
 use crate::auth::{HaloAuthClient, HaloCredentials};
-use crate::theater::film::{ChunkKind, FilmChunk};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 /// Default per-origin request rate.
@@ -488,20 +487,14 @@ impl HaloInfiniteClient {
         &self,
         film: &FilmManifest,
         chunk: &FilmChunkResponse,
-    ) -> Result<FilmChunk, InfiniteClientError> {
+    ) -> Result<RawFilmChunk, InfiniteClientError> {
         let base = film.blob_storage_path_prefix.trim_end_matches('/');
         let path = format!("/{}", chunk.file_relative_path.trim_start_matches('/'));
-        let compressed = self.get_bytes_with_clearance(base, &path).await?;
-        let mut decoder = flate2::read::ZlibDecoder::new(compressed.as_slice());
-        let mut data = Vec::new();
-        decoder
-            .read_to_end(&mut data)
-            .map_err(|error| InfiniteClientError::FilmDecompression(Arc::new(error)))?;
-        Ok(FilmChunk {
-            kind: ChunkKind::try_from(chunk.chunk_type)
-                .map_err(|_| InfiniteClientError::FilmChunkKind(chunk.chunk_type))?,
-            index: Some(i64::from(chunk.index)),
-            start_ms: Some(chunk.start_time_offset_ms),
+        let data = self.get_bytes_with_clearance(base, &path).await?;
+        Ok(RawFilmChunk {
+            kind: RawChunkKind(chunk.chunk_type),
+            index: chunk.index,
+            start_ms: chunk.start_time_offset_ms,
             data,
         })
     }
@@ -510,7 +503,7 @@ impl HaloInfiniteClient {
     pub async fn film_chunks(
         &self,
         film: &FilmManifest,
-    ) -> Result<Vec<FilmChunk>, InfiniteClientError> {
+    ) -> Result<Vec<RawFilmChunk>, InfiniteClientError> {
         let mut chunks = Vec::with_capacity(film.custom_data.chunks.len());
         for chunk in &film.custom_data.chunks {
             chunks.push(self.film_chunk(film, chunk).await?);
@@ -1007,7 +1000,7 @@ impl HaloInfiniteClient {
     /// Fetches the progression document referenced by a CSR calendar entry.
     ///
     /// This intentionally stays untyped raw JSON. No community Halo Infinite client has ever
-    /// confirmed a schema for it — even the most complete one (OpenSpartan/grunt) notes this
+    /// confirmed a schema for it — even the most complete one (reference client) notes this
     /// endpoint returns a 403 Forbidden for them. It may be genuinely inaccessible at the auth
     /// tier this crate uses, not merely unexplored, so a guessed struct would risk being simply
     /// wrong.

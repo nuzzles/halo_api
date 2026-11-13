@@ -1,0 +1,212 @@
+[
+  {
+    "name": "absent",
+    "hex": "7f6e5d00",
+    "bit_len": 26,
+    "prefix_bits": 1
+  },
+  {
+    "name": "empty",
+    "hex": "ff6e5d4c0fedcba0",
+    "bit_len": 61,
+    "prefix_bits": 36
+  },
+  {
+    "name": "zero-key",
+    "hex": "800000000fedcba0",
+    "bit_len": 61,
+    "prefix_bits": 36
+  },
+  {
+    "name": "empty-argument",
+    "hex": "ff6e5d4c11fdb974",
+    "bit_len": 64,
+    "prefix_bits": 39
+  },
+  {
+    "name": "player-None",
+    "hex": "ff6e5d4c13fedcba00",
+    "bit_len": 65,
+    "prefix_bits": 40
+  },
+  {
+    "name": "player-0",
+    "hex": "ff6e5d4c1207f6e5d0",
+    "bit_len": 70,
+    "prefix_bits": 45
+  },
+  {
+    "name": "player-1",
+    "hex": "ff6e5d4c120ff6e5d0",
+    "bit_len": 70,
+    "prefix_bits": 45
+  },
+  {
+    "name": "player-15",
+    "hex": "ff6e5d4c127ff6e5d0",
+    "bit_len": 70,
+    "prefix_bits": 45
+  },
+  {
+    "name": "player-31",
+    "hex": "ff6e5d4c12fff6e5d0",
+    "bit_len": 70,
+    "prefix_bits": 45
+  },
+  {
+    "name": "int-0",
+    "hex": "ff6e5d4c1400000000fedcba00",
+    "bit_len": 97,
+    "prefix_bits": 72
+  },
+  {
+    "name": "int-1",
+    "hex": "ff6e5d4c1400000001fedcba00",
+    "bit_len": 97,
+    "prefix_bits": 72
+  },
+  {
+    "name": "int-2147483647",
+    "hex": "ff6e5d4c147ffffffffedcba00",
+    "bit_len": 97,
+    "prefix_bits": 72
+  },
+  {
+    "name": "int-2147483648",
+    "hex": "ff6e5d4c1480000000fedcba00",
+    "bit_len": 97,
+    "prefix_bits": 72
+  },
+  {
+    "name": "int-4294967295",
+    "hex": "ff6e5d4c14fffffffffedcba00",
+    "bit_len": 97,
+    "prefix_bits": 72
+  },
+  {
+    "name": "real-0",
+    "hex": "ff6e5d4c15000000fedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-1",
+    "hex": "ff6e5d4c15000001fedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-8388607",
+    "hex": "ff6e5d4c157ffffffedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-8388608",
+    "hex": "ff6e5d4c15800000fedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-8388609",
+    "hex": "ff6e5d4c15800001fedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-16777214",
+    "hex": "ff6e5d4c15fffffefedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "real-16777215",
+    "hex": "ff6e5d4c15fffffffedcba00",
+    "bit_len": 89,
+    "prefix_bits": 64
+  },
+  {
+    "name": "kind-3-0",
+    "hex": "ff6e5d4c1600000001fdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-3-4294967295",
+    "hex": "ff6e5d4c17fffffffffdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-4-0",
+    "hex": "ff6e5d4c1800000001fdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-4-4294967295",
+    "hex": "ff6e5d4c19fffffffffdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-5-0",
+    "hex": "ff6e5d4c1a00000001fdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-5-4294967295",
+    "hex": "ff6e5d4c1bfffffffffdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-6-0",
+    "hex": "ff6e5d4c1c00000001fdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-6-4294967295",
+    "hex": "ff6e5d4c1dfffffffffdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-7-0",
+    "hex": "ff6e5d4c1e00000001fdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "kind-7-4294967295",
+    "hex": "ff6e5d4c1ffffffffffdb974",
+    "bit_len": 96,
+    "prefix_bits": 71
+  },
+  {
+    "name": "mixed-seven",
+    "hex": "ff6e5d4c705f34800000005ffffff600000001c48d159e3fb72ea6af37bc4bbd5b7dde00",
+    "bit_len": 286,
+    "prefix_bits": 186
+  },
+  {
+    "name": "repeated-players",
+    "hex": "ff6e5d4c72391c8e472391c8ffdb9740",
+    "bit_len": 124,
+    "prefix_bits": 99
+  },
+  {
+    "name": "all-unknown",
+    "hex": "ff6e5d4c480000000340000000b00000001f00000004fedcba00",
+    "bit_len": 201,
+    "prefix_bits": 176
+  },
+  {
+    "name": "absent-with-body",
+    "hex": "7f6e5d4d5e6f78977ab6fbbc00",
+    "bit_len": 101,
+    "prefix_bits": 1
+  }
+]

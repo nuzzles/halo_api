@@ -1,7 +1,7 @@
 use std::{borrow::Cow, collections::BTreeMap};
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
 const WAYPOINT_FILE_BASE_URL: &str = "https://gamecms-hacs.svc.halowaypoint.com/hi/Waypoint/file";
 
@@ -1265,8 +1265,48 @@ pub struct FilmCustomData {
     pub film_major_version: i32,
 }
 
+/// One downloaded film chunk containing a zlib stream.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RawFilmChunk {
+    /// Numeric manifest chunk kind, preserved even when unrecognized.
+    pub kind: RawChunkKind,
+    /// Numeric chunk index assigned by the film manifest.
+    pub index: i32,
+    /// Chunk start-time offset in milliseconds from the manifest.
+    /// Packet timestamps are separate values inside the chunk.
+    pub start_ms: i64,
+    /// Downloaded zlib bytes, replaced by decompressed bytes when
+    /// [`Self::inflate`] consumes the chunk.
+    pub data: Vec<u8>,
+}
+
+/// Numeric chunk kind supplied by the film manifest, including unknown values.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct RawChunkKind(pub i32);
+
+impl RawChunkKind {
+    /// Registry/bootstrap chunk code.
+    pub const REGISTRY: Self = Self(1);
+    /// Replication stream chunk code.
+    pub const REPLICATION: Self = Self(2);
+    /// Summary/highlights chunk code.
+    pub const SUMMARY: Self = Self(3);
+
+    /// Return the original manifest code.
+    pub const fn raw(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<i32> for RawChunkKind {
+    fn from(value: i32) -> Self {
+        Self(value)
+    }
+}
+
 /// Chunk metadata exactly as returned in the film-manifest response.
-/// Downloading it produces the canonical `theater::film::FilmChunk`.
+/// Downloading it produces a [`RawFilmChunk`].
 #[derive(Debug, Clone, Deserialize)]
 pub struct FilmChunkResponse {
     #[serde(rename = "Index")]
@@ -2476,7 +2516,7 @@ pub struct PlayerOperationPass {
 /// A player's active, upcoming, and completed challenge decks.
 ///
 /// Field names confirmed by cross-checking two independent community reverse-engineerings
-/// (OpenSpartan/grunt and SpartanReport) that agree on this shape.
+/// (reference client and SpartanReport) that agree on this shape.
 #[derive(Debug, Clone, Deserialize)]
 pub struct PlayerChallengeDecks {
     #[serde(rename = "AssignedDecks")]

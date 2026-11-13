@@ -70,7 +70,9 @@ pub(crate) fn read_primary(
         }
         "equipment-tracked-object-handles-stack-component" => {
             let count = r.r("count", 4)?;
-            for i in 0..=count {
+            // FUN_140f72dec advances before comparing the end pointer: count
+            // is the number of entries, including zero for an empty stack.
+            for i in 0..count {
                 r.inline_optional_handle(&format!("objects[{i}]"), 0)?;
             }
         }

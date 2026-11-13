@@ -1,0 +1,41 @@
+{
+  "commit": "413971bcc485be53a2fa8cf229e170539a5146f8",
+  "blobs": {
+    "orientation_frame.go": "fe2f382c1bd333ebea227d205e7196cf7662537b",
+    "components_managed_object.go": "8e0e8742f54a0f81fb222ebd544b3f8e97ae51ad"
+  },
+  "cases": [
+    {
+      "name": "config-quarter",
+      "roll_bits": 3217625051
+    },
+    {
+      "name": "config-zero",
+      "roll_bits": 3226013659
+    },
+    {
+      "name": "config-half",
+      "roll_bits": 0
+    },
+    {
+      "name": "config-last",
+      "roll_bits": 1078530011
+    },
+    {
+      "name": "config-up",
+      "roll_bits": 3226013659
+    },
+    {
+      "name": "raw-overridden-default",
+      "roll_bits": 3226013658
+    },
+    {
+      "name": "raw-overridden-up",
+      "roll_bits": 3226013658
+    },
+    {
+      "name": "delta-overridden",
+      "roll_bits": 3226013658
+    }
+  ]
+}

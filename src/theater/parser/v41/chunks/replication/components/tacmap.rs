@@ -6,10 +6,22 @@ use super::reader::ComponentReader;
 pub(crate) fn read_primary(
     r: &mut ComponentReader<'_>,
     name: &str,
-    _level: u32,
+    level: u32,
     _archetype: u32,
 ) -> Option<bool> {
     match name {
+        "tacmap-backmenulocked-state" => {
+            r.r("state", 16)?;
+        }
+        "tacmap-mapdismissallock" | "tacmap-playercontrol" | "tacmap-tooltip-state" => {
+            for i in 0..32 {
+                r.gate(&format!("entries[{i}].player"), 5, false)?;
+                if name == "tacmap-tooltip-state" {
+                    r.bit(&format!("entries[{i}].flag"))?;
+                    r.words(&format!("entries[{i}].values"), 2, 32)?;
+                }
+            }
+        }
         "tacmap-queuedreplaymission" | "tacmap-backmenu-openoverride" => {
             for i in 0..32 {
                 r.gate(&format!("entry[{i}].handle"), 5, false)?;
@@ -22,19 +34,17 @@ pub(crate) fn read_primary(
             }
         }
         "tacmap-cooptetherarea" => {
-            if r.position_encoding.is_none() {
+            if !position::point(r, "position")? {
                 return Some(false);
             }
-            position::traversal_payload(r)?;
             r.words("extent", 2, 12)?;
         }
         "tacmap-displayasset" => {
-            if r.position_encoding.is_none() {
-                return Some(false);
-            }
             r.words("references", 2, 32)?;
             r.r("kind", 2)?;
-            position::traversal_payload(r)?;
+            if !position::point(r, "position")? {
+                return Some(false);
+            }
             for i in 0..2 {
                 r.r(&format!("asset[{i}].id"), 64)?;
                 r.r(&format!("asset[{i}].word"), 32)?;
@@ -42,12 +52,14 @@ pub(crate) fn read_primary(
             r.bit("flag")?;
         }
         "tacmap-waypointstate" => {
-            if r.position_encoding.is_none() {
-                return Some(false);
-            }
             r.bit("flag")?;
             r.r("reference", 32)?;
-            position::traversal_payload(r)?;
+            if !position::point(r, "position")? {
+                return Some(false);
+            }
+            if level > 1 {
+                r.bit("tail")?;
+            }
         }
         "tacmap-iconlodthresholds" => {
             let count = r.r("count", 5)? as usize;

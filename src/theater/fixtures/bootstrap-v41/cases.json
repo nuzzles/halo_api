@@ -1,0 +1,2056 @@
+[
+  {
+    "name": "flag/False",
+    "bit_len": 4769,
+    "fields": [
+      {
+        "kind": {
+          "EventVersion": 0
+        },
+        "bit": 0,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 1
+        },
+        "bit": 32,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 2
+        },
+        "bit": 64,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 3
+        },
+        "bit": 96,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 4
+        },
+        "bit": 128,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 5
+        },
+        "bit": 160,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 6
+        },
+        "bit": 192,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 7
+        },
+        "bit": 224,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 8
+        },
+        "bit": 256,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 9
+        },
+        "bit": 288,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 10
+        },
+        "bit": 320,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 11
+        },
+        "bit": 352,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 12
+        },
+        "bit": 384,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 13
+        },
+        "bit": 416,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 14
+        },
+        "bit": 448,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 15
+        },
+        "bit": 480,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 16
+        },
+        "bit": 512,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 17
+        },
+        "bit": 544,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 18
+        },
+        "bit": 576,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 19
+        },
+        "bit": 608,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 20
+        },
+        "bit": 640,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 21
+        },
+        "bit": 672,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 22
+        },
+        "bit": 704,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 23
+        },
+        "bit": 736,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 24
+        },
+        "bit": 768,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 25
+        },
+        "bit": 800,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 26
+        },
+        "bit": 832,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 27
+        },
+        "bit": 864,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 28
+        },
+        "bit": 896,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 29
+        },
+        "bit": 928,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 30
+        },
+        "bit": 960,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 31
+        },
+        "bit": 992,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 32
+        },
+        "bit": 1024,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 33
+        },
+        "bit": 1056,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 34
+        },
+        "bit": 1088,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 35
+        },
+        "bit": 1120,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 36
+        },
+        "bit": 1152,
+        "width": 32,
+        "hex": "03000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 37
+        },
+        "bit": 1184,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 38
+        },
+        "bit": 1216,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 39
+        },
+        "bit": 1248,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 40
+        },
+        "bit": 1280,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 41
+        },
+        "bit": 1312,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 42
+        },
+        "bit": 1344,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 43
+        },
+        "bit": 1376,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 44
+        },
+        "bit": 1408,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 45
+        },
+        "bit": 1440,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 46
+        },
+        "bit": 1472,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 47
+        },
+        "bit": 1504,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 48
+        },
+        "bit": 1536,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 49
+        },
+        "bit": 1568,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 50
+        },
+        "bit": 1600,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 51
+        },
+        "bit": 1632,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 52
+        },
+        "bit": 1664,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 53
+        },
+        "bit": 1696,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 54
+        },
+        "bit": 1728,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 55
+        },
+        "bit": 1760,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 56
+        },
+        "bit": 1792,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 57
+        },
+        "bit": 1824,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 58
+        },
+        "bit": 1856,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 59
+        },
+        "bit": 1888,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 60
+        },
+        "bit": 1920,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 61
+        },
+        "bit": 1952,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 62
+        },
+        "bit": 1984,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 63
+        },
+        "bit": 2016,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 64
+        },
+        "bit": 2048,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 65
+        },
+        "bit": 2080,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 66
+        },
+        "bit": 2112,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 67
+        },
+        "bit": 2144,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 68
+        },
+        "bit": 2176,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 69
+        },
+        "bit": 2208,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 70
+        },
+        "bit": 2240,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 71
+        },
+        "bit": 2272,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 72
+        },
+        "bit": 2304,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 73
+        },
+        "bit": 2336,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 74
+        },
+        "bit": 2368,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 75
+        },
+        "bit": 2400,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 76
+        },
+        "bit": 2432,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 77
+        },
+        "bit": 2464,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 78
+        },
+        "bit": 2496,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 79
+        },
+        "bit": 2528,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 80
+        },
+        "bit": 2560,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 81
+        },
+        "bit": 2592,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 82
+        },
+        "bit": 2624,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 83
+        },
+        "bit": 2656,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 84
+        },
+        "bit": 2688,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 85
+        },
+        "bit": 2720,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 86
+        },
+        "bit": 2752,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 87
+        },
+        "bit": 2784,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 88
+        },
+        "bit": 2816,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 89
+        },
+        "bit": 2848,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 90
+        },
+        "bit": 2880,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 91
+        },
+        "bit": 2912,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 92
+        },
+        "bit": 2944,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 93
+        },
+        "bit": 2976,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 94
+        },
+        "bit": 3008,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 95
+        },
+        "bit": 3040,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 96
+        },
+        "bit": 3072,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 97
+        },
+        "bit": 3104,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 98
+        },
+        "bit": 3136,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 99
+        },
+        "bit": 3168,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 100
+        },
+        "bit": 3200,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 101
+        },
+        "bit": 3232,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 102
+        },
+        "bit": 3264,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 103
+        },
+        "bit": 3296,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 104
+        },
+        "bit": 3328,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 105
+        },
+        "bit": 3360,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 106
+        },
+        "bit": 3392,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 107
+        },
+        "bit": 3424,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 108
+        },
+        "bit": 3456,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 109
+        },
+        "bit": 3488,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 110
+        },
+        "bit": 3520,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 111
+        },
+        "bit": 3552,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 112
+        },
+        "bit": 3584,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 113
+        },
+        "bit": 3616,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 114
+        },
+        "bit": 3648,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 115
+        },
+        "bit": 3680,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 116
+        },
+        "bit": 3712,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 117
+        },
+        "bit": 3744,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 118
+        },
+        "bit": 3776,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 119
+        },
+        "bit": 3808,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 120
+        },
+        "bit": 3840,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 121
+        },
+        "bit": 3872,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 122
+        },
+        "bit": 3904,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": "BuildVersion",
+        "bit": 3936,
+        "width": 256,
+        "hex": "362e31303032362e31383431312e3000ffffffffffffffffffffffffffffffff"
+      },
+      {
+        "kind": "BuildBranch",
+        "bit": 4192,
+        "width": 256,
+        "hex": "48495f315f31335f3000fefefefefefefefefefefefefefefefefefefefefefe"
+      },
+      {
+        "kind": "BuildFlavor",
+        "bit": 4448,
+        "width": 256,
+        "hex": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"
+      },
+      {
+        "kind": "BuildId",
+        "bit": 4704,
+        "width": 32,
+        "hex": "98abcdfe"
+      },
+      {
+        "kind": "Changelist",
+        "bit": 4736,
+        "width": 32,
+        "hex": "21436587"
+      },
+      {
+        "kind": "CorruptionChecks",
+        "bit": 4768,
+        "width": 1,
+        "hex": "00"
+      }
+    ],
+    "hex": "0000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120300000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffff362e31303032362e31383431312e3000ffffffffffffffffffffffffffffffff48495f315f31335f3000fefefefefefefefefefefefefefefefefefefefefefe808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f98abcdfe2143658700"
+  },
+  {
+    "name": "flag/True",
+    "bit_len": 4769,
+    "fields": [
+      {
+        "kind": {
+          "EventVersion": 0
+        },
+        "bit": 0,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 1
+        },
+        "bit": 32,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 2
+        },
+        "bit": 64,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 3
+        },
+        "bit": 96,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 4
+        },
+        "bit": 128,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 5
+        },
+        "bit": 160,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 6
+        },
+        "bit": 192,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 7
+        },
+        "bit": 224,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 8
+        },
+        "bit": 256,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 9
+        },
+        "bit": 288,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 10
+        },
+        "bit": 320,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 11
+        },
+        "bit": 352,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 12
+        },
+        "bit": 384,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 13
+        },
+        "bit": 416,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 14
+        },
+        "bit": 448,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 15
+        },
+        "bit": 480,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 16
+        },
+        "bit": 512,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 17
+        },
+        "bit": 544,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 18
+        },
+        "bit": 576,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 19
+        },
+        "bit": 608,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 20
+        },
+        "bit": 640,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 21
+        },
+        "bit": 672,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 22
+        },
+        "bit": 704,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 23
+        },
+        "bit": 736,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 24
+        },
+        "bit": 768,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 25
+        },
+        "bit": 800,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 26
+        },
+        "bit": 832,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 27
+        },
+        "bit": 864,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 28
+        },
+        "bit": 896,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 29
+        },
+        "bit": 928,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 30
+        },
+        "bit": 960,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 31
+        },
+        "bit": 992,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 32
+        },
+        "bit": 1024,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 33
+        },
+        "bit": 1056,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 34
+        },
+        "bit": 1088,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 35
+        },
+        "bit": 1120,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 36
+        },
+        "bit": 1152,
+        "width": 32,
+        "hex": "03000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 37
+        },
+        "bit": 1184,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 38
+        },
+        "bit": 1216,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 39
+        },
+        "bit": 1248,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 40
+        },
+        "bit": 1280,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 41
+        },
+        "bit": 1312,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 42
+        },
+        "bit": 1344,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 43
+        },
+        "bit": 1376,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 44
+        },
+        "bit": 1408,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 45
+        },
+        "bit": 1440,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 46
+        },
+        "bit": 1472,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 47
+        },
+        "bit": 1504,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 48
+        },
+        "bit": 1536,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 49
+        },
+        "bit": 1568,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 50
+        },
+        "bit": 1600,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 51
+        },
+        "bit": 1632,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 52
+        },
+        "bit": 1664,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 53
+        },
+        "bit": 1696,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 54
+        },
+        "bit": 1728,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 55
+        },
+        "bit": 1760,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 56
+        },
+        "bit": 1792,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 57
+        },
+        "bit": 1824,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 58
+        },
+        "bit": 1856,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 59
+        },
+        "bit": 1888,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 60
+        },
+        "bit": 1920,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 61
+        },
+        "bit": 1952,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 62
+        },
+        "bit": 1984,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 63
+        },
+        "bit": 2016,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 64
+        },
+        "bit": 2048,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 65
+        },
+        "bit": 2080,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 66
+        },
+        "bit": 2112,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 67
+        },
+        "bit": 2144,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 68
+        },
+        "bit": 2176,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 69
+        },
+        "bit": 2208,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 70
+        },
+        "bit": 2240,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 71
+        },
+        "bit": 2272,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 72
+        },
+        "bit": 2304,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 73
+        },
+        "bit": 2336,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 74
+        },
+        "bit": 2368,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 75
+        },
+        "bit": 2400,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 76
+        },
+        "bit": 2432,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 77
+        },
+        "bit": 2464,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 78
+        },
+        "bit": 2496,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 79
+        },
+        "bit": 2528,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 80
+        },
+        "bit": 2560,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 81
+        },
+        "bit": 2592,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 82
+        },
+        "bit": 2624,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 83
+        },
+        "bit": 2656,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 84
+        },
+        "bit": 2688,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 85
+        },
+        "bit": 2720,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 86
+        },
+        "bit": 2752,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 87
+        },
+        "bit": 2784,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 88
+        },
+        "bit": 2816,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 89
+        },
+        "bit": 2848,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 90
+        },
+        "bit": 2880,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 91
+        },
+        "bit": 2912,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 92
+        },
+        "bit": 2944,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 93
+        },
+        "bit": 2976,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 94
+        },
+        "bit": 3008,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 95
+        },
+        "bit": 3040,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 96
+        },
+        "bit": 3072,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 97
+        },
+        "bit": 3104,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 98
+        },
+        "bit": 3136,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 99
+        },
+        "bit": 3168,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 100
+        },
+        "bit": 3200,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 101
+        },
+        "bit": 3232,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 102
+        },
+        "bit": 3264,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 103
+        },
+        "bit": 3296,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 104
+        },
+        "bit": 3328,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 105
+        },
+        "bit": 3360,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 106
+        },
+        "bit": 3392,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 107
+        },
+        "bit": 3424,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 108
+        },
+        "bit": 3456,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 109
+        },
+        "bit": 3488,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 110
+        },
+        "bit": 3520,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 111
+        },
+        "bit": 3552,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 112
+        },
+        "bit": 3584,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 113
+        },
+        "bit": 3616,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 114
+        },
+        "bit": 3648,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 115
+        },
+        "bit": 3680,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 116
+        },
+        "bit": 3712,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 117
+        },
+        "bit": 3744,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 118
+        },
+        "bit": 3776,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": {
+          "EventVersion": 119
+        },
+        "bit": 3808,
+        "width": 32,
+        "hex": "cdab3412"
+      },
+      {
+        "kind": {
+          "EventVersion": 120
+        },
+        "bit": 3840,
+        "width": 32,
+        "hex": "00000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 121
+        },
+        "bit": 3872,
+        "width": 32,
+        "hex": "01000000"
+      },
+      {
+        "kind": {
+          "EventVersion": 122
+        },
+        "bit": 3904,
+        "width": 32,
+        "hex": "ffffffff"
+      },
+      {
+        "kind": "BuildVersion",
+        "bit": 3936,
+        "width": 256,
+        "hex": "362e31303032362e31383431312e3000ffffffffffffffffffffffffffffffff"
+      },
+      {
+        "kind": "BuildBranch",
+        "bit": 4192,
+        "width": 256,
+        "hex": "48495f315f31335f3000fefefefefefefefefefefefefefefefefefefefefefe"
+      },
+      {
+        "kind": "BuildFlavor",
+        "bit": 4448,
+        "width": 256,
+        "hex": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"
+      },
+      {
+        "kind": "BuildId",
+        "bit": 4704,
+        "width": 32,
+        "hex": "98abcdfe"
+      },
+      {
+        "kind": "Changelist",
+        "bit": 4736,
+        "width": 32,
+        "hex": "21436587"
+      },
+      {
+        "kind": "CorruptionChecks",
+        "bit": 4768,
+        "width": 1,
+        "hex": "80"
+      }
+    ],
+    "hex": "0000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120300000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffffcdab34120000000001000000ffffffff362e31303032362e31383431312e3000ffffffffffffffffffffffffffffffff48495f315f31335f3000fefefefefefefefefefefefefefefefefefefefefefe808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f98abcdfe2143658780"
+  }
+]

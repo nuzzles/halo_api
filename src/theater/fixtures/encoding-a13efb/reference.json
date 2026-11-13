@@ -1,0 +1,165 @@
+{
+  "source": "a13efb323b230c96b59685defbc376720043240f",
+  "rows": [
+    {
+      "path": "aim/01-pitch-up",
+      "manifest_sha256": "b897b9aa8d869ecde4f74e82f2517f16a6ba74fed5641da92e3311292c8b46f0",
+      "label": "PerEntity"
+    },
+    {
+      "path": "aim/02-yaw-right",
+      "manifest_sha256": "53482918a440287be98d3c816bc7c6a9cc2c4fe9ed1281d1854da2f4ea9fd52a",
+      "label": "PerEntity"
+    },
+    {
+      "path": "appearance/01-cadet-blue",
+      "manifest_sha256": "ff8f1b0f7ea38357d6615682fef85d65a6049e9f33e4fa6fb58639d0cb699530",
+      "label": "PerEntity"
+    },
+    {
+      "path": "appearance/02-cadet-brick",
+      "manifest_sha256": "bc339513d7a8831e53c426759893a17a8d1bcb27be84db56d71cb1aae394758d",
+      "label": "PerEntity"
+    },
+    {
+      "path": "bandit/01-evo",
+      "manifest_sha256": "e3ba07760f7b993457abf0108dd16f8d0c75f3b835014f24a864449a5eefe905",
+      "label": "MultiplayerComposite"
+    },
+    {
+      "path": "controller/01-stick-circles",
+      "manifest_sha256": "f3c35af28580271b148a3e595a28314e0e360480f6eacfa1eef06d9ae268ba2d",
+      "label": "PerEntity"
+    },
+    {
+      "path": "maps/01-bazaar-idle",
+      "manifest_sha256": "0e0064f4b27718d35e8eaa31faed498f55a0452e9634646e49a4069247224db4",
+      "label": "PerEntity"
+    },
+    {
+      "path": "maps/02-aquarius",
+      "manifest_sha256": "c696eaf36578e4960af574bc586a1a534e938f2ceb47b06c72a10d3b4b8f46df",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/01-do-nothing",
+      "manifest_sha256": "ec0d7cfd0254915565c249a5d758fefbd187f792440a8376195c6c12c9e0b782",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/02-jump",
+      "manifest_sha256": "e3765f9292fca91c0905c3804ceec965cbd7900cc9430b5cc231c118b0622dfe",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/03-shoot",
+      "manifest_sha256": "7e7a2d36ee40a95f83a315c9ae7b373188471606b0f2eafe98cd692a4e4bdfe9",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/04-walk-forward",
+      "manifest_sha256": "180468eb4b564009817c2df1d519ecd5977507e33e68aac301442530c2cd3732",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/05-walk-backward",
+      "manifest_sha256": "5b4c4c9b2b5c66b4e8d75c76ba8171d998fce11c598a68269b6ed4b1f8350a82",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/06-walk-left",
+      "manifest_sha256": "6428eb0dc5ebf0464895fd7b81789dd031a0950395447f31a22f27ae3c03283c",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/07-walk-right",
+      "manifest_sha256": "c41a3bab8133e002630729204e0d024801e5733994f032d986b1836ebea311d1",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/08-crouch",
+      "manifest_sha256": "7ea7279ede723ae327d882f330766785412f5cc81f2d7d3b16356902c2d9587a",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/09-grenade",
+      "manifest_sha256": "8c0d26481b63236af5a5bd035c8a25dd4d6ee448c406bbae30646dc69d70fc6d",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/10-switch-weapon",
+      "manifest_sha256": "c0baeee8ef14aecc90d573d5b12c689b5c7160ee381042ac71d87fdb5654d5a5",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/11-switch-grenade",
+      "manifest_sha256": "6fe74e82207726c38f78bc672078bec896edb1ef04599f8db7b9782e1fc716ff",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/12-ping",
+      "manifest_sha256": "ca012d5853d6ce439e3467811ab8243fec0987f7db99d0e9a9dd136ddcffe7bc",
+      "label": "PerEntity"
+    },
+    {
+      "path": "natural-end/13-melee",
+      "manifest_sha256": "bd4d7af77ea2830cb77e69d1b2c110d40b1ff0a885036876baf93e0ebb3e17ff",
+      "label": "PerEntity"
+    },
+    {
+      "path": "octagon/01-idle",
+      "manifest_sha256": "03587b91279d6dd429f9a3e6d5054227e9d6bb0e17221e6eb7ae50baf8f014f1",
+      "label": "PerEntity"
+    },
+    {
+      "path": "octagon/02-ar-kill",
+      "manifest_sha256": "cd13dba22164abe703882851d2c131a6cc7d3eddfd4fcbb4c0ac8dc82b223f60",
+      "label": "PerEntity"
+    },
+    {
+      "path": "octagon/03-first-to-50",
+      "manifest_sha256": "29241ec1dda8d84a0adc99bc7b49dcc3596b876a2d56b7baec398d048bf49b23",
+      "label": "PerEntity"
+    },
+    {
+      "path": "posture/01-crouch-slide",
+      "manifest_sha256": "7ab071919bff2576a0bdfa7111f8f4edc192508150b77ce9a0c9bffa8dbba01e",
+      "label": "PerEntity"
+    },
+    {
+      "path": "raids/01-hour-long-raid",
+      "manifest_sha256": "5d9f68f4ae6ab08ca59bc2fb57ac1e808633245049b2afb3c5fe16217826585a",
+      "label": "MultiplayerComposite"
+    },
+    {
+      "path": "ranked-arena/02-oddball",
+      "manifest_sha256": "59483e156a59894f43266d97f4d824437171332bad9b209edcea365c6625880f",
+      "label": "MultiplayerComposite"
+    },
+    {
+      "path": "weapons/01-switch-bandit-pistol",
+      "manifest_sha256": "81b7ad9855ede37458a087e459bf4e9e3eb7db6a4bca8e77f4a48b96451bf7d3",
+      "label": "PerEntity"
+    },
+    {
+      "path": "weapons/02-reload-comparison",
+      "manifest_sha256": "a03ce7303cac83db8017b41c5ba6ca2b2603b8dd89c69d1922c969a8edaaa6cd",
+      "label": "PerEntity"
+    },
+    {
+      "path": "weapons/03-br-sniper-zoom",
+      "manifest_sha256": "f890aa65e473200fa6177da0802ccbb91c0a47745b4343b3c3b70f620bd6832d",
+      "label": "PerEntity"
+    },
+    {
+      "path": "weapons/04-br-shock-rifle",
+      "manifest_sha256": "da5778caaa06aea051e1a64dec2203d12e26c56a623bf830717ab72f469bec05",
+      "label": "PerEntity"
+    },
+    {
+      "path": "weapons/05-ar-stalker-rifle",
+      "manifest_sha256": "1e3371391047ef8c93de4a825b0c8b0201e71039e6c65af459b93baa6cb647cc",
+      "label": "PerEntity"
+    }
+  ]
+}

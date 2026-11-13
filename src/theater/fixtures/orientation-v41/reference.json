@@ -1,0 +1,101 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blobs": {
+    "src/zones.rs": "4701db66d587260404006301be25b4fb2ae1931f",
+    "src/bits.rs": "5d1a69e536e63ce03c366aee8ee144c8ed48ee72"
+  },
+  "cases": [
+    {
+      "name": "config-quarter",
+      "angle_bits": 4614256656552045848
+    },
+    {
+      "name": "raw-east",
+      "angle_bits": 4609753056924675352
+    },
+    {
+      "name": "delta-keep-absent",
+      "angle_bits": null
+    },
+    {
+      "name": "config-zero",
+      "angle_bits": 4609753056924675352
+    },
+    {
+      "name": "config-half",
+      "angle_bits": 4616991696741409234
+    },
+    {
+      "name": "config-last",
+      "angle_bits": 4620528815610835057
+    },
+    {
+      "name": "config-up",
+      "angle_bits": null
+    },
+    {
+      "name": "raw-overridden-default",
+      "angle_bits": 4616991696741409234
+    },
+    {
+      "name": "raw-overridden-up",
+      "angle_bits": 4616991688954909988
+    },
+    {
+      "name": "delta-overridden",
+      "angle_bits": null
+    },
+    {
+      "name": "nominal-default",
+      "angle_bits": null
+    },
+    {
+      "name": "nominal-up",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-1-0-0",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-1-0-1",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-0-0-0",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-0-0-1",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-0-1-0",
+      "angle_bits": null
+    },
+    {
+      "name": "delta-0-1-1",
+      "angle_bits": null
+    },
+    {
+      "name": "raw-north",
+      "angle_bits": 4614256656552045848
+    },
+    {
+      "name": "raw-west",
+      "angle_bits": 4609753056924675352
+    },
+    {
+      "name": "raw-nan",
+      "angle_bits": 4609753056924675352
+    },
+    {
+      "name": "raw-parallel",
+      "angle_bits": 4609753056924675352
+    },
+    {
+      "name": "raw-vertical",
+      "angle_bits": 4609753056924675352
+    }
+  ]
+}

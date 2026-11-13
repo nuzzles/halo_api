@@ -52,8 +52,13 @@ impl<'a> ComponentCursor<'a> {
             self.data.len().saturating_mul(8).saturating_sub(bit)
         })
     }
-    pub(crate) fn raw_bits(&self, start: i64, width: u64) -> Option<crate::theater::film::RawBits> {
-        crate::theater::film::RawBits::from_source(
+    pub(crate) fn raw_bits(
+        &self,
+        start: i64,
+        width: u64,
+    ) -> Option<crate::theater::parser::v41::chunks::replication::source::components::field::RawBits>
+    {
+        crate::theater::parser::v41::chunks::replication::source::components::field::RawBits::from_source(
             self.data,
             usize::try_from(start).ok()?,
             usize::try_from(width).ok()?,
@@ -63,7 +68,7 @@ impl<'a> ComponentCursor<'a> {
         &mut self,
         width: i64,
         base: u32,
-    ) -> crate::theater::film::RecordHeader {
+    ) -> crate::theater::parser::v41::chunks::replication::source::RecordHeader {
         let mut reader = FilmBits::new(self.data);
         reader.set_position(self.position);
         struct CopyBack<'r, 'd> {

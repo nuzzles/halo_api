@@ -1,0 +1,86 @@
+{
+  "repository": "https://github.com/OpenSpartan/libfilmshell",
+  "commit": "18067987ebc3628ad499c819c6aee814692df43b",
+  "cases": [
+    {
+      "name": "fixed",
+      "limit": 0,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 1,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 8191,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 8192,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 8193,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 30719,
+      "status": "limit"
+    },
+    {
+      "name": "fixed",
+      "limit": 30720,
+      "status": "complete"
+    },
+    {
+      "name": "fixed",
+      "limit": 30721,
+      "status": "complete"
+    },
+    {
+      "name": "dynamic",
+      "limit": 0,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 1,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 8191,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 8192,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 8193,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 30719,
+      "status": "limit"
+    },
+    {
+      "name": "dynamic",
+      "limit": 30720,
+      "status": "complete"
+    },
+    {
+      "name": "dynamic",
+      "limit": 30721,
+      "status": "complete"
+    }
+  ]
+}

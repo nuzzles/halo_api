@@ -1,7 +1,7 @@
 //! Source-backed component field reading and internal reference evidence.
 use super::cursor::ComponentCursor as Cursor;
 use super::position::PositionEncoding;
-use crate::theater::film::ComponentField;
+use crate::theater::parser::v41::chunks::replication::source::components::field::ComponentField;
 use crate::theater::parser::v41::context::movement::MovementProfile;
 use crate::theater::parser::v41::context::profile::DecodeGrammar;
 use crate::theater::parser::v41::context::values::FilmMppWidths;
@@ -18,7 +18,12 @@ pub(crate) struct ComponentWidths<'a> {
     pub maximum: u64,
 }
 pub(crate) struct ComponentReader<'a> {
+    pub(crate) category_references: bool,
+    /// Encoding mode established by the enclosing packet, never inferred from values.
+    pub(crate) snapshot: bool,
     pub(crate) reference_widths: Option<ComponentWidths<'a>>,
+    /// Missing layout context is unsupported, not truncated source.
+    pub(crate) context_error: Option<&'static str>,
     pub(crate) width_error: Option<&'static str>,
 
     pub(crate) live_grammar: Option<DecodeGrammar>,
@@ -153,9 +158,12 @@ impl ComponentReader<'_> {
         Some(())
     }
     pub(crate) fn handle(&mut self, name: &str, mut category: u8) -> Option<()> {
+        // FUN_1406d3140 consumes category 1's probe even with the table
+        // disabled. Its value cannot establish the unknown global range.
         if category == 1 && self.bit(&format!("{name}.category4"))? {
             category = 4;
         }
+        self.require_category_references()?;
         let width = match category {
             2 | 3 | 5 => 8,
             4 | 6 => 9,
@@ -163,6 +171,19 @@ impl ComponentReader<'_> {
         };
         self.r(&format!("{name}.value"), width)?;
         self.r(&format!("{name}.generation"), 2)?;
+        Some(())
+    }
+    pub(crate) fn reference_configuration_unavailable(&self) -> bool {
+        self.context_error == Some("global reference range")
+    }
+    pub(crate) fn runtime_context_unavailable(&self) -> Option<&'static str> {
+        (self.context_error == Some("engine-one handle width")).then_some("engine-one handle width")
+    }
+    pub(crate) fn require_category_references(&mut self) -> Option<()> {
+        if !self.category_references {
+            self.context_error = Some("global reference range");
+            return None;
+        }
         Some(())
     }
     // Same wire shape, used by reference inline readers which do not publish UnitRefRead.
@@ -201,7 +222,11 @@ impl ComponentReader<'_> {
         });
         Some(())
     }
-    pub(crate) fn optional_word_reference(&mut self, name: &str, emit_absent: bool) -> Option<()> {
+    pub(crate) fn optional_word_reference(
+        &mut self,
+        name: &str,
+        emit_absent: bool,
+    ) -> Option<bool> {
         let start_bit = self.cursor.position;
         let present = self.bit(&format!("{name}.gate"))?;
         let value = if present { self.r(name, 32)? as u32 } else { 0 };
@@ -216,7 +241,7 @@ impl ComponentReader<'_> {
                 probe: false,
             });
         }
-        Some(())
+        Some(present)
     }
     pub(crate) fn word_reference(&mut self, name: &str) -> Option<()> {
         let start_bit = self.cursor.position;

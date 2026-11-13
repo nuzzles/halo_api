@@ -1,0 +1,149 @@
+{
+  "closed": false,
+  "player": 0,
+  "record": {
+    "archetype": null,
+    "components": [
+      {
+        "end_bit": 1288,
+        "fields": [
+          {
+            "bit": 1284,
+            "name": "team",
+            "raw": {
+              "bit_len": 4,
+              "bytes": [
+                96
+              ]
+            },
+            "width": 4
+          }
+        ],
+        "index": 0,
+        "name": "managed-player-team-designator-component",
+        "start_bit": 1284,
+        "status": "Complete"
+      },
+      {
+        "end_bit": 1320,
+        "fields": [
+          {
+            "bit": 1288,
+            "name": "value",
+            "raw": {
+              "bit_len": 32,
+              "bytes": [
+                39,
+                165,
+                102,
+                15
+              ]
+            },
+            "width": 32
+          }
+        ],
+        "index": 8,
+        "name": "managed-player-current-season-component",
+        "start_bit": 1288,
+        "status": "Complete"
+      }
+    ],
+    "default_state": null,
+    "end_bit": 1320,
+    "fields": [
+      {
+        "bit": 1255,
+        "name": "baseline.gate",
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        },
+        "width": 1
+      },
+      {
+        "bit": 1256,
+        "name": "mask.dense",
+        "raw": {
+          "bit_len": 1,
+          "bytes": [
+            0
+          ]
+        },
+        "width": 1
+      },
+      {
+        "bit": 1257,
+        "name": "mask.count",
+        "raw": {
+          "bit_len": 3,
+          "bytes": [
+            128
+          ]
+        },
+        "width": 3
+      },
+      {
+        "bit": 1260,
+        "name": "mask.index[0]",
+        "raw": {
+          "bit_len": 6,
+          "bytes": [
+            128
+          ]
+        },
+        "width": 6
+      },
+      {
+        "bit": 1266,
+        "name": "mask.index[1]",
+        "raw": {
+          "bit_len": 6,
+          "bytes": [
+            0
+          ]
+        },
+        "width": 6
+      },
+      {
+        "bit": 1272,
+        "name": "mask.index[2]",
+        "raw": {
+          "bit_len": 6,
+          "bytes": [
+            32
+          ]
+        },
+        "width": 6
+      },
+      {
+        "bit": 1278,
+        "name": "mask.index[3]",
+        "raw": {
+          "bit_len": 6,
+          "bytes": [
+            64
+          ]
+        },
+        "width": 6
+      }
+    ],
+    "header": {
+      "end_bit": 1255,
+      "id": 1073747189,
+      "kind": "Delta",
+      "prefix": null,
+      "start_bit": 1237
+    },
+    "mask": 4295033089,
+    "stop": "Complete"
+  },
+  "source": {
+    "chunk_index": 15,
+    "end_bit": 1320,
+    "payload_byte": 717055,
+    "start_bit": 1237
+  },
+  "time": 291926900
+}

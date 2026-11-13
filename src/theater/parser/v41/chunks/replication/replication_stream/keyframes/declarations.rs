@@ -1,10 +1,10 @@
 //! Corroborated schema hints and complete object baselines from type-2 snapshots.
 use std::collections::BTreeMap;
 
-use crate::theater::film::{
-    DatumEntry, DefaultStateStatus, Film, FilmRegistry, KeyframeRecord, KeyframeStop, PacketRead,
-    ReplicationStreamPacketBody,
-};
+use crate::theater::film::{Film};
+use crate::theater::parser::v41::chunks::replication::source::{DatumEntry, DefaultStateStatus, KeyframeRecord, KeyframeStop, ReplicationStreamPacketBody};
+use crate::theater::parser::v41::chunks::registry::source::{FilmRegistry};
+use crate::theater::parser::packet::{PacketRead};
 use crate::theater::parser::v41::context::V41DecodeConfig;
 
 use crate::theater::parser::v41::chunks::replication::bindings::{
@@ -102,7 +102,7 @@ pub(crate) fn evidence_from_keyframes(film: &Film) -> KeyframeEvidence {
     let mut config = V41DecodeConfig::default();
     config.profile.grammar.baseline_scope = true;
     config.profile.grammar.writer_absolute = true;
-    let mut snapshots = Vec::<(i64, BTreeMap<u32, Candidate>)>::new();
+    let mut snapshots = Vec::<(usize, BTreeMap<u32, Candidate>)>::new();
     for chunk in &film.replication_stream {
         let mut datums = None;
         for (packet_index, packet) in chunk.body.packets.iter().enumerate() {
@@ -129,12 +129,9 @@ pub(crate) fn evidence_from_keyframes(film: &Film) -> KeyframeEvidence {
                             &found,
                         );
                         if !records.is_empty() {
-                            baselines.insert((chunk.source_position, packet_index), records);
+                            baselines.insert(((chunk.index), packet_index), records);
                         }
-                        snapshots.push((
-                            chunk.source.index.unwrap_or(chunk.source_position as i64),
-                            found,
-                        ));
+                        snapshots.push((chunk.index, found));
                     }
                 }
                 _ => {}
@@ -185,7 +182,7 @@ fn object_baselines(
         .collect()
 }
 
-fn corroborated(snapshots: &[(i64, BTreeMap<u32, Candidate>)]) -> AnticipatedBindings {
+fn corroborated(snapshots: &[(usize, BTreeMap<u32, Candidate>)]) -> AnticipatedBindings {
     let mut out = AnticipatedBindings::default();
     for pair in snapshots.windows(2) {
         let [(left_chunk, left), (right_chunk, right)] = pair else {
@@ -221,7 +218,7 @@ fn corroborated(snapshots: &[(i64, BTreeMap<u32, Candidate>)]) -> AnticipatedBin
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theater::film::BitRange;
+    use crate::theater::parser::packet::BitRange;
 
     fn candidate(bit: usize, slot: u32, generation: u32, archetype: u32) -> Candidate {
         Candidate {

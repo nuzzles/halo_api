@@ -1,0 +1,1262 @@
+[
+  {
+    "name": "predicted-source/False/0/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/False/0/None/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 71,
+    "hex": "d800001fffffa468ac"
+  },
+  {
+    "name": "predicted-source/False/0/None/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 53,
+    "hex": "d00007fff9abc8"
+  },
+  {
+    "name": "predicted-source/False/0/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/False/0/0/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e06000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/0/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e040001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/0/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/False/0/1/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e0e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/1/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e0c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/0/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/False/0/16/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e86000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/16/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e840001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/0/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/False/0/17/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e8e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/17/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e8c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/0/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/False/0/62/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ff6000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/62/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ff40001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/0/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/False/0/63/default",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ffe000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/0/63/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ffc0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/False/1/None/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 71,
+    "hex": "d800001fffffa468ac"
+  },
+  {
+    "name": "predicted-source/False/1/None/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 53,
+    "hex": "d00007fff9abc8"
+  },
+  {
+    "name": "predicted-source/False/1/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/False/1/0/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e06000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/0/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e040001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/False/1/1/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e0e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/1/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e0c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/False/1/16/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e86000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/16/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e840001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/False/1/17/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e8e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/17/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e8c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/False/1/62/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ff6000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/62/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ff40001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/1/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/False/1/63/default",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ffe000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/1/63/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ffc0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/False/2/None/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 71,
+    "hex": "d800001fffffa468ac"
+  },
+  {
+    "name": "predicted-source/False/2/None/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 53,
+    "hex": "d00007fff9abc8"
+  },
+  {
+    "name": "predicted-source/False/2/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/False/2/0/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e06000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/0/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e040001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/False/2/1/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e0e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/1/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e0c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/False/2/16/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e86000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/16/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e840001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/False/2/17/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e8e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/17/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e8c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/False/2/62/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ff6000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/62/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ff40001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/2/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/False/2/63/default",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ffe000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/2/63/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ffc0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/False/4/None/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 71,
+    "hex": "d800001fffffa468ac"
+  },
+  {
+    "name": "predicted-source/False/4/None/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 53,
+    "hex": "d00007fff9abc8"
+  },
+  {
+    "name": "predicted-source/False/4/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/False/4/0/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e06000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/0/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e040001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/False/4/1/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e0e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/1/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e0c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/False/4/16/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e86000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/16/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e840001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/False/4/17/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "e8e000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/17/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "e8c0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/False/4/62/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ff6000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/62/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ff40001fffe6af20"
+  },
+  {
+    "name": "predicted-source/False/4/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/False/4/63/default",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 77,
+    "hex": "ffe000007ffffe91a2b0"
+  },
+  {
+    "name": "predicted-source/False/4/63/indexed",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": false,
+    "complete": true,
+    "bit_len": 59,
+    "hex": "ffc0001fffe6af20"
+  },
+  {
+    "name": "predicted-source/True/0/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/True/0/None/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 100,
+    "hex": "d00000000000000804523c17f0"
+  },
+  {
+    "name": "predicted-source/True/0/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/True/0/0/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e040000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/0/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/True/0/1/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e0c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/0/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/True/0/16/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e840000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/0/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/True/0/17/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e8c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/0/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/True/0/62/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ff40000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/0/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/True/0/63/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 0,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ffc0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/True/1/None/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 100,
+    "hex": "d00000000000000804523c17f0"
+  },
+  {
+    "name": "predicted-source/True/1/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/True/1/0/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e040000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/True/1/1/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e0c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/True/1/16/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e840000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/True/1/17/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e8c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/True/1/62/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ff40000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/1/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/True/1/63/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 1,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ffc0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/True/2/None/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 100,
+    "hex": "d00000000000000804523c17f0"
+  },
+  {
+    "name": "predicted-source/True/2/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/True/2/0/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e040000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/True/2/1/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e0c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/True/2/16/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e840000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/True/2/17/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e8c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/True/2/62/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ff40000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/2/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/True/2/63/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 2,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ffc0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/None/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 4,
+    "hex": "c0"
+  },
+  {
+    "name": "predicted-source/True/4/None/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 100,
+    "hex": "d00000000000000804523c17f0"
+  },
+  {
+    "name": "predicted-source/True/4/0/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e000"
+  },
+  {
+    "name": "predicted-source/True/4/0/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e040000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/1/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e080"
+  },
+  {
+    "name": "predicted-source/True/4/1/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e0c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/16/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e800"
+  },
+  {
+    "name": "predicted-source/True/4/16/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e840000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/17/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "e880"
+  },
+  {
+    "name": "predicted-source/True/4/17/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "e8c0000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/62/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff00"
+  },
+  {
+    "name": "predicted-source/True/4/62/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ff40000000000000201148f05fc0"
+  },
+  {
+    "name": "predicted-source/True/4/63/absent",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 10,
+    "hex": "ff80"
+  },
+  {
+    "name": "predicted-source/True/4/63/raw",
+    "component": "biped-spartan-ability-component",
+    "version": 4,
+    "snapshot": true,
+    "complete": true,
+    "bit_len": 106,
+    "hex": "ffc0000000000000201148f05fc0"
+  }
+]

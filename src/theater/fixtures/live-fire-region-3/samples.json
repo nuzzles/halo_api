@@ -1,0 +1,50 @@
+[
+  {
+    "file": "position-mask-33554447.bin",
+    "chunk": 1,
+    "payload_byte": 596627,
+    "start_bit": 90,
+    "counter": 32,
+    "mask": 33554447
+  },
+  {
+    "file": "position-mask-33554445.bin",
+    "chunk": 14,
+    "payload_byte": 615658,
+    "start_bit": 1169,
+    "counter": 95,
+    "mask": 33554445
+  },
+  {
+    "file": "position-mask-33554441.bin",
+    "chunk": 14,
+    "payload_byte": 619964,
+    "start_bit": 1194,
+    "counter": 113,
+    "mask": 33554441
+  },
+  {
+    "file": "position-mask-33554439.bin",
+    "chunk": 14,
+    "payload_byte": 827203,
+    "start_bit": 1064,
+    "counter": 63,
+    "mask": 33554439
+  },
+  {
+    "file": "position-mask-33554443.bin",
+    "chunk": 15,
+    "payload_byte": 523685,
+    "start_bit": 1070,
+    "counter": 101,
+    "mask": 33554443
+  },
+  {
+    "file": "position-mask-33554435.bin",
+    "chunk": 15,
+    "payload_byte": 525693,
+    "start_bit": 969,
+    "counter": 108,
+    "mask": 33554435
+  }
+]

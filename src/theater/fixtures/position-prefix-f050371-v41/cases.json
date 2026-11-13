@@ -1,0 +1,30 @@
+[
+  {
+    "name": "raid-chunk-140-packet-909624-bit-2595",
+    "component": "object-position-dynamic-precision-component",
+    "version": 1,
+    "hex": "da9000420c3be36f29b6322185386490fec0bff7",
+    "snapshot": false,
+    "archetype": 35,
+    "local_end": 99,
+    "upstream_end": 2,
+    "chunk_sha256": "6487437b0a122c5e4fa0946b83e86a0c242239c5b164b21b1ef2360afd3cdf5e",
+    "packet_payload_start": 909624,
+    "component_start_bit": 2595,
+    "upstream_complete": false
+  },
+  {
+    "name": "raid-chunk-163-packet-850675-bit-3377",
+    "component": "object-position-dynamic-precision-component",
+    "version": 1,
+    "hex": "9e04590ac1a8c22000841887aed86f6cf413e770",
+    "snapshot": false,
+    "archetype": 35,
+    "local_end": 99,
+    "upstream_end": 101,
+    "chunk_sha256": "e329bec5b68d2d05cb91032fd87852c6c4c8fe2058f59066a52c1481c263caf3",
+    "packet_payload_start": 850675,
+    "component_start_bit": 3377,
+    "upstream_complete": true
+  }
+]

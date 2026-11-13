@@ -1,0 +1,20 @@
+[
+  {
+    "name": "kill-absent-players",
+    "code": 85,
+    "hex": "d51fffffffff00000000",
+    "complete": true,
+    "record_end": 79,
+    "bit_len": 80,
+    "indexed_points": []
+  },
+  {
+    "name": "kill-boundary-players",
+    "code": 85,
+    "hex": "d5003fffffffff4600000000",
+    "complete": true,
+    "record_end": 94,
+    "bit_len": 95,
+    "indexed_points": []
+  }
+]

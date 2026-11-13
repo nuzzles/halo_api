@@ -1,4 +1,4 @@
-//! Downloads and decompresses every Theater chunk into a local directory.
+//! Downloads every compressed Theater chunk into a local directory.
 
 mod common;
 
@@ -15,17 +15,8 @@ async fn main() -> Result<(), common::ExampleError> {
 
     fs::create_dir_all(&output)?;
     for chunk in chunks {
-        let chunk_type = match chunk.kind {
-            halo_api::theater::film::ChunkKind::Registry => 1,
-            halo_api::theater::film::ChunkKind::Replication => 2,
-            halo_api::theater::film::ChunkKind::Summary => 3,
-            halo_api::theater::film::ChunkKind::Unknown(value) => value,
-        };
-        let path = output.join(format!(
-            "chunk-{:03}-type-{}.bin",
-            chunk.index.unwrap_or_default(),
-            chunk_type
-        ));
+        let chunk_type = chunk.kind.raw();
+        let path = output.join(format!("chunk-{:03}-type-{}.bin", chunk.index, chunk_type));
         fs::write(&path, &chunk.data)?;
         println!("{}: {} bytes", path.display(), chunk.data.len());
     }

@@ -1,0 +1,2683 @@
+{
+  "films": 32,
+  "replication": {
+    "0": {
+      "packets": 403465,
+      "opaque_packets": 0,
+      "fields_bits": 584004148,
+      "opaque_bits": 1373907,
+      "padding_bits": 0,
+      "unparsed_bits": 135321425
+    },
+    "1": {
+      "packets": 451,
+      "opaque_packets": 0,
+      "fields_bits": 1237609395,
+      "opaque_bits": 0,
+      "padding_bits": 3157,
+      "unparsed_bits": 0
+    },
+    "2": {
+      "packets": 451,
+      "opaque_packets": 0,
+      "fields_bits": 325235803,
+      "opaque_bits": 0,
+      "padding_bits": 741,
+      "unparsed_bits": 208276464
+    },
+    "6": {
+      "packets": 451,
+      "opaque_packets": 451,
+      "fields_bits": 0,
+      "opaque_bits": 14432,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    },
+    "7": {
+      "packets": 451,
+      "opaque_packets": 0,
+      "fields_bits": 0,
+      "opaque_bits": 0,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    },
+    "8": {
+      "packets": 509,
+      "opaque_packets": 0,
+      "fields_bits": 2188153,
+      "opaque_bits": 132093236,
+      "padding_bits": 0,
+      "unparsed_bits": 2883
+    },
+    "10": {
+      "packets": 403465,
+      "opaque_packets": 403465,
+      "fields_bits": 0,
+      "opaque_bits": 32774328,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    },
+    "12": {
+      "packets": 509,
+      "opaque_packets": 0,
+      "fields_bits": 16288,
+      "opaque_bits": 0,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    }
+  },
+  "summary": {
+    "7": {
+      "packets": 32,
+      "opaque_packets": 32,
+      "fields_bits": 0,
+      "opaque_bits": 0,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    },
+    "9": {
+      "packets": 32,
+      "opaque_packets": 0,
+      "fields_bits": 1024,
+      "opaque_bits": 92288240,
+      "padding_bits": 0,
+      "unparsed_bits": 0
+    }
+  },
+  "unread_framing_bytes": 0,
+  "stops": {
+    "entity: InvalidArchetype ": 155,
+    "entity: Truncated": 379,
+    "entity: UnsupportedComponent ": 644,
+    "entity: UnsupportedDefault ": 32,
+    "entity_end: Failure": 1210,
+    "entity_end: Marker": 256988,
+    "entity_end: PayloadBoundary": 1,
+    "entity_end: Rejected ": 143882,
+    "entity_end: Truncated": 3,
+    "event: MissingKillPlaybackContext": 1381,
+    "frame: IncompleteMessageList": 1381,
+    "keyframe: RuntimeContextUnavailable ": 207,
+    "keyframe: UnsupportedComponent ": 1,
+    "keyframe_table: Desync": 208,
+    "keyframe_table: End": 243
+  },
+  "unsupported_default_archetypes": {
+    "35": 3,
+    "36": 3,
+    "37": 6,
+    "38": 5,
+    "39": 2,
+    "40": 4,
+    "41": 3,
+    "42": 3,
+    "43": 3
+  },
+  "unsupported_defaults": [
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-141-type-2.bin",
+      "packet": 22,
+      "id": 2147485992,
+      "archetype": 38,
+      "start_bit": 2415,
+      "end_bit": 2552,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226129,
+          null,
+          1783,
+          1948,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742662,
+          null,
+          1948,
+          2187,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742891,
+          null,
+          2187,
+          2266,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484981,
+          null,
+          2266,
+          2415,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-player-team-designator-component",
+          2311,
+          2315,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-player-color-override-component",
+          2315,
+          2379,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-player-flags-component",
+          2379,
+          2383,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-player-back-button-scoreboard-flair-component",
+          2383,
+          2415,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-150-type-2.bin",
+      "packet": 980,
+      "id": 3221232566,
+      "archetype": 39,
+      "start_bit": 3407,
+      "end_bit": 3526,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          2147485577,
+          null,
+          2912,
+          3159,
+          "Complete"
+        ],
+        [
+          "Delete",
+          808,
+          null,
+          3159,
+          3209,
+          "Complete"
+        ],
+        [
+          "New",
+          2470,
+          9,
+          3209,
+          3357,
+          "Complete"
+        ],
+        [
+          "Delete",
+          1366,
+          null,
+          3357,
+          3407,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-150-type-2.bin",
+      "packet": 1042,
+      "id": 1073749320,
+      "archetype": 40,
+      "start_bit": 4115,
+      "end_bit": 4234,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226174,
+          null,
+          3471,
+          3636,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742963,
+          null,
+          3636,
+          3785,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485575,
+          null,
+          3785,
+          3881,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485577,
+          null,
+          3881,
+          4115,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3914,
+          4068,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          4068,
+          4115,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-151-type-2.bin",
+      "packet": 924,
+      "id": 262,
+      "archetype": 36,
+      "start_bit": 3188,
+      "end_bit": 3312,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742984,
+          null,
+          2909,
+          2988,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743560,
+          null,
+          2988,
+          3069,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485623,
+          null,
+          3069,
+          3167,
+          "Complete"
+        ],
+        [
+          "Delta",
+          4240,
+          null,
+          3167,
+          3188,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-151-type-2.bin",
+      "packet": 1172,
+      "id": 1073744392,
+      "archetype": 41,
+      "start_bit": 3540,
+      "end_bit": 3650,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742671,
+          null,
+          2643,
+          2882,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742672,
+          null,
+          2882,
+          3121,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743404,
+          null,
+          3121,
+          3202,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485656,
+          null,
+          3202,
+          3540,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3247,
+          3279,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          3279,
+          3287,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3287,
+          3436,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3436,
+          3540,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-152-type-2.bin",
+      "packet": 14,
+      "id": 3221225851,
+      "archetype": 40,
+      "start_bit": 4184,
+      "end_bit": 4289,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742671,
+          null,
+          3057,
+          3296,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742672,
+          null,
+          3296,
+          3535,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485656,
+          null,
+          3535,
+          3840,
+          "Complete"
+        ],
+        [
+          "New",
+          4835,
+          41,
+          3840,
+          4184,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-152-type-2.bin",
+      "packet": 266,
+      "id": 2147487058,
+      "archetype": 42,
+      "start_bit": 3231,
+      "end_bit": 3311,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226185,
+          null,
+          2200,
+          2365,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742671,
+          null,
+          2365,
+          2604,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742672,
+          null,
+          2604,
+          2843,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485668,
+          null,
+          2843,
+          3231,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          2888,
+          2920,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          2920,
+          2928,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          2928,
+          3154,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3154,
+          3231,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-153-type-2.bin",
+      "packet": 58,
+      "id": 1073744467,
+      "archetype": 42,
+      "start_bit": 4402,
+      "end_bit": 4490,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742671,
+          null,
+          3716,
+          3955,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742672,
+          null,
+          3955,
+          4161,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743000,
+          null,
+          4161,
+          4310,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485663,
+          null,
+          4310,
+          4402,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          4337,
+          4402,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-153-type-2.bin",
+      "packet": 60,
+      "id": 1073744471,
+      "archetype": 42,
+      "start_bit": 5583,
+      "end_bit": 5703,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742671,
+          null,
+          4897,
+          5136,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742672,
+          null,
+          5136,
+          5342,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743000,
+          null,
+          5342,
+          5491,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485663,
+          null,
+          5491,
+          5583,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          5518,
+          5583,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-153-type-2.bin",
+      "packet": 1040,
+      "id": 3221229173,
+      "archetype": 43,
+      "start_bit": 2645,
+      "end_bit": 2777,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226189,
+          null,
+          2033,
+          2198,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226192,
+          null,
+          2198,
+          2367,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226193,
+          null,
+          2367,
+          2532,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226194,
+          null,
+          2532,
+          2645,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "sound-placement-state-data-component",
+          2577,
+          2599,
+          "Complete"
+        ],
+        [
+          1,
+          "sound-placement-state-data-component",
+          2599,
+          2621,
+          "Complete"
+        ],
+        [
+          21,
+          "sound-placement-state-data-component",
+          2621,
+          2623,
+          "Complete"
+        ],
+        [
+          25,
+          "sound-placement-state-data-component",
+          2623,
+          2645,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-153-type-2.bin",
+      "packet": 1138,
+      "id": 3221228182,
+      "archetype": 35,
+      "start_bit": 2579,
+      "end_bit": 2718,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226189,
+          null,
+          2035,
+          2169,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226192,
+          null,
+          2169,
+          2301,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226193,
+          null,
+          2301,
+          2466,
+          "Complete"
+        ],
+        [
+          "Delta",
+          3221226194,
+          null,
+          2466,
+          2579,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "sound-placement-state-data-component",
+          2511,
+          2533,
+          "Complete"
+        ],
+        [
+          1,
+          "sound-placement-state-data-component",
+          2533,
+          2555,
+          "Complete"
+        ],
+        [
+          21,
+          "sound-placement-state-data-component",
+          2555,
+          2557,
+          "Complete"
+        ],
+        [
+          25,
+          "sound-placement-state-data-component",
+          2557,
+          2579,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-154-type-2.bin",
+      "packet": 144,
+      "id": 3221225671,
+      "archetype": 40,
+      "start_bit": 3633,
+      "end_bit": 3744,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          1073743009,
+          null,
+          3082,
+          3231,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743560,
+          null,
+          3231,
+          3312,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485759,
+          null,
+          3312,
+          3608,
+          "Complete"
+        ],
+        [
+          "New",
+          1073748664,
+          4,
+          3608,
+          3633,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-156-type-2.bin",
+      "packet": 76,
+      "id": 262,
+      "archetype": 35,
+      "start_bit": 3129,
+      "end_bit": 3268,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          3221226206,
+          null,
+          2310,
+          2475,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742671,
+          null,
+          2475,
+          2714,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743015,
+          null,
+          2714,
+          2863,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147485863,
+          null,
+          2863,
+          3129,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          2902,
+          2934,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          2934,
+          3123,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3123,
+          3129,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 110,
+      "id": 3221233110,
+      "archetype": 35,
+      "start_bit": 3927,
+      "end_bit": 4066,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742673,
+          null,
+          3129,
+          3368,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742678,
+          null,
+          3368,
+          3607,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486229,
+          null,
+          3607,
+          3877,
+          "Complete"
+        ],
+        [
+          "Delete",
+          1073746460,
+          null,
+          3877,
+          3927,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 328,
+      "id": 2147484080,
+      "archetype": 37,
+      "start_bit": 3329,
+      "end_bit": 3449,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742673,
+          null,
+          2475,
+          2714,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742678,
+          null,
+          2714,
+          2953,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743079,
+          null,
+          2953,
+          3032,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486229,
+          null,
+          3032,
+          3329,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3065,
+          3282,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3282,
+          3329,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 330,
+      "id": 2147484048,
+      "archetype": 37,
+      "start_bit": 3432,
+      "end_bit": 3552,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742678,
+          null,
+          2736,
+          2975,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743079,
+          null,
+          2975,
+          3054,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743537,
+          null,
+          3054,
+          3135,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486229,
+          null,
+          3135,
+          3432,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3168,
+          3385,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3385,
+          3432,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 342,
+      "id": 2147486093,
+      "archetype": 43,
+      "start_bit": 3447,
+      "end_bit": 3566,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742673,
+          null,
+          2361,
+          2600,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742677,
+          null,
+          2600,
+          2839,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742678,
+          null,
+          2839,
+          3078,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486229,
+          null,
+          3078,
+          3447,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3117,
+          3149,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3149,
+          3383,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3383,
+          3447,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 352,
+      "id": 2147484016,
+      "archetype": 38,
+      "start_bit": 3504,
+      "end_bit": 3646,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742673,
+          null,
+          2490,
+          2729,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742677,
+          null,
+          2729,
+          2968,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742678,
+          null,
+          2968,
+          3207,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486229,
+          null,
+          3207,
+          3504,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3240,
+          3457,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3457,
+          3504,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-164-type-2.bin",
+      "packet": 610,
+      "id": 3221228210,
+      "archetype": 39,
+      "start_bit": 2116,
+      "end_bit": 2208,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          524,
+          null,
+          1644,
+          1712,
+          "Complete"
+        ],
+        [
+          "Delta",
+          525,
+          null,
+          1712,
+          1809,
+          "Complete"
+        ],
+        [
+          "Delta",
+          526,
+          null,
+          1809,
+          1943,
+          "Complete"
+        ],
+        [
+          "Delta",
+          527,
+          null,
+          1943,
+          2116,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "supply-lines-item-unlocked-component",
+          1988,
+          2020,
+          "Complete"
+        ],
+        [
+          1,
+          "supply-lines-item-unlocked-component",
+          2020,
+          2052,
+          "Complete"
+        ],
+        [
+          25,
+          "supply-lines-item-unlocked-component",
+          2052,
+          2084,
+          "Complete"
+        ],
+        [
+          56,
+          "supply-lines-item-unlocked-component",
+          2084,
+          2116,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-168-type-2.bin",
+      "packet": 1054,
+      "id": 874,
+      "archetype": 40,
+      "start_bit": 4173,
+      "end_bit": 4270,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          2147484700,
+          null,
+          3500,
+          3649,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484701,
+          null,
+          3649,
+          3798,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484702,
+          null,
+          3798,
+          3947,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486490,
+          null,
+          3947,
+          4173,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3992,
+          4024,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          4024,
+          4032,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          4032,
+          4149,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          4149,
+          4173,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-168-type-2.bin",
+      "packet": 1060,
+      "id": 874,
+      "archetype": 38,
+      "start_bit": 3667,
+      "end_bit": 3764,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          2147484700,
+          null,
+          2994,
+          3143,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484701,
+          null,
+          3143,
+          3292,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484702,
+          null,
+          3292,
+          3441,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486490,
+          null,
+          3441,
+          3667,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3486,
+          3518,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          3518,
+          3526,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3526,
+          3643,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3643,
+          3667,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-168-type-2.bin",
+      "packet": 1062,
+      "id": 874,
+      "archetype": 38,
+      "start_bit": 3931,
+      "end_bit": 4028,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          2147484700,
+          null,
+          3258,
+          3407,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484701,
+          null,
+          3407,
+          3556,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484702,
+          null,
+          3556,
+          3705,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486490,
+          null,
+          3705,
+          3931,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3750,
+          3782,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          3782,
+          3790,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          3790,
+          3907,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3907,
+          3931,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-175-type-2.bin",
+      "packet": 316,
+      "id": 1073744180,
+      "archetype": 37,
+      "start_bit": 3989,
+      "end_bit": 4127,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          1073743277,
+          null,
+          3551,
+          3683,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743540,
+          null,
+          3683,
+          3780,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486889,
+          null,
+          3780,
+          3899,
+          "Complete"
+        ],
+        [
+          "New",
+          262,
+          30,
+          3899,
+          3989,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-175-type-2.bin",
+      "packet": 376,
+      "id": 3221230519,
+      "archetype": 37,
+      "start_bit": 3006,
+      "end_bit": 3136,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          595,
+          null,
+          2541,
+          2675,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147484743,
+          null,
+          2675,
+          2824,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486889,
+          null,
+          2824,
+          2973,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147483912,
+          null,
+          2973,
+          3006,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-175-type-2.bin",
+      "packet": 430,
+      "id": 1073748981,
+      "archetype": 36,
+      "start_bit": 3195,
+      "end_bit": 3324,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          2147484743,
+          null,
+          2797,
+          2946,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073743404,
+          null,
+          2946,
+          3027,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147486889,
+          null,
+          3027,
+          3161,
+          "Complete"
+        ],
+        [
+          "New",
+          1073747947,
+          8,
+          3161,
+          3195,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-181-type-2.bin",
+      "packet": 994,
+      "id": 1073742087,
+      "archetype": 41,
+      "start_bit": 3111,
+      "end_bit": 3230,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          627,
+          null,
+          2392,
+          2557,
+          "Complete"
+        ],
+        [
+          "Delta",
+          628,
+          null,
+          2557,
+          2654,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742688,
+          null,
+          2654,
+          2893,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147487231,
+          null,
+          2893,
+          3111,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          2938,
+          2970,
+          "Complete"
+        ],
+        [
+          1,
+          "managed-navpoint-flags-component",
+          2970,
+          2978,
+          "Complete"
+        ],
+        [
+          2,
+          "managed-navpoint-visibility-distance-filters-component",
+          2978,
+          3087,
+          "Complete"
+        ],
+        [
+          3,
+          "managed-navpoint-visible-offscreen-filters-component",
+          3087,
+          3111,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-185-type-2.bin",
+      "packet": 548,
+      "id": 2147488109,
+      "archetype": 37,
+      "start_bit": 2929,
+      "end_bit": 3035,
+      "last_field": "mpp.count",
+      "last_field_value": 7,
+      "preceding_records": [
+        [
+          "Delta",
+          648,
+          null,
+          2427,
+          2592,
+          "Complete"
+        ],
+        [
+          "Delta",
+          649,
+          null,
+          2592,
+          2757,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147487421,
+          null,
+          2757,
+          2830,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2433,
+          null,
+          2830,
+          2929,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          1,
+          "managed-navpoint-flags-component",
+          2894,
+          2902,
+          "Complete"
+        ],
+        [
+          4,
+          "managed-navpoint-can-be-occluded-filters-component",
+          2902,
+          2921,
+          "Complete"
+        ],
+        [
+          7,
+          "managed-navpoint-docking-order-component",
+          2921,
+          2929,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-195-type-2.bin",
+      "packet": 312,
+      "id": 59,
+      "archetype": 43,
+      "start_bit": 3362,
+      "end_bit": 3467,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          677,
+          null,
+          2535,
+          2704,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742695,
+          null,
+          2704,
+          2943,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742698,
+          null,
+          2943,
+          3168,
+          "Complete"
+        ],
+        [
+          "Delta",
+          4098,
+          null,
+          3168,
+          3362,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "managed-navpoint-sub-type-component",
+          3225,
+          3257,
+          "Complete"
+        ],
+        [
+          8,
+          "managed-navpoint-docking-group-name-component",
+          3257,
+          3289,
+          "Complete"
+        ],
+        [
+          12,
+          "managed-navpoint-manual-timer-current-duration-component",
+          3289,
+          3306,
+          "Complete"
+        ],
+        [
+          18,
+          "managed-navpoint-position-offset",
+          3306,
+          3362,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-197-type-2.bin",
+      "packet": 84,
+      "id": 2147483754,
+      "archetype": 37,
+      "start_bit": 3388,
+      "end_bit": 3516,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          680,
+          null,
+          2893,
+          2961,
+          "Complete"
+        ],
+        [
+          "Delta",
+          681,
+          null,
+          2961,
+          3029,
+          "Complete"
+        ],
+        [
+          "Delta",
+          682,
+          null,
+          3029,
+          3194,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742698,
+          null,
+          3194,
+          3388,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "object-position-component",
+          3245,
+          3297,
+          "Complete"
+        ],
+        [
+          1,
+          "object-translational-velocity-component",
+          3297,
+          3327,
+          "Complete"
+        ],
+        [
+          2,
+          "object-forward-and-up-dynamic-precision-component",
+          3327,
+          3360,
+          "Complete"
+        ],
+        [
+          3,
+          "object-angular-velocity-component",
+          3360,
+          3388,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-197-type-2.bin",
+      "packet": 272,
+      "id": 1073742068,
+      "archetype": 36,
+      "start_bit": 2833,
+      "end_bit": 2965,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          679,
+          null,
+          2241,
+          2406,
+          "Complete"
+        ],
+        [
+          "Delta",
+          680,
+          null,
+          2406,
+          2474,
+          "Complete"
+        ],
+        [
+          "Delta",
+          682,
+          null,
+          2474,
+          2639,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742698,
+          null,
+          2639,
+          2833,
+          "Complete"
+        ]
+      ],
+      "preceding_components": [
+        [
+          0,
+          "object-position-component",
+          2690,
+          2742,
+          "Complete"
+        ],
+        [
+          1,
+          "object-translational-velocity-component",
+          2742,
+          2772,
+          "Complete"
+        ],
+        [
+          2,
+          "object-forward-and-up-dynamic-precision-component",
+          2772,
+          2805,
+          "Complete"
+        ],
+        [
+          3,
+          "object-angular-velocity-component",
+          2805,
+          2833,
+          "Complete"
+        ]
+      ]
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-197-type-2.bin",
+      "packet": 634,
+      "id": 4364,
+      "archetype": 41,
+      "start_bit": 3563,
+      "end_bit": 3681,
+      "last_field": "mpp.count",
+      "last_field_value": 5,
+      "preceding_records": [
+        [
+          "Delta",
+          1073742695,
+          null,
+          2927,
+          3133,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742698,
+          null,
+          3133,
+          3292,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2147491336,
+          null,
+          3292,
+          3513,
+          "Complete"
+        ],
+        [
+          "Delete",
+          3221233120,
+          null,
+          3513,
+          3563,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-198-type-2.bin",
+      "packet": 28,
+      "id": 706,
+      "archetype": 38,
+      "start_bit": 2128,
+      "end_bit": 2220,
+      "last_field": "mpp.count",
+      "last_field_value": 6,
+      "preceding_records": [
+        [
+          "Delta",
+          687,
+          null,
+          1654,
+          1819,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742698,
+          null,
+          1819,
+          1941,
+          "Complete"
+        ],
+        [
+          "Delta",
+          2179,
+          null,
+          1941,
+          2078,
+          "Complete"
+        ],
+        [
+          "Delete",
+          991,
+          null,
+          2078,
+          2128,
+          "Complete"
+        ]
+      ],
+      "preceding_components": []
+    }
+  ],
+  "unparsed_by_cause_bits": {
+    "entity_end: Failure": 910357,
+    "entity_end: Marker": 3228221,
+    "entity_end: PayloadBoundary": 0,
+    "entity_end: Rejected ": 116940273,
+    "entity_end: Truncated": 17,
+    "event: MissingKillPlaybackContext": 14242557,
+    "keyframe: Complete": 0,
+    "keyframe: RuntimeContextUnavailable ": 207324603,
+    "keyframe: UnsupportedComponent ": 951861,
+    "other": 2883
+  },
+  "rejected_by_reason": {
+    "Unbound": 143882
+  },
+  "rejected_unparsed_by_reason_bits": {
+    "Unbound": 116940273
+  },
+  "rejected_slot_buckets": {
+    "1024_or_above": 141478,
+    "below_1024": 2404
+  },
+  "early_rejections": [
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-020-type-2.bin",
+      "packet": 6,
+      "id": 1073743651,
+      "header_bit": 3785,
+      "prior_packet_types": [
+        1,
+        2,
+        6,
+        8,
+        12,
+        10
+      ],
+      "prior_keyframe_stops": [
+        "Desync"
+      ],
+      "prior_keyframe_headers": [
+        769
+      ],
+      "prior_keyframe_slot": [],
+      "prior_new_for_slot": [],
+      "event_end_bit": 33,
+      "preceding_records": [
+        [
+          "Delta",
+          1073741947,
+          null,
+          33,
+          68,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742337,
+          null,
+          68,
+          233,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742338,
+          null,
+          233,
+          398,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742339,
+          null,
+          398,
+          563,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742340,
+          null,
+          563,
+          728,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742341,
+          null,
+          728,
+          893,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742342,
+          null,
+          893,
+          1097,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742344,
+          null,
+          1097,
+          1262,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742345,
+          null,
+          1262,
+          1365,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742346,
+          null,
+          1365,
+          1565,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742347,
+          null,
+          1565,
+          1765,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742348,
+          null,
+          1765,
+          1899,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742349,
+          null,
+          1899,
+          2027,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742352,
+          null,
+          2027,
+          2095,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742353,
+          null,
+          2095,
+          2231,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742354,
+          null,
+          2231,
+          2431,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742355,
+          null,
+          2431,
+          2487,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742356,
+          null,
+          2487,
+          2592,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742357,
+          null,
+          2592,
+          2726,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742358,
+          null,
+          2726,
+          2860,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742592,
+          null,
+          2860,
+          3099,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742595,
+          null,
+          3099,
+          3338,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742862,
+          null,
+          3338,
+          3487,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742863,
+          null,
+          3487,
+          3636,
+          "Complete"
+        ],
+        [
+          "Delta",
+          1073742864,
+          null,
+          3636,
+          3785,
+          "Complete"
+        ]
+      ]
+    }
+  ],
+  "largest_unparsed": [
+    {
+      "film": "appearance/02-cadet-brick",
+      "file": "chunk-002-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 224166,
+      "end_bit": 1623344
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "file": "chunk-002-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 224166,
+      "end_bit": 1623312
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "file": "chunk-003-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606336
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "file": "chunk-004-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606336
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "file": "chunk-005-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606336
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "file": "chunk-003-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606304
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "file": "chunk-004-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606304
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "file": "chunk-005-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 217780,
+      "end_bit": 1606304
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "file": "chunk-001-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 211415,
+      "end_bit": 1448208
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "file": "chunk-001-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 211415,
+      "end_bit": 1448208
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-026-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 264145,
+      "end_bit": 1267616
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-131-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 270025,
+      "end_bit": 1273344
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-059-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 267638,
+      "end_bit": 1269792
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-084-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 266375,
+      "end_bit": 1268176
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-183-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 274252,
+      "end_bit": 1275160
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-085-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 267003,
+      "end_bit": 1267848
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-100-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 267197,
+      "end_bit": 1267552
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-076-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 267018,
+      "end_bit": 1267320
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-025-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 264317,
+      "end_bit": 1264128
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-035-type-2.bin",
+      "packet": 1,
+      "packet_type": 2,
+      "start_bit": 263389,
+      "end_bit": 1262208
+    }
+  ],
+  "largest_unparsed_frame": [
+    {
+      "film": "ranked-arena/02-oddball",
+      "file": "chunk-042-type-2.bin",
+      "packet": 2392,
+      "packet_type": 0,
+      "start_bit": 151,
+      "end_bit": 47088
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-107-type-2.bin",
+      "packet": 880,
+      "packet_type": 0,
+      "start_bit": 835,
+      "end_bit": 22424
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-157-type-2.bin",
+      "packet": 850,
+      "packet_type": 0,
+      "start_bit": 4887,
+      "end_bit": 26440
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-087-type-2.bin",
+      "packet": 820,
+      "packet_type": 0,
+      "start_bit": 874,
+      "end_bit": 22176
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-026-type-2.bin",
+      "packet": 496,
+      "packet_type": 0,
+      "start_bit": 164,
+      "end_bit": 20888
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-074-type-2.bin",
+      "packet": 700,
+      "packet_type": 0,
+      "start_bit": 411,
+      "end_bit": 21112
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-197-type-2.bin",
+      "packet": 802,
+      "packet_type": 0,
+      "start_bit": 2309,
+      "end_bit": 22768
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-070-type-2.bin",
+      "packet": 754,
+      "packet_type": 0,
+      "start_bit": 467,
+      "end_bit": 20408
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-100-type-2.bin",
+      "packet": 62,
+      "packet_type": 0,
+      "start_bit": 462,
+      "end_bit": 20376
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-125-type-2.bin",
+      "packet": 126,
+      "packet_type": 0,
+      "start_bit": 285,
+      "end_bit": 19992
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-117-type-2.bin",
+      "packet": 646,
+      "packet_type": 0,
+      "start_bit": 1120,
+      "end_bit": 20744
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-051-type-2.bin",
+      "packet": 330,
+      "packet_type": 0,
+      "start_bit": 661,
+      "end_bit": 19896
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-074-type-2.bin",
+      "packet": 956,
+      "packet_type": 0,
+      "start_bit": 1182,
+      "end_bit": 20184
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-152-type-2.bin",
+      "packet": 88,
+      "packet_type": 0,
+      "start_bit": 1080,
+      "end_bit": 19792
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-123-type-2.bin",
+      "packet": 14,
+      "packet_type": 0,
+      "start_bit": 869,
+      "end_bit": 19496
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-173-type-2.bin",
+      "packet": 444,
+      "packet_type": 0,
+      "start_bit": 624,
+      "end_bit": 19208
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-155-type-2.bin",
+      "packet": 1084,
+      "packet_type": 0,
+      "start_bit": 636,
+      "end_bit": 19192
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-082-type-2.bin",
+      "packet": 304,
+      "packet_type": 0,
+      "start_bit": 462,
+      "end_bit": 18992
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-176-type-2.bin",
+      "packet": 1202,
+      "packet_type": 0,
+      "start_bit": 912,
+      "end_bit": 19392
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "file": "chunk-175-type-2.bin",
+      "packet": 104,
+      "packet_type": 0,
+      "start_bit": 146,
+      "end_bit": 18264
+    }
+  ]
+}

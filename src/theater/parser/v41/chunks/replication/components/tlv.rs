@@ -6,16 +6,26 @@ const MAX_FIELDS: u64 = 1 << 12;
 const MAX_BODY_BYTES: u64 = 1 << 20;
 const MAX_DEPTH: usize = 8;
 
+// Resource limits are parser admission limits, not wire lengths. Never clamp a
+// declared body/count or silently leave a nested scope and report completion.
+fn refuse<T>(r: &mut ComponentReader<'_>, reason: &'static str) -> Option<T> {
+    r.context_error = Some(reason);
+    None
+}
+
 fn varint(r: &mut ComponentReader<'_>, name: &str) -> Option<u64> {
     let mut value = 0;
     for shift in (0..64).step_by(7) {
         let byte = r.r(&format!("{name}.byte[{}]", shift / 7), 8)?;
+        if shift == 63 && byte > 1 {
+            return refuse(r, "TLV varint exceeds 64 bits");
+        }
         value |= (byte & 0x7f) << shift;
         if byte < 0x80 {
-            break;
+            return Some(value);
         }
     }
-    Some(value)
+    unreachable!("the tenth byte must terminate or be refused")
 }
 
 fn field(r: &mut ComponentReader<'_>, name: &str, wire: u64, depth: usize) -> Option<()> {
@@ -33,7 +43,10 @@ fn field(r: &mut ComponentReader<'_>, name: &str, wire: u64, depth: usize) -> Op
             varint(r, name)?;
         }
         9 | 10 | 18 => {
-            let count = varint(r, &format!("{name}.length"))?.min(MAX_BODY_BYTES);
+            let count = varint(r, &format!("{name}.length"))?;
+            if count > MAX_BODY_BYTES {
+                return refuse(r, "TLV body exceeds resource limit");
+            }
             let bits = count as usize * if wire == 18 { 16 } else { 8 };
             for offset in (0..bits).step_by(64) {
                 r.r(
@@ -49,21 +62,23 @@ fn field(r: &mut ComponentReader<'_>, name: &str, wire: u64, depth: usize) -> Op
             } else {
                 varint(r, &format!("{name}.count"))?
             };
-            if depth < MAX_DEPTH {
-                for i in 0..count.min(MAX_FIELDS) {
-                    field(r, &format!("{name}[{i}]"), header & 31, depth + 1)?;
-                }
+            if count > MAX_FIELDS || (count != 0 && depth >= MAX_DEPTH) {
+                return refuse(r, "TLV list exceeds resource limit");
+            }
+            for i in 0..count {
+                field(r, &format!("{name}[{i}]"), header & 31, depth + 1)?;
             }
         }
         13 => {
             let key = r.r(&format!("{name}.key_wire"), 8)?;
             let value = r.r(&format!("{name}.value_wire"), 8)?;
             let count = varint(r, &format!("{name}.count"))?;
-            if depth < MAX_DEPTH {
-                for i in 0..count.min(MAX_FIELDS) {
-                    field(r, &format!("{name}[{i}].key"), key, depth + 1)?;
-                    field(r, &format!("{name}[{i}].value"), value, depth + 1)?;
-                }
+            if count > MAX_FIELDS || (count != 0 && depth >= MAX_DEPTH) {
+                return refuse(r, "TLV map exceeds resource limit");
+            }
+            for i in 0..count {
+                field(r, &format!("{name}[{i}].key"), key, depth + 1)?;
+                field(r, &format!("{name}[{i}].value"), value, depth + 1)?;
             }
         }
         _ => {}
@@ -91,9 +106,12 @@ pub(crate) fn multiplayer_properties(r: &mut ComponentReader<'_>) -> Option<()> 
         }
         let wire = tag & 31;
         if wire <= 1 {
-            break;
+            return Some(());
         }
         field(r, &name, wire, 0)?;
     }
-    Some(())
+    refuse(
+        r,
+        "TLV message exceeds resource limit before its terminator",
+    )
 }

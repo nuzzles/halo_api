@@ -1,5 +1,6 @@
 //! Component field grammars, separate from packet and record traversal.
 pub(crate) mod ability;
+pub(crate) mod actions;
 pub(crate) mod basic;
 pub(crate) mod biped;
 pub(crate) mod control;
@@ -23,5 +24,14 @@ pub(crate) mod scene;
 pub(crate) mod tacmap;
 pub(crate) mod tlv;
 pub(crate) mod unit;
+pub(crate) mod vehicle;
 pub(crate) mod weapon;
 pub(crate) mod widths;
+
+#[cfg(test)]
+mod tests;
+
+#[cfg(test)]
+pub(crate) mod regions;
+#[cfg(test)]
+mod zero_axes;

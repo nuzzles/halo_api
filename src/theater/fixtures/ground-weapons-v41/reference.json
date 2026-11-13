@@ -1,0 +1,364 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blobs": {
+    "src/inventory.rs": "c5cc80c8f3cf7093da53b73cf00ca9a4937ffc79"
+  },
+  "cases": [
+    {
+      "name": "pending-then-two-positions",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            4,
+            5,
+            6
+          ]
+        ],
+        [
+          [
+            "delete",
+            43
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 3,
+          "region": 3,
+          "codes": [
+            4,
+            5,
+            6
+          ],
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "open-positioned",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": null,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "never-positioned",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delete",
+            43
+          ]
+        ]
+      ],
+      "expected": []
+    },
+    {
+      "name": "pickup-same-packet",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            "pickup",
+            123,
+            0,
+            1,
+            1
+          ],
+          [
+            "delete",
+            43
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 2,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": true
+        }
+      ]
+    },
+    {
+      "name": "pickup-other-packet",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            "pickup",
+            123,
+            0,
+            1,
+            1
+          ]
+        ],
+        [
+          [
+            "delete",
+            43
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 3,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "two-identical-tags",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ],
+          [
+            "new",
+            44,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ],
+          [
+            "delta",
+            44,
+            3,
+            1,
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            "pickup",
+            123,
+            0,
+            1,
+            1
+          ],
+          [
+            "delete",
+            43
+          ],
+          [
+            "delete",
+            44
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 2,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": true
+        },
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 2,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "reuse-after-delete",
+      "frames": [
+        [
+          [
+            "new",
+            43,
+            123
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            1,
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            "delete",
+            43
+          ]
+        ],
+        [
+          [
+            "new",
+            43,
+            124
+          ]
+        ],
+        [
+          [
+            "delta",
+            43,
+            3,
+            7,
+            8,
+            9
+          ]
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "start": 0,
+          "end": 2,
+          "region": 3,
+          "codes": [
+            1,
+            2,
+            3
+          ],
+          "taken": false
+        },
+        {
+          "tag": 124,
+          "start": 3,
+          "end": null,
+          "region": 3,
+          "codes": [
+            7,
+            8,
+            9
+          ],
+          "taken": false
+        }
+      ]
+    }
+  ]
+}

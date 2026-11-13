@@ -1,0 +1,669 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blobs": {
+    "src/world.rs": "6aac5301bee54d94cf150fe2ee8abd15e20dd526",
+    "src/snapshot.rs": "cd8971c6b1e53e593361fe29026324a98a861728"
+  },
+  "cases": [
+    {
+      "name": "singleton",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": []
+    },
+    {
+      "name": "stable-open",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "anchor-drift",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              0,
+              1065353216,
+              1065353216
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1025758986,
+              1065353216,
+              1065353216
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1034147594,
+              1065353216,
+              1065353216
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1034147594,
+              1065353216,
+              1065353216
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13845191154443747328,
+          "y_bits": 0,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13845191154443747328,
+          "y_bits": 4605380978788007936,
+          "start": 2,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "absence-reappearance",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 3,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "tag-change",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 124,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 124,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "tag": 124,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 2,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "flags-and-zero",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 1,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              0,
+              2147483648,
+              0
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 4,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "all-four-types",
+      "snapshots": [
+        [
+          {
+            "id": 37,
+            "entity_type": 37,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 40,
+            "entity_type": 40,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 42,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 43,
+            "entity_type": 43,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 37,
+            "entity_type": 37,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 40,
+            "entity_type": 40,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 42,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          },
+          {
+            "id": 43,
+            "entity_type": 43,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 37,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": null
+        },
+        {
+          "tag": 123,
+          "entity_type": 40,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": null
+        },
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": null
+        },
+        {
+          "tag": 123,
+          "entity_type": 43,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "different-namespace",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1073741825,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1073741825,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 2,
+          "end": null
+        }
+      ]
+    },
+    {
+      "name": "nonfinite",
+      "snapshots": [
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              1065353216,
+              1073741824,
+              1077936128
+            ]
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "entity_type": 42,
+            "flags": 3,
+            "tag": 123,
+            "position_bits": [
+              2143289344,
+              1065353216,
+              1065353216
+            ]
+          }
+        ]
+      ],
+      "expected": [
+        {
+          "tag": 123,
+          "entity_type": 42,
+          "x_bits": 13849694754071117824,
+          "y_bits": 4621819117588971520,
+          "start": 0,
+          "end": 2
+        }
+      ]
+    }
+  ]
+}

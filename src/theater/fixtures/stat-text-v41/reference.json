@@ -1,0 +1,236 @@
+{
+  "commit": "f050371a6cda83b9887eeb83a1884336fce28e53",
+  "source_blob": "4814607a2a27f4ad2cd4ef0a16845582f73c8172",
+  "cases": [
+    {
+      "name": "reordered",
+      "indices": [
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          3,
+          3,
+          3,
+          3
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "different-fields",
+      "indices": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ]
+    },
+    {
+      "name": "same-text-different-indices",
+      "indices": [
+        [
+          0,
+          1,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "missing-index",
+      "indices": [
+        [
+          0,
+          null,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "negative-index",
+      "indices": [
+        [
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      ]
+    },
+    {
+      "name": "large-index",
+      "indices": [
+        [
+          2147483647,
+          2147483647,
+          2147483647,
+          2147483647
+        ]
+      ]
+    },
+    {
+      "name": "wrong-index-type",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "duplicate-index",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "base-only-index",
+      "indices": [
+        [
+          1,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "base-derived-index",
+      "indices": [
+        [
+          1,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "missing-id",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "duplicate-ids",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "shared-reference",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "empty-invalid-text",
+      "indices": [
+        [
+          2,
+          2,
+          2,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "missing-definitions",
+      "indices": []
+    },
+    {
+      "name": "empty-definitions",
+      "indices": []
+    },
+    {
+      "name": "missing-strings",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "empty-strings",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "missing-blob",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "duplicate-string-table",
+      "indices": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ]
+}

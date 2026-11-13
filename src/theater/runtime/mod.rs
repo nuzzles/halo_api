@@ -1,104 +1,224 @@
-//! Owned Theater analysis and stateful playback over a canonical recording.
+//! Stateful playback of a film's finished, typed observations.
 //!
-//! Load once with [`TheaterRuntime::load`]. The resolved representation is private;
-//! public events, evidence, and world models live in the supporting modules.
+//! Controls and recorded events remain in the observation feed; they do not
+//! imply entity state changes. Highlights are the film's guarded candidates.
 
-pub mod coordinates;
-pub mod medals;
-pub mod replay;
-mod resolved;
 use crate::theater::Film;
-use resolved::ResolvedFilm;
+use crate::theater::film::ReplicationComponentChange;
+pub use crate::theater::film::replication::ReplicationValue;
+use crate::theater::film::{ArchetypeId, ComponentSlot, EntityId, KeyframeId};
+pub use crate::theater::film::{
+    ReplicationChange, ReplicationControl, ReplicationField, ReplicationObservation,
+    SummaryHighlight,
+};
+use std::collections::BTreeMap;
 use std::sync::Arc;
 
-pub use resolved::EventFilter;
-pub use resolved::events::*;
-pub use resolved::identity::*;
-pub use resolved::summary::*;
-pub use resolved::world::*;
-pub use resolved::{events, identity, interpretation, query, summary, world};
+/// Latest complete component update for an entity.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ComponentState {
+    pub name: String,
+    pub fields: Vec<ReplicationField>,
+    pub weapon_id: Option<crate::theater::film::catalog::weapons::Weapon>,
+}
 
-/// An owned canonical film, query indexes, and an independent playback cursor.
-///
-/// A runtime is a stateful session and is not cloneable. Original chunk buffers
-/// are shared without copying; resolving derived state can copy its field values.
+/// Materialized live entity or keyframe baseline state. `Id` keeps their
+/// distinct ID domains while sharing the component snapshot shape.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EntityState<Id = EntityId> {
+    /// Exact recorded ID in this state's domain.
+    pub id: Id,
+    pub archetype: ArchetypeId,
+    pub default_fields: Vec<ReplicationField>,
+    /// Fields of the latest entity-level change; component fields are separate.
+    pub fields: Vec<ReplicationField>,
+    pub components: BTreeMap<ComponentSlot, ComponentState>,
+    pub created_at_us: Option<u64>,
+    pub updated_at_us: u64,
+}
+
+/// Entity state after applying observations through the requested time.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct WorldSnapshot {
+    /// Live entities keyed by their exact recorded IDs.
+    pub entities: BTreeMap<EntityId, EntityState>,
+    /// Keyframe baselines keyed by their exact recorded IDs. No link to a live
+    /// entity is assumed from the keyframe ID.
+    pub keyframes: BTreeMap<KeyframeId, EntityState<KeyframeId>>,
+}
+
+/// An owned film and an independent playback cursor.
 #[derive(Debug)]
 pub struct TheaterRuntime {
-    resolved: ResolvedFilm,
+    film: Arc<Film>,
+    /// Source order is authoritative; monotonic films can advance by prefix.
+    monotonic_timestamps: bool,
+    cursor: usize,
+    timestamp_us: Option<u64>,
+    world: WorldSnapshot,
 }
 
 impl TheaterRuntime {
-    /// Take ownership of a canonical film and resolve its supported records.
-    /// An `Arc<Film>` can be supplied to share the same recording across runtimes.
-    /// Loading walks records, sorts events, and builds indexes/checkpoints; it is
-    /// not constant time. Unknown data and interpretation uncertainty stay explicit.
+    /// Prepare playback from the film's finished observations.
     pub fn load(film: impl Into<Arc<Film>>) -> Self {
+        let film = film.into();
+        let monotonic_timestamps = film
+            .replication_stream
+            .observations
+            .windows(2)
+            .all(|pair| pair[0].timestamp_us <= pair[1].timestamp_us);
         Self {
-            resolved: ResolvedFilm::from_film(film.into()),
+            film,
+            monotonic_timestamps,
+            cursor: 0,
+            timestamp_us: None,
+            world: WorldSnapshot::default(),
         }
     }
 
-    /// Borrow the unchanged canonical recording and its retained source bytes.
-    pub fn film(&self) -> &Film {
-        self.resolved.film()
-    }
-    /// Inspect explicitly labeled evidence derived from otherwise opaque regions.
-    pub fn interpretations(&self) -> &interpretation::Interpretations {
-        self.resolved.interpretations()
-    }
-    /// Borrow the complete chronological supported event stream, including state updates.
-    pub fn events(&self) -> &[Event] {
-        self.resolved.events()
-    }
-    /// Borrow typed chronological summaries with recorded actor fields and derivation.
-    pub fn summary_events(&self) -> &[summary::SummaryEvent] {
-        self.resolved.summary_events()
-    }
-    /// Compare each packet's declared summary count with recovered candidate counts.
-    pub fn summary_reports(&self) -> &[SummaryReadReport] {
-        self.resolved.summary_reports()
-    }
-    /// Filter indexed summary events without moving the playback cursor.
-    pub fn query_summaries(&self, filter: SummaryFilter) -> impl Iterator<Item = &SummaryEvent> {
-        self.resolved.query_summaries(filter)
-    }
-    /// Filter the full event stream without moving the playback cursor.
-    pub fn query(&self, filter: EventFilter) -> impl Iterator<Item = &Event> {
-        self.resolved.query(filter)
-    }
-    /// Follow a source reference to a structural record or an explicitly derived read.
-    /// Invalid references return `None`; derived reads are not canonical Film records.
-    pub fn record(&self, source: SourceRef) -> Option<Record<'_>> {
-        self.resolved.record(source)
-    }
-    /// Look up an unambiguous bootstrap roster slot by recorded film index.
-    pub fn player(&self, film_index: usize) -> Option<&PlayerTableSlot> {
-        self.resolved.player(film_index)
+    /// Finished replication observations in recorded order.
+    pub fn observations(&self) -> &[ReplicationObservation] {
+        &self.film.replication_stream.observations
     }
 
-    /// O(1) borrowed access to the materialized snapshot. Enumerating/copying it
-    /// costs O(world size); this method performs no seek or event application.
+    /// Guarded summary highlights in recorded order.
+    pub fn summary_highlights(&self) -> &[SummaryHighlight] {
+        &self.film.summary.highlights
+    }
+
+    /// Materialized entity state without moving playback.
     pub fn current(&self) -> &WorldSnapshot {
-        self.resolved.current()
+        &self.world
     }
-    /// Current requested playback time, or `None` before playback or after rewind.
+
+    /// Requested playback time, or None before playback and after rewind.
     pub fn timestamp_us(&self) -> Option<u64> {
-        self.resolved.timestamp_us()
+        self.timestamp_us
     }
-    /// Apply intervening updates; earlier timestamps use checkpoint seeking.
+
+    /// Apply changes through the requested time in observation vector order.
     pub fn advance_to(&mut self, timestamp_us: u64) -> &WorldSnapshot {
-        self.resolved.advance_to(timestamp_us)
+        if !self.monotonic_timestamps
+            || self
+                .timestamp_us
+                .is_some_and(|previous| timestamp_us < previous)
+        {
+            self.rewind();
+        }
+        let observations = &self.film.replication_stream.observations;
+        if self.monotonic_timestamps {
+            while self.cursor < observations.len()
+                && observations[self.cursor].timestamp_us <= timestamp_us
+            {
+                apply(&mut self.world, &observations[self.cursor]);
+                self.cursor += 1;
+            }
+        } else {
+            for observation in observations {
+                if observation.timestamp_us <= timestamp_us {
+                    apply(&mut self.world, observation);
+                }
+            }
+        }
+        self.timestamp_us = Some(timestamp_us);
+        &self.world
     }
-    /// Binary-search events/checkpoints, copy the nearest checkpoint world, and
-    /// apply at most 1,024 remaining events. Copy cost scales with world size.
+
+    /// Reconstruct state at a timestamp, regardless of the current cursor.
     pub fn seek(&mut self, timestamp_us: u64) -> &WorldSnapshot {
-        self.resolved.seek(timestamp_us)
+        self.rewind();
+        self.advance_to(timestamp_us)
     }
-    /// Clear the current world and cursor while retaining shared indexes and evidence.
+
+    /// Clear playback state while retaining the film.
     pub fn rewind(&mut self) {
-        self.resolved.rewind();
+        self.world.entities.clear();
+        self.world.keyframes.clear();
+        self.cursor = 0;
+        self.timestamp_us = None;
+    }
+}
+
+fn component_state(change: &ReplicationComponentChange) -> ComponentState {
+    ComponentState {
+        name: change.name.clone(),
+        fields: change.fields.clone(),
+        weapon_id: change.weapon_id,
+    }
+}
+
+fn components(changes: &[ReplicationComponentChange]) -> BTreeMap<ComponentSlot, ComponentState> {
+    changes
+        .iter()
+        .map(|change| (change.index, component_state(change)))
+        .collect()
+}
+
+fn apply(world: &mut WorldSnapshot, observation: &ReplicationObservation) {
+    let timestamp_us = observation.timestamp_us;
+    match &observation.change {
+        ReplicationChange::EntityCreated {
+            id,
+            archetype,
+            default_fields,
+            fields,
+            components: changes,
+        } => {
+            world.entities.insert(
+                *id,
+                EntityState {
+                    id: *id,
+                    archetype: *archetype,
+                    default_fields: default_fields.clone(),
+                    fields: fields.clone(),
+                    components: components(changes),
+                    created_at_us: Some(timestamp_us),
+                    updated_at_us: timestamp_us,
+                },
+            );
+        }
+        ReplicationChange::EntityUpdated {
+            id,
+            fields,
+            components: changes,
+        } => {
+            let Some(state) = world.entities.get_mut(id) else {
+                return;
+            };
+            state.fields = fields.clone();
+            state.updated_at_us = timestamp_us;
+            for change in changes {
+                state
+                    .components
+                    .insert(change.index, component_state(change));
+            }
+        }
+        ReplicationChange::EntityDeleted { id } => {
+            world.entities.remove(id);
+        }
+        ReplicationChange::Keyframe {
+            id,
+            archetype,
+            default_fields,
+            fields,
+            components: changes,
+        } => {
+            world.keyframes.insert(
+                *id,
+                EntityState {
+                    id: *id,
+                    archetype: *archetype,
+                    default_fields: default_fields.clone(),
+                    fields: fields.clone(),
+                    components: components(changes),
+                    created_at_us: None,
+                    updated_at_us: timestamp_us,
+                },
+            );
+        }
+        ReplicationChange::Control { .. } | ReplicationChange::Event { .. } => {}
     }
 }
 
 #[cfg(test)]
-mod tests;
+mod playback_tests;

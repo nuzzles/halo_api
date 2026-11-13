@@ -1,0 +1,199 @@
+{
+  "repository": "https://github.com/OpenSpartan/libfilmshell",
+  "commit": "a13efb323b230c96b59685defbc376720043240f",
+  "source_blob": "51c7626e939444345753f366b3eb1177980d9034",
+  "films": [
+    {
+      "film": "aim/01-pitch-up",
+      "manifest_sha256": "b897b9aa8d869ecde4f74e82f2517f16a6ba74fed5641da92e3311292c8b46f0",
+      "registry_sha256": "231e2538e6ee1dfd43fc16898b8911f2f7b56c020ce93df6e9ba269e4246b56b",
+      "icon": 0
+    },
+    {
+      "film": "aim/02-yaw-right",
+      "manifest_sha256": "53482918a440287be98d3c816bc7c6a9cc2c4fe9ed1281d1854da2f4ea9fd52a",
+      "registry_sha256": "c9d554883661d8d72528acec947ed7503e511b218f0b37f7423e56f0d5386dac",
+      "icon": 0
+    },
+    {
+      "film": "appearance/01-cadet-blue",
+      "manifest_sha256": "ff8f1b0f7ea38357d6615682fef85d65a6049e9f33e4fa6fb58639d0cb699530",
+      "registry_sha256": "90d4afd12dc53b81d8b301da153debf030352c2bfeef0f038a44dd8ef43e0077",
+      "icon": 0
+    },
+    {
+      "film": "appearance/02-cadet-brick",
+      "manifest_sha256": "bc339513d7a8831e53c426759893a17a8d1bcb27be84db56d71cb1aae394758d",
+      "registry_sha256": "e6ae8895e03f6befdd650977c1b1cf919a794b5c9e692df9b8e5a533000773f4",
+      "icon": 0
+    },
+    {
+      "film": "bandit/01-evo",
+      "manifest_sha256": "e3ba07760f7b993457abf0108dd16f8d0c75f3b835014f24a864449a5eefe905",
+      "registry_sha256": "08745fea5ba6ec81ec9a275338ee638612f381e61d183477a1e890881a34fbc9",
+      "icon": 8
+    },
+    {
+      "film": "controller/01-stick-circles",
+      "manifest_sha256": "f3c35af28580271b148a3e595a28314e0e360480f6eacfa1eef06d9ae268ba2d",
+      "registry_sha256": "deaf9ff3a0cb31d66875c52fcb6b371ef27c6995456b535338d89a292668ac8b",
+      "icon": 0
+    },
+    {
+      "film": "maps/01-bazaar-idle",
+      "manifest_sha256": "0e0064f4b27718d35e8eaa31faed498f55a0452e9634646e49a4069247224db4",
+      "registry_sha256": "9895f10b150fdb75bfdb0ab8f1976e4302bf1f4c1ab7b8703c8bde8dfc49edaf",
+      "icon": 0
+    },
+    {
+      "film": "maps/02-aquarius",
+      "manifest_sha256": "c696eaf36578e4960af574bc586a1a534e938f2ceb47b06c72a10d3b4b8f46df",
+      "registry_sha256": "6fadda3e83f4e40928b9d3fff9b0f36b1c704171e4f2cce8106fb9dd91efbe3a",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/01-do-nothing",
+      "manifest_sha256": "ec0d7cfd0254915565c249a5d758fefbd187f792440a8376195c6c12c9e0b782",
+      "registry_sha256": "63e203eba8a26394894f9a94e7dd80b42fd35445ce41e04d10a5015c67f01f42",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/02-jump",
+      "manifest_sha256": "e3765f9292fca91c0905c3804ceec965cbd7900cc9430b5cc231c118b0622dfe",
+      "registry_sha256": "26ceaa0afff89a34d33d62d5c6992119c3ef95c983913543de989bf1ec36d885",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/03-shoot",
+      "manifest_sha256": "7e7a2d36ee40a95f83a315c9ae7b373188471606b0f2eafe98cd692a4e4bdfe9",
+      "registry_sha256": "ae52e84750cb6af9a6ce76e0c84d0ca1c8e8ed469a41ae670b5e0c813a2c51ee",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/04-walk-forward",
+      "manifest_sha256": "180468eb4b564009817c2df1d519ecd5977507e33e68aac301442530c2cd3732",
+      "registry_sha256": "9405d795fa5f5adf99f92b7d11142b688c3fd6b242b0464a4c7172c7a2a7c86c",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/05-walk-backward",
+      "manifest_sha256": "5b4c4c9b2b5c66b4e8d75c76ba8171d998fce11c598a68269b6ed4b1f8350a82",
+      "registry_sha256": "1f00baed2376a67fdc78b90aa6e9d0789cd269ffc47ba356f3b81157808debda",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/06-walk-left",
+      "manifest_sha256": "6428eb0dc5ebf0464895fd7b81789dd031a0950395447f31a22f27ae3c03283c",
+      "registry_sha256": "85b0e20a5ab6a1fb0a9e7d23056cec0bcfe7ecf8b5408c01740fc5b5c186b362",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/07-walk-right",
+      "manifest_sha256": "c41a3bab8133e002630729204e0d024801e5733994f032d986b1836ebea311d1",
+      "registry_sha256": "05fba80fd7d66e18163a1c0bb608707527737cf77b599fe1c52bb8f3c56a679c",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/08-crouch",
+      "manifest_sha256": "7ea7279ede723ae327d882f330766785412f5cc81f2d7d3b16356902c2d9587a",
+      "registry_sha256": "8ca52cac34c1981756c5e62a3a0e85dca71c47236647ce3a9869bac553d44999",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/09-grenade",
+      "manifest_sha256": "8c0d26481b63236af5a5bd035c8a25dd4d6ee448c406bbae30646dc69d70fc6d",
+      "registry_sha256": "07deaa02c92c0c931bb9ef4a2f14514b9c04d0c412c2ea341c50248d1c2e7dcf",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/10-switch-weapon",
+      "manifest_sha256": "c0baeee8ef14aecc90d573d5b12c689b5c7160ee381042ac71d87fdb5654d5a5",
+      "registry_sha256": "f82654fb5b2693049ac8246c81afa4288ced9272d4c03aa18b56c8935dd9ac13",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/11-switch-grenade",
+      "manifest_sha256": "6fe74e82207726c38f78bc672078bec896edb1ef04599f8db7b9782e1fc716ff",
+      "registry_sha256": "71ae421d9dcbe7685346f3de4788b2e4dd9af24ea336c65cd8d06d57618dc05a",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/12-ping",
+      "manifest_sha256": "ca012d5853d6ce439e3467811ab8243fec0987f7db99d0e9a9dd136ddcffe7bc",
+      "registry_sha256": "5c29ce5f23e3688e1593dcb46aa915e93235bb951ce2422249891e23770e5da4",
+      "icon": 0
+    },
+    {
+      "film": "natural-end/13-melee",
+      "manifest_sha256": "bd4d7af77ea2830cb77e69d1b2c110d40b1ff0a885036876baf93e0ebb3e17ff",
+      "registry_sha256": "3009f4f9f0354caf04569f50a6c046f71b2bec356063f1eaf38988cec08b884d",
+      "icon": 0
+    },
+    {
+      "film": "octagon/01-idle",
+      "manifest_sha256": "03587b91279d6dd429f9a3e6d5054227e9d6bb0e17221e6eb7ae50baf8f014f1",
+      "registry_sha256": "7078125eb4c79aaed17d5692f58bd6ada4c37fd171ed69a1944ce5441213391b",
+      "icon": 0
+    },
+    {
+      "film": "octagon/02-ar-kill",
+      "manifest_sha256": "cd13dba22164abe703882851d2c131a6cc7d3eddfd4fcbb4c0ac8dc82b223f60",
+      "registry_sha256": "d2fe6da26366155b81c97fec8bf70c4d25ecb32d0f030b154bb49b6bf7ba306b",
+      "icon": 0
+    },
+    {
+      "film": "octagon/03-first-to-50",
+      "manifest_sha256": "29241ec1dda8d84a0adc99bc7b49dcc3596b876a2d56b7baec398d048bf49b23",
+      "registry_sha256": "8034a11c1c8697c075e4e69bd8806e972c5e6bcd9e9642e9e72c770db16150b3",
+      "icon": 0
+    },
+    {
+      "film": "posture/01-crouch-slide",
+      "manifest_sha256": "7ab071919bff2576a0bdfa7111f8f4edc192508150b77ce9a0c9bffa8dbba01e",
+      "registry_sha256": "b44b09e9f359c63b1d026db485ba1bbaa3be7b816a16e4b1f7c8b1aa7123b3ff",
+      "icon": 0
+    },
+    {
+      "film": "raids/01-hour-long-raid",
+      "manifest_sha256": "5d9f68f4ae6ab08ca59bc2fb57ac1e808633245049b2afb3c5fe16217826585a",
+      "registry_sha256": "badf4b2c42d87d9cd11055c31e88e571debb4c337f9054dcc408fe45b20b1621",
+      "icon": 0
+    },
+    {
+      "film": "ranked-arena/02-oddball",
+      "manifest_sha256": "59483e156a59894f43266d97f4d824437171332bad9b209edcea365c6625880f",
+      "registry_sha256": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c",
+      "icon": 2
+    },
+    {
+      "film": "weapons/01-switch-bandit-pistol",
+      "manifest_sha256": "81b7ad9855ede37458a087e459bf4e9e3eb7db6a4bca8e77f4a48b96451bf7d3",
+      "registry_sha256": "215993a8b8aecd0a60d94ee72900d910b7f931348a857e40a097854298374da4",
+      "icon": 0
+    },
+    {
+      "film": "weapons/02-reload-comparison",
+      "manifest_sha256": "a03ce7303cac83db8017b41c5ba6ca2b2603b8dd89c69d1922c969a8edaaa6cd",
+      "registry_sha256": "1d8045e1a9316083028abc996d1c108008dadc20480baca7501bd2a61b1518bb",
+      "icon": 0
+    },
+    {
+      "film": "weapons/03-br-sniper-zoom",
+      "manifest_sha256": "f890aa65e473200fa6177da0802ccbb91c0a47745b4343b3c3b70f620bd6832d",
+      "registry_sha256": "cbffab81713f75fc04686ff9b4582ffe6cb42630f675f0fb37320b045c6577db",
+      "icon": 0
+    },
+    {
+      "film": "weapons/04-br-shock-rifle",
+      "manifest_sha256": "da5778caaa06aea051e1a64dec2203d12e26c56a623bf830717ab72f469bec05",
+      "registry_sha256": "b62878aad1ba7a6c13be8dfd5409bc8c1af3575cd07082e52f193ea6defcd7e2",
+      "icon": 0
+    },
+    {
+      "film": "weapons/05-ar-stalker-rifle",
+      "manifest_sha256": "1e3371391047ef8c93de4a825b0c8b0201e71039e6c65af459b93baa6cb647cc",
+      "registry_sha256": "1235154709345fe4c13d8cb8debfa55e39a2844acbd48218c9a3fcd1f0220054",
+      "icon": 0
+    }
+  ]
+}

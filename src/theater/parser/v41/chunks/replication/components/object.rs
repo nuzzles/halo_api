@@ -1,7 +1,7 @@
 //! Object lifecycle, low-frequency state and weapon identity.
 use super::reader::ComponentReader;
 use super::{orientation, position, tlv};
-use crate::theater::film::{Weapon, WeaponId};
+use crate::theater::film::{WeaponId, catalog::weapons::Weapon};
 use crate::theater::parser::v41::reference::observations::{
     FilmComponentObservation, MovementComponent, ObjectParentState,
 };
@@ -143,33 +143,61 @@ pub(crate) fn read_primary(
 ) -> Option<bool> {
     match name {
         "object-position-component" => {
-            if r.position_encoding.is_some_and(|e| e.full_precision_gate()) {
+            if r.snapshot || r.position_encoding.is_some_and(|e| e.full_precision_gate()) {
                 let handle = r.bit("high_precision")?;
-                r.words("vector_bits", 3, 32)?;
+                let words = position::raw_words(r, "vector_bits")?;
                 if handle {
                     r.optional_handle("position_handle", 0)?;
                     r.gate("position_region", 11, true)?;
                 }
+                if !position::raw_words_finite(words) {
+                    r.context_error = Some("nonfinite raw position");
+                    return Some(false);
+                }
                 r.r("finite", 2)?;
             } else if r.bit("high_precision")? {
-                r.r("high_precision_body", 59)?;
+                // Parent-local codes have fixed precision. Handle/region gates
+                // are recorded independently; no map calibration is needed.
+                r.words("local_position", 3, 14)?;
+                r.optional_handle("position_handle", 0)?;
+                r.gate("position_region", 11, true)?;
+                r.r("finite", 2)?;
             } else {
-                let Some(encoding) = r.position_encoding else {
-                    return Some(false);
-                };
-                let widths = if let Some(raw) = r.reference_widths {
-                    raw.movement.world_object.axis_bits
-                } else if let Some(widths) = encoding.world_axis_bits {
-                    widths.map(|w| w as u64)
-                } else {
-                    return Some(false);
-                };
+                let mut widths = [22; 3];
                 if !r.bit("region.gate")? {
+                    let Some(encoding) = r.position_encoding else {
+                        return Some(false);
+                    };
+                    widths = if let Some(raw) = r.reference_widths {
+                        raw.movement.world_object.axis_bits
+                    } else if let Some(widths) = encoding.world_axis_bits {
+                        widths.map(|w| w as u64)
+                    } else {
+                        return Some(false);
+                    };
                     let raw = r.reference_widths.map_or(encoding.index_bits as u64, |w| {
                         w.movement.world_object.index_bits
                     });
                     let width = r.reference_position_width(raw, "world index")?;
-                    r.r_wide("region", width)?;
+                    let region = r.r_wide("region", width)? as u32;
+                    if let Some(profile) = r.reference_widths
+                        && !profile.movement.world_object.regions.is_empty()
+                    {
+                        let Some(axes) = profile.movement.world_object.axes_for_region(region)
+                        else {
+                            r.context_error = Some("unknown world region");
+                            return Some(false);
+                        };
+                        if !axes.iter().all(|w| (0..=32).contains(w)) {
+                            r.context_error = Some("invalid world region widths");
+                            return Some(false);
+                        }
+                        widths = axes;
+                    } else if r.reference_widths.is_none()
+                        && let Some(axes) = encoding.region_axis_bits.get(&region)
+                    {
+                        widths = axes.map(|w| w as u64);
+                    }
                 }
                 for (i, raw) in widths.into_iter().enumerate() {
                     let width = r.reference_position_width(raw, "world axes")?;
@@ -214,6 +242,11 @@ pub(crate) fn read_primary(
         }
         "object-damage-sections-component" => {
             let count = r.r("count", 6)?;
+            // The six-bit field can encode more than the supported 32 slots.
+            // Retain the count and refuse before consuming any entry gates.
+            if count > 32 {
+                return Some(false);
+            }
             for i in 0..count {
                 if r.bit(&format!("section[{i}].present"))? {
                     r.r(&format!("section[{i}].amount"), 7)?;

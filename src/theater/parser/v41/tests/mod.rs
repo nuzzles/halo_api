@@ -1,9 +1,11 @@
-use crate::theater::film::{
-    ByteRange, ComponentReadStatus, DefaultStateStatus, EntityViewStop, EventFieldValue,
-    EventListStop, Film, FilmArchetype, FilmRegistry, FrameDecodeError, FrameRead, KeyframeStop,
-    PacketRead, ProductionEntityEnd, RecordKind, RegistryComponent, ReplicationStreamPacketBody,
-};
+mod device_record;
+mod vehicle_context;
+
+use crate::theater::parser::packet::{ByteRange, PacketRead};
 use crate::theater::parser::test_support::{FixtureFilmSource, test_chunks};
+use crate::theater::parser::v41::chunks::registry::source::{
+    FilmArchetype, FilmRegistry, RegistryComponent,
+};
 use crate::theater::parser::v41::chunks::replication::replication_stream;
 #[cfg(test)]
 use crate::theater::parser::v41::chunks::replication::replication_stream::continue_event_views;
@@ -13,10 +15,14 @@ use crate::theater::parser::v41::chunks::replication::replication_stream::{
     ContinuationStatePolicy, EventContinuation,
 };
 use crate::theater::parser::v41::chunks::replication::replication_stream::{DecodeContext, decode};
+use crate::theater::parser::v41::chunks::replication::source::{
+    ComponentReadStatus, DefaultStateStatus, EntityViewStop, EventFieldValue, EventListStop,
+    FrameDecodeError, FrameRead, KeyframeStop, ProductionEntityEnd, RecordKind,
+    ReplicationStreamPacketBody,
+};
 use crate::theater::parser::v41::chunks::replication::state::ReplicationDecodeState;
 use crate::theater::parser::v41::context::V41DecodeConfig;
 
-use crate::theater::runtime::interpretation::weapon_damage::read_weapon_damage;
 use serde_json::{Value, json};
 use std::io::Read;
 
@@ -54,6 +60,7 @@ fn reference_data_event_continuation_reference_oracle() {
             })
             .collect(),
     };
+    let mut newly_supported = 0usize;
     let mut continued = 0;
     let mut record_count = 0;
     for (index, case) in cases.iter().enumerate() {
@@ -63,13 +70,65 @@ fn reference_data_event_continuation_reference_oracle() {
             .map(|b| u8::from_str_radix(&hex[b..b + 2], 16).unwrap())
             .collect();
         let events = read_reference_event_list(&data, 1, case["gate"].as_bool(), data.len());
+        if events.records.first().is_some_and(|r| r.code == Some(14)) {
+            // Mode 6 deliberately selected a then-unsupported code. Preserve
+            // that historical refusal as evidence, but do not require the new
+            // source-backed 32-bit reader to refuse it. New f050371 fixtures
+            // independently verify its complete body and following boundaries.
+            assert_eq!(case["mode"], 6);
+            assert_eq!(case["terminated"], false);
+            assert_eq!(case["count"], 0);
+            let record = &events.records[0];
+            if record.layout_complete {
+                let body = record
+                    .fields
+                    .iter()
+                    .filter(|f| f.stage == crate::theater::parser::v41::chunks::replication::source::EventFieldStage::Body)
+                    .collect::<Vec<_>>();
+                assert_eq!(body.len(), 1);
+                assert_eq!(body[0].width, 32);
+                assert_eq!(record.end_bit, record.body_start_bit.unwrap() + 32);
+            }
+            for field in events.records.iter().flat_map(|r| &r.fields) {
+                if let EventFieldValue::Scalar(value) = field.value {
+                    assert_eq!(
+                        crate::theater::parser::v41::chunks::replication::source::components::field::RawBits::from_source(&data, field.bit, field.width)
+                            .unwrap()
+                            .low_u64(),
+                        value
+                    );
+                }
+            }
+            if events.stop != EventListStop::Terminator {
+                let mut state = ReplicationDecodeState::default();
+                assert!(
+                    continue_event_views(
+                        &data,
+                        &events,
+                        &V41DecodeConfig::default(),
+                        &registry,
+                        &mut state
+                    )
+                    .is_none()
+                );
+                assert_eq!(state, ReplicationDecodeState::default());
+            }
+            newly_supported += 1;
+            continue;
+        }
         // The old oracle assumed fixed projectile payload lengths without map bounds.
         if let Some(last) = events.records.last()
             && matches!(last.code, Some(5 | 6))
             && events.stop == EventListStop::UnsupportedBody
         {
             assert!(!last.layout_complete);
-            assert_eq!(Some(last.end_bit), last.body_start_bit);
+            // Prefix fields and the indexed-box gate are self-contained. The
+            // missing map descriptor stops before the region index/axes.
+            assert!(Some(last.end_bit) > last.body_start_bit);
+            assert_eq!(
+                last.fields.last().unwrap().value,
+                EventFieldValue::Scalar(0)
+            );
             let mut world = ReplicationDecodeState::default();
             assert!(
                 continue_event_views(
@@ -102,6 +161,13 @@ fn reference_data_event_continuation_reference_oracle() {
             extra_fields: case["extra"].as_bool().unwrap(),
             ..Default::default()
         };
+        // Historical synthetic oracle uses an 8-bit stand-in under archetype 3.
+        // This explicit legacy calibration does not validate its canonical table.
+        config.profile.grammar.calibrated_widths = Some(
+            crate::theater::parser::v41::context::profile::SharedWidths::from_map(
+                [("high-frequency".into(), 8)].into(),
+            ),
+        );
         config.profile.grammar.corruption_check = case["check"].as_bool().unwrap();
         config.profile.grammar.default_state_by_archetype = true;
         config.profile.grammar.generation_strict = true;
@@ -117,6 +183,22 @@ fn reference_data_event_continuation_reference_oracle() {
             continued += 1;
             assert_eq!(result.start_bit, events.end_bit);
             let frame = result.frame.decoded().unwrap();
+            let records = expected["records"].as_array().unwrap();
+            if records
+                .iter()
+                .any(|record| record["Type"] == 1 && record["Trace"]["Gate"] == false)
+            {
+                // The retained Go oracle consumes a mask after a clear NEW
+                // gate. Current reference reader and the captured first-frame
+                // boundary do not. Keep event and serde checks, but do not
+                // assert its downstream entity offsets as wire truth.
+                assert!(frame.end_bit <= (data.len() * 8) as i64);
+                assert_eq!(
+                    serde_json::from_value::<EventContinuation>(json!(result)).unwrap(),
+                    result
+                );
+                continue;
+            }
             let expected_end = expected["end"].as_i64().unwrap();
             if expected_end <= (data.len() * 8) as i64 {
                 assert_eq!(frame.end_bit, expected_end, "case {index}");
@@ -133,7 +215,6 @@ fn reference_data_event_continuation_reference_oracle() {
                 assert!(completed_views(frame) <= expected["views"].as_u64().unwrap() as usize);
             }
             assert!(frame.messages.is_none());
-            let records = expected["records"].as_array().unwrap();
             assert_eq!(frame.records.len(), records.len(), "case {index}");
             for (record, reference) in frame.records.iter().zip(records) {
                 record_count += 1;
@@ -182,6 +263,7 @@ fn reference_data_event_continuation_reference_oracle() {
         }
     }
     assert!(continued > 0 && record_count > 0);
+    assert_eq!(newly_supported, 128);
 }
 
 #[test]
@@ -197,8 +279,10 @@ fn frame_views_follow_message_terminator_once() {
         &[],
     )
     .unwrap();
-    let parsed = Film::parse(test_chunks(&source)).unwrap();
-    let packet = &parsed.replication_stream.first().unwrap().body.packets[0];
+    let mut chunks = test_chunks(&source);
+    chunks[0] = crate::theater::parser::test_support::registry_with_corruption_policy(false);
+    let parsed = crate::theater::parser::test_support::parse_fixture_structural(chunks).unwrap();
+    let packet = &parsed.replication_stream.0.first().unwrap().body.packets[0];
     let PacketRead::Decoded(ReplicationStreamPacketBody::FramePacketBody(original)) = &packet.body
     else {
         panic!("missing frame")
@@ -209,8 +293,11 @@ fn frame_views_follow_message_terminator_once() {
     assert_eq!(completed_views(frame), 2);
     assert_eq!(frame.end_bit, 17);
     assert_eq!(
-        serde_json::from_value::<Film>(json!(parsed)).unwrap(),
-        parsed
+        serde_json::from_value::<
+            crate::theater::parser::v41::chunks::replication::source::ReplicationStreamPacket,
+        >(json!(packet))
+        .unwrap(),
+        *packet
     );
 }
 
@@ -254,10 +341,17 @@ fn corrected_damage_boundary_applies_following_entities() {
             })
             .collect(),
     };
-    let config = V41DecodeConfig {
+    let mut config = V41DecodeConfig {
         id_low_bits: 5,
         ..Default::default()
     };
+    // Historical synthetic oracle uses an 8-bit stand-in under archetype 3.
+    // This explicit legacy calibration does not validate its canonical table.
+    config.profile.grammar.calibrated_widths = Some(
+        crate::theater::parser::v41::context::profile::SharedWidths::from_map(
+            [("high-frequency".into(), 8)].into(),
+        ),
+    );
     for damage in [true, false] {
         let prefix_bits = if damage { 112 } else { 13 };
         let total_bits = prefix_bits + frame.len() * 8 - 2;
@@ -280,9 +374,6 @@ fn corrected_damage_boundary_applies_following_entities() {
         let result =
             continue_event_views(&payload, &events, &config, &registry, &mut world).unwrap();
         assert!(!result.frame.decoded().unwrap().records.is_empty());
-        if damage {
-            assert_eq!(read_weapon_damage(&payload, 0).end_bit, 111);
-        }
         assert_eq!(result.state_policy, ContinuationStatePolicy::Applied);
         assert_ne!(world, before);
         let mut old = json!(result);
@@ -343,7 +434,7 @@ fn truncated_keyframe_corruption_check_stays_with_its_component() {
         archetypes: vec![FilmArchetype {
             index: 0,
             components: vec![RegistryComponent {
-                name_bytes: [b"high-frequency".as_slice(), &[0; 242]].concat(),
+                name_bytes: [b"equipment-being-hacked-component".as_slice(), &[0; 224]].concat(),
                 precision_level: 1,
                 source: ByteRange { start: 0, end: 260 },
             }],
@@ -469,12 +560,110 @@ fn recorded_new_declaration_survives_a_truncated_body_for_later_delta_grammar() 
     assert!(fourth.records.is_empty());
     assert!(matches!(
         fourth.entity_end,
-        Some(ProductionEntityEnd::Rejected { .. })
+        Some(ProductionEntityEnd::Rejected {
+            reason: crate::theater::parser::v41::chunks::replication::source::DeltaRejectionReason::Unbound,
+            ..
+        })
     ));
 }
 
 #[test]
-fn vehicle_runtime_gate_is_never_assumed_from_plausible_payload_bits() {
+fn delta_bound_to_another_view_reports_its_admission_reason() {
+    use crate::theater::parser::v41::chunks::replication::source::DeltaRejectionReason;
+    let registry = FilmRegistry {
+        archetypes: vec![FilmArchetype {
+            index: 0,
+            components: vec![],
+            source: ByteRange { start: 0, end: 0 },
+            padding: ByteRange { start: 0, end: 0 },
+        }],
+    };
+    // DELTA slot 7, generation 1 at bit 2. Its body is intentionally absent.
+    let mut bits = vec![false; 2];
+    bits.push(true);
+    bits.extend((0..13).rev().map(|shift| 7 & (1 << shift) != 0));
+    bits.extend([false, true]);
+    let mut data = vec![0; bits.len().div_ceil(8)];
+    for (bit, set) in bits.into_iter().enumerate() {
+        if set {
+            data[bit / 8] |= 1 << (7 - bit % 8);
+        }
+    }
+    let mut state = ReplicationDecodeState::default();
+    state.bind_full((1 << 30) | 7, 0);
+    state.slots.get_mut(&7).unwrap().view = Some(1);
+    let frame = V41DecodeConfig::default()
+        .decode_production_views(&data, 2, &registry, &mut state)
+        .unwrap();
+    assert!(matches!(
+        frame.entity_end,
+        Some(ProductionEntityEnd::Rejected {
+            reason: DeltaRejectionReason::OtherView,
+            ..
+        })
+    ));
+    assert!(frame.records.is_empty());
+}
+
+#[test]
+fn clear_creation_gate_and_gate_free_creation_keep_the_next_header_aligned() {
+    let registry = FilmRegistry {
+        archetypes: (0..35)
+            .map(|index| FilmArchetype {
+                index,
+                components: vec![],
+                source: ByteRange { start: 0, end: 0 },
+                padding: ByteRange { start: 0, end: 0 },
+            })
+            .collect(),
+    };
+    let mut bits = vec![false; 2];
+    let mut push = |width: usize, value: u32| {
+        bits.extend((0..width).rev().map(|shift| value & (1 << shift) != 0));
+    };
+    for (slot, archetype, has_gate) in [(0, 22, true), (1, 34, true), (2, 7, false)] {
+        push(3, 1); // NEW
+        push(13, slot);
+        push(2, 1);
+        push(6, archetype);
+        if has_gate {
+            push(1, 0);
+        }
+    }
+    push(3, 0); // entity terminator
+    push(1, 0); // empty controls
+    let mut data = vec![0; bits.len().div_ceil(8)];
+    for (bit, set) in bits.into_iter().enumerate() {
+        if set {
+            data[bit / 8] |= 1 << (7 - bit % 8);
+        }
+    }
+    let frame = V41DecodeConfig::default()
+        .decode_production_views(&data, 2, &registry, &mut ReplicationDecodeState::default())
+        .unwrap();
+    assert_eq!(frame.records.len(), 3);
+    assert_eq!(
+        frame
+            .records
+            .iter()
+            .map(|r| (r.header.start_bit, r.end_bit, r.mask))
+            .collect::<Vec<_>>(),
+        vec![(2, 27, None), (27, 52, None), (52, 76, None)]
+    );
+    assert!(
+        frame
+            .records
+            .iter()
+            .all(|r| r.stop == EntityViewStop::Complete)
+    );
+    assert!(matches!(
+        frame.entity_end,
+        Some(ProductionEntityEnd::Marker(_))
+    ));
+}
+
+#[test]
+fn included_vehicle_physics_delta_selects_its_recorded_body_mode() {
     let registry = FilmRegistry {
         archetypes: vec![FilmArchetype {
             index: 0,
@@ -494,8 +683,8 @@ fn vehicle_runtime_gate_is_never_assumed_from_plausible_payload_bits() {
         }],
     };
     // Empty messages, DELTA slot 1 / generation 1, no baseline, sparse mask
-    // containing component zero. Everything after bit 29 is undecodable without
-    // vehicle+0x818, even if it resembles either documented body mode.
+    // containing component zero. Inclusion in a delta establishes the enable
+    // condition; only snapshots require the external vehicle+0x818 context.
     let prefix = "00100000000000010100001000000";
     assert_eq!(prefix.len(), 29);
     for byte in [0x00, 0xff] {
@@ -513,20 +702,14 @@ fn vehicle_runtime_gate_is_never_assumed_from_plausible_payload_bits() {
         let frame = V41DecodeConfig::default()
             .decode_production_views(&payload, 2, &registry, &mut world)
             .unwrap();
-        assert_eq!(frame.end_bit, 29);
-        assert_eq!(frame.records.len(), 1);
-        assert_eq!(
-            frame.records[0].stop,
-            EntityViewStop::RuntimeContextUnavailable {
-                index: 0,
-                name: "vehicle-type-physics-component".into(),
-                field: "vehicle+0x818".into(),
-            }
-        );
-        let component = &frame.records[0].components[0];
-        assert_eq!((component.start_bit, component.end_bit), (29, 29));
-        assert!(component.fields.is_empty());
-        assert!(frame.controls.is_none());
+        let record = &frame.records[0];
+        assert_eq!(record.stop, EntityViewStop::Complete);
+        let component = &record.components[0];
+        let end = 29 + if byte == 0 { 57 } else { 289 };
+        assert_eq!((component.start_bit, component.end_bit), (29, end));
+        assert_eq!(record.end_bit, end);
+        assert_eq!(component.fields[0].name, "raw");
+        assert_eq!(component.fields[0].raw.low_u64(), u64::from(byte != 0));
     }
 }
 
@@ -587,3 +770,6 @@ fn partial_nested_event_extent_contains_only_source_backed_fields() {
         }
     }
 }
+
+mod corruption;
+mod reference_configuration;

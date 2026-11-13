@@ -104,6 +104,11 @@ pub(crate) fn read_component(
         return signed_override(r, name, i64::try_from(width).ok()?, true);
     }
     let mut status = component(r, name, level, archetype);
+    if r.context_error.is_some() {
+        // Missing layouts and rejected resource bounds cannot be repaired by
+        // an opaque stub that would invent the end of the component.
+        return Some(false);
+    }
     if status == Some(true)
         && !policy.0
         && matches!(name, "simulation-state" | "simulation-state-component")

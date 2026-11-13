@@ -1,5 +1,6 @@
 //! Packet type 1: datum/reference table entries.
-use crate::theater::film::{PacketDecodeError, ReplicationStreamPacketBody};
+use crate::theater::parser::packet::PacketDecodeError;
+use crate::theater::parser::v41::chunks::replication::source::ReplicationStreamPacketBody;
 
 pub(crate) fn decode(payload: &[u8]) -> Result<ReplicationStreamPacketBody, PacketDecodeError> {
     decode_datum_table(payload)
@@ -11,7 +12,7 @@ pub(crate) fn decode(payload: &[u8]) -> Result<ReplicationStreamPacketBody, Pack
         })
 }
 
-use crate::theater::film::chunks::replication::replication_stream::models::datums::{
+use crate::theater::parser::v41::chunks::replication::source::replication_stream::models::datums::{
     DatumComponentMask, DatumDecodeError, DatumEntry, DatumTable,
 };
 use crate::theater::parser::bits::Cursor;
@@ -45,7 +46,7 @@ pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeE
     let mut entries = Vec::with_capacity(count);
     for _ in 0..count {
         entries.push(DatumEntry {
-            source: crate::theater::film::BitRange {
+            source: crate::theater::parser::packet::BitRange {
                 start: r.position,
                 end: r.position + 79,
             },
@@ -57,7 +58,7 @@ pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeE
     }
     let mut component_masks = Vec::with_capacity(count);
     for _ in 0..count {
-        let source = crate::theater::film::BitRange {
+        let source = crate::theater::parser::packet::BitRange {
             start: r.position,
             end: r.position + 256,
         };
@@ -67,7 +68,7 @@ pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeE
         }
         component_masks.push(DatumComponentMask { source, words });
     }
-    let tail_source = crate::theater::film::BitRange {
+    let tail_source = crate::theater::parser::packet::BitRange {
         start: r.position,
         end: r.position + 160,
     };
@@ -81,7 +82,7 @@ pub(crate) fn decode_datum_table(data: &[u8]) -> Result<DatumTable, DatumDecodeE
         component_masks,
         tail_words,
         tail_source,
-        padding_source: crate::theater::film::BitRange {
+        padding_source: crate::theater::parser::packet::BitRange {
             start: consumed_bits,
             end: total,
         },
@@ -126,11 +127,11 @@ mod tests {
         assert_eq!(table.entries.len(), 2);
         assert_eq!(
             table.entries[0].source,
-            crate::theater::film::BitRange { start: 0, end: 79 }
+            crate::theater::parser::packet::BitRange { start: 0, end: 79 }
         );
         assert_eq!(
             table.entries[1].source,
-            crate::theater::film::BitRange {
+            crate::theater::parser::packet::BitRange {
                 start: 79,
                 end: 158
             }
@@ -139,14 +140,14 @@ mod tests {
         assert_eq!(table.entries[1].view_mask, 3);
         assert_eq!(
             table.component_masks[0].source,
-            crate::theater::film::BitRange {
+            crate::theater::parser::packet::BitRange {
                 start: 158,
                 end: 414
             }
         );
         assert_eq!(
             table.component_masks[1].source,
-            crate::theater::film::BitRange {
+            crate::theater::parser::packet::BitRange {
                 start: 414,
                 end: 670
             }
@@ -155,7 +156,7 @@ mod tests {
         assert_eq!(table.component_masks[1].words, masks[1]);
         assert_eq!(
             table.tail_source,
-            crate::theater::film::BitRange {
+            crate::theater::parser::packet::BitRange {
                 start: 670,
                 end: 830
             }
@@ -163,7 +164,7 @@ mod tests {
         assert_eq!(table.tail_words, [9, 10, 11, 12, 13]);
         assert_eq!(
             table.padding_source,
-            crate::theater::film::BitRange {
+            crate::theater::parser::packet::BitRange {
                 start: 830,
                 end: 832
             }

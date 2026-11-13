@@ -26,7 +26,7 @@ pub(crate) fn read_primary(
             r.optional_word_reference("control.reference", true)?;
         }
         "unit-actor-control-component" => return control::actor_control(r, level),
-        "unit-actor-state-component" => control::actor_state(r, level)?,
+        "unit-actor-state-component" => return control::actor_state(r, level),
         "unit-grenade-counts-component" => {
             let count = r.r("count", 3)?;
             let mut values = Vec::new();

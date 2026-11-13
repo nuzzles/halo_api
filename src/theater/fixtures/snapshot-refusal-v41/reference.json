@@ -1,0 +1,422 @@
+{
+  "commit": "18067987ebc3628ad499c819c6aee814692df43b",
+  "file": "ranked-arena/02-oddball/chunk-057-type-2.bin",
+  "payload_byte": 343051,
+  "timestamp_us": 16915080967,
+  "registry_sha256": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c",
+  "packet_sha256": "786bb2f7fea9a1d8ac22ff0a43e6a21c98aef5491ba86508033b7d1caa77aa32",
+  "slots": 756,
+  "live_records": 129,
+  "components": [
+    {
+      "index": 0,
+      "start": 226696,
+      "end": 226797,
+      "complete": true,
+      "trace": [
+        [
+          226696,
+          2
+        ],
+        [
+          226698,
+          99
+        ]
+      ]
+    },
+    {
+      "index": 1,
+      "start": 226797,
+      "end": 226894,
+      "complete": true,
+      "trace": [
+        [
+          226797,
+          1
+        ],
+        [
+          226798,
+          32
+        ],
+        [
+          226830,
+          32
+        ],
+        [
+          226862,
+          32
+        ]
+      ]
+    },
+    {
+      "index": 2,
+      "start": 226894,
+      "end": 226922,
+      "complete": true,
+      "trace": [
+        [
+          226894,
+          1
+        ],
+        [
+          226895,
+          19
+        ],
+        [
+          226914,
+          8
+        ]
+      ]
+    },
+    {
+      "index": 3,
+      "start": 226922,
+      "end": 226950,
+      "complete": true,
+      "trace": [
+        [
+          226922,
+          1
+        ],
+        [
+          226923,
+          27
+        ]
+      ]
+    },
+    {
+      "index": 4,
+      "start": 226950,
+      "end": 226961,
+      "complete": true,
+      "trace": [
+        [
+          226950,
+          8
+        ],
+        [
+          226958,
+          3
+        ]
+      ]
+    },
+    {
+      "index": 5,
+      "start": 226961,
+      "end": 226990,
+      "complete": true,
+      "trace": [
+        [
+          226961,
+          8
+        ],
+        [
+          226969,
+          1
+        ],
+        [
+          226970,
+          16
+        ],
+        [
+          226986,
+          4
+        ]
+      ]
+    },
+    {
+      "index": 6,
+      "start": 226990,
+      "end": 226997,
+      "complete": true,
+      "trace": [
+        [
+          226990,
+          1
+        ],
+        [
+          226991,
+          6
+        ],
+        [
+          226997,
+          0
+        ]
+      ]
+    },
+    {
+      "index": 7,
+      "start": 226997,
+      "end": 227003,
+      "complete": false,
+      "trace": [
+        [
+          226997,
+          6
+        ]
+      ]
+    }
+  ],
+  "start": 226358,
+  "index": 755,
+  "generation": 1,
+  "archetype": 35,
+  "registry": [
+    [
+      "object-position-dynamic-precision-component",
+      1
+    ],
+    [
+      "object-translational-velocity-dynamic-precision-component",
+      1
+    ],
+    [
+      "object-forward-and-up-component",
+      1
+    ],
+    [
+      "object-angular-velocity-component",
+      1
+    ],
+    [
+      "object-body-vitality-component",
+      1
+    ],
+    [
+      "object-shield-vitality-component",
+      1
+    ],
+    [
+      "object-region-state-component",
+      1
+    ],
+    [
+      "object-damage-sections-component",
+      1
+    ],
+    [
+      "object-constraint-component",
+      1
+    ],
+    [
+      "object-multiplayer-properties-component",
+      1
+    ],
+    [
+      "object-parent-state-component",
+      3
+    ],
+    [
+      "object-dead-state-component",
+      1
+    ],
+    [
+      "object-scale-component",
+      2
+    ],
+    [
+      "object-maximum-vitalities-component",
+      3
+    ],
+    [
+      "object-dissolver-component",
+      1
+    ],
+    [
+      "object-low-frequency-component",
+      2
+    ],
+    [
+      "object-physics-flags-component",
+      1
+    ],
+    [
+      "object-frame-configuration-component",
+      0
+    ],
+    [
+      "unit-control-component",
+      2
+    ],
+    [
+      "unit-actor-control-component",
+      2
+    ],
+    [
+      "unit-actor-state-component",
+      4
+    ],
+    [
+      "unit-desired-aiming-vector-component",
+      1
+    ],
+    [
+      "unit-grenade-counts-component",
+      1
+    ],
+    [
+      "unit-malleable-property-component",
+      4
+    ],
+    [
+      "unit-low-frequency-component",
+      1
+    ],
+    [
+      "unit-command-tick-component",
+      1
+    ],
+    [
+      "unit-equipment-component",
+      1
+    ],
+    [
+      "unit-stun-component",
+      1
+    ],
+    [
+      "unit-active-camo-state-component",
+      1
+    ],
+    [
+      "unit-crouch-component",
+      0
+    ],
+    [
+      "weapon-state-ammo",
+      1
+    ],
+    [
+      "weapon-state-rounds-inventory",
+      1
+    ],
+    [
+      "weapon-state-overheated",
+      1
+    ],
+    [
+      "weapon-state-ammo",
+      1
+    ],
+    [
+      "weapon-state-rounds-inventory",
+      1
+    ],
+    [
+      "weapon-state-overheated",
+      1
+    ],
+    [
+      "weapon-state-ammo",
+      1
+    ],
+    [
+      "weapon-state-rounds-inventory",
+      1
+    ],
+    [
+      "weapon-state-overheated",
+      1
+    ],
+    [
+      "weapon-state-ammo",
+      1
+    ],
+    [
+      "weapon-state-rounds-inventory",
+      1
+    ],
+    [
+      "weapon-state-overheated",
+      1
+    ],
+    [
+      "biped-desired-weapon-set",
+      1
+    ],
+    [
+      "weapon-state-type-info",
+      2
+    ],
+    [
+      "weapon-state-type-info",
+      2
+    ],
+    [
+      "weapon-state-type-info",
+      2
+    ],
+    [
+      "weapon-state-type-info",
+      2
+    ],
+    [
+      "biped-desired-grenade-set-component",
+      1
+    ],
+    [
+      "biped-desired-ability-set-component",
+      1
+    ],
+    [
+      "biped-control-context-component",
+      1
+    ],
+    [
+      "biped-map-editor-flag-component",
+      1
+    ],
+    [
+      "biped-emp-timer-component",
+      1
+    ],
+    [
+      "biped-low-frequency-data-component",
+      1
+    ],
+    [
+      "biped-malleable-property-component",
+      2
+    ],
+    [
+      "biped-mobility-action-component",
+      1
+    ],
+    [
+      "biped-posture-physics-component",
+      1
+    ],
+    [
+      "biped-spartan-ability-energy-component",
+      1
+    ],
+    [
+      "biped-spartan-ability-component",
+      2
+    ],
+    [
+      "biped-spartan-ability-malleable-property-component",
+      1
+    ],
+    [
+      "biped-spartan-ability-non-predicted-state",
+      2
+    ],
+    [
+      "simulation-state-component",
+      1
+    ],
+    [
+      "simulation-state-playback-component",
+      1
+    ],
+    [
+      "biped-slide-component",
+      1
+    ],
+    [
+      "biped-action-component",
+      0
+    ]
+  ]
+}

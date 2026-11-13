@@ -1,0 +1,921 @@
+{
+  "films": [
+    {
+      "chunks": [
+        {
+          "file": "chunk-000-type-1.bin",
+          "sha256": "8034a11c1c8697c075e4e69bd8806e972c5e6bcd9e9642e9e72c770db16150b3"
+        },
+        {
+          "file": "chunk-001-type-2.bin",
+          "sha256": "cc2a49012c96d513fc48560179ea863c3db07129aba542608641c51d84852615"
+        },
+        {
+          "file": "chunk-002-type-2.bin",
+          "sha256": "98aa62c8d23e7751dfcd8611e51e01eb05081c3ffb0600d95d57ff8feded89f9"
+        },
+        {
+          "file": "chunk-003-type-2.bin",
+          "sha256": "dd15ab066c60dc4de492bbf14861665128e1eaf7932fcb908d6543407659ccae"
+        },
+        {
+          "file": "chunk-004-type-2.bin",
+          "sha256": "4b88e3ab307fd15a2f73230a747630bffe9a8ff583c865d5ddf20454ef6b7c2c"
+        },
+        {
+          "file": "chunk-005-type-2.bin",
+          "sha256": "94d0bd52e12ebbc1abc6b7cf63aa663584a7d6c7405b1203fbcc494e69262cd0"
+        },
+        {
+          "file": "chunk-006-type-2.bin",
+          "sha256": "efb974046ac910e17e7dbad59aa01718fa269ac2fc9c713f1e5803654f8e2e67"
+        },
+        {
+          "file": "chunk-007-type-2.bin",
+          "sha256": "6416b8a4e82af06678588adf10096a43cefc32323cb562855651d121cd0342fe"
+        },
+        {
+          "file": "chunk-008-type-2.bin",
+          "sha256": "c8c65f1dc9fa00307679822a52429d4fdcc191069cb549e93a5415b04c55c9b9"
+        },
+        {
+          "file": "chunk-009-type-2.bin",
+          "sha256": "3c5a4960a159201487b11c0ee3383819bc59f8416e6b2d08253ee6935177b26c"
+        },
+        {
+          "file": "chunk-010-type-2.bin",
+          "sha256": "1d7c78db22b313c32b35c666ad82d7b545c994fa6bdc8a0be7a73b2915c3d40e"
+        },
+        {
+          "file": "chunk-011-type-2.bin",
+          "sha256": "a5bfc7b1e4b6f8db075a5172c2e8d091c99ed8dfff7e9d3ceeff61b63cc7e307"
+        },
+        {
+          "file": "chunk-012-type-2.bin",
+          "sha256": "eb96aea12c9badc8952fe997aad19af585312876997644ebfffdc0d9c8c35574"
+        },
+        {
+          "file": "chunk-013-type-2.bin",
+          "sha256": "84110a56de49049e45e92e5053b69cc246d7dfa6e172e316fb95d104b32867a9"
+        },
+        {
+          "file": "chunk-014-type-2.bin",
+          "sha256": "ee2c337e959692081aa403dabec5e3a023385dae0830eae4d7940fdf48f34cb1"
+        },
+        {
+          "file": "chunk-015-type-2.bin",
+          "sha256": "a48769294dc012fe21fa8796c56f3c24571cc737be3d855338751a93df271ec6"
+        },
+        {
+          "file": "chunk-016-type-2.bin",
+          "sha256": "dc3692818c7d57f6a4d65c92f25d1425b81be934cd94be8b07b05bf6ded2516a"
+        },
+        {
+          "file": "chunk-017-type-2.bin",
+          "sha256": "78b76076956ed3d912b180ed61cba19abda719e9d83e8a744e6453df7cdb0a39"
+        },
+        {
+          "file": "chunk-018-type-2.bin",
+          "sha256": "8baa691c6c2383c77815fbb2421b4c2c172c3d1a5d0499f650763fc4ca29cc3d"
+        },
+        {
+          "file": "chunk-019-type-2.bin",
+          "sha256": "d2163e74700d5b4569a00fc172d8023403e86bafff3df5ac87841fc06245278a"
+        },
+        {
+          "file": "chunk-020-type-2.bin",
+          "sha256": "206e0b268172971fceb13aadddde6912eac5968f02b8cdde27435a0509530841"
+        },
+        {
+          "file": "chunk-021-type-2.bin",
+          "sha256": "a5d8966649fc81b8e9344395c7142379fc87a9a0a34f895ecbda906924ee8b2e"
+        },
+        {
+          "file": "chunk-022-type-2.bin",
+          "sha256": "b608ce5a3594f856bc1a91c28e9dc97df5b924a38241f8b611be6804f88d9b2c"
+        },
+        {
+          "file": "chunk-023-type-3.bin",
+          "sha256": "4dfcd85899b819cf88030463e3e9030263bb8456af0602f40183d5ccbead2c01"
+        }
+      ],
+      "export_sha256": "5cf7d93457c9607edac0b398ca0144c3b9c15fa08f982413690aa146f07c8643",
+      "fields": {
+        "Phase": {
+          "observations": 23,
+          "values": {
+            "1": 22,
+            "2": 1
+          }
+        },
+        "RespawnTimer": {
+          "changed_positive_time_pairs": {
+            "gap_or_reset": 21,
+            "gap_or_reset/second_word_decreasing": 2,
+            "gap_or_reset/second_word_increasing": 5,
+            "gap_or_reset/second_word_unchanged": 14
+          },
+          "examples": {
+            "gap_or_reset/second_word_decreasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 97101,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 24667,
+                "source": "StatSource { record: SourceRef { chunk: 16, packet: 1632, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 2224138672,
+                "value": {
+                  "active": false,
+                  "words": [
+                    0,
+                    1
+                  ]
+                }
+              },
+              "delta_time_us": 4070862,
+              "delta_values": [
+                0,
+                -1
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 95866,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 24221,
+                "source": "StatSource { record: SourceRef { chunk: 16, packet: 1144, record: Entity { index: 1 } }, component: 1 }",
+                "time_us": 2220067810,
+                "value": {
+                  "active": false,
+                  "words": [
+                    0,
+                    2
+                  ]
+                }
+              }
+            },
+            "gap_or_reset/second_word_increasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 36571,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 8586,
+                "source": "StatSource { record: SourceRef { chunk: 8, packet: 330, record: Entity { index: 1 } }, component: 1 }",
+                "time_us": 2053250721,
+                "value": {
+                  "active": true,
+                  "words": [
+                    1,
+                    1
+                  ]
+                }
+              },
+              "delta_time_us": 2689682,
+              "delta_values": [
+                1,
+                1
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 35624,
+                "field": "RespawnTimer",
+                "reset": true,
+                "segment": 8422,
+                "source": "StatSource { record: SourceRef { chunk: 8, packet: 1, record: Keyframe(53) }, component: 1 }",
+                "time_us": 2050561039,
+                "value": {
+                  "active": true,
+                  "words": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            },
+            "gap_or_reset/second_word_unchanged": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 37610,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 8794,
+                "source": "StatSource { record: SourceRef { chunk: 8, packet: 746, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 2056720659,
+                "value": {
+                  "active": true,
+                  "words": [
+                    0,
+                    1
+                  ]
+                }
+              },
+              "delta_time_us": 3469938,
+              "delta_values": [
+                -1,
+                0
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 53 }",
+                "event": 36571,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 8586,
+                "source": "StatSource { record: SourceRef { chunk: 8, packet: 330, record: Entity { index: 1 } }, component: 1 }",
+                "time_us": 2053250721,
+                "value": {
+                  "active": true,
+                  "words": [
+                    1,
+                    1
+                  ]
+                }
+              }
+            }
+          },
+          "observations": 809,
+          "states": {
+            "False": {
+              "max": [
+                1,
+                2
+              ],
+              "min": [
+                0,
+                0
+              ],
+              "observations": 138
+            },
+            "True": {
+              "max": [
+                1,
+                1
+              ],
+              "min": [
+                0,
+                0
+              ],
+              "observations": 671
+            }
+          }
+        },
+        "Round": {
+          "observations": 22,
+          "values": {
+            "0": 22
+          }
+        },
+        "RoundTimer": {
+          "changed_positive_time_pairs": {
+            "gap_or_reset": 404,
+            "gap_or_reset/second_word_increasing": 404
+          },
+          "examples": {
+            "gap_or_reset/second_word_increasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 4425,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 1020,
+                "source": "StatSource { record: SourceRef { chunk: 1, packet: 2036, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 1927757434,
+                "value": {
+                  "quanta": [
+                    0,
+                    2
+                  ],
+                  "seconds": [
+                    0.0,
+                    0.8239997625350952
+                  ],
+                  "state": 19
+                }
+              },
+              "delta_time_us": 483782,
+              "delta_values": [
+                0.0,
+                0.8239997625350952
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 4306,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 991,
+                "source": "StatSource { record: SourceRef { chunk: 1, packet: 1978, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 1927273652,
+                "value": {
+                  "quanta": [
+                    0,
+                    0
+                  ],
+                  "seconds": [
+                    0.0,
+                    0.0
+                  ],
+                  "state": 19
+                }
+              }
+            }
+          },
+          "observations": 429,
+          "states": {
+            "1": {
+              "max": [
+                0.0,
+                405.1331787109375
+              ],
+              "min": [
+                0.0,
+                0.0
+              ],
+              "observations": 2
+            },
+            "19": {
+              "max": [
+                0.0,
+                405.1331787109375
+              ],
+              "min": [
+                0.0,
+                0.0
+              ],
+              "observations": 427
+            }
+          }
+        }
+      },
+      "manifest_sha256": "29241ec1dda8d84a0adc99bc7b49dcc3596b876a2d56b7baec398d048bf49b23",
+      "name": "octagon/03-first-to-50",
+      "opaque_packets": {
+        "10: UnsupportedLayout { packet_type: 10 }": 26100,
+        "6: UnsupportedLayout { packet_type: 6 }": 22
+      }
+    },
+    {
+      "chunks": [
+        {
+          "file": "chunk-000-type-1.bin",
+          "sha256": "f270010f785f48e7c8cdc3da0326a5fa016619e4fdfca21a3b496ab23de21e9c"
+        },
+        {
+          "file": "chunk-001-type-2.bin",
+          "sha256": "fb02a54123a4d1eddfa088aff6caade8696819326c5b1e302fdb2e64599d9f3b"
+        },
+        {
+          "file": "chunk-002-type-2.bin",
+          "sha256": "9deb0862be145e37899c0aabdc0b49a5742477bca211ad918ef23f26c592892d"
+        },
+        {
+          "file": "chunk-003-type-2.bin",
+          "sha256": "d50a7bc1f65df7cdacf365f1906e3cb77cb43da32d949c5450a96cf318b57727"
+        },
+        {
+          "file": "chunk-004-type-2.bin",
+          "sha256": "ae6981927e70fb987e05ff93fe65994406992d982f300a686e20da3b6ba8f4c0"
+        },
+        {
+          "file": "chunk-005-type-2.bin",
+          "sha256": "bcb6ef764f8f021b1027c367325e4f486487dc726676e66002d0c28fef1b7e6e"
+        },
+        {
+          "file": "chunk-006-type-2.bin",
+          "sha256": "1276a1f60449dcc881f4a88182570c85e96809a6afa0a927b7b4370f2400a24e"
+        },
+        {
+          "file": "chunk-007-type-2.bin",
+          "sha256": "60ad7b92dced2d8f1276fd9e47bb95ffe5ba8f7c3a205efac3f03ad307cf9285"
+        },
+        {
+          "file": "chunk-008-type-2.bin",
+          "sha256": "8fb1bed45fa4d031a95df10b3fac65066fc13396744b25250aaed107df8765fc"
+        },
+        {
+          "file": "chunk-009-type-2.bin",
+          "sha256": "8fcba1683e757af9a081952a87b4d5f6edf1dcc46ac0ab9c04d06e599177f6d4"
+        },
+        {
+          "file": "chunk-010-type-2.bin",
+          "sha256": "7c6f3f356f4a8d754490e684fd7247ff4e16ace88bf545dbd01e84291c6f83d7"
+        },
+        {
+          "file": "chunk-011-type-2.bin",
+          "sha256": "d758a0a4ae8aa5aeaa93a1478324ec54ec763f11f76e8bada07da2670c86d011"
+        },
+        {
+          "file": "chunk-012-type-2.bin",
+          "sha256": "fbc452f1b4b5234abf1d0260ccfc142d845dbeb546c9b90aa3fc26134edee8dc"
+        },
+        {
+          "file": "chunk-013-type-2.bin",
+          "sha256": "43e7a201c94a00eeef1411aee5883f27ba9b50fd227ba3d1034b34a7a4c66ab3"
+        },
+        {
+          "file": "chunk-014-type-2.bin",
+          "sha256": "6cb854fafb8669749aedcc5a6366f6409e7a92d201d5c370e1b89e554dc2941f"
+        },
+        {
+          "file": "chunk-015-type-2.bin",
+          "sha256": "616ffea021c409a4c34f8b91b1c440da7dba659c6e3bd56104d6f6d86b8f953c"
+        },
+        {
+          "file": "chunk-016-type-2.bin",
+          "sha256": "e8a81be3d12c3fb8164db192cf105575346c23f9641c30d6eee63c0a31c72b54"
+        },
+        {
+          "file": "chunk-017-type-2.bin",
+          "sha256": "2a76e0f9c02f662dea7cf5bc1b97960397686a8185d9a0cbfa13cd664178699b"
+        },
+        {
+          "file": "chunk-018-type-2.bin",
+          "sha256": "d7aa542d3b373dd8b6561a2cb17a27c19d73176318c65d79a5d8dbcd7e57ccd3"
+        },
+        {
+          "file": "chunk-019-type-2.bin",
+          "sha256": "dde94b21c120152af876f8c7b0605caa3e654aacd7fe9c3361d7e74ca689fc82"
+        },
+        {
+          "file": "chunk-020-type-2.bin",
+          "sha256": "9b5a5fa9d4ca764d3308d89a473df86bbd32f951084942085ac6a426509773b1"
+        },
+        {
+          "file": "chunk-021-type-2.bin",
+          "sha256": "2f1323a92b85c9488f8f6d60ff94879b086aecb3d049ba2bd992442b5e1b2feb"
+        },
+        {
+          "file": "chunk-022-type-2.bin",
+          "sha256": "5d240005feb1f1bb833c6d5f8baf05d8cf7712ec5e3f31467908daa6878c60b1"
+        },
+        {
+          "file": "chunk-023-type-2.bin",
+          "sha256": "55c8900dbd16cb49ecae6b0fcf0987f09a55ac830f9bb9951fa214fbe3488e07"
+        },
+        {
+          "file": "chunk-024-type-2.bin",
+          "sha256": "ae0b20ee84c13ffbadd206093febfef6c9a42c9de3e35320273be3461a57e900"
+        },
+        {
+          "file": "chunk-025-type-2.bin",
+          "sha256": "c4a9eab32fd1ebafc246c956af5260b98041f0155bad6ca13dc5dec5dc99c6ec"
+        },
+        {
+          "file": "chunk-026-type-2.bin",
+          "sha256": "c73ce399c238c1823c030e3d8bfa390b84225c57069f85ac4e91999e30d546ea"
+        },
+        {
+          "file": "chunk-027-type-2.bin",
+          "sha256": "63cea85a58169a88595447c607d548736632f5f78f183cf9c776e6fe75dfb306"
+        },
+        {
+          "file": "chunk-028-type-2.bin",
+          "sha256": "ab5b0f87ec13153fe22eba3b0cecb3f5ece8c6f47141cedddbd71f7788725957"
+        },
+        {
+          "file": "chunk-029-type-2.bin",
+          "sha256": "5ef255baa41a843969199466f646b12409253db9b78fded26372198a3d7553cd"
+        },
+        {
+          "file": "chunk-030-type-2.bin",
+          "sha256": "0a0512f371795f0b9d69637e983804e78e16fccdd5d88d445e9ca7c32b26642e"
+        },
+        {
+          "file": "chunk-031-type-2.bin",
+          "sha256": "250032a5722aeb8f80e2020024a98edf7eac17e37332f3b29b63e78303517761"
+        },
+        {
+          "file": "chunk-032-type-2.bin",
+          "sha256": "895136c076b76e680b26dfee1c537465c352cc45ddf0f3e3be450dc6f94b9728"
+        },
+        {
+          "file": "chunk-033-type-2.bin",
+          "sha256": "7b13d61907c6e2885f1af56d021b2ac8e6c8e9ab58aa19b513fa98b0e01a9b48"
+        },
+        {
+          "file": "chunk-034-type-2.bin",
+          "sha256": "b00b010b31f4cd3c3d064ac7697c388e1fab96f52e3c723a868343ade3c79896"
+        },
+        {
+          "file": "chunk-035-type-2.bin",
+          "sha256": "07beb1df44a2f837ccbe0b19c1cb573203c5f11146dce8ed6ddcf06b04500363"
+        },
+        {
+          "file": "chunk-036-type-2.bin",
+          "sha256": "5183f442339897e1222a60630596bb8a0bfe78b419d9d0b2f9e06177881c2d7c"
+        },
+        {
+          "file": "chunk-037-type-2.bin",
+          "sha256": "63d15b37415bdb149613e8015de6f3457d002173587d2f20a4847485b4cdf63d"
+        },
+        {
+          "file": "chunk-038-type-2.bin",
+          "sha256": "759111020cbb4a26aad2f2e57ac31ce4caade52d6ea7b344425ce96e3ac789d8"
+        },
+        {
+          "file": "chunk-039-type-2.bin",
+          "sha256": "8a9975bd5e33a09061b2b7440fba856c3f23901daba66ca238c1e4ede9dc112c"
+        },
+        {
+          "file": "chunk-040-type-2.bin",
+          "sha256": "3b6e846b80de84c0e9aa330455d08dc31d2c05902cdb8c32c84ffe68f4a02d71"
+        },
+        {
+          "file": "chunk-041-type-2.bin",
+          "sha256": "3ed8f654656832c9fb1466abeeb883cd265b5bb8237e10ce6b9ddd9c85728a11"
+        },
+        {
+          "file": "chunk-042-type-2.bin",
+          "sha256": "acd6d8a8df4afff79f8d8c5e3e0de1d651a0d467cfc3ba79dcd94a2363ae18b1"
+        },
+        {
+          "file": "chunk-043-type-2.bin",
+          "sha256": "3d021f5aae0fc6a2507cd87524fcb8a4f74af9b17d5a97cada10103a25594cfe"
+        },
+        {
+          "file": "chunk-044-type-2.bin",
+          "sha256": "5ffcad88869a40b8352750ad7bf0a23f66e2a7bb49406ccb26abb2e687f69e0c"
+        },
+        {
+          "file": "chunk-045-type-2.bin",
+          "sha256": "d656aad2620cc12509e604656388d749aadeeafb8ce4b2a4b8649f4b4a42b6af"
+        },
+        {
+          "file": "chunk-046-type-2.bin",
+          "sha256": "2c35b48bd8f48409908dcb37e399304c87a98bde5bf67dd7b9ea1f40023bc18c"
+        },
+        {
+          "file": "chunk-047-type-2.bin",
+          "sha256": "b10ac87d145cada681534bbd81fbfe68c44db201106009c8059f9c2bd8392807"
+        },
+        {
+          "file": "chunk-048-type-2.bin",
+          "sha256": "e51c5af2046f864ec8a1660af5b1f2da6f2532ce0767ead93284b699a6692b36"
+        },
+        {
+          "file": "chunk-049-type-2.bin",
+          "sha256": "a309fe42cc087cd6ee545d99c2e7a00b73685e6b9ad3e0e49aa78968d45261f2"
+        },
+        {
+          "file": "chunk-050-type-2.bin",
+          "sha256": "0c2fb4c90a864d4a8aa72a88876cc08d832e1b6a3bc5873b926abc6717a6c0b1"
+        },
+        {
+          "file": "chunk-051-type-2.bin",
+          "sha256": "06d0b18bf91b6aabe562ec5690f8bd69782bda609f770d4ef5754b4243c80b8b"
+        },
+        {
+          "file": "chunk-052-type-2.bin",
+          "sha256": "75ccb6b4689024945a23d11ef0a8c07d110950cc403f03aa44756c62a7dbfe9a"
+        },
+        {
+          "file": "chunk-053-type-2.bin",
+          "sha256": "d6af9cba448c00034d09869ebd0d8d3f5bdd835d9194801435f2c42241481ac8"
+        },
+        {
+          "file": "chunk-054-type-2.bin",
+          "sha256": "447741206ebbca0cd602ac803946614d6231c4382826d9229ea2f6fbabd93fd4"
+        },
+        {
+          "file": "chunk-055-type-2.bin",
+          "sha256": "1eeee6c5b53b78339a7dada92a44ce083f543713b9098b48e2e43e055e80fde8"
+        },
+        {
+          "file": "chunk-056-type-2.bin",
+          "sha256": "1c73327b41ec5424b109aded1684a2fa5f8b5453572ef8d477aa663826e1ab18"
+        },
+        {
+          "file": "chunk-057-type-2.bin",
+          "sha256": "e4c484bfbf466451f5730547006ef7aa6a17a16d0ff0236a4e3289eed3616e12"
+        },
+        {
+          "file": "chunk-058-type-2.bin",
+          "sha256": "0ee3e4a59fe19e1efe95f6559486625f0a993d60d0cf2cee34b00ef5c699594c"
+        },
+        {
+          "file": "chunk-059-type-2.bin",
+          "sha256": "85fee281e21279115405079c77dd5f48f203b86e80f0b4c78c8e484de85d9f73"
+        },
+        {
+          "file": "chunk-060-type-2.bin",
+          "sha256": "44aadfc7c8fbcbc938ce6a3d986652c9ef3e0ee1ad0fa86c063553923c2815d5"
+        },
+        {
+          "file": "chunk-061-type-2.bin",
+          "sha256": "d78e23760a9c788609b342f14cf7ffefb899e107e74a382a63d16b31057520dc"
+        },
+        {
+          "file": "chunk-062-type-3.bin",
+          "sha256": "a4674bf8f48dd14fd0fea601cd7668947ad5fa870b7f90df510ecdc0dd4b0e49"
+        }
+      ],
+      "export_sha256": "5ef2b0316aac14107580c1595ec0fbc893638d32adc247219fa4f270c7c23d8f",
+      "fields": {
+        "Phase": {
+          "observations": 66,
+          "values": {
+            "1": 60,
+            "2": 4,
+            "3": 2
+          }
+        },
+        "RespawnTimer": {
+          "changed_positive_time_pairs": {
+            "gap_or_reset": 2463,
+            "gap_or_reset/second_word_decreasing": 8,
+            "gap_or_reset/second_word_increasing": 18,
+            "gap_or_reset/second_word_unchanged": 2437
+          },
+          "examples": {
+            "gap_or_reset/second_word_decreasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 59 }",
+                "event": 105448,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 7025,
+                "source": "StatSource { record: SourceRef { chunk: 5, packet: 2188, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 15893083004,
+                "value": {
+                  "active": false,
+                  "words": [
+                    9,
+                    10
+                  ]
+                }
+              },
+              "delta_time_us": 18192268,
+              "delta_values": [
+                9,
+                -1
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 59 }",
+                "event": 87208,
+                "field": "RespawnTimer",
+                "reset": true,
+                "segment": 5485,
+                "source": "StatSource { record: SourceRef { chunk: 5, packet: 1, record: Keyframe(59) }, component: 1 }",
+                "time_us": 15874890736,
+                "value": {
+                  "active": false,
+                  "words": [
+                    0,
+                    11
+                  ]
+                }
+              }
+            },
+            "gap_or_reset/second_word_increasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 52 }",
+                "event": 44089,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 2567,
+                "source": "StatSource { record: SourceRef { chunk: 3, packet: 178, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 15836309135,
+                "value": {
+                  "active": false,
+                  "words": [
+                    9,
+                    10
+                  ]
+                }
+              },
+              "delta_time_us": 1425047,
+              "delta_values": [
+                9,
+                10
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 52 }",
+                "event": 42470,
+                "field": "RespawnTimer",
+                "reset": true,
+                "segment": 2418,
+                "source": "StatSource { record: SourceRef { chunk: 3, packet: 1, record: Keyframe(52) }, component: 1 }",
+                "time_us": 15834884088,
+                "value": {
+                  "active": false,
+                  "words": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            },
+            "gap_or_reset/second_word_unchanged": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 52 }",
+                "event": 45246,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 2637,
+                "source": "StatSource { record: SourceRef { chunk: 3, packet: 298, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 15837309970,
+                "value": {
+                  "active": false,
+                  "words": [
+                    8,
+                    10
+                  ]
+                }
+              },
+              "delta_time_us": 1000835,
+              "delta_values": [
+                -1,
+                0
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 52 }",
+                "event": 44089,
+                "field": "RespawnTimer",
+                "reset": false,
+                "segment": 2567,
+                "source": "StatSource { record: SourceRef { chunk: 3, packet: 178, record: Entity { index: 0 } }, component: 1 }",
+                "time_us": 15836309135,
+                "value": {
+                  "active": false,
+                  "words": [
+                    9,
+                    10
+                  ]
+                }
+              }
+            }
+          },
+          "observations": 4408,
+          "states": {
+            "False": {
+              "max": [
+                11,
+                11
+              ],
+              "min": [
+                0,
+                0
+              ],
+              "observations": 2928
+            },
+            "True": {
+              "max": [
+                0,
+                10
+              ],
+              "min": [
+                0,
+                0
+              ],
+              "observations": 1480
+            }
+          }
+        },
+        "Round": {
+          "observations": 63,
+          "values": {
+            "0": 25,
+            "1": 18,
+            "2": 20
+          }
+        },
+        "RoundTimer": {
+          "changed_positive_time_pairs": {
+            "gap_or_reset": 708,
+            "gap_or_reset/second_word_decreasing": 706,
+            "gap_or_reset/second_word_increasing": 2
+          },
+          "examples": {
+            "gap_or_reset/second_word_decreasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 21485,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 1555,
+                "source": "StatSource { record: SourceRef { chunk: 2, packet: 730, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 15820910698,
+                "value": {
+                  "quanta": [
+                    547,
+                    545
+                  ],
+                  "seconds": [
+                    300.2105712890625,
+                    299.1119079589844
+                  ],
+                  "state": 6
+                }
+              },
+              "delta_time_us": 501083,
+              "delta_values": [
+                0.0,
+                -1.098663330078125
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 20676,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 1519,
+                "source": "StatSource { record: SourceRef { chunk: 2, packet: 670, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 15820409615,
+                "value": {
+                  "quanta": [
+                    547,
+                    547
+                  ],
+                  "seconds": [
+                    300.2105712890625,
+                    300.2105712890625
+                  ],
+                  "state": 6
+                }
+              }
+            },
+            "gap_or_reset/second_word_increasing": {
+              "current": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 468904,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 42936,
+                "source": "StatSource { record: SourceRef { chunk: 25, packet: 1158, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 16284562060,
+                "value": {
+                  "quanta": [
+                    547,
+                    547
+                  ],
+                  "seconds": [
+                    300.2105712890625,
+                    300.2105712890625
+                  ],
+                  "state": 1
+                }
+              },
+              "delta_time_us": 7992937,
+              "delta_values": [
+                0.0,
+                300.2105712890625
+              ],
+              "previous": {
+                "entity": "EntityKey { domain: Runtime, slot: 2 }",
+                "event": 463474,
+                "field": "RoundTimer",
+                "reset": false,
+                "segment": 42153,
+                "source": "StatSource { record: SourceRef { chunk: 25, packet: 200, record: Entity { index: 0 } }, component: 5 }",
+                "time_us": 16276569123,
+                "value": {
+                  "quanta": [
+                    547,
+                    0
+                  ],
+                  "seconds": [
+                    300.2105712890625,
+                    0.0
+                  ],
+                  "state": 1
+                }
+              }
+            }
+          },
+          "observations": 906,
+          "states": {
+            "1": {
+              "max": [
+                300.2105712890625,
+                300.2105712890625
+              ],
+              "min": [
+                300.2105712890625,
+                0.0
+              ],
+              "observations": 104
+            },
+            "6": {
+              "max": [
+                300.2105712890625,
+                300.2105712890625
+              ],
+              "min": [
+                300.2105712890625,
+                0.0
+              ],
+              "observations": 802
+            }
+          }
+        }
+      },
+      "manifest_sha256": "59483e156a59894f43266d97f4d824437171332bad9b209edcea365c6625880f",
+      "name": "ranked-arena/02-oddball",
+      "opaque_packets": {
+        "10: UnsupportedLayout { packet_type: 10 }": 72145,
+        "6: UnsupportedLayout { packet_type: 6 }": 61
+      }
+    }
+  ],
+  "levelup": "413971bcc485be53a2fa8cf229e170539a5146f8",
+  "libfilmshell": "8f0f8d078e513c800baa21fac416fd4c0c127d03"
+}

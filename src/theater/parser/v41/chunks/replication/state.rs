@@ -1,5 +1,5 @@
 //! Chronological schema declarations and view admission needed to decode records.
-use crate::theater::film::FilmRegistry;
+use crate::theater::parser::v41::chunks::registry::source::FilmRegistry;
 use crate::theater::parser::v41::chunks::replication::bindings::{
     AnticipatedBindings, AnticipatedDeclaration,
 };
@@ -35,9 +35,16 @@ pub(crate) struct DecodeBinding {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub(crate) struct ReplicationDecodeState {
     pub slots: BTreeMap<u32, DecodeBinding>,
+    /// Ephemeral contextual recovery evidence, drained by runtime per packet.
+    #[serde(skip)]
+    pub(crate) schema_recoveries: Vec<(
+        u32,
+        i64,
+        super::replication_stream::frame::entities::RecoveredSchema,
+    )>,
     pub current_view: i8,
     pub keyframe_namespace: Option<u8>,
-    pub current_chunk: i64,
+    pub current_chunk: usize,
     pub anticipated: Option<AnticipatedBindings>,
     pub anticipations: BTreeMap<u32, usize>,
     #[serde(skip)]
@@ -245,7 +252,8 @@ impl ReplicationDecodeState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::theater::film::{ByteRange, FilmArchetype, RegistryComponent};
+    use crate::theater::parser::packet::ByteRange;
+    use crate::theater::parser::v41::chunks::registry::source::{FilmArchetype, RegistryComponent};
 
     fn registry() -> FilmRegistry {
         let range = ByteRange { start: 0, end: 0 };

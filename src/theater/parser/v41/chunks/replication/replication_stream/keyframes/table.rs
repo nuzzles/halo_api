@@ -1,8 +1,9 @@
 //! Deterministic reference chaining between independently established keyframe boundaries.
-use crate::theater::film::chunks::replication::replication_stream::models::keyframe_chain::{
+use crate::theater::parser::v41::chunks::replication::source::replication_stream::models::keyframe_chain::{
     KeyframeChainAttempt, KeyframeChainStop, KeyframeTable,
 };
-use crate::theater::film::{FilmRegistry, KeyframeStop};
+use crate::theater::parser::v41::chunks::registry::source::{FilmRegistry};
+use crate::theater::parser::v41::chunks::replication::source::{KeyframeStop};
 use crate::theater::parser::v41::chunks::replication::components::cursor::ComponentCursor;
 use crate::theater::parser::v41::chunks::replication::replication_stream::keyframes::record::decode_reference_keyframe_record_contextual;
 use crate::theater::parser::v41::context::layout::RecordLayout;
@@ -71,6 +72,7 @@ pub(crate) fn decode_reference_keyframe_table_contextual(
     context: Option<&DecodeProfile>,
 ) -> KeyframeTable {
     let mut out = KeyframeTable {
+        slots: None,
         records: Vec::new(),
         stop: KeyframeChainStop::End,
     };

@@ -1,0 +1,1418 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "cases": [
+    {
+      "bit_len": 12,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "8380",
+      "name": "absent",
+      "series": {},
+      "throttle": null
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83c00000",
+      "name": "axes-0-0",
+      "series": {
+        "7": [
+          [
+            0,
+            -31,
+            -31,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        0,
+        0
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83c07c00",
+      "name": "axes-0-62",
+      "series": {
+        "7": [
+          [
+            0,
+            -31,
+            31,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        0,
+        62
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83df0000",
+      "name": "axes-62-0",
+      "series": {
+        "7": [
+          [
+            0,
+            31,
+            -31,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        62,
+        0
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83df7c00",
+      "name": "axes-62-62",
+      "series": {
+        "7": [
+          [
+            0,
+            31,
+            31,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        62,
+        62
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83cfbe00",
+      "name": "axes-31-31",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            0,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        31
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83cf4000",
+      "name": "axes-30-32",
+      "series": {
+        "7": [
+          [
+            0,
+            -1,
+            1,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        30,
+        32
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83dffe00",
+      "name": "axes-63-63",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            32,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        63
+      ]
+    },
+    {
+      "bit_len": 29,
+      "head": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "hex": "83c0fa00",
+      "name": "axes-1-61",
+      "series": {
+        "7": [
+          [
+            0,
+            -30,
+            30,
+            -1
+          ]
+        ]
+      },
+      "throttle": [
+        1,
+        61
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        0
+      ],
+      "hex": "83cfc04000",
+      "name": "stance-0",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        1
+      ],
+      "hex": "83cfc04200",
+      "name": "stance-1",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        2
+      ],
+      "hex": "83cfc04400",
+      "name": "stance-2",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            2
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        3
+      ],
+      "hex": "83cfc04600",
+      "name": "stance-3",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            3
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        4
+      ],
+      "hex": "83cfc04800",
+      "name": "stance-4",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            4
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        5
+      ],
+      "hex": "83cfc04a00",
+      "name": "stance-5",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            5
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        6
+      ],
+      "hex": "83cfc04c00",
+      "name": "stance-6",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            6
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        7
+      ],
+      "hex": "83cfc04e00",
+      "name": "stance-7",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            7
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        8
+      ],
+      "hex": "83cfc05000",
+      "name": "stance-8",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            8
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        9
+      ],
+      "hex": "83cfc05200",
+      "name": "stance-9",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            9
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        10
+      ],
+      "hex": "83cfc05400",
+      "name": "stance-10",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            10
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        11
+      ],
+      "hex": "83cfc05600",
+      "name": "stance-11",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            11
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        12
+      ],
+      "hex": "83cfc05800",
+      "name": "stance-12",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            12
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        13
+      ],
+      "hex": "83cfc05a00",
+      "name": "stance-13",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            13
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        14
+      ],
+      "hex": "83cfc05c00",
+      "name": "stance-14",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            14
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        15
+      ],
+      "hex": "83cfc05e00",
+      "name": "stance-15",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            15
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        16
+      ],
+      "hex": "83cfc06000",
+      "name": "stance-16",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            16
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        17
+      ],
+      "hex": "83cfc06200",
+      "name": "stance-17",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            17
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        18
+      ],
+      "hex": "83cfc06400",
+      "name": "stance-18",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            18
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        19
+      ],
+      "hex": "83cfc06600",
+      "name": "stance-19",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            19
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        20
+      ],
+      "hex": "83cfc06800",
+      "name": "stance-20",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            20
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        21
+      ],
+      "hex": "83cfc06a00",
+      "name": "stance-21",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            21
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        22
+      ],
+      "hex": "83cfc06c00",
+      "name": "stance-22",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            22
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        23
+      ],
+      "hex": "83cfc06e00",
+      "name": "stance-23",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            23
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        24
+      ],
+      "hex": "83cfc07000",
+      "name": "stance-24",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            24
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        25
+      ],
+      "hex": "83cfc07200",
+      "name": "stance-25",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            25
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        26
+      ],
+      "hex": "83cfc07400",
+      "name": "stance-26",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            26
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        27
+      ],
+      "hex": "83cfc07600",
+      "name": "stance-27",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            27
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        28
+      ],
+      "hex": "83cfc07800",
+      "name": "stance-28",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            28
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        29
+      ],
+      "hex": "83cfc07a00",
+      "name": "stance-29",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            29
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        30
+      ],
+      "hex": "83cfc07c00",
+      "name": "stance-30",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            30
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        31
+      ],
+      "hex": "83cfc07e00",
+      "name": "stance-31",
+      "series": {
+        "7": [
+          [
+            0,
+            0,
+            1,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        31,
+        32
+      ]
+    },
+    {
+      "bit_len": 34,
+      "head": [
+        null,
+        null,
+        null,
+        31
+      ],
+      "hex": "83df807e00",
+      "name": "heads-0-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 41,
+      "head": [
+        null,
+        null,
+        null,
+        31
+      ],
+      "hex": "9fe7bf00fc00",
+      "name": "heads-0-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 36,
+      "head": [
+        3,
+        null,
+        null,
+        31
+      ],
+      "hex": "83ffe01f80",
+      "name": "heads-1-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 43,
+      "head": [
+        3,
+        null,
+        null,
+        31
+      ],
+      "hex": "9fe7ffc03f00",
+      "name": "heads-1-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 39,
+      "head": [
+        null,
+        29,
+        null,
+        31
+      ],
+      "hex": "83df81ebf0",
+      "name": "heads-2-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 46,
+      "head": [
+        null,
+        29,
+        null,
+        31
+      ],
+      "hex": "9fe7bf03d7e0",
+      "name": "heads-2-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 41,
+      "head": [
+        3,
+        29,
+        null,
+        31
+      ],
+      "hex": "83ffe07afc00",
+      "name": "heads-3-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 48,
+      "head": [
+        3,
+        29,
+        null,
+        31
+      ],
+      "hex": "9fe7ffc0f5f8",
+      "name": "heads-3-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 40,
+      "head": [
+        null,
+        null,
+        61,
+        31
+      ],
+      "hex": "83df80fbf8",
+      "name": "heads-4-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 47,
+      "head": [
+        null,
+        null,
+        61,
+        31
+      ],
+      "hex": "9fe7bf01f7f0",
+      "name": "heads-4-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 42,
+      "head": [
+        3,
+        null,
+        61,
+        31
+      ],
+      "hex": "83ffe03efe00",
+      "name": "heads-5-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 49,
+      "head": [
+        3,
+        null,
+        61,
+        31
+      ],
+      "hex": "9fe7ffc07dfc00",
+      "name": "heads-5-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 45,
+      "head": [
+        null,
+        29,
+        61,
+        31
+      ],
+      "hex": "83df81efdfc0",
+      "name": "heads-6-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 52,
+      "head": [
+        null,
+        29,
+        61,
+        31
+      ],
+      "hex": "9fe7bf03dfbf80",
+      "name": "heads-6-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 47,
+      "head": [
+        3,
+        29,
+        61,
+        31
+      ],
+      "hex": "83ffe07bf7f0",
+      "name": "heads-7-None",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    },
+    {
+      "bit_len": 54,
+      "head": [
+        3,
+        29,
+        61,
+        31
+      ],
+      "hex": "9fe7ffc0f7efe0",
+      "name": "heads-7-127",
+      "series": {
+        "7": [
+          [
+            0,
+            32,
+            -31,
+            31
+          ]
+        ]
+      },
+      "throttle": [
+        63,
+        0
+      ]
+    }
+  ]
+}

@@ -8,6 +8,35 @@ use crate::theater::parser::v41::reference::observations::{
 pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str) -> Option<bool> {
     let field_start = r.fields.len();
     match name {
+        "managed-radialmenu-enabled-component" => {
+            r.bit("value")?;
+        }
+        "managed-object-flags-component" => {
+            r.r("flags", 2)?;
+        }
+        "managed-navpoint-override-flags" => {
+            r.r("flags", 5)?;
+        }
+        "managed-navpoint-bottom-progress"
+        | "managed-navpoint-top-progress"
+        | "matchflow-isplaying-flags-component" => {
+            r.r("value", 8)?;
+        }
+        "managed-radialmenu-identifier-component"
+        | "managed-radialmenu-item-count-component"
+        | "managed-radialmenu-iconindex-component"
+        | "managed-navpoint-object-marker"
+        | "managed-object-navpoint-component"
+        | "managed-object-networked-property-component"
+        | "supply-lines-item-unlocked-component" => {
+            r.r("value", 32)?;
+        }
+        "game-engine-soft-ceilings-component" => {
+            r.r("flags", 128)?;
+        }
+        "managed-radialmenu-title-component" | "managed-radialmenu-description-component" => {
+            formatted_text(r)?
+        }
         "player-fade-properties-component" => r.words("fade", 6, 12)?,
         "player-soft-kill-timer-component" => r.words("timers", 3, 5)?,
         "player-target-tracking-detection-component" => r.words("flags", 2, 1)?,
@@ -72,8 +101,11 @@ pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str) -> Option<bool>
                 match r.r(&format!("timer[{slot}].tag"), 2)? {
                     0 => {}
                     1 => {
-                        r.words(&format!("timer[{slot}].value"), 3, 16)?;
+                        // FUN_142ba78dc first calls FUN_140d580d0 (two
+                        // values and the state), then reads its third value.
+                        r.words(&format!("timer[{slot}].value"), 2, 16)?;
                         r.r(&format!("timer[{slot}].tail"), 5)?;
+                        r.r(&format!("timer[{slot}].value[2]"), 16)?;
                     }
                     _ => {
                         r.words(&format!("timer[{slot}].value"), 2, 16)?;
@@ -370,13 +402,17 @@ mod tests {
         }
         push_bits(&mut bytes, &mut bits, 7, 5);
         push_bits(&mut bytes, &mut bits, 1, 2);
-        for value in [21, 22, 23] {
+        for value in [21, 22] {
             push_bits(&mut bytes, &mut bits, value, 16);
         }
         push_bits(&mut bytes, &mut bits, 9, 5);
+        push_bits(&mut bytes, &mut bits, 23, 16);
         let mut reader = ComponentReader {
+            category_references: true,
+            snapshot: false,
             reference_widths: None,
             width_error: None,
+            context_error: None,
             live_grammar: None,
             movement_slot: None,
             references: Vec::new(),
@@ -394,9 +430,12 @@ mod tests {
         assert_eq!(reader.fields[1].name, "timer[0].tag");
         assert_eq!(reader.fields[2].name, "timer[1].tag");
         assert_eq!(reader.fields[6].name, "timer[63].tag");
-        assert_eq!(reader.fields.last().unwrap().raw.low_u64(), 9);
+        assert_eq!(reader.fields[9].raw.low_u64(), 9);
+        assert_eq!(reader.fields.last().unwrap().raw.low_u64(), 23);
 
         let mut truncated = ComponentReader {
+            category_references: true,
+            snapshot: false,
             cursor: ComponentCursor::new(&bytes[..19], 0).unwrap(),
             fields: Vec::new(),
             ..reader

@@ -1,0 +1,171 @@
+[
+  {
+    "name": "config-quarter",
+    "hex": "3400000000",
+    "bit_len": 34,
+    "kind": "config",
+    "version": 2,
+    "roll": 268435456
+  },
+  {
+    "name": "raw-east",
+    "hex": "8000200fc00000000000000000000000000000000000200fc0",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  },
+  {
+    "name": "delta-keep-absent",
+    "hex": "50",
+    "bit_len": 5,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "config-zero",
+    "hex": "3000000000",
+    "bit_len": 34,
+    "kind": "config",
+    "version": 2,
+    "roll": 0
+  },
+  {
+    "name": "config-half",
+    "hex": "3800000000",
+    "bit_len": 34,
+    "kind": "config",
+    "version": 2,
+    "roll": 536870912
+  },
+  {
+    "name": "config-last",
+    "hex": "3fffffffc0",
+    "bit_len": 34,
+    "kind": "config",
+    "version": 2,
+    "roll": 1073741823
+  },
+  {
+    "name": "config-up",
+    "hex": "2048d159c0000011",
+    "bit_len": 64,
+    "kind": "config",
+    "version": 2,
+    "roll": 17
+  },
+  {
+    "name": "raw-overridden-default",
+    "hex": "e000001080",
+    "bit_len": 33,
+    "kind": "config",
+    "version": 2,
+    "roll": 33
+  },
+  {
+    "name": "raw-overridden-up",
+    "hex": "c091a2b38000004a",
+    "bit_len": 63,
+    "kind": "config",
+    "version": 2,
+    "roll": 37
+  },
+  {
+    "name": "delta-overridden",
+    "hex": "7000000a40",
+    "bit_len": 34,
+    "kind": "config",
+    "version": 2,
+    "roll": 41
+  },
+  {
+    "name": "nominal-default",
+    "hex": "1640",
+    "bit_len": 12,
+    "kind": "nominal",
+    "version": 2
+  },
+  {
+    "name": "nominal-up",
+    "hex": "0000f790",
+    "bit_len": 31,
+    "kind": "nominal",
+    "version": 2
+  },
+  {
+    "name": "delta-1-0-0",
+    "hex": "50",
+    "bit_len": 5,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "delta-1-0-1",
+    "hex": "5e80",
+    "bit_len": 9,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "delta-0-0-0",
+    "hex": "45432100",
+    "bit_len": 25,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "delta-0-0-1",
+    "hex": "454321e8",
+    "bit_len": 29,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "delta-0-1-0",
+    "hex": "4f18",
+    "bit_len": 14,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "delta-0-1-1",
+    "hex": "4f1f40",
+    "bit_len": 18,
+    "kind": "delta",
+    "version": 2
+  },
+  {
+    "name": "raw-north",
+    "hex": "800000000000200fc000000000000000000000000000200fc0",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  },
+  {
+    "name": "raw-west",
+    "hex": "8000202fc00000000000000000000000000000000000200fc0",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  },
+  {
+    "name": "raw-nan",
+    "hex": "8000301fc00000000000000000000000000000000000200fc0",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  },
+  {
+    "name": "raw-parallel",
+    "hex": "8000200fc0000000000000000000200fc00000000000000000",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  },
+  {
+    "name": "raw-vertical",
+    "hex": "80000000000000000000200fc000200fc00000000000000000",
+    "bit_len": 194,
+    "kind": "raw",
+    "version": 2
+  }
+]

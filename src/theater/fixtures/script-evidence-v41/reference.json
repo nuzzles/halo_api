@@ -1,0 +1,2936 @@
+{
+  "commit": "f050371a6cda83b9887eeb83a1884336fce28e53",
+  "blobs": {
+    "src/scripts.rs": "005e1bcc84512b5d09a1919609961dedab70a32b",
+    "src/model/variant.rs": "e07071372a506302f7def1a6e7afd488539fe704",
+    "src/game/options.rs": "43ade2aafef5f38ca492b507e7adce03cc4be38d",
+    "src/game/options_data.rs": "021e911b805a2b74c24321c7209462a76bd0a708"
+  },
+  "cases": [
+    {
+      "name": "empty",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "repeats",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "ascii-space",
+      "names": [
+        "script name_42.lua"
+      ],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "no-separator",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "empty-name",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "uppercase-extension",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "unsupported-name-char",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "following-byte",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "end-of-blob",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "unrecognized",
+      "names": [
+        "something_else.lua"
+      ],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "absent",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "wrong-type",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "duplicate-blob",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "base-only-blob",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "base-derived-blob",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "outside-blob",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/00",
+      "names": [],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "modes/01",
+      "names": [
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/02",
+      "names": [
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Other"
+    },
+    {
+      "name": "modes/03",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/04",
+      "names": [
+        "arenaflagevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/05",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/06",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/07",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/08",
+      "names": [
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/09",
+      "names": [
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/0a",
+      "names": [
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/0b",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/0c",
+      "names": [
+        "arenaflagevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/0d",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/0e",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/0f",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/10",
+      "names": [
+        "bastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/11",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/12",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/13",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/14",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/15",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/16",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/17",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/18",
+      "names": [
+        "bastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/19",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/1a",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/1b",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/1c",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/1d",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/1e",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/1f",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/20",
+      "names": [
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/21",
+      "names": [
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/22",
+      "names": [
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/23",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/24",
+      "names": [
+        "arenaflagevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/25",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/26",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/27",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/28",
+      "names": [
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/29",
+      "names": [
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/2a",
+      "names": [
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/2b",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/2c",
+      "names": [
+        "arenaflagevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/2d",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/2e",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/2f",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/30",
+      "names": [
+        "bastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/31",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/32",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/33",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/34",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/35",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/36",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/37",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/38",
+      "names": [
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/39",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/3a",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/3b",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/3c",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/3d",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/3e",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/3f",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/40",
+      "names": [
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/41",
+      "names": [
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/42",
+      "names": [
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/43",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/44",
+      "names": [
+        "arenaflagevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/45",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/46",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/47",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/48",
+      "names": [
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/49",
+      "names": [
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/4a",
+      "names": [
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/4b",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/4c",
+      "names": [
+        "arenaflagevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/4d",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/4e",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/4f",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/50",
+      "names": [
+        "bastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/51",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/52",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/53",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/54",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/55",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/56",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/57",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/58",
+      "names": [
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/59",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/5a",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/5b",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/5c",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/5d",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/5e",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/5f",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/60",
+      "names": [
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/61",
+      "names": [
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/62",
+      "names": [
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/63",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/64",
+      "names": [
+        "arenaflagevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/65",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/66",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/67",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/68",
+      "names": [
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/69",
+      "names": [
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/6a",
+      "names": [
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/6b",
+      "names": [
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/6c",
+      "names": [
+        "arenaflagevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/6d",
+      "names": [
+        "arenaflagevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/6e",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/6f",
+      "names": [
+        "arenaflagevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/70",
+      "names": [
+        "bastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/71",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/72",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/73",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/74",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/75",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/76",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/77",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/78",
+      "names": [
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/79",
+      "names": [
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/7a",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/7b",
+      "names": [
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/7c",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/7d",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/7e",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/7f",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/80",
+      "names": [
+        "btbslayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/81",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/82",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/83",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/84",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/85",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/86",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/87",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/88",
+      "names": [
+        "btbslayerevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/89",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/8a",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/8b",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/8c",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/8d",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/8e",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/8f",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/90",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/91",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/92",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/93",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/94",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/95",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/96",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/97",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/98",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/99",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/9a",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/9b",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/9c",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/9d",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/9e",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/9f",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/a0",
+      "names": [
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/a1",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/a2",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/a3",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/a4",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/a5",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/a6",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/a7",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/a8",
+      "names": [
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/a9",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/aa",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/ab",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/ac",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/ad",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ae",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/af",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/b0",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/b1",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/b2",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/b3",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/b4",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/b5",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/b6",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/b7",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/b8",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/b9",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ba",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/bb",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/bc",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/bd",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/be",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/bf",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/c0",
+      "names": [
+        "btbslayerevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/c1",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/c2",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Slayer"
+    },
+    {
+      "name": "modes/c3",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/c4",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/c5",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/c6",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/c7",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/c8",
+      "names": [
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/c9",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ca",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/cb",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/cc",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/cd",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ce",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/cf",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/d0",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/d1",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/d2",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/d3",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/d4",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/d5",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/d6",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/d7",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/d8",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/d9",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/da",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/db",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/dc",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/dd",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/de",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/df",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/e0",
+      "names": [
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/e1",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/e2",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Strongholds"
+    },
+    {
+      "name": "modes/e3",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/e4",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/e5",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/e6",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/e7",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/e8",
+      "names": [
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/e9",
+      "names": [
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ea",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/eb",
+      "names": [
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/ec",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/ed",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/ee",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/ef",
+      "names": [
+        "arenaflagevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/f0",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/f1",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/f2",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "KingOfTheHill"
+    },
+    {
+      "name": "modes/f3",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/f4",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/f5",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/f6",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/f7",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/f8",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/f9",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/fa",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Oddball"
+    },
+    {
+      "name": "modes/fb",
+      "names": [
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    },
+    {
+      "name": "modes/fc",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/fd",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "Firefight"
+    },
+    {
+      "name": "modes/fe",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "CaptureTheFlag"
+    },
+    {
+      "name": "modes/ff",
+      "names": [
+        "arenaflagevents.lua",
+        "bastionevents.lua",
+        "btbslayerevents.lua",
+        "fbastionevents.lua",
+        "firefightevents.lua",
+        "oddballevents.lua",
+        "parcel_stronghold.lua",
+        "slayerevents.lua"
+      ],
+      "registry_names": [],
+      "mode": "FirefightKingOfTheHill"
+    }
+  ]
+}

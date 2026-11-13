@@ -53,7 +53,15 @@ pub(crate) struct PositionEncoding {
     pub baseline_scope: bool,
     pub full_precision: bool,
     pub writer_absolute: bool,
+    /// A full-scope handle needs the engine-dependent category-0 width.
+    /// Unknown engine type must keep this possible.
+    #[serde(default = "default_true")]
+    pub engine_one_possible: bool,
     pub delta_handle_tail: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 impl PositionEncoding {
@@ -71,7 +79,7 @@ impl PositionEncoding {
                 .chain(self.traversal_axis_bits.iter())
                 .chain(self.region_axis_bits.values().flatten())
                 .chain(self.world_axis_bits.iter().flatten())
-                .all(|w| (1..=32).contains(w))
+                .all(|w| (0..=32).contains(w))
     }
 }
 
@@ -97,6 +105,21 @@ pub(crate) fn traversal_payload(r: &mut ComponentReader<'_>) -> Option<()> {
 }
 
 pub(crate) fn component(r: &mut ComponentReader<'_>) -> Option<bool> {
+    if r.snapshot {
+        let predicted = r.bit("use_prediction")?;
+        let delta = r.bit("delta")?;
+        if predicted || delta {
+            return Some(false);
+        }
+        r.bit("snapshot.flag")?;
+        let words = raw_words(r, "vector_bits")?;
+        if !raw_words_finite(words) {
+            r.context_error = Some("nonfinite raw position");
+            return Some(false);
+        }
+        r.r("finite", 2)?;
+        return Some(true);
+    }
     let Some(encoding) = r.position_encoding else {
         return Some(false);
     };
@@ -122,7 +145,16 @@ pub(crate) fn component(r: &mut ComponentReader<'_>) -> Option<bool> {
         if encoding.writer_absolute {
             let handle = r.bit("has_handle")?;
             if encoding.full_precision_gate() {
-                r.words("vector_bits", 3, 32)?;
+                let words = raw_words(r, "vector_bits")?;
+                if !scope_handle_tail(r, handle, encoding)? {
+                    return Some(false);
+                }
+                if !raw_words_finite(words) {
+                    r.context_error = Some("nonfinite raw position");
+                    return Some(false);
+                }
+                r.r("finite", 2)?;
+                return Some(true);
             } else {
                 absolute_payload(r, encoding)?;
             }
@@ -176,6 +208,23 @@ pub(crate) fn component(r: &mut ComponentReader<'_>) -> Option<bool> {
     Some(true)
 }
 
+/// The stream's 32-bit words become IEEE-754 words only after byte reversal.
+/// Keep their original bits in source fields; this predicate decides whether the
+/// native reader admits the two closing bits after the parent tail.
+pub(crate) fn raw_words_finite(words: [u32; 3]) -> bool {
+    words
+        .into_iter()
+        .all(|word| word.swap_bytes() & 0x7f80_0000 != 0x7f80_0000)
+}
+
+pub(crate) fn raw_words(r: &mut ComponentReader<'_>, name: &str) -> Option<[u32; 3]> {
+    let mut words = [0; 3];
+    for (i, word) in words.iter_mut().enumerate() {
+        *word = r.r(&format!("{name}[{i}]"), 32)? as u32;
+    }
+    Some(words)
+}
+
 fn absolute(r: &mut ComponentReader<'_>, encoding: &PositionEncoding) -> Option<()> {
     let high = r.bit("precision_high")?;
     if encoding.full_precision_gate() {
@@ -200,13 +249,6 @@ pub(crate) fn absolute_payload(
     r: &mut ComponentReader<'_>,
     encoding: &PositionEncoding,
 ) -> Option<()> {
-    read_absolute_payload(r, encoding).map(|_| ())
-}
-
-fn read_absolute_payload(
-    r: &mut ComponentReader<'_>,
-    encoding: &PositionEncoding,
-) -> Option<(i32, [u64; 3], [u64; 3])> {
     let mut raw_widths = encoding.default_axis_bits.map(|v| v as u64);
     let mut region_index = -1;
     if !r.bit("default_region")? {
@@ -217,11 +259,38 @@ fn read_absolute_payload(
         let raw_index = r.r_wide("region_index", width)?;
         let index = raw_index as u32;
         region_index = index as i32;
+        let known_axes = r
+            .reference_widths
+            .and_then(|w| w.movement.world_object.regions.get(&index).copied());
+        let complete_table = r
+            .reference_widths
+            .is_some_and(|w| !w.movement.world_object.regions.is_empty());
+        if complete_table
+            && known_axes.is_none_or(|axes| !axes.iter().all(|w| (0..=32).contains(w)))
+        {
+            r.context_error = Some("unknown world region");
+            return None;
+        }
+        if known_axes.is_none()
+            && let Some(bits) = r
+                .reference_widths
+                .and_then(|w| w.movement.opaque_position_region_bits.get(&index).copied())
+        {
+            // Do not split an aggregate width into invented axes. Runtime position
+            // resolution requires position[0..2], so this cannot publish a pose.
+            r.record_absolute(region_index);
+            r.r_wide("position.opaque_region_bits", bits)?;
+            return Some(());
+        }
         if let Some(w) = r.reference_widths {
             // Reference absAxisWFor takes a signed host int. Its negative sentinel
             // includes wide recorded indices whose low 64-bit word is negative.
             if raw_index as i64 >= 0 {
-                raw_widths = w.movement.world_object.axis_bits;
+                raw_widths = if w.movement.world_object.regions.is_empty() {
+                    w.movement.world_object.axis_bits
+                } else {
+                    known_axes?
+                };
             }
         } else if let Some(region) = encoding.region_axis_bits.get(&index) {
             raw_widths = region.map(|v| v as u64);
@@ -230,13 +299,11 @@ fn read_absolute_payload(
         }
     }
     r.record_absolute(region_index);
-    let mut q = [0; 3];
-    let mut widths = [0; 3];
     for (i, raw) in raw_widths.into_iter().enumerate() {
-        widths[i] = r.reference_position_width(raw, "world axes")?;
-        q[i] = r.r_wide(&format!("position[{i}]"), widths[i])?;
+        let width = r.reference_position_width(raw, "world axes")?;
+        r.r_wide(&format!("position[{i}]"), width)?;
     }
-    Some((region_index, q, widths))
+    Some(())
 }
 
 fn handle_tail(
@@ -248,6 +315,9 @@ fn handle_tail(
         return Some(());
     }
     if r.bit("handle_selector")? && r.bit("handle_present")? {
+        // This legacy precision-profile path still calls FUN_1406d3140.
+        // A configured width cannot replace a missing global range.
+        r.require_category_references()?;
         let raw = r.reference_widths.map_or(encoding.handle_bits as u64, |w| {
             w.movement.traversal.index_bits
         });
@@ -259,6 +329,60 @@ fn handle_tail(
         r.gate("region", 11, true)?;
     }
     Some(())
+}
+
+/// FUN_14076e3e4 in the writer's full-scope absolute form. This differs
+/// from the inline keep-baseline/delta handle tail above.
+fn scope_handle_tail(
+    r: &mut ComponentReader<'_>,
+    present: bool,
+    encoding: &PositionEncoding,
+) -> Option<bool> {
+    if !present {
+        return Some(true);
+    }
+    if encoding.engine_one_possible {
+        r.context_error = Some("engine-one handle width");
+        return Some(false);
+    }
+    r.optional_handle("scope.handle", 0)?;
+    r.gate("scope.region", 11, true)?;
+    Some(true)
+}
+
+/// Precision-16 point with the explicit full-precision/baseline overrides used
+/// by biped movement readers. Snapshot and default-box forms need no map table.
+pub(crate) fn contextual_point(r: &mut ComponentReader<'_>, prefix: &str) -> Option<bool> {
+    if r.position_encoding.is_some_and(|e| e.full_precision_gate()) {
+        r.words(&format!("{prefix}.float_bits"), 3, 32)?;
+        Some(true)
+    } else {
+        point(r, prefix)
+    }
+}
+
+/// Point used by the low-frequency/navpoint layouts: snapshot raw float bits
+/// versus a delta's explicit region/quantized fields. Keep fields on failure.
+pub(crate) fn point(r: &mut ComponentReader<'_>, prefix: &str) -> Option<bool> {
+    if r.snapshot {
+        r.words(&format!("{prefix}.float_bits"), 3, 32)?;
+        return Some(true);
+    }
+    let Some(encoding) = r.position_encoding else {
+        // The default box is self-contained (three 22-bit words). Only the
+        // indexed box needs external index/axis widths, after this recorded gate.
+        if r.bit(&format!("{prefix}.default_region"))? {
+            r.words(&format!("{prefix}.position"), 3, 22)?;
+            return Some(true);
+        }
+        return Some(false);
+    };
+    let start = r.fields.len();
+    let result = absolute_payload(r, encoding);
+    for field in &mut r.fields[start..] {
+        field.name = format!("{prefix}.{}", field.name);
+    }
+    result.map(|_| true)
 }
 
 #[cfg(test)]
@@ -276,8 +400,11 @@ mod tests {
         let config = V41DecodeConfig::default();
         let layout = config.record_layout();
         let mut reader = ComponentReader {
+            category_references: true,
+            snapshot: false,
             reference_widths: None,
             width_error: None,
+            context_error: None,
             live_grammar: None,
             movement_slot: None,
             references: vec![],

@@ -31,7 +31,7 @@ not evidence that an action never happened.
 
 | Feature | Available now | Remaining work |
 | --- | --- | --- |
-| Player 3D position tracking | **Partial typed replay.** The contextual runtime binds recorded player lives to full entity IDs and publishes source-backed absolute positions with map-specific bounds and 100 ms freshness. Corroborated keyframe headers can recover schemas missed after an unsupported keyframe component. Raw predicted and delta branches remain preserved. | Decode predicted and delta position forms, resolve remaining blocked frame suffixes and keyframe bodies, and validate trajectories against source gameplay across more films. Missing observations are unknown, not evidence that a player stood still. |
+| Player 3D position tracking | **Partial typed replay.** The contextual runtime binds recorded player lives to full entity IDs and publishes source-backed absolute positions with map-specific bounds, held until an explicit update, decode gap or life boundary. Corroborated keyframe headers can recover schemas missed after an unsupported keyframe component. Raw predicted and delta branches remain preserved. | Decode predicted and delta position forms, resolve remaining blocked frame suffixes and keyframe bodies, and validate trajectories against source gameplay across more films. Missing observations are unknown, not evidence that a player stood still. |
 | Player body orientation and velocity | **Raw fields.** Forward/up, angular velocity and translational velocity component layouts are supported. | Decode packed vectors into documented coordinates; resolve reference frames/parents and player entities; validate orientation and velocity across updates. |
 | Player aim tracking | **Raw fields + interpretation.** Desired-aim components retain yaw/pitch fields; actor/action blocks retain packed directions. Selected fire reads expose optional aim evidence. | Establish units, coordinate conventions, which vector describes which actor, and continuous aim state. Aim evidence at a shot is not a complete camera timeline. |
 | Player camera tracking | **Not established as a camera track.** Aim/orientation fields and selected zoom reads provide related evidence. | Identify actual view transforms, camera origin, offsets, FOV, zoom transitions and first/third-person modes. Do not substitute body orientation or tactical-map heading for the player's camera. |
@@ -65,7 +65,7 @@ not evidence that an action never happened.
 | --- | --- | --- |
 | Player identities | **Interpretation + typed summary actors.** Bootstrap/player-table reads expose roster evidence. Summary actors contain source-read XUID/gamertag and explicit unique/missing/ambiguous roster linkage. | Establish a complete time-varying player-to-controlled-entity relationship, including respawns, bots, joins/leaves and ownership changes. A control index or entity slot is not itself a gamertag. |
 | Entity lifetimes and component state | **Runtime support.** NEW/DELETE/delta/keyframe records are indexed; supported state accumulates with source references and generation checks. Partial reads and separate keyframe namespaces remain explicit. | Add typed component semantics and relationships; preserve uncertainty around incomplete NEWs, keyframe-only observations and unsupported updates. An entity NEW is not automatically a player spawn. |
-| Kills, deaths and medals | **Typed feature with derived provenance.** `summary_events()` and `query_summaries()` expose guarded v41 summary interpretations, including actors, timestamps and known/unknown medals. | Establish a complete sequential summary grammar. Opponent/weapon relationships are not fabricated from opaque kill/death bodies. Count agreement alone does not establish complete decoding. |
+| Kills, deaths and medals | **Typed feature with derived provenance.** `summary_highlights()` and `query_highlights()` expose guarded v41 summary interpretations, including actors, timestamps and known/unknown medals. | Establish a complete sequential summary grammar. Opponent/weapon relationships are not fabricated from opaque kill/death bodies. Count agreement alone does not establish complete decoding. |
 | Objectives and mode events | **Raw fields + typed summary category.** Several game-engine/team/objective components are decoded; summary payloads include mode events. | Map mode-specific payloads to concrete actions/outcomes, participants, scores and object relationships; validate each mode. A mode category is not a fully decoded objective action. |
 | Ordered event log and filters | **Runtime support.** Source-linked structural, lifecycle, state, control, recorded-event and summary entries have chronological ordering. Filters cover category, kind, entity/player index and time; summaries additionally support XUID/medal queries. | Add validated named gameplay events and per-player associations. `RecordedEvent` currently means a supported record read, not a guarantee of an understood physical action. |
 | Pause/advance/seek state | **Runtime support.** The runtime exposes a materialized raw-component world, forward advancement, rewind and checkpointed seeking. Seek/sequential consistency is tested. | Build a playback clock and typed world suitable for a renderer. `current()` is O(1) borrowed access; seek is not O(1). See [resolution costs](RESOLUTION.md#costs-and-playback). |
@@ -76,13 +76,17 @@ not evidence that an action never happened.
 - Registry, packet envelopes, supported datum/keyframe/frame layouts and raw
   component fields are decoded. Unknown chunks/payloads, unread suffixes and
   explicit stops remain inspectable; retention is not semantic decoding.
-- Replication type 8 is acknowledged, but its body has no decoder. Other
-  unsupported packet types retain their source rather than acquiring a guessed layout.
+- Replication types 8/12 now have count-driven roster/bot readers with exact raw
+  fields and partial stops; opaque player-block internals and runtime ownership
+  remain open. Other unsupported packet types retain their source. See ROSTER.md.
 - The sequential event reader stops when the code-15 runtime setting is
   unavailable. We no longer infer this gate. Other unknown/unsupported event
   layouts and opaque bodies also limit coverage.
-- Control handler kinds 1/2 and the secondary control block are unsupported.
-  The supported kind-0 control path does not imply complete input-stream decoding.
+- Control kinds 0/1/2 and the secondary unit block have source-backed readers.
+  Kind 3 stops at its disputed prefix. Command floats remain raw bits/delta
+  prefixes; missing position context stops explicitly. The new layouts have
+  synthetic upstream boundary fixtures, not independently annotated input-action
+  coverage. See [control fixtures](../fixtures/controls-v41/README.md).
 - Canonical summary parsing reads a count and retains an opaque stream; runtime
   summary candidates are guarded interpretations, not canonical record boundaries.
 - Some pinned readers model zero-tail/padded reads. Padding and partial results

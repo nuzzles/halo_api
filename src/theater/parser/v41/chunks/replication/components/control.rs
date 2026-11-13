@@ -1,6 +1,6 @@
 //! Shared v41 actor/input component grammar.
 //! Reference action fields and source ranges follow d61443e bloc_action.go.
-use super::position::absolute_payload;
+use super::position::point;
 use super::reader::ComponentReader;
 
 /// Internal outcome distinct from a failed primitive read (`None`).
@@ -56,15 +56,11 @@ fn action_body(r: &mut ComponentReader<'_>) -> Option<bool> {
         r.gate("actions.aim.value10", 10, true)?;
         match r.r("actions.aim.vector_mode", 2)? {
             0 => {
-                let Some(encoding) = r.position_encoding else {
-                    // The wire prefix is complete. Missing caller context is not
-                    // evidence of truncated source; stop before guessing widths.
-                    return Some(false);
-                };
-                if encoding.full_precision_gate() {
+                if !r.snapshot && r.position_encoding.is_some_and(|e| e.full_precision_gate()) {
                     r.words("actions.aim.position_bits", 3, 32)?;
-                } else {
-                    absolute_payload(r, encoding)?;
+                } else if !point(r, "actions.aim")? {
+                    // Only an indexed quantized point needs map context.
+                    return Some(false);
                 }
             }
             1 => {
@@ -103,7 +99,7 @@ fn action_body(r: &mut ComponentReader<'_>) -> Option<bool> {
     Some(true)
 }
 
-pub(crate) fn actor_state(r: &mut ComponentReader<'_>, level: u32) -> Option<()> {
+pub(crate) fn actor_state(r: &mut ComponentReader<'_>, level: u32) -> Option<bool> {
     r.words("state", 2, 32)?;
     r.r(
         "fraction",
@@ -127,12 +123,18 @@ pub(crate) fn actor_state(r: &mut ComponentReader<'_>, level: u32) -> Option<()>
             r.bit(&format!("{prefix}.c"))?;
             r.r(&format!("{prefix}.kind"), 2)?;
             r.words(&format!("{prefix}.fractions"), 2, 10)?;
-            r.r(&format!("{prefix}.quaternion"), 16)?;
+            // FUN_14076e494's 0x10 argument is a precision level, not a
+            // sixteen-bit payload width. Snapshot mode supplies raw words.
+            if !point(r, &format!("{prefix}.position"))? {
+                return Some(false);
+            }
             r.optional_word_reference(&format!("{prefix}.optional_reference"), true)?;
             r.word_reference(&format!("{prefix}.second_reference"))?;
             r.optional_handle(&format!("{prefix}.slot"), 0)?;
         } else if !a {
-            r.r(&format!("{prefix}.quaternion"), 16)?;
+            if !point(r, &format!("{prefix}.position"))? {
+                return Some(false);
+            }
         } else {
             r.optional_handle(&format!("{prefix}.slot"), 0)?;
         }
@@ -141,5 +143,5 @@ pub(crate) fn actor_state(r: &mut ComponentReader<'_>, level: u32) -> Option<()>
         }
         r.optional_word_reference(&format!("{prefix}.tail_reference"), true)?;
     }
-    Some(())
+    Some(true)
 }

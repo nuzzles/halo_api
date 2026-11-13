@@ -1,0 +1,120 @@
+[
+  {
+    "name": "box",
+    "hex": "547c28702858441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 262,
+    "bond_hex": "1f0a1c0a161106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "single"
+  },
+  {
+    "name": "cylinder-recorded-right",
+    "hex": "547c287028584412c6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 262,
+    "bond_hex": "1f0a1c0a161104b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "single"
+  },
+  {
+    "name": "missing-dimensions",
+    "hex": "54342828281c441ac6020020000000",
+    "bit_len": 118,
+    "bond_hex": "0d0a0a0a071106b1808008000000",
+    "policy": "single"
+  },
+  {
+    "name": "wrapped-integers",
+    "hex": "54b828ac2894280c441802a81446020020032818144602004003281c14460200600328201447fffc0c00034420080000",
+    "bit_len": 382,
+    "bond_hex": "2e0a2b0a250a03110600aa051180800800ca06051180801000ca07051180801800ca080511ffff030000d108020000",
+    "policy": "single"
+  },
+  {
+    "name": "single-lists",
+    "hex": "54842d28742d2858441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 278,
+    "bond_hex": "210b4a1d0b4a161106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "single"
+  },
+  {
+    "name": "unknown-shape",
+    "hex": "54802874285c471806c6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 270,
+    "bond_hex": "200a1d0a1711c601b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "single"
+  },
+  {
+    "name": "multiple-items",
+    "hex": "54f42da8702858441ac6020023441a020043441e0200634423fffc0c03442008007028584412c6020023441a020043441e0200634423fffc0c034420100000",
+    "bit_len": 502,
+    "bond_hex": "3d0b6a1c0a161106b1808008d106808010d107808018d108ffff0300d10802001c0a161104b1808008d106808010d107808018d108ffff0300d108040000",
+    "policy": "multiple"
+  },
+  {
+    "name": "empty-items",
+    "hex": "540c2ca800",
+    "bit_len": 38,
+    "bond_hex": "030b2a00",
+    "policy": "empty"
+  },
+  {
+    "name": "duplicate-root",
+    "hex": "54f428702858441ac6020023441a020043441e0200634423fffc0c0344200800287028584412c6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 502,
+    "bond_hex": "3d0a1c0a161106b1808008d106808010d107808018d108ffff0300d10802000a1c0a161104b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "duplicate-root"
+  },
+  {
+    "name": "duplicate-dimension",
+    "hex": "54502844282c441ac6020022c6020040034420080000",
+    "bit_len": 174,
+    "bond_hex": "140a110a0b1106b1808008b180801000d108020000",
+    "policy": "duplicate-dimension"
+  },
+  {
+    "name": "inherited-root",
+    "hex": "54800428702858441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 270,
+    "bond_hex": "20010a1c0a161106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "inheritance"
+  },
+  {
+    "name": "root-short",
+    "hex": "540428702858441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 262,
+    "bond_hex": "010a1c0a161106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "invalid-bond"
+  },
+  {
+    "name": "root-long",
+    "hex": "54d028702858441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 262,
+    "bond_hex": "340a1c0a161106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "invalid-bond"
+  },
+  {
+    "name": "nested-short",
+    "hex": "547c28702804441ac6020023441a020043441e0200634423fffc0c034420080000",
+    "bit_len": 262,
+    "bond_hex": "1f0a1c0a011106b1808008d106808010d107808018d108ffff0300d108020000",
+    "policy": "invalid-bond"
+  },
+  {
+    "name": "empty-wrapped-right",
+    "hex": "54402834281c441328180400034420080000",
+    "bit_len": 142,
+    "bond_hex": "100a0d0a071104ca06010000d108020000",
+    "policy": "empty-wrapper"
+  },
+  {
+    "name": "multiple-geometries",
+    "hex": "54d028c431a858441ac6020023441a020043441e0200634423fffc0c00584412c6020023441a020043441e0200634423fffc0c000000",
+    "bit_len": 430,
+    "bond_hex": "340a310c6a161106b1808008d106808010d107808018d108ffff0300161104b1808008d106808010d107808018d108ffff03000000",
+    "policy": "geometries"
+  },
+  {
+    "name": "absent",
+    "hex": "80",
+    "bit_len": 1,
+    "policy": "absent"
+  }
+]

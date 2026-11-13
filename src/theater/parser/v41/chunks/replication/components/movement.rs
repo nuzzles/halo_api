@@ -1,5 +1,5 @@
 //! Slide and posture bodies from the reference movement-state deserializers.
-use super::orientation;
+use super::position;
 use super::reader::ComponentReader;
 use crate::theater::parser::v41::reference::observations::MovementComponent;
 
@@ -63,18 +63,16 @@ pub(crate) fn posture(r: &mut ComponentReader<'_>) -> Option<bool> {
             if r.r("sub", 2)? != 0 {
                 r.r("handle", 15)?;
                 r.words("kinds", 2, 2)?;
-                if r.position_encoding.is_none() {
+                if !position::contextual_point(r, "position")? {
                     return Some(false);
                 }
-                orientation::media_frame(r)?;
                 r.r("direction", 19)?;
             }
         }
         2 => {
-            if r.position_encoding.is_none() {
+            if !position::contextual_point(r, "position")? {
                 return Some(false);
             }
-            orientation::media_frame(r)?;
             r.r("direction", 19)?;
             if r.bit("gate")? {
                 r.optional_handle("reference", 0)?;
@@ -86,10 +84,9 @@ pub(crate) fn posture(r: &mut ComponentReader<'_>) -> Option<bool> {
         3 => {
             r.r("handle", 15)?;
             if r.bit("gate")? {
-                if r.position_encoding.is_none() {
+                if !position::contextual_point(r, "position")? {
                     return Some(false);
                 }
-                orientation::media_frame(r)?;
                 r.r("direction", 19)?;
             }
             r.r("word", 32)?;

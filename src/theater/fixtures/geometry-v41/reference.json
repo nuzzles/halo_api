@@ -1,0 +1,182 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blobs": {
+    "src/zones.rs": "4701db66d587260404006301be25b4fb2ae1931f",
+    "src/bits.rs": "5d1a69e536e63ce03c366aee8ee144c8ed48ee72",
+    "src/calibrate.rs": "34641c30d1e88a6b74405023bb87a8a0805adb6f"
+  },
+  "cases": [
+    {
+      "name": "box",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "cylinder-recorded-right",
+      "shape": {
+        "cylinder": true,
+        "a": 4621819117588971520,
+        "b": 0,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "missing-dimensions",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 0,
+        "top": 0,
+        "bottom": 0,
+        "angle": 4609753056924675352,
+        "team": null
+      }
+    },
+    {
+      "name": "wrapped-integers",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "single-lists",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "unknown-shape",
+      "shape": null
+    },
+    {
+      "name": "multiple-items",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "empty-items",
+      "shape": null
+    },
+    {
+      "name": "duplicate-root",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "duplicate-dimension",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 0,
+        "top": 0,
+        "bottom": 0,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "inherited-root",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "root-short",
+      "shape": null
+    },
+    {
+      "name": "root-long",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "nested-short",
+      "shape": {
+        "cylinder": false,
+        "a": 0,
+        "b": 0,
+        "top": 0,
+        "bottom": 0,
+        "angle": 4609753056924675352,
+        "team": -32768
+      }
+    },
+    {
+      "name": "empty-wrapped-right",
+      "shape": {
+        "cylinder": true,
+        "a": 0,
+        "b": 0,
+        "top": 0,
+        "bottom": 0,
+        "angle": 4609753056924675352,
+        "team": 1
+      }
+    },
+    {
+      "name": "multiple-geometries",
+      "shape": {
+        "cylinder": false,
+        "a": 4621819117588971520,
+        "b": 4626322717216342016,
+        "top": 4629137466983448576,
+        "bottom": 13840687554816376832,
+        "angle": 4609753056924675352,
+        "team": null
+      }
+    },
+    {
+      "name": "absent",
+      "shape": null
+    }
+  ]
+}

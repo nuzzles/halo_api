@@ -3,9 +3,6 @@ pub(crate) mod chunks;
 pub(crate) mod context;
 pub(crate) mod reference;
 pub(crate) mod reference_bits;
-pub use chunks::{
-    V41ChunkReader, registry::V41RegistryChunkReader, replication::V41ReplicationStreamChunkReader,
-    summary::V41SummaryChunkReader,
-};
+pub(crate) use chunks::V41ChunkReader;
 #[cfg(test)]
 mod tests;

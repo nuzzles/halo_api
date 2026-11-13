@@ -1,21 +1,139 @@
 //! Bootstrap entity-component registry.
+mod bootstrap;
+pub(crate) mod source;
+pub(crate) use source::*;
 /// Read the v41 registry's recorded blocks, slots, and retained bootstrap bytes.
 pub struct V41RegistryChunkReader;
 
-impl V41RegistryChunkReader {
-    pub(crate) fn read(
-        input: crate::theater::parser::transport::PreparedChunk,
-    ) -> Result<crate::theater::film::RegistryChunk, crate::theater::film::ParseError> {
-        let body = parse_registry_chunk(&input.data)?;
-        Ok(input.with_body(body))
+/// Structural type-1 read kept inside the parser until public setup is built.
+#[derive(Debug)]
+pub(crate) struct ParsedRegistry {
+    pub(crate) index: usize,
+    pub(crate) start_ms: i64,
+    pub(crate) data: Vec<u8>,
+    pub(crate) body: crate::theater::parser::v41::chunks::registry::source::FilmRegistryRead,
+}
+
+impl ParsedRegistry {
+    /// Project recorded setup after all readers have used the source context.
+    pub(crate) fn public_registry(
+        &self,
+    ) -> Result<crate::theater::film::Registry, crate::theater::film::ParseError> {
+        use self::source::{
+            BootstrapIdentificationFieldKind, GameOptionsEntry, GameOptionsFieldKind,
+        };
+        use crate::theater::film::registry::{
+            Registry, RegistryArchetype, RegistryComponentDefinition, RegistryGameMode,
+            RegistryMap, RegistryOptions, RegistryVersion,
+        };
+
+        let version = self
+            .body
+            .header
+            .map(|[film, format]| RegistryVersion { film, format })
+            .expect("chunk reader requires a complete registry version header");
+        let components = self
+            .body
+            .registry
+            .archetypes
+            .iter()
+            .map(|archetype| RegistryArchetype {
+                index: crate::theater::film::ArchetypeId(archetype.index as u32),
+                components: archetype
+                    .components
+                    .iter()
+                    .map(|component| RegistryComponentDefinition {
+                        name: component
+                            .name()
+                            .expect("reader accepted registry name")
+                            .to_owned(),
+                        precision_level: component.precision_level,
+                    })
+                    .collect(),
+            })
+            .collect();
+        let identification = self
+            .body
+            .bootstrap_header
+            .as_ref()
+            .and_then(|header| header.identification.as_ref());
+        let options = identification
+            .and_then(|id| id.game_options.as_ref())
+            .and_then(|read| {
+                let value = |kind, width| {
+                    read.entries.iter().find_map(|entry| match entry {
+                        GameOptionsEntry::Field {
+                            kind: recorded,
+                            bits,
+                        } if *recorded == kind && bits.width == width => bits
+                            .raw
+                            .as_ref()
+                            .filter(|raw| raw.bit_len == width)
+                            .map(|raw| raw.low_u64()),
+                        _ => None,
+                    })
+                };
+                Some((
+                    value(GameOptionsFieldKind::GameMode, 3)? as u8,
+                    value(GameOptionsFieldKind::RecorderSimulation, 3)? as u8,
+                    crate::theater::film::TagId(value(GameOptionsFieldKind::LevelTag, 32)? as u32),
+                ))
+            });
+        let map = identification.and_then(|id| {
+            let bytes = |kind| {
+                id.fields.iter().find_map(|field| {
+                    if field.kind != kind || field.width != 128 {
+                        return None;
+                    }
+                    let raw = field.raw.as_ref()?;
+                    if raw.bit_len != 128 {
+                        return None;
+                    }
+                    raw.bytes.as_slice().try_into().ok()
+                })
+            };
+            Some(RegistryMap {
+                asset_id: crate::theater::film::MapAssetId(bytes(
+                    BootstrapIdentificationFieldKind::MapAssetId,
+                )?),
+                version_id: crate::theater::film::MapVersionId(bytes(
+                    BootstrapIdentificationFieldKind::MapVersionId,
+                )?),
+            })
+        });
+        let map = map.ok_or(crate::theater::film::ParseError::MissingRegistryMap)?;
+        let (game_mode, recorder_simulation, level_tag) =
+            options.ok_or(crate::theater::film::ParseError::IncompleteRegistryOptions)?;
+        let options = RegistryOptions {
+            game_mode: RegistryGameMode::try_from(game_mode)?,
+            recorder_simulation,
+            level_tag,
+        };
+        Ok(Registry {
+            version,
+            components,
+            options,
+            map,
+        })
     }
 }
-use crate::theater::film::ByteRange;
 
-use crate::theater::film::chunks::registry::{
-    FilmArchetype, FilmRegistry, FilmRegistryRead, FilmRegistryReadError, RegistryComponent,
-    RegistryStop,
-};
+impl V41RegistryChunkReader {
+    pub(crate) fn read(
+        input: crate::theater::film::InflatedFilmChunk,
+    ) -> Result<ParsedRegistry, crate::theater::film::ParseError> {
+        let body = parse_registry_chunk(&input.data)?;
+        Ok(ParsedRegistry {
+            index: input.index,
+            start_ms: input.start_ms,
+            data: input.data,
+            body,
+        })
+    }
+}
+use crate::theater::film::FilmRegistryReadError;
+use crate::theater::parser::packet::ByteRange;
+
 use std::collections::HashSet;
 use std::sync::{Mutex, OnceLock};
 
@@ -122,11 +240,13 @@ pub(crate) fn parse_registry_chunk(data: &[u8]) -> Result<FilmRegistryRead, Film
         }
     }
     warn_unknown_registry(&registry);
+    let bootstrap_header = bootstrap::read(data, header, &registry, registry_end_byte);
     Ok(FilmRegistryRead {
         registry,
         header,
         registry_end_byte,
         stop,
+        bootstrap_header,
     })
 }
 fn registry_looks_compressed(data: &[u8]) -> bool {
@@ -151,8 +271,241 @@ fn registry_slot_name(slot: &[u8]) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{REGISTRY_BLOCK_SIZE, parse_registry_chunk};
-    use crate::theater::film::{ByteRange, FilmRegistryRead, RegistryStop};
+    use super::{ParsedRegistry, REGISTRY_BLOCK_SIZE, parse_registry_chunk};
+    use crate::theater::parser::packet::ByteRange;
+    use crate::theater::parser::v41::chunks::registry::source::{
+        FilmArchetype, FilmRegistryRead, RegistryComponent, RegistryStop,
+    };
+
+    #[test]
+    fn public_registry_projects_typed_setup_without_source_bytes() {
+        use crate::theater::film::registry::RegistryVersion;
+        use crate::theater::parser::v41::chunks::registry::source::{
+            BondBits, GameOptionsEntry, GameOptionsFieldKind, GameOptionsRead, GameOptionsStop,
+        };
+        use crate::theater::parser::v41::chunks::registry::source::{
+            BootstrapHeaderRead, BootstrapHeaderStop, BootstrapIdentificationField,
+            BootstrapIdentificationFieldKind, BootstrapIdentificationRead,
+            BootstrapIdentificationStop,
+        };
+        use crate::theater::parser::v41::chunks::replication::source::components::field::RawBits;
+
+        let mut body =
+            parse_registry_chunk(&[41u32.to_le_bytes(), 27u32.to_le_bytes()].concat()).unwrap();
+        let mut name_bytes = vec![0; 256];
+        name_bytes[..5].copy_from_slice(b"alpha");
+        body.registry.archetypes.push(FilmArchetype {
+            index: 4,
+            components: vec![RegistryComponent {
+                name_bytes,
+                precision_level: 7,
+                source: ByteRange { start: 8, end: 268 },
+            }],
+            source: ByteRange {
+                start: 8,
+                end: 16_648,
+            },
+            padding: ByteRange {
+                start: 268,
+                end: 16_648,
+            },
+        });
+        let map_field = |kind, byte| BootstrapIdentificationField {
+            kind,
+            bit: 0,
+            width: 128,
+            raw: Some(RawBits {
+                bit_len: 128,
+                bytes: vec![byte; 16],
+            }),
+        };
+        let option = |kind, width, value| GameOptionsEntry::Field {
+            kind,
+            bits: BondBits {
+                bit: 0,
+                width,
+                raw: Some(RawBits::from_low(value, width)),
+            },
+        };
+        body.bootstrap_header = Some(BootstrapHeaderRead {
+            start_bit: 0,
+            end_bit: 0,
+            fields: vec![],
+            stop: BootstrapHeaderStop::Complete,
+            identification: Some(BootstrapIdentificationRead {
+                start_bit: 0,
+                end_bit: 0,
+                fields: vec![
+                    map_field(BootstrapIdentificationFieldKind::MapAssetId, 1),
+                    map_field(BootstrapIdentificationFieldKind::MapVersionId, 2),
+                ],
+                stop: BootstrapIdentificationStop::Complete,
+                game_options: Some(GameOptionsRead {
+                    start_bit: 0,
+                    end_bit: 0,
+                    entries: vec![
+                        option(GameOptionsFieldKind::GameMode, 3, 2),
+                        option(GameOptionsFieldKind::RecorderSimulation, 3, 1),
+                        option(GameOptionsFieldKind::LevelTag, 32, 123),
+                    ],
+                    stop: GameOptionsStop::Complete,
+                }),
+            }),
+        });
+        let parsed = ParsedRegistry {
+            index: 0,
+            start_ms: 5,
+            data: vec![0xaa],
+            body,
+        };
+        let public = parsed.public_registry().unwrap();
+        assert_eq!(
+            public.version,
+            RegistryVersion {
+                film: 41,
+                format: 27
+            }
+        );
+        assert_eq!(public.components.len(), 1);
+        assert_eq!(
+            public.components[0].index,
+            crate::theater::film::ArchetypeId(4)
+        );
+        assert_eq!(public.components[0].components[0].name, "alpha");
+        assert_eq!(public.components[0].components[0].precision_level, 7);
+        let options = public.options;
+        assert_eq!(
+            (
+                options.game_mode,
+                options.recorder_simulation,
+                options.level_tag
+            ),
+            (
+                crate::theater::film::RegistryGameMode::Multiplayer,
+                1,
+                crate::theater::film::TagId(123)
+            )
+        );
+        let map = public.map;
+        assert_eq!(
+            (map.asset_id.bytes(), map.version_id.bytes()),
+            ([1; 16], [2; 16])
+        );
+        let value = serde_json::to_value(parsed.public_registry().unwrap()).unwrap();
+        assert_eq!(
+            value
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(String::as_str)
+                .collect::<Vec<_>>(),
+            vec!["components", "map", "options", "version"]
+        );
+
+        let mut partial = parsed;
+        partial
+            .body
+            .bootstrap_header
+            .as_mut()
+            .unwrap()
+            .identification
+            .as_mut()
+            .unwrap()
+            .game_options = None;
+        assert!(matches!(
+            partial.public_registry(),
+            Err(crate::theater::film::ParseError::IncompleteRegistryOptions)
+        ));
+        partial
+            .body
+            .bootstrap_header
+            .as_mut()
+            .unwrap()
+            .identification = None;
+        assert!(matches!(
+            partial.public_registry(),
+            Err(crate::theater::film::ParseError::MissingRegistryMap)
+        ));
+    }
+
+    #[test]
+    fn finished_registry_requires_each_game_option() {
+        use super::V41RegistryChunkReader;
+        use crate::theater::film::ParseError;
+        use crate::theater::parser::v41::chunks::registry::source::{
+            GameOptionsEntry, GameOptionsFieldKind,
+        };
+
+        for missing in [
+            GameOptionsFieldKind::GameMode,
+            GameOptionsFieldKind::RecorderSimulation,
+            GameOptionsFieldKind::LevelTag,
+        ] {
+            let input = crate::theater::parser::test_support::registry_with_complete_setup()
+                .inflate()
+                .unwrap();
+            let mut parsed = V41RegistryChunkReader::read(input).unwrap();
+            let entries = &mut parsed
+                .body
+                .bootstrap_header
+                .as_mut()
+                .unwrap()
+                .identification
+                .as_mut()
+                .unwrap()
+                .game_options
+                .as_mut()
+                .unwrap()
+                .entries;
+            let before = entries.len();
+            entries.retain(
+                |entry| !matches!(entry, GameOptionsEntry::Field { kind, .. } if *kind == missing),
+            );
+            assert!(entries.len() < before);
+            assert!(matches!(
+                parsed.public_registry(),
+                Err(ParseError::IncompleteRegistryOptions)
+            ));
+        }
+
+        let input = crate::theater::parser::test_support::registry_with_complete_setup()
+            .inflate()
+            .unwrap();
+        let mut parsed = V41RegistryChunkReader::read(input).unwrap();
+        let entries = &mut parsed
+            .body
+            .bootstrap_header
+            .as_mut()
+            .unwrap()
+            .identification
+            .as_mut()
+            .unwrap()
+            .game_options
+            .as_mut()
+            .unwrap()
+            .entries;
+        let mode = entries
+            .iter_mut()
+            .find(|entry| {
+                matches!(
+                    entry,
+                    GameOptionsEntry::Field {
+                        kind: GameOptionsFieldKind::GameMode,
+                        ..
+                    }
+                )
+            })
+            .unwrap();
+        if let GameOptionsEntry::Field { bits, .. } = mode {
+            bits.raw = Some(
+                crate::theater::parser::v41::chunks::replication::source::components::field::RawBits::from_low(1, 3),
+            );
+        }
+        assert!(matches!(
+            parsed.public_registry(),
+            Err(ParseError::UnsupportedGameMode(1))
+        ));
+    }
 
     #[test]
     fn registry_components_own_wire_fields_and_block_ranges() {

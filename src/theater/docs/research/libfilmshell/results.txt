@@ -1,0 +1,30 @@
+STUDY controller--01-stick-circles--chunk-001 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=207 snapshot_stop=None snapshot_with_recovery_entities=207
+STUDY counts={"control_endpoint_without_tick_resume": 1180, "control_reaches_last_byte": 1180, "entity_terminated": 1180, "frames": 1180} control_messages={0: 972} secondary_blocks=0
+STUDY controller--01-stick-circles--chunk-003 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=218 snapshot_stop=None snapshot_with_recovery_entities=218
+STUDY counts={"control_endpoint_without_tick_resume": 1196, "control_reaches_last_byte": 1196, "entity_terminated": 1196, "frames": 1196} control_messages={0: 1196} secondary_blocks=0
+STUDY controller--01-stick-circles--chunk-005 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=218 snapshot_stop=None snapshot_with_recovery_entities=218
+STUDY counts={"control_endpoint_without_tick_resume": 642, "control_reaches_last_byte": 642, "entity_terminated": 642, "frames": 642} control_messages={0: 281} secondary_blocks=0
+STUDY maps--01-bazaar-idle--chunk-001 level=4c2a2491 widths=[17, 17, 16] snapshot_sequential_entities=265 snapshot_stop=None snapshot_with_recovery_entities=265
+STUDY counts={"control_endpoint_without_tick_resume": 1184, "control_reaches_last_byte": 1184, "entity_terminated": 1184, "frames": 1184} control_messages={0: 1029} secondary_blocks=0
+STUDY maps--01-bazaar-idle--chunk-002 level=4c2a2491 widths=[17, 17, 16] snapshot_sequential_entities=307 snapshot_stop=None snapshot_with_recovery_entities=307
+STUDY counts={"control_endpoint_without_tick_resume": 1199, "control_reaches_last_byte": 1199, "entity_terminated": 1199, "frames": 1199} control_messages={0: 1199} secondary_blocks=0
+STUDY maps--01-bazaar-idle--chunk-003 level=4c2a2491 widths=[17, 17, 16] snapshot_sequential_entities=306 snapshot_stop=None snapshot_with_recovery_entities=306
+STUDY counts={"control_endpoint_without_tick_resume": 536, "control_reaches_last_byte": 536, "entity_terminated": 536, "frames": 536} control_messages={0: 174} secondary_blocks=0
+STUDY octagon--02-ar-kill--chunk-001 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=209 snapshot_stop=None snapshot_with_recovery_entities=209
+STUDY counts={"control_endpoint_without_tick_resume": 1183, "control_reaches_last_byte": 1183, "entity_terminated": 1183, "frames": 1183} control_messages={0: 1927} secondary_blocks=0
+STUDY octagon--02-ar-kill--chunk-003 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=222 snapshot_stop=None snapshot_with_recovery_entities=222
+STUDY counts={"control_endpoint_without_tick_resume": 1199, "control_reaches_last_byte": 1199, "entity_terminated": 1199, "frames": 1199} control_messages={0: 1199} secondary_blocks=0
+STUDY octagon--02-ar-kill--chunk-005 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=222 snapshot_stop=None snapshot_with_recovery_entities=222
+STUDY counts={"control_endpoint_without_tick_resume": 653, "control_reaches_last_byte": 653, "entity_terminated": 653, "frames": 653} control_messages={0: 291} secondary_blocks=0
+STUDY raids--01-hour-long-raid--chunk-001 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=306 snapshot_stop=None snapshot_with_recovery_entities=306
+STUDY counts={"control_endpoint_without_tick_resume": 576, "control_reaches_last_byte": 576, "entity_terminated": 576, "frames": 576} control_messages={0: 6430} secondary_blocks=0
+STUDY raids--01-hour-long-raid--chunk-100 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=402 snapshot_stop=None snapshot_with_recovery_entities=402
+STUDY counts={"control_endpoint_without_tick_resume": 600, "control_reaches_last_byte": 600, "entity_terminated": 600, "frames": 600} control_messages={0: 9532} secondary_blocks=0
+STUDY raids--01-hour-long-raid--chunk-198 level=196b6b69 widths=[15, 15, 17] snapshot_sequential_entities=395 snapshot_stop=None snapshot_with_recovery_entities=395
+STUDY counts={"control_endpoint_without_tick_resume": 294, "control_reaches_last_byte": 294, "entity_terminated": 294, "frames": 294} control_messages={0: 1220} secondary_blocks=0
+STUDY ranked-arena--02-oddball--chunk-001 level=d7014717 widths=[18, 18, 15] snapshot_sequential_entities=247 snapshot_stop=None snapshot_with_recovery_entities=247
+STUDY counts={"control_endpoint_without_tick_resume": 1176, "control_reaches_last_byte": 1176, "entity_terminated": 1176, "frames": 1176} control_messages={0: 8020} secondary_blocks=0
+STUDY ranked-arena--02-oddball--chunk-031 level=d7014717 widths=[18, 18, 15] snapshot_sequential_entities=317 snapshot_stop=None snapshot_with_recovery_entities=317
+STUDY counts={"control_endpoint_without_tick_resume": 1124, "control_reaches_last_byte": 1124, "entity_stop:BadHeader": 1, "entity_stop:Component(35, 0)": 74, "entity_terminated": 1124, "frames": 1199, "tick_resumed_frames": 1} control_messages={0: 7002} secondary_blocks=0
+STUDY ranked-arena--02-oddball--chunk-061 level=d7014717 widths=[18, 18, 15] snapshot_sequential_entities=295 snapshot_stop=None snapshot_with_recovery_entities=295
+STUDY counts={"control_endpoint_without_tick_resume": 231, "control_reaches_last_byte": 231, "entity_terminated": 231, "frames": 231} control_messages={} secondary_blocks=0

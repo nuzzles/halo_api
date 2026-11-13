@@ -1,0 +1,168 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "counts": {
+    "packets": 1018,
+    "human_assignments": 5347,
+    "bot_assignments": 0,
+    "native_agreements": 5333,
+    "missing_engine_ids": 0,
+    "scanner_omissions": 14,
+    "retained_go_agreements": 5347
+  },
+  "scanner_omissions": [
+    {
+      "name": "octagon/03-first-to-50/film.json:7:1447",
+      "entry": 1,
+      "entry_bits": [
+        27938,
+        44326
+      ],
+      "short_bit": 29112,
+      "short_value": 21,
+      "payload_sha256": "acfe04dd4615641199b9d8cf1f92f101827d74233006ed82f187aa78778c64b5"
+    },
+    {
+      "name": "octagon/03-first-to-50/film.json:7:1451",
+      "entry": 1,
+      "entry_bits": [
+        27938,
+        44326
+      ],
+      "short_bit": 29112,
+      "short_value": 21,
+      "payload_sha256": "06369b8b5913799a0ea2696ef2c4057caa0f5ec15b4f0ee4f94a1b1f49466d61"
+    },
+    {
+      "name": "octagon/03-first-to-50/film.json:7:1467",
+      "entry": 1,
+      "entry_bits": [
+        27938,
+        44326
+      ],
+      "short_bit": 29112,
+      "short_value": 21,
+      "payload_sha256": "06369b8b5913799a0ea2696ef2c4057caa0f5ec15b4f0ee4f94a1b1f49466d61"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:93:869",
+      "entry": 13,
+      "entry_bits": [
+        340204,
+        356592
+      ],
+      "short_bit": 341378,
+      "short_value": 21,
+      "payload_sha256": "45559fc5de22615a78de4677b949461a81bc5c876a05cf278985c70e70bab56b"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:93:873",
+      "entry": 13,
+      "entry_bits": [
+        340204,
+        356592
+      ],
+      "short_bit": 341378,
+      "short_value": 21,
+      "payload_sha256": "2526b6727ee3f4c61fc891c8db1757019f3fc3b73fc0f86e8afe06499a12988e"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:93:881",
+      "entry": 13,
+      "entry_bits": [
+        340204,
+        356592
+      ],
+      "short_bit": 341378,
+      "short_value": 21,
+      "payload_sha256": "2526b6727ee3f4c61fc891c8db1757019f3fc3b73fc0f86e8afe06499a12988e"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:96:821",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "203af872758c7d7b0aa93dfbc576ac6320f74226fe51e335002a3bac27f53671"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:96:827",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:96:841",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:96:907",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:102:101",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "203af872758c7d7b0aa93dfbc576ac6320f74226fe51e335002a3bac27f53671"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:102:105",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:102:121",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    },
+    {
+      "name": "raids/01-hour-long-raid/film.json:102:187",
+      "entry": 18,
+      "entry_bits": [
+        445660,
+        462048
+      ],
+      "short_bit": 446834,
+      "short_value": 21,
+      "payload_sha256": "21afb2815998203fae519e46a455e4e63930afd1067173a78b3313604885806a"
+    }
+  ]
+}

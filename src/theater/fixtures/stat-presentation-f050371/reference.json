@@ -1,0 +1,355 @@
+{
+  "commit": "f050371a6cda83b9887eeb83a1884336fce28e53",
+  "blobs": {
+    "src/model/variant.rs": "e07071372a506302f7def1a6e7afd488539fe704",
+    "src/game/options.rs": "43ade2aafef5f38ca492b507e7adce03cc4be38d",
+    "src/game/options_data.rs": "021e911b805a2b74c24321c7209462a76bd0a708"
+  },
+  "display": [
+    {
+      "code": -2,
+      "name": "Other(-2)"
+    },
+    {
+      "code": -1,
+      "name": "Other(-1)"
+    },
+    {
+      "code": 0,
+      "name": "Number"
+    },
+    {
+      "code": 1,
+      "name": "Time"
+    },
+    {
+      "code": 2,
+      "name": "Percentage"
+    },
+    {
+      "code": 3,
+      "name": "Other(3)"
+    },
+    {
+      "code": 9223372036854775807,
+      "name": "Other(9223372036854775807)"
+    }
+  ],
+  "shown": [
+    {
+      "precision": -100,
+      "stored": -2147483648,
+      "bits": "c1e0000000000000"
+    },
+    {
+      "precision": -100,
+      "stored": -12345,
+      "bits": "c0c81c8000000000"
+    },
+    {
+      "precision": -100,
+      "stored": -1,
+      "bits": "bff0000000000000"
+    },
+    {
+      "precision": -100,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": -100,
+      "stored": 1,
+      "bits": "3ff0000000000000"
+    },
+    {
+      "precision": -100,
+      "stored": 12345,
+      "bits": "40c81c8000000000"
+    },
+    {
+      "precision": -100,
+      "stored": 2147483647,
+      "bits": "41dfffffffc00000"
+    },
+    {
+      "precision": -1,
+      "stored": -2147483648,
+      "bits": "c1e0000000000000"
+    },
+    {
+      "precision": -1,
+      "stored": -12345,
+      "bits": "c0c81c8000000000"
+    },
+    {
+      "precision": -1,
+      "stored": -1,
+      "bits": "bff0000000000000"
+    },
+    {
+      "precision": -1,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": -1,
+      "stored": 1,
+      "bits": "3ff0000000000000"
+    },
+    {
+      "precision": -1,
+      "stored": 12345,
+      "bits": "40c81c8000000000"
+    },
+    {
+      "precision": -1,
+      "stored": 2147483647,
+      "bits": "41dfffffffc00000"
+    },
+    {
+      "precision": 0,
+      "stored": -2147483648,
+      "bits": "c1e0000000000000"
+    },
+    {
+      "precision": 0,
+      "stored": -12345,
+      "bits": "c0c81c8000000000"
+    },
+    {
+      "precision": 0,
+      "stored": -1,
+      "bits": "bff0000000000000"
+    },
+    {
+      "precision": 0,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 0,
+      "stored": 1,
+      "bits": "3ff0000000000000"
+    },
+    {
+      "precision": 0,
+      "stored": 12345,
+      "bits": "40c81c8000000000"
+    },
+    {
+      "precision": 0,
+      "stored": 2147483647,
+      "bits": "41dfffffffc00000"
+    },
+    {
+      "precision": 1,
+      "stored": -2147483648,
+      "bits": "c1a999999999999a"
+    },
+    {
+      "precision": 1,
+      "stored": -12345,
+      "bits": "c0934a0000000000"
+    },
+    {
+      "precision": 1,
+      "stored": -1,
+      "bits": "bfb999999999999a"
+    },
+    {
+      "precision": 1,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 1,
+      "stored": 1,
+      "bits": "3fb999999999999a"
+    },
+    {
+      "precision": 1,
+      "stored": 12345,
+      "bits": "40934a0000000000"
+    },
+    {
+      "precision": 1,
+      "stored": 2147483647,
+      "bits": "41a9999999666666"
+    },
+    {
+      "precision": 2,
+      "stored": -2147483648,
+      "bits": "c1747ae147ae147b"
+    },
+    {
+      "precision": 2,
+      "stored": -12345,
+      "bits": "c05edccccccccccd"
+    },
+    {
+      "precision": 2,
+      "stored": -1,
+      "bits": "bf847ae147ae147b"
+    },
+    {
+      "precision": 2,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 2,
+      "stored": 1,
+      "bits": "3f847ae147ae147b"
+    },
+    {
+      "precision": 2,
+      "stored": 12345,
+      "bits": "405edccccccccccd"
+    },
+    {
+      "precision": 2,
+      "stored": 2147483647,
+      "bits": "41747ae147851eb8"
+    },
+    {
+      "precision": 9,
+      "stored": -2147483648,
+      "bits": "c0012e0be826d695"
+    },
+    {
+      "precision": 9,
+      "stored": -12345,
+      "bits": "bee9e3abe16fc70d"
+    },
+    {
+      "precision": 9,
+      "stored": -1,
+      "bits": "be112e0be826d695"
+    },
+    {
+      "precision": 9,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 9,
+      "stored": 1,
+      "bits": "3e112e0be826d695"
+    },
+    {
+      "precision": 9,
+      "stored": 12345,
+      "bits": "3ee9e3abe16fc70d"
+    },
+    {
+      "precision": 9,
+      "stored": 2147483647,
+      "bits": "40012e0be8047a7d"
+    },
+    {
+      "precision": 18,
+      "stored": -2147483648,
+      "bits": "be22725dd1d243ac"
+    },
+    {
+      "precision": 18,
+      "stored": -12345,
+      "bits": "bd0bcc6871d9240a"
+    },
+    {
+      "precision": 18,
+      "stored": -1,
+      "bits": "bc32725dd1d243ac"
+    },
+    {
+      "precision": 18,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 18,
+      "stored": 1,
+      "bits": "3c32725dd1d243ac"
+    },
+    {
+      "precision": 18,
+      "stored": 12345,
+      "bits": "3d0bcc6871d9240a"
+    },
+    {
+      "precision": 18,
+      "stored": 2147483647,
+      "bits": "3e22725dd1ad5ef0"
+    },
+    {
+      "precision": 19,
+      "stored": -2147483648,
+      "bits": "be22725dd1d243ac"
+    },
+    {
+      "precision": 19,
+      "stored": -12345,
+      "bits": "bd0bcc6871d9240a"
+    },
+    {
+      "precision": 19,
+      "stored": -1,
+      "bits": "bc32725dd1d243ac"
+    },
+    {
+      "precision": 19,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 19,
+      "stored": 1,
+      "bits": "3c32725dd1d243ac"
+    },
+    {
+      "precision": 19,
+      "stored": 12345,
+      "bits": "3d0bcc6871d9240a"
+    },
+    {
+      "precision": 19,
+      "stored": 2147483647,
+      "bits": "3e22725dd1ad5ef0"
+    },
+    {
+      "precision": 100,
+      "stored": -2147483648,
+      "bits": "be22725dd1d243ac"
+    },
+    {
+      "precision": 100,
+      "stored": -12345,
+      "bits": "bd0bcc6871d9240a"
+    },
+    {
+      "precision": 100,
+      "stored": -1,
+      "bits": "bc32725dd1d243ac"
+    },
+    {
+      "precision": 100,
+      "stored": 0,
+      "bits": "0000000000000000"
+    },
+    {
+      "precision": 100,
+      "stored": 1,
+      "bits": "3c32725dd1d243ac"
+    },
+    {
+      "precision": 100,
+      "stored": 12345,
+      "bits": "3d0bcc6871d9240a"
+    },
+    {
+      "precision": 100,
+      "stored": 2147483647,
+      "bits": "3e22725dd1ad5ef0"
+    }
+  ]
+}

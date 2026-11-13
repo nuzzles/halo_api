@@ -1,0 +1,375 @@
+{
+  "commit": "413971bcc485be53a2fa8cf229e170539a5146f8",
+  "blobs": {
+    "keyframe_entrees.go": "5a09df3b557e047a3a2d22200a9834e281c13667",
+    "keyframe_fullstate_loop.go": "d9d6d39b643e61c0c5e5107c1e94d20522ef2252",
+    "source/bits.go": "2951f8428d6228a7de607a8f1c1d062b7475da4d"
+  },
+  "cases": [
+    {
+      "name": "empty-payload",
+      "count": 0,
+      "truncate_bytes": 0
+    },
+    {
+      "name": "prefix-only",
+      "count": 0
+    },
+    {
+      "name": "one-vacant",
+      "count": 1
+    },
+    {
+      "name": "all-vacant",
+      "count": 8191
+    },
+    {
+      "name": "extra-slot",
+      "count": 8192
+    },
+    {
+      "name": "nonzero-alignment",
+      "count": 8191,
+      "nonzero_tail": true
+    },
+    {
+      "name": "vacant-arbitrary-header",
+      "count": 8191,
+      "entries": [
+        {
+          "slot": 0,
+          "id": 0,
+          "archetype": 4294967295,
+          "word": 123,
+          "flags": 15,
+          "byte": 231
+        }
+      ]
+    },
+    {
+      "name": "interleaved-live",
+      "count": 8191,
+      "entries": [
+        {
+          "slot": 1,
+          "id": 4294967295,
+          "archetype": 0,
+          "word": 7,
+          "flags": 15,
+          "byte": 221,
+          "n1": 0,
+          "n2": 0
+        },
+        {
+          "slot": 7,
+          "id": 5,
+          "archetype": 0,
+          "n1": 4294967295,
+          "n2": 2147483648
+        },
+        {
+          "slot": 8190,
+          "id": 2,
+          "archetype": 0,
+          "n1": 0,
+          "n2": 0
+        }
+      ]
+    },
+    {
+      "name": "invalid-archetype",
+      "count": 8191,
+      "entries": [
+        {
+          "slot": 4,
+          "id": 0,
+          "archetype": 50
+        }
+      ]
+    },
+    {
+      "name": "truncated-live-guard",
+      "count": 2,
+      "entries": [
+        {
+          "slot": 1,
+          "id": 0,
+          "archetype": 0,
+          "n1": 0,
+          "n2": 0
+        }
+      ],
+      "truncate_bytes": 33
+    },
+    {
+      "name": "last-header-minus-1",
+      "count": 8191,
+      "truncate_bytes": 110578
+    },
+    {
+      "name": "last-header-minus-2",
+      "count": 8191,
+      "truncate_bytes": 110577
+    },
+    {
+      "name": "last-header-minus-3",
+      "count": 8191,
+      "truncate_bytes": 110576
+    },
+    {
+      "name": "last-header-minus-4",
+      "count": 8191,
+      "truncate_bytes": 110575
+    },
+    {
+      "name": "last-header-minus-5",
+      "count": 8191,
+      "truncate_bytes": 110574
+    },
+    {
+      "name": "last-header-minus-6",
+      "count": 8191,
+      "truncate_bytes": 110573
+    },
+    {
+      "name": "last-header-minus-7",
+      "count": 8191,
+      "truncate_bytes": 110572
+    },
+    {
+      "name": "last-header-minus-8",
+      "count": 8191,
+      "truncate_bytes": 110571
+    },
+    {
+      "name": "last-header-minus-9",
+      "count": 8191,
+      "truncate_bytes": 110570
+    },
+    {
+      "name": "last-header-minus-10",
+      "count": 8191,
+      "truncate_bytes": 110569
+    },
+    {
+      "name": "last-header-minus-11",
+      "count": 8191,
+      "truncate_bytes": 110568
+    },
+    {
+      "name": "last-header-minus-12",
+      "count": 8191,
+      "truncate_bytes": 110567
+    },
+    {
+      "name": "last-header-minus-13",
+      "count": 8191,
+      "truncate_bytes": 110566
+    },
+    {
+      "name": "last-header-minus-14",
+      "count": 8191,
+      "truncate_bytes": 110565
+    }
+  ],
+  "results": [
+    {
+      "name": "empty-payload",
+      "bits": 0,
+      "headers": 0,
+      "end": 1,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "prefix-only",
+      "bits": 8,
+      "headers": 0,
+      "end": 1,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "one-vacant",
+      "bits": 112,
+      "headers": 1,
+      "end": 109,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "all-vacant",
+      "bits": 884632,
+      "headers": 8191,
+      "end": 884629,
+      "ok": true,
+      "live": []
+    },
+    {
+      "name": "extra-slot",
+      "bits": 884744,
+      "headers": 8191,
+      "end": 884629,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "nonzero-alignment",
+      "bits": 884632,
+      "headers": 8191,
+      "end": 884629,
+      "ok": true,
+      "live": []
+    },
+    {
+      "name": "vacant-arbitrary-header",
+      "bits": 884632,
+      "headers": 8191,
+      "end": 884629,
+      "ok": true,
+      "live": []
+    },
+    {
+      "name": "interleaved-live",
+      "bits": 884824,
+      "headers": 8191,
+      "end": 884821,
+      "ok": true,
+      "live": [
+        109,
+        821,
+        884649
+      ]
+    },
+    {
+      "name": "invalid-archetype",
+      "bits": 884632,
+      "headers": 5,
+      "end": 433,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "truncated-live-guard",
+      "bits": 264,
+      "headers": 2,
+      "end": 109,
+      "ok": false,
+      "live": [
+        109
+      ]
+    },
+    {
+      "name": "last-header-minus-1",
+      "bits": 884624,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-2",
+      "bits": 884616,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-3",
+      "bits": 884608,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-4",
+      "bits": 884600,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-5",
+      "bits": 884592,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-6",
+      "bits": 884584,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-7",
+      "bits": 884576,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-8",
+      "bits": 884568,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-9",
+      "bits": 884560,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-10",
+      "bits": 884552,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-11",
+      "bits": 884544,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-12",
+      "bits": 884536,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-13",
+      "bits": 884528,
+      "headers": 8190,
+      "end": 884521,
+      "ok": false,
+      "live": []
+    },
+    {
+      "name": "last-header-minus-14",
+      "bits": 884520,
+      "headers": 8189,
+      "end": 884413,
+      "ok": false,
+      "live": []
+    }
+  ]
+}

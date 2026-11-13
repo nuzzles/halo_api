@@ -1,0 +1,308 @@
+{
+  "commit": "8f0f8d078e513c800baa21fac416fd4c0c127d03",
+  "blobs": {
+    "src/zones.rs": "4701db66d587260404006301be25b4fb2ae1931f"
+  },
+  "cases": [
+    {
+      "limit": 1,
+      "quantum": 0,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 1,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8388606,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8388607,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8388608,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8388609,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8388864,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8409579,
+      "points": 0
+    },
+    {
+      "limit": 1,
+      "quantum": 8430551,
+      "points": 1
+    },
+    {
+      "limit": 1,
+      "quantum": 8455716,
+      "points": 1
+    },
+    {
+      "limit": 1,
+      "quantum": 16777214,
+      "points": 100
+    },
+    {
+      "limit": 1,
+      "quantum": 16777215,
+      "points": 100
+    },
+    {
+      "limit": 2,
+      "quantum": 0,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 1,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8388606,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8388607,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8388608,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8388609,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8388864,
+      "points": 0
+    },
+    {
+      "limit": 2,
+      "quantum": 8409579,
+      "points": 1
+    },
+    {
+      "limit": 2,
+      "quantum": 8430551,
+      "points": 1
+    },
+    {
+      "limit": 2,
+      "quantum": 8455716,
+      "points": 2
+    },
+    {
+      "limit": 2,
+      "quantum": 16777214,
+      "points": 200
+    },
+    {
+      "limit": 2,
+      "quantum": 16777215,
+      "points": 200
+    },
+    {
+      "limit": 99,
+      "quantum": 0,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 1,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8388606,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8388607,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8388608,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8388609,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8388864,
+      "points": 0
+    },
+    {
+      "limit": 99,
+      "quantum": 8409579,
+      "points": 25
+    },
+    {
+      "limit": 99,
+      "quantum": 8430551,
+      "points": 50
+    },
+    {
+      "limit": 99,
+      "quantum": 8455716,
+      "points": 79
+    },
+    {
+      "limit": 99,
+      "quantum": 16777214,
+      "points": 9900
+    },
+    {
+      "limit": 99,
+      "quantum": 16777215,
+      "points": 9900
+    },
+    {
+      "limit": 100,
+      "quantum": 0,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 1,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8388606,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8388607,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8388608,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8388609,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8388864,
+      "points": 0
+    },
+    {
+      "limit": 100,
+      "quantum": 8409579,
+      "points": 25
+    },
+    {
+      "limit": 100,
+      "quantum": 8430551,
+      "points": 50
+    },
+    {
+      "limit": 100,
+      "quantum": 8455716,
+      "points": 80
+    },
+    {
+      "limit": 100,
+      "quantum": 16777214,
+      "points": 10000
+    },
+    {
+      "limit": 100,
+      "quantum": 16777215,
+      "points": 10000
+    },
+    {
+      "limit": 999,
+      "quantum": 0,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 1,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 8388606,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 8388607,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 8388608,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 8388609,
+      "points": 0
+    },
+    {
+      "limit": 999,
+      "quantum": 8388864,
+      "points": 3
+    },
+    {
+      "limit": 999,
+      "quantum": 8409579,
+      "points": 250
+    },
+    {
+      "limit": 999,
+      "quantum": 8430551,
+      "points": 500
+    },
+    {
+      "limit": 999,
+      "quantum": 8455716,
+      "points": 799
+    },
+    {
+      "limit": 999,
+      "quantum": 16777214,
+      "points": 99900
+    },
+    {
+      "limit": 999,
+      "quantum": 16777215,
+      "points": 99900
+    }
+  ]
+}

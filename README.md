@@ -75,22 +75,25 @@ scoreboard, see `recent_match_scoreboard`.
 
 ## Theater films
 
-Parse v41 recordings once, then borrow an indexed view for queries and playback:
+Parse v41 recordings once, then play their typed observations:
 
 ```rust,no_run
-use halo_api::theater::{Film, TheaterRuntime, film::FilmChunk};
-# fn inspect(chunks: Vec<FilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
+use halo_api::clients::hi::models::RawFilmChunk;
+use halo_api::theater::{Film, TheaterRuntime};
+# fn inspect(chunks: Vec<RawFilmChunk>) -> Result<(), Box<dyn std::error::Error>> {
 let film = Film::parse(chunks)?;
+let highlight_count = film.summary.highlights.len();
 let mut runtime = TheaterRuntime::load(film);
-let summaries = runtime.summary_events();
 let world = runtime.seek(10_000_000); // microseconds
+# let _ = (highlight_count, world);
 # Ok(())
 # }
 ```
 
-`Film` retains the original input and ordered native reads, including unknown
-regions and partial decoding. `TheaterRuntime` keeps resolution private, exposes typed summary events, and
-accumulates entity state without changing the canonical model. See the [Theater format and API documentation](src/theater/docs/README.md)
+`Film` contains typed registry setup, timestamped replication observations,
+and guarded summary highlights. The parser keeps packet and partial-read
+evidence private while constructing it. `TheaterRuntime` accumulates entity
+state from those observations. See the [Theater format and API documentation](src/theater/docs/README.md)
 for the fidelity contract, supported scope, and validation.
 
 ## MSRV

@@ -1,0 +1,290 @@
+[
+  {
+    "name": "delta/0/1/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/0/1/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "7d",
+    "bit_len": 8,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/0/0/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "4a8642",
+    "bit_len": 24,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/0/0/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "4a8643d0",
+    "bit_len": 28,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/0/0/1/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "5e30",
+    "bit_len": 13,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/0/0/1/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "5e3e80",
+    "bit_len": 17,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 0,
+    "hex": "80000000000000000000000000000000000000003fe091a280",
+    "bit_len": 193,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/1/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "60",
+    "bit_len": 4,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/1/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "7d",
+    "bit_len": 8,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/0/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "4a8642",
+    "bit_len": 24,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/0/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "4a8643d0",
+    "bit_len": 28,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/0/1/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "5e30",
+    "bit_len": 13,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/1/0/1/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "5e3e80",
+    "bit_len": 17,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 1,
+    "hex": "80000000000000000000000000000000000000003fe091a280",
+    "bit_len": 193,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/1/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "50",
+    "bit_len": 5,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/1/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "5e80",
+    "bit_len": 9,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/0/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "45432100",
+    "bit_len": 25,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/0/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "454321e8",
+    "bit_len": 29,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/0/1/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "4f18",
+    "bit_len": 14,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/2/0/1/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "4f1f40",
+    "bit_len": 18,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw/2",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "80000000000000000000000000000000000000001ff048d140",
+    "bit_len": 194,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw-overridden/2/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "c1a2b3c48468acf0",
+    "bit_len": 63,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw-overridden/2/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 2,
+    "hex": "e11a2b3c00",
+    "bit_len": 33,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/1/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "50",
+    "bit_len": 5,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/1/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "5e80",
+    "bit_len": 9,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/0/0/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "45432100",
+    "bit_len": 25,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/0/0/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "454321e8",
+    "bit_len": 29,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/0/1/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "4f18",
+    "bit_len": 14,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "delta/4/0/1/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "4f1f40",
+    "bit_len": 18,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw/4",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "80000000000000000000000000000000000000001ff048d140",
+    "bit_len": 194,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw-overridden/4/0",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "c1a2b3c48468acf0",
+    "bit_len": 63,
+    "complete": true,
+    "snapshot": false
+  },
+  {
+    "name": "raw-overridden/4/1",
+    "component": "object-forward-and-up-dynamic-precision-component",
+    "version": 4,
+    "hex": "e11a2b3c00",
+    "bit_len": 33,
+    "complete": true,
+    "snapshot": false
+  }
+]

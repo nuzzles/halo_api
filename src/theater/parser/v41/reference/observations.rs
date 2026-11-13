@@ -197,7 +197,8 @@ pub struct CamoState {
     pub sub: [Option<u16>; 6],
 }
 
-/// Reference non-predicted ability publication, including unsupported body prefixes.
+/// Source-read non-predicted ability publication, including unsupported prefixes.
+/// Position ranges preserve their recorded form; they are not world coordinates.
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct AbilityNonPredictedState {
     pub tag: u32,
@@ -205,14 +206,18 @@ pub struct AbilityNonPredictedState {
     pub body_ok: bool,
     /// None is reference Inner=-1: the body was not read.
     pub inner: Option<u32>,
-    pub flags: u32,
-    pub position: [u32; 3],
-    pub mid: u32,
+    pub reference: Option<UnitReference>,
+    pub position: Option<crate::theater::parser::packet::BitRange>,
+    pub flags: Option<u32>,
+    pub source: Option<UnitReference>,
+    pub target: Option<UnitReference>,
+    pub destination: Option<crate::theater::parser::packet::BitRange>,
     pub value8: Option<u32>,
-    /// Direction and magnitude quanta; None denotes the constant-vector gate.
+    /// Direction and magnitude quanta; None is constant or not reached/read.
     pub vectors: [Option<[u32; 2]>; 3],
-    pub packed: u32,
-    pub tail: u32,
+    pub flag: Option<bool>,
+    pub packed: Option<u32>,
+    pub tail: Option<u32>,
 }
 
 /// Reference component-hook publications. Values describe reads, including padded
@@ -276,7 +281,7 @@ pub enum FilmComponentObservation {
     },
 
     HeldWeapon {
-        id: Option<crate::theater::film::Weapon>,
+        id: Option<crate::theater::film::catalog::weapons::Weapon>,
     },
     ObjectParent {
         state: Box<ObjectParentState>,

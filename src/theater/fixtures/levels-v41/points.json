@@ -1,0 +1,6582 @@
+[
+  {
+    "name": "fo08_wetland-0-event-16",
+    "tag": 88891201,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-0-event-15",
+    "tag": 88891201,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-0-event-12",
+    "tag": 88891201,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-0-dynamic-16",
+    "tag": 88891201,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-0-object-16",
+    "tag": 88891201,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-1-event-16",
+    "tag": 88891201,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-1-event-15",
+    "tag": 88891201,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-1-event-12",
+    "tag": 88891201,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-1-dynamic-16",
+    "tag": 88891201,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo08_wetland-1-object-16",
+    "tag": 88891201,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-0-event-16",
+    "tag": 426470249,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-0-event-15",
+    "tag": 426470249,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-0-event-12",
+    "tag": 426470249,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-0-dynamic-16",
+    "tag": 426470249,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-0-object-16",
+    "tag": 426470249,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-1-event-16",
+    "tag": 426470249,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-1-event-15",
+    "tag": 426470249,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-1-event-12",
+    "tag": 426470249,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-1-dynamic-16",
+    "tag": 426470249,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo11_blank-1-object-16",
+    "tag": 426470249,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-0-event-16",
+    "tag": 799711266,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "0000fffc003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-0-event-15",
+    "tag": 799711266,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      8195
+    ],
+    "widths": [
+      13,
+      12,
+      14
+    ],
+    "hex": "0001fff001e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-0-event-12",
+    "tag": 799711266,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      1027
+    ],
+    "widths": [
+      10,
+      9,
+      11
+    ],
+    "hex": "000ffc03d3",
+    "bit_len": 32,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-0-dynamic-16",
+    "tag": 799711266,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "00001fff80076980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-0-object-16",
+    "tag": 799711266,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "00007ffe001da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-1-event-16",
+    "tag": 799711266,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "40000ffffe0007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-1-event-15",
+    "tag": 799711266,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "40001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-1-event-12",
+    "tag": 799711266,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "4000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-1-dynamic-16",
+    "tag": 799711266,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "080001ffffc000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "btb_engine-1-object-16",
+    "tag": 799711266,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "200007ffff0003b4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-1-event-16",
+    "tag": 814815460,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "2001fff00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-1-event-15",
+    "tag": 814815460,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      515
+    ],
+    "widths": [
+      11,
+      11,
+      10
+    ],
+    "hex": "2003ffc07a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-1-event-12",
+    "tag": 814815460,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      67
+    ],
+    "widths": [
+      8,
+      8,
+      7
+    ],
+    "hex": "201ff0f4c0",
+    "bit_len": 26,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-1-dynamic-16",
+    "tag": 814815460,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "04003ffe01da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-1-object-16",
+    "tag": 814815460,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "1000fff8076980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-0-event-16",
+    "tag": 814815460,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0001fff003d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-0-event-15",
+    "tag": 814815460,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      2051
+    ],
+    "widths": [
+      11,
+      11,
+      12
+    ],
+    "hex": "0003ffc01e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-0-event-12",
+    "tag": 814815460,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      259
+    ],
+    "widths": [
+      8,
+      8,
+      9
+    ],
+    "hex": "001ff03d30",
+    "bit_len": 28,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-0-dynamic-16",
+    "tag": 814815460,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "00003ffe007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-0-object-16",
+    "tag": 814815460,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0000fff801da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-2-event-16",
+    "tag": 814815460,
+    "region": 2,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "4000fffc00f4c0",
+    "bit_len": 42,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-2-event-15",
+    "tag": 814815460,
+    "region": 2,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "4001fff007a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-2-event-12",
+    "tag": 814815460,
+    "region": 2,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      259
+    ],
+    "widths": [
+      9,
+      9,
+      9
+    ],
+    "hex": "400ffc0f4c",
+    "bit_len": 30,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-2-dynamic-16",
+    "tag": 814815460,
+    "region": 2,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "08001fff801da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-2-object-16",
+    "tag": 814815460,
+    "region": 2,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "20007ffe007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-3-event-16",
+    "tag": 814815460,
+    "region": 3,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "600003ffffc001e980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-3-event-15",
+    "tag": 814815460,
+    "region": 3,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "600007ffff000f4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-3-event-12",
+    "tag": 814815460,
+    "region": 3,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      15,
+      15,
+      12
+    ],
+    "hex": "60003fffc01e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-3-dynamic-16",
+    "tag": 814815460,
+    "region": 3,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "0c00007ffff8003b4c",
+    "bit_len": 62,
+    "upstream": true
+  },
+  {
+    "name": "academy_tutorial-3-object-16",
+    "tag": 814815460,
+    "region": 3,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "300001ffffe000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-0-event-16",
+    "tag": 847557134,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      2051
+    ],
+    "widths": [
+      13,
+      13,
+      12
+    ],
+    "hex": "0001fff803d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-0-event-15",
+    "tag": 847557134,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "0003ffe01e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-0-event-12",
+    "tag": 847557134,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      131
+    ],
+    "widths": [
+      9,
+      9,
+      8
+    ],
+    "hex": "001ff83d30",
+    "bit_len": 28,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-0-dynamic-16",
+    "tag": 847557134,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      2051
+    ],
+    "widths": [
+      13,
+      13,
+      12
+    ],
+    "hex": "00003fff007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-0-object-16",
+    "tag": 847557134,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      2051
+    ],
+    "widths": [
+      13,
+      13,
+      12
+    ],
+    "hex": "0000fffc01da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-1-event-16",
+    "tag": 847557134,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "40001ffff8007a60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-1-event-15",
+    "tag": 847557134,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "40003fffe003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-1-event-12",
+    "tag": 847557134,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      1027
+    ],
+    "widths": [
+      13,
+      13,
+      11
+    ],
+    "hex": "4001fff807a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-1-dynamic-16",
+    "tag": 847557134,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "080003ffff000ed3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "ctf_breaker-1-object-16",
+    "tag": 847557134,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "20000ffffc003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-1-event-16",
+    "tag": 1253388187,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "2001fff00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-1-event-15",
+    "tag": 1253388187,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      515
+    ],
+    "widths": [
+      11,
+      11,
+      10
+    ],
+    "hex": "2003ffc07a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-1-event-12",
+    "tag": 1253388187,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      67
+    ],
+    "widths": [
+      8,
+      8,
+      7
+    ],
+    "hex": "201ff0f4c0",
+    "bit_len": 26,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-1-dynamic-16",
+    "tag": 1253388187,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "04003ffe01da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-1-object-16",
+    "tag": 1253388187,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      12,
+      12,
+      11
+    ],
+    "hex": "1000fff8076980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-0-event-16",
+    "tag": 1253388187,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0001fff003d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-0-event-15",
+    "tag": 1253388187,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      2051
+    ],
+    "widths": [
+      11,
+      11,
+      12
+    ],
+    "hex": "0003ffc01e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-0-event-12",
+    "tag": 1253388187,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      259
+    ],
+    "widths": [
+      8,
+      8,
+      9
+    ],
+    "hex": "001ff03d30",
+    "bit_len": 28,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-0-dynamic-16",
+    "tag": 1253388187,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "00003ffe007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-0-object-16",
+    "tag": 1253388187,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0000fff801da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-2-event-16",
+    "tag": 1253388187,
+    "region": 2,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "4000fffc00f4c0",
+    "bit_len": 42,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-2-event-15",
+    "tag": 1253388187,
+    "region": 2,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "4001fff007a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-2-event-12",
+    "tag": 1253388187,
+    "region": 2,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      259
+    ],
+    "widths": [
+      9,
+      9,
+      9
+    ],
+    "hex": "400ffc0f4c",
+    "bit_len": 30,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-2-dynamic-16",
+    "tag": 1253388187,
+    "region": 2,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "08001fff801da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-2-object-16",
+    "tag": 1253388187,
+    "region": 2,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "20007ffe007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-3-event-16",
+    "tag": 1253388187,
+    "region": 3,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "600003ffffc001e980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-3-event-15",
+    "tag": 1253388187,
+    "region": 3,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "600007ffff000f4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-3-event-12",
+    "tag": 1253388187,
+    "region": 3,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      15,
+      15,
+      12
+    ],
+    "hex": "60003fffc01e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-3-dynamic-16",
+    "tag": 1253388187,
+    "region": 3,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "0c00007ffff8003b4c",
+    "bit_len": 62,
+    "upstream": true
+  },
+  {
+    "name": "sgh_interlock-3-object-16",
+    "tag": 1253388187,
+    "region": 3,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "300001ffffe000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "academy_weapon_drills-0-event-16",
+    "tag": 1272294866,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      524291
+    ],
+    "widths": [
+      20,
+      20,
+      20
+    ],
+    "hex": "000003ffffe0000f4c",
+    "bit_len": 62,
+    "upstream": true
+  },
+  {
+    "name": "academy_weapon_drills-0-event-15",
+    "tag": 1272294866,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      524287,
+      262147
+    ],
+    "widths": [
+      19,
+      19,
+      19
+    ],
+    "hex": "000007ffff80007a60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "academy_weapon_drills-0-event-12",
+    "tag": 1272294866,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      65535,
+      32771
+    ],
+    "widths": [
+      16,
+      16,
+      16
+    ],
+    "hex": "00003fffe000f4c0",
+    "bit_len": 50,
+    "upstream": true
+  },
+  {
+    "name": "academy_weapon_drills-0-dynamic-16",
+    "tag": 1272294866,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      524291
+    ],
+    "widths": [
+      20,
+      20,
+      20
+    ],
+    "hex": "0000007ffffc0001da60",
+    "bit_len": 67,
+    "upstream": true
+  },
+  {
+    "name": "academy_weapon_drills-0-object-16",
+    "tag": 1272294866,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      524291
+    ],
+    "widths": [
+      20,
+      20,
+      20
+    ],
+    "hex": "000001fffff000076980",
+    "bit_len": 65,
+    "upstream": true
+  },
+  {
+    "name": "ctf_bazaar-0-event-16",
+    "tag": 1277830289,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "00001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "ctf_bazaar-0-event-15",
+    "tag": 1277830289,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      16387
+    ],
+    "widths": [
+      16,
+      16,
+      15
+    ],
+    "hex": "00003fffe001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "ctf_bazaar-0-event-12",
+    "tag": 1277830289,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      2051
+    ],
+    "widths": [
+      13,
+      13,
+      12
+    ],
+    "hex": "0001fff803d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "ctf_bazaar-0-dynamic-16",
+    "tag": 1277830289,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "000003ffff00076980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "ctf_bazaar-0-object-16",
+    "tag": 1277830289,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "00000ffffc001da6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-0-event-16",
+    "tag": 1437677928,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-0-event-15",
+    "tag": 1437677928,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-0-event-12",
+    "tag": 1437677928,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-0-dynamic-16",
+    "tag": 1437677928,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-0-object-16",
+    "tag": 1437677928,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-1-event-16",
+    "tag": 1437677928,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-1-event-15",
+    "tag": 1437677928,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-1-event-12",
+    "tag": 1437677928,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-1-dynamic-16",
+    "tag": 1437677928,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo09_academy-1-object-16",
+    "tag": 1437677928,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-0-event-16",
+    "tag": 1804860316,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-0-event-15",
+    "tag": 1804860316,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-0-event-12",
+    "tag": 1804860316,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-0-dynamic-16",
+    "tag": 1804860316,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-0-object-16",
+    "tag": 1804860316,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-1-event-16",
+    "tag": 1804860316,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-1-event-15",
+    "tag": 1804860316,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-1-event-12",
+    "tag": 1804860316,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-1-dynamic-16",
+    "tag": 1804860316,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo05_desert-1-object-16",
+    "tag": 1804860316,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "chasm-0-event-16",
+    "tag": 1967327111,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "00000ffffe0007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "chasm-0-event-15",
+    "tag": 1967327111,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "00001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "chasm-0-event-12",
+    "tag": 1967327111,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "0000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "chasm-0-dynamic-16",
+    "tag": 1967327111,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "000001ffffc000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "chasm-0-object-16",
+    "tag": 1967327111,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "000007ffff0003b4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-0-event-16",
+    "tag": 2068765158,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "0000fffc003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-0-event-15",
+    "tag": 2068765158,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      8195
+    ],
+    "widths": [
+      13,
+      12,
+      14
+    ],
+    "hex": "0001fff001e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-0-event-12",
+    "tag": 2068765158,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      1027
+    ],
+    "widths": [
+      10,
+      9,
+      11
+    ],
+    "hex": "000ffc03d3",
+    "bit_len": 32,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-0-dynamic-16",
+    "tag": 2068765158,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "00001fff80076980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-0-object-16",
+    "tag": 2068765158,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      16387
+    ],
+    "widths": [
+      14,
+      13,
+      15
+    ],
+    "hex": "00007ffe001da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-1-event-16",
+    "tag": 2068765158,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      20,
+      19,
+      17
+    ],
+    "hex": "400003ffffc000f4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-1-event-15",
+    "tag": 2068765158,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      19,
+      18,
+      16
+    ],
+    "hex": "400007ffff0007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-1-event-12",
+    "tag": 2068765158,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      4099
+    ],
+    "widths": [
+      16,
+      15,
+      13
+    ],
+    "hex": "40003fffc00f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-1-dynamic-16",
+    "tag": 2068765158,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      20,
+      19,
+      17
+    ],
+    "hex": "0800007ffff8001da6",
+    "bit_len": 63,
+    "upstream": true
+  },
+  {
+    "name": "sgh_crystalcaves-1-object-16",
+    "tag": 2068765158,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      20,
+      19,
+      17
+    ],
+    "hex": "200001ffffe0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "forest-0-event-16",
+    "tag": 2110386834,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "0001fff801e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "forest-0-event-15",
+    "tag": 2110386834,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "0003ffe00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "forest-0-event-12",
+    "tag": 2110386834,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      259
+    ],
+    "widths": [
+      9,
+      9,
+      9
+    ],
+    "hex": "001ff81e98",
+    "bit_len": 29,
+    "upstream": true
+  },
+  {
+    "name": "forest-0-dynamic-16",
+    "tag": 2110386834,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "00003fff003b4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "forest-0-object-16",
+    "tag": 2110386834,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      4099
+    ],
+    "widths": [
+      13,
+      13,
+      13
+    ],
+    "hex": "0000fffc00ed30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "forest-1-event-16",
+    "tag": 2110386834,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      18,
+      17,
+      15
+    ],
+    "hex": "40000ffffc003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "forest-1-event-15",
+    "tag": 2110386834,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      17,
+      16,
+      14
+    ],
+    "hex": "40001ffff001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "forest-1-event-12",
+    "tag": 2110386834,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      1027
+    ],
+    "widths": [
+      14,
+      13,
+      11
+    ],
+    "hex": "4000fffc03d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "forest-1-dynamic-16",
+    "tag": 2110386834,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      18,
+      17,
+      15
+    ],
+    "hex": "080001ffff80076980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "forest-1-object-16",
+    "tag": 2110386834,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      18,
+      17,
+      15
+    ],
+    "hex": "200007fffe001da6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-0-event-16",
+    "tag": 2123870979,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-0-event-15",
+    "tag": 2123870979,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-0-event-12",
+    "tag": 2123870979,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-0-dynamic-16",
+    "tag": 2123870979,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-0-object-16",
+    "tag": 2123870979,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-1-event-16",
+    "tag": 2123870979,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-1-event-15",
+    "tag": 2123870979,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-1-event-12",
+    "tag": 2123870979,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-1-dynamic-16",
+    "tag": 2123870979,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo06_deepsea-1-object-16",
+    "tag": 2123870979,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-0-event-16",
+    "tag": 2183682746,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00003fffc003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-0-event-15",
+    "tag": 2183682746,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "00007fff001e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-0-event-12",
+    "tag": 2183682746,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      11,
+      11,
+      11
+    ],
+    "hex": "0003ffc03d30",
+    "bit_len": 36,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-0-dynamic-16",
+    "tag": 2183682746,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "000007fff8007698",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-0-object-16",
+    "tag": 2183682746,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00001fffe001da60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-1-event-16",
+    "tag": 2183682746,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "200007ffff0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-1-event-15",
+    "tag": 2183682746,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "20000ffffc001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-1-event-12",
+    "tag": 2183682746,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "20007fff003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-1-dynamic-16",
+    "tag": 2183682746,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "040000ffffe0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-1-object-16",
+    "tag": 2183682746,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "100003ffff8001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-2-event-16",
+    "tag": 2183682746,
+    "region": 2,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "400007ffff0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-2-event-15",
+    "tag": 2183682746,
+    "region": 2,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "40000ffffc001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-2-event-12",
+    "tag": 2183682746,
+    "region": 2,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "40007fff003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-2-dynamic-16",
+    "tag": 2183682746,
+    "region": 2,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "080000ffffe0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "pve_house-2-object-16",
+    "tag": 2183682746,
+    "region": 2,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "200003ffff8001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "btb_highpower-0-event-16",
+    "tag": 2184995238,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      18,
+      19,
+      17
+    ],
+    "hex": "00000fffff0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "btb_highpower-0-event-15",
+    "tag": 2184995238,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      17,
+      18,
+      16
+    ],
+    "hex": "00001ffffc001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "btb_highpower-0-event-12",
+    "tag": 2184995238,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      4099
+    ],
+    "widths": [
+      14,
+      15,
+      13
+    ],
+    "hex": "0000ffff003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "btb_highpower-0-dynamic-16",
+    "tag": 2184995238,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      18,
+      19,
+      17
+    ],
+    "hex": "000001ffffe0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "btb_highpower-0-object-16",
+    "tag": 2184995238,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      18,
+      19,
+      17
+    ],
+    "hex": "000007ffff8001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-0-event-16",
+    "tag": 2360248941,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "00003fffe003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-0-event-15",
+    "tag": 2360248941,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      32767,
+      4099
+    ],
+    "widths": [
+      15,
+      15,
+      13
+    ],
+    "hex": "00007fff801e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-0-event-12",
+    "tag": 2360248941,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      4095,
+      515
+    ],
+    "widths": [
+      12,
+      12,
+      10
+    ],
+    "hex": "0003ffe03d30",
+    "bit_len": 36,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-0-dynamic-16",
+    "tag": 2360248941,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "000007fffc007698",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-0-object-16",
+    "tag": 2360248941,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "00001ffff001da60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-1-event-16",
+    "tag": 2360248941,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      13,
+      15,
+      12
+    ],
+    "hex": "4001fffe00f4c0",
+    "bit_len": 42,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-1-event-15",
+    "tag": 2360248941,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      1027
+    ],
+    "widths": [
+      12,
+      14,
+      11
+    ],
+    "hex": "4003fff807a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-1-event-12",
+    "tag": 2360248941,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      131
+    ],
+    "widths": [
+      9,
+      11,
+      8
+    ],
+    "hex": "401ffe0f4c",
+    "bit_len": 30,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-1-dynamic-16",
+    "tag": 2360248941,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      13,
+      15,
+      12
+    ],
+    "hex": "08003fffc01da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "mainmenu_sn05-1-object-16",
+    "tag": 2360248941,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      13,
+      15,
+      12
+    ],
+    "hex": "2000ffff007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-0-event-16",
+    "tag": 2696895562,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      13,
+      12,
+      11
+    ],
+    "hex": "0001fff00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-0-event-15",
+    "tag": 2696895562,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      515
+    ],
+    "widths": [
+      12,
+      11,
+      10
+    ],
+    "hex": "0003ffc07a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-0-event-12",
+    "tag": 2696895562,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      67
+    ],
+    "widths": [
+      9,
+      8,
+      7
+    ],
+    "hex": "001ff0f4c0",
+    "bit_len": 26,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-0-dynamic-16",
+    "tag": 2696895562,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      13,
+      12,
+      11
+    ],
+    "hex": "00003ffe01da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-0-object-16",
+    "tag": 2696895562,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      1027
+    ],
+    "widths": [
+      13,
+      12,
+      11
+    ],
+    "hex": "0000fff8076980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-1-event-16",
+    "tag": 2696895562,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "40007fff800f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-1-event-15",
+    "tag": 2696895562,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "4000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-1-event-12",
+    "tag": 2696895562,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      515
+    ],
+    "widths": [
+      11,
+      11,
+      10
+    ],
+    "hex": "4007ff80f4c0",
+    "bit_len": 34,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-1-dynamic-16",
+    "tag": 2696895562,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "08000ffff001da60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "ctf_aquarius-1-object-16",
+    "tag": 2696895562,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "20003fffc0076980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "ctf_illusion-0-event-16",
+    "tag": 2822361047,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "00000ffffe0007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "ctf_illusion-0-event-15",
+    "tag": 2822361047,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "00001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "ctf_illusion-0-event-12",
+    "tag": 2822361047,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "0000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "ctf_illusion-0-dynamic-16",
+    "tag": 2822361047,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "000001ffffc000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "ctf_illusion-0-object-16",
+    "tag": 2822361047,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "000007ffff0003b4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-0-event-16",
+    "tag": 2845874957,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00001ffff8007a60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-0-event-15",
+    "tag": 2845874957,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "00003fffe003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-0-event-12",
+    "tag": 2845874957,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      1027
+    ],
+    "widths": [
+      13,
+      13,
+      11
+    ],
+    "hex": "0001fff807a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-0-dynamic-16",
+    "tag": 2845874957,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "000003ffff000ed3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-0-object-16",
+    "tag": 2845874957,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00000ffffc003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-1-event-16",
+    "tag": 2845874957,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "40001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-1-event-15",
+    "tag": 2845874957,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      16387
+    ],
+    "widths": [
+      16,
+      16,
+      15
+    ],
+    "hex": "40003fffe001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-1-event-12",
+    "tag": 2845874957,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      2051
+    ],
+    "widths": [
+      13,
+      13,
+      12
+    ],
+    "hex": "4001fff803d3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-1-dynamic-16",
+    "tag": 2845874957,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "080003ffff00076980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "va_behemoth-1-object-16",
+    "tag": 2845874957,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "20000ffffc001da6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-0-event-16",
+    "tag": 2876574080,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      8195
+    ],
+    "widths": [
+      13,
+      12,
+      14
+    ],
+    "hex": "0001fff001e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-0-event-15",
+    "tag": 2876574080,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      12,
+      11,
+      13
+    ],
+    "hex": "0003ffc00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-0-event-12",
+    "tag": 2876574080,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      515
+    ],
+    "widths": [
+      9,
+      8,
+      10
+    ],
+    "hex": "001ff01e98",
+    "bit_len": 29,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-0-dynamic-16",
+    "tag": 2876574080,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      8195
+    ],
+    "widths": [
+      13,
+      12,
+      14
+    ],
+    "hex": "00003ffe003b4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-0-object-16",
+    "tag": 2876574080,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      8195
+    ],
+    "widths": [
+      13,
+      12,
+      14
+    ],
+    "hex": "0000fff800ed30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-1-event-16",
+    "tag": 2876574080,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "40000ffffe0007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-1-event-15",
+    "tag": 2876574080,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      32771
+    ],
+    "widths": [
+      17,
+      17,
+      16
+    ],
+    "hex": "40001ffff8003d30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-1-event-12",
+    "tag": 2876574080,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "4000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-1-dynamic-16",
+    "tag": 2876574080,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "080001ffffc000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "ctf_forbidden-1-object-16",
+    "tag": 2876574080,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      65539
+    ],
+    "widths": [
+      18,
+      18,
+      17
+    ],
+    "hex": "200007ffff0003b4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-0-event-16",
+    "tag": 3184879381,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-0-event-15",
+    "tag": 3184879381,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-0-event-12",
+    "tag": 3184879381,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-0-dynamic-16",
+    "tag": 3184879381,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-0-object-16",
+    "tag": 3184879381,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-1-event-16",
+    "tag": 3184879381,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-1-event-15",
+    "tag": 3184879381,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-1-event-12",
+    "tag": 3184879381,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-1-dynamic-16",
+    "tag": 3184879381,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo10_deadland-1-object-16",
+    "tag": 3184879381,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-0-event-16",
+    "tag": 3250903933,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00007fff8007a6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-0-event-15",
+    "tag": 3250903933,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "0000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-0-event-12",
+    "tag": 3250903933,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      11,
+      11,
+      11
+    ],
+    "hex": "0007ff807a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-0-dynamic-16",
+    "tag": 3250903933,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00000ffff000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-0-object-16",
+    "tag": 3250903933,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00003fffc003b4c0",
+    "bit_len": 50,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-1-event-16",
+    "tag": 3250903933,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      19,
+      19,
+      17
+    ],
+    "hex": "400007ffff8001e980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-1-event-15",
+    "tag": 3250903933,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      18,
+      18,
+      16
+    ],
+    "hex": "40000ffffe000f4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-1-event-12",
+    "tag": 3250903933,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      4099
+    ],
+    "widths": [
+      15,
+      15,
+      13
+    ],
+    "hex": "40007fff801e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-1-dynamic-16",
+    "tag": 3250903933,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      19,
+      19,
+      17
+    ],
+    "hex": "080000fffff0003b4c",
+    "bit_len": 62,
+    "upstream": true
+  },
+  {
+    "name": "catalyst-1-object-16",
+    "tag": 3250903933,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      65539
+    ],
+    "widths": [
+      19,
+      19,
+      17
+    ],
+    "hex": "200003ffffc000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-0-event-16",
+    "tag": 3285571092,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      8195
+    ],
+    "widths": [
+      13,
+      13,
+      14
+    ],
+    "hex": "0001fff800f4c0",
+    "bit_len": 42,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-0-event-15",
+    "tag": 3285571092,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0003ffe007a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-0-event-12",
+    "tag": 3285571092,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      511,
+      515
+    ],
+    "widths": [
+      9,
+      9,
+      10
+    ],
+    "hex": "001ff80f4c",
+    "bit_len": 30,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-0-dynamic-16",
+    "tag": 3285571092,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      8195
+    ],
+    "widths": [
+      13,
+      13,
+      14
+    ],
+    "hex": "00003fff001da6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-0-object-16",
+    "tag": 3285571092,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      8191,
+      8195
+    ],
+    "widths": [
+      13,
+      13,
+      14
+    ],
+    "hex": "0000fffc007698",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-1-event-16",
+    "tag": 3285571092,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      32771
+    ],
+    "widths": [
+      19,
+      20,
+      16
+    ],
+    "hex": "400007ffffc001e980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-1-event-15",
+    "tag": 3285571092,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      524287,
+      16387
+    ],
+    "widths": [
+      18,
+      19,
+      15
+    ],
+    "hex": "40000fffff000f4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-1-event-12",
+    "tag": 3285571092,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      65535,
+      2051
+    ],
+    "widths": [
+      15,
+      16,
+      12
+    ],
+    "hex": "40007fffc01e98",
+    "bit_len": 45,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-1-dynamic-16",
+    "tag": 3285571092,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      32771
+    ],
+    "widths": [
+      19,
+      20,
+      16
+    ],
+    "hex": "080000fffff8003b4c",
+    "bit_len": 62,
+    "upstream": true
+  },
+  {
+    "name": "ridgeline-1-object-16",
+    "tag": 3285571092,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      1048575,
+      32771
+    ],
+    "widths": [
+      19,
+      20,
+      16
+    ],
+    "hex": "200003ffffe000ed30",
+    "bit_len": 60,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-0-event-16",
+    "tag": 3302608311,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-0-event-15",
+    "tag": 3302608311,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-0-event-12",
+    "tag": 3302608311,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-0-dynamic-16",
+    "tag": 3302608311,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-0-object-16",
+    "tag": 3302608311,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-1-event-16",
+    "tag": 3302608311,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-1-event-15",
+    "tag": 3302608311,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-1-event-12",
+    "tag": 3302608311,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-1-dynamic-16",
+    "tag": 3302608311,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo13_frost-1-object-16",
+    "tag": 3302608311,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-0-event-16",
+    "tag": 3352633669,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "0003ffe00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-0-event-15",
+    "tag": 3352633669,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      11,
+      11,
+      11
+    ],
+    "hex": "0007ff807a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-0-event-12",
+    "tag": 3352633669,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      131
+    ],
+    "widths": [
+      8,
+      8,
+      8
+    ],
+    "hex": "003fe0f4c0",
+    "bit_len": 26,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-0-dynamic-16",
+    "tag": 3352633669,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "00007ffc01da60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-0-object-16",
+    "tag": 3352633669,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      2051
+    ],
+    "widths": [
+      12,
+      12,
+      12
+    ],
+    "hex": "0001fff0076980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-1-event-16",
+    "tag": 3352633669,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "40007fff8007a6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-1-event-15",
+    "tag": 3352633669,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-1-event-12",
+    "tag": 3352633669,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      11,
+      11,
+      11
+    ],
+    "hex": "4007ff807a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-1-dynamic-16",
+    "tag": 3352633669,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "08000ffff000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "sgh_streets-1-object-16",
+    "tag": 3352633669,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "20003fffc003b4c0",
+    "bit_len": 50,
+    "upstream": true
+  },
+  {
+    "name": "btb_drydock-0-event-16",
+    "tag": 3509463519,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00007fff8007a6",
+    "bit_len": 47,
+    "upstream": true
+  },
+  {
+    "name": "btb_drydock-0-event-15",
+    "tag": 3509463519,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "0000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "btb_drydock-0-event-12",
+    "tag": 3509463519,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      11,
+      11,
+      11
+    ],
+    "hex": "0007ff807a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "btb_drydock-0-dynamic-16",
+    "tag": 3509463519,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00000ffff000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "btb_drydock-0-object-16",
+    "tag": 3509463519,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      16387
+    ],
+    "widths": [
+      15,
+      15,
+      15
+    ],
+    "hex": "00003fffc003b4c0",
+    "bit_len": 50,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-0-event-16",
+    "tag": 3547833599,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00007fff8001e980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-0-event-15",
+    "tag": 3547833599,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      32771
+    ],
+    "widths": [
+      14,
+      14,
+      16
+    ],
+    "hex": "0000fffe000f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-0-event-12",
+    "tag": 3547833599,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      4099
+    ],
+    "widths": [
+      11,
+      11,
+      13
+    ],
+    "hex": "0007ff801e98",
+    "bit_len": 37,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-0-dynamic-16",
+    "tag": 3547833599,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00000ffff0003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-0-object-16",
+    "tag": 3547833599,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      65539
+    ],
+    "widths": [
+      15,
+      15,
+      17
+    ],
+    "hex": "00003fffc000ed30",
+    "bit_len": 52,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-1-event-16",
+    "tag": 3547833599,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "40000ffffe0003d3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-1-event-15",
+    "tag": 3547833599,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      65539
+    ],
+    "widths": [
+      17,
+      17,
+      17
+    ],
+    "hex": "40001ffff8001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-1-event-12",
+    "tag": 3547833599,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      8195
+    ],
+    "widths": [
+      14,
+      14,
+      14
+    ],
+    "hex": "4000fffe003d30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-1-dynamic-16",
+    "tag": 3547833599,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "080001ffffc0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "fo03_space-1-object-16",
+    "tag": 3547833599,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      131075
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "200007ffff0001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "va_launchsite-0-event-16",
+    "tag": 3556542974,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00001ffff8007a60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "va_launchsite-0-event-15",
+    "tag": 3556542974,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "00003fffe003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "va_launchsite-0-event-12",
+    "tag": 3556542974,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      1027
+    ],
+    "widths": [
+      13,
+      13,
+      11
+    ],
+    "hex": "0001fff807a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "va_launchsite-0-dynamic-16",
+    "tag": 3556542974,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "000003ffff000ed3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "va_launchsite-0-object-16",
+    "tag": 3556542974,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00000ffffc003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-3-event-16",
+    "tag": 3585397381,
+    "region": 3,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      1023,
+      515
+    ],
+    "widths": [
+      11,
+      10,
+      10
+    ],
+    "hex": "3001ffc07a60",
+    "bit_len": 35,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-3-event-15",
+    "tag": 3585397381,
+    "region": 3,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      511,
+      259
+    ],
+    "widths": [
+      10,
+      9,
+      9
+    ],
+    "hex": "3003ff03d3",
+    "bit_len": 32,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-3-event-12",
+    "tag": 3585397381,
+    "region": 3,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      63,
+      35
+    ],
+    "widths": [
+      7,
+      6,
+      6
+    ],
+    "hex": "301fc7a6",
+    "bit_len": 23,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-3-dynamic-16",
+    "tag": 3585397381,
+    "region": 3,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      1023,
+      515
+    ],
+    "widths": [
+      11,
+      10,
+      10
+    ],
+    "hex": "06003ff80ed3",
+    "bit_len": 40,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-3-object-16",
+    "tag": 3585397381,
+    "region": 3,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      1023,
+      515
+    ],
+    "widths": [
+      11,
+      10,
+      10
+    ],
+    "hex": "1800ffe03b4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-0-event-16",
+    "tag": 3585397381,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "0000fff801e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-0-event-15",
+    "tag": 3585397381,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      2051
+    ],
+    "widths": [
+      11,
+      11,
+      12
+    ],
+    "hex": "0001ffe00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-0-event-12",
+    "tag": 3585397381,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      259
+    ],
+    "widths": [
+      8,
+      8,
+      9
+    ],
+    "hex": "000ff81e98",
+    "bit_len": 29,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-0-dynamic-16",
+    "tag": 3585397381,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "00001fff003b4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-0-object-16",
+    "tag": 3585397381,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "00007ffc00ed30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-1-event-16",
+    "tag": 3585397381,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "1000fff801e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-1-event-15",
+    "tag": 3585397381,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      2047,
+      2051
+    ],
+    "widths": [
+      11,
+      11,
+      12
+    ],
+    "hex": "1001ffe00f4c",
+    "bit_len": 38,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-1-event-12",
+    "tag": 3585397381,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      255,
+      259
+    ],
+    "widths": [
+      8,
+      8,
+      9
+    ],
+    "hex": "100ff81e98",
+    "bit_len": 29,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-1-dynamic-16",
+    "tag": 3585397381,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "02001fff003b4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-1-object-16",
+    "tag": 3585397381,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      4095,
+      4099
+    ],
+    "widths": [
+      12,
+      12,
+      13
+    ],
+    "hex": "08007ffc00ed30",
+    "bit_len": 44,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-2-event-16",
+    "tag": 3585397381,
+    "region": 2,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "200001ffffe000f4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-2-event-15",
+    "tag": 3585397381,
+    "region": 2,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "200003ffff8007a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-2-event-12",
+    "tag": 3585397381,
+    "region": 2,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      32767,
+      2051
+    ],
+    "widths": [
+      15,
+      15,
+      12
+    ],
+    "hex": "20001fffe00f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-2-dynamic-16",
+    "tag": 3585397381,
+    "region": 2,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "0400003ffffc001da6",
+    "bit_len": 63,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-2-object-16",
+    "tag": 3585397381,
+    "region": 2,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      524287,
+      32771
+    ],
+    "widths": [
+      19,
+      19,
+      16
+    ],
+    "hex": "100000fffff0007698",
+    "bit_len": 61,
+    "upstream": true
+  },
+  {
+    "name": "mp_02-4-event-16",
+    "tag": 3585397381,
+    "region": 4,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      12,
+      11,
+      11
+    ],
+    "hex": "4000fff00f4c",
+    "bit_len": 38,
+    "upstream": false
+  },
+  {
+    "name": "mp_02-4-event-15",
+    "tag": 3585397381,
+    "region": 4,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      1023,
+      515
+    ],
+    "widths": [
+      11,
+      10,
+      10
+    ],
+    "hex": "4001ffc07a60",
+    "bit_len": 35,
+    "upstream": false
+  },
+  {
+    "name": "mp_02-4-event-12",
+    "tag": 3585397381,
+    "region": 4,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      127,
+      67
+    ],
+    "widths": [
+      8,
+      7,
+      7
+    ],
+    "hex": "400ff0f4c0",
+    "bit_len": 26,
+    "upstream": false
+  },
+  {
+    "name": "mp_02-4-dynamic-16",
+    "tag": 3585397381,
+    "region": 4,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      12,
+      11,
+      11
+    ],
+    "hex": "08001ffe01da60",
+    "bit_len": 43,
+    "upstream": false
+  },
+  {
+    "name": "mp_02-4-object-16",
+    "tag": 3585397381,
+    "region": 4,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      2047,
+      1027
+    ],
+    "widths": [
+      12,
+      11,
+      11
+    ],
+    "hex": "20007ff8076980",
+    "bit_len": 41,
+    "upstream": false
+  },
+  {
+    "name": "sgh_blueprint-0-event-16",
+    "tag": 3607185175,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "00000ffffe001e98",
+    "bit_len": 53,
+    "upstream": true
+  },
+  {
+    "name": "sgh_blueprint-0-event-15",
+    "tag": 3607185175,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      8195
+    ],
+    "widths": [
+      17,
+      17,
+      14
+    ],
+    "hex": "00001ffff800f4c0",
+    "bit_len": 50,
+    "upstream": true
+  },
+  {
+    "name": "sgh_blueprint-0-event-12",
+    "tag": 3607185175,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      1027
+    ],
+    "widths": [
+      14,
+      14,
+      11
+    ],
+    "hex": "0000fffe01e980",
+    "bit_len": 41,
+    "upstream": true
+  },
+  {
+    "name": "sgh_blueprint-0-dynamic-16",
+    "tag": 3607185175,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "000001ffffc003b4c0",
+    "bit_len": 58,
+    "upstream": true
+  },
+  {
+    "name": "sgh_blueprint-0-object-16",
+    "tag": 3607185175,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      16387
+    ],
+    "widths": [
+      18,
+      18,
+      15
+    ],
+    "hex": "000007ffff000ed3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-0-event-16",
+    "tag": 3683588899,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "00007fff800f4c",
+    "bit_len": 46,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-0-event-15",
+    "tag": 3683588899,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      16383,
+      4099
+    ],
+    "widths": [
+      14,
+      14,
+      13
+    ],
+    "hex": "0000fffe007a60",
+    "bit_len": 43,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-0-event-12",
+    "tag": 3683588899,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      2047,
+      515
+    ],
+    "widths": [
+      11,
+      11,
+      10
+    ],
+    "hex": "0007ff80f4c0",
+    "bit_len": 34,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-0-dynamic-16",
+    "tag": 3683588899,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "00000ffff001da60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-0-object-16",
+    "tag": 3683588899,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      32767,
+      8195
+    ],
+    "widths": [
+      15,
+      15,
+      14
+    ],
+    "hex": "00003fffc0076980",
+    "bit_len": 49,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-1-event-16",
+    "tag": 3683588899,
+    "region": 1,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      18,
+      18,
+      16
+    ],
+    "hex": "40000ffffe000f4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-1-event-15",
+    "tag": 3683588899,
+    "region": 1,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "40001ffff8007a60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-1-event-12",
+    "tag": 3683588899,
+    "region": 1,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      16383,
+      2051
+    ],
+    "widths": [
+      14,
+      14,
+      12
+    ],
+    "hex": "4000fffe00f4c0",
+    "bit_len": 42,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-1-dynamic-16",
+    "tag": 3683588899,
+    "region": 1,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      18,
+      18,
+      16
+    ],
+    "hex": "080001ffffc001da60",
+    "bit_len": 59,
+    "upstream": true
+  },
+  {
+    "name": "btb_exiled-1-object-16",
+    "tag": 3683588899,
+    "region": 1,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      262143,
+      32771
+    ],
+    "widths": [
+      18,
+      18,
+      16
+    ],
+    "hex": "200007ffff00076980",
+    "bit_len": 57,
+    "upstream": true
+  },
+  {
+    "name": "btb_fragmentation-0-event-16",
+    "tag": 3954331604,
+    "region": 0,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00001ffff8007a60",
+    "bit_len": 51,
+    "upstream": true
+  },
+  {
+    "name": "btb_fragmentation-0-event-15",
+    "tag": 3954331604,
+    "region": 0,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      0,
+      65535,
+      8195
+    ],
+    "widths": [
+      16,
+      16,
+      14
+    ],
+    "hex": "00003fffe003d3",
+    "bit_len": 48,
+    "upstream": true
+  },
+  {
+    "name": "btb_fragmentation-0-event-12",
+    "tag": 3954331604,
+    "region": 0,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      0,
+      8191,
+      1027
+    ],
+    "widths": [
+      13,
+      13,
+      11
+    ],
+    "hex": "0001fff807a6",
+    "bit_len": 39,
+    "upstream": true
+  },
+  {
+    "name": "btb_fragmentation-0-dynamic-16",
+    "tag": 3954331604,
+    "region": 0,
+    "kind": "dynamic",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "000003ffff000ed3",
+    "bit_len": 56,
+    "upstream": true
+  },
+  {
+    "name": "btb_fragmentation-0-object-16",
+    "tag": 3954331604,
+    "region": 0,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      0,
+      131071,
+      16387
+    ],
+    "widths": [
+      17,
+      17,
+      15
+    ],
+    "hex": "00000ffffc003b4c",
+    "bit_len": 54,
+    "upstream": true
+  },
+  {
+    "name": "default-event-16",
+    "tag": 88891201,
+    "region": null,
+    "kind": "event",
+    "precision": 16,
+    "codes": [
+      1,
+      4194303,
+      2097152
+    ],
+    "widths": [
+      22,
+      22,
+      22
+    ],
+    "hex": "800003fffffc00001a60",
+    "bit_len": 67,
+    "upstream": true
+  },
+  {
+    "name": "default-event-15",
+    "tag": 88891201,
+    "region": null,
+    "kind": "event",
+    "precision": 15,
+    "codes": [
+      1,
+      2097151,
+      1048576
+    ],
+    "widths": [
+      21,
+      21,
+      21
+    ],
+    "hex": "800007fffff00000d3",
+    "bit_len": 64,
+    "upstream": true
+  },
+  {
+    "name": "default-event-12",
+    "tag": 88891201,
+    "region": null,
+    "kind": "event",
+    "precision": 12,
+    "codes": [
+      1,
+      262143,
+      131072
+    ],
+    "widths": [
+      18,
+      18,
+      18
+    ],
+    "hex": "80003ffffc0001a6",
+    "bit_len": 55,
+    "upstream": true
+  },
+  {
+    "name": "default-object-16",
+    "tag": 88891201,
+    "region": null,
+    "kind": "object",
+    "precision": 16,
+    "codes": [
+      1,
+      4194303,
+      2097152
+    ],
+    "widths": [
+      22,
+      22,
+      22
+    ],
+    "hex": "400001fffffe00000b4c",
+    "bit_len": 70,
+    "upstream": true
+  }
+]

@@ -7,19 +7,17 @@ use crate::theater::parser::v41::reference::observations::{
     EquipmentCreationField, FilmComponentObservation, MppField, UnitReference, UnitReferenceKind,
 };
 
-/// FUN_1408efb58 at d61443e. NEW calls with param5=true. The full-state
-/// reference form is retained here, but is not wired into keyframe traversal.
-pub(crate) fn projectile(
-    r: &mut ComponentReader<'_>,
-    widths: [usize; 2],
-    param5: bool,
-) -> Option<bool> {
+/// Projectile creation: NEW uses handles/quantized positions, while snapshots
+/// use raw target words/float bits. The enclosing record selects the form.
+fn projectile_body(r: &mut ComponentReader<'_>, widths: [usize; 2], param5: bool) -> Option<bool> {
     let version = if r.bit("version.present")? {
         r.r("version", 8)?
     } else {
         1
     };
-    multiplayer(r, widths)?;
+    if !multiplayer(r, widths)? {
+        return Some(false);
+    }
     r.gate("projectile.value_70", 5, true)?;
     if r.bit("projectile.flag2")? {
         r.optional_handle("projectile.reference_64", 1)?;
@@ -44,7 +42,7 @@ pub(crate) fn projectile(
     }
     r.r("projectile.scale_90", 5)?;
     if r.bit("projectile.flag8")? {
-        if !projectile_position(r)? {
+        if !projectile_position(r, param5)? {
             return Some(false);
         }
         r.r("projectile.direction", 19)?;
@@ -58,7 +56,7 @@ pub(crate) fn projectile(
             r.r("projectile.relative.kind", 2)?;
             r.words("projectile.relative.axes", 3, 13)?;
             r.gate("projectile.relative.tail", 16, true)?;
-        } else if !projectile_position(r)? {
+        } else if !projectile_position(r, param5)? {
             return Some(false);
         }
     }
@@ -74,7 +72,11 @@ pub(crate) fn projectile(
     Some(true)
 }
 
-fn projectile_position(r: &mut ComponentReader<'_>) -> Option<bool> {
+fn projectile_position(r: &mut ComponentReader<'_>, tick: bool) -> Option<bool> {
+    if !tick {
+        r.words("projectile.position_bits", 3, 32)?;
+        return Some(true);
+    }
     let Some(encoding) = r.position_encoding else {
         return Some(false);
     };
@@ -113,6 +115,7 @@ pub(crate) fn has_reference_deserializer(ti: u32) -> bool {
             | 38
             | 39
             | 40
+            | 41
             | 42
             | 43
             | 47
@@ -121,7 +124,7 @@ pub(crate) fn has_reference_deserializer(ti: u32) -> bool {
     )
 }
 
-pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) -> Option<bool> {
+fn state_body(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) -> Option<bool> {
     match ti {
         // Verified zero-bit vtable implementations; excluded from the fallback.
         0 | 1 | 2 | 4 | 7 | 15 | 16 | 18 | 19 | 22 | 25 | 26 | 27 | 30 | 31 | 32 | 33 | 34 | 45
@@ -169,8 +172,14 @@ pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) ->
         13 => {
             version(r)?;
             r.r("property_name", 32)?;
-            let count = if r.bit("array")? { 32 } else { 1 };
-            r.words("properties", count, 4)?;
+            let masked = r.bit("array")?;
+            for i in 0..if masked { 32 } else { 1 } {
+                let tag = r.r(&format!("properties[{i}]"), 4)?;
+                let width = super::managed::property_width(tag, masked);
+                if width != 0 {
+                    r.r(&format!("properties[{i}].value"), width)?;
+                }
+            }
         }
         21 => {
             r.r("value", 18)?;
@@ -192,10 +201,17 @@ pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) ->
             if v > 10 {
                 r.gate("player_index", 5, false)?;
             }
-            multiplayer(r, widths)?;
+            if !multiplayer(r, widths)? {
+                return Some(false);
+            }
             r.gate("index", 6, true)?;
             r.bit("flag")?;
-            r.optional_word_reference("reference", true)?;
+            if r.optional_word_reference("reference", true)? {
+                if !super::position::point(r, "reference.position")? {
+                    return Some(false);
+                }
+                r.gate("reference.player", 5, false)?;
+            }
             r.r("direction", 19)?;
             if v > 5 {
                 r.bit("version_flag")?;
@@ -222,14 +238,13 @@ pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) ->
             }
         }
         36..=40 | 42 | 43 => {
-            if ti == 40 && r.position_encoding.is_none() {
-                return Some(false);
-            }
             version(r)?;
             if ti == 37 || ti == 42 {
                 version(r)?;
             }
-            multiplayer(r, widths)?;
+            if !multiplayer(r, widths)? {
+                return Some(false);
+            }
             match ti {
                 37 => {
                     let value = r.gated_value("player_index", 5, false)?;
@@ -240,6 +255,9 @@ pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) ->
                 38 | 39 => r.optional_handle("reference", 0)?,
                 40 => {
                     if r.bit("media_frame.present")? {
+                        if !r.snapshot && r.position_encoding.is_none() {
+                            return Some(false);
+                        }
                         media_frame(r)?;
                         r.gate("media_frame.direction", 19, false)?;
                         r.r("media_frame.magnitude", 8)?;
@@ -264,6 +282,7 @@ pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) ->
                 _ => {}
             }
         }
+        41 => return projectile(r, widths, !r.snapshot),
         48 => r.gate("player_index", 5, false)?,
         _ => return Some(false),
     }
@@ -311,7 +330,7 @@ fn mpp_field(r: &mut ComponentReader<'_>, lead: bool, fallback: usize) -> Option
     }
 }
 
-fn multiplayer(r: &mut ComponentReader<'_>, widths: [usize; 2]) -> Option<()> {
+fn multiplayer(r: &mut ComponentReader<'_>, widths: [usize; 2]) -> Option<bool> {
     let value = mpp_field(r, true, widths[0])?;
     publish_mpp(r, MppField::Word9, Some(value));
     let value = r.r("mpp.object_tag", 32)?;
@@ -323,11 +342,12 @@ fn multiplayer(r: &mut ComponentReader<'_>, widths: [usize; 2]) -> Option<()> {
     r.r("mpp.kind", 2)?;
     mpp_field(r, false, widths[1])?;
     let count = r.r("mpp.count", 3)?;
-    if count <= 4 {
-        for i in 0..count {
-            r.r(&format!("mpp.entry[{i}].index"), 5)?;
-            r.optional_word_reference(&format!("mpp.entry[{i}].reference"), true)?;
-        }
+    if count > 4 {
+        return Some(false);
+    }
+    for i in 0..count {
+        r.r(&format!("mpp.entry[{i}].index"), 5)?;
+        r.optional_word_reference(&format!("mpp.entry[{i}].reference"), true)?;
     }
     if r.bit("mpp.extra.present")? {
         r.gate("mpp.extra.index", 5, false)?;
@@ -342,9 +362,33 @@ fn multiplayer(r: &mut ComponentReader<'_>, widths: [usize; 2]) -> Option<()> {
     } else {
         publish_mpp(r, MppField::TailName, None);
     }
-    Some(())
+    Some(true)
 }
 
 fn version(r: &mut ComponentReader<'_>) -> Option<()> {
     r.gate("version", 8, true)
+}
+
+#[cfg(test)]
+mod tests;
+
+pub(crate) fn projectile(
+    r: &mut ComponentReader<'_>,
+    widths: [usize; 2],
+    param5: bool,
+) -> Option<bool> {
+    let result = projectile_body(r, widths, param5);
+    if r.context_error.is_some() {
+        Some(false)
+    } else {
+        result
+    }
+}
+pub(crate) fn state(r: &mut ComponentReader<'_>, ti: u32, widths: [usize; 2]) -> Option<bool> {
+    let result = state_body(r, ti, widths);
+    if r.context_error.is_some() {
+        Some(false)
+    } else {
+        result
+    }
 }
