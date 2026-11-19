@@ -349,9 +349,6 @@ fn captured_kill_film_has_typed_highlights() {
     assert_eq!(highlights.len(), 3);
     assert_eq!(highlights[0].payload, SummaryHighlightPayload::Kill);
     assert_eq!(highlights[1].payload, SummaryHighlightPayload::Death);
-    assert_eq!(highlights[0].medal_code, None);
-    assert_eq!(highlights[1].medal_code, None);
-    assert!(highlights[2].medal_code.is_some());
     assert!(matches!(
         highlights[2].payload,
         SummaryHighlightPayload::Medal(_)

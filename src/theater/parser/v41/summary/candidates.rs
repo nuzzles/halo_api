@@ -10,26 +10,7 @@ use crate::theater::parser::v41::packet::BitRange;
 use crate::theater::parser::wire::bits::Bits;
 
 pub(super) fn candidate_payload(read: &SummaryEventRead) -> SummaryHighlightPayload {
-    if read.medal_flag == 1
-        && matches!(
-            read.type_code,
-            50 | 51
-                | 52
-                | 100
-                | 101
-                | 150
-                | 200
-                | 205
-                | 210
-                | 220
-                | 225
-                | 230
-                | 235
-                | 240
-                | 245
-                | 250
-        )
-    {
+    if read.medal_flag == 1 {
         return SummaryHighlightPayload::Medal(Medal::from_codes(read.type_code, read.metadata));
     }
     match read.type_code {
@@ -121,4 +102,40 @@ pub(crate) fn read_summary_candidates(payload: &[u8]) -> Vec<SummaryEventRead> {
     }
     events.sort_by_key(|event| event.identity_source.start);
     events
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn flagged_unfamiliar_type_is_an_unknown_medal() {
+        let mut read = SummaryEventRead {
+            xuid: 1,
+            gamertag_utf16: [0; 16],
+            timestamp_ms: 0,
+            metadata: 251,
+            medal_flag: 1,
+            type_code: 77,
+            source: BitRange { start: 0, end: 0 },
+            identity_source: BitRange { start: 0, end: 0 },
+        };
+        assert_eq!(
+            candidate_payload(&read),
+            SummaryHighlightPayload::Medal(Medal::Unknown {
+                type_code: 77,
+                medal_code: 251,
+            })
+        );
+
+        read.medal_flag = 0;
+        assert_eq!(
+            candidate_payload(&read),
+            SummaryHighlightPayload::Unknown {
+                type_code: 77,
+                medal_flag: 0,
+                metadata: 251,
+            }
+        );
+    }
 }
