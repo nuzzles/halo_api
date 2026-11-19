@@ -31,6 +31,10 @@ pub struct SummaryHighlight {
     pub xuid: crate::theater::film::Xuid,
     /// Film-relative candidate time in microseconds.
     pub timestamp_us: u64,
+    /// Raw summary metadata code when the record carries a medal flag.
+    /// Retained even when the medal name is unknown.
+    #[serde(default)]
+    pub medal_code: Option<u8>,
     /// Meaning inferred from the guarded type and medal fields.
     pub payload: SummaryHighlightPayload,
 }

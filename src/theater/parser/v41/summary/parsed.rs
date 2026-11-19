@@ -19,6 +19,7 @@ impl From<ParsedSummary> for Summary {
                     gamertag: read.gamertag(),
                     xuid: crate::theater::film::Xuid(read.xuid),
                     timestamp_us: u64::from(read.timestamp_ms) * 1_000,
+                    medal_code: (read.medal_flag == 1).then_some(read.metadata),
                     payload: candidate_payload(&read),
                 });
             }
