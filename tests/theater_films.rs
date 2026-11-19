@@ -1,5 +1,3 @@
-#![cfg(theater_film_tests)]
-
 use halo_api::clients::hi::models::{RawChunkKind, RawFilmChunk};
 use halo_api::theater::Film;
 use halo_api::theater::film::{
