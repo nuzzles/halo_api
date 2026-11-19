@@ -311,11 +311,11 @@ fn parent(r: &mut ComponentReader<'_>, level: u32, archetype: u32) -> Option<()>
             | r.fields[r.fields.len() - 2].raw.low_u64() as u32;
         state.word = r.r("word", 16)? as u32;
         state.optional_word = r.gated_value("optional_word", 16, true)?.map(|v| v as u32);
-        for i in 0..2 {
-            state.flags[i] = r.bit(&format!("flags[{i}]"))?;
+        for (i, flag) in state.flags.iter_mut().enumerate() {
+            *flag = r.bit(&format!("flags[{i}]"))?;
         }
-        for i in 0..3 {
-            state.matrix[i] = r.r(&format!("matrix[{i}]"), 16)? as u32;
+        for (i, value) in state.matrix.iter_mut().enumerate() {
+            *value = r.r(&format!("matrix[{i}]"), 16)? as u32;
         }
         state.velocity = r.gated_value("velocity", 19, false)?.map(|v| v as u32);
         state.byte = r.r("magnitude", 8)? as u32;

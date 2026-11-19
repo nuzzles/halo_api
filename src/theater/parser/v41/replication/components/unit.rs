@@ -110,8 +110,8 @@ pub(crate) fn read_primary(
                     state.fraction = Some(r.r("fraction", 12)? as u16);
                 }
             }
-            for i in 0..6 {
-                state.sub[i] = r
+            for (i, value) in state.sub.iter_mut().enumerate() {
+                *value = r
                     .gated_value(&format!("sub[{i}]"), 12, true)?
                     .map(|v| v as u16);
             }

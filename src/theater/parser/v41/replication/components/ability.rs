@@ -95,8 +95,8 @@ fn anchor_body(r: &mut ComponentReader<'_>, state: &mut AbilityNonPredictedState
         3 => {
             state.target = Some(anchor_reference(r, "target", 0)?);
             state.source = Some(anchor_reference(r, "source", 5)?);
-            for i in 0..3 {
-                state.vectors[i] = anchor_vector(r, i)?;
+            for (i, vector) in state.vectors.iter_mut().enumerate().take(3) {
+                *vector = anchor_vector(r, i)?;
             }
             state.packed = Some(r.r("packed", 24)? as u32);
             state.tail = Some(r.r("tail9", 9)? as u32);
@@ -121,8 +121,8 @@ fn anchor_body(r: &mut ComponentReader<'_>, state: &mut AbilityNonPredictedState
                 state.source = Some(anchor_reference(r, "source", 5)?);
             }
             state.target = Some(anchor_reference(r, "target", 0)?);
-            for i in 0..2 {
-                state.vectors[i] = anchor_vector(r, i)?;
+            for (i, vector) in state.vectors.iter_mut().enumerate().take(2) {
+                *vector = anchor_vector(r, i)?;
             }
             state.flag = Some(r.bit("flag")?);
             state.packed = Some(r.r("packed", 24)? as u32);
