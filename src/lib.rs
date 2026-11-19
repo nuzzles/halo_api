@@ -1,5 +1,5 @@
-//! Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service records, match
-//! history, and more.
+//! Unofficial Halo Infinite API client and Theater film parser for Rust.
+//! The [`theater`] module parses v41 films and plays their recorded entity state.
 //!
 //! This crate is not affiliated with, endorsed by or supported by Microsoft.
 //!
@@ -32,6 +32,7 @@
 
 pub mod auth;
 pub mod clients;
+pub mod theater;
 
 pub use clients::hi::{
     HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,

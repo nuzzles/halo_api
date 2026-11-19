@@ -1,4 +1,4 @@
-use std::{io::Read, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
@@ -7,17 +7,16 @@ use xbox::models::Xuid;
 use xbox::util::wrap_xuid;
 
 use super::endpoints::HaloEndpoints;
-use super::film::{FilmEvent, FilmEventReport, decode_events, decode_players, validate_events};
 use super::models::{
     AppearanceCustomization, BanMessage, BanSummary, CareerRanks, CareerRewardTrack, CsrRecords,
     CsrSeason, CsrSeasonCalendar, CurrentUser, CustomizationItemMetadata, EmblemMapping,
-    EmblemMetadata, FilmChunk, FilmChunkData, FilmManifest, GameModeId, GameVariantAsset,
-    HipcSettings, MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill,
-    MatchStats, MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
+    EmblemMetadata, FilmChunkResponse, FilmManifest, GameModeId, GameVariantAsset, HipcSettings,
+    MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill, MatchStats,
+    MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
     PlayerChallengeDecks, PlayerCustomizationCollection, PlayerMatchHistory, PlayerOperationPasses,
     PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
-    SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset, UgcAssetKind, UgcSearchResults,
-    UserInfo,
+    RawChunkKind, RawFilmChunk, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset,
+    UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use super::pager::MatchHistoryPager;
 use super::player::Player;
@@ -584,79 +583,33 @@ impl HaloInfiniteClient {
         }
     }
 
-    /// Downloads and zlib-decompresses one Theater film chunk.
+    /// Downloads one manifest chunk into the canonical Theater parser input.
     pub async fn film_chunk(
         &self,
         film: &FilmManifest,
-        chunk: &FilmChunk,
-    ) -> Result<FilmChunkData, InfiniteClientError> {
+        chunk: &FilmChunkResponse,
+    ) -> Result<RawFilmChunk, InfiniteClientError> {
         let base = film.blob_storage_path_prefix.trim_end_matches('/');
         let path = format!("/{}", chunk.file_relative_path.trim_start_matches('/'));
-        let compressed = self.get_bytes_with_clearance(base, &path).await?;
-        let mut decoder = flate2::read::ZlibDecoder::new(compressed.as_slice());
-        let mut data = Vec::new();
-        decoder
-            .read_to_end(&mut data)
-            .map_err(|error| TheaterError::Decompression(Arc::new(error)))?;
-        Ok(FilmChunkData {
-            metadata: chunk.clone(),
+        let data = self.get_bytes_with_clearance(base, &path).await?;
+        Ok(RawFilmChunk {
+            kind: RawChunkKind(chunk.chunk_type),
+            index: chunk.index,
+            start_ms: chunk.start_time_offset_ms,
             data,
         })
     }
 
-    /// Downloads and decompresses every retained chunk in a Theater film.
+    /// Downloads every retained chunk as canonical Theater parser inputs.
     pub async fn film_chunks(
         &self,
         film: &FilmManifest,
-    ) -> Result<Vec<FilmChunkData>, InfiniteClientError> {
+    ) -> Result<Vec<RawFilmChunk>, InfiniteClientError> {
         let mut chunks = Vec::with_capacity(film.custom_data.chunks.len());
         for chunk in &film.custom_data.chunks {
             chunks.push(self.film_chunk(film, chunk).await?);
         }
         Ok(chunks)
-    }
-
-    /// Downloads a match's Theater film and returns its human-player highlight events.
-    ///
-    /// Events include kills, deaths, mode-related events, and medals. Theater films do not
-    /// contain highlight events for bots or AI opponents, and some events may be absent from a
-    /// film. Use [`Self::match_highlight_events_with_validation`] to compare the decoded counts
-    /// with Halo's match-statistics record.
-    pub async fn match_highlight_events(
-        &self,
-        match_id: &str,
-    ) -> Result<Vec<FilmEvent>, InfiniteClientError> {
-        Ok(self.decoded_highlight_events(match_id).await?.0)
-    }
-
-    async fn decoded_highlight_events(
-        &self,
-        match_id: &str,
-    ) -> Result<(Vec<FilmEvent>, Vec<super::film::FilmPlayer>), InfiniteClientError> {
-        let film = self.match_film(match_id).await?;
-        let chunks = self.film_chunks(&film).await?;
-        let players = decode_players(&chunks);
-        let events = decode_events(&chunks, &players, film.custom_data.film_major_version);
-        Ok((events, players))
-    }
-
-    /// Downloads a match's Theater highlights and compares each human player's
-    /// kill, death, and medal totals with the match-statistics API.
-    ///
-    /// A mismatch is returned in [`FilmEventReport::validation`] rather than
-    /// as an error because Theater films can omit summary events.
-    pub async fn match_highlight_events_with_validation(
-        &self,
-        match_id: &str,
-    ) -> Result<FilmEventReport, InfiniteClientError> {
-        let ((events, players), match_stats) = tokio::try_join!(
-            self.decoded_highlight_events(match_id),
-            self.match_stats(match_id)
-        )?;
-        Ok(FilmEventReport {
-            validation: validate_events(&events, &players, &match_stats),
-            events,
-        })
     }
 
     /// Gets per-player CSR and MMR skill results for a completed match.
@@ -1148,7 +1101,7 @@ impl HaloInfiniteClient {
     /// Fetches the progression document referenced by a CSR calendar entry.
     ///
     /// This intentionally stays untyped raw JSON. No community Halo Infinite client has ever
-    /// confirmed a schema for it — even the most complete one (OpenSpartan/grunt) notes this
+    /// confirmed a schema for it — even the most complete one (reference client) notes this
     /// endpoint returns a 403 Forbidden for them. It may be genuinely inaccessible at the auth
     /// tier this crate uses, not merely unexplored, so a guessed struct would risk being simply
     /// wrong.

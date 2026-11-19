@@ -1,0 +1,46 @@
+{
+  "chunks": [
+    {
+      "kind": 1,
+      "index": 0,
+      "start_ms": 0,
+      "file": "chunk-000-type-1.bin"
+    },
+    {
+      "kind": 2,
+      "index": 1,
+      "start_ms": 0,
+      "file": "chunk-001-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 2,
+      "start_ms": 19995,
+      "file": "chunk-002-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 3,
+      "start_ms": 39999,
+      "file": "chunk-003-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 4,
+      "start_ms": 60002,
+      "file": "chunk-004-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 5,
+      "start_ms": 80005,
+      "file": "chunk-005-type-2.bin"
+    },
+    {
+      "kind": 3,
+      "index": 6,
+      "start_ms": 90896,
+      "file": "chunk-006-type-3.bin"
+    }
+  ]
+}

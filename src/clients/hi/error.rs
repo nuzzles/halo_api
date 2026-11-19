@@ -11,10 +11,6 @@ pub enum TheaterError {
     /// missing or expired films can produce the same response for other match types.
     #[error("no Theater film available for match {match_id}")]
     FilmUnavailable { match_id: String },
-
-    /// Downloaded film data could not be decompressed as zlib.
-    #[error("failed to decompress Halo Infinite Theater film data: {0}")]
-    Decompression(#[source] Arc<std::io::Error>),
 }
 
 /// Errors produced by the Halo Infinite API client.

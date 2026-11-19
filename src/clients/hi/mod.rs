@@ -1,7 +1,6 @@
 mod client;
 pub(crate) mod endpoints;
 mod error;
-pub mod film;
 pub mod models;
 mod pager;
 mod player;
