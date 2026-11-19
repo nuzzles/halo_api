@@ -5,6 +5,7 @@ use crate::theater::parser::v41::context::profile::DecodeProfile;
 use crate::theater::parser::v41::registry::source::FilmRegistry;
 use crate::theater::parser::v41::replication::components::cursor::ComponentCursor as Cursor;
 use crate::theater::parser::v41::replication::components::defaults;
+use crate::theater::parser::v41::replication::components::fields::take_component_fields;
 use crate::theater::parser::v41::replication::components::m4b::required_runtime_field;
 use crate::theater::parser::v41::replication::components::reader::{
     ComponentReader, ComponentWidths,
@@ -327,6 +328,7 @@ fn body(
     if n2 <= 0 {
         return Some(KeyframeStop::Complete);
     }
+    let source_bits = r.cursor.source_bits();
     for (index, registry_component) in arch.components.iter().enumerate() {
         let name = registry_component.name()?;
         let start_bit = r.cursor.position;
@@ -347,13 +349,20 @@ fn body(
                 (simulation_complete, None),
             ),
         };
+        let fields = take_component_fields(
+            &mut r.fields,
+            field_start,
+            start_bit,
+            r.cursor.position,
+            source_bits,
+        );
         components.push(KeyframeComponentRead {
             status: status.into(),
             index,
             name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
-            fields: r.fields[field_start..].to_vec(),
+            fields,
         });
         if r.reference_configuration_unavailable() {
             components.last_mut().unwrap().status =
@@ -387,14 +396,18 @@ fn body(
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::ContextUnavailable;
             return Some(KeyframeStop::MissingCorruptionCheckContext);
         };
+        let guard_start = r.fields.len();
         let check = if check {
             r.gate("component_corruption_check", 32, true)
         } else {
             Some(())
         };
+        let end_bit = r.cursor.position;
+        let guard_fields =
+            take_component_fields(&mut r.fields, guard_start, start_bit, end_bit, source_bits);
         let component = components.last_mut().unwrap();
-        component.end_bit = r.cursor.position;
-        component.fields = r.fields[field_start..].to_vec();
+        component.end_bit = end_bit;
+        component.fields.extend(guard_fields);
         if check.is_none() {
             component.status =
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::Truncated;

@@ -9,6 +9,7 @@ pub(crate) mod defaults;
 pub(crate) mod device;
 pub(crate) mod dispatch;
 pub(crate) mod equipment;
+pub(crate) mod fields;
 pub(crate) mod flock;
 pub(crate) mod m4b;
 pub(crate) mod managed;

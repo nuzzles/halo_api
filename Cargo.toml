@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 description = "Unofficial Halo Infinite API client and Theater film parser for Rust."
 repository = "https://github.com/nuzzles/halo_api"
 readme = "README.md"
-exclude = ["/tests/theater_films.rs", "/tests/fixtures/**", "/.local/**"]
+exclude = ["/tests/theater_films.rs", "/tests/fixtures/**", "/benchmarks/**", "/.local/**"]
 keywords = ["halo", "halo-infinite", "gaming", "api"]
 categories = ["api-bindings"]
 
