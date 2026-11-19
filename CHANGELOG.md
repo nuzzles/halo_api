@@ -15,6 +15,13 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - Decode Halo Infinite Theater chunks into a typed `Film` with registry, replication stream,
   and summary highlights. `FilmRuntime` replays observations into seekable world snapshots;
   the `film_world_inspector` example explores entities and their components.
+- `Medal::code()` returns the recorded Theater summary code for known and unknown medals.
+
+### Changed
+
+- Medal-flagged summary highlights with unrecognized type codes now use
+  `SummaryHighlightPayload::Medal(Medal::Unknown { type_code, medal_code })` instead of the
+  generic `Unknown` payload.
 
 ## [0.5.0] - 2026-11-18
 
