@@ -39,7 +39,11 @@ fn zlib_header(raw: &[u8]) -> Result<usize, InflateError> {
 }
 
 fn inflate_body(raw: &[u8], header: usize, limit: usize) -> Result<Vec<u8>, InflateError> {
-    let mut decoder = Decompress::new(false);
+    // Let the backend validate the ordinary zlib header and Adler checksum.
+    // A preset empty dictionary still follows the established raw-deflate path.
+    let dictionary = header == 6;
+    let input_start = if dictionary { header } else { 0 };
+    let mut decoder = Decompress::new(!dictionary);
     let mut out = Vec::with_capacity(raw.len().saturating_mul(6).min(64 << 20).min(limit));
     let result = loop {
         let before = (decoder.total_in(), decoder.total_out());
@@ -49,7 +53,7 @@ fn inflate_body(raw: &[u8], header: usize, limit: usize) -> Result<Vec<u8>, Infl
         // from real overflow, including when the checksum needs another call.
         let scratch_len = block.len().min(remaining.saturating_add(1));
         let status = decoder.decompress(
-            &raw[header + before.0 as usize..],
+            &raw[input_start + before.0 as usize..],
             &mut block[..scratch_len],
             FlushDecompress::None,
         );
@@ -60,17 +64,21 @@ fn inflate_body(raw: &[u8], header: usize, limit: usize) -> Result<Vec<u8>, Infl
         }
         match status {
             Ok(Status::StreamEnd) => {
-                let end = header + decoder.total_in() as usize;
-                let checksum = raw.get(end..end.saturating_add(4));
-                let (mut a, mut b) = (1u32, 0u32);
-                for &byte in &out {
-                    a = (a + u32::from(byte)) % 65521;
-                    b = (b + a) % 65521;
-                }
-                break if checksum == Some(&(b << 16 | a).to_be_bytes()) {
-                    Ok(())
+                break if dictionary {
+                    let end = header + decoder.total_in() as usize;
+                    let checksum = raw.get(end..end.saturating_add(4));
+                    let (mut a, mut b) = (1u32, 0u32);
+                    for &byte in &out {
+                        a = (a + u32::from(byte)) % 65521;
+                        b = (b + a) % 65521;
+                    }
+                    if checksum == Some(&(b << 16 | a).to_be_bytes()) {
+                        Ok(())
+                    } else {
+                        Err(InflateError::Stream)
+                    }
                 } else {
-                    Err(InflateError::Stream)
+                    Ok(())
                 };
             }
             Err(_) => break Err(InflateError::Stream),
@@ -104,5 +112,63 @@ impl RawFilmChunk {
     fn inflate_with_limit(&self, limit: usize) -> Result<Vec<u8>, InflateError> {
         let header = zlib_header(&self.data)?;
         inflate_body(&self.data, header, limit)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{InflateError, inflate_body, zlib_header};
+    use flate2::{Compression, write::ZlibEncoder};
+    use std::io::Write;
+
+    fn zlib(input: &[u8]) -> Vec<u8> {
+        let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+        encoder.write_all(input).unwrap();
+        encoder.finish().unwrap()
+    }
+
+    #[test]
+    fn ordinary_zlib_validates_checksum_and_output_limit() {
+        let data = b"theater film chunk".repeat(64);
+        let compressed = zlib(&data);
+        let header = zlib_header(&compressed).unwrap();
+        assert_eq!(inflate_body(&compressed, header, data.len()).unwrap(), data);
+        assert_eq!(
+            inflate_body(&compressed, header, data.len() - 1),
+            Err(InflateError::Limit)
+        );
+
+        let mut damaged = compressed.clone();
+        *damaged.last_mut().unwrap() ^= 1;
+        assert_eq!(
+            inflate_body(&damaged, header, data.len()),
+            Err(InflateError::Stream)
+        );
+        assert_eq!(
+            inflate_body(&compressed[..compressed.len() - 1], header, data.len()),
+            Err(InflateError::Stream)
+        );
+    }
+
+    #[test]
+    fn empty_preset_dictionary_header_preserves_raw_deflate_path() {
+        let data = b"dictionary film chunk".repeat(32);
+        let compressed = zlib(&data);
+        let mut with_dictionary = vec![0x78, 0x20, 0, 0, 0, 1];
+        with_dictionary.extend_from_slice(&compressed[2..]);
+        let header = zlib_header(&with_dictionary).unwrap();
+        assert_eq!(header, 6);
+        assert_eq!(
+            inflate_body(&with_dictionary, header, data.len()).unwrap(),
+            data
+        );
+
+        *with_dictionary.last_mut().unwrap() ^= 1;
+        assert_eq!(
+            inflate_body(&with_dictionary, header, data.len()),
+            Err(InflateError::Stream)
+        );
+        with_dictionary[5] = 2;
+        assert_eq!(zlib_header(&with_dictionary), Err(InflateError::Header));
     }
 }

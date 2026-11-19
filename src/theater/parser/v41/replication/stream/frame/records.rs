@@ -5,6 +5,7 @@ use crate::theater::parser::v41::reference::diagnostics::WidthPurpose;
 use crate::theater::parser::v41::registry::source::FilmRegistry;
 use crate::theater::parser::v41::replication::components::cursor::ComponentCursor as Cursor;
 use crate::theater::parser::v41::replication::components::defaults;
+use crate::theater::parser::v41::replication::components::fields::take_component_fields;
 use crate::theater::parser::v41::replication::components::m4b::required_runtime_field;
 use crate::theater::parser::v41::replication::components::reader::{
     ComponentReader, ComponentWidths,
@@ -259,6 +260,7 @@ fn record_body(
     };
     // The reference registry loop ignores mask bits beyond its component list.
     let component_count = arch.components.len();
+    let source_bits = r.cursor.source_bits();
     for index in 0..component_count {
         if mask.unwrap_or(0) & (1 << (index & 63)) == 0 {
             continue;
@@ -277,16 +279,21 @@ fn record_body(
             Some(&encoding.component_widths),
             (simulation_complete, None),
         );
-        let fields = r.fields[field_start..].to_vec();
-        let mut component = EntityComponentRead {
+        let fields = take_component_fields(
+            &mut r.fields,
+            field_start,
+            start_bit,
+            r.cursor.position,
+            source_bits,
+        );
+        rec.components.push(EntityComponentRead {
             index,
             name: name.to_owned(),
             start_bit,
             end_bit: r.cursor.position,
             status: status.into(),
             fields,
-        };
-        rec.components.push(component.clone());
+        });
         if r.reference_configuration_unavailable() {
             rec.components.last_mut().unwrap().status =
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::ContextUnavailable;
@@ -330,18 +337,22 @@ fn record_body(
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::ContextUnavailable;
             return Some(EntityViewStop::MissingCorruptionCheckContext);
         };
+        let guard_start = r.fields.len();
         let check = if check {
             r.gate("component.corruption_check", 32, true)
         } else {
             Some(())
         };
-        component.end_bit = r.cursor.position;
-        component.fields = r.fields[field_start..].to_vec();
+        let end_bit = r.cursor.position;
+        let guard_fields =
+            take_component_fields(&mut r.fields, guard_start, start_bit, end_bit, source_bits);
+        let component = rec.components.last_mut().unwrap();
+        component.end_bit = end_bit;
+        component.fields.extend(guard_fields);
         if check.is_none() {
             component.status =
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::Truncated;
         }
-        *rec.components.last_mut().unwrap() = component;
         check?;
     }
     if rec.header.kind == RecordKind::New {
