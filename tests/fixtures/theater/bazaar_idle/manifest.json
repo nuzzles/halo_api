@@ -1,0 +1,34 @@
+{
+  "chunks": [
+    {
+      "kind": 1,
+      "index": 0,
+      "start_ms": 0,
+      "file": "chunk-000-type-1.bin"
+    },
+    {
+      "kind": 2,
+      "index": 1,
+      "start_ms": 0,
+      "file": "chunk-001-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 2,
+      "start_ms": 19994,
+      "file": "chunk-002-type-2.bin"
+    },
+    {
+      "kind": 2,
+      "index": 3,
+      "start_ms": 39997,
+      "file": "chunk-003-type-2.bin"
+    },
+    {
+      "kind": 3,
+      "index": 4,
+      "start_ms": 48936,
+      "file": "chunk-004-type-3.bin"
+    }
+  ]
+}

@@ -10,6 +10,12 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Added
+
+- Decode Halo Infinite Theater chunks into a typed `Film` with registry, replication stream,
+  and summary highlights. `FilmRuntime` replays observations into seekable world snapshots;
+  the `film_world_inspector` example explores entities and their components.
+
 ## [0.5.0] - 2026-11-18
 
 This release has an [MSRV][] of 1.96.

@@ -1,4 +1,4 @@
-//! Downloads and decompresses every Theater chunk into a local directory.
+//! Downloads every compressed Theater chunk into a local directory.
 
 mod common;
 
@@ -15,10 +15,8 @@ async fn main() -> Result<(), common::ExampleError> {
 
     fs::create_dir_all(&output)?;
     for chunk in chunks {
-        let path = output.join(format!(
-            "chunk-{:03}-type-{}.bin",
-            chunk.metadata.index, chunk.metadata.chunk_type
-        ));
+        let chunk_type = chunk.kind.raw();
+        let path = output.join(format!("chunk-{:03}-type-{}.bin", chunk.index, chunk_type));
         fs::write(&path, &chunk.data)?;
         println!("{}: {} bytes", path.display(), chunk.data.len());
     }

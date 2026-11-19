@@ -1,0 +1,93 @@
+//! Wire-layout configuration shared by frame and keyframe readers.
+use crate::theater::parser::v41::replication::components::widths::ComponentWidthOverrides;
+use crate::theater::parser::v41::replication::{
+    components::position::PositionEncoding, stream::frame::header::RecordIdLayout,
+};
+/// Reference New-record default routing and calibration widths. Neither skip is
+/// a component length; terminal bits apply only after a successful New body.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct NewRecordLayout {
+    pub deserialize_defaults: bool,
+    pub fallback_default_bits: usize,
+    /// Raw reference configuration, converted only if this New uses fallback state.
+    /// None uses the bounded fallback width.
+    pub reference_fallback_default_bits: Option<i64>,
+    pub terminal_bits: usize,
+}
+impl Default for NewRecordLayout {
+    fn default() -> Self {
+        Self {
+            deserialize_defaults: true,
+            fallback_default_bits: 0,
+            reference_fallback_default_bits: None,
+            terminal_bits: 0,
+        }
+    }
+}
+impl NewRecordLayout {
+    fn is_default(&self) -> bool {
+        self == &Self::default()
+    }
+}
+
+/// Full-state keyframe framing, independent of New-record framing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct KeyframeLayout {
+    pub header_bits: usize,
+    pub size_word_bits: usize,
+}
+impl Default for KeyframeLayout {
+    fn default() -> Self {
+        Self {
+            header_bits: 108,
+            size_word_bits: 32,
+        }
+    }
+}
+impl KeyframeLayout {
+    fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+    pub(crate) fn valid(&self) -> bool {
+        self.header_bits >= 64 && self.size_word_bits <= 32
+    }
+}
+
+/// Values sourced from bootstrap/map context, not guessed from record contents.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct RecordLayout {
+    /// Packet configuration selects category ranges. False requires an
+    /// unestablished global range at the first present variable-width handle.
+    pub category_references: bool,
+    pub keyframe_layout: KeyframeLayout,
+    /// Explicit inherited simulation-state gate for configured reference readers. None
+    /// uses the completed-body policy.
+    pub keyframe_simulation_complete: Option<bool>,
+    /// External vehicle construction state, only for an explicitly selected
+    /// keyframe record. None preserves the canonical missing-context stop.
+    pub snapshot_vehicle_type_gate: Option<bool>,
+    pub component_widths: ComponentWidthOverrides,
+    pub new_record: NewRecordLayout,
+    /// Original signed reference ID width; admitted only after a non-End prefix.
+    /// None uses ids.low_bits. Reference readers use wrapping slot arithmetic.
+    pub reference_id_low_bits: Option<i64>,
+    pub ids: RecordIdLayout,
+    pub mpp_widths: [usize; 2],
+    pub position: Option<PositionEncoding>,
+    pub extra_fields: bool,
+    /// None stops at the first boundary requiring the recorded guard policy.
+    pub corruption_check: Option<bool>,
+}
+
+fn category_references_default() -> bool {
+    true
+}
+
+impl RecordLayout {
+    pub(in crate::theater) fn valid(&self) -> bool {
+        (self.reference_id_low_bits.is_some()
+            || (self.ids.low_bits <= 30 && self.ids.base <= 0x3fff_ffff))
+            && self.mpp_widths.iter().all(|w| (1..=32).contains(w))
+            && self.position.as_ref().is_none_or(PositionEncoding::valid)
+    }
+}

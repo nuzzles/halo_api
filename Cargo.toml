@@ -4,9 +4,10 @@ version = "0.5.0"
 edition = "2024"
 rust-version = "1.96"
 license = "MIT OR Apache-2.0"
-description = "Unofficial Halo Infinite REST API client for Rust (CSR, service record, match history, and more)."
+description = "Unofficial Halo Infinite API client and Theater film parser for Rust."
 repository = "https://github.com/nuzzles/halo_api"
 readme = "README.md"
+exclude = ["/tests/theater_films.rs", "/tests/fixtures/**", "/.local/**"]
 keywords = ["halo", "halo-infinite", "gaming", "api"]
 categories = ["api-bindings"]
 
@@ -17,7 +18,7 @@ all-features = true
 xbox = { version = "0.2", default-features = false }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
+serde_json = { version = "1.0.151", features = ["float_roundtrip"] }
 thiserror = "2.0.19"
 tokio = { version = "1.53.1", features = ["sync", "time", "macros", "rt"] }
 chrono = { version = "0.4.45", features = ["serde"] }
@@ -26,12 +27,14 @@ tracing = "0.1.44"
 flate2 = "1.1"
 csv = "1.4"
 scraper = "0.24"
+uuid = "1.24"
 
 [dev-dependencies]
 tokio = { version = "1.53.1", features = ["full"] }
 wiremock = "0.6.5"
 rpassword = "7.5.4"
 roxmltree = "0.21.1"
+eframe = { version = "0.33.3", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
 
 # Password login uses native redirect handling; browser clients supply tokens.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

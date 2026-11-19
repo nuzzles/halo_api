@@ -1,51 +1,57 @@
-//! Downloads a Theater film and prints its decoded player-event timeline.
-
+//! Download a v41 film and print its typed observations and guarded highlights.
 mod common;
+use std::time::Instant;
 
-use halo_api::clients::hi::film::FilmEventKind;
+use halo_api::theater::{Film, FilmRuntime};
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
     let (_, halo) = common::halo_infinite_client()?;
     let match_id = common::value("HALO_MATCH_ID", "Match ID")?;
-    let film = halo.match_film(&match_id).await?;
-    eprintln!(
-        "film_major_version: {}",
-        film.custom_data.film_major_version
-    );
-    let events = halo.match_highlight_events(&match_id).await?;
-
-    println!("Timeline:");
-    let mut kills = std::collections::BTreeMap::<String, usize>::new();
-    let mut deaths = std::collections::BTreeMap::<String, usize>::new();
-    for event in events {
-        let seconds = event.timestamp_ms as f64 / 1_000.0;
-        match event.kind {
-            FilmEventKind::Kill | FilmEventKind::Death | FilmEventKind::Mode => println!(
-                "  {seconds:>8.3}s  {:<16} {:?} (metadata {})",
-                event.gamertag, event.kind, event.metadata
-            ),
-            FilmEventKind::Medal => {
-                let medal = event.medal().expect("medal event has medal metadata");
-                println!(
-                    "  {seconds:>8.3}s  {:<16} {} (film medal {})",
-                    event.gamertag,
-                    medal.name(),
-                    event.metadata
-                );
-            }
-            FilmEventKind::Other(code) => println!(
-                "  {seconds:>8.3}s  {:<16} unclassified event code {code} (metadata {})",
-                event.gamertag, event.metadata
-            ),
-        }
-        match event.kind {
-            FilmEventKind::Kill => *kills.entry(event.gamertag).or_default() += 1,
-            FilmEventKind::Death => *deaths.entry(event.gamertag).or_default() += 1,
-            _ => {}
-        }
+    println!("Downloading film {match_id}...");
+    let download_started = Instant::now();
+    let download = async {
+        let manifest = halo.match_film(&match_id).await?;
+        halo.film_chunks(&manifest).await
     }
-    println!("Kills:  {kills:?}");
-    println!("Deaths: {deaths:?}");
+    .await;
+    let chunks = match download {
+        Ok(chunks) => chunks,
+        Err(error) => {
+            eprintln!(
+                "Download stopped after {:.3}s: {error}",
+                download_started.elapsed().as_secs_f64()
+            );
+            return Err(error.into());
+        }
+    };
+    let bytes: usize = chunks.iter().map(|chunk| chunk.data.len()).sum();
+    println!(
+        "Download complete: {} chunks, {bytes} bytes in {:.3}s.",
+        chunks.len(),
+        download_started.elapsed().as_secs_f64()
+    );
+
+    println!("Parsing film...");
+    let parse_started = Instant::now();
+    let film = Film::parse(chunks)?;
+    println!(
+        "Film parsed in {:.3}s.",
+        parse_started.elapsed().as_secs_f64()
+    );
+
+    let runtime = FilmRuntime::load(film);
+    println!(
+        "Film contains {} observations and {} summary highlights.",
+        runtime.film().replication_stream.observations.len(),
+        runtime.film().summary.highlights.len()
+    );
+    println!("Latest 20 summary highlights:");
+    for event in runtime.film().summary.highlights.iter().rev().take(20) {
+        println!(
+            "{} at {} us: {:?} ({})",
+            event.gamertag, event.timestamp_us, event.payload, event.xuid
+        );
+    }
     Ok(())
 }

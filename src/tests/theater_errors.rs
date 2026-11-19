@@ -1,14 +1,15 @@
 use super::{FailingSpartanTokenSource, UnusedClearanceTokenSource, test_client};
 use crate::auth::{AuthError, HaloAuthClient};
-use crate::clients::hi::models::{FilmChunk, FilmCustomData, FilmManifest};
+use crate::clients::hi::models::{FilmChunkResponse, FilmCustomData, FilmManifest};
 use crate::clients::hi::{HaloInfiniteClient, InfiniteClientError, TheaterError};
+use crate::theater::film::ParseError;
 use std::error::Error;
 use std::sync::Arc;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[tokio::test]
-async fn missing_film_is_typed_and_propagates_to_highlights() {
+async fn missing_film_is_typed() {
     let server = MockServer::start().await;
     let (halo, _) = test_client(&server).await;
     Mock::given(method("GET"))
@@ -16,22 +17,15 @@ async fn missing_film_is_typed_and_propagates_to_highlights() {
         .and(header("X-343-Authorization-Spartan", "fake-spartan-token"))
         .and(header("343-Clearance", "fake-clearance"))
         .respond_with(ResponseTemplate::new(404).set_body_json("No film found for that match"))
-        .expect(2)
+        .expect(1)
         .mount(&server)
         .await;
 
-    for error in [
+    assert!(matches!(
         halo.match_film("local-match").await.unwrap_err(),
-        halo.match_highlight_events("local-match")
-            .await
-            .unwrap_err(),
-    ] {
-        assert!(matches!(
-            error,
-            InfiniteClientError::Theater(TheaterError::FilmUnavailable { match_id })
-                if match_id == "local-match"
-        ));
-    }
+        InfiniteClientError::Theater(TheaterError::FilmUnavailable { match_id })
+            if match_id == "local-match"
+    ));
 }
 
 #[tokio::test]
@@ -115,7 +109,7 @@ fn film_manifest(server: &MockServer) -> FilmManifest {
             manifest_refresh_seconds: 60,
             match_id: "test-match".into(),
             film_major_version: 41,
-            chunks: vec![FilmChunk {
+            chunks: vec![FilmChunkResponse {
                 index: 0,
                 start_time_offset_ms: 0,
                 duration_ms: 1000,
@@ -128,7 +122,7 @@ fn film_manifest(server: &MockServer) -> FilmManifest {
 }
 
 #[tokio::test]
-async fn corrupt_chunk_returns_theater_error_with_io_source() {
+async fn corrupt_chunk_is_downloaded_then_rejected_by_inflation() {
     let server = MockServer::start().await;
     let (halo, _) = test_client(&server).await;
     Mock::given(method("GET"))
@@ -137,11 +131,9 @@ async fn corrupt_chunk_returns_theater_error_with_io_source() {
         .expect(1)
         .mount(&server)
         .await;
-    let error = halo.film_chunks(&film_manifest(&server)).await.unwrap_err();
-    assert!(matches!(
-        &error,
-        InfiniteClientError::Theater(TheaterError::Decompression(_))
-    ));
+    let chunks = halo.film_chunks(&film_manifest(&server)).await.unwrap();
+    let error = chunks.into_iter().next().unwrap().inflate().unwrap_err();
+    assert!(matches!(&error, ParseError::Inflate { index: 0, .. }));
     assert!(error.source().is_some());
 }
 
