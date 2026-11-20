@@ -1526,9 +1526,7 @@ pub(crate) struct PlayerCustomizationCollection {
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct RawPlayerCustomization {
     #[serde(rename = "Id")]
-    pub id: String,
-    #[serde(rename = "ResultCode")]
-    pub result_code: String,
+    pub id: PlayerCustomizationId,
     #[serde(rename = "Result")]
     pub result: PlayerCustomizationData,
 }
@@ -1563,14 +1561,46 @@ where
 /// Public customization for one player, with Halo's result and collection wrappers removed.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct PlayerCustomization {
-    pub id: String,
-    pub result_code: String,
+    pub id: PlayerCustomizationId,
     pub appearance: PlayerAppearance,
     pub ai: Vec<EquippedCore<AiTheme>>,
     pub armor: Vec<EquippedCore<ArmorTheme>>,
     pub vehicles: Vec<EquippedCore<VehicleTheme>>,
     pub weapons: WeaponCustomizations,
     pub body: Option<SpartanBody>,
+}
+
+/// The identifier returned for a customized player.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+#[serde(tag = "type", content = "value", rename_all = "snake_case")]
+pub enum PlayerCustomizationId {
+    Xuid(u64),
+    Gamertag(String),
+}
+
+impl<'de> Deserialize<'de> for PlayerCustomizationId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        use serde::de::Error as _;
+
+        let raw = String::deserialize(deserializer)?;
+        if let Some(value) = raw.strip_prefix("xuid(").and_then(|s| s.strip_suffix(')')) {
+            return value
+                .parse::<u64>()
+                .map(Self::Xuid)
+                .map_err(|_| D::Error::custom("invalid xuid in customization Id"));
+        }
+        if let Some(value) = raw.strip_prefix("gt(").and_then(|s| s.strip_suffix(')')) {
+            if !value.is_empty() {
+                return Ok(Self::Gamertag(value.to_owned()));
+            }
+        }
+        Err(D::Error::custom(
+            "expected xuid(number) or gt(name) in customization Id",
+        ))
+    }
 }
 
 /// Equipped customization core. Halo sends `Themes` as an array; the selected theme is
@@ -1758,7 +1788,6 @@ impl From<RawPlayerCustomization> for PlayerCustomization {
         let data = raw.result;
         Self {
             id: raw.id,
-            result_code: raw.result_code,
             appearance: data.appearance,
             ai: data.ai_cores.cores.into_iter().map(Into::into).collect(),
             armor: data.armor_cores.cores.into_iter().map(Into::into).collect(),
@@ -4095,9 +4124,14 @@ mod tests {
         .unwrap();
         let public =
             PlayerCustomization::from(public.player_customizations.into_iter().next().unwrap());
-        assert_eq!(public.result_code, "Success");
+        assert_eq!(public.id, PlayerCustomizationId::Xuid(123));
         assert_eq!(public.body.as_ref().unwrap().body_type, "Large");
         let output = serde_json::to_value(&public).unwrap();
+        assert_eq!(
+            output["id"],
+            serde_json::json!({"type": "xuid", "value": 123})
+        );
+        assert!(output.get("result_code").is_none());
         assert_eq!(output["appearance"]["service_tag"], "117");
         assert_eq!(output["body"]["body_type"], "Large");
         assert_eq!(
@@ -4107,6 +4141,14 @@ mod tests {
         assert!(output.get("result").is_none());
         assert!(output["armor"].is_array());
         assert!(output["weapons"].is_object());
+
+        let gamertag: PlayerCustomizationId = serde_json::from_str("\"gt(Nuzzles)\"").unwrap();
+        assert_eq!(gamertag, PlayerCustomizationId::Gamertag("Nuzzles".into()));
+        assert_eq!(
+            serde_json::to_value(gamertag).unwrap(),
+            serde_json::json!({"type": "gamertag", "value": "Nuzzles"})
+        );
+        assert!(serde_json::from_str::<PlayerCustomizationId>("\"xuid(not-a-number)\"").is_err());
 
         let weapon = |core_type: &str| WeaponCore {
             core_id: String::new(),
