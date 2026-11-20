@@ -33,10 +33,10 @@ impl<T: Clone> ExpiryTokenCache<T> {
         Fut: Future<Output = Result<CachedToken<T>, E>>,
     {
         let mut slot = self.slot.lock().await;
-        if let Some(cached) = slot.as_ref() {
-            if cached.expires_at > Utc::now() + Duration::minutes(1) {
-                return Ok(cached.value.clone());
-            }
+        if let Some(cached) = slot.as_ref()
+            && cached.expires_at > Utc::now() + Duration::minutes(1)
+        {
+            return Ok(cached.value.clone());
         }
         *slot = None;
         let token = fetch().await?;
