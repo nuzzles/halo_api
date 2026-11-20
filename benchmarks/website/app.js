@@ -32,7 +32,7 @@ function render(results) {
     title.textContent = row.label;
     const detail = document.createElement('span');
     detail.className = 'film-detail';
-    detail.textContent = `${row.chunks} chunks · ${row.compressed_mib.toFixed(2)} MiB`;
+    detail.textContent = `${row.runs} trials · ${row.chunks} chunks · ${row.compressed_mib.toFixed(2)} MiB`;
     title.append(detail);
     const bars = document.createElement('div');
     bars.className = 'bars';
@@ -54,6 +54,10 @@ fetch('results.json')
     }
     document.querySelector('#cpu-model').textContent = report.cpu_model || `${report.os}/${report.arch}`;
     document.querySelector('#threading').textContent = report.threading || 'Unspecified';
+    const trials = [...new Set(report.results.map(row => row.runs))].sort((a, b) => a - b);
+    const trialCount = new Intl.ListFormat(undefined, { type: 'disjunction' }).format(trials.map(String));
+    document.querySelector('#method').textContent =
+      `Median parse time of ${trialCount} ${trials.length === 1 && trials[0] === 1 ? 'trial' : 'trials'} · Each pair is scaled to its slower parser · Lower is better`;
     const updated = document.querySelector('#updated');
     const date = new Date(report.generated_at_unix_seconds * 1000);
     updated.dateTime = date.toISOString();

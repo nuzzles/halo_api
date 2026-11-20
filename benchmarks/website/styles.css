@@ -24,7 +24,7 @@ h1 { margin: 0; font-size: clamp(23px, 2vw, 30px); font-weight: 700; letter-spac
 .swatch.halo, .bar.halo { background: var(--halo); }
 .swatch.shell, .bar.shell { background: var(--shell); }
 .chart { margin-top: 28px; }
-.chart-row { display: grid; grid-template-columns: 178px minmax(0, 1fr); align-items: center; gap: 22px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.chart-row { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: center; gap: 22px; padding: 17px 0; border-bottom: 1px solid var(--line); }
 .film-label { font-size: 16px; font-weight: 600; }
 .film-detail { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 400; }
 .bars { display: grid; gap: 7px; min-width: 0; }
