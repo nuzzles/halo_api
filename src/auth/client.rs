@@ -78,12 +78,7 @@ impl HaloAuthClient {
     /// Exchanges caller-supplied Halo Waypoint XSTS tickets for Spartan tokens
     /// and clearance. The source must renew its Xbox credentials as needed.
     pub fn from_xsts_source(source: impl XstsTicketSource + 'static) -> Self {
-        Self::from_shared_xsts_source(Arc::new(source))
-    }
-
-    /// Uses an already shared XSTS ticket source for Halo Waypoint authentication.
-    pub fn from_shared_xsts_source(source: Arc<dyn XstsTicketSource>) -> Self {
-        Self::from_xsts_source_with_endpoints(source, &AuthEndpoints::default())
+        Self::from_xsts_source_with_endpoints(Arc::new(source), &AuthEndpoints::default())
     }
 
     /// Uses existing Halo Waypoint credentials without performing an Xbox
