@@ -16,8 +16,13 @@ body { margin: 0; color: var(--text); background: var(--background); font: 16px/
 .setting h2 { margin: 0 0 12px; color: var(--muted); font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .choice { display: inline-block; max-width: 100%; padding: 8px 13px; border: 1px solid #4d6265; border-radius: 5px; background: #326f75; font-size: 15px; font-weight: 550; line-height: 1.35; }
 .content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
-.chart-header { text-align: center; }
-h1 { margin: 0; font-size: clamp(23px, 2vw, 30px); font-weight: 700; letter-spacing: -.025em; }
+.page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
+.page-header select { padding: 8px 30px 8px 11px; border: 1px solid #555; border-radius: 5px; background: #303030; color: var(--text); font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; }
+.page-header select:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
+.chart-header { padding-top: 30px; text-align: center; }
+h1, h2 { margin: 0; font-weight: 700; letter-spacing: -.025em; }
+h1 { font-size: 21px; }
+.chart-header h2 { font-size: clamp(22px, 2vw, 27px); }
 .legend { display: flex; justify-content: center; gap: 25px; margin-top: 14px; color: #d0d0d0; font-size: 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 8px; }
 .swatch { display: inline-block; width: 14px; height: 11px; }

@@ -56,10 +56,12 @@ fetch('results.json')
     document.querySelector('#threading').textContent = report.threading || 'Unspecified';
     const trials = [...new Set(report.results.map(row => row.runs))].sort((a, b) => a - b);
     const trialCount = new Intl.ListFormat(undefined, { type: 'disjunction' }).format(trials.map(String));
-    document.querySelector('#method').textContent =
-      `Median parse time of ${trialCount} ${trials.length === 1 && trials[0] === 1 ? 'trial' : 'trials'} · Each pair is scaled to its slower parser · Lower is better`;
+    document.querySelector('#chart-title').textContent =
+      `Median parse time of ${trialCount} ${trials.length === 1 && trials[0] === 1 ? 'trial' : 'trials'}`;
     const updated = document.querySelector('#updated');
     const date = new Date(report.generated_at_unix_seconds * 1000);
+    const day = date.toISOString().slice(0, 10);
+    document.querySelector('#dataset-date').replaceChildren(new Option(day, day));
     updated.dateTime = date.toISOString();
     updated.textContent = `Updated ${date.toLocaleString(undefined, {
       year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
