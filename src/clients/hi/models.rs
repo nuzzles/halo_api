@@ -1592,10 +1592,10 @@ impl<'de> Deserialize<'de> for PlayerCustomizationId {
                 .map(Self::Xuid)
                 .map_err(|_| D::Error::custom("invalid xuid in customization Id"));
         }
-        if let Some(value) = raw.strip_prefix("gt(").and_then(|s| s.strip_suffix(')')) {
-            if !value.is_empty() {
-                return Ok(Self::Gamertag(value.to_owned()));
-            }
+        if let Some(value) = raw.strip_prefix("gt(").and_then(|s| s.strip_suffix(')'))
+            && !value.is_empty()
+        {
+            return Ok(Self::Gamertag(value.to_owned()));
         }
         Err(D::Error::custom(
             "expected xuid(number) or gt(name) in customization Id",
