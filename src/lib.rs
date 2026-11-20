@@ -25,6 +25,10 @@ pub mod auth;
 pub mod clients;
 pub mod theater;
 
+/// The optional Xbox client crate, available with the `xbox` feature.
+#[cfg(feature = "xbox")]
+pub use xbox;
+
 pub use clients::hi::{
     HaloInfiniteClient, HaloInfiniteClientPool, HaloInfiniteClientPoolError, InfiniteClientError,
 };

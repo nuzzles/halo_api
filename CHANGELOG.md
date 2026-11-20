@@ -10,6 +10,15 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-20
+
+This release has an [MSRV][] of 1.96.
+
+### Added
+
+- The `xbox` feature re-exports the Xbox crate as `halo_api::xbox`, so consumers can use
+  `halo_api`'s Xbox authentication helpers without declaring a separate Xbox dependency.
+
 ## [0.6.0] - 2026-11-20
 
 This release has an [MSRV][] of 1.96.
@@ -139,7 +148,8 @@ This release has an [MSRV][] of 1.96.
 
 [MSRV]: README.md#msrv
 
-[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/nuzzles/halo_api/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/nuzzles/halo_api/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nuzzles/halo_api/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/nuzzles/halo_api/compare/v0.3.1...v0.4.0
