@@ -4,26 +4,12 @@ use std::env;
 use std::io::{self, Write};
 use std::sync::Arc;
 
-use async_trait::async_trait;
-use halo_api::auth::{AuthError, HaloAuthClient, XstsTicketSource};
+use halo_api::auth::{HaloAuthClient, XboxXstsTicketSource};
 use halo_api::clients::hi::{HaloInfiniteClient, Player};
 use xbox::{RelyingParty, XboxClient, auth::LegacyPasswordProvider, models::Xuid};
 
 pub type ExampleError = Box<dyn std::error::Error>;
 pub type ExampleXboxClient = XboxClient<LegacyPasswordProvider>;
-
-struct ExampleXstsSource(Arc<ExampleXboxClient>);
-
-#[async_trait]
-impl XstsTicketSource for ExampleXstsSource {
-    async fn xsts_ticket(&self) -> Result<String, AuthError> {
-        self.0
-            .xsts_ticket(RelyingParty::new("https://prod.xsts.halowaypoint.com/"))
-            .await
-            .map(|ticket| ticket.token)
-            .map_err(|error| AuthError::SpartanTokenProvider(error.to_string()))
-    }
-}
 
 fn prompt_line(label: &str) -> Result<String, ExampleError> {
     print!("{label}: ");
@@ -73,7 +59,7 @@ pub fn xbox_client() -> Result<Arc<ExampleXboxClient>, ExampleError> {
 pub fn halo_infinite_client() -> Result<(Arc<ExampleXboxClient>, HaloInfiniteClient), ExampleError>
 {
     let xbox = xbox_client()?;
-    let auth = HaloAuthClient::from_xsts_source(Arc::new(ExampleXstsSource(xbox.clone())));
+    let auth = HaloAuthClient::from_xsts_source(Arc::new(XboxXstsTicketSource::new(xbox.clone())));
     Ok((xbox, HaloInfiniteClient::new(auth)))
 }
 
