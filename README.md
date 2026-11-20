@@ -26,7 +26,7 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 
 | Feature | Default | Description |
 | --- | --- | --- |
-| `xbox` | No | Adds `from_xbox_xsts_source` and `XboxXstsTicketSource` auth convenience and re-exports the [`xbox`](https://crates.io/crates/xbox) crate as `halo_api::xbox`. |
+| `xbox` | No | Adds `from_xbox_xsts_source` and `XboxXstsTicketSource` auth convenience from the [`xbox`](https://crates.io/crates/xbox) crate. |
 
 If your application already obtains Halo Waypoint credentials, use
 `HaloAuthClient::from_tokens(spartan_token, clearance_token)` instead. Those values remain private to the
