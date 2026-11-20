@@ -19,6 +19,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- Updated the `xbox` dependency to 0.3.0 so callers can supply OAuth refresh-token providers.
 - Medal-flagged summary highlights with unrecognized type codes now use
   `SummaryHighlightPayload::Medal(Medal::Unknown { type_code, medal_code })` instead of the
   generic `Unknown` payload.
