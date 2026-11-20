@@ -44,7 +44,7 @@ pub enum EntityViewStop {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EntityComponentRead {
     pub index: usize,
-    pub name: crate::theater::film::FilmName,
+    pub name: std::sync::Arc<str>,
     pub start_bit: i64,
     /// Component payload end, including any recorded corruption-check fields.
     pub end_bit: i64,

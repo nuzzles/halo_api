@@ -1,7 +1,6 @@
 //! Source-backed component field reading and internal reference evidence.
 use super::cursor::ComponentCursor as Cursor;
 use super::position::PositionEncoding;
-use crate::theater::film::FilmName;
 use crate::theater::parser::v41::context::movement::MovementProfile;
 use crate::theater::parser::v41::context::profile::DecodeGrammar;
 use crate::theater::parser::v41::context::values::FilmMppWidths;
@@ -13,7 +12,7 @@ use crate::theater::parser::v41::reference::observations::{
 };
 use crate::theater::parser::v41::replication::source::components::field::ComponentField;
 use std::cell::RefCell;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 const FLAG_NAMES: [&str; 32] = [
     "flags[0]",
@@ -50,7 +49,7 @@ const FLAG_NAMES: [&str; 32] = [
     "flags[31]",
 ];
 
-static COMMON_FIELD_NAMES: LazyLock<[FilmName; 39]> = LazyLock::new(|| {
+static COMMON_FIELD_NAMES: LazyLock<[Arc<str>; 39]> = LazyLock::new(|| {
     [
         "baseline.gate",
         "stationary",
@@ -92,11 +91,11 @@ static COMMON_FIELD_NAMES: LazyLock<[FilmName; 39]> = LazyLock::new(|| {
         "state",
         "count",
     ]
-    .map(FilmName::from)
+    .map(Arc::from)
 });
 
 thread_local! {
-    static INTERNED_NAMES: RefCell<rustc_hash::FxHashMap<String, FilmName>> =
+    static INTERNED_NAMES: RefCell<rustc_hash::FxHashMap<String, Arc<str>>> =
         RefCell::new(rustc_hash::FxHashMap::default());
 }
 
@@ -104,7 +103,7 @@ pub(crate) fn clear_interned_names() {
     INTERNED_NAMES.with(|names| names.borrow_mut().clear());
 }
 
-pub(crate) fn intern_name(name: &str) -> FilmName {
+pub(crate) fn intern_name(name: &str) -> Arc<str> {
     let common = match name {
         "baseline.gate" => Some(0),
         "stationary" => Some(1),
@@ -155,7 +154,7 @@ pub(crate) fn intern_name(name: &str) -> FilmName {
         if let Some(interned) = names.get(name) {
             return interned.clone();
         }
-        let interned = FilmName::from(name);
+        let interned: Arc<str> = Arc::from(name);
         names.insert(name.to_owned(), interned.clone());
         interned
     })
@@ -496,6 +495,7 @@ impl ComponentReader<'_> {
 #[cfg(test)]
 mod tests {
     use super::{COMMON_FIELD_NAMES, gate_name, indexed_name, intern_name};
+    use std::sync::Arc;
 
     #[test]
     fn stack_gate_names_preserve_utf8_and_fall_back_when_long() {
@@ -523,7 +523,7 @@ mod tests {
     #[test]
     fn common_name_slots_match_their_lookup_keys() {
         for name in COMMON_FIELD_NAMES.iter() {
-            assert_eq!(&intern_name(name.as_str()), name);
+            assert!(Arc::ptr_eq(&intern_name(name), name));
         }
     }
 }

@@ -94,7 +94,6 @@ pub enum FilmRegistryReadError {
 
 pub mod catalog;
 mod ids;
-mod name;
 pub mod registry;
 pub mod replication;
 pub mod summary;
@@ -104,7 +103,6 @@ pub use ids::{
     ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId, MapAssetId,
     MapVersionId, TagId, WeaponId, WeaponVariantId, Xuid,
 };
-pub use name::FilmName;
 pub use registry::{
     EntitySchema, EntitySchemaKind, Registry, RegistryComponentDefinition, RegistryGameMode,
     RegistryMap, RegistryMapKind, RegistryOptions, RegistryVersion,

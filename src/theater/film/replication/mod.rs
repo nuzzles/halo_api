@@ -1,9 +1,10 @@
 //! Typed observations retained by a finished film.
 use crate::theater::film::catalog::items::{Equipment, Grenade, Vehicle, Weapon};
 use crate::theater::film::{
-    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EntitySchemaKind, FilmName,
-    KeyframeId, TagId,
+    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EntitySchemaKind, KeyframeId,
+    TagId,
 };
+use std::sync::Arc;
 
 mod event_kind;
 pub use event_kind::ReplicationEventKind;
@@ -76,7 +77,7 @@ pub enum ReplicationChange {
 /// A complete value from an established named component or record field.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ReplicationField {
-    pub name: FilmName,
+    pub name: Arc<str>,
     pub value: ReplicationValue,
 }
 
@@ -165,7 +166,7 @@ pub struct ReplicationComponentChange {
     /// Slot within this entity's schema, not a global component ID.
     pub index: ComponentSlot,
     /// Registry component name shared across observations of this film.
-    pub name: FilmName,
+    pub name: Arc<str>,
     pub fields: Vec<ReplicationField>,
 }
 

@@ -394,7 +394,7 @@ mod tests {
         assert_eq!(
             record
                 .iter()
-                .map(|field| field.name.as_str())
+                .map(|field| field.name.as_ref())
                 .collect::<Vec<_>>(),
             ["header", "outside_a", "outside_b"]
         );
@@ -402,7 +402,7 @@ mod tests {
             components[0]
                 .fields
                 .iter()
-                .map(|field| field.name.as_str())
+                .map(|field| field.name.as_ref())
                 .collect::<Vec<_>>(),
             ["inside_a", "outside_a"]
         );
@@ -410,7 +410,7 @@ mod tests {
             components[1]
                 .fields
                 .iter()
-                .map(|field| field.name.as_str())
+                .map(|field| field.name.as_ref())
                 .collect::<Vec<_>>(),
             ["inside_b", "outside_b"]
         );
@@ -437,7 +437,7 @@ mod tests {
         assert_eq!(
             record
                 .iter()
-                .map(|field| field.name.as_str())
+                .map(|field| field.name.as_ref())
                 .collect::<Vec<_>>(),
             ["header", "outside_b"]
         );

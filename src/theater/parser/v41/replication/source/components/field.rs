@@ -1,6 +1,6 @@
 //! Source-backed component fields.
-use crate::theater::film::FilmName;
 use crate::theater::parser::wire::bits::Bits;
+use std::sync::Arc;
 
 /// Field width and scalar tail retained until ordered projection copies its
 /// exact bits from the packet payload.
@@ -37,7 +37,7 @@ impl FieldBits {
 /// One source-backed component field with its exact payload position and bits.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ComponentField {
-    pub name: FilmName,
+    pub name: Arc<str>,
     pub bit: usize,
     /// The read width is `raw.bit_len`. Zero is an explicit schema-selected,
     /// zero-bit read, distinct from an omitted field.
