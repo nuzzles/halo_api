@@ -4384,9 +4384,9 @@ checksum = "ea6fc2961e4ef194dcbfe56bb845534d0dc8098940c7e5c012a258bfec6701bd"
 
 [[package]]
 name = "xbox"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c8d961de189994282da6e832c87b8c1c32ab09f40a9b3c9087f3bd4cfc7f800"
+checksum = "a077bb826bbb446a015b5a47580e398eec42e244d0c9603b837e335e0256e963"
 dependencies = [
  "async-trait",
  "chrono",

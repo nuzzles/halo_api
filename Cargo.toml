@@ -19,6 +19,7 @@ default = []
 xbox = ["dep:xbox"]
 
 [dependencies]
+xbox = { version = "0.3.1", default-features = false, optional = true }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["float_roundtrip"] }
@@ -32,14 +33,11 @@ csv = "1.4"
 scraper = "0.24"
 uuid = "1.24"
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-xbox = { version = "0.3.0", default-features = false, optional = true }
-
 [dev-dependencies]
 tokio = { version = "1.53.1", features = ["full"] }
 wiremock = "0.6.5"
 rpassword = "7.5.4"
-xbox = { version = "0.3.0", features = ["legacy-password-login"] }
+xbox = { version = "0.3.1", features = ["legacy-password-login"] }
 roxmltree = "0.21.1"
 eframe = { version = "0.33.3", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
 [[example]]

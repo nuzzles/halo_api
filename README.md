@@ -26,14 +26,14 @@ Use your own Xbox authentication code to supply Halo Waypoint XSTS tickets throu
 `HaloAuthClient::from_xsts_source`. `halo_api` exchanges those tickets for Spartan tokens and
 Waypoint clearance, and refreshes them as needed. The ticket source must keep its Xbox credentials
 valid. The optional `xbox` feature provides `XboxXstsTicketSource` and the
-`HALO_RELYING_PARTY` constant for callers using `xbox 0.3.0`. The default build has no Xbox
+`HALO_RELYING_PARTY` constant for callers using `xbox 0.3.1`. The default build has no Xbox
 dependency; the examples use Xbox as a dev dependency.
 
 ## Feature flags
 
 | Feature | Default | Description |
 | --- | --- | --- |
-| `xbox` | No | Exposes `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for Xbox 0.3.0 on native targets. |
+| `xbox` | No | Exposes `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for Xbox 0.3.1. |
 
 Run Xbox-backed examples with `cargo run --features xbox --example playlist_csr`.
 

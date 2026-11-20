@@ -3,7 +3,7 @@ mod clearance;
 mod client;
 mod error;
 mod spartan;
-#[cfg(all(feature = "xbox", not(target_arch = "wasm32")))]
+#[cfg(feature = "xbox")]
 mod xbox;
 
 pub(crate) mod endpoints;
@@ -14,5 +14,5 @@ pub(crate) use client::HaloCredentials;
 pub use error::AuthError;
 pub use spartan::XstsTicketSource;
 pub(crate) use spartan::{SpartanTokenSource, WaypointSpartanTokenProvider};
-#[cfg(all(feature = "xbox", not(target_arch = "wasm32")))]
+#[cfg(feature = "xbox")]
 pub use xbox::{HALO_RELYING_PARTY, XboxXstsTicketSource};
