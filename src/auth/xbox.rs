@@ -3,7 +3,7 @@ use std::sync::Arc;
 use xbox::XboxClient;
 use xbox::auth::{RelyingParty, XblAuthProvider};
 
-use super::{AuthError, XstsTicketSource};
+use super::{AuthError, HaloAuthClient, XstsTicketSource};
 
 /// Xbox relying party used by Halo Waypoint's Spartan-token exchange.
 pub const HALO_RELYING_PARTY: RelyingParty =
@@ -20,6 +20,16 @@ pub struct XboxXstsTicketSource<P: XblAuthProvider> {
 impl<P: XblAuthProvider> XboxXstsTicketSource<P> {
     pub fn new(xbox: impl Into<Arc<XboxClient<P>>>) -> Self {
         Self { xbox: xbox.into() }
+    }
+}
+
+impl HaloAuthClient {
+    /// Exchanges XSTS tickets from an Xbox client for Halo Waypoint credentials.
+    /// The Xbox client and its authentication provider remain caller-owned.
+    pub fn from_xbox_xsts_source<P: XblAuthProvider + 'static>(
+        xbox: impl Into<Arc<XboxClient<P>>>,
+    ) -> Self {
+        Self::from_xsts_source(Arc::new(XboxXstsTicketSource::new(xbox)))
     }
 }
 
