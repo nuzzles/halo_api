@@ -7,6 +7,7 @@
   --muted: #aaa;
   --halo: #398c94;
   --shell: #8564bc;
+  --jgtm: #c78854;
 }
 * { box-sizing: border-box; }
 body { margin: 0; color: var(--text); background: var(--background); font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -30,6 +31,7 @@ h1 { font-size: 21px; }
 .swatch { display: inline-block; width: 14px; height: 11px; }
 .swatch.halo, .bar.halo { background: var(--halo); }
 .swatch.shell, .bar.shell { background: var(--shell); }
+.swatch.jgtm, .bar.jgtm { background: var(--jgtm); }
 .chart { margin-top: 28px; }
 .chart-row { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: center; gap: 22px; padding: 17px 0; border-bottom: 1px solid var(--line); }
 .film-label { font-size: 16px; font-weight: 600; }

@@ -7,7 +7,8 @@ function formatMs(value) {
 function renderBar(value, maximum, parser) {
   const line = document.createElement('div');
   line.className = 'bar-line';
-  line.setAttribute('aria-label', `${parser === 'halo' ? 'halo_api' : 'libfilmshell'}: ${formatMs(value)}`);
+  const names = { halo: 'halo_api', shell: 'libfilmshell', jgtm: 'JGtm (partial decode)' };
+  line.setAttribute('aria-label', `${names[parser]}: ${formatMs(value)}`);
   const rail = document.createElement('span');
   rail.className = 'bar-rail';
   const fill = document.createElement('span');
@@ -24,7 +25,7 @@ function renderBar(value, maximum, parser) {
 function render(results) {
   chart.replaceChildren();
   for (const row of results) {
-    const maximum = Math.max(row.halo_api_ms, row.libfilmshell_ms);
+    const maximum = Math.max(row.halo_api_ms, row.libfilmshell_ms, row.jgtm_partial_ms);
     const outer = document.createElement('div');
     outer.className = 'chart-row';
     const title = document.createElement('div');
@@ -38,6 +39,7 @@ function render(results) {
     bars.className = 'bars';
     bars.append(renderBar(row.halo_api_ms, maximum, 'halo'));
     bars.append(renderBar(row.libfilmshell_ms, maximum, 'shell'));
+    bars.append(renderBar(row.jgtm_partial_ms, maximum, 'jgtm'));
     outer.append(title, bars);
     chart.append(outer);
   }
@@ -49,7 +51,8 @@ fetch('results.json')
     return response.json();
   })
   .then(report => {
-    if (report.schema !== 1 || !Array.isArray(report.results) || report.results.length === 0) {
+    if (report.schema !== 2 || !Array.isArray(report.results) || report.results.length === 0 ||
+        report.results.some(row => !Number.isFinite(row.jgtm_partial_ms))) {
       throw new Error('Unexpected benchmark data');
     }
     document.querySelector('#cpu-model').textContent = report.cpu_model || `${report.os}/${report.arch}`;
