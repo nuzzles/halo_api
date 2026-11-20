@@ -33,7 +33,7 @@ dependency; the examples use Xbox as a dev dependency.
 
 | Feature | Default | Description |
 | --- | --- | --- |
-| `xbox` | No | Exposes `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for Xbox 0.3.0. |
+| `xbox` | No | Exposes `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for Xbox 0.3.0 on native targets. |
 
 Run Xbox-backed examples with `cargo run --features xbox --example playlist_csr`.
 
