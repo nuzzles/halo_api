@@ -28,7 +28,7 @@ impl HaloAuthClient {
     pub fn from_xbox_xsts_source<P: XblAuthProvider + 'static>(
         xbox: impl Into<Arc<XboxClient<P>>>,
     ) -> Self {
-        Self::from_xsts_source(Arc::new(XboxXstsTicketSource::new(xbox)))
+        Self::from_xsts_source(XboxXstsTicketSource::new(xbox))
     }
 }
 
