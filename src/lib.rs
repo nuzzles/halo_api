@@ -7,23 +7,14 @@
 //!
 //! ```no_run
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-//! use std::sync::Arc;
-//!
 //! use halo_api::clients::hi::models::PlaylistId;
 //! use halo_api::auth::HaloAuthClient;
 //! use halo_api::clients::hi::{HaloInfiniteClient, Player};
-//! use xbox::auth::LegacyPasswordProvider;
-//! use xbox::XboxClient;
 //!
-//! let xbox_client = Arc::new(XboxClient::new(LegacyPasswordProvider::new(
-//!     "my-username",
-//!     "my-password",
-//! )));
-//! let auth = HaloAuthClient::from_xbox_client(xbox_client.clone());
+//! let auth = HaloAuthClient::from_tokens("spartan-token", "clearance-token");
 //! let halo = HaloInfiniteClient::new(auth);
 //!
-//! let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
-//! let csr = halo.playlist_csr(PlaylistId::RANKED_ARENA, &Player::from(&xuid)).await?;
+//! let csr = halo.playlist_csr(PlaylistId::RANKED_ARENA, &Player::gamertag("Some Gamertag")).await?;
 //!
 //! println!("{csr:?}");
 //! # Ok(())

@@ -1,20 +1,26 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use super::cache::CachedToken;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::Deserialize;
-use xbox::XboxClient;
-use xbox::auth::{RelyingParty, XblAuthProvider};
-use xbox::cache::CachedToken;
 
 use crate::auth::AuthError;
 
 use super::endpoints::AuthEndpoints;
 
 const SPARTAN_TOKEN_TIMEOUT: Duration = Duration::from_secs(10);
-const HALO_RELYING_PARTY: RelyingParty = RelyingParty::new("https://prod.xsts.halowaypoint.com/");
+
+/// Supplies a valid XSTS ticket for `https://prod.xsts.halowaypoint.com/`.
+/// The caller owns Xbox sign-in and ticket refresh. This method may be called
+/// again whenever Halo credentials expire or a request is rejected.
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
+pub trait XstsTicketSource: Send + Sync {
+    async fn xsts_ticket(&self) -> Result<String, AuthError>;
+}
 
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -36,16 +42,19 @@ struct ExpiresUtc {
     iso8601_date: DateTime<Utc>,
 }
 
-pub(crate) struct XboxSpartanTokenProvider<P: XblAuthProvider> {
-    xbox: Arc<XboxClient<P>>,
+pub(crate) struct WaypointSpartanTokenProvider {
+    source: Arc<dyn XstsTicketSource>,
     http: Client,
     spartan_token_url: String,
 }
 
-impl<P: XblAuthProvider> XboxSpartanTokenProvider<P> {
-    pub(crate) fn with_endpoints(xbox: Arc<XboxClient<P>>, endpoints: &AuthEndpoints) -> Self {
+impl WaypointSpartanTokenProvider {
+    pub(crate) fn with_endpoints(
+        source: Arc<dyn XstsTicketSource>,
+        endpoints: &AuthEndpoints,
+    ) -> Self {
         Self {
-            xbox,
+            source,
             http: Client::new(),
             spartan_token_url: endpoints.spartan_token_url.clone(),
         }
@@ -54,13 +63,9 @@ impl<P: XblAuthProvider> XboxSpartanTokenProvider<P> {
 
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-impl<P: XblAuthProvider> SpartanTokenSource for XboxSpartanTokenProvider<P> {
+impl SpartanTokenSource for WaypointSpartanTokenProvider {
     async fn spartan_token(&self) -> Result<CachedToken<String>, AuthError> {
-        let xsts = self
-            .xbox
-            .xsts_ticket(HALO_RELYING_PARTY)
-            .await
-            .map_err(|err| AuthError::SpartanTokenProvider(err.to_string()))?;
+        let xsts = self.source.xsts_ticket().await?;
 
         let response = self
             .http
@@ -71,7 +76,7 @@ impl<P: XblAuthProvider> SpartanTokenSource for XboxSpartanTokenProvider<P> {
                 "Audience": "urn:343:s3:services",
                 "MinVersion": "4",
                 "Proof": [{
-                    "Token": xsts.token,
+                    "Token": xsts,
                     "TokenType": "Xbox_XSTSv3",
                 }],
             }))

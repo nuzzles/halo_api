@@ -22,8 +22,10 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 
-This crate depends on the [`xbox`](https://crates.io/crates/xbox) crate for Xbox Live authentication (XSTS
-tickets and XUID resolution). [`HaloAuthClient`] acquires and refreshes all Halo Waypoint credentials.
+Use your own Xbox authentication code to supply Halo Waypoint XSTS tickets through
+`HaloAuthClient::from_xsts_source`. `halo_api` exchanges those tickets for Spartan tokens and
+Waypoint clearance, and refreshes them as needed. The ticket source must keep its Xbox credentials
+valid. `halo_api` has no dependency on an Xbox authentication crate.
 
 If your application already obtains Halo Waypoint credentials, use
 `HaloAuthClient::from_tokens(spartan_token, clearance_token)` instead. Those values remain private to the
@@ -32,26 +34,17 @@ client, but the caller is responsible for replacing the client when they expire.
 ## Quick start
 
 ```rust,no_run
-use std::sync::Arc;
-
 use halo_api::clients::hi::models::PlaylistId;
 use halo_api::auth::HaloAuthClient;
 use halo_api::clients::hi::{HaloInfiniteClient, Player};
-use xbox::auth::LegacyPasswordProvider;
-use xbox::XboxClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let xbox_client = Arc::new(XboxClient::new(LegacyPasswordProvider::new(
-        "my-username",
-        "my-password",
-    )));
-    let auth = HaloAuthClient::from_xbox_client(xbox_client.clone());
+    let auth = HaloAuthClient::from_tokens("spartan-token", "clearance-token");
     let halo = HaloInfiniteClient::new(auth);
 
-    let xuid = xbox_client.gamertag_to_xuid("Some Gamertag").await?;
     let csr = halo
-        .playlist_csr(PlaylistId::RANKED_ARENA, &Player::from(&xuid))
+        .playlist_csr(PlaylistId::RANKED_ARENA, &Player::gamertag("Some Gamertag"))
         .await?;
 
     println!("{csr:?}");

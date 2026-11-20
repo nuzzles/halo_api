@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
+use super::cache::{CachedToken, ExpiryTokenCache};
 use chrono::{Duration as ChronoDuration, Utc};
-use xbox::cache::{CachedToken, ExpiryTokenCache};
-use xbox::{XboxClient, auth::XblAuthProvider};
 
 use super::{
-    ClearanceTokenSource, SpartanTokenSource, WaypointClearanceProvider, XboxSpartanTokenProvider,
+    ClearanceTokenSource, SpartanTokenSource, WaypointClearanceProvider,
+    WaypointSpartanTokenProvider, XstsTicketSource,
 };
 use crate::auth::AuthError;
 
@@ -24,8 +24,8 @@ pub struct HaloAuthClient {
 struct HaloAuthState {
     spartan_source: Arc<dyn SpartanTokenSource>,
     clearance_source: Arc<dyn ClearanceTokenSource>,
-    spartan_cache: ExpiryTokenCache<String, AuthError>,
-    clearance_cache: ExpiryTokenCache<String, AuthError>,
+    spartan_cache: ExpiryTokenCache<String>,
+    clearance_cache: ExpiryTokenCache<String>,
 }
 
 /// Non-refreshable credentials supplied directly by an application.
@@ -75,16 +75,10 @@ pub(crate) struct HaloCredentials {
 }
 
 impl HaloAuthClient {
-    /// Builds the standard Waypoint authentication flow from an owned or shared
-    /// Xbox Live client.
-    ///
-    /// Both `XboxClient<P>` and `Arc<XboxClient<P>>` are accepted. Pass an `Arc`
-    /// when the caller also needs the Xbox client, such as for gamertag-to-XUID
-    /// resolution.
-    pub fn from_xbox_client<P: XblAuthProvider + 'static>(
-        xbox: impl Into<Arc<XboxClient<P>>>,
-    ) -> Self {
-        Self::from_xbox_client_with_endpoints(xbox, &AuthEndpoints::default())
+    /// Exchanges caller-supplied Halo Waypoint XSTS tickets for Spartan tokens
+    /// and clearance. The source must renew its Xbox credentials as needed.
+    pub fn from_xsts_source(source: Arc<dyn XstsTicketSource>) -> Self {
+        Self::from_xsts_source_with_endpoints(source, &AuthEndpoints::default())
     }
 
     /// Uses existing Halo Waypoint credentials without performing an Xbox
@@ -109,14 +103,13 @@ impl HaloAuthClient {
     }
 
     /// Builds the authentication flow with overridable URLs for crate tests.
-    pub(crate) fn from_xbox_client_with_endpoints<P: XblAuthProvider + 'static>(
-        xbox: impl Into<Arc<XboxClient<P>>>,
+    pub(crate) fn from_xsts_source_with_endpoints(
+        source: Arc<dyn XstsTicketSource>,
         endpoints: &AuthEndpoints,
     ) -> Self {
         Self::with_sources(
-            Arc::new(XboxSpartanTokenProvider::with_endpoints(
-                xbox.into(),
-                endpoints,
+            Arc::new(WaypointSpartanTokenProvider::with_endpoints(
+                source, endpoints,
             )),
             Arc::new(WaypointClearanceProvider::new(
                 &endpoints.current_user_url,

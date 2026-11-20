@@ -3,7 +3,7 @@
 mod common;
 
 use halo_api::clients::hi::Player;
-use xbox::models::Xuid;
+use halo_api::clients::hi::Xuid;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {

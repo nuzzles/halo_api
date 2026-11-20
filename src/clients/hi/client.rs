@@ -1,10 +1,17 @@
 use std::{sync::Arc, time::Duration};
 
+use super::Xuid;
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
 use tracing::warn;
-use xbox::models::Xuid;
-use xbox::util::wrap_xuid;
+
+fn wrap_xuid(value: &str) -> String {
+    if value.starts_with("xuid(") && value.ends_with(')') {
+        value.to_owned()
+    } else {
+        format!("xuid({value})")
+    }
+}
 
 use super::endpoints::HaloEndpoints;
 use super::models::{
