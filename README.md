@@ -22,9 +22,6 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 - Automatically invalidates and retries once on an expired/unauthorized (401) response, instead of surfacing a
   hard failure the caller has to handle manually.
 
-Use your own Xbox authentication code to supply Halo Waypoint XSTS tickets through
-`HaloAuthClient::from_xsts_source`.
-
 ## Feature flags
 
 | Feature | Default | Description |
