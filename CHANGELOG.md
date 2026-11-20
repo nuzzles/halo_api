@@ -19,6 +19,13 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- Removed the `xbox` dependency. Callers now supply Halo Waypoint XSTS tickets through
+  `HaloAuthClient::from_xsts_source` or Halo credentials through `from_tokens`.
+- `Player::Xuid` now contains `halo_api::clients::hi::Xuid`; callers using Xbox's XUID type
+  should pass its string value to `Player::xuid`.
+- Examples use `xbox 0.3.0` as a dev dependency and pass XSTS tickets through the new source.
+- The optional `xbox` feature provides `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for
+  `xbox 0.3.0` callers.
 - Medal-flagged summary highlights with unrecognized type codes now use
   `SummaryHighlightPayload::Medal(Medal::Unknown { type_code, medal_code })` instead of the
   generic `Unknown` payload.

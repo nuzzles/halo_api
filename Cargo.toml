@@ -14,8 +14,12 @@ categories = ["api-bindings"]
 [package.metadata.docs.rs]
 all-features = true
 
+[features]
+default = []
+xbox = ["dep:xbox"]
+
 [dependencies]
-xbox = { version = "0.2", default-features = false }
+xbox = { version = "0.3.1", default-features = false, optional = true }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["float_roundtrip"] }
@@ -33,9 +37,177 @@ uuid = "1.24"
 tokio = { version = "1.53.1", features = ["full"] }
 wiremock = "0.6.5"
 rpassword = "7.5.4"
+xbox = { version = "0.3.1", features = ["legacy-password-login"] }
 roxmltree = "0.21.1"
 eframe = { version = "0.33.3", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+[[example]]
+name = "appearance_gamertag"
+required-features = ["xbox"]
 
-# Password login uses native redirect handling; browser clients supply tokens.
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-xbox = { version = "0.2", features = ["legacy-password-login"] }
+[[example]]
+name = "asset"
+required-features = ["xbox"]
+
+[[example]]
+name = "ban_check"
+required-features = ["xbox"]
+
+[[example]]
+name = "ban_summary"
+required-features = ["xbox"]
+
+[[example]]
+name = "career_rank"
+required-features = ["xbox"]
+
+[[example]]
+name = "csr_season"
+required-features = ["xbox"]
+
+[[example]]
+name = "csr_seasons"
+required-features = ["xbox"]
+
+[[example]]
+name = "current_csr_season"
+required-features = ["xbox"]
+
+[[example]]
+name = "current_user"
+required-features = ["xbox"]
+
+[[example]]
+name = "discover_named_assets"
+required-features = ["xbox"]
+
+[[example]]
+name = "download_film"
+required-features = ["xbox"]
+
+[[example]]
+name = "emblem_mapping"
+required-features = ["xbox"]
+
+[[example]]
+name = "film_events"
+required-features = ["xbox"]
+
+[[example]]
+name = "latest_match"
+required-features = ["xbox"]
+
+[[example]]
+name = "map"
+required-features = ["xbox"]
+
+[[example]]
+name = "map_mode_pair"
+required-features = ["xbox"]
+
+[[example]]
+name = "match_count"
+required-features = ["xbox"]
+
+[[example]]
+name = "match_film"
+required-features = ["xbox"]
+
+[[example]]
+name = "match_skill"
+required-features = ["xbox"]
+
+[[example]]
+name = "match_stats"
+required-features = ["xbox"]
+
+[[example]]
+name = "medals"
+required-features = ["xbox"]
+
+[[example]]
+name = "mode"
+required-features = ["xbox"]
+
+[[example]]
+name = "player_customizations"
+required-features = ["xbox"]
+
+[[example]]
+name = "player_match_count"
+required-features = ["xbox"]
+
+[[example]]
+name = "player_matches"
+required-features = ["xbox"]
+
+[[example]]
+name = "player_matches_paged"
+required-features = ["xbox"]
+
+[[example]]
+name = "playlist"
+required-features = ["xbox"]
+
+[[example]]
+name = "playlist_csr"
+required-features = ["xbox"]
+
+[[example]]
+name = "playlist_metadata"
+required-features = ["xbox"]
+
+[[example]]
+name = "post_match_report"
+required-features = ["xbox"]
+
+[[example]]
+name = "privacy_check"
+required-features = ["xbox"]
+
+[[example]]
+name = "public_player_check"
+required-features = ["xbox"]
+
+[[example]]
+name = "ranked_arena"
+required-features = ["xbox"]
+
+[[example]]
+name = "recent_match_scoreboard"
+required-features = ["xbox"]
+
+[[example]]
+name = "recent_player_summary"
+required-features = ["xbox"]
+
+[[example]]
+name = "reward_track_operations"
+required-features = ["xbox"]
+
+[[example]]
+name = "season_calendar"
+required-features = ["xbox"]
+
+[[example]]
+name = "service_record"
+required-features = ["xbox"]
+
+[[example]]
+name = "service_record_filtered"
+required-features = ["xbox"]
+
+[[example]]
+name = "settings"
+required-features = ["xbox"]
+
+[[example]]
+name = "user"
+required-features = ["xbox"]
+
+[[example]]
+name = "users"
+required-features = ["xbox"]
+
+[[example]]
+name = "whoami"
+required-features = ["xbox"]

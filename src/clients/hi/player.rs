@@ -1,6 +1,32 @@
 //! A player identifier accepted by Halo Infinite endpoints.
 
-use xbox::models::Xuid;
+/// An Xbox user ID stored as a numeric string.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Xuid(pub String);
+
+impl Xuid {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for Xuid {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl From<String> for Xuid {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for Xuid {
+    fn from(value: &str) -> Self {
+        Self(value.to_owned())
+    }
+}
 
 /// A player identifier: either a gamertag or a numeric XUID.
 ///

@@ -1,8 +1,11 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use crate::auth::cache::CachedToken;
 use crate::auth::endpoints::AuthEndpoints;
-use crate::auth::{AuthError, ClearanceTokenSource, HaloAuthClient, SpartanTokenSource};
+use crate::auth::{
+    AuthError, ClearanceTokenSource, HaloAuthClient, SpartanTokenSource, XstsTicketSource,
+};
 use crate::clients::hi::endpoints::HaloEndpoints;
 use crate::clients::hi::models::{
     CustomizationItemMetadata, EmblemImageAssets, MatchHistoryType, MatchType, PlaylistId,
@@ -14,16 +17,12 @@ use crate::clients::hi::{
 };
 use async_trait::async_trait;
 use chrono::{Duration, Utc};
-use wiremock::matchers::{header, method, path, query_param};
+use wiremock::matchers::{body_json, header, method, path, query_param};
 use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate};
-use xbox::auth::XblAuthProvider;
-use xbox::cache::CachedToken;
-use xbox::{XboxClient, XboxEndpoints, XboxError};
 
 mod theater_errors;
 
-/// Hands out a fixed, never-expiring user token without touching the network.
-struct FakeAuthProvider;
+struct FakeXstsSource;
 
 struct FailingSpartanTokenSource;
 struct UnusedClearanceTokenSource;
@@ -77,21 +76,10 @@ impl ClearanceTokenSource for UnusedClearanceTokenSource {
 }
 
 #[async_trait]
-impl XblAuthProvider for FakeAuthProvider {
-    async fn user_token(&self) -> Result<CachedToken<String>, XboxError> {
-        Ok(CachedToken::new(
-            "fake-user-token".to_string(),
-            Utc::now() + Duration::hours(1),
-        ))
+impl XstsTicketSource for FakeXstsSource {
+    async fn xsts_ticket(&self) -> Result<String, AuthError> {
+        Ok("fake-xsts-token".into())
     }
-}
-
-fn xsts_body() -> serde_json::Value {
-    serde_json::json!({
-        "Token": "fake-xsts-token",
-        "NotAfter": (Utc::now() + Duration::hours(1)).to_rfc3339(),
-        "DisplayClaims": { "xui": [{ "uhs": "fake-uhs" }] }
-    })
 }
 
 fn spartan_token_body(expires_at: chrono::DateTime<Utc>) -> serde_json::Value {
@@ -114,17 +102,8 @@ fn csr_body(value: i32) -> serde_json::Value {
     })
 }
 
-/// Sets up a mock server with XSTS + spartan-token mocks, and returns a `HaloInfiniteClient` wired to
-/// it plus the shared `XboxClient` (for XUID resolution) — everything an end-to-end test needs.
-async fn test_client(
-    server: &MockServer,
-) -> (HaloInfiniteClient, Arc<XboxClient<FakeAuthProvider>>) {
-    Mock::given(method("POST"))
-        .and(path("/xsts/authorize"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(xsts_body()))
-        .mount(server)
-        .await;
-
+/// Sets up a mock server with a caller-supplied XSTS ticket and Halo endpoints.
+async fn test_client(server: &MockServer) -> (HaloInfiniteClient, ()) {
     Mock::given(method("GET"))
         .and(path(
             "/oban/flight-configurations/titles/hi/audiences/retail/players/xuid(123456789)/active",
@@ -146,21 +125,17 @@ async fn test_client(
 
     Mock::given(method("POST"))
         .and(path("/spartan-token"))
+        .and(body_json(serde_json::json!({
+            "Audience": "urn:343:s3:services",
+            "MinVersion": "4",
+            "Proof": [{"Token": "fake-xsts-token", "TokenType": "Xbox_XSTSv3"}]
+        })))
         .respond_with(
             ResponseTemplate::new(200)
                 .set_body_json(spartan_token_body(Utc::now() + Duration::hours(1))),
         )
         .mount(server)
         .await;
-
-    let xbox_client = Arc::new(XboxClient::with_endpoints(
-        FakeAuthProvider,
-        reqwest::Client::new(),
-        XboxEndpoints {
-            xsts_authorize_url: format!("{}/xsts/authorize", server.uri()),
-            peoplehub_base_url: server.uri(),
-        },
-    ));
 
     let auth_endpoints = AuthEndpoints {
         spartan_token_url: format!("{}/spartan-token", server.uri()),
@@ -182,10 +157,10 @@ async fn test_client(
         economy_base_url: server.uri(),
     };
     let auth =
-        HaloAuthClient::from_xbox_client_with_endpoints(xbox_client.clone(), &auth_endpoints);
+        HaloAuthClient::from_xsts_source_with_endpoints(Arc::new(FakeXstsSource), &auth_endpoints);
     let halo_infinite_client = HaloInfiniteClient::with_endpoints(auth, endpoints);
 
-    (halo_infinite_client, xbox_client)
+    (halo_infinite_client, ())
 }
 
 #[tokio::test]

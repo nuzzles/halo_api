@@ -59,7 +59,7 @@ pub fn xbox_client() -> Result<Arc<ExampleXboxClient>, ExampleError> {
 pub fn halo_infinite_client() -> Result<(Arc<ExampleXboxClient>, HaloInfiniteClient), ExampleError>
 {
     let xbox = xbox_client()?;
-    let auth = HaloAuthClient::from_xbox_client(xbox.clone());
+    let auth = HaloAuthClient::from_xbox_xsts_source(xbox.clone());
     Ok((xbox, HaloInfiniteClient::new(auth)))
 }
 

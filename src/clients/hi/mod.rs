@@ -10,5 +10,5 @@ mod rate_limit;
 pub use client::{HaloInfiniteClient, HaloInfiniteClientBuilder};
 pub use error::{InfiniteClientError, TheaterError};
 pub use pager::{MAX_PAGE_SIZE, MatchHistoryPager};
-pub use player::Player;
+pub use player::{Player, Xuid};
 pub use pool::{HaloInfiniteClientPool, HaloInfiniteClientPoolError};
