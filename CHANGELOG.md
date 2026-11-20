@@ -10,25 +10,32 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-20
+
+This release has an [MSRV][] of 1.96.
+
 ### Added
 
 - Decode Halo Infinite Theater chunks into a typed `Film` with registry, replication stream,
   and summary highlights. `FilmRuntime` replays observations into seekable world snapshots;
   the `film_world_inspector` example explores entities and their components.
 - `Medal::code()` returns the recorded Theater summary code for known and unknown medals.
+- The optional `xbox` feature provides `HaloAuthClient::from_xbox_xsts_source` and
+  `XboxXstsTicketSource` for `xbox 0.3.1`.
 
 ### Changed
 
-- Removed the `xbox` dependency. Callers now supply Halo Waypoint XSTS tickets through
-  `HaloAuthClient::from_xsts_source` or Halo credentials through `from_tokens`.
+- Xbox authentication is optional. The default build has no Xbox dependency; callers can supply
+  an owned `XstsTicketSource` through `HaloAuthClient::from_xsts_source`, or Halo credentials
+  through `from_tokens`. Replace `from_xbox_client` with `from_xbox_xsts_source` when using the
+  `xbox` feature.
 - `Player::Xuid` now contains `halo_api::clients::hi::Xuid`; callers using Xbox's XUID type
   should pass its string value to `Player::xuid`.
-- Examples use `xbox 0.3.0` as a dev dependency and pass XSTS tickets through the new source.
-- The optional `xbox` feature provides `XboxXstsTicketSource` and `HALO_RELYING_PARTY` for
-  `xbox 0.3.0` callers.
+- Xbox-backed examples use `xbox 0.3.1` as a dev dependency and require the `xbox` feature.
 - Medal-flagged summary highlights with unrecognized type codes now use
   `SummaryHighlightPayload::Medal(Medal::Unknown { type_code, medal_code })` instead of the
   generic `Unknown` payload.
+- Reduced Theater film decoding overhead when parsing replication fields and compressed chunks.
 
 ## [0.5.0] - 2026-11-18
 
@@ -132,7 +139,8 @@ This release has an [MSRV][] of 1.96.
 
 [MSRV]: README.md#msrv
 
-[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/nuzzles/halo_api/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/nuzzles/halo_api/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nuzzles/halo_api/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/nuzzles/halo_api/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/nuzzles/halo_api/compare/v0.3.0...v0.3.1
