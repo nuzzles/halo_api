@@ -6,8 +6,7 @@ use xbox::auth::{RelyingParty, XblAuthProvider};
 use super::{AuthError, HaloAuthClient, XstsTicketSource};
 
 /// Xbox relying party used by Halo Waypoint's Spartan-token exchange.
-pub const HALO_RELYING_PARTY: RelyingParty =
-    RelyingParty::new("https://prod.xsts.halowaypoint.com/");
+const HALO_RELYING_PARTY: RelyingParty = RelyingParty::new("https://prod.xsts.halowaypoint.com/");
 
 /// Adapts an Xbox 0.3 client into a Halo Waypoint XSTS ticket source.
 ///

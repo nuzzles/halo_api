@@ -15,4 +15,4 @@ pub use error::AuthError;
 pub use spartan::XstsTicketSource;
 pub(crate) use spartan::{SpartanTokenSource, WaypointSpartanTokenProvider};
 #[cfg(feature = "xbox")]
-pub use xbox::{HALO_RELYING_PARTY, XboxXstsTicketSource};
+pub use xbox::XboxXstsTicketSource;
