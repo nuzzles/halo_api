@@ -1,9 +1,8 @@
 {
-  "schema": 2,
+  "schema": 1,
   "generated_at_unix_seconds": 1795215330,
   "halo_api_commit": "3026526",
   "libfilmshell_commit": "031e2179f0758314e2a97fb96438c7b1e82ce1fb",
-  "jgtm_commit": "037ec4d4db6578309a9d8139ae8a11af1b3de871",
   "os": "macos",
   "arch": "aarch64",
   "logical_cpus": 10,
@@ -18,7 +17,6 @@
       "runs": 100,
       "halo_api_ms": 19.073228999999998,
       "libfilmshell_ms": 25.862770500000003,
-      "jgtm_partial_ms": 8.747499999999999,
       "film_fingerprint": "e7a166262cc37979"
     },
     {
@@ -29,7 +27,6 @@
       "runs": 100,
       "halo_api_ms": 15.8190205,
       "libfilmshell_ms": 26.8982915,
-      "jgtm_partial_ms": 7.5817499999999995,
       "film_fingerprint": "9ebb6a12e814cc91"
     },
     {
@@ -40,7 +37,6 @@
       "runs": 100,
       "halo_api_ms": 64.2467705,
       "libfilmshell_ms": 89.10554150000002,
-      "jgtm_partial_ms": 53.206520999999995,
       "film_fingerprint": "765655c8107ee4f1"
     },
     {
@@ -51,7 +47,6 @@
       "runs": 100,
       "halo_api_ms": 409.99906250000004,
       "libfilmshell_ms": 529.9606249999999,
-      "jgtm_partial_ms": 93.375271,
       "film_fingerprint": "d89638563a19cf14"
     },
     {
@@ -62,7 +57,6 @@
       "runs": 100,
       "halo_api_ms": 444.058187,
       "libfilmshell_ms": 4639.7943335,
-      "jgtm_partial_ms": 254.068375,
       "film_fingerprint": "09f3de8ebe6fb0e7"
     },
     {
@@ -73,7 +67,6 @@
       "runs": 100,
       "halo_api_ms": 293.4081875,
       "libfilmshell_ms": 906.3861870000001,
-      "jgtm_partial_ms": 149.3047915,
       "film_fingerprint": "37d1b0ddd3be6916"
     },
     {
@@ -84,7 +77,6 @@
       "runs": 100,
       "halo_api_ms": 3099.3950205,
       "libfilmshell_ms": 7250.945020499999,
-      "jgtm_partial_ms": 926.4273335,
       "film_fingerprint": "b658eabb736ef621"
     }
   ]

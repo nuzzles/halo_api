@@ -2,7 +2,7 @@
 
 | Benchmark | Contents |
 | --- | --- |
-| [`001_film_parse`](001_film_parse/) | Seven complete Theater film fixtures and the halo_api/libfilmshell/JGtm decode harness. |
+| [`001_film_parse`](001_film_parse/) | Seven complete Theater film fixtures and the halo_api/libfilmshell decode harness. |
 | [`website`](website/) | Static GitHub Pages chart generated from the harness JSON output. |
 
 The site publishes a measured snapshot. It does not run benchmarks in a GitHub
