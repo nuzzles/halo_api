@@ -1276,9 +1276,11 @@ dependencies = [
  "reqwest",
  "roxmltree",
  "rpassword",
+ "rustc-hash 2.1.3",
  "scraper",
  "serde",
  "serde_json",
+ "smallvec",
  "thiserror 2.0.19",
  "tokio",
  "tracing",
@@ -3149,6 +3151,9 @@ name = "smallvec"
 version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "smithay-client-toolkit"

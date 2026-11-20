@@ -22,7 +22,7 @@ pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str, level: u32) -> 
                 let first = r.fields.len();
                 let result = formatted_text(r);
                 for field in &mut r.fields[first..] {
-                    field.name = format!("entries[{i}].{}", field.name);
+                    field.name = format!("entries[{i}].{}", field.name).into();
                 }
                 result?;
             }
@@ -176,7 +176,7 @@ fn payload(r: &mut ComponentReader<'_>, prefix: &str, tag: u64) -> Option<bool> 
         Some(true)
     })();
     for field in &mut r.fields[start..] {
-        field.name = format!("{prefix}.{}", field.name);
+        field.name = format!("{prefix}.{}", field.name).into();
     }
     result
 }

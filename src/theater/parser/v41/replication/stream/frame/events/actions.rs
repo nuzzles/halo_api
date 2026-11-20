@@ -31,9 +31,9 @@ pub(super) fn read(r: &mut Reader<'_>, data: &[u8], variant: u64) -> bool {
     if let Some(trace) = &mut r.trace {
         trace.extend(component.fields.into_iter().map(|field| EventField {
             bit: field.bit,
-            width: field.width,
+            width: field.raw.bit_len,
             stage: r.stage,
-            value: if field.width <= 64 {
+            value: if field.raw.bit_len <= 64 {
                 EventFieldValue::Scalar(field.raw.low_u64())
             } else {
                 EventFieldValue::Opaque

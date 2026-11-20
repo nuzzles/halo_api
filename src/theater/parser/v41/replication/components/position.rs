@@ -292,9 +292,10 @@ pub(crate) fn absolute_payload(
         }
     }
     r.record_absolute(region_index);
+    const POSITION_NAMES: [&str; 3] = ["position[0]", "position[1]", "position[2]"];
     for (i, raw) in raw_widths.into_iter().enumerate() {
         let width = r.reference_position_width(raw, "world axes")?;
-        r.r_wide(&format!("position[{i}]"), width)?;
+        r.r_wide(POSITION_NAMES[i], width)?;
     }
     Some(())
 }
@@ -373,7 +374,7 @@ pub(crate) fn point(r: &mut ComponentReader<'_>, prefix: &str) -> Option<bool> {
     let start = r.fields.len();
     let result = absolute_payload(r, encoding);
     for field in &mut r.fields[start..] {
-        field.name = format!("{prefix}.{}", field.name);
+        field.name = format!("{prefix}.{}", field.name).into();
     }
     result.map(|_| true)
 }

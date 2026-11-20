@@ -23,12 +23,21 @@ impl<'a> Bits<'a> {
         }
         let first = offset / 8;
         let count = ((offset % 8) + width).div_ceil(8);
-        let mut word = 0u128;
-        for &byte in self.0.get(first..first + count)? {
-            word = (word << 8) | u128::from(byte);
-        }
         let shift = count * 8 - offset % 8 - width;
-        Some(((word >> shift) & ((1u128 << width) - 1)) as u64)
+        let bytes = self.0.get(first..first + count)?;
+        if count <= 8 {
+            let mut word = 0u64;
+            for &byte in bytes {
+                word = (word << 8) | u64::from(byte);
+            }
+            Some((word >> shift) & (u64::MAX >> (64 - width)))
+        } else {
+            let mut word = 0u128;
+            for &byte in bytes {
+                word = (word << 8) | u128::from(byte);
+            }
+            Some(((word >> shift) & ((1u128 << width) - 1)) as u64)
+        }
     }
     pub(crate) fn windows(self) -> Windows<'a> {
         let mut value = 0u64;
@@ -144,5 +153,52 @@ impl Iterator for Windows<'_> {
         self.value = (self.value << 1) | bit;
         self.offset += 1;
         Some(result)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Bits;
+
+    #[test]
+    fn short_reads_match_msb_first_bits_at_every_boundary() {
+        let data = [0x72, 0xa1, 0x05, 0xef, 0xc3, 0x49, 0x18, 0xb6, 0x2d];
+        let bits = Bits(&data);
+        for offset in 0..=data.len() * 8 {
+            for width in 0..=8 {
+                let expected = (offset + width <= data.len() * 8).then(|| {
+                    (0..width).fold(0u64, |value, bit| {
+                        let source = offset + bit;
+                        (value << 1) | u64::from((data[source / 8] >> (7 - source % 8)) & 1)
+                    })
+                });
+                assert_eq!(
+                    bits.read(offset, width),
+                    expected,
+                    "offset {offset}, width {width}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn scalar_reads_match_msb_first_bits_at_every_boundary() {
+        let data = [0x72, 0xa1, 0x05, 0xef, 0xc3, 0x49, 0x18, 0xb6, 0x2d, 0xf0];
+        let bits = Bits(&data);
+        for offset in 0..=data.len() * 8 {
+            for width in 0..=64 {
+                let expected = (offset + width <= data.len() * 8).then(|| {
+                    (0..width).fold(0u64, |value, bit| {
+                        let source = offset + bit;
+                        (value << 1) | u64::from((data[source / 8] >> (7 - source % 8)) & 1)
+                    })
+                });
+                assert_eq!(
+                    bits.read(offset, width),
+                    expected,
+                    "offset {offset}, width {width}"
+                );
+            }
+        }
     }
 }

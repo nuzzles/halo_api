@@ -11,11 +11,55 @@ pub(crate) fn reference_bit_at(data: &[u8], position: i64) -> u8 {
 /// Zero-pad both boundaries. Negative widths read nothing; widths above 64
 /// retain the last 64 bits, as in the reference's unsigned accumulator.
 pub(crate) fn reference_bits_tolerant(data: &[u8], position: i64, width: i64) -> u64 {
+    if let (Ok(start), Ok(width)) = (usize::try_from(position), usize::try_from(width))
+        && width <= 64
+        && let Some(end) = start.checked_add(width)
+        && end <= data.len().saturating_mul(8)
+    {
+        let mut value = 0u64;
+        let mut bit = start;
+        while bit < end {
+            let byte_end = (bit | 7).saturating_add(1).min(end);
+            let count = byte_end - bit;
+            let shift = 8 - bit % 8 - count;
+            let mask = (1u16 << count) - 1;
+            value = (value << count) | u64::from((u16::from(data[bit / 8] >> shift)) & mask);
+            bit = byte_end;
+        }
+        return value;
+    }
     let mut value = 0;
     for i in width.saturating_sub(64).max(0)..width {
         value = (value << 1) | u64::from(reference_bit_at(data, position.wrapping_add(i)));
     }
     value
+}
+
+#[cfg(test)]
+mod tests {
+    use super::reference_bits_tolerant;
+
+    #[test]
+    fn byte_path_matches_bitwise_reference_at_all_boundaries() {
+        let data = [0x72, 0xa1, 0x05, 0xef, 0xc3, 0x49, 0x18, 0xb6, 0x2d];
+        for position in -8..=data.len() as i64 * 8 + 8 {
+            for width in -1i64..=80 {
+                let expected = (width.saturating_sub(64).max(0)..width).fold(0u64, |value, i| {
+                    let p = position.wrapping_add(i);
+                    let bit = usize::try_from(p)
+                        .ok()
+                        .and_then(|p| data.get(p / 8).map(|b| (b >> (7 - p % 8)) & 1))
+                        .unwrap_or(0);
+                    (value << 1) | u64::from(bit)
+                });
+                assert_eq!(
+                    reference_bits_tolerant(&data, position, width),
+                    expected,
+                    "position {position}, width {width}"
+                );
+            }
+        }
+    }
 }
 
 /// Read a scalar with zero tail padding.

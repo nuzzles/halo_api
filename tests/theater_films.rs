@@ -393,6 +393,22 @@ fn parse_rejects_missing_summary_and_damaged_zlib() {
         Film::parse(damaged),
         Err(ParseError::Inflate { index: 1, .. })
     ));
+
+    let mut damaged_both = chunks("bazaar_idle");
+    let summary_index = damaged_both.len() - 1;
+    damaged_both[1].data.truncate(2);
+    damaged_both[summary_index].data.truncate(2);
+    assert!(matches!(
+        Film::parse(damaged_both),
+        Err(ParseError::Inflate { index: 1, .. })
+    ));
+
+    let mut damaged_summary = chunks("bazaar_idle");
+    damaged_summary[summary_index].data.truncate(2);
+    assert!(matches!(
+        Film::parse(damaged_summary),
+        Err(ParseError::Inflate { index, .. }) if index == summary_index
+    ));
 }
 
 #[test]

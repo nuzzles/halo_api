@@ -2,7 +2,9 @@
 use crate::theater::parser::v41::context::layout::RecordLayout;
 use crate::theater::parser::v41::context::profile::DecodeProfile;
 use crate::theater::parser::v41::registry::source::FilmRegistry;
-use crate::theater::parser::v41::replication::source::components::field::ComponentField;
+use crate::theater::parser::v41::replication::source::components::field::{
+    ComponentField, FieldBits,
+};
 use crate::theater::parser::v41::replication::source::{
     DeltaRejectionReason, EntityRecord, EntityViewStop, ExternalDeltaSchemaUse, FrameViewStop,
     RecordKind,
@@ -15,7 +17,6 @@ use crate::theater::parser::v41::replication::stream::frame::header::decode_fram
 use crate::theater::parser::v41::replication::stream::frame::records::{
     RecordBinding, RecordReadContext, decode_entity_record,
 };
-use crate::theater::parser::wire::fields::RawBits;
 
 use crate::theater::parser::v41::replication::source::stream::models::production_frame::{
     ProductionEntityEnd, ProductionFrame,
@@ -117,14 +118,13 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
         }
         let prefix = if encoding.extra_fields {
             let start = usize::try_from(out.end_bit).ok()?;
-            let Some(raw) = RawBits::from_source(data, start, 32) else {
+            let Some(raw) = FieldBits::from_source(data, start, 32) else {
                 out.entity_end = Some(ProductionEntityEnd::Truncated);
                 break;
             };
             Some(ComponentField {
                 name: "record.prefix".into(),
                 bit: start,
-                width: 32,
                 raw,
             })
         } else {
@@ -161,8 +161,7 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
             // successor; the canonical reader has no recovery hook and keeps
             // its ordinary source walk unchanged.
             let generation_changed = world
-                .slots
-                .get(&(id & 0x3fff_ffff))
+                .binding(id & 0x3fff_ffff)
                 .is_some_and(|binding| !binding.generation_any && binding.full_id != id);
             let mut reason = world.admit_delta(id, true);
             if (matches!(reason, DeltaAdmission::Unbound) || generation_changed)
@@ -205,7 +204,7 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
             .map(|archetype| RecordBinding { id, archetype });
         let Some(mut record) = decode_entity_record(
             data,
-            header_bit,
+            header,
             registry,
             &body_encoding,
             binding,
@@ -256,8 +255,7 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
                     })
                     && ALLOW_REPLACEMENT
                     && world
-                        .slots
-                        .get(&(id & 0x3fff_ffff))
+                        .binding(id & 0x3fff_ffff)
                         .is_some_and(|binding| !binding.generation_any && binding.full_id != id)
                 {
                     // A new generation may reuse the slot with another schema.

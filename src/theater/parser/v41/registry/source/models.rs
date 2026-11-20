@@ -6,6 +6,8 @@ use crate::theater::parser::v41::packet::ByteRange;
 pub struct RegistryComponent {
     /// All 256 name bytes, including the terminator and string tail.
     pub name_bytes: Vec<u8>,
+    /// Validated name, decoded once when the registry slot is read.
+    pub name: String,
     /// Recorded little-endian 32-bit encoding parameter immediately after the
     /// 256-byte name. Its meaning depends on the named component: it can select
     /// quantization widths, gate additional fields, or select a layout. Some
@@ -18,23 +20,6 @@ pub struct RegistryComponent {
     pub precision_level: u32,
     /// Complete 260-byte slot in the decompressed registry chunk.
     pub source: ByteRange,
-}
-
-impl RegistryComponent {
-    /// Borrow the ASCII name accepted by the registry grammar.
-    /// Invalid manually constructed names return None.
-    pub fn name(&self) -> Option<&str> {
-        let end = self
-            .name_bytes
-            .iter()
-            .position(|byte| *byte == 0)
-            .unwrap_or(self.name_bytes.len());
-        let bytes = &self.name_bytes[..end];
-        if bytes.is_empty() || !bytes.iter().all(|byte| (0x20..=0x7e).contains(byte)) {
-            return None;
-        }
-        std::str::from_utf8(bytes).ok()
-    }
 }
 
 /// One accepted registry block with components in recorded slot order.
@@ -86,7 +71,7 @@ impl FilmRegistry {
         let mut hash = 0xcbf29ce484222325u64;
         for archetype in &self.archetypes {
             for component in &archetype.components {
-                let name = component.name()?;
+                let name = component.name.as_str();
                 let level = component.precision_level;
                 for byte in level.to_le_bytes().iter().chain(name.as_bytes()) {
                     hash = (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3);

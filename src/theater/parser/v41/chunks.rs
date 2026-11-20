@@ -16,15 +16,34 @@ impl V41ChunkReader {
         parse_context: FilmParseContext,
     ) -> Result<ParsedFilm, ParseError> {
         let registry = V41RegistryChunkReader::read(chunks.registry)?;
-        let parsed_summary =
-            V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)?;
-        let parsed_replication = ParsedReplicationStream::parse(
-            &registry,
-            chunks.replication_stream,
-            &parse_context,
-            limits.max_packets_per_chunk,
-            limits.max_control_records,
-        )?;
+        #[cfg(not(target_arch = "wasm32"))]
+        let (parsed_summary, parsed_replication) = std::thread::scope(|scope| {
+            let summary = scope.spawn(|| {
+                V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)
+            });
+            let replication = ParsedReplicationStream::parse(
+                &registry,
+                chunks.replication_stream,
+                &parse_context,
+                limits.max_packets_per_chunk,
+                limits.max_control_records,
+            );
+            // Keep summary errors ahead of replication errors, as in the
+            // sequential reader, while letting both readers run concurrently.
+            let summary = summary.join().expect("film summary worker panicked")?;
+            Ok::<_, ParseError>((summary, replication?))
+        })?;
+        #[cfg(target_arch = "wasm32")]
+        let (parsed_summary, parsed_replication) = (
+            V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)?,
+            ParsedReplicationStream::parse(
+                &registry,
+                chunks.replication_stream,
+                &parse_context,
+                limits.max_packets_per_chunk,
+                limits.max_control_records,
+            )?,
+        );
         Ok(ParsedFilm {
             registry,
             replication_stream: parsed_replication,

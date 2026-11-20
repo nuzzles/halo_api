@@ -106,7 +106,14 @@ pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str) -> Option<bool>
 }
 
 fn signed(r: &mut ComponentReader<'_>, name: &str) -> Option<()> {
-    let selector = r.r(&format!("{name}.selector"), 2)?;
+    let selector_name = match name {
+        "value_a" => std::borrow::Cow::Borrowed("value_a.selector"),
+        "value_b" => std::borrow::Cow::Borrowed("value_b.selector"),
+        "extra_a" => std::borrow::Cow::Borrowed("extra_a.selector"),
+        "extra_b" => std::borrow::Cow::Borrowed("extra_b.selector"),
+        _ => std::borrow::Cow::Owned(format!("{name}.selector")),
+    };
+    let selector = r.r(&selector_name, 2)?;
     r.r(name, 8 << selector)?;
     Some(())
 }

@@ -47,18 +47,19 @@ fn inflate_body(raw: &[u8], header: usize, limit: usize) -> Result<Vec<u8>, Infl
     let mut out = Vec::with_capacity(raw.len().saturating_mul(6).min(64 << 20).min(limit));
     let result = loop {
         let before = (decoder.total_in(), decoder.total_out());
-        let mut block = [0; 8192];
         let remaining = limit - out.len();
         // One scratch byte beyond the limit distinguishes exact-limit StreamEnd
         // from real overflow, including when the checksum needs another call.
-        let scratch_len = block.len().min(remaining.saturating_add(1));
+        let scratch_len = 8192.min(remaining.saturating_add(1));
+        let output_start = out.len();
+        out.resize(output_start + scratch_len, 0);
         let status = decoder.decompress(
             &raw[input_start + before.0 as usize..],
-            &mut block[..scratch_len],
+            &mut out[output_start..],
             FlushDecompress::None,
         );
         let produced = (decoder.total_out() - before.1) as usize;
-        out.extend_from_slice(&block[..produced.min(remaining)]);
+        out.truncate(output_start + produced.min(remaining));
         if produced > remaining {
             break Err(InflateError::Limit);
         }

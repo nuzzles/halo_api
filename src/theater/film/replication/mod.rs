@@ -1,8 +1,8 @@
 //! Typed observations retained by a finished film.
 use crate::theater::film::catalog::items::{Equipment, Grenade, Vehicle, Weapon};
 use crate::theater::film::{
-    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EntitySchemaKind, KeyframeId,
-    TagId,
+    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EntitySchemaKind, FilmName,
+    KeyframeId, TagId,
 };
 
 mod event_kind;
@@ -76,7 +76,7 @@ pub enum ReplicationChange {
 /// A complete value from an established named component or record field.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ReplicationField {
-    pub name: String,
+    pub name: FilmName,
     pub value: ReplicationValue,
 }
 
@@ -101,7 +101,7 @@ pub enum ReplicationValue {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct BitValue {
     pub bit_len: usize,
-    pub bytes: Vec<u8>,
+    pub bytes: smallvec::SmallVec<[u8; 4]>,
 }
 
 impl BitValue {
@@ -124,19 +124,19 @@ mod tests {
     fn bit_values_preserve_width_and_reject_truncating_numeric_reads() {
         let twelve_bits = BitValue {
             bit_len: 12,
-            bytes: vec![0xab, 0xc0],
+            bytes: smallvec::smallvec![0xab, 0xc0],
         };
         assert_eq!(twelve_bits.as_u64(), Some(0xabc));
 
         let sixty_four_bits = BitValue {
             bit_len: 64,
-            bytes: u64::MAX.to_be_bytes().to_vec(),
+            bytes: smallvec::SmallVec::from_slice(&u64::MAX.to_be_bytes()),
         };
         assert_eq!(sixty_four_bits.as_u64(), Some(u64::MAX));
 
         let wider_bits = BitValue {
             bit_len: 128,
-            bytes: vec![0xff; 16],
+            bytes: smallvec::SmallVec::from_elem(0xff, 16),
         };
         assert_eq!(wider_bits.as_u64(), None);
     }
@@ -164,7 +164,8 @@ pub enum TagKind {
 pub struct ReplicationComponentChange {
     /// Slot within this entity's schema, not a global component ID.
     pub index: ComponentSlot,
-    pub name: String,
+    /// Registry component name shared across observations of this film.
+    pub name: FilmName,
     pub fields: Vec<ReplicationField>,
 }
 

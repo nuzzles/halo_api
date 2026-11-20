@@ -1,14 +1,15 @@
 //! Exact bit values retained from an established source range.
+use smallvec::SmallVec;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RawBits {
     pub bit_len: usize,
     /// MSB-first bytes; unused low bits in the final byte are zero.
-    pub bytes: Vec<u8>,
+    pub bytes: SmallVec<[u8; 4]>,
 }
 
 impl RawBits {
     pub fn from_low(value: u64, bit_len: usize) -> Self {
-        let mut bytes = vec![0; bit_len.div_ceil(8)];
+        let mut bytes = SmallVec::from_elem(0, bit_len.div_ceil(8));
         let retained = bit_len.min(64);
         for index in 0..retained {
             let bit = (value >> (retained - 1 - index)) & 1;
@@ -20,13 +21,38 @@ impl RawBits {
     pub fn from_source(data: &[u8], start_bit: usize, bit_len: usize) -> Option<Self> {
         let end = start_bit.checked_add(bit_len)?;
         (end <= data.len().checked_mul(8)?).then(|| {
+            if bit_len == 0 {
+                return Self {
+                    bit_len,
+                    bytes: SmallVec::new(),
+                };
+            }
+            if bit_len <= 8 {
+                let first = start_bit / 8;
+                let offset = start_bit % 8;
+                let byte = if offset == 0 {
+                    data[first]
+                } else {
+                    (data[first] << offset)
+                        | (data.get(first + 1).copied().unwrap_or(0) >> (8 - offset))
+                };
+                let bytes =
+                    SmallVec::from_buf_and_len([byte & (u8::MAX << (8 - bit_len)), 0, 0, 0], 1);
+                return Self { bit_len, bytes };
+            }
             let byte_len = bit_len.div_ceil(8);
             let first = start_bit / 8;
             let offset = start_bit % 8;
             let mut bytes = if offset == 0 {
-                data[first..first + byte_len].to_vec()
+                SmallVec::from_slice(&data[first..first + byte_len])
+            } else if bit_len <= 32 {
+                let mut window = [0u8; 8];
+                let source_len = (byte_len + 1).min(data.len() - first);
+                window[..source_len].copy_from_slice(&data[first..first + source_len]);
+                let shifted = (u64::from_be_bytes(window) << offset).to_be_bytes();
+                SmallVec::from_slice(&shifted[..byte_len])
             } else {
-                let mut bytes = Vec::with_capacity(byte_len);
+                let mut bytes = SmallVec::with_capacity(byte_len);
                 for index in 0..byte_len {
                     bytes.push(
                         (data[first + index] << offset)
@@ -43,6 +69,9 @@ impl RawBits {
     }
 
     pub fn low_u64(&self) -> u64 {
+        if self.bytes.len() == 1 {
+            return u64::from(self.bytes[0] >> ((8 - self.bit_len % 8) % 8));
+        }
         let trailing_padding = (8 - self.bit_len % 8) % 8;
         let last_eight = self.bytes.len().saturating_sub(8);
         let low = self.bytes[last_eight..]
@@ -72,7 +101,7 @@ mod tests {
                     expected[i / 8] |=
                         ((data[(start + i) / 8] >> (7 - (start + i) % 8)) & 1) << (7 - i % 8);
                 }
-                assert_eq!(raw.bytes, expected, "start {start}, len {len}");
+                assert_eq!(raw.bytes.as_slice(), expected, "start {start}, len {len}");
                 let expected_low = (len.saturating_sub(64)..len).fold(0u64, |value, i| {
                     (value << 1) | u64::from((expected[i / 8] >> (7 - i % 8)) & 1)
                 });
@@ -96,6 +125,22 @@ mod tests {
                     (value << 1) | u64::from((data[source / 8] >> (7 - source % 8)) & 1)
                 });
                 assert_eq!(raw.low_u64(), expected, "start {start}, len {len}");
+            }
+        }
+    }
+
+    #[test]
+    fn unaligned_word_path_retains_every_source_bit() {
+        let data = [0x72, 0xa1, 0x05, 0xef, 0xc3, 0x49, 0x18, 0xb6, 0x2d];
+        for start in 0..data.len() * 8 {
+            for len in 9..=32.min(data.len() * 8 - start) {
+                let raw = RawBits::from_source(&data, start, len).unwrap();
+                let mut expected = vec![0; len.div_ceil(8)];
+                for bit in 0..len {
+                    expected[bit / 8] |=
+                        ((data[(start + bit) / 8] >> (7 - (start + bit) % 8)) & 1) << (7 - bit % 8);
+                }
+                assert_eq!(raw.bytes.as_slice(), expected, "start {start}, len {len}");
             }
         }
     }

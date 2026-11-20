@@ -19,7 +19,7 @@ pub(crate) fn slide(r: &mut ComponentReader<'_>, level: u32) -> Option<bool> {
     let field = |name: &str| {
         r.fields[field_start..]
             .iter()
-            .find(|f| f.name == name)
+            .find(|f| f.name.as_ref() == name)
             .map_or(0, |f| f.raw.low_u64())
     };
     let values = [
@@ -97,7 +97,7 @@ pub(crate) fn posture(r: &mut ComponentReader<'_>) -> Option<bool> {
     let field = |name: &str| {
         r.fields[field_start..]
             .iter()
-            .find(|f| f.name == name)
+            .find(|f| f.name.as_ref() == name)
             .map_or(0, |f| f.raw.low_u64())
     };
     let tag = field("tag");
