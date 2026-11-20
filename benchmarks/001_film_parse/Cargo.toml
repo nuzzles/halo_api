@@ -10,6 +10,7 @@ filmshell = { git = "https://github.com/OpenSpartan/libfilmshell", rev = "031e21
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 flate2 = "1"
+tar = "0.4"
 
 [profile.release]
 opt-level = 3

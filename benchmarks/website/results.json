@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "generated_at_unix_seconds": 1795189676,
+  "halo_api_commit": "2d3f5f3",
+  "libfilmshell_commit": "031e2179f0758314e2a97fb96438c7b1e82ce1fb",
+  "os": "macos",
+  "arch": "aarch64",
+  "logical_cpus": 10,
+  "results": [
+    {
+      "fixture": "aquarius_idle",
+      "label": "Aquarius Idle",
+      "chunks": 7,
+      "compressed_mib": 0.5712957382202148,
+      "runs": 15,
+      "halo_api_ms": 18.578375,
+      "libfilmshell_ms": 26.687042,
+      "film_fingerprint": "e7a166262cc37979"
+    },
+    {
+      "fixture": "bazaar_idle",
+      "label": "Bazaar Idle",
+      "chunks": 5,
+      "compressed_mib": 0.5458307266235352,
+      "runs": 15,
+      "halo_api_ms": 14.861915999999999,
+      "libfilmshell_ms": 27.634583,
+      "film_fingerprint": "9ebb6a12e814cc91"
+    },
+    {
+      "fixture": "octagon",
+      "label": "Octagon",
+      "chunks": 24,
+      "compressed_mib": 1.9050264358520508,
+      "runs": 15,
+      "halo_api_ms": 64.2975,
+      "libfilmshell_ms": 89.563875,
+      "film_fingerprint": "765655c8107ee4f1"
+    },
+    {
+      "fixture": "ranked_slayer",
+      "label": "Ranked Slayer",
+      "chunks": 26,
+      "compressed_mib": 5.556819915771484,
+      "runs": 5,
+      "halo_api_ms": 397.964,
+      "libfilmshell_ms": 527.30575,
+      "film_fingerprint": "d89638563a19cf14"
+    },
+    {
+      "fixture": "ranked_oddball",
+      "label": "Ranked Oddball",
+      "chunks": 63,
+      "compressed_mib": 14.598649978637695,
+      "runs": 5,
+      "halo_api_ms": 420.57345899999996,
+      "libfilmshell_ms": 4533.349458,
+      "film_fingerprint": "09f3de8ebe6fb0e7"
+    },
+    {
+      "fixture": "ranked_ctf",
+      "label": "Ranked CTF",
+      "chunks": 41,
+      "compressed_mib": 8.452743530273438,
+      "runs": 5,
+      "halo_api_ms": 235.49858400000002,
+      "libfilmshell_ms": 865.6845,
+      "film_fingerprint": "37d1b0ddd3be6916"
+    },
+    {
+      "fixture": "clan_raid",
+      "label": "Clan Raid",
+      "chunks": 200,
+      "compressed_mib": 58.58565807342529,
+      "runs": 5,
+      "halo_api_ms": 3001.8249579999997,
+      "libfilmshell_ms": 7083.781,
+      "film_fingerprint": "b658eabb736ef621"
+    }
+  ]
+}
