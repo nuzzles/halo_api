@@ -12,11 +12,10 @@ cargo run --locked --release --manifest-path benchmarks/001_film_parse/Cargo.tom
   --output benchmarks/website/results.json
 ```
 
-The command runs all seven fixtures. Pass fixture names after `--output` to
-measure a subset, for example `ranked_slayer ranked_ctf`. Set
-`FILM_BENCH_RUNS=3` to override the default of 15 runs for small films and 5
-for films above 5 MB compressed. The output JSON drives the static site; commit
-it only when you intend to publish a new measured snapshot.
+The command runs 100 trials for each of the seven fixtures. Pass fixture names
+after `--output` to measure a subset, for example `ranked_slayer ranked_ctf`.
+Set `FILM_BENCH_RUNS=3` for a quick local check. The output JSON drives the
+static site; commit it only when you intend to publish a new measured snapshot.
 
 The harness reads all files before timing and gives both decoders fresh owned
 copies of the compressed chunks. It warms each decoder, alternates run order,

@@ -17,8 +17,10 @@ body { margin: 0; color: var(--text); background: var(--background); font: 16px/
 .choice { display: inline-block; max-width: 100%; padding: 8px 13px; border: 1px solid #4d6265; border-radius: 5px; background: #326f75; font-size: 15px; font-weight: 550; line-height: 1.35; }
 .content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
-.page-header select { padding: 8px 30px 8px 11px; border: 1px solid #555; border-radius: 5px; background: #303030; color: var(--text); font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; }
-.page-header select:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
+.date-select { position: relative; display: inline-flex; flex: none; }
+.date-select::after { content: ""; position: absolute; right: 17px; top: 50%; width: 9px; height: 9px; border-right: 2px solid var(--text); border-bottom: 2px solid var(--text); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+.date-select select { appearance: none; min-width: 176px; padding: 11px 42px 11px 16px; border: 1px solid #626262; border-radius: 8px; background: #303030; color: var(--text); font: inherit; font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: .02em; cursor: pointer; }
+.date-select select:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
 .chart-header { padding-top: 30px; text-align: center; }
 h1, h2 { margin: 0; font-weight: 700; letter-spacing: -.025em; }
 h1 { font-size: 21px; }
@@ -47,6 +49,8 @@ h1 { font-size: 21px; }
   .content { padding: 27px 20px; }
 }
 @media (max-width: 560px) {
+  .page-header { flex-wrap: wrap; }
+  .date-select { margin-left: auto; }
   .chart-row { grid-template-columns: 1fr; gap: 9px; }
   .chart-footer { display: block; }
   #updated { display: block; margin-top: 10px; white-space: normal; }

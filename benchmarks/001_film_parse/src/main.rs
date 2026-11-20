@@ -22,6 +22,7 @@ const FIXTURES: [(&str, &str); 7] = [
     ("clan_raid", "Clan Raid"),
 ];
 const LIBFILMSHELL_REV: &str = "031e2179f0758314e2a97fb96438c7b1e82ce1fb";
+const DEFAULT_RUNS: usize = 100;
 
 #[derive(Deserialize)]
 struct Manifest {
@@ -80,7 +81,27 @@ fn cpu_model() -> String {
             return name;
         }
     }
+    #[cfg(target_os = "macos")]
+    if let Ok(output) = std::process::Command::new("system_profiler")
+        .arg("SPHardwareDataType")
+        .output()
+        && output.status.success()
+        && let Some(chip) = String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .find_map(|line| line.trim().strip_prefix("Chip:"))
+    {
+        return chip.trim().to_owned();
+    }
     format!("{}/{}", std::env::consts::OS, std::env::consts::ARCH)
+}
+
+fn median(sorted: &[f64]) -> f64 {
+    let middle = sorted.len() / 2;
+    if sorted.len().is_multiple_of(2) {
+        (sorted[middle - 1] + sorted[middle]) / 2.0
+    } else {
+        sorted[middle]
+    }
 }
 
 fn load(archive_path: &Path) -> Result<Vec<Input>, Box<dyn std::error::Error>> {
@@ -182,7 +203,7 @@ fn benchmark(
 ) -> Result<ResultRow, Box<dyn std::error::Error>> {
     let entries = load(archive_path)?;
     let bytes: usize = entries.iter().map(|entry| entry.data.len()).sum();
-    let runs = requested_runs.unwrap_or(if bytes > 5_000_000 { 5 } else { 15 });
+    let runs = requested_runs.unwrap_or(DEFAULT_RUNS);
     let parsed = parse_halo(&entries)?;
     let film_fingerprint = fingerprint(&parsed)?;
     drop(parsed);
@@ -207,8 +228,8 @@ fn benchmark(
         chunks: entries.len(),
         compressed_mib: bytes as f64 / 1_048_576.0,
         runs,
-        halo_api_ms: halo_times[runs / 2],
-        libfilmshell_ms: shell_times[runs / 2],
+        halo_api_ms: median(&halo_times),
+        libfilmshell_ms: median(&shell_times),
         film_fingerprint,
     };
     println!(
