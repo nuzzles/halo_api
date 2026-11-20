@@ -3,7 +3,7 @@
 mod common;
 
 use halo_api::clients::hi::Player;
-use halo_api::clients::hi::Xuid;
+use xbox::models::Xuid;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
@@ -16,7 +16,10 @@ async fn main() -> Result<(), common::ExampleError> {
         println!("{} -> xuid({})", user.gamertag, user.xuid);
         xuids.push(Xuid::from(user.xuid));
     }
-    let players = xuids.iter().map(Player::from).collect::<Vec<_>>();
+    let players = xuids
+        .iter()
+        .map(|xuid| Player::xuid(xuid.as_str()))
+        .collect::<Vec<_>>();
 
     match halo.users(&players).await {
         Ok(users) => println!("users batch: {} result(s)", users.len()),

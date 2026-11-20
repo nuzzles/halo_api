@@ -25,7 +25,8 @@ Unofficial Halo Infinite REST API client for Rust: CSR/rank lookups, service rec
 Use your own Xbox authentication code to supply Halo Waypoint XSTS tickets through
 `HaloAuthClient::from_xsts_source`. `halo_api` exchanges those tickets for Spartan tokens and
 Waypoint clearance, and refreshes them as needed. The ticket source must keep its Xbox credentials
-valid. `halo_api` has no dependency on an Xbox authentication crate.
+valid. `halo_api` has no runtime dependency on an Xbox authentication crate. Its examples use
+`xbox 0.3.0` as a dev dependency to demonstrate this boundary.
 
 If your application already obtains Halo Waypoint credentials, use
 `HaloAuthClient::from_tokens(spartan_token, clearance_token)` instead. Those values remain private to the

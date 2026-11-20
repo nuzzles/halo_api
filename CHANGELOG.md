@@ -23,6 +23,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   `HaloAuthClient::from_xsts_source` or Halo credentials through `from_tokens`.
 - `Player::Xuid` now contains `halo_api::clients::hi::Xuid`; callers using Xbox's XUID type
   should pass its string value to `Player::xuid`.
+- Examples use `xbox 0.3.0` as a dev dependency and pass XSTS tickets through the new source.
 - Medal-flagged summary highlights with unrecognized type codes now use
   `SummaryHighlightPayload::Medal(Medal::Unknown { type_code, medal_code })` instead of the
   generic `Unknown` payload.

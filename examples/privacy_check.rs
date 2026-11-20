@@ -6,9 +6,9 @@ use halo_api::clients::hi::Player;
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
-    let (_, halo) = common::halo_infinite_client()?;
-    let (gamertag, xuid) = common::logged_in_player(&halo).await?;
-    let privacy = halo.matches_privacy(&Player::xuid(xuid)).await?;
+    let (xbox, halo) = common::halo_infinite_client()?;
+    let (gamertag, xuid) = common::logged_in_player(&xbox).await?;
+    let privacy = halo.matches_privacy(&Player::xuid(xuid.as_str())).await?;
 
     println!("{gamertag}");
     println!("  matchmade games: {:?}", privacy.matchmade_setting());

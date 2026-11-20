@@ -15,9 +15,11 @@ fn bare_xuid(player_id: &str) -> &str {
 
 #[tokio::main]
 async fn main() -> Result<(), common::ExampleError> {
-    let (_, halo) = common::halo_infinite_client()?;
-    let (gamertag, xuid) = common::logged_in_player(&halo).await?;
-    let history = halo.player_matches(&Player::xuid(xuid), 0, 1).await?;
+    let (xbox, halo) = common::halo_infinite_client()?;
+    let (gamertag, xuid) = common::logged_in_player(&xbox).await?;
+    let history = halo
+        .player_matches(&Player::xuid(xuid.as_str()), 0, 1)
+        .await?;
     let latest = history.results.first().ok_or("No recent matches found")?;
     let stats = halo.match_stats(&latest.match_id).await?;
 
