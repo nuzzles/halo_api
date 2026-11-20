@@ -56,7 +56,10 @@ fetch('results.json')
     document.querySelector('#threading').textContent = report.threading || 'Unspecified';
     const updated = document.querySelector('#updated');
     const date = new Date(report.generated_at_unix_seconds * 1000);
-    updated.textContent = `Updated ${date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}`;
+    updated.dateTime = date.toISOString();
+    updated.textContent = `Updated ${date.toLocaleString(undefined, {
+      year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+    })}`;
     render(report.results);
   })
   .catch(error => { chart.textContent = `Results could not be loaded: ${error.message}`; });

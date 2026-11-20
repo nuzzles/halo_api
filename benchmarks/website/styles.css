@@ -44,6 +44,6 @@ h1 { margin: 0; font-size: clamp(23px, 2vw, 30px); font-weight: 700; letter-spac
 @media (max-width: 560px) {
   .chart-row { grid-template-columns: 1fr; gap: 9px; }
   .chart-footer { display: block; }
-  #updated { margin-top: 10px; }
+  #updated { display: block; margin-top: 10px; white-space: normal; }
   .bar-line { grid-template-columns: minmax(0, 1fr) 78px; gap: 8px; }
 }
