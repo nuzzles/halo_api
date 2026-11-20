@@ -1517,14 +1517,14 @@ pub struct AppearanceCustomization {
     pub appearance: PlayerAppearance,
 }
 
-#[derive(Debug, Clone, Deserialize, serde::Serialize)]
-pub struct PlayerCustomizationCollection {
+#[derive(Debug, Clone, Deserialize)]
+pub(crate) struct PlayerCustomizationCollection {
     #[serde(rename = "PlayerCustomizations")]
-    pub player_customizations: Vec<PlayerCustomization>,
+    pub player_customizations: Vec<RawPlayerCustomization>,
 }
 
-#[derive(Debug, Clone, Deserialize, serde::Serialize)]
-pub struct PlayerCustomization {
+#[derive(Debug, Clone, Deserialize)]
+pub(crate) struct RawPlayerCustomization {
     #[serde(rename = "Id")]
     pub id: String,
     #[serde(rename = "ResultCode")]
@@ -1533,8 +1533,8 @@ pub struct PlayerCustomization {
     pub result: PlayerCustomizationData,
 }
 
-#[derive(Debug, Clone, Deserialize, serde::Serialize)]
-pub struct PlayerCustomizationData {
+#[derive(Debug, Clone, Deserialize)]
+pub(crate) struct PlayerCustomizationData {
     #[serde(rename = "Appearance")]
     pub appearance: PlayerAppearance,
     #[serde(default, rename = "AiCores")]
@@ -1549,14 +1549,239 @@ pub struct PlayerCustomizationData {
     pub spartan_body: Option<SpartanBody>,
 }
 
+fn serialize_emblems<S>(emblems: &[CustomizationEmblem], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    if emblems.len() == 1 {
+        emblems[0].serialize(serializer)
+    } else {
+        emblems.serialize(serializer)
+    }
+}
+
+/// Public customization for one player, with Halo's result and collection wrappers removed.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct PlayerCustomization {
+    pub id: String,
+    pub result_code: String,
+    pub appearance: PlayerAppearance,
+    pub ai: Vec<EquippedCore<AiTheme>>,
+    pub armor: Vec<EquippedCore<ArmorTheme>>,
+    pub vehicles: Vec<EquippedCore<VehicleTheme>>,
+    pub weapons: WeaponCustomizations,
+    pub body: Option<SpartanBody>,
+}
+
+/// Equipped customization core. Halo sends `Themes` as an array; the selected theme is
+/// exposed directly, and any remaining themes are retained in `other_themes`.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EquippedCore<T: serde::Serialize> {
+    pub core_id: String,
+    pub core_path: String,
+    pub core_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_equipped: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub theme: Option<T>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub other_themes: Vec<T>,
+}
+
+fn select_theme<T>(mut themes: Vec<T>, equipped: impl Fn(&T) -> bool) -> (Option<T>, Vec<T>) {
+    let index = themes.iter().position(equipped).unwrap_or(0);
+    if themes.is_empty() {
+        (None, themes)
+    } else {
+        (Some(themes.remove(index)), themes)
+    }
+}
+
+impl From<AiCore> for EquippedCore<AiTheme> {
+    fn from(core: AiCore) -> Self {
+        let (theme, other_themes) = select_theme(core.themes, |theme| theme.is_equipped);
+        Self {
+            core_id: core.core_id,
+            core_path: core.core_path,
+            core_type: core.core_type,
+            is_equipped: Some(core.is_equipped),
+            theme,
+            other_themes,
+        }
+    }
+}
+
+impl From<ArmorCore> for EquippedCore<ArmorTheme> {
+    fn from(core: ArmorCore) -> Self {
+        let (theme, other_themes) = select_theme(core.themes, |theme| theme.is_equipped);
+        Self {
+            core_id: core.core_id,
+            core_path: core.core_path,
+            core_type: core.core_type,
+            is_equipped: Some(core.is_equipped),
+            theme,
+            other_themes,
+        }
+    }
+}
+
+impl From<VehicleCore> for EquippedCore<VehicleTheme> {
+    fn from(core: VehicleCore) -> Self {
+        let (theme, other_themes) = select_theme(core.themes, |theme| theme.is_equipped);
+        Self {
+            core_id: core.core_id,
+            core_path: core.core_path,
+            core_type: core.core_type,
+            is_equipped: None,
+            theme,
+            other_themes,
+        }
+    }
+}
+
+impl From<WeaponCore> for EquippedCore<WeaponTheme> {
+    fn from(core: WeaponCore) -> Self {
+        let (theme, other_themes) = select_theme(core.themes, |theme| theme.is_equipped);
+        Self {
+            core_id: core.core_id,
+            core_path: core.core_path,
+            core_type: core.core_type,
+            is_equipped: None,
+            theme,
+            other_themes,
+        }
+    }
+}
+
+/// Named weapon customization slots. Unrecognized or repeated types are retained in `other`.
+#[derive(Debug, Clone, Default, serde::Serialize)]
+pub struct WeaponCustomizations {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidekick: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assault_rifle: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub battle_rifle: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub commando: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub spnkr: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sniper: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shotgun: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hydra: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bandit: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ma5k_smg: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mutilator: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub needler: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shock_rifle: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub heatwave: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mangler: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stalker_rifle: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pulse_carbine: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cindershot: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub olympus_carbine: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gravity_hammer: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sentinel_beam: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disruptor: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plasma_pistol: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ravager: Option<EquippedCore<WeaponTheme>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub other: Vec<EquippedCore<WeaponTheme>>,
+}
+
+impl From<Vec<WeaponCore>> for WeaponCustomizations {
+    fn from(cores: Vec<WeaponCore>) -> Self {
+        let mut weapons = Self::default();
+        for core in cores {
+            let slot = match core.core_type.as_str() {
+                "WeaponSidekick" => Some(&mut weapons.sidekick),
+                "WeaponAR" => Some(&mut weapons.assault_rifle),
+                "WeaponBR" => Some(&mut weapons.battle_rifle),
+                "WeaponCommando" => Some(&mut weapons.commando),
+                "WeaponSPnKr" => Some(&mut weapons.spnkr),
+                "WeaponSniper" => Some(&mut weapons.sniper),
+                "WeaponShotgun" => Some(&mut weapons.shotgun),
+                "WeaponHydra" => Some(&mut weapons.hydra),
+                "WeaponBandit" => Some(&mut weapons.bandit),
+                "WeaponMA5KSMG" => Some(&mut weapons.ma5k_smg),
+                "WeaponMutilator" => Some(&mut weapons.mutilator),
+                "WeaponNeedler" => Some(&mut weapons.needler),
+                "WeaponShockRifle" => Some(&mut weapons.shock_rifle),
+                "WeaponHeatwave" => Some(&mut weapons.heatwave),
+                "WeaponMangler" => Some(&mut weapons.mangler),
+                "WeaponStalkerRifle" => Some(&mut weapons.stalker_rifle),
+                "WeaponPulseCarbine" => Some(&mut weapons.pulse_carbine),
+                "WeaponCindershot" => Some(&mut weapons.cindershot),
+                "WeaponOlympusCarbine" => Some(&mut weapons.olympus_carbine),
+                "WeaponGravityHammer" => Some(&mut weapons.gravity_hammer),
+                "WeaponSentinelBeam" => Some(&mut weapons.sentinel_beam),
+                "WeaponDisruptor" => Some(&mut weapons.disruptor),
+                "WeaponPlasmaPistol" => Some(&mut weapons.plasma_pistol),
+                "WeaponRavager" => Some(&mut weapons.ravager),
+                _ => None,
+            };
+            if let Some(slot) = slot {
+                if slot.is_none() {
+                    *slot = Some(core.into());
+                } else {
+                    weapons.other.push(core.into());
+                }
+            } else {
+                weapons.other.push(core.into());
+            }
+        }
+        weapons
+    }
+}
+
+impl From<RawPlayerCustomization> for PlayerCustomization {
+    fn from(raw: RawPlayerCustomization) -> Self {
+        let data = raw.result;
+        Self {
+            id: raw.id,
+            result_code: raw.result_code,
+            appearance: data.appearance,
+            ai: data.ai_cores.cores.into_iter().map(Into::into).collect(),
+            armor: data.armor_cores.cores.into_iter().map(Into::into).collect(),
+            vehicles: data
+                .vehicle_cores
+                .cores
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            weapons: WeaponCustomizations::from(data.weapon_cores.cores),
+            body: data.spartan_body,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize, serde::Serialize)]
 pub struct AiCoreCollection {
-    #[serde(default, rename = "AiCores")]
+    #[serde(default, rename(deserialize = "AiCores", serialize = "cores"))]
     pub cores: Vec<AiCore>,
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct AiCore {
     pub core_id: String,
     pub core_path: String,
@@ -1566,7 +1791,7 @@ pub struct AiCore {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct AiTheme {
     pub color_path: String,
     pub model_path: String,
@@ -1579,7 +1804,7 @@ pub struct AiTheme {
 
 #[derive(Debug, Clone, Default, Deserialize, serde::Serialize)]
 pub struct ArmorCoreCollection {
-    #[serde(default, rename = "ArmorCores")]
+    #[serde(default, rename(deserialize = "ArmorCores", serialize = "cores"))]
     pub cores: Vec<ArmorCore>,
 }
 
@@ -1590,7 +1815,7 @@ impl ArmorCoreCollection {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct ArmorCore {
     pub core_id: String,
     pub core_path: String,
@@ -1606,14 +1831,19 @@ impl ArmorCore {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct ArmorTheme {
     pub armor_fx_path: String,
     #[serde(default, deserialize_with = "deserialize_null_default")]
     pub armor_fx_paths: Vec<String>,
     pub chest_attachment_path: String,
     pub coating_path: String,
-    #[serde(default)]
+    #[serde(
+        default,
+        rename(serialize = "emblem", deserialize = "Emblems"),
+        skip_serializing_if = "Vec::is_empty",
+        serialize_with = "serialize_emblems"
+    )]
     pub emblems: Vec<CustomizationEmblem>,
     pub glove_path: String,
     pub helmet_attachment_path: String,
@@ -1634,12 +1864,12 @@ pub struct ArmorTheme {
 
 #[derive(Debug, Clone, Default, Deserialize, serde::Serialize)]
 pub struct VehicleCoreCollection {
-    #[serde(default, rename = "VehicleCores")]
+    #[serde(default, rename(deserialize = "VehicleCores", serialize = "cores"))]
     pub cores: Vec<VehicleCore>,
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct VehicleCore {
     pub core_id: String,
     pub core_path: String,
@@ -1648,11 +1878,16 @@ pub struct VehicleCore {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct VehicleTheme {
     pub alternate_geometry_region_path: String,
     pub coating_path: String,
-    #[serde(default)]
+    #[serde(
+        default,
+        rename(serialize = "emblem", deserialize = "Emblems"),
+        skip_serializing_if = "Vec::is_empty",
+        serialize_with = "serialize_emblems"
+    )]
     pub emblems: Vec<CustomizationEmblem>,
     pub horn_path: String,
     pub theme_path: String,
@@ -1666,12 +1901,12 @@ pub struct VehicleTheme {
 
 #[derive(Debug, Clone, Default, Deserialize, serde::Serialize)]
 pub struct WeaponCoreCollection {
-    #[serde(default, rename = "WeaponCores")]
+    #[serde(default, rename(deserialize = "WeaponCores", serialize = "cores"))]
     pub cores: Vec<WeaponCore>,
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct WeaponCore {
     pub core_id: String,
     pub core_path: String,
@@ -1680,13 +1915,18 @@ pub struct WeaponCore {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct WeaponTheme {
     pub alternate_geometry_region_path: String,
     pub ammo_counter_color_path: String,
     pub coating_path: String,
     pub death_fx_path: String,
-    #[serde(default)]
+    #[serde(
+        default,
+        rename(serialize = "emblem", deserialize = "Emblems"),
+        skip_serializing_if = "Vec::is_empty",
+        serialize_with = "serialize_emblems"
+    )]
     pub emblems: Vec<CustomizationEmblem>,
     pub stat_tracker_path: String,
     pub theme_path: String,
@@ -1698,7 +1938,7 @@ pub struct WeaponTheme {
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct SpartanBody {
     pub body_type: String,
     pub voice_path: String,
@@ -1711,33 +1951,33 @@ pub struct SpartanBody {
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
 pub struct PlayerAppearance {
-    #[serde(rename = "LastModifiedDateUtc")]
+    #[serde(rename(deserialize = "LastModifiedDateUtc", serialize = "last_modified"))]
     pub last_modified: Option<ApiDate>,
-    #[serde(rename = "ActionPosePath")]
+    #[serde(rename(deserialize = "ActionPosePath", serialize = "action_pose_path"))]
     pub action_pose_path: Option<String>,
-    #[serde(rename = "StancePath")]
+    #[serde(rename(deserialize = "StancePath", serialize = "stance_path"))]
     pub stance_path: Option<String>,
-    #[serde(rename = "BackdropImagePath")]
+    #[serde(rename(deserialize = "BackdropImagePath", serialize = "backdrop_image_path"))]
     pub backdrop_image_path: Option<String>,
-    #[serde(rename = "Emblem")]
+    #[serde(rename(deserialize = "Emblem", serialize = "emblem"))]
     pub emblem: Option<EmblemConfiguration>,
-    #[serde(rename = "ServiceTag")]
+    #[serde(rename(deserialize = "ServiceTag", serialize = "service_tag"))]
     pub service_tag: String,
-    #[serde(rename = "IntroEmotePath")]
+    #[serde(rename(deserialize = "IntroEmotePath", serialize = "intro_emote_path"))]
     pub intro_emote_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
 pub struct EmblemConfiguration {
-    #[serde(rename = "EmblemPath")]
+    #[serde(rename(deserialize = "EmblemPath", serialize = "emblem_path"))]
     pub emblem_path: String,
-    #[serde(rename = "ConfigurationId")]
+    #[serde(rename(deserialize = "ConfigurationId", serialize = "configuration_id"))]
     pub configuration_id: i64,
 }
 
 /// An emblem applied to an armor, weapon, or vehicle location.
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all(deserialize = "PascalCase", serialize = "snake_case"))]
 pub struct CustomizationEmblem {
     pub path: String,
     pub location_id: i64,
@@ -2053,10 +2293,19 @@ impl CsrSeasonCalendar {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ApiDate {
-    #[serde(rename = "ISO8601Date")]
+    #[serde(rename(deserialize = "ISO8601Date", serialize = "iso8601_date"))]
     pub iso8601_date: DateTime<Utc>,
+}
+
+impl serde::Serialize for ApiDate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.iso8601_date.serialize(serializer)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
@@ -3844,16 +4093,37 @@ mod tests {
             }]
         }))
         .unwrap();
-        assert_eq!(public.player_customizations[0].result_code, "Success");
+        let public =
+            PlayerCustomization::from(public.player_customizations.into_iter().next().unwrap());
+        assert_eq!(public.result_code, "Success");
+        assert_eq!(public.body.as_ref().unwrap().body_type, "Large");
+        let output = serde_json::to_value(&public).unwrap();
+        assert_eq!(output["appearance"]["service_tag"], "117");
+        assert_eq!(output["body"]["body_type"], "Large");
         assert_eq!(
-            public.player_customizations[0]
-                .result
-                .spartan_body
-                .as_ref()
-                .unwrap()
-                .body_type,
-            "Large"
+            output["body"]["last_modified_date_utc"],
+            "2026-01-01T00:00:00Z"
         );
+        assert!(output.get("result").is_none());
+        assert!(output["armor"].is_array());
+        assert!(output["weapons"].is_object());
+
+        let weapon = |core_type: &str| WeaponCore {
+            core_id: String::new(),
+            core_path: String::new(),
+            core_type: core_type.to_owned(),
+            themes: Vec::new(),
+        };
+        let weapons = WeaponCustomizations::from(vec![
+            weapon("WeaponRavager"),
+            weapon("WeaponStalkerRifle"),
+            weapon("WeaponRavager"),
+            weapon("WeaponFuture"),
+        ]);
+        let output = serde_json::to_value(&weapons).unwrap();
+        assert_eq!(output["ravager"]["core_type"], "WeaponRavager");
+        assert_eq!(output["stalker_rifle"]["core_type"], "WeaponStalkerRifle");
+        assert_eq!(output["other"].as_array().unwrap().len(), 2);
 
         let armor_theme: ArmorTheme = serde_json::from_value(serde_json::json!({
             "ArmorFxPath": "",
@@ -3879,6 +4149,15 @@ mod tests {
         }))
         .unwrap();
         assert!(armor_theme.armor_fx_paths.is_empty());
+        let mut armor_theme = armor_theme;
+        armor_theme.emblems.push(CustomizationEmblem {
+            path: "emblem.json".into(),
+            location_id: 1,
+            configuration_id: 2,
+        });
+        let output = serde_json::to_value(&armor_theme).unwrap();
+        assert_eq!(output["emblem"]["path"], "emblem.json");
+        assert!(output.get("emblems").is_none());
 
         let bans: BanSummary = serde_json::from_value(serde_json::json!({
             "Results": [{
