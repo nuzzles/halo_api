@@ -6,6 +6,8 @@
   "os": "macos",
   "arch": "aarch64",
   "logical_cpus": 10,
+  "cpu_model": "Apple M1 Max",
+  "threading": "Multi-Threaded",
   "results": [
     {
       "fixture": "aquarius_idle",

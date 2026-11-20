@@ -64,7 +64,23 @@ struct Report {
     os: &'static str,
     arch: &'static str,
     logical_cpus: usize,
+    cpu_model: String,
+    threading: &'static str,
     results: Vec<ResultRow>,
+}
+
+fn cpu_model() -> String {
+    #[cfg(target_os = "macos")]
+    if let Ok(output) = std::process::Command::new("sysctl")
+        .args(["-n", "machdep.cpu.brand_string"])
+        .output()
+    {
+        let name = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+        if output.status.success() && !name.is_empty() {
+            return name;
+        }
+    }
+    format!("{}/{}", std::env::consts::OS, std::env::consts::ARCH)
 }
 
 fn load(archive_path: &Path) -> Result<Vec<Input>, Box<dyn std::error::Error>> {
@@ -251,6 +267,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             os: std::env::consts::OS,
             arch: std::env::consts::ARCH,
             logical_cpus: std::thread::available_parallelism()?.get(),
+            cpu_model: cpu_model(),
+            threading: "Multi-Threaded",
             results,
         };
         if let Some(parent) = output.parent() {
