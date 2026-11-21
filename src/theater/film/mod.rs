@@ -133,7 +133,6 @@ pub mod catalog;
 pub mod players;
 pub use players::*;
 pub mod settings;
-pub use replication::EventPosition;
 pub use settings::*;
 mod ids;
 pub mod registry;

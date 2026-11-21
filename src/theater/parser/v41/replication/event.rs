@@ -1,5 +1,5 @@
 //! Project established event fields and reference roles without correlating events.
-use crate::theater::film::EventPosition;
+use crate::theater::film::catalog::maps::levels::LevelCalibration;
 use crate::theater::film::{
     EventPlayerSlot, ParseError, ReplicationEvent, ReplicationEventReference, TagId, WeaponTagId,
     WeaponVariantId,
@@ -72,8 +72,8 @@ pub(super) fn project(
                 config
                     .projectile_event_positions
                     .as_ref()
-                    .map(|p| &p.detonation),
-                21,
+                    .map(|p| (&p.detonation, p.level)),
+                15,
             )?;
             bits.skip(19 + 5 + 1 + 9)?;
             if bits.read(1)? != 0 {
@@ -91,8 +91,8 @@ pub(super) fn project(
                 config
                     .projectile_event_positions
                     .as_ref()
-                    .map(|p| &p.impact),
-                18,
+                    .map(|p| (&p.impact, p.level)),
+                12,
             )?;
             bits.skip(19 + 9 + 1)?;
             Ok(ReplicationEvent::ProjectileImpact { position })
@@ -180,20 +180,25 @@ fn skip_tag(bits: &mut Cursor<'_>) -> Option<()> {
 
 fn point(
     bits: &mut Cursor<'_>,
-    encoding: Option<&PrecisionDescriptor>,
-    default_width: u8,
-) -> Option<EventPosition> {
+    encoding: Option<(&PrecisionDescriptor, &LevelCalibration)>,
+    precision: u8,
+) -> Option<[f64; 3]> {
+    let default_width = match precision {
+        15 => 21,
+        12 => 18,
+        _ => return None,
+    };
     if bits.read(1)? != 0 {
         let mut codes = [0; 3];
         for code in &mut codes {
             *code = bits.read(default_width as usize)? as u32;
         }
-        return Some(EventPosition::DefaultBox {
-            codes,
-            axis_bits: default_width,
-        });
+        // FUN_14076e524 selects DAT_143b8c6b8 (+/-20000), not map
+        // bounds, when this gate is set. FUN_140c1e978 uses bin centers.
+        let step = 40_000.0 / (1_u32 << default_width) as f64;
+        return Some(codes.map(|code| -20_000.0 + (f64::from(code) + 0.5) * step));
     }
-    let encoding = encoding?;
+    let (encoding, level) = encoding?;
     if encoding.index_bits > 30 {
         return None;
     }
@@ -206,11 +211,11 @@ fn point(
     for (code, width) in codes.iter_mut().zip(widths) {
         *code = bits.read(width as usize)? as u32;
     }
-    Some(EventPosition::MapRegion {
-        region,
+    level.region(region)?.bounds.dequantize_at_precision(
         codes,
-        axis_bits: widths.map(|w| w as u8),
-    })
+        widths.map(|w| w as usize),
+        precision,
+    )
 }
 
 fn player(bits: &mut Cursor<'_>) -> Option<Option<EventPlayerSlot>> {
@@ -533,10 +538,7 @@ mod tests {
                 ],
             ),
             ReplicationEvent::ProjectileDetonation {
-                position: EventPosition::DefaultBox {
-                    codes: [0; 3],
-                    axis_bits: 21
-                }
+                position: [-19999.990463256836; 3],
             }
         );
         assert_eq!(
@@ -554,10 +556,7 @@ mod tests {
                 ],
             ),
             ReplicationEvent::ProjectileImpact {
-                position: EventPosition::DefaultBox {
-                    codes: [0; 3],
-                    axis_bits: 18
-                }
+                position: [-19999.923706054688; 3],
             }
         );
     }
@@ -939,10 +938,7 @@ mod tests {
             assert_eq!(
                 decode(5, &refs, &body),
                 ReplicationEvent::ProjectileDetonation {
-                    position: EventPosition::DefaultBox {
-                        codes: [1, 2, 3],
-                        axis_bits: 21
-                    },
+                    position: [-19999.971389770508, -19999.95231628418, -19999.93324279785],
                 }
             );
         }
@@ -964,10 +960,11 @@ mod tests {
                 ]
             ),
             ReplicationEvent::ProjectileImpact {
-                position: EventPosition::DefaultBox {
-                    codes: [1, 2, 3],
-                    axis_bits: 18
-                },
+                position: [
+                    -19999.771118164062,
+                    -19999.618530273438,
+                    -19999.465942382812
+                ],
             }
         );
     }
@@ -1068,33 +1065,130 @@ mod tests {
 
     #[test]
     fn region_positions_require_the_recorded_region_and_axis_widths() {
+        use crate::theater::film::catalog::maps::{PositionBounds, levels};
         let encoding = PrecisionDescriptor {
             index_bits: 2,
             axis_bits: [3, 4, 5],
             region: 2,
             regions: Default::default(),
         };
+        let level = LevelCalibration {
+            play: levels::LevelRegion {
+                bounds: PositionBounds {
+                    region: 2,
+                    min: [0.0; 3],
+                    max: [0.25, 0.5, 1.0],
+                },
+                axis_bits: [4, 5, 6],
+            },
+            others: &[],
+            ..levels::all()[0]
+        };
         let (data, _) = pack(&[(0, 1), (2, 2), (7, 3), (15, 4), (31, 5)]);
         assert_eq!(
-            point(&mut Cursor::new(&data, 0).unwrap(), Some(&encoding), 22),
-            Some(EventPosition::MapRegion {
-                region: 2,
-                codes: [7, 15, 31],
-                axis_bits: [3, 4, 5]
-            })
+            point(
+                &mut Cursor::new(&data, 0).unwrap(),
+                Some((&encoding, &level)),
+                15
+            ),
+            Some([0.234375, 0.484375, 0.984375])
         );
-        assert!(point(&mut Cursor::new(&data, 0).unwrap(), None, 22).is_none());
+        assert!(point(&mut Cursor::new(&data, 0).unwrap(), None, 15).is_none());
         let mut other = encoding.clone();
         other.region = 1;
-        assert!(point(&mut Cursor::new(&data, 0).unwrap(), Some(&other), 22).is_none());
         assert!(
             point(
-                &mut Cursor::new(&data[..1], 0).unwrap(),
-                Some(&encoding),
-                22
+                &mut Cursor::new(&data, 0).unwrap(),
+                Some((&other, &level)),
+                15
             )
             .is_none()
         );
+        // Same codes and widths must not be decoded using another precision's bounds.
+        assert!(
+            point(
+                &mut Cursor::new(&data, 0).unwrap(),
+                Some((&encoding, &level)),
+                12
+            )
+            .is_none()
+        );
+        let mut missing_region = level;
+        missing_region.play.bounds.region = 1;
+        assert!(
+            point(
+                &mut Cursor::new(&data, 0).unwrap(),
+                Some((&encoding, &missing_region)),
+                15
+            )
+            .is_none()
+        );
+        assert!(
+            point(
+                &mut Cursor::new(&data[..1], 0).unwrap(),
+                Some((&encoding, &level)),
+                15
+            )
+            .is_none()
+        );
+    }
+
+    #[test]
+    fn default_positions_decode_bin_centers_at_both_event_precisions() {
+        for (precision, width, half_step) in
+            [(15, 21, 0.0095367431640625), (12, 18, 0.0762939453125)]
+        {
+            let (data, length) = pack(&[
+                (1, 1),
+                (0, width),
+                (1 << (width - 1), width),
+                ((1 << width) - 1, width),
+            ]);
+            let mut bits = Cursor::new(&data, 0).unwrap();
+            assert_eq!(
+                point(&mut bits, None, precision),
+                Some([-20000.0 + half_step, half_step, 20000.0 - half_step])
+            );
+            assert_eq!(bits.position, length);
+            assert!(
+                point(
+                    &mut Cursor::new(&data[..data.len() - 1], 0).unwrap(),
+                    None,
+                    precision
+                )
+                .is_none()
+            );
+        }
+    }
+
+    #[test]
+    fn all_catalogued_regions_decode_at_both_event_precisions() {
+        use crate::theater::film::catalog::maps::levels;
+        use crate::theater::parser::v41::context::map::level_precision;
+        for level in levels::all() {
+            for precision in [12, 15] {
+                let encoding = level_precision(level, precision).unwrap();
+                for region in level.regions() {
+                    let widths = encoding.axes_for_region(region.bounds.region).unwrap();
+                    let codes = [0, (1 << widths[1]) / 2, (1 << widths[2]) - 1];
+                    let mut fields = vec![(0, 1), (region.bounds.region as u64, level.index_bits)];
+                    fields.extend(codes.into_iter().zip(widths.map(|w| w as usize)));
+                    let (data, length) = pack(&fields);
+                    let mut bits = Cursor::new(&data, 0).unwrap();
+                    let xyz = point(&mut bits, Some((&encoding, level)), precision).unwrap();
+                    assert_eq!(bits.position, length);
+                    for axis in 0..3 {
+                        let min = f64::from(region.bounds.min[axis]);
+                        let max = f64::from(region.bounds.max[axis]);
+                        let step = (max - min) / (1_u64 << widths[axis]) as f64;
+                        assert!(
+                            (xyz[axis] - (min + (codes[axis] as f64 + 0.5) * step)).abs() < 1e-9
+                        );
+                        assert!(xyz[axis] > min && xyz[axis] < max);
+                    }
+                }
+            }
+        }
     }
 
     #[test]

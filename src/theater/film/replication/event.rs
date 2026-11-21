@@ -16,7 +16,7 @@ pub struct ReplicationEventReference {
 /// are not used to infer which individual shot produced a hit.
 /// Required fields are enforced for supported captures even when the wire has
 /// a presence gate; an absent required value fails parsing instead of defaulting.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ReplicationEvent {
     WeaponReload {
         player: EventPlayerSlot,
@@ -36,10 +36,12 @@ pub enum ReplicationEvent {
         level: u8,
     },
     ProjectileDetonation {
-        position: EventPosition,
+        /// World-space [x, y, z] in engine axes and units, decoded at bin centers.
+        position: [f64; 3],
     },
     ProjectileImpact {
-        position: EventPosition,
+        /// World-space [x, y, z] in engine axes and units, decoded at bin centers.
+        position: [f64; 3],
     },
     /// `damage_aftermath`: victim/attacker references and recorded hit fields.
     DamageAftermath {
@@ -66,20 +68,5 @@ pub enum ReplicationEvent {
     /// Keeps the event occurrence and kind, not its uninterpreted bytes.
     Other {
         kind: ReplicationEventKind,
-    },
-}
-
-/// Exact codes and their widths from the point's selected encoding.
-/// Map bounds and application-specific coordinate conversion belong to consumers.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum EventPosition {
-    DefaultBox {
-        codes: [u32; 3],
-        axis_bits: u8,
-    },
-    MapRegion {
-        region: u32,
-        codes: [u32; 3],
-        axis_bits: [u8; 3],
     },
 }

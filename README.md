@@ -100,11 +100,12 @@ slots use `EventPlayerSlot`, and weapon asset tags use `WeaponTagId` (distinct f
 family/variant `WeaponId`). Only damage attacker references and attacker-player slots remain
 optional in these payloads. Meaningful victim/attacker/shooter references are retained without
 resolving them to entity IDs; unexplained references stay internal. Projectile payloads retain
-only position. Unobserved replication kill/teleport payloads and other unsupported payloads
+only world-space `position: [f64; 3]` in native engine XYZ axes and units. Both default-box
+and map-region encodings decode to quantization-bin centers; map regions use the exact
+recorded build/level's catalogued bounds. Unobserved replication kill/teleport payloads and other unsupported payloads
 retain only their event kind in `Other`; summary kill highlights are unaffected.
 Uninterpreted event fields, opaque player blocks, and duplicate raw metadata are not exposed.
-Slots are not resolved to roster XUIDs,
-and event positions retain their quantized codes.
+Slots are not resolved to roster XUIDs. Position encoding details remain internal.
 To advance recorded observations to a time, use `FilmRuntime`; the parser does not construct
 resolved gameplay timelines or interpret projectile attachment geometry.
 

@@ -3,6 +3,8 @@ use super::{PrecisionDescriptor, Reader, read_event_point};
 
 #[derive(Debug, Clone)]
 pub(crate) struct ProjectilePositionEncoding {
+    /// Bounds from the same build-specific catalogue that supplied the widths.
+    pub level: &'static crate::theater::film::catalog::maps::levels::LevelCalibration,
     /// Map-region widths at precision level 15.
     pub detonation: PrecisionDescriptor,
     /// Map-region widths at precision level 12.

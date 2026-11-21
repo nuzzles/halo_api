@@ -18,13 +18,15 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - Recorded match settings, including variant name/description, score/time/respawn limits,
   starting loadouts, and typed option values.
 - Typed reload, throw, melee, pickup, zoom, projectile impact, and detonation events.
-  Positions retain quantized codes; gameplay state and projectile attachment interpretation
+  Positions decode to world-space XYZ; gameplay state and projectile attachment interpretation
   remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
 
 ### Changed
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Decode projectile event positions to world-space `[f64; 3]` using verified default-box
+  or build-specific map-region bounds. Remove the public `EventPosition` wire encoding.
 - Inline projectile detonation/impact `position` fields on `ReplicationEvent`, removing
   their single-field payload structs and the serialized `data` wrapper.
 - Require event fields populated in all 31 audited films: reload/throw player slots,

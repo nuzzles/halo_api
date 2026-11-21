@@ -482,6 +482,16 @@ fn local_corpus_event_field_presence() {
                 continue;
             };
             let json = serde_json::to_value(event).unwrap();
+            if let ReplicationEvent::ProjectileDetonation { position }
+            | ReplicationEvent::ProjectileImpact { position } = event
+            {
+                assert!(
+                    position.iter().all(|axis| axis.is_finite()),
+                    "{name}: invalid XYZ"
+                );
+                let body = json.as_object().unwrap().values().next().unwrap();
+                assert_eq!(body["position"].as_array().unwrap().len(), 3);
+            }
             for retired in [
                 "/Kill",
                 "/Teleport",

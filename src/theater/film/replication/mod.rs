@@ -9,7 +9,7 @@ use std::sync::Arc;
 mod event_kind;
 pub use event_kind::ReplicationEventKind;
 mod event;
-pub use event::{EventPosition, ReplicationEvent, ReplicationEventReference};
+pub use event::{ReplicationEvent, ReplicationEventReference};
 mod tag_reference;
 pub use tag_reference::{
     DamageAmount, DamageCause, DamageReference, FiringReference, ProjectileReference, TagLink,
