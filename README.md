@@ -62,11 +62,10 @@ initial 32-slot player table, including vacant slots. An unreadable table return
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
 such as score/time limits and equipment remain `None`, rather than acquiring game defaults.
 
-Starting weapons are `StartingWeapon::{Real(TagId), Random, RandomWithTag(TagId), Unspecified}`.
-`Unspecified` preserves a recorded slot with no tag or enabled random selection; it does not
+Starting weapons are `StartingWeapon::{Real(TagId), Random, Unknown}`.
+`Unknown` preserves a recorded slot with no tag or enabled random selection; it does not
 resolve the runtime's default weapon. Match options have required names, raw bytes, and typed
 values, with an explicit `MatchOptionValue::Unknown` for unfamiliar discriminators.
-See the [field-by-field Option audit](docs/film-option-audit.md) for corpus evidence and retained Options.
 
 Player appearance is also recorded in timestamped roster packets. Initial player-table
 appearance blocks can be empty even when later roster blocks are populated:

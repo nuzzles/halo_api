@@ -77,8 +77,6 @@ fn recorded_players_and_settings() {
             "Control Power Weapons to eliminate the enemy."
         );
         assert_eq!(settings.minimum_respawn_seconds, 8);
-        assert_eq!(settings.killcam_enabled, None);
-        assert!(settings.play_of_game_enabled);
         assert_eq!(
             settings.time_limit_seconds,
             Some(if name == "bazaar_idle" { 720 } else { 60 })
@@ -96,7 +94,7 @@ fn recorded_players_and_settings() {
         use halo_api::theater::film::StartingWeapon;
         assert_eq!(weapons[0], StartingWeapon::Real(TagId(1220648237)));
         assert_eq!(weapons[1], StartingWeapon::Real(TagId(4094171407)));
-        assert_eq!(weapons[2], StartingWeapon::Unspecified);
+        assert_eq!(weapons[2], StartingWeapon::Unknown);
         assert_eq!(settings.starting_loadouts[0].equipment, None);
         assert_eq!(settings.options.len(), 10);
         assert_eq!(
@@ -255,7 +253,6 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
         "name",
         "description",
         "engine_type",
-        "play_of_game_enabled",
         "minimum_respawn_seconds",
         "starting_loadouts",
         "options",

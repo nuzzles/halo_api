@@ -28,7 +28,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.
   Missing or malformed required metadata returns `ParseError::InvalidMatchSettings`; the
   redundant `variant_decoded` flag and implicit default settings are removed. Starting weapons
-  use an enum that retains unspecified slots and random-selection states. Unrecognized option
+  use `Real`, `Random`, and `Unknown` variants. Unrecognized option
   discriminators use `MatchOptionValue::Unknown` and retain their bytes.
 - `LevelCalibration::api_id` is required for all bundled levels. Genuine recorded absences
   (including equipment, optional limits, and event presence-bit fields) remain optional.

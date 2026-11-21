@@ -11,15 +11,13 @@ pub struct MatchSettings {
     pub name: String,
     pub description: String,
     pub engine_type: i64,
-    pub killcam_enabled: Option<bool>,
-    pub play_of_game_enabled: bool,
     pub score_to_win: Option<i64>,
     pub time_limit_seconds: Option<i64>,
     pub minimum_respawn_seconds: i64,
     pub overtime_seconds: Option<i64>,
     pub last_chance_enabled: Option<bool>,
     pub last_chance_seconds: Option<i64>,
-    /// All recorded starting loadouts, retaining their order, including unspecified slots.
+    /// All recorded starting loadouts, retaining their order, including unknown slots.
     pub starting_loadouts: Vec<StartingLoadout>,
     pub options: Vec<MatchOption>,
 }
@@ -35,10 +33,8 @@ pub struct StartingLoadout {
 pub enum StartingWeapon {
     Real(TagId),
     Random,
-    /// Retains both fields if a record carries a tag and enables random selection.
-    RandomWithTag(TagId),
     /// Neither a tag nor enabled random selection was recorded. Not a resolved empty slot.
-    Unspecified,
+    Unknown,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
