@@ -26,10 +26,7 @@ async fn main() -> Result<(), common::ExampleError> {
         Err(error) => println!("users batch: {error}"),
     }
     match halo.player_customizations(&players).await {
-        Ok(response) => println!(
-            "customizations batch: {} result(s)",
-            response.player_customizations.len()
-        ),
+        Ok(response) => println!("customizations batch: {} result(s)", response.len()),
         Err(error) => println!("customizations batch: {error}"),
     }
     match halo.ban_summary(&players).await {

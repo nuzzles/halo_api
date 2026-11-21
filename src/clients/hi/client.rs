@@ -20,10 +20,10 @@ use super::models::{
     EmblemMetadata, FilmChunkResponse, FilmManifest, GameModeId, GameVariantAsset, HipcSettings,
     MapAsset, MapId, MapModePairAsset, MatchCount, MatchHistoryType, MatchSkill, MatchStats,
     MatchType, MatchesPrivacy, MedalMetadata, OperationRewardTrack, PlayerCareerRank,
-    PlayerChallengeDecks, PlayerCustomizationCollection, PlayerMatchHistory, PlayerOperationPasses,
-    PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode, RankedArenaSeason,
-    RawChunkKind, RawFilmChunk, SeasonCalendar, ServiceRecord, ServiceRecordFilter, UgcAsset,
-    UgcAssetKind, UgcSearchResults, UserInfo,
+    PlayerChallengeDecks, PlayerCustomization, PlayerCustomizationCollection, PlayerMatchHistory,
+    PlayerOperationPasses, PlaylistAsset, PlaylistId, PlaylistMetadata, RankedArenaMapMode,
+    RankedArenaSeason, RawChunkKind, RawFilmChunk, SeasonCalendar, ServiceRecord,
+    ServiceRecordFilter, UgcAsset, UgcAssetKind, UgcSearchResults, UserInfo,
 };
 use super::pager::MatchHistoryPager;
 use super::player::Player;
@@ -683,16 +683,22 @@ impl HaloInfiniteClient {
     pub async fn player_customizations(
         &self,
         players: &[Player],
-    ) -> Result<PlayerCustomizationCollection, InfiniteClientError> {
+    ) -> Result<Vec<PlayerCustomization>, InfiniteClientError> {
         let xuids = self.resolve_xuids(players).await?;
-        self.get_authenticated_with_user_agent(
-            &self.endpoints.economy_base_url,
-            "/hi/customization",
-            &[("players", Self::join_wrapped_xuids(&xuids))],
-            true,
-            HALO_WAYPOINT_USER_AGENT,
-        )
-        .await
+        let response: PlayerCustomizationCollection = self
+            .get_authenticated_with_user_agent(
+                &self.endpoints.economy_base_url,
+                "/hi/customization",
+                &[("players", Self::join_wrapped_xuids(&xuids))],
+                true,
+                HALO_WAYPOINT_USER_AGENT,
+            )
+            .await?;
+        Ok(response
+            .player_customizations
+            .into_iter()
+            .map(PlayerCustomization::from)
+            .collect())
     }
 
     pub async fn map(&self, map: MapId) -> Result<MapAsset, InfiniteClientError> {
