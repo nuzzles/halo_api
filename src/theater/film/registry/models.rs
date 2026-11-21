@@ -6,6 +6,11 @@ use crate::theater::film::{ComponentSlot, EntitySchemaId, MapAssetId, MapVersion
 /// reads stay in the parser's `ParsedRegistry`.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Registry {
+    /// Named recorded settings; absent values do not imply game defaults.
+    pub settings: crate::theater::film::MatchSettings,
+    /// Complete initial table in source-slot order, including vacant slots.
+    /// Film parsing fails if this table cannot be decoded.
+    pub players: Vec<crate::theater::film::InitialPlayer>,
     /// Recorded film and format versions. Parsing rejects an incomplete header.
     pub version: RegistryVersion,
     /// Recorded entity schemas in index order.

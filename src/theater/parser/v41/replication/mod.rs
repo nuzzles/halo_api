@@ -104,6 +104,7 @@ impl ParsedReplicationStream {
             .map(|schema| (schema.index, schema.kind))
             .collect::<std::collections::BTreeMap<EntitySchemaId, EntitySchemaKind>>();
         let mut tick_status = ReplayTickStatus::Absent;
+        let projection_config = &config;
 
         #[cfg(not(target_arch = "wasm32"))]
         if threading == Threading::Multi
@@ -225,15 +226,15 @@ impl ParsedReplicationStream {
                         if projection_pending.len() == 2 {
                             let group = std::mem::take(&mut projection_pending);
                             let schema_kinds = &schema_kinds;
-                            projection_handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            projection_handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                             if projection_handles.len() == workers {
                                 projection_parts.push(
                                     projection_handles
                                         .remove(0)
                                         .join()
-                                        .expect("film projection worker panicked"),
+                                        .expect("film projection worker panicked")?,
                                 );
                             }
                         }
@@ -301,15 +302,15 @@ impl ParsedReplicationStream {
                         if projection_pending.len() == 2 {
                             let group = std::mem::take(&mut projection_pending);
                             let schema_kinds = &schema_kinds;
-                            projection_handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            projection_handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                             if projection_handles.len() == workers {
                                 projection_parts.push(
                                     projection_handles
                                         .remove(0)
                                         .join()
-                                        .expect("film projection worker panicked"),
+                                        .expect("film projection worker panicked")?,
                                 );
                             }
                         }
@@ -319,13 +320,18 @@ impl ParsedReplicationStream {
                     if !projection_pending.is_empty() {
                         let schema_kinds = &schema_kinds;
                         projection_handles.push(scope.spawn(move || {
-                            parsed::project_chunks(projection_pending, schema_kinds)
+                            parsed::project_chunks(
+                                projection_pending,
+                                schema_kinds,
+                                projection_config,
+                            )
                         }));
                     }
                     projection_parts.extend(
                         projection_handles
                             .into_iter()
-                            .map(|handle| handle.join().expect("film projection worker panicked")),
+                            .map(|handle| handle.join().expect("film projection worker panicked"))
+                            .collect::<Result<Vec<_>, ParseError>>()?,
                     );
                     let mut observations =
                         Vec::with_capacity(projection_parts.iter().map(Vec::len).sum());
@@ -391,9 +397,9 @@ impl ParsedReplicationStream {
                             let group =
                                 std::mem::replace(&mut pending, Vec::with_capacity(group_size));
                             let schema_kinds = &schema_kinds;
-                            handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                         }
                         let Some(input) = next else { break };
                         current = input;
@@ -402,14 +408,14 @@ impl ParsedReplicationStream {
                     }
                     if !pending.is_empty() {
                         let schema_kinds = &schema_kinds;
-                        handles.push(
-                            scope.spawn(move || parsed::project_chunks(pending, schema_kinds)),
-                        );
+                        handles.push(scope.spawn(move || {
+                            parsed::project_chunks(pending, schema_kinds, projection_config)
+                        }));
                     }
                     let mut parts = handles
                         .into_iter()
                         .map(|handle| handle.join().expect("film projection worker panicked"))
-                        .collect::<Vec<_>>();
+                        .collect::<Result<Vec<_>, ParseError>>()?;
                     let mut observations = Vec::with_capacity(parts.iter().map(Vec::len).sum());
                     for part in &mut parts {
                         observations.append(part);
@@ -436,7 +442,7 @@ impl ParsedReplicationStream {
             chunks.push(chunk);
         }
         Ok(Self {
-            observations: parsed::project_chunks(chunks, &schema_kinds),
+            observations: parsed::project_chunks(chunks, &schema_kinds, projection_config)?,
             tick_status,
         })
     }

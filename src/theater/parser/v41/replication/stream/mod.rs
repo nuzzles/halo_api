@@ -10,7 +10,7 @@ pub(crate) mod datums;
 pub(crate) mod frame;
 
 pub(crate) mod keyframes;
-mod roster;
+pub(crate) mod roster;
 
 pub(crate) struct DecodeContext<'a> {
     pub config: &'a V41DecodeConfig,

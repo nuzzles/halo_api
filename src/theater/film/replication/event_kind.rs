@@ -5,6 +5,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 pub enum ReplicationEventKind {
     Damage,
     ProjectileDetonation,
+    ProjectileImpact,
     Pickup,
     Zoom,
     VehicleExit,
@@ -25,6 +26,7 @@ impl ReplicationEventKind {
         match self {
             Self::Damage => 0,
             Self::ProjectileDetonation => 5,
+            Self::ProjectileImpact => 6,
             Self::Pickup => 9,
             Self::Zoom => 21,
             Self::VehicleExit => 22,
@@ -47,6 +49,7 @@ impl From<u8> for ReplicationEventKind {
         match code {
             0 => Self::Damage,
             5 => Self::ProjectileDetonation,
+            6 => Self::ProjectileImpact,
             9 => Self::Pickup,
             21 => Self::Zoom,
             22 => Self::VehicleExit,

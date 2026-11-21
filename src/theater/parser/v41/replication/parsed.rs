@@ -5,7 +5,7 @@ use crate::theater::film::replication::{
     ReplicationObservation, ReplicationStream, ReplicationValue,
 };
 use crate::theater::film::{
-    BitValue, ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId,
+    BitValue, ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId, ParseError,
 };
 use crate::theater::parser::v41::packet::PacketRead;
 use crate::theater::parser::wire::fields::RawBits;
@@ -30,7 +30,8 @@ pub(super) fn project_chunks(
         EntitySchemaId,
         crate::theater::film::EntitySchemaKind,
     >,
-) -> Vec<ReplicationObservation> {
+    config: &crate::theater::parser::v41::context::V41DecodeConfig,
+) -> Result<Vec<ReplicationObservation>, ParseError> {
     let capacity = chunks
         .iter()
         .flat_map(|chunk| &chunk.body.packets)
@@ -78,23 +79,9 @@ pub(super) fn project_chunks(
                         if !record.layout_complete {
                             continue;
                         }
-                        let Some(code) = record.code else {
-                            continue;
-                        };
-                        let Some(start) = record.start_bit.checked_add(8) else {
-                            continue;
-                        };
-                        let Some(bit_len) = record.end_bit.checked_sub(start) else {
-                            continue;
-                        };
-                        let Some(event) = event::project(&record, payload).or_else(|| {
-                            RawBits::from_source(payload, start, bit_len).map(|raw| {
-                                crate::theater::film::ReplicationEvent::Raw {
-                                    kind: code.into(),
-                                    payload: raw.into(),
-                                }
-                            })
-                        }) else {
+                        let Some(event) = event::project(&record, payload, config)
+                            .or_else(|| event::raw(&record, payload))
+                        else {
                             continue;
                         };
                         emit(ReplicationChange::Event { event });
@@ -211,11 +198,21 @@ pub(super) fn project_chunks(
                         });
                     }
                 }
+                ReplicationStreamPacketBody::RosterPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::roster(&read)? {
+                        emit(ReplicationChange::Roster { players });
+                    }
+                }
+                ReplicationStreamPacketBody::BotsPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::bots(&read)? {
+                        emit(ReplicationChange::Bots { players });
+                    }
+                }
                 _ => {}
             }
         }
     }
-    observations
+    Ok(observations)
 }
 
 fn project_fields(

@@ -9,7 +9,10 @@ use std::sync::Arc;
 mod event_kind;
 pub use event_kind::ReplicationEventKind;
 mod event;
-pub use event::{ReplicationEvent, ReplicationEventHandle};
+pub use event::{
+    EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant, ReplicationEvent,
+    ThrowSelection,
+};
 mod tag_reference;
 pub use tag_reference::{
     DamageAmount, DamageCause, DamageReference, FiringReference, ProjectileReference, TagLink,
@@ -36,6 +39,14 @@ pub struct ReplicationObservation {
 /// this film's registry. Event kinds name only verified codes, not their payloads.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ReplicationChange {
+    /// Complete session population at this packet timestamp, including an empty roster.
+    Roster {
+        players: Vec<crate::theater::film::RosterPlayer>,
+    },
+    /// Complete bot metadata packet. Does not infer control of a live biped.
+    Bots {
+        players: Vec<crate::theater::film::BotPlayer>,
+    },
     /// Introduce a live entity with its film-local schema and complete recorded
     /// default, entity-level, and component field bodies.
     EntityCreated {
@@ -69,8 +80,8 @@ pub enum ReplicationChange {
         fields: Vec<ReplicationField>,
         components: Vec<ReplicationComponentChange>,
     },
-    /// Record an event at this observation's timestamp. Combat bodies expose
-    /// only recorded fields; other bodies retain their exact bits.
+    /// Record an event at this observation's timestamp. Known bodies expose
+    /// recorded fields; other bodies retain their exact bits.
     Event { event: ReplicationEvent },
 }
 

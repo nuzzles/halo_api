@@ -10,13 +10,14 @@ fn optional(r: &mut Reader<'_>, width: usize) {
 
 // Unguarded FUN_1406d3140 reference. The caller supplies presence, if any.
 fn reference(r: &mut Reader<'_>, category: u8) {
-    let width = if category == 1 {
-        if r.read(1) != 0 { 9 } else { 13 }
-    } else {
-        8 // category 2
-    };
-    r.read(width);
-    r.read(2);
+    let reference = crate::theater::parser::v41::reference::references::read_reference(
+        category,
+        &mut |width| {
+            let value = r.read(width);
+            (!r.over).then_some(value)
+        },
+    );
+    r.over |= reference.is_none();
 }
 
 fn target(r: &mut Reader<'_>) {

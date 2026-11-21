@@ -10,8 +10,36 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Added
+
+- Offline Theater player metadata: the initial 32-slot player table, timestamped roster and bot
+  snapshots, and recorded Spartan appearance hashes for recognized HI_1_12_0/HI_1_13_0 blocks.
+  Item names, asset paths, and current API customization are not substituted for recorded data.
+- Recorded match settings, including variant name/description, score/time/respawn limits,
+  starting loadouts, and typed option values with original bytes.
+- Typed reload, throw, melee, pickup, zoom, teleport, projectile impact, and detonation events.
+  Positions retain quantized codes; gameplay state and projectile attachment interpretation
+  remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
+
 ### Changed
 
+- Event reference triplets are decoded once with presence-gated slots and kept inside the parser.
+  Public events no longer expose raw handles; fallback payloads exclude headers and guard trailers.
+  Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
+- Match-option payloads use inline eight-byte arrays. Registry projection borrows packed Bond
+  bytes, and roster projection avoids temporary short-field, word-byte, and join-key allocations.
+- `FilmCustomization::spartan` is required and the duplicate `raw` appearance bytes are removed.
+  Unsupported or invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
+- Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.
+  Missing or malformed required metadata returns `ParseError::InvalidMatchSettings`; the
+  redundant `variant_decoded` flag and implicit default settings are removed. Starting weapons
+  use `Real`, `Random`, and `Unknown` variants. Unrecognized option
+  discriminators use `MatchOptionValue::Unknown` and retain their bytes.
+- `LevelCalibration::api_id` is required for all bundled levels. Genuine recorded absences
+  (including equipment, optional limits, and event presence-bit fields) remain optional.
+- `Registry::players` is a required `Vec<InitialPlayer>`. Film parsing returns
+  `ParseError::IncompleteRegistryPlayers` if the complete initial player table cannot be decoded,
+  instead of succeeding with missing player metadata.
 - `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded
   Theater decoding; `Film::parse` keeps the multi-threaded default. Film parsing benchmarks now
   measure both modes with 25 trials per fixture. Film chunk inflation now uses `zlib-rs`, which

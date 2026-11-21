@@ -2,6 +2,9 @@
 //! Unknown runtime settings stop decoding without speculative localization.
 use crate::theater::parser::v41::context::events::{EventVersionContext, VariantContext};
 use crate::theater::parser::v41::context::movement::PrecisionDescriptor;
+use crate::theater::parser::v41::reference::references::{
+    EventReference, ReferenceTriplet, read_triplet,
+};
 use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::{
     EventAssumption, EventField, EventFieldStage, EventFieldValue, EventListRead, EventListStop,
     EventRecord,
@@ -141,12 +144,6 @@ const CONFIG: [[i8; 3]; 123] = [
     [8, 8, 7], // 122
 ];
 
-/// Recorded reference domains for the v41 event grammar. Runtime projections
-/// use this same table without rereading or searching packet bytes.
-pub(crate) fn reference_kinds(code: u8) -> Option<[i8; 3]> {
-    CONFIG.get(usize::from(code)).copied()
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct KillEventFields {
     pub killer: i32,
@@ -258,6 +255,7 @@ pub(crate) fn read_event_list(
             end_bit: r.cursor.position,
             code: (!r.over).then_some(code as u8),
             body_start_bit: None,
+            references: None,
             fields: Vec::new(),
             layout_complete: false,
         };
@@ -271,7 +269,8 @@ pub(crate) fn read_event_list(
             Some(EventListStop::UnsupportedReferenceConfiguration)
         } else {
             r.stage = EventFieldStage::References;
-            if !presence(&mut r, code) {
+            record.references = presence(&mut r, code);
+            if record.references.is_none() {
                 Some(if r.over {
                     EventListStop::Truncated
                 } else {
@@ -435,25 +434,11 @@ fn kill_fields(r: &mut Reader<'_>) -> KillEventFields {
         end: if r.over { -1 } else { r.cursor.position as i64 },
     }
 }
-fn presence(r: &mut Reader<'_>, code: usize) -> bool {
-    const RANGE: [u32; 10] = [7679, 7679, 256, 256, 512, 256, 512, 8191, 8191, 0];
-    for mut cfg in CONFIG[code] {
-        if r.read(1) == 0 {
-            continue;
-        }
-        if cfg < 0 {
-            return false;
-        }
-        if cfg == 1 && r.read(1) == 1 {
-            cfg = 4;
-        }
-        let range = RANGE[cfg as usize];
-        if range > 0 {
-            r.read((32 - (range - 1).leading_zeros()) as usize);
-        }
-        r.read(2);
-    }
-    !r.over
+fn presence(r: &mut Reader<'_>, code: usize) -> Option<ReferenceTriplet<EventReference>> {
+    read_triplet(CONFIG[code], |width| {
+        let value = r.read(width);
+        (!r.over).then_some(value)
+    })
 }
 fn empty_body(code: usize) -> bool {
     matches!(
@@ -816,23 +801,16 @@ fn event_point(r: &mut Reader<'_>, encoding: Option<&PrecisionDescriptor>) -> bo
     read_event_point(r, encoding, 22).is_some()
 }
 
-/// Source encoding of a successfully consumed point. Default-box source codes
-/// stay in the event fields; they cannot be interpreted using map-region bounds.
-enum EventPoint {
-    DefaultBox,
-    Map { region: u32, codes: [u32; 3] },
-}
-
 fn read_event_point(
     r: &mut Reader<'_>,
     encoding: Option<&PrecisionDescriptor>,
     default_width: usize,
-) -> Option<EventPoint> {
+) -> Option<()> {
     if r.read(1) != 0 {
         for _ in 0..3 {
             r.read(default_width);
         }
-        return (!r.over).then_some(EventPoint::DefaultBox);
+        return (!r.over).then_some(());
     }
     let encoding = encoding?;
     if encoding.index_bits > 30
@@ -848,6 +826,8 @@ fn read_event_point(
     if !widths.iter().all(|w| (0..=32).contains(w)) {
         return None;
     }
-    let codes = widths.map(|width| r.read(width as usize) as u32);
-    (!r.over).then_some(EventPoint::Map { region, codes })
+    for width in widths {
+        r.read(width as usize);
+    }
+    (!r.over).then_some(())
 }

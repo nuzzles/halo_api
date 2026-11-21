@@ -17,10 +17,20 @@ impl From<ParsedRegistry> for crate::theater::film::Registry {
     }
 }
 
-impl TryFrom<&source::FilmRegistryRead> for crate::theater::film::Registry {
+impl
+    TryFrom<(
+        &source::FilmRegistryRead,
+        Vec<crate::theater::film::InitialPlayer>,
+    )> for crate::theater::film::Registry
+{
     type Error = crate::theater::film::ParseError;
 
-    fn try_from(body: &source::FilmRegistryRead) -> Result<Self, Self::Error> {
+    fn try_from(
+        (body, players): (
+            &source::FilmRegistryRead,
+            Vec<crate::theater::film::InitialPlayer>,
+        ),
+    ) -> Result<Self, Self::Error> {
         use super::source::{
             BootstrapIdentificationFieldKind, GameOptionsEntry, GameOptionsFieldKind,
         };
@@ -117,6 +127,8 @@ impl TryFrom<&source::FilmRegistryRead> for crate::theater::film::Registry {
             level_tag,
         };
         Ok(Self {
+            settings: super::settings::project(body)?,
+            players,
             version,
             schemas,
             options,
