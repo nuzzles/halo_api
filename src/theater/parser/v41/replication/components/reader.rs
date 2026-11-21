@@ -12,7 +12,7 @@ use crate::theater::parser::v41::reference::observations::{
 };
 use crate::theater::parser::v41::replication::source::components::field::ComponentField;
 use std::cell::RefCell;
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 
 const FLAG_NAMES: [&str; 32] = [
     "flags[0]",
@@ -49,7 +49,10 @@ const FLAG_NAMES: [&str; 32] = [
     "flags[31]",
 ];
 
-static COMMON_FIELD_NAMES: LazyLock<[Arc<str>; 39]> = LazyLock::new(|| {
+// Each worker owns its common-name counters; decoding unrelated chunks must not
+// contend on the same process-wide Arc allocations. Returned fields retain ownership
+// after the worker and its thread-local table have been dropped.
+thread_local! { static COMMON_FIELD_NAMES: [Arc<str>; 39] = {
     [
         "baseline.gate",
         "stationary",
@@ -92,7 +95,7 @@ static COMMON_FIELD_NAMES: LazyLock<[Arc<str>; 39]> = LazyLock::new(|| {
         "count",
     ]
     .map(Arc::from)
-});
+}; }
 
 thread_local! {
     static INTERNED_NAMES: RefCell<rustc_hash::FxHashMap<String, Arc<str>>> =
@@ -147,7 +150,7 @@ pub(crate) fn intern_name(name: &str) -> Arc<str> {
         _ => None,
     };
     if let Some(index) = common {
-        return COMMON_FIELD_NAMES[index].clone();
+        return COMMON_FIELD_NAMES.with(|names| names[index].clone());
     }
     INTERNED_NAMES.with(|names| {
         let mut names = names.borrow_mut();
@@ -520,10 +523,28 @@ mod tests {
         assert_eq!(indexed_name(&"x".repeat(128), 1, &mut buffer), None);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn common_names_outlive_workers_without_sharing_their_counters() {
+        let local = intern_name("tick");
+        let worker = std::thread::spawn(|| {
+            let name = intern_name("tick");
+            assert!(Arc::ptr_eq(&name, &intern_name("tick")));
+            name
+        })
+        .join()
+        .unwrap();
+        assert_eq!(local, worker);
+        assert!(!Arc::ptr_eq(&local, &worker));
+        assert_eq!(worker.as_ref(), "tick");
+    }
+
     #[test]
     fn common_name_slots_match_their_lookup_keys() {
-        for name in COMMON_FIELD_NAMES.iter() {
-            assert!(Arc::ptr_eq(&intern_name(name), name));
-        }
+        COMMON_FIELD_NAMES.with(|names| {
+            for name in names {
+                assert!(Arc::ptr_eq(&intern_name(name), name));
+            }
+        });
     }
 }

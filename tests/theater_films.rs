@@ -66,6 +66,57 @@ fn threading_modes_produce_identical_films() {
 }
 
 #[test]
+fn replication_packet_boundaries_preserve_observations_across_chunks() {
+    use std::io::Write;
+    let original = chunks("bazaar_idle");
+    let expected = Film::parse_with_options(
+        original.clone(),
+        FilmParseOptions {
+            threading: Threading::Single,
+        },
+    )
+    .unwrap();
+    let mut split = Vec::new();
+    for chunk in original {
+        if chunk.kind != RawChunkKind::REPLICATION {
+            split.push(chunk);
+            continue;
+        }
+        let inflated = chunk.clone().inflate().unwrap();
+        let mut packets = Vec::new();
+        let mut offset = 0;
+        while offset < inflated.data.len() {
+            let header = &inflated.data[offset..offset + 16];
+            let size = u32::from_le_bytes(header[4..8].try_into().unwrap()) as usize;
+            let end = offset + 16 + size;
+            assert!(end <= inflated.data.len());
+            packets.push(offset..end);
+            offset = end;
+        }
+        // More than eight replication chunks exercises speculative workers as
+        // well as the sequential path, with bindings carried across boundaries.
+        for group in packets.chunks(packets.len().div_ceil(9).max(1)) {
+            let bytes = &inflated.data[group[0].start..group.last().unwrap().end];
+            let mut encoder =
+                flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+            encoder.write_all(bytes).unwrap();
+            let mut part = chunk.clone();
+            part.data = encoder.finish().unwrap();
+            split.push(part);
+        }
+    }
+    assert!(split.len() >= 10);
+    for (index, chunk) in split.iter_mut().enumerate() {
+        chunk.index = index as i32;
+    }
+    for threading in [Threading::Single, Threading::Multi] {
+        let actual =
+            Film::parse_with_options(split.clone(), FilmParseOptions { threading }).unwrap();
+        assert_eq!(actual, expected, "{threading:?}");
+    }
+}
+
+#[test]
 fn captured_films_parse_into_typed_sections() {
     for (name, observations, highlights, changes) in [
         ("bazaar_idle", 10_051, 0, [310, 6210, 29, 2401, 878, 223]),
