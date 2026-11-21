@@ -23,6 +23,11 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- Event reference triplets are decoded once with presence-gated slots and kept inside the parser.
+  Public events no longer expose raw handles; fallback payloads exclude headers and guard trailers.
+  Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
+- Match-option payloads use inline eight-byte arrays. Registry projection borrows packed Bond
+  bytes, and roster projection avoids temporary short-field, word-byte, and join-key allocations.
 - `FilmCustomization::spartan` is required and the duplicate `raw` appearance bytes are removed.
   Unsupported or invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
 - Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.

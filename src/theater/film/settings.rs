@@ -1,5 +1,5 @@
 //! Recorded match settings. Absent optional fields stay absent; no game defaults are applied.
-use super::TagId;
+use super::{TagId, WeaponTagId};
 use serde::{Deserialize, Serialize};
 
 /// Core metadata must decode successfully; genuinely omitted variant options stay optional.
@@ -31,7 +31,7 @@ pub struct StartingLoadout {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StartingWeapon {
-    Real(TagId),
+    Real(WeaponTagId),
     Random,
     /// Neither a tag nor enabled random selection was recorded. Not a resolved empty slot.
     Unknown,
@@ -41,7 +41,7 @@ pub enum StartingWeapon {
 pub struct MatchOption {
     pub name_hash: u32,
     /// Recorded bytes, including unknown types and nonfinite float bit patterns.
-    pub raw_value: Vec<u8>,
+    pub raw_value: [u8; 8],
     pub value: MatchOptionValue,
 }
 

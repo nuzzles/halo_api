@@ -91,9 +91,9 @@ fn recorded_players_and_settings() {
         );
         let weapons = &settings.starting_loadouts[0].weapons;
         assert_eq!(weapons.len(), 3);
-        use halo_api::theater::film::StartingWeapon;
-        assert_eq!(weapons[0], StartingWeapon::Real(TagId(1220648237)));
-        assert_eq!(weapons[1], StartingWeapon::Real(TagId(4094171407)));
+        use halo_api::theater::film::{StartingWeapon, WeaponTagId};
+        assert_eq!(weapons[0], StartingWeapon::Real(WeaponTagId(1220648237)));
+        assert_eq!(weapons[1], StartingWeapon::Real(WeaponTagId(4094171407)));
         assert_eq!(weapons[2], StartingWeapon::Unknown);
         assert_eq!(settings.starting_loadouts[0].equipment, None);
         assert_eq!(settings.options.len(), 10);

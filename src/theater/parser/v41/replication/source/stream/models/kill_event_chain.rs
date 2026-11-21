@@ -1,4 +1,5 @@
 //! Reference data models.
+use crate::theater::parser::v41::reference::references::{EventReference, ReferenceTriplet};
 /// Read order and source ranges from the reference event-layout walker. Scalar
 /// values remain unnamed unless their semantics are established elsewhere.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,10 +39,34 @@ pub struct EventRecord {
     pub end_bit: usize,
     pub code: Option<u8>,
     pub body_start_bit: Option<usize>,
+    /// A complete reference header. Outer absence means the header did not decode.
+    /// Inner absent slots correspond exactly to unset presence bits.
+    pub references: Option<ReferenceTriplet<EventReference>>,
     /// Header, reference, body, and corruption fields in their recorded read order.
     pub fields: Vec<EventField>,
     /// The layout reached its end; opaque fields can still be present.
     pub layout_complete: bool,
+}
+
+impl EventRecord {
+    /// Recorded body only, excluding the reference header and guard trailer.
+    pub(crate) fn body_range(&self) -> Option<std::ops::Range<usize>> {
+        if !self.layout_complete {
+            return None;
+        }
+        let start = self.body_start_bit?;
+        let end = self
+            .fields
+            .iter()
+            // Guards are a suffix: inspect at most the trailer and its predecessor,
+            // rather than scanning every body field again during projection.
+            .rev()
+            .take_while(|field| field.stage == EventFieldStage::CorruptionCheck)
+            .last()
+            .map_or(self.end_bit, |field| field.bit);
+        (self.start_bit.checked_add(8)? <= start && start <= end && end <= self.end_bit)
+            .then_some(start..end)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

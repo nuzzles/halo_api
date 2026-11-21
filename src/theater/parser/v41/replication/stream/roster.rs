@@ -170,11 +170,10 @@ fn player(
             })
             .collect::<Option<Vec<_>>>()?;
         let gamertag = String::from_utf16_lossy(gamertag_utf16.split(|v| *v == 0).next()?);
-        let shorts = (0..6)
-            .map(|i| scalar(fields, K::Short(i)).map(|v| v as u16))
-            .collect::<Option<Vec<_>>>()?
-            .try_into()
-            .ok()?;
+        let mut shorts = [0; 6];
+        for (i, short) in shorts.iter_mut().enumerate() {
+            *short = scalar(fields, K::Short(i as u8))? as u16;
+        }
         let block44 = (0..44)
             .map(|i| scalar(fields, K::Block44Byte(i)).map(|v| v as u8))
             .collect::<Option<Vec<_>>>()?;
@@ -183,7 +182,8 @@ fn player(
             gamertag_utf16,
             presence_mask: value(fields, K::Mask)?.clone().into(),
             byte_list: bytes(K::ByteList)?,
-            word_list: bytes(K::WordList)?
+            word_list: value(fields, K::WordList)?
+                .bytes
                 .as_chunks::<4>()
                 .0
                 .iter()
@@ -192,7 +192,11 @@ fn player(
             block104: bytes(K::Block104)?,
             block16: bytes(K::Block16)?,
             desired_representation: scalar(fields, K::Representation)? as u32,
-            join_key: bytes(K::JoinKey)?.try_into().ok()?,
+            join_key: value(fields, K::JoinKey)?
+                .bytes
+                .as_slice()
+                .try_into()
+                .ok()?,
             short_fields: shorts,
             customization,
             block44,

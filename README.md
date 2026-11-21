@@ -96,7 +96,10 @@ Raw appearance bytes are not retained in the parsed film.
 
 `ReplicationChange::Bots` exposes recorded bot metadata. `ReplicationChange::Event` includes
 typed reload, throw, melee, pickup, zoom, teleport, impact, and detonation payloads. Event player
-slots and handles are not resolved to roster XUIDs; event positions retain their quantized codes.
+slots use `EventPlayerSlot`, and weapon asset tags use `WeaponTagId` (distinct from the
+family/variant `WeaponId`). Absent fields remain optional. Reference headers stay internal to
+the parser; raw fallback events contain only body bits. Slots are not resolved to roster XUIDs,
+and event positions retain their quantized codes.
 To advance recorded observations to a time, use `FilmRuntime`; the parser does not construct
 resolved gameplay timelines or interpret projectile attachment geometry.
 

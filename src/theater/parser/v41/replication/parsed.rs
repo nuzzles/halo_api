@@ -79,23 +79,9 @@ pub(super) fn project_chunks(
                         if !record.layout_complete {
                             continue;
                         }
-                        let Some(code) = record.code else {
-                            continue;
-                        };
-                        let Some(start) = record.start_bit.checked_add(8) else {
-                            continue;
-                        };
-                        let Some(bit_len) = record.end_bit.checked_sub(start) else {
-                            continue;
-                        };
-                        let Some(event) = event::project(&record, payload, config).or_else(|| {
-                            RawBits::from_source(payload, start, bit_len).map(|raw| {
-                                crate::theater::film::ReplicationEvent::Raw {
-                                    kind: code.into(),
-                                    payload: raw.into(),
-                                }
-                            })
-                        }) else {
+                        let Some(event) = event::project(&record, payload, config)
+                            .or_else(|| event::raw(&record, payload))
+                        else {
                             continue;
                         };
                         emit(ReplicationChange::Event { event });
