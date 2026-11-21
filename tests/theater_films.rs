@@ -301,6 +301,17 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     use halo_api::theater::film::{MatchOption, MatchSettings, Registry, StartingLoadout};
     let film = Film::parse(chunks("bazaar_idle")).unwrap();
     let settings = serde_json::to_value(&film.registry.settings).unwrap();
+    assert!(settings.get("last_chance_enabled").is_none());
+    assert!(settings.get("last_chance_seconds").is_none());
+    assert!(settings.get("sudden_death_enabled_in_overtime").is_some());
+    assert!(settings.get("sudden_death_seconds").is_some());
+    let mut sudden_death = settings.clone();
+    sudden_death["sudden_death_enabled_in_overtime"] = serde_json::json!(true);
+    sudden_death["sudden_death_seconds"] = serde_json::json!(30);
+    let decoded: MatchSettings = serde_json::from_value(sudden_death.clone()).unwrap();
+    assert_eq!(decoded.sudden_death_enabled_in_overtime, Some(true));
+    assert_eq!(decoded.sudden_death_seconds, Some(30));
+    assert_eq!(serde_json::to_value(decoded).unwrap(), sudden_death);
     for invalid in [
         serde_json::json!(1700000000),
         serde_json::json!("not a timestamp"),

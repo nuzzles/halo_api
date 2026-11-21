@@ -258,8 +258,12 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
         score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
         time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
         overtime_seconds: optional_number(v, &[1, 7, 9], "overtime_seconds")?,
-        last_chance_enabled: optional_boolean(v, &[1, 7, 10], "last_chance_enabled")?,
-        last_chance_seconds: optional_number(v, &[1, 7, 11], "last_chance_seconds")?,
+        sudden_death_enabled_in_overtime: optional_boolean(
+            v,
+            &[1, 7, 10],
+            "sudden_death_enabled_in_overtime",
+        )?,
+        sudden_death_seconds: optional_number(v, &[1, 7, 11], "sudden_death_seconds")?,
         starting_loadouts: loadouts.iter().map(loadout).collect::<Result<_, _>>()?,
         options: options.iter().map(option).collect::<Result<_, _>>()?,
     })

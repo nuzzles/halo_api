@@ -25,6 +25,8 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Rename the match settings to `sudden_death_enabled_in_overtime` and
+  `sudden_death_seconds`, replacing the internal "last chance" terminology.
 - Expose the film recorder timestamp as `recording_start_time: chrono::DateTime<Utc>`
   instead of raw Unix seconds, with UTC RFC 3339 serialization on native and WASM.
 - Replace optional starting equipment tags with `StartingEquipment::Real(EquipmentTagId)`

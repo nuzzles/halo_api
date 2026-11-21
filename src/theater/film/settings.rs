@@ -17,8 +17,10 @@ pub struct MatchSettings {
     pub time_limit_seconds: Option<i64>,
     pub minimum_respawn_seconds: i64,
     pub overtime_seconds: Option<i64>,
-    pub last_chance_enabled: Option<bool>,
-    pub last_chance_seconds: Option<i64>,
+    /// Whether sudden death is enabled during overtime.
+    pub sudden_death_enabled_in_overtime: Option<bool>,
+    /// Recorded sudden-death duration; absence does not imply zero.
+    pub sudden_death_seconds: Option<i64>,
     /// All recorded starting loadouts, retaining their order, including unknown slots.
     pub starting_loadouts: Vec<StartingLoadout>,
     pub options: Vec<MatchOption>,
