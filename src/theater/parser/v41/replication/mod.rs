@@ -422,7 +422,9 @@ impl ParsedReplicationStream {
             }
         }
 
-        let mut chunks = Vec::with_capacity(inputs.len());
+        // Keep only the finished observations: retaining all decoded chunks here
+        // otherwise keeps the entire intermediate film alive during projection.
+        let mut observations = Vec::new();
         for (chunk_index, input) in inputs.into_iter().enumerate() {
             context.state.current_chunk = input.index;
             let chunk = V41ReplicationStreamChunkReader::read(
@@ -433,10 +435,10 @@ impl ParsedReplicationStream {
                 &mut None,
             )?;
             update_tick_status(&mut tick_status, &chunk, chunk_index);
-            chunks.push(chunk);
+            parsed::project_chunks_into(vec![chunk], &schema_kinds, &mut observations);
         }
         Ok(Self {
-            observations: parsed::project_chunks(chunks, &schema_kinds),
+            observations,
             tick_status,
         })
     }

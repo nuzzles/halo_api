@@ -17,7 +17,9 @@ cargo run --locked --release --manifest-path benchmarks/001_film_parse/Cargo.tom
 
 Each command runs 25 trials for each of the seven fixtures. Pass fixture names
 after the options to measure a subset, for example `ranked_slayer ranked_ctf`.
-Set `FILM_BENCH_RUNS=3` for a quick local check. The output JSON drives the
+Set `FILM_BENCH_RUNS=3` for a quick local check. Add `--halo-only` to skip libfilmshell when comparing halo_api revisions. Reports
+include every halo_api trial in `halo_api_samples_ms`, in execution order, as well
+as the median. The output JSON drives the
 static site; commit it only when you intend to publish a new measured snapshot.
 
 The harness reads all files before timing and gives each decoder fresh owned

@@ -31,6 +31,21 @@ pub(super) fn project_chunks(
         crate::theater::film::EntitySchemaKind,
     >,
 ) -> Vec<ReplicationObservation> {
+    let mut observations = Vec::new();
+    project_chunks_into(chunks, schema_kinds, &mut observations);
+    observations
+}
+
+/// Append observations in source order so sequential decoding can release each
+/// chunk's bytes and intermediate records before decoding the next chunk.
+pub(super) fn project_chunks_into(
+    chunks: Vec<ParsedReplicationStreamChunk>,
+    schema_kinds: &std::collections::BTreeMap<
+        EntitySchemaId,
+        crate::theater::film::EntitySchemaKind,
+    >,
+    observations: &mut Vec<ReplicationObservation>,
+) {
     let capacity = chunks
         .iter()
         .flat_map(|chunk| &chunk.body.packets)
@@ -56,7 +71,7 @@ pub(super) fn project_chunks(
             _ => 0,
         })
         .sum();
-    let mut observations = Vec::with_capacity(capacity);
+    observations.reserve(capacity);
     for chunk in chunks {
         for packet in chunk.body.packets {
             let timestamp_us = packet.header.timestamp_us;
@@ -215,7 +230,6 @@ pub(super) fn project_chunks(
             }
         }
     }
-    observations
 }
 
 fn project_fields(
