@@ -1,9 +1,9 @@
 use halo_api::clients::hi::models::{RawChunkKind, RawFilmChunk};
 use halo_api::theater::Film;
 use halo_api::theater::film::{
-    EntitySchemaId, EntitySchemaKind, ParseError, RegistryGameMode, RegistryMapKind,
-    ReplicationChange, ReplicationEvent, ReplicationEventKind, ReplicationValue,
-    SummaryHighlightPayload, TagId, TagKind, TagLink, TagReference,
+    EntitySchemaId, EntitySchemaKind, FilmParseOptions, ParseError, RegistryGameMode,
+    RegistryMapKind, ReplicationChange, ReplicationEvent, ReplicationEventKind, ReplicationValue,
+    SummaryHighlightPayload, TagId, TagKind, TagLink, TagReference, Threading,
 };
 use serde::Deserialize;
 use std::path::PathBuf;
@@ -39,6 +39,30 @@ fn chunks(name: &str) -> Vec<RawFilmChunk> {
             data: std::fs::read(directory.join(chunk.file)).expect("golden film chunk"),
         })
         .collect()
+}
+
+#[test]
+fn threading_modes_produce_identical_films() {
+    for name in ["bazaar_idle", "octagon_ar_kill"] {
+        let input = chunks(name);
+        let default = Film::parse(input.clone()).expect(name);
+        let single = Film::parse_with_options(
+            input.clone(),
+            FilmParseOptions {
+                threading: Threading::Single,
+            },
+        )
+        .expect(name);
+        let multi = Film::parse_with_options(
+            input,
+            FilmParseOptions {
+                threading: Threading::Multi,
+            },
+        )
+        .expect(name);
+        assert_eq!(single, multi, "{name}");
+        assert_eq!(default, multi, "{name}");
+    }
 }
 
 #[test]
