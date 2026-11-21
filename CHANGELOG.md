@@ -12,6 +12,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- `player_customizations` now returns a `Vec<PlayerCustomization>` with typed player IDs,
+  direct appearance and core fields, selected themes, and named weapon slots. Serialized
+  customization output uses normalized field names and timestamps instead of Halo's response
+  wrappers and result codes.
 - Theater film decoding now processes independent replication chunks in parallel while preserving
   recorded observations and parser fallbacks. Reproducible benchmarks and a results site are in
   `benchmarks/`.
