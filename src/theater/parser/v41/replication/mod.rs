@@ -104,6 +104,7 @@ impl ParsedReplicationStream {
             .map(|schema| (schema.index, schema.kind))
             .collect::<std::collections::BTreeMap<EntitySchemaId, EntitySchemaKind>>();
         let mut tick_status = ReplayTickStatus::Absent;
+        let projection_config = &config;
 
         #[cfg(not(target_arch = "wasm32"))]
         if threading == Threading::Multi
@@ -225,9 +226,9 @@ impl ParsedReplicationStream {
                         if projection_pending.len() == 2 {
                             let group = std::mem::take(&mut projection_pending);
                             let schema_kinds = &schema_kinds;
-                            projection_handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            projection_handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                             if projection_handles.len() == workers {
                                 projection_parts.push(
                                     projection_handles
@@ -301,9 +302,9 @@ impl ParsedReplicationStream {
                         if projection_pending.len() == 2 {
                             let group = std::mem::take(&mut projection_pending);
                             let schema_kinds = &schema_kinds;
-                            projection_handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            projection_handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                             if projection_handles.len() == workers {
                                 projection_parts.push(
                                     projection_handles
@@ -319,7 +320,11 @@ impl ParsedReplicationStream {
                     if !projection_pending.is_empty() {
                         let schema_kinds = &schema_kinds;
                         projection_handles.push(scope.spawn(move || {
-                            parsed::project_chunks(projection_pending, schema_kinds)
+                            parsed::project_chunks(
+                                projection_pending,
+                                schema_kinds,
+                                projection_config,
+                            )
                         }));
                     }
                     projection_parts.extend(
@@ -391,9 +396,9 @@ impl ParsedReplicationStream {
                             let group =
                                 std::mem::replace(&mut pending, Vec::with_capacity(group_size));
                             let schema_kinds = &schema_kinds;
-                            handles.push(
-                                scope.spawn(move || parsed::project_chunks(group, schema_kinds)),
-                            );
+                            handles.push(scope.spawn(move || {
+                                parsed::project_chunks(group, schema_kinds, projection_config)
+                            }));
                         }
                         let Some(input) = next else { break };
                         current = input;
@@ -402,9 +407,9 @@ impl ParsedReplicationStream {
                     }
                     if !pending.is_empty() {
                         let schema_kinds = &schema_kinds;
-                        handles.push(
-                            scope.spawn(move || parsed::project_chunks(pending, schema_kinds)),
-                        );
+                        handles.push(scope.spawn(move || {
+                            parsed::project_chunks(pending, schema_kinds, projection_config)
+                        }));
                     }
                     let mut parts = handles
                         .into_iter()
@@ -436,7 +441,7 @@ impl ParsedReplicationStream {
             chunks.push(chunk);
         }
         Ok(Self {
-            observations: parsed::project_chunks(chunks, &schema_kinds),
+            observations: parsed::project_chunks(chunks, &schema_kinds, projection_config),
             tick_status,
         })
     }

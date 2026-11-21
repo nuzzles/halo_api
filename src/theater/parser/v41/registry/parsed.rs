@@ -117,6 +117,8 @@ impl TryFrom<&source::FilmRegistryRead> for crate::theater::film::Registry {
             level_tag,
         };
         Ok(Self {
+            settings: super::settings::project(body),
+            players: None,
             version,
             schemas,
             options,

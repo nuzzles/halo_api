@@ -30,6 +30,7 @@ pub(super) fn project_chunks(
         EntitySchemaId,
         crate::theater::film::EntitySchemaKind,
     >,
+    config: &crate::theater::parser::v41::context::V41DecodeConfig,
 ) -> Vec<ReplicationObservation> {
     let capacity = chunks
         .iter()
@@ -87,7 +88,7 @@ pub(super) fn project_chunks(
                         let Some(bit_len) = record.end_bit.checked_sub(start) else {
                             continue;
                         };
-                        let Some(event) = event::project(&record, payload).or_else(|| {
+                        let Some(event) = event::project(&record, payload, config).or_else(|| {
                             RawBits::from_source(payload, start, bit_len).map(|raw| {
                                 crate::theater::film::ReplicationEvent::Raw {
                                     kind: code.into(),
@@ -209,6 +210,16 @@ pub(super) fn project_chunks(
                                 })
                                 .collect(),
                         });
+                    }
+                }
+                ReplicationStreamPacketBody::RosterPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::roster(&read) {
+                        emit(ReplicationChange::Roster { players });
+                    }
+                }
+                ReplicationStreamPacketBody::BotsPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::bots(&read) {
+                        emit(ReplicationChange::Bots { players });
                     }
                 }
                 _ => {}

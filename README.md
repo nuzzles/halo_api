@@ -53,6 +53,45 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Offline Theater data
+
+`Film::parse` reads downloaded chunks without API calls. `film.registry.settings` exposes
+recorded match settings; `film.registry.players` contains the initial 32-slot player table
+when its layout is readable. Missing settings stay `None`, rather than acquiring game defaults.
+
+Player appearance is also recorded in timestamped roster packets. Initial player-table
+appearance blocks can be empty even when later roster blocks are populated:
+
+```rust
+use halo_api::theater::{Film, film::ReplicationChange};
+
+fn inspect_appearances(film: &Film) {
+    for observation in &film.replication_stream.observations {
+        if let ReplicationChange::Roster { players } = &observation.change {
+            for entry in players {
+                if let Some(spartan) = &entry.player.customization.spartan {
+                    println!("{} / {} at {}us: coating hash {:08x}",
+                        entry.player.gamertag, entry.xuid, observation.timestamp_us,
+                        spartan.coating_name);
+                }
+            }
+        }
+    }
+}
+```
+
+Appearance fields include region/permutation pairs, variant/style, theme/coating, attachments,
+objects, and action pose. They are recorded hashes—not endpoint inventory paths, named armor
+slots, meshes, textures, or animation clips. Typed appearance currently recognizes the
+1,852-byte HI_1_12_0/HI_1_13_0 layout. Original bytes remain available in `customization.raw`
+when the block can be read but its internal layout is unknown.
+
+`ReplicationChange::Bots` exposes recorded bot metadata. `ReplicationChange::Event` includes
+typed reload, throw, melee, pickup, zoom, teleport, impact, and detonation payloads. Event player
+slots and handles are not resolved to roster XUIDs; event positions retain their quantized codes.
+To advance recorded observations to a time, use `FilmRuntime`; the parser does not construct
+resolved gameplay timelines or interpret projectile attachment geometry.
+
 ### Alternatives
 
 Other projects cover Halo API reverse engineering, film decoding, and replay:

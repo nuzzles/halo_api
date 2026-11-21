@@ -66,12 +66,272 @@ fn threading_modes_produce_identical_films() {
 }
 
 #[test]
+fn recorded_players_and_settings() {
+    for name in ["bazaar_idle", "octagon_ar_kill"] {
+        let film = Film::parse(chunks(name)).unwrap();
+        let settings = &film.registry.settings;
+        assert!(settings.variant_decoded);
+        assert_eq!(settings.build.as_deref(), Some("HI_1_13_0"));
+        assert_eq!(settings.name.as_deref(), Some("Slayer"));
+        assert_eq!(
+            settings.description.as_deref(),
+            Some("Control Power Weapons to eliminate the enemy.")
+        );
+        assert_eq!(settings.minimum_respawn_seconds, Some(8));
+        assert_eq!(settings.killcam_enabled, None);
+        assert_eq!(settings.play_of_game_enabled, Some(true));
+        assert_eq!(
+            settings.time_limit_seconds,
+            Some(if name == "bazaar_idle" { 720 } else { 60 })
+        );
+        assert_eq!(
+            settings.score_to_win,
+            if name == "bazaar_idle" {
+                Some(50)
+            } else {
+                None
+            }
+        );
+        let weapons = settings.starting_loadouts.as_ref().unwrap()[0]
+            .weapons
+            .as_ref()
+            .unwrap();
+        assert_eq!(weapons.len(), 3);
+        assert_eq!(weapons[0].tag, Some(TagId(1220648237)));
+        assert_eq!(weapons[1].tag, Some(TagId(4094171407)));
+        assert_eq!(weapons[2].tag, None);
+        assert_eq!(settings.options.as_ref().unwrap().len(), 10);
+        assert_eq!(
+            settings.options.as_ref().unwrap()[0].value,
+            Some(halo_api::theater::film::MatchOptionValue::NumberBits(
+                0.6f32.to_bits()
+            ))
+        );
+        let initial = film
+            .registry
+            .players
+            .as_ref()
+            .expect("initial player table");
+        assert_eq!(initial.len(), 32);
+        assert!(
+            initial
+                .iter()
+                .enumerate()
+                .all(|(i, p)| p.slot as usize == i)
+        );
+        let occupied: Vec<_> = initial
+            .iter()
+            .filter(|p| !p.player.gamertag.is_empty())
+            .collect();
+        assert_eq!(occupied.len(), if name == "bazaar_idle" { 1 } else { 2 });
+        assert_eq!(occupied[0].player.gamertag, "Nuzzles");
+        assert_eq!(occupied[0].xuid.0, 2535472547643888);
+        for p in &occupied {
+            assert!(p.player.customization.raw.iter().all(|v| *v == 0));
+        }
+        let mut snapshots = 0;
+        for observation in &film.replication_stream.observations {
+            if let ReplicationChange::Roster { players } = &observation.change {
+                snapshots += 1;
+                assert_eq!(players.len(), occupied.len());
+                for p in players {
+                    let initial = occupied.iter().find(|i| i.xuid == p.xuid).unwrap();
+                    assert_eq!(initial.player.gamertag, p.player.gamertag);
+                    assert_eq!(p.player.customization.raw.len(), 1852);
+                    let appearance = p.player.customization.spartan.as_ref().unwrap();
+                    assert_eq!(appearance.regions.len(), 22);
+                    assert_eq!(appearance.attachments.len(), 24);
+                    assert_eq!(appearance.objects.len(), 7);
+                    if p.player.gamertag == "Nuzzles" {
+                        assert_eq!(appearance.variant_name, 0x101f4ba9);
+                        assert_eq!(appearance.style_name, 0x79666886);
+                        assert_eq!(appearance.theme_name, 0x1dbd4399);
+                        assert_eq!(appearance.coating_name, 0x8de0ee80);
+                        assert_eq!(appearance.action_pose, 0x4abd4c24);
+                    } else {
+                        assert_eq!(p.player.gamertag, "Yet");
+                        assert_eq!(appearance.coating_name, 1369882871);
+                    }
+                }
+            }
+        }
+        assert!(snapshots > 0);
+        let json = serde_json::to_vec(&film).unwrap();
+        assert_eq!(serde_json::from_slice::<Film>(&json).unwrap(), film);
+    }
+}
+
+#[test]
+fn runtime_replays_roster_snapshots_without_player_entity_inference() {
+    use halo_api::theater::{FilmRuntime, film::ReplicationObservation};
+    let mut film = Film::parse(chunks("bazaar_idle")).unwrap();
+    let players = film
+        .replication_stream
+        .observations
+        .iter()
+        .find_map(|o| match &o.change {
+            ReplicationChange::Roster { players } if !players.is_empty() => Some(players.clone()),
+            _ => None,
+        })
+        .unwrap();
+    film.replication_stream.observations = vec![
+        ReplicationObservation {
+            timestamp_us: 10,
+            change: ReplicationChange::Roster {
+                players: players.clone(),
+            },
+        },
+        ReplicationObservation {
+            timestamp_us: 15,
+            change: ReplicationChange::Bots { players: vec![] },
+        },
+        ReplicationObservation {
+            timestamp_us: 20,
+            change: ReplicationChange::Roster { players: vec![] },
+        },
+    ];
+    let mut runtime = FilmRuntime::load(film);
+    assert!(runtime.current().roster.is_none());
+    assert!(runtime.advance_to(9).roster.is_none());
+    assert_eq!(runtime.advance_to(10).roster.as_ref(), Some(&players));
+    assert_eq!(runtime.advance_to(15).bots, Some(vec![]));
+    assert!(runtime.current().entities.is_empty());
+    assert_eq!(runtime.advance_to(20).roster, Some(vec![]));
+    assert_eq!(runtime.seek(10).roster.as_ref(), Some(&players));
+    assert!(runtime.current().bots.is_none());
+    assert!(runtime.advance_to(9).roster.is_none());
+    runtime.advance_to(20);
+    runtime.rewind();
+    assert!(runtime.current().roster.is_none());
+    assert!(runtime.current().bots.is_none());
+}
+
+/// Opt-in regression against a local corpus with film.json manifests. No downloads.
+#[test]
+#[ignore = "set HALO_FILM_CORPUS to a directory of local film.json fixtures"]
+fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
+    use std::io::Write;
+    fn visit(path: &std::path::Path, manifests: &mut Vec<PathBuf>) {
+        for entry in std::fs::read_dir(path).unwrap() {
+            let entry = entry.unwrap();
+            if entry.file_type().unwrap().is_dir() {
+                visit(&entry.path(), manifests);
+            } else if entry.file_name() == "film.json" {
+                manifests.push(entry.path());
+            }
+        }
+    }
+    let root = std::env::var_os("HALO_FILM_CORPUS").expect("HALO_FILM_CORPUS");
+    let mut manifests = vec![];
+    visit(std::path::Path::new(&root), &mut manifests);
+    manifests.sort();
+    assert!(!manifests.is_empty());
+    let mut populations = 0;
+    let mut event_counts = [0usize; 8];
+    for manifest in &manifests {
+        let json: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
+        let input: Vec<_> = json["chunks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|c| {
+                let mut data =
+                    std::fs::read(manifest.parent().unwrap().join(c["file"].as_str().unwrap()))
+                        .unwrap();
+                // Some corpus entries store inflated bytes despite their .zlib suffix.
+                let compressed = data
+                    .get(..2)
+                    .is_some_and(|h| h[0] & 15 == 8 && u16::from_be_bytes([h[0], h[1]]) % 31 == 0);
+                if !compressed {
+                    let mut writer =
+                        flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+                    writer.write_all(&data).unwrap();
+                    data = writer.finish().unwrap();
+                }
+                RawFilmChunk {
+                    kind: RawChunkKind(c["chunk_type"].as_i64().unwrap() as i32),
+                    index: c["index"].as_i64().unwrap() as i32,
+                    start_ms: c["start_time_offset_ms"].as_i64().unwrap(),
+                    data,
+                }
+            })
+            .collect();
+        let single = Film::parse_with_options(
+            input.clone(),
+            FilmParseOptions {
+                threading: Threading::Single,
+            },
+        )
+        .unwrap_or_else(|e| panic!("{}: {e}", manifest.display()));
+        let multi = Film::parse_with_options(
+            input,
+            FilmParseOptions {
+                threading: Threading::Multi,
+            },
+        )
+        .unwrap();
+        assert_eq!(single, multi, "{}", manifest.display());
+        assert_eq!(
+            single.registry.players.as_ref().unwrap().len(),
+            32,
+            "{}",
+            manifest.display()
+        );
+        assert!(
+            single.registry.settings.variant_decoded,
+            "{}",
+            manifest.display()
+        );
+        for o in &single.replication_stream.observations {
+            match &o.change {
+                ReplicationChange::Roster { players } => {
+                    populations += 1;
+                    for p in players {
+                        assert!(p.player.customization.spartan.is_some());
+                    }
+                }
+                ReplicationChange::Event { event } => {
+                    let index = match event {
+                        ReplicationEvent::WeaponReload { .. } => 0,
+                        ReplicationEvent::Throw { .. } => 1,
+                        ReplicationEvent::Melee { .. } => 2,
+                        ReplicationEvent::Pickup { .. } => 3,
+                        ReplicationEvent::Zoom { .. } => 4,
+                        ReplicationEvent::Teleport { .. } => 5,
+                        ReplicationEvent::ProjectileDetonation { .. } => 6,
+                        ReplicationEvent::ProjectileImpact { .. } => 7,
+                        ReplicationEvent::Raw { kind, .. }
+                            if matches!(kind.code(), 5 | 6 | 9 | 21 | 32 | 38 | 39 | 40) =>
+                        {
+                            panic!("{}: event {kind:?} was not projected", manifest.display())
+                        }
+                        _ => continue,
+                    };
+                    event_counts[index] += 1;
+                }
+                _ => {}
+            }
+        }
+        eprintln!("validated {}", manifest.display());
+    }
+    eprintln!(
+        "{} films, {populations} rosters, new typed events: {event_counts:?}",
+        manifests.len()
+    );
+    assert!(populations > 0);
+    // A user's corpus need not contain every event kind (our captures have no
+    // type-32 teleports). Synthetic decoder tests cover those missing branches.
+    assert!(event_counts.iter().any(|n| *n > 0));
+}
+
+#[test]
 fn captured_films_parse_into_typed_sections() {
     for (name, observations, highlights, changes) in [
-        ("bazaar_idle", 10_051, 0, [310, 6210, 29, 2401, 878, 223]),
+        ("bazaar_idle", 10_059, 0, [310, 6210, 29, 2401, 878, 223]),
         (
             "octagon_ar_kill",
-            13_668,
+            13_680,
             3,
             [223, 6058, 3, 6134, 1098, 152],
         ),
@@ -90,7 +350,7 @@ fn captured_films_parse_into_typed_sections() {
                     ReplicationEvent::DamageAftermath { .. } => counts[0] += 1,
                     ReplicationEvent::WeaponFire { .. } => counts[1] += 1,
                     ReplicationEvent::Kill { .. } => counts[2] += 1,
-                    ReplicationEvent::Raw { .. } => {}
+                    _ => {}
                 }
                 counts
             });
@@ -208,6 +468,7 @@ fn captured_films_parse_into_typed_sections() {
                 ReplicationChange::Control { .. } => 3,
                 ReplicationChange::Keyframe { .. } => 4,
                 ReplicationChange::Event { .. } => 5,
+                ReplicationChange::Roster { .. } | ReplicationChange::Bots { .. } => continue,
             };
             actual[slot] += 1;
         }

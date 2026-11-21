@@ -10,6 +10,18 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Added
+
+- Offline Theater player metadata: the initial 32-slot player table, timestamped roster and bot
+  snapshots, and recorded Spartan appearance hashes for recognized HI_1_12_0/HI_1_13_0 blocks.
+  Original appearance bytes are retained; item names, asset paths, and current API customization
+  are not substituted for recorded data.
+- Recorded match settings, including variant name/description, score/time/respawn limits,
+  starting loadouts, and typed option values with original bytes.
+- Typed reload, throw, melee, pickup, zoom, teleport, projectile impact, and detonation events.
+  Positions retain quantized codes; gameplay state and projectile attachment interpretation
+  remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
+
 ### Changed
 
 - `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded

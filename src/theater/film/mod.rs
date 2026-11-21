@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct Film {
     /// Setup: recorded version, component schemas, game options, and map identity.
     pub registry: Registry,
-    /// Timestamped entity, component, control, keyframe, and event observations.
+    /// Timestamped entity, component, control, keyframe, event, and roster observations.
     pub replication_stream: ReplicationStream,
     /// Guarded, typed highlights in recorded order.
     pub summary: Summary,
@@ -122,6 +122,13 @@ pub enum FilmRegistryReadError {
 }
 
 pub mod catalog;
+pub mod players;
+pub use players::*;
+pub mod settings;
+pub use replication::{
+    EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant, ThrowSelection,
+};
+pub use settings::*;
 mod ids;
 pub mod registry;
 pub mod replication;
