@@ -4,7 +4,7 @@
 use super::source::*;
 use crate::theater::film::{
     MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingLoadout, StartingWeapon,
-    TagId,
+    TagId, WeaponTagId,
 };
 
 fn field(v: &BondValue, id: u16) -> Option<&BondValue> {
@@ -85,7 +85,7 @@ fn tag(v: &BondValue, p: &[u16]) -> Option<TagId> {
     (n >= i32::MIN as i64 && n <= u32::MAX as i64).then_some(TagId(n as u32))
 }
 
-fn bytes(v: &BondValue) -> Option<Vec<u8>> {
+fn bytes(v: &BondValue) -> Option<std::borrow::Cow<'_, [u8]>> {
     let BondValueBody::Sequence {
         header,
         count: Some(count),
@@ -101,12 +101,17 @@ fn bytes(v: &BondValue) -> Option<Vec<u8>> {
     }
     if let Some(packed) = packed {
         let raw = packed.raw.as_ref()?;
-        return (raw.bit_len == *count as usize * 8).then(|| raw.bytes.to_vec());
+        return (raw.bit_len == *count as usize * 8)
+            .then(|| std::borrow::Cow::Borrowed(raw.bytes.as_slice()));
     }
     if values.len() != *count as usize {
         return None;
     }
-    values.iter().map(|v| integer(v).map(|n| n as u8)).collect()
+    values
+        .iter()
+        .map(|v| integer(v).map(|n| n as u8))
+        .collect::<Option<Vec<_>>>()
+        .map(std::borrow::Cow::Owned)
 }
 
 fn text(block: &[u8], offset: Option<i64>) -> Option<String> {
@@ -271,7 +276,7 @@ fn weapon(w: &BondValue) -> Result<StartingWeapon, ParseError> {
     let tag = optional_tag(w, &[0, 0], "weapon.tag")?;
     let random = optional_boolean(w, &[2], "weapon.random")?;
     Ok(match (tag, random == Some(true)) {
-        (Some(tag), false) => StartingWeapon::Real(tag),
+        (Some(tag), false) => StartingWeapon::Real(WeaponTagId(tag.raw())),
         (None, true) => StartingWeapon::Random,
         (Some(_), true) => {
             return Err(ParseError::InvalidMatchSettings {
@@ -283,8 +288,10 @@ fn weapon(w: &BondValue) -> Result<StartingWeapon, ParseError> {
 }
 
 fn option(o: &BondValue) -> Result<MatchOption, ParseError> {
-    let raw_value = required(
-        path(o, &[1, 0]).and_then(bytes).filter(|b| b.len() == 8),
+    let raw_value: [u8; 8] = required(
+        path(o, &[1, 0])
+            .and_then(bytes)
+            .and_then(|b| b.as_ref().try_into().ok()),
         "option.raw_value",
     )?;
     let value = match raw_value[4] {
@@ -553,7 +560,7 @@ mod tests {
         );
         assert_eq!(
             weapon(&read(&[6, 10, 3, 3, 42, 0, 0])).unwrap(),
-            StartingWeapon::Real(TagId(42))
+            StartingWeapon::Real(WeaponTagId(42))
         );
         assert!(matches!(
             weapon(&read(&[8, 10, 3, 3, 42, 0, 66, 1, 0])),
