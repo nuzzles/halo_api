@@ -55,16 +55,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Alternatives
 
-#### API Wrappers
+Other projects cover Halo API reverse engineering, film decoding, and replay:
 
-- [Grunt API](https://github.com/PlayGrifball/grunt) is a C#/.NET client and HTTP gateway for the
-  Halo Infinite APIs.
-- [SPNKr](https://github.com/acurtis166/SPNKr) is a Python SDK for the Halo Infinite web API.
-
-#### Theater Libraries
-
-These projects serve different parts of Halo Infinite Theater replay work:
-
+- [OpenSpartan](https://github.com/openspartan) has many Halo API reverse-engineering examples.
+- [SPNKr](https://github.com/acurtis166/SPNKr) is a Python SDK for the Halo Infinite web API,
+  including film highlights.
 - [libfilmshell](https://github.com/OpenSpartan/libfilmshell) is a Rust library for extracting data
   from Theater films.
 - [halo-infinite-film-decoder](https://github.com/JGtm/halo-infinite-film-decoder) turns film chunks
