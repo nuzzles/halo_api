@@ -3,7 +3,7 @@ use super::registry::ParsedRegistry;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::theater::film::ChunkKind;
 use crate::theater::film::replication::ReplicationObservation;
-use crate::theater::film::{EntitySchemaId, EntitySchemaKind, InflatedFilmChunk};
+use crate::theater::film::{EntitySchemaId, EntitySchemaKind, InflatedFilmChunk, Threading};
 pub(crate) mod source;
 
 use crate::theater::film::ParseError;
@@ -56,7 +56,10 @@ impl ParsedReplicationStream {
         parse_context: &FilmParseContext,
         max_packets: usize,
         max_control_records: usize,
+        threading: Threading,
     ) -> Result<Self, ParseError> {
+        #[cfg(target_arch = "wasm32")]
+        let _ = threading;
         for &archetype in parse_context.delta_record_archetypes.values() {
             if archetype >= 50
                 || registry
@@ -103,7 +106,8 @@ impl ParsedReplicationStream {
         let mut tick_status = ReplayTickStatus::Absent;
 
         #[cfg(not(target_arch = "wasm32"))]
-        if inputs.len() >= 8
+        if threading == Threading::Multi
+            && inputs.len() >= 8
             && !config.guard_rejected_frame_deletes
             && config.schema_recovery.is_none()
         {
@@ -337,7 +341,7 @@ impl ParsedReplicationStream {
         }
 
         #[cfg(not(target_arch = "wasm32"))]
-        if inputs.len() >= 2 {
+        if threading == Threading::Multi && inputs.len() >= 2 {
             let workers =
                 std::thread::available_parallelism().map_or(1, |count| count.get().min(8));
             if workers > 1 {

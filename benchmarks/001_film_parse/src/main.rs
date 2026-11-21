@@ -7,6 +7,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use filmshell::{Chunk, Film as ShellFilm};
 use halo_api::clients::hi::models::{RawChunkKind, RawFilmChunk};
+use halo_api::theater::film::{FilmParseOptions, Threading};
 use halo_api::theater::Film as HaloFilm;
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +21,7 @@ const FIXTURES: [(&str, &str); 7] = [
     ("clan_raid", "Clan Raid"),
 ];
 const LIBFILMSHELL_REV: &str = "031e2179f0758314e2a97fb96438c7b1e82ce1fb";
-const DEFAULT_RUNS: usize = 100;
+const DEFAULT_RUNS: usize = 25;
 
 #[derive(Deserialize)]
 struct Manifest {
@@ -50,7 +51,8 @@ struct ResultRow {
     compressed_mib: f64,
     runs: usize,
     halo_api_ms: f64,
-    libfilmshell_ms: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    libfilmshell_ms: Option<f64>,
     film_fingerprint: String,
 }
 
@@ -59,7 +61,8 @@ struct Report {
     schema: u8,
     generated_at_unix_seconds: u64,
     halo_api_commit: String,
-    libfilmshell_commit: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    libfilmshell_commit: Option<&'static str>,
     os: &'static str,
     arch: &'static str,
     logical_cpus: usize,
@@ -144,7 +147,7 @@ fn load(archive_path: &Path) -> Result<Vec<Input>, Box<dyn std::error::Error>> {
     Ok(inputs)
 }
 
-fn parse_halo(entries: &[Input]) -> Result<HaloFilm, String> {
+fn parse_halo(entries: &[Input], threading: Threading) -> Result<HaloFilm, String> {
     let chunks = entries
         .iter()
         .map(|entry| RawFilmChunk {
@@ -154,7 +157,8 @@ fn parse_halo(entries: &[Input]) -> Result<HaloFilm, String> {
             data: entry.data.clone(),
         })
         .collect::<Vec<_>>();
-    HaloFilm::parse(chunks).map_err(|error| error.to_string())
+    HaloFilm::parse_with_options(chunks, FilmParseOptions { threading })
+        .map_err(|error| error.to_string())
 }
 
 fn parse_shell(entries: &[Input]) -> Result<ShellFilm, String> {
@@ -184,7 +188,7 @@ fn fingerprint(film: &HaloFilm) -> Result<String, Box<dyn std::error::Error>> {
     Ok(format!("{:016x}", writer.0.finish()))
 }
 
-fn timed<T>(entries: &[Input], parse: fn(&[Input]) -> Result<T, String>) -> Result<f64, String> {
+fn timed<T>(entries: &[Input], parse: impl FnOnce(&[Input]) -> Result<T, String>) -> Result<f64, String> {
     let start = Instant::now();
     let film = parse(black_box(entries))?;
     black_box(&film);
@@ -198,28 +202,37 @@ fn benchmark(
     label: &str,
     archive_path: &Path,
     requested_runs: Option<usize>,
+    threading: Threading,
 ) -> Result<ResultRow, Box<dyn std::error::Error>> {
     let entries = load(archive_path)?;
     let bytes: usize = entries.iter().map(|entry| entry.data.len()).sum();
     let runs = requested_runs.unwrap_or(DEFAULT_RUNS);
-    let parsed = parse_halo(&entries)?;
+    let parsed = parse_halo(&entries, threading)?;
     let film_fingerprint = fingerprint(&parsed)?;
     drop(parsed);
-    parse_shell(&entries)?;
+    if threading == Threading::Multi {
+        parse_shell(&entries)?;
+    }
 
     let mut halo_times = Vec::with_capacity(runs);
-    let mut shell_times = Vec::with_capacity(runs);
+    let mut shell_times = (threading == Threading::Multi).then(|| Vec::with_capacity(runs));
     for run in 0..runs {
-        if run % 2 == 0 {
-            halo_times.push(timed(&entries, parse_halo)?);
+        if let Some(shell_times) = &mut shell_times {
+            if run % 2 == 0 {
+            halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
             shell_times.push(timed(&entries, parse_shell)?);
         } else {
             shell_times.push(timed(&entries, parse_shell)?);
-            halo_times.push(timed(&entries, parse_halo)?);
+            halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
+            }
+        } else {
+            halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
         }
     }
     halo_times.sort_by(f64::total_cmp);
-    shell_times.sort_by(f64::total_cmp);
+    if let Some(shell_times) = &mut shell_times {
+        shell_times.sort_by(f64::total_cmp);
+    }
     let result = ResultRow {
         fixture: fixture.to_owned(),
         label: label.to_owned(),
@@ -227,23 +240,37 @@ fn benchmark(
         compressed_mib: bytes as f64 / 1_048_576.0,
         runs,
         halo_api_ms: median(&halo_times),
-        libfilmshell_ms: median(&shell_times),
+        libfilmshell_ms: shell_times.as_deref().map(median),
         film_fingerprint,
     };
-    println!(
-        "{label}: halo_api {:.1} ms, libfilmshell {:.1} ms ({} runs, {} chunks)",
-        result.halo_api_ms, result.libfilmshell_ms, runs, result.chunks
-    );
+    if let Some(shell_ms) = result.libfilmshell_ms {
+        println!(
+            "{label}: halo_api {:.1} ms, libfilmshell {:.1} ms ({} runs, {} chunks)",
+            result.halo_api_ms, shell_ms, runs, result.chunks
+        );
+    } else {
+        println!(
+            "{label}: halo_api {:.1} ms ({} runs, {} chunks)",
+            result.halo_api_ms, runs, result.chunks
+        );
+    }
     Ok(result)
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let mut output = None;
+    let mut threading = Threading::Multi;
     let mut fixture_names = Vec::new();
     while let Some(arg) = args.next() {
         if arg == "--output" {
             output = Some(PathBuf::from(args.next().ok_or("--output needs a path")?));
+        } else if arg == "--threading" {
+            threading = match args.next().ok_or("--threading needs single or multi")?.as_str() {
+                "single" => Threading::Single,
+                "multi" => Threading::Multi,
+                _ => return Err("--threading must be single or multi".into()),
+            };
         } else {
             fixture_names.push(arg);
         }
@@ -272,6 +299,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             label,
             &root.join(format!("{fixture}.tar")),
             requested_runs,
+            threading,
         )?);
     }
     if let Some(output) = output {
@@ -282,12 +310,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             schema: 1,
             generated_at_unix_seconds: SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs(),
             halo_api_commit: String::from_utf8(commit.stdout)?.trim().to_owned(),
-            libfilmshell_commit: LIBFILMSHELL_REV,
+            libfilmshell_commit: (threading == Threading::Multi).then_some(LIBFILMSHELL_REV),
             os: std::env::consts::OS,
             arch: std::env::consts::ARCH,
             logical_cpus: std::thread::available_parallelism()?.get(),
             cpu_model: cpu_model(),
-            threading: "Multi-Threaded",
+            threading: match threading {
+                Threading::Single => "Single-Threaded",
+                Threading::Multi => "Multi-Threaded",
+            },
             results,
         };
         if let Some(parent) = output.parent() {

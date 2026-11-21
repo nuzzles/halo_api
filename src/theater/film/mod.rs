@@ -16,6 +16,24 @@ pub struct Film {
     /// Guarded, typed highlights in recorded order.
     pub summary: Summary,
 }
+
+/// Controls how film chunks are decoded. The default uses multiple threads on
+/// native targets when parallel work is available.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct FilmParseOptions {
+    pub threading: Threading,
+}
+
+/// Whether film decoding may spawn worker threads.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Threading {
+    /// Decode on the calling thread only.
+    Single,
+    /// Allow parallel decoding on native targets when it is beneficial.
+    #[default]
+    Multi,
+}
+
 impl Film {
     /// Read the registry header, select a supported parser, and decode the chunks.
     ///
@@ -28,10 +46,21 @@ impl Film {
     /// consumed into typed observations and guarded highlights. Manifest indices
     /// must be contiguous from zero, and replay tick evidence must be complete.
     pub fn parse(chunks: impl IntoIterator<Item = RawFilmChunk>) -> Result<Self, ParseError> {
+        Self::parse_with_options(chunks, FilmParseOptions::default())
+    }
+
+    /// Decode a film with an explicit threading choice. `Single` never spawns
+    /// parser workers; `Multi` may do so on native targets. WASM decodes on
+    /// the calling thread in either mode.
+    pub fn parse_with_options(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+        options: FilmParseOptions,
+    ) -> Result<Self, ParseError> {
         crate::theater::parser::ChunkReader::read(
             chunks,
             ParseLimits::default(),
             FilmParseContext::default(),
+            options.threading,
         )
     }
 }

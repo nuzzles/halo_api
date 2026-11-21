@@ -12,6 +12,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded
+  Theater decoding; `Film::parse` keeps the multi-threaded default. Film parsing benchmarks now
+  measure both modes with 25 trials per fixture. Film chunk inflation now uses `zlib-rs`, which
+  uses SIMD on supported processors.
 - `player_customizations` now returns a `Vec<PlayerCustomization>` with typed player IDs,
   direct appearance and core fields, selected themes, and named weapon slots. Serialized
   customization output uses normalized field names and timestamps instead of Halo's response

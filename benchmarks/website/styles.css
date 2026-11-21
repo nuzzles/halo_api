@@ -15,6 +15,8 @@ body { margin: 0; color: var(--text); background: var(--background); font: 16px/
 .setting { margin-bottom: 32px; }
 .setting h2 { margin: 0 0 12px; color: var(--muted); font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .choice { display: inline-block; max-width: 100%; padding: 8px 13px; border: 1px solid #4d6265; border-radius: 5px; background: #326f75; font-size: 15px; font-weight: 550; line-height: 1.35; }
+select.choice { width: 100%; color: var(--text); cursor: pointer; }
+select.choice:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
 .content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
 .date-select { position: relative; display: inline-flex; flex: none; }
@@ -27,6 +29,7 @@ h1 { font-size: 21px; }
 .chart-header h2 { font-size: clamp(22px, 2vw, 27px); }
 .legend { display: flex; justify-content: center; gap: 25px; margin-top: 14px; color: #d0d0d0; font-size: 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 8px; }
+#shell-legend[hidden] { display: none; }
 .swatch { display: inline-block; width: 14px; height: 11px; }
 .swatch.halo, .bar.halo { background: var(--halo); }
 .swatch.shell, .bar.shell { background: var(--shell); }

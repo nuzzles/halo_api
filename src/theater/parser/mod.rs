@@ -12,7 +12,7 @@ pub(crate) use ticks::{ReplayTickSource, ReplayTickStatus};
 pub(crate) mod v41;
 
 use crate::clients::hi::models::{RawChunkKind, RawFilmChunk};
-use crate::theater::film::{ChunkKind, Film, InflatedFilmChunk, ParseError};
+use crate::theater::film::{ChunkKind, Film, InflatedFilmChunk, ParseError, Threading};
 
 /// Validated chunk roles after each downloaded buffer has been consumed by inflation.
 pub(crate) struct InflatedFilmChunks {
@@ -52,6 +52,7 @@ impl ChunkReader {
         chunks: impl IntoIterator<Item = RawFilmChunk>,
         limits: ParseLimits,
         context: FilmParseContext,
+        threading: Threading,
     ) -> Result<Film, ParseError> {
         let chunks = Self::sort_chunks(chunks)?;
         for (expected, chunk) in chunks.iter().enumerate() {
@@ -59,7 +60,7 @@ impl ChunkReader {
                 return Err(ParseError::MissingIndex { index: expected });
             }
         }
-        let parsed = Self::read_ordered(chunks, limits, context)?;
+        let parsed = Self::read_ordered(chunks, limits, context, threading)?;
         let tick_status = parsed.replication_stream.replay_tick_status();
         match tick_status {
             ReplayTickStatus::Found(_) => Ok(parsed.into()),
@@ -93,6 +94,7 @@ impl ChunkReader {
         mut chunks: Vec<RawFilmChunk>,
         limits: ParseLimits,
         context: FilmParseContext,
+        threading: Threading,
     ) -> Result<ParsedFilm, ParseError> {
         // Registry chunk should always come first
         let registry_chunk = chunks.first().ok_or(ParseError::MissingRegistry)?;
@@ -139,12 +141,13 @@ impl ChunkReader {
         // Large terminal summaries can inflate while the replication workers
         // inflate the middle chunks. Tiny summaries cost less than a thread.
         #[cfg(not(target_arch = "wasm32"))]
-        let (replication_stream, summary) = if summary_chunk.data.len() >= 64 * 1024
+        let (replication_stream, summary) = if threading == Threading::Multi
+            && summary_chunk.data.len() >= 64 * 1024
             && std::thread::available_parallelism().is_ok_and(|workers| workers.get() > 1)
         {
             std::thread::scope(|scope| {
                 let summary = scope.spawn(|| summary_chunk.inflate());
-                let replication_stream = Self::inflate_replication_chunks(chunks);
+                let replication_stream = Self::inflate_replication_chunks(chunks, threading);
                 let summary = summary
                     .join()
                     .expect("film summary inflation worker panicked");
@@ -152,13 +155,13 @@ impl ChunkReader {
             })?
         } else {
             (
-                Self::inflate_replication_chunks(chunks)?,
+                Self::inflate_replication_chunks(chunks, threading)?,
                 summary_chunk.inflate()?,
             )
         };
         #[cfg(target_arch = "wasm32")]
         let (replication_stream, summary) = (
-            Self::inflate_replication_chunks(chunks)?,
+            Self::inflate_replication_chunks(chunks, threading)?,
             summary_chunk.inflate()?,
         );
         let chunks = InflatedFilmChunks {
@@ -169,15 +172,18 @@ impl ChunkReader {
 
         // Finish parsing film
         match reader {
-            Self::V41(reader) => reader.read(chunks, limits, context),
+            Self::V41(reader) => reader.read(chunks, limits, context, threading),
         }
     }
 
     fn inflate_replication_chunks(
         chunks: Vec<RawFilmChunk>,
+        threading: Threading,
     ) -> Result<Vec<InflatedFilmChunk>, ParseError> {
+        #[cfg(target_arch = "wasm32")]
+        let _ = threading;
         #[cfg(not(target_arch = "wasm32"))]
-        if chunks.len() >= 2 {
+        if threading == Threading::Multi && chunks.len() >= 2 {
             let workers =
                 std::thread::available_parallelism().map_or(1, |count| count.get().min(8));
             if workers > 1 {
