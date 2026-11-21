@@ -28,6 +28,86 @@ pub(super) fn candidate_payload(read: &SummaryEventRead) -> SummaryHighlightPayl
 const IDENTITY_TO_TAIL_BITS: usize = 14_926;
 const TAIL_BITS: usize = 60 * 8;
 const END_MARKER: u64 = 0x0000_2ee0;
+const MARKERS: [u16; 2] = [0x2dc0, 0x25c0];
+#[cfg(any(test, target_arch = "aarch64"))]
+const MIDDLE_BYTES: [u8; 12] = [
+    0x2e, 0x4b, 0x5b, 0x5c, 0x6e, 0x70, 0x97, 0xb7, 0xb8, 0xc0, 0xdc, 0xe0,
+];
+
+// A marker may begin at any bit offset. Its middle byte must be one of these
+// twelve values, regardless of the preceding and following bits.
+const fn middle_byte_mask() -> [u8; 256] {
+    let mut masks = [0; 256];
+    let mut marker = 0;
+    while marker < MARKERS.len() {
+        let mut offset = 0;
+        while offset < 8 {
+            masks[((MARKERS[marker] >> offset) & 0xff) as usize] |= 1 << offset;
+            offset += 1;
+        }
+        marker += 1;
+    }
+    masks
+}
+
+const MIDDLE_BYTE_MASK: [u8; 256] = middle_byte_mask();
+
+#[cfg(target_arch = "aarch64")]
+#[inline]
+fn possible_middle_bytes(bytes: &[u8]) -> bool {
+    use std::arch::aarch64::{vceqq_u8, vdupq_n_u8, vld1q_u8, vmaxvq_u8, vorrq_u8};
+
+    debug_assert!(bytes.len() >= 16);
+    // SAFETY: the caller provides at least sixteen bytes. NEON is baseline on
+    // AArch64, including Apple Silicon.
+    unsafe {
+        let block = vld1q_u8(bytes.as_ptr());
+        let mut matches = vdupq_n_u8(0);
+        for byte in MIDDLE_BYTES {
+            matches = vorrq_u8(matches, vceqq_u8(block, vdupq_n_u8(byte)));
+        }
+        vmaxvq_u8(matches) != 0
+    }
+}
+
+fn for_each_marker(payload: &[u8], mut visit: impl FnMut(usize)) {
+    let mut byte: usize = 12; // The identity preceding a marker requires 96 bits.
+    #[cfg(target_arch = "aarch64")]
+    while byte.saturating_add(18) <= payload.len() {
+        if !possible_middle_bytes(&payload[byte + 1..]) {
+            byte += 16;
+            continue;
+        }
+        let end = byte + 16;
+        while byte < end {
+            visit_byte(payload, byte, &mut visit);
+            byte += 1;
+        }
+    }
+    while byte.saturating_add(2) < payload.len() {
+        visit_byte(payload, byte, &mut visit);
+        byte += 1;
+    }
+}
+
+#[inline]
+fn visit_byte(payload: &[u8], byte: usize, visit: &mut impl FnMut(usize)) {
+    let mut mask = MIDDLE_BYTE_MASK[payload[byte + 1] as usize];
+    if mask == 0 {
+        return;
+    }
+    let window = (u32::from(payload[byte]) << 16)
+        | (u32::from(payload[byte + 1]) << 8)
+        | u32::from(payload[byte + 2]);
+    while mask != 0 {
+        let offset = mask.trailing_zeros() as usize;
+        let marker = (window >> (8 - offset)) as u16;
+        if MARKERS.contains(&marker) {
+            visit(byte * 8 + offset);
+        }
+        mask &= mask - 1;
+    }
+}
 
 fn read_event(bits: Bits<'_>, marker_bit: usize) -> Option<SummaryEventRead> {
     let identity_bit = marker_bit.checked_sub(64)?;
@@ -92,14 +172,11 @@ fn read_event(bits: Bits<'_>, marker_bit: usize) -> Option<SummaryEventRead> {
 pub(crate) fn read_summary_candidates(payload: &[u8]) -> Vec<SummaryEventRead> {
     let bits = Bits(payload);
     let mut events = Vec::new();
-    for (bit, word) in bits.windows() {
-        if bit < 32 + 64 || !matches!(word >> 48, 0x2dc0 | 0x25c0) {
-            continue;
-        }
+    for_each_marker(payload, |bit| {
         if let Some(event) = read_event(bits, bit) {
             events.push(event);
         }
-    }
+    });
     events.sort_by_key(|event| event.identity_source.start);
     events
 }
@@ -107,6 +184,48 @@ pub(crate) fn read_summary_candidates(payload: &[u8]) -> Vec<SummaryEventRead> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn byte_filter_matches_bit_windows() {
+        for (byte, mask) in MIDDLE_BYTE_MASK.iter().enumerate() {
+            assert_eq!(*mask != 0, MIDDLE_BYTES.contains(&(byte as u8)));
+        }
+        let mut random = vec![0u8; 16_384];
+        let mut value = 0x7a53_4c2bu32;
+        for byte in &mut random {
+            value ^= value << 13;
+            value ^= value >> 17;
+            value ^= value << 5;
+            *byte = value as u8;
+        }
+        let check = |payload: &[u8]| {
+            let expected = Bits(payload)
+                .windows()
+                .filter(|(bit, word)| *bit >= 96 && matches!(word >> 48, 0x2dc0 | 0x25c0))
+                .map(|(bit, _)| bit)
+                .collect::<Vec<_>>();
+            let mut actual = Vec::new();
+            for_each_marker(payload, |bit| actual.push(bit));
+            assert_eq!(actual, expected);
+        };
+        check(&random);
+        for offset in 0..8 {
+            let mut payload = random.clone();
+            for (index, marker) in MARKERS.into_iter().enumerate() {
+                let position = 512 + offset + index * 64;
+                for shift in 0..16 {
+                    let source = position + shift;
+                    let mask = 1 << (7 - source % 8);
+                    payload[source / 8] &= !mask;
+                    payload[source / 8] |= (((marker >> (15 - shift)) as u8) & 1) * mask;
+                }
+            }
+            check(&payload);
+        }
+        for len in 0..20 {
+            check(&random[..len]);
+        }
+    }
 
     #[test]
     fn flagged_unfamiliar_type_is_an_unknown_medal() {
