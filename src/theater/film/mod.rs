@@ -104,6 +104,8 @@ pub enum ParseError {
     InvalidCustomization,
     #[error("recorded match setting {field} is missing or invalid")]
     InvalidMatchSettings { field: &'static str },
+    #[error("recorded event field {field} is required but absent")]
+    MissingRequiredEventField { field: &'static str },
     #[error("unsupported registry game mode {0}; supported: 2 (Multiplayer)")]
     UnsupportedGameMode(u8),
     #[error("unsupported film version {0}; supported: 41")]

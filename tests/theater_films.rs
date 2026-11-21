@@ -395,11 +395,7 @@ fn invalid_roster_customization_fails_the_whole_film_in_both_threading_modes() {
     }
 }
 
-/// Opt-in regression against a local corpus with film.json manifests. No downloads.
-#[test]
-#[ignore = "set HALO_FILM_CORPUS to a directory of local film.json fixtures"]
-fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
-    use std::io::Write;
+fn local_corpus_manifests() -> Vec<PathBuf> {
     fn visit(path: &std::path::Path, manifests: &mut Vec<PathBuf>) {
         for entry in std::fs::read_dir(path).unwrap() {
             let entry = entry.unwrap();
@@ -415,37 +411,143 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
     visit(std::path::Path::new(&root), &mut manifests);
     manifests.sort();
     assert!(!manifests.is_empty());
+    manifests
+}
+
+fn local_corpus_chunks(manifest: &std::path::Path) -> Vec<RawFilmChunk> {
+    use std::io::Write;
+    let json: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
+    json["chunks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| {
+            let mut data =
+                std::fs::read(manifest.parent().unwrap().join(c["file"].as_str().unwrap()))
+                    .unwrap();
+            // Some corpus entries store inflated bytes despite their .zlib suffix.
+            let compressed = data
+                .get(..2)
+                .is_some_and(|h| h[0] & 15 == 8 && u16::from_be_bytes([h[0], h[1]]) % 31 == 0);
+            if !compressed {
+                let mut writer =
+                    flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+                writer.write_all(&data).unwrap();
+                data = writer.finish().unwrap();
+            }
+            RawFilmChunk {
+                kind: RawChunkKind(c["chunk_type"].as_i64().unwrap() as i32),
+                index: c["index"].as_i64().unwrap() as i32,
+                start_ms: c["start_time_offset_ms"].as_i64().unwrap(),
+                data,
+            }
+        })
+        .collect()
+}
+
+/// Counts are conditional on the containing record existing: an absent projectile
+/// variant is not also counted as an absent tag inside that nonexistent variant.
+#[test]
+#[ignore = "set HALO_FILM_CORPUS to audit event field presence in local and checked-in films"]
+fn local_corpus_event_field_presence() {
+    const FIELDS: &[&str] = &[
+        "WeaponReload/player",
+        "Throw/item",
+        "Throw/player",
+        "Melee/weapon",
+        "Melee/player",
+        "Pickup/item",
+        "Teleport/tags/0",
+        "Teleport/tags/1",
+        "DamageAftermath/victim",
+        "DamageAftermath/attacker",
+        "DamageAftermath/effect",
+        "DamageAftermath/attacker_player",
+        "WeaponFire/shooter",
+        "WeaponFire/player",
+        "WeaponFire/weapon",
+        "Kill/victim",
+        "Kill/killer",
+        "Kill/assistant",
+        "ProjectileDetonation/data/variant",
+        "ProjectileDetonation/data/variant/tag",
+        "ProjectileDetonation/data/tag",
+        "ProjectileImpact/data/variant",
+        "ProjectileImpact/data/variant/tag",
+    ];
+    #[derive(Default)]
+    struct Counts {
+        present: usize,
+        absent: usize,
+        first_absent: Option<String>,
+    }
+    let mut counts: Vec<Counts> = FIELDS.iter().map(|_| Counts::default()).collect();
+    let mut kinds = std::collections::BTreeMap::<String, usize>::new();
+    let manifests = local_corpus_manifests();
+    let mut audit = |name: &str, input| {
+        let film = Film::parse(input).unwrap_or_else(|e| panic!("{name}: {e}"));
+        for observation in &film.replication_stream.observations {
+            let ReplicationChange::Event { event } = &observation.change else {
+                continue;
+            };
+            let json = serde_json::to_value(event).unwrap();
+            let kind = json.as_object().unwrap().keys().next().unwrap();
+            *kinds.entry(kind.clone()).or_default() += 1;
+            for (path, count) in FIELDS.iter().zip(&mut counts) {
+                let (parent, field) = path.rsplit_once('/').unwrap();
+                let Some(parent) = json.pointer(&format!("/{parent}")).filter(|p| !p.is_null())
+                else {
+                    continue;
+                };
+                let value = if let Some(array) = parent.as_array() {
+                    &array[field.parse::<usize>().unwrap()]
+                } else {
+                    parent
+                        .get(field)
+                        .unwrap_or_else(|| panic!("missing audit field {path}"))
+                };
+                if value.is_null() {
+                    count.absent += 1;
+                    count.first_absent.get_or_insert_with(|| {
+                        format!("{name} @ {}us: {json}", observation.timestamp_us)
+                    });
+                } else {
+                    count.present += 1;
+                }
+            }
+        }
+        eprintln!("audited {name}");
+    };
+    for name in ["bazaar_idle", "octagon_ar_kill"] {
+        audit(name, chunks(name));
+    }
+    for manifest in &manifests {
+        audit(
+            &manifest.display().to_string(),
+            local_corpus_chunks(manifest),
+        );
+    }
+    eprintln!("{} films; event counts: {kinds:?}", manifests.len() + 2);
+    for (path, count) in FIELDS.iter().zip(counts) {
+        eprintln!(
+            "{path}: present={} absent={} first_absent={}",
+            count.present,
+            count.absent,
+            count.first_absent.as_deref().unwrap_or("none observed")
+        );
+    }
+}
+
+/// Opt-in regression against a local corpus with film.json manifests. No downloads.
+#[test]
+#[ignore = "set HALO_FILM_CORPUS to a directory of local film.json fixtures"]
+fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
+    let manifests = local_corpus_manifests();
     let mut populations = 0;
     let mut event_counts = [0usize; 8];
     for manifest in &manifests {
-        let json: serde_json::Value =
-            serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
-        let input: Vec<_> = json["chunks"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|c| {
-                let mut data =
-                    std::fs::read(manifest.parent().unwrap().join(c["file"].as_str().unwrap()))
-                        .unwrap();
-                // Some corpus entries store inflated bytes despite their .zlib suffix.
-                let compressed = data
-                    .get(..2)
-                    .is_some_and(|h| h[0] & 15 == 8 && u16::from_be_bytes([h[0], h[1]]) % 31 == 0);
-                if !compressed {
-                    let mut writer =
-                        flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
-                    writer.write_all(&data).unwrap();
-                    data = writer.finish().unwrap();
-                }
-                RawFilmChunk {
-                    kind: RawChunkKind(c["chunk_type"].as_i64().unwrap() as i32),
-                    index: c["index"].as_i64().unwrap() as i32,
-                    start_ms: c["start_time_offset_ms"].as_i64().unwrap(),
-                    data,
-                }
-            })
-            .collect();
+        let input = local_corpus_chunks(manifest);
         let single = Film::parse_with_options(
             input.clone(),
             FilmParseOptions {
@@ -556,12 +658,16 @@ fn captured_films_parse_into_typed_sections() {
                             victim, attacker, ..
                         },
                 } => {
-                    references[0] += usize::from(victim.is_some());
+                    assert!(matches!(victim.kind, 1 | 4));
+                    references[0] += 1;
                     references[1] += usize::from(attacker.is_some());
                 }
                 ReplicationChange::Event {
                     event: ReplicationEvent::WeaponFire { shooter, .. },
-                } => references[2] += usize::from(shooter.is_some()),
+                } => {
+                    assert!(matches!(shooter.kind, 1 | 4));
+                    references[2] += 1;
+                }
                 _ => {}
             }
         }

@@ -96,6 +96,7 @@ pub(super) fn project_chunks_into(
                             continue;
                         }
                         let Some(event) = event::project(&record, payload, config)
+                            .transpose()?
                             .or_else(|| event::other(&record))
                         else {
                             continue;

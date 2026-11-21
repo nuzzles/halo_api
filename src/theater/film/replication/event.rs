@@ -14,23 +14,25 @@ pub struct ReplicationEventReference {
 /// One event from the replication stream. Player numbers are the recorded
 /// five-bit event-body slots, not resolved player identities. Event references
 /// are not used to infer which individual shot produced a hit.
+/// Required fields are enforced for supported captures even when the wire has
+/// a presence gate; an absent required value fails parsing instead of defaulting.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ReplicationEvent {
     WeaponReload {
-        player: Option<EventPlayerSlot>,
+        player: EventPlayerSlot,
     },
     Throw {
         /// Asset tag when the tagged throw branch records one.
         item: Option<TagId>,
-        player: Option<EventPlayerSlot>,
+        player: EventPlayerSlot,
     },
     Melee {
-        weapon: Option<WeaponTagId>,
+        weapon: WeaponTagId,
         variant: WeaponVariantId,
-        player: Option<EventPlayerSlot>,
+        player: EventPlayerSlot,
     },
     Pickup {
-        item: Option<TagId>,
+        item: TagId,
     },
     Zoom {
         level: u8,
@@ -39,6 +41,7 @@ pub enum ReplicationEvent {
         /// Quantized source positions, not reconstructed world coordinates.
         from: EventPosition,
         to: EventPosition,
+        /// Independently gated tags. No captured teleports establish stronger guarantees.
         tags: [Option<TagId>; 2],
     },
     ProjectileDetonation {
@@ -49,11 +52,11 @@ pub enum ReplicationEvent {
     },
     /// `damage_aftermath`: victim/attacker references and recorded hit fields.
     DamageAftermath {
-        /// First recorded reference: the victim, when present.
-        victim: Option<ReplicationEventReference>,
+        /// First recorded reference: the victim.
+        victim: ReplicationEventReference,
         /// Second recorded reference: the attacker, when present.
         attacker: Option<ReplicationEventReference>,
-        effect: Option<TagId>,
+        effect: TagId,
         /// Separately recorded body slot; not derived from `attacker`.
         attacker_player: Option<EventPlayerSlot>,
         /// Raw 19-bit packed direction, not an angle or vector.
@@ -62,14 +65,15 @@ pub enum ReplicationEvent {
     /// `action_weapon_fire`: the shooter's body slot and the recorded weapon
     /// tag and variant. Neither a hit nor a kill is implied.
     WeaponFire {
-        /// First recorded reference: the shooter's unit, when present.
-        shooter: Option<ReplicationEventReference>,
-        player: Option<EventPlayerSlot>,
-        weapon: Option<WeaponTagId>,
+        /// First recorded reference: the shooter's unit.
+        shooter: ReplicationEventReference,
+        player: EventPlayerSlot,
+        weapon: WeaponTagId,
         variant: WeaponVariantId,
     },
     /// `PlayerKilledEvent`: recorded player slots and damage-share words. The
     /// event itself does not identify a weapon or damage-effect tag.
+    /// No captured events establish stronger guarantees than the wire's slot gates.
     Kill {
         victim: Option<EventPlayerSlot>,
         killer: Option<EventPlayerSlot>,
@@ -101,7 +105,8 @@ pub enum EventPosition {
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct ProjectileVariant {
-    pub tag: Option<TagId>,
+    /// Required when a variant is recorded; the whole variant may be absent.
+    pub tag: TagId,
     pub variant: WeaponVariantId,
 }
 

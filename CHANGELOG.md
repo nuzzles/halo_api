@@ -25,6 +25,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Require event fields populated in all 31 audited films: reload/throw player slots,
+  melee weapon/player, pickup item, damage victim/effect, weapon-fire shooter/player/weapon,
+  and the tag inside a recorded projectile variant. Missing gated values now fail with
+  `ParseError::MissingRequiredEventField`, without silently falling back to `Other`.
+  The audit covers 26,084 damage events, 43,368 weapon fires, and five recorded projectile
+  variants. Damage attackers and attacker-player slots remain optional (1,495 and 1,494
+  recorded absences), as do throw items and projectile variant/detonation-tag fields.
+  No kill or teleport events were captured, so their wire-gated fields remain optional.
 - Event reference triplets are decoded once with presence-gated slots. Public events retain
   meaningful victim/attacker and shooter references as `ReplicationEventReference`, without
   resolving them to entity or player IDs. Unexplained references stay internal;
