@@ -28,6 +28,8 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Group mode rules, starting loadouts, and named script options under
+  `MatchSettings.mode_options: ModeOptions`; recording/variant metadata stays on `MatchSettings`.
 - Decode match-option hashes into `MatchOptionName::Known(KnownMatchOption)` using the
   98-entry name catalogue, preserving unmatched hashes in `Unknown { name_hash }`.
   Known names serialize with their original script spelling; recorded values are unchanged.

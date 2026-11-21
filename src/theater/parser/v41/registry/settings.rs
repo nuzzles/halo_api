@@ -4,8 +4,8 @@
 use super::source::*;
 use crate::theater::film::catalog::options::OptionHash;
 use crate::theater::film::{
-    EquipmentTagId, MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingEquipment,
-    StartingLoadout, StartingWeapon, TagId, WeaponTagId,
+    EquipmentTagId, MatchOption, MatchOptionValue, MatchSettings, ModeOptions, ParseError,
+    StartingEquipment, StartingLoadout, StartingWeapon, TagId, WeaponTagId,
 };
 
 // Reference serializer fields in the already-decoded variant tree.
@@ -265,34 +265,36 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
             "description",
         )?,
         engine_type: required(number(v, &[0, 0]), "engine_type")?,
-        minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
-        score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
-        time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
-        round_limit: optional_number(v, ROUND_LIMIT, "round_limit")?,
-        rounds_to_win: optional_number(v, ROUNDS_TO_WIN, "rounds_to_win")?,
-        rounds_to_draw: optional_number(v, ROUNDS_TO_DRAW, "rounds_to_draw")?,
-        self_destruction_respawn_penalty_seconds: required(
-            number(v, SELF_DESTRUCTION_PENALTY),
-            "self_destruction_respawn_penalty_seconds",
-        )?,
-        betrayal_respawn_penalty_seconds: required(
-            number(v, BETRAYAL_PENALTY),
-            "betrayal_respawn_penalty_seconds",
-        )?,
-        machinima_controls_enabled: optional_boolean(
-            v,
-            MACHINIMA_CONTROLS,
-            "machinima_controls_enabled",
-        )?,
-        overtime_seconds: optional_number(v, &[1, 7, 9], "overtime_seconds")?,
-        sudden_death_enabled_in_overtime: optional_boolean(
-            v,
-            &[1, 7, 10],
-            "sudden_death_enabled_in_overtime",
-        )?,
-        sudden_death_seconds: optional_number(v, &[1, 7, 11], "sudden_death_seconds")?,
-        starting_loadouts: loadouts.iter().map(loadout).collect::<Result<_, _>>()?,
-        options: options.iter().map(option).collect::<Result<_, _>>()?,
+        mode_options: ModeOptions {
+            minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
+            score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
+            time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
+            round_limit: optional_number(v, ROUND_LIMIT, "round_limit")?,
+            rounds_to_win: optional_number(v, ROUNDS_TO_WIN, "rounds_to_win")?,
+            rounds_to_draw: optional_number(v, ROUNDS_TO_DRAW, "rounds_to_draw")?,
+            self_destruction_respawn_penalty_seconds: required(
+                number(v, SELF_DESTRUCTION_PENALTY),
+                "self_destruction_respawn_penalty_seconds",
+            )?,
+            betrayal_respawn_penalty_seconds: required(
+                number(v, BETRAYAL_PENALTY),
+                "betrayal_respawn_penalty_seconds",
+            )?,
+            machinima_controls_enabled: optional_boolean(
+                v,
+                MACHINIMA_CONTROLS,
+                "machinima_controls_enabled",
+            )?,
+            overtime_seconds: optional_number(v, &[1, 7, 9], "overtime_seconds")?,
+            sudden_death_enabled_in_overtime: optional_boolean(
+                v,
+                &[1, 7, 10],
+                "sudden_death_enabled_in_overtime",
+            )?,
+            sudden_death_seconds: optional_number(v, &[1, 7, 11], "sudden_death_seconds")?,
+            starting_loadouts: loadouts.iter().map(loadout).collect::<Result<_, _>>()?,
+            options: options.iter().map(option).collect::<Result<_, _>>()?,
+        },
     })
 }
 
@@ -528,12 +530,12 @@ mod tests {
             *round_settings
                 .entry((
                     parsed.registry.settings.name.clone(),
-                    parsed.registry.settings.round_limit,
-                    parsed.registry.settings.rounds_to_win,
-                    parsed.registry.settings.rounds_to_draw,
+                    parsed.registry.settings.mode_options.round_limit,
+                    parsed.registry.settings.mode_options.rounds_to_win,
+                    parsed.registry.settings.mode_options.rounds_to_draw,
                 ))
                 .or_insert(0_usize) += 1;
-            for option in &parsed.registry.settings.options {
+            for option in &parsed.registry.settings.mode_options.options {
                 use crate::theater::film::MatchOptionName;
                 match option.name {
                     MatchOptionName::Known(_) => known_option_names += 1,
@@ -545,7 +547,7 @@ mod tests {
             }
             let settings = serde_json::to_value(&parsed.registry.settings).unwrap();
             count(&settings, "settings", &mut counts);
-            if let Some(loadouts) = settings["starting_loadouts"].as_array() {
+            if let Some(loadouts) = settings["mode_options"]["starting_loadouts"].as_array() {
                 for l in loadouts {
                     *equipment.entry(l["equipment"].to_string()).or_default() += 1;
                     if let Some(entries) = l["weapons"].as_array() {

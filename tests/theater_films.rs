@@ -127,32 +127,33 @@ fn recorded_players_and_settings() {
             settings.description,
             "Control Power Weapons to eliminate the enemy."
         );
-        assert_eq!(settings.minimum_respawn_seconds, 8);
+        let mode_options = &settings.mode_options;
+        assert_eq!(mode_options.minimum_respawn_seconds, 8);
         assert_eq!(
-            settings.time_limit_seconds,
+            mode_options.time_limit_seconds,
             Some(if name == "bazaar_idle" { 720 } else { 60 })
         );
         assert_eq!(
-            settings.score_to_win,
+            mode_options.score_to_win,
             if name == "bazaar_idle" {
                 Some(50)
             } else {
                 None
             }
         );
-        let weapons = &settings.starting_loadouts[0].weapons;
+        let weapons = &mode_options.starting_loadouts[0].weapons;
         assert_eq!(weapons.len(), 3);
         use halo_api::theater::film::{StartingWeapon, WeaponTagId};
         assert_eq!(weapons[0], StartingWeapon::Real(WeaponTagId(1220648237)));
         assert_eq!(weapons[1], StartingWeapon::Real(WeaponTagId(4094171407)));
         assert_eq!(weapons[2], StartingWeapon::Unknown);
         assert_eq!(
-            settings.starting_loadouts[0].equipment,
+            mode_options.starting_loadouts[0].equipment,
             halo_api::theater::film::StartingEquipment::None
         );
-        assert_eq!(settings.options.len(), 10);
+        assert_eq!(mode_options.options.len(), 10);
         assert_eq!(
-            settings.options[0].value,
+            mode_options.options[0].value,
             halo_api::theater::film::MatchOptionValue::NumberBits(0.6f32.to_bits())
         );
         let initial = &film.registry.players;
@@ -298,10 +299,12 @@ fn parse_rejects_an_unreadable_initial_player_layout() {
 
 #[test]
 fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
-    use halo_api::theater::film::{MatchOption, MatchSettings, Registry, StartingLoadout};
+    use halo_api::theater::film::{
+        MatchOption, MatchSettings, ModeOptions, Registry, StartingLoadout,
+    };
     let film = Film::parse(chunks("bazaar_idle")).unwrap();
     use halo_api::theater::film::{KnownMatchOption, MatchOptionName, MatchOptionValue};
-    let options = &film.registry.settings.options;
+    let options = &film.registry.settings.mode_options.options;
     let score = options
         .iter()
         .find(|o| o.name == MatchOptionName::Known(KnownMatchOption::SlayerScorePerKill))
@@ -329,38 +332,63 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     assert!(json.get("name_hash").is_none());
     assert_eq!(serde_json::from_value::<MatchOption>(json).unwrap(), *score);
     let settings = serde_json::to_value(&film.registry.settings).unwrap();
+    let mode_options = &settings["mode_options"];
+    assert_eq!(
+        serde_json::from_value::<ModeOptions>(mode_options.clone()).unwrap(),
+        film.registry.settings.mode_options
+    );
+    assert_eq!(
+        serde_json::from_value::<MatchSettings>(settings.clone()).unwrap(),
+        film.registry.settings
+    );
+    for field in mode_options.as_object().unwrap().keys() {
+        assert!(
+            settings.get(field).is_none(),
+            "mode option leaked to metadata: {field}"
+        );
+    }
     for (field, value) in [
         ("round_limit", serde_json::json!(3)),
         ("rounds_to_win", serde_json::json!(2)),
         ("rounds_to_draw", serde_json::json!(2)),
         ("machinima_controls_enabled", serde_json::json!(false)),
     ] {
-        assert!(settings.get(field).is_some());
+        assert!(mode_options.get(field).is_some());
         let mut populated = settings.clone();
-        populated[field] = value;
+        populated["mode_options"][field] = value;
         let decoded: MatchSettings = serde_json::from_value(populated.clone()).unwrap();
         assert_eq!(serde_json::to_value(decoded).unwrap(), populated);
         for absent in [false, true] {
             let mut missing = settings.clone();
             if absent {
-                missing.as_object_mut().unwrap().remove(field);
+                missing["mode_options"]
+                    .as_object_mut()
+                    .unwrap()
+                    .remove(field);
             } else {
-                missing[field] = serde_json::Value::Null;
+                missing["mode_options"][field] = serde_json::Value::Null;
             }
             let decoded: MatchSettings = serde_json::from_value(missing).unwrap();
-            assert!(serde_json::to_value(decoded).unwrap()[field].is_null());
+            assert!(serde_json::to_value(decoded).unwrap()["mode_options"][field].is_null());
         }
     }
-    assert!(settings.get("last_chance_enabled").is_none());
-    assert!(settings.get("last_chance_seconds").is_none());
-    assert!(settings.get("sudden_death_enabled_in_overtime").is_some());
-    assert!(settings.get("sudden_death_seconds").is_some());
+    assert!(mode_options.get("last_chance_enabled").is_none());
+    assert!(mode_options.get("last_chance_seconds").is_none());
+    assert!(
+        mode_options
+            .get("sudden_death_enabled_in_overtime")
+            .is_some()
+    );
+    assert!(mode_options.get("sudden_death_seconds").is_some());
     let mut sudden_death = settings.clone();
-    sudden_death["sudden_death_enabled_in_overtime"] = serde_json::json!(true);
-    sudden_death["sudden_death_seconds"] = serde_json::json!(30);
+    sudden_death["mode_options"]["sudden_death_enabled_in_overtime"] = serde_json::json!(true);
+    sudden_death["mode_options"]["sudden_death_seconds"] = serde_json::json!(30);
     let decoded: MatchSettings = serde_json::from_value(sudden_death.clone()).unwrap();
-    assert_eq!(decoded.sudden_death_enabled_in_overtime, Some(true));
-    assert_eq!(decoded.sudden_death_seconds, Some(30));
+    assert_eq!(
+        decoded.mode_options.sudden_death_enabled_in_overtime,
+        Some(true)
+    );
+    assert_eq!(decoded.mode_options.sudden_death_seconds, Some(30));
     assert_eq!(serde_json::to_value(decoded).unwrap(), sudden_death);
     for invalid in [
         serde_json::json!(1700000000),
@@ -376,11 +404,7 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
         "name",
         "description",
         "engine_type",
-        "minimum_respawn_seconds",
-        "self_destruction_respawn_penalty_seconds",
-        "betrayal_respawn_penalty_seconds",
-        "starting_loadouts",
-        "options",
+        "mode_options",
     ] {
         let mut missing = settings.clone();
         missing.as_object_mut().unwrap().remove(field);
@@ -395,14 +419,41 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
             "{field}"
         );
     }
+    for field in [
+        "minimum_respawn_seconds",
+        "self_destruction_respawn_penalty_seconds",
+        "betrayal_respawn_penalty_seconds",
+        "starting_loadouts",
+        "options",
+    ] {
+        for absent in [false, true] {
+            let mut invalid = settings.clone();
+            if absent {
+                invalid["mode_options"]
+                    .as_object_mut()
+                    .unwrap()
+                    .remove(field);
+            } else {
+                invalid["mode_options"][field] = serde_json::Value::Null;
+            }
+            assert!(
+                serde_json::from_value::<ModeOptions>(invalid["mode_options"].clone()).is_err(),
+                "{field}"
+            );
+            assert!(
+                serde_json::from_value::<MatchSettings>(invalid).is_err(),
+                "{field}"
+            );
+        }
+    }
     for field in ["name", "value"] {
-        let mut missing = settings["options"][0].clone();
+        let mut missing = mode_options["options"][0].clone();
         missing.as_object_mut().unwrap().remove(field);
         assert!(
             serde_json::from_value::<MatchOption>(missing).is_err(),
             "{field}"
         );
-        let mut null = settings["options"][0].clone();
+        let mut null = mode_options["options"][0].clone();
         null[field] = serde_json::Value::Null;
         assert!(
             serde_json::from_value::<MatchOption>(null).is_err(),
@@ -410,10 +461,10 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
         );
     }
     for field in ["weapons", "equipment"] {
-        let mut loadout = settings["starting_loadouts"][0].clone();
+        let mut loadout = mode_options["starting_loadouts"][0].clone();
         loadout.as_object_mut().unwrap().remove(field);
         assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
-        let mut loadout = settings["starting_loadouts"][0].clone();
+        let mut loadout = mode_options["starting_loadouts"][0].clone();
         loadout[field] = serde_json::Value::Null;
         assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
     }

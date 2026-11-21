@@ -56,8 +56,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Offline Theater data
 
 `Film::parse` reads downloaded chunks without API calls. `film.registry.settings` exposes
-recorded match settings; `film.registry.players` is a `Vec<InitialPlayer>` containing the complete
-initial 32-slot player table, including vacant slots. An unreadable table returns
+recording/variant metadata and a required `mode_options: ModeOptions` containing the mode rules,
+starting loadouts, and named script options. `film.registry.players` is a `Vec<InitialPlayer>`
+containing the complete initial 32-slot player table, including vacant slots. An unreadable table returns
 `ParseError::IncompleteRegistryPlayers`. Core settings and their lists are required; missing or
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
 such as score/time limits remain `None`, rather than acquiring game defaults.

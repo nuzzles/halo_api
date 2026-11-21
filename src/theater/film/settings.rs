@@ -14,6 +14,12 @@ pub struct MatchSettings {
     pub name: String,
     pub description: String,
     pub engine_type: i64,
+    pub mode_options: ModeOptions,
+}
+
+/// Recorded mode rules, starting loadouts, and script options. No game defaults are applied.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModeOptions {
     pub score_to_win: Option<i64>,
     pub time_limit_seconds: Option<i64>,
     /// Recorded round limit; absence does not infer the game's default.
