@@ -68,10 +68,11 @@ Promise.all([loadReport('results.json'), loadReport('results-single.json')])
         single.results.some(row => row.libfilmshell_ms != null)) {
       throw new Error('Unexpected parser results');
     }
-    const threading = document.querySelector('#threading');
+    const threadingButtons = [...document.querySelectorAll('#threading button')];
+    let selectedThreading = 'multi';
     function showReport() {
-      const report = reports[threading.value];
-      document.querySelector('#shell-legend').hidden = threading.value === 'single';
+      const report = reports[selectedThreading];
+      document.querySelector('#shell-legend').hidden = selectedThreading === 'single';
       document.querySelector('#cpu-model').textContent = report.cpu_model || `${report.os}/${report.arch}`;
       const trials = [...new Set(report.results.map(row => row.runs))].sort((a, b) => a - b);
       const trialCount = new Intl.ListFormat(undefined, { type: 'disjunction' }).format(trials.map(String));
@@ -87,7 +88,15 @@ Promise.all([loadReport('results.json'), loadReport('results-single.json')])
       })}`;
       render(report.results);
     }
-    threading.addEventListener('change', showReport);
+    for (const button of threadingButtons) {
+      button.addEventListener('click', () => {
+        selectedThreading = button.dataset.threading;
+        for (const option of threadingButtons) {
+          option.setAttribute('aria-pressed', String(option === button));
+        }
+        showReport();
+      });
+    }
     showReport();
   })
   .catch(error => { chart.textContent = `Results could not be loaded: ${error.message}`; });

@@ -15,8 +15,10 @@ body { margin: 0; color: var(--text); background: var(--background); font: 16px/
 .setting { margin-bottom: 32px; }
 .setting h2 { margin: 0 0 12px; color: var(--muted); font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .choice { display: inline-block; max-width: 100%; padding: 8px 13px; border: 1px solid #4d6265; border-radius: 5px; background: #326f75; font-size: 15px; font-weight: 550; line-height: 1.35; }
-select.choice { width: 100%; color: var(--text); cursor: pointer; }
-select.choice:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
+.threading-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.threading-options button { padding: 8px 4px; border: 1px solid #626262; border-radius: 5px; background: #303030; color: var(--text); font: inherit; font-size: 14px; font-weight: 550; cursor: pointer; }
+.threading-options button[aria-pressed="true"] { border-color: #4d6265; background: #326f75; }
+.threading-options button:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
 .content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
 .date-select { position: relative; display: inline-flex; flex: none; }
