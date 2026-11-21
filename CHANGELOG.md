@@ -17,7 +17,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   Item names, asset paths, and current API customization are not substituted for recorded data.
 - Recorded match settings, including variant name/description, score/time/respawn limits,
   starting loadouts, and typed option values.
-- Typed reload, throw, melee, pickup, zoom, teleport, projectile impact, and detonation events.
+- Typed reload, throw, melee, pickup, zoom, projectile impact, and detonation events.
   Positions retain quantized codes; gameplay state and projectile attachment interpretation
   remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
 
@@ -26,20 +26,23 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
 - Require event fields populated in all 31 audited films: reload/throw player slots,
-  melee weapon/player, pickup item, damage victim/effect, weapon-fire shooter/player/weapon,
-  and the tag inside a recorded projectile variant. Missing gated values now fail with
+  melee weapon/player, pickup item, damage victim/effect, and weapon-fire shooter/player/weapon.
+  Missing gated values now fail with
   `ParseError::MissingRequiredEventField`, without silently falling back to `Other`.
-  The audit covers 26,084 damage events, 43,368 weapon fires, and five recorded projectile
-  variants. Damage attackers and attacker-player slots remain optional (1,495 and 1,494
-  recorded absences), as do throw items and projectile variant/detonation-tag fields.
-  No kill or teleport events were captured, so their wire-gated fields remain optional.
+  The audit covers 26,084 damage events and 43,368 weapon fires. Damage attackers and
+  attacker-player slots are the only remaining optional event fields (1,495 and 1,494 absences).
+- Remove the unobserved typed replication `Kill` and `Teleport` payloads; their kinds remain
+  representable through `Other`. Summary kill highlights are unchanged. Remove throw item,
+  detonation variant/tag, and impact variant fields, all at least 80% absent in the corpus,
+  along with the unused `ProjectileVariant` type. Present discarded values are still consumed
+  without allocating or exposing them; projectile positions remain available.
 - Event reference triplets are decoded once with presence-gated slots. Public events retain
   meaningful victim/attacker and shooter references as `ReplicationEventReference`, without
   resolving them to entity or player IDs. Unexplained references stay internal;
   unprojected events retain only their kind in `Other`.
   Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
 - Remove uninterpreted event numbers, flags, and action subcodes from public payloads.
-  Projectile records retain asset identifiers and position. Player metadata retains identity,
+  Projectile records retain position. Player metadata retains identity,
   gamertag, and customization rather than opaque blocks, header words, and duplicate UTF-16 units.
   Match options no longer retain raw payload copies. Required wire fields are still consumed
   and validated; unused values are skipped during projection instead of stored.

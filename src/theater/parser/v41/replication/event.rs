@@ -3,9 +3,7 @@ use crate::theater::film::{
     EventPlayerSlot, ParseError, ReplicationEvent, ReplicationEventReference, TagId, WeaponTagId,
     WeaponVariantId,
 };
-use crate::theater::film::{
-    EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant,
-};
+use crate::theater::film::{EventPosition, ProjectileDetonation, ProjectileImpact};
 use crate::theater::parser::v41::context::{V41DecodeConfig, movement::PrecisionDescriptor};
 use crate::theater::parser::v41::reference::references::EventReference;
 use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::EventRecord;
@@ -19,8 +17,7 @@ pub(super) fn project(
     config: &V41DecodeConfig,
 ) -> Option<Result<ReplicationEvent, ParseError>> {
     let code = record.code?;
-    if !record.layout_complete || !matches!(code, 0 | 5 | 6 | 9 | 21 | 32 | 36 | 38 | 39 | 40 | 85)
-    {
+    if !record.layout_complete || !matches!(code, 0 | 5 | 6 | 9 | 21 | 36 | 38 | 39 | 40) {
         return None;
     }
     let body = record.body_range()?;
@@ -32,16 +29,14 @@ pub(super) fn project(
                 .map(|player| ReplicationEvent::WeaponReload { player })
         }
         39 => {
-            let item = if bits.read(1)? != 0 {
-                let tag = optional_tag(&mut bits)?;
+            if bits.read(1)? != 0 {
+                skip_tag(&mut bits)?;
                 bits.skip(4)?;
-                tag
             } else {
                 bits.skip(3)?;
-                None
-            };
+            }
             required(player(&mut bits)?, "Throw.player")
-                .map(|player| ReplicationEvent::Throw { item, player })
+                .map(|player| ReplicationEvent::Throw { player })
         }
         40 => {
             let kind = bits.read(3)? as u8;
@@ -68,20 +63,10 @@ pub(super) fn project(
         21 => Ok(ReplicationEvent::Zoom {
             level: bits.read(2)? as u8,
         }),
-        32 => {
-            let encoding = config
-                .event_quantized_vectors
-                .then_some(&config.profile.movement.world_object);
-            Ok(ReplicationEvent::Teleport {
-                from: point(&mut bits, encoding, 22)?,
-                to: point(&mut bits, encoding, 22)?,
-                tags: [optional_tag(&mut bits)?, optional_tag(&mut bits)?],
-            })
-        }
         5 => {
             bits.skip(6)?;
-            let variant = projectile_variant(&mut bits)?;
-            let tag = optional_tag(&mut bits)?;
+            skip_projectile_variant(&mut bits)?;
+            skip_tag(&mut bits)?;
             let position = point(
                 &mut bits,
                 config
@@ -96,16 +81,12 @@ pub(super) fn project(
             }
             let direction_bits = if bits.read(1)? != 0 { 19 } else { 8 };
             bits.skip(direction_bits + 2)?;
-            variant.map(|variant| ReplicationEvent::ProjectileDetonation {
-                data: ProjectileDetonation {
-                    variant,
-                    tag,
-                    position,
-                },
+            Ok(ReplicationEvent::ProjectileDetonation {
+                data: ProjectileDetonation { position },
             })
         }
         6 => {
-            let variant = projectile_variant(&mut bits)?;
+            skip_projectile_variant(&mut bits)?;
             bits.skip(14 + 19)?;
             let position = point(
                 &mut bits,
@@ -116,8 +97,8 @@ pub(super) fn project(
                 18,
             )?;
             bits.skip(19 + 9 + 1)?;
-            variant.map(|variant| ReplicationEvent::ProjectileImpact {
-                data: ProjectileImpact { variant, position },
+            Ok(ReplicationEvent::ProjectileImpact {
+                data: ProjectileImpact { position },
             })
         }
         0 => {
@@ -157,28 +138,13 @@ pub(super) fn project(
                 })
             })()
         }
-        85 => {
-            let victim = player(&mut bits)?;
-            let killer = player(&mut bits)?;
-            let killer_percent = bits.read(32)? as u32;
-            bits.skip(1)?;
-            let assistant = player(&mut bits)?;
-            let assistant_percent = bits.read(32)? as u32;
-            Ok(ReplicationEvent::Kill {
-                victim,
-                killer,
-                killer_percent,
-                assistant,
-                assistant_percent,
-            })
-        }
         _ => return None,
     };
     // A parser or layout change must not silently reinterpret bits beyond the
     // event's established source range.
     // Existing combat projections intentionally expose a prefix of their bodies.
     // New action/projectile layouts must close exactly before any guard trailer.
-    (bits.position <= body.end && (matches!(code, 0 | 36 | 85) || bits.position == body.end))
+    (bits.position <= body.end && (matches!(code, 0 | 36) || bits.position == body.end))
         .then_some(event)
 }
 
@@ -201,15 +167,19 @@ pub(super) fn other(record: &EventRecord) -> Option<ReplicationEvent> {
     Some(ReplicationEvent::Other { kind })
 }
 
-fn projectile_variant(
-    bits: &mut Cursor<'_>,
-) -> Option<Result<Option<ProjectileVariant>, ParseError>> {
-    if bits.read(1)? != 0 {
-        return Some(Ok(None));
+fn skip_projectile_variant(bits: &mut Cursor<'_>) -> Option<()> {
+    if bits.read(1)? == 0 {
+        skip_tag(bits)?;
+        bits.skip(32)?;
     }
-    let tag = optional_tag(bits)?;
-    let variant = WeaponVariantId(bits.read(32)? as u32);
-    Some(required(tag, "ProjectileVariant.tag").map(|tag| Some(ProjectileVariant { tag, variant })))
+    Some(())
+}
+
+fn skip_tag(bits: &mut Cursor<'_>) -> Option<()> {
+    if bits.read(1)? != 0 {
+        bits.skip(32)?;
+    }
+    Some(())
 }
 
 fn point(
@@ -324,7 +294,12 @@ mod tests {
             fields: Vec::new(),
             layout_complete: true,
         };
-        let event = project(&record, &payload, &V41DecodeConfig::default()).unwrap()?;
+        let event = if matches!(code, 32 | 85) {
+            assert!(project(&record, &payload, &V41DecodeConfig::default()).is_none());
+            other(&record).unwrap()
+        } else {
+            project(&record, &payload, &V41DecodeConfig::default()).unwrap()?
+        };
         if matches!(code, 0 | 36) {
             let mut missing_header = record.clone();
             missing_header.references = None;
@@ -353,8 +328,8 @@ mod tests {
             "/WeaponFire/shooter",
             "/WeaponFire/player",
             "/WeaponFire/weapon",
-            "/ProjectileDetonation/data/variant/tag",
-            "/ProjectileImpact/data/variant/tag",
+            "/ProjectileDetonation/data/position",
+            "/ProjectileImpact/data/position",
         ] {
             if json.pointer(path).is_none() {
                 continue;
@@ -382,13 +357,19 @@ mod tests {
             assert!(!body.contains_key("handles"));
             assert!(!body.contains_key("third_reference"));
             for field in ["flag", "mode", "extra", "raw_scale", "kind", "selection"] {
+                if kind == "Other" && field == "kind" {
+                    continue;
+                }
                 assert!(!body.contains_key(field), "unexpected {field} in {kind}");
+            }
+            if kind == "Throw" {
+                assert!(!body.contains_key("item"));
             }
             if matches!(kind.as_str(), "ProjectileDetonation" | "ProjectileImpact") {
                 let data = body["data"].as_object().unwrap();
-                assert!(
-                    data.keys()
-                        .all(|key| matches!(key.as_str(), "variant" | "tag" | "position"))
+                assert_eq!(
+                    data.keys().map(String::as_str).collect::<Vec<_>>(),
+                    ["position"]
                 );
             }
         }
@@ -538,37 +519,55 @@ mod tests {
             &[(0, 10), (0, 6), (1, 1), (0, 1), (0, 32)],
             "WeaponFire.weapon",
         );
-        assert_missing(
-            5,
-            &none,
-            &[
-                (0, 6),
-                (0, 1),
-                (0, 1),
-                (0, 32), // variant present, tag absent
-                (0, 1),
-                (1, 1),
-                (0, 63), // detonation tag absent, default position
-                (0, 34),
-                (0, 1),
-                (0, 1),
-                (0, 10),
-            ],
-            "ProjectileVariant.tag",
+        assert_eq!(
+            decode(
+                5,
+                &none,
+                &[
+                    (0, 6),
+                    (0, 1),
+                    (0, 1),
+                    (0, 32), // variant present, tag absent
+                    (0, 1),
+                    (1, 1),
+                    (0, 63), // detonation tag absent, default position
+                    (0, 34),
+                    (0, 1),
+                    (0, 1),
+                    (0, 10),
+                ],
+            ),
+            ReplicationEvent::ProjectileDetonation {
+                data: ProjectileDetonation {
+                    position: EventPosition::DefaultBox {
+                        codes: [0; 3],
+                        axis_bits: 21
+                    }
+                }
+            }
         );
-        assert_missing(
-            6,
-            &none,
-            &[
-                (0, 1),
-                (0, 1),
-                (0, 32), // variant present, tag absent
-                (0, 33),
-                (1, 1),
-                (0, 54),
-                (0, 29),
-            ],
-            "ProjectileVariant.tag",
+        assert_eq!(
+            decode(
+                6,
+                &none,
+                &[
+                    (0, 1),
+                    (0, 1),
+                    (0, 32), // variant present, tag absent
+                    (0, 33),
+                    (1, 1),
+                    (0, 54),
+                    (0, 29),
+                ],
+            ),
+            ReplicationEvent::ProjectileImpact {
+                data: ProjectileImpact {
+                    position: EventPosition::DefaultBox {
+                        codes: [0; 3],
+                        axis_bits: 18
+                    }
+                }
+            }
         );
     }
 
@@ -597,13 +596,7 @@ mod tests {
                 &[],
                 &[(1, 1), (1, 1), (0, 32), (0, 1), (0, 1), (31, 5), (100, 32)]
             ),
-            ReplicationEvent::Kill {
-                victim: None,
-                killer: None,
-                killer_percent: 0,
-                assistant: Some(EventPlayerSlot(31)),
-                assistant_percent: 100,
-            }
+            ReplicationEvent::Other { kind: 85.into() }
         );
     }
 
@@ -678,13 +671,7 @@ mod tests {
                     (0, 32)
                 ]
             ),
-            ReplicationEvent::Kill {
-                victim: Some(EventPlayerSlot(4)),
-                killer: Some(EventPlayerSlot(9)),
-                killer_percent: 65,
-                assistant: None,
-                assistant_percent: 0,
-            }
+            ReplicationEvent::Other { kind: 85.into() }
         );
     }
 
@@ -821,7 +808,6 @@ mod tests {
         assert_eq!(
             decode(39, &refs, &[(0, 1), (7, 3), (0, 1), (0, 5)]),
             ReplicationEvent::Throw {
-                item: None,
                 player: EventPlayerSlot(0)
             }
         );
@@ -832,14 +818,12 @@ mod tests {
                 &[(1, 1), (1, 1), (42, 32), (4, 4), (0, 1), (3, 5)]
             ),
             ReplicationEvent::Throw {
-                item: Some(TagId(42)),
                 player: EventPlayerSlot(3)
             }
         );
         assert_eq!(
             decode(39, &refs, &[(1, 1), (0, 1), (2, 4), (0, 1), (0, 5)]),
             ReplicationEvent::Throw {
-                item: None,
                 player: EventPlayerSlot(0)
             }
         );
@@ -892,7 +876,7 @@ mod tests {
     }
 
     #[test]
-    fn projectile_and_teleport_payloads_preserve_quantized_positions() {
+    fn projectile_positions_remain_and_teleports_are_kind_only() {
         let refs = [(0, 1); 3];
         assert_eq!(
             decode(
@@ -912,17 +896,7 @@ mod tests {
                     (42, 32)
                 ]
             ),
-            ReplicationEvent::Teleport {
-                from: EventPosition::DefaultBox {
-                    codes: [1, 2, 3],
-                    axis_bits: 22
-                },
-                to: EventPosition::DefaultBox {
-                    codes: [4, 5, 6],
-                    axis_bits: 22
-                },
-                tags: [None, Some(TagId(42))]
-            }
+            ReplicationEvent::Other { kind: 32.into() }
         );
         for (optional, wide) in [(false, false), (false, true), (true, false), (true, true)] {
             let mut body = vec![
@@ -975,11 +949,6 @@ mod tests {
                 decode(5, &refs, &body),
                 ReplicationEvent::ProjectileDetonation {
                     data: ProjectileDetonation {
-                        variant: Some(ProjectileVariant {
-                            tag: TagId(42),
-                            variant: WeaponVariantId(123)
-                        }),
-                        tag: None,
                         position: EventPosition::DefaultBox {
                             codes: [1, 2, 3],
                             axis_bits: 21
@@ -1007,7 +976,6 @@ mod tests {
             ),
             ReplicationEvent::ProjectileImpact {
                 data: ProjectileImpact {
-                    variant: None,
                     position: EventPosition::DefaultBox {
                         codes: [1, 2, 3],
                         axis_bits: 18
@@ -1015,6 +983,100 @@ mod tests {
                 }
             }
         );
+    }
+
+    #[test]
+    fn retired_event_payloads_preserve_the_following_event() {
+        for (code, body) in [
+            (
+                32,
+                vec![
+                    (1, 1),
+                    (0, 22),
+                    (0, 22),
+                    (0, 22),
+                    (1, 1),
+                    (0, 22),
+                    (0, 22),
+                    (0, 22),
+                    (1, 1),
+                    (42, 32),
+                    (0, 1),
+                ],
+            ),
+            (
+                85,
+                vec![
+                    (0, 1),
+                    (4, 5),
+                    (0, 1),
+                    (9, 5),
+                    (65, 32),
+                    (0, 1),
+                    (1, 1),
+                    (0, 32),
+                ],
+            ),
+        ] {
+            let mut fields = vec![(1, 1), (code, 7), (0, 3)];
+            fields.extend(body);
+            let next_start: usize = fields.iter().map(|(_, width)| width).sum();
+            fields.extend([(1, 1), (21, 7), (0, 3), (2, 2), (0, 1)]);
+            let (payload, end) = pack(&fields);
+            let list = read_event_list(
+                &payload,
+                0,
+                3,
+                EventLayout {
+                    corruption_check: Some(false),
+                    kill_tail: Some(false),
+                    ..EventLayout::default()
+                },
+            );
+            assert_eq!(list.stop, EventListStop::Terminator, "code {code}");
+            assert_eq!(list.end_bit, end);
+            assert_eq!(list.records.len(), 2);
+            assert!(project(&list.records[0], &payload, &V41DecodeConfig::default()).is_none());
+            assert_eq!(
+                other(&list.records[0]),
+                Some(ReplicationEvent::Other {
+                    kind: (code as u8).into()
+                })
+            );
+            assert_eq!(list.records[1].start_bit, next_start);
+            assert_eq!(
+                project(&list.records[1], &payload, &V41DecodeConfig::default())
+                    .unwrap()
+                    .unwrap(),
+                ReplicationEvent::Zoom { level: 2 }
+            );
+            assert!(
+                serde_json::from_value::<ReplicationEvent>(serde_json::json!({
+                    if code == 32 { "Teleport" } else { "Kill" }: {}
+                }))
+                .is_err()
+            );
+        }
+    }
+
+    #[test]
+    fn discarded_projectile_identifiers_still_obey_presence_and_bounds() {
+        for mut fields in [
+            vec![(1, 1)],
+            vec![(0, 1), (0, 1), (123, 32)],
+            vec![(0, 1), (1, 1), (42, 32), (123, 32)],
+        ] {
+            let next_start: usize = fields.iter().map(|(_, width)| width).sum();
+            fields.push((21, 5));
+            let (payload, _) = pack(&fields);
+            let mut bits = Cursor::new(&payload, 0).unwrap();
+            assert_eq!(skip_projectile_variant(&mut bits), Some(()));
+            assert_eq!(bits.position, next_start);
+            assert_eq!(bits.read(5), Some(21));
+        }
+        assert!(skip_tag(&mut Cursor::new(&[0x80], 0).unwrap()).is_none());
+        assert!(skip_projectile_variant(&mut Cursor::new(&[0], 0).unwrap()).is_none());
+        assert!(skip_projectile_variant(&mut Cursor::new(&[0x40], 0).unwrap()).is_none());
     }
 
     #[test]

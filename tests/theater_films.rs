@@ -446,20 +446,16 @@ fn local_corpus_chunks(manifest: &std::path::Path) -> Vec<RawFilmChunk> {
         .collect()
 }
 
-/// Counts are conditional on the containing record existing: an absent projectile
-/// variant is not also counted as an absent tag inside that nonexistent variant.
+/// Audit retained fields and ensure retired payloads are not published.
 #[test]
 #[ignore = "set HALO_FILM_CORPUS to audit event field presence in local and checked-in films"]
 fn local_corpus_event_field_presence() {
     const FIELDS: &[&str] = &[
         "WeaponReload/player",
-        "Throw/item",
         "Throw/player",
         "Melee/weapon",
         "Melee/player",
         "Pickup/item",
-        "Teleport/tags/0",
-        "Teleport/tags/1",
         "DamageAftermath/victim",
         "DamageAftermath/attacker",
         "DamageAftermath/effect",
@@ -467,14 +463,8 @@ fn local_corpus_event_field_presence() {
         "WeaponFire/shooter",
         "WeaponFire/player",
         "WeaponFire/weapon",
-        "Kill/victim",
-        "Kill/killer",
-        "Kill/assistant",
-        "ProjectileDetonation/data/variant",
-        "ProjectileDetonation/data/variant/tag",
-        "ProjectileDetonation/data/tag",
-        "ProjectileImpact/data/variant",
-        "ProjectileImpact/data/variant/tag",
+        "ProjectileDetonation/data/position",
+        "ProjectileImpact/data/position",
     ];
     #[derive(Default)]
     struct Counts {
@@ -492,6 +482,19 @@ fn local_corpus_event_field_presence() {
                 continue;
             };
             let json = serde_json::to_value(event).unwrap();
+            for retired in [
+                "/Kill",
+                "/Teleport",
+                "/Throw/item",
+                "/ProjectileDetonation/data/variant",
+                "/ProjectileDetonation/data/tag",
+                "/ProjectileImpact/data/variant",
+            ] {
+                assert!(
+                    json.pointer(retired).is_none(),
+                    "{name}: retained {retired}"
+                );
+            }
             let kind = json.as_object().unwrap().keys().next().unwrap();
             *kinds.entry(kind.clone()).or_default() += 1;
             for (path, count) in FIELDS.iter().zip(&mut counts) {
@@ -545,7 +548,7 @@ fn local_corpus_event_field_presence() {
 fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
     let manifests = local_corpus_manifests();
     let mut populations = 0;
-    let mut event_counts = [0usize; 8];
+    let mut event_counts = [0usize; 7];
     for manifest in &manifests {
         let input = local_corpus_chunks(manifest);
         let single = Film::parse_with_options(
@@ -584,11 +587,10 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
                         ReplicationEvent::Melee { .. } => 2,
                         ReplicationEvent::Pickup { .. } => 3,
                         ReplicationEvent::Zoom { .. } => 4,
-                        ReplicationEvent::Teleport { .. } => 5,
-                        ReplicationEvent::ProjectileDetonation { .. } => 6,
-                        ReplicationEvent::ProjectileImpact { .. } => 7,
+                        ReplicationEvent::ProjectileDetonation { .. } => 5,
+                        ReplicationEvent::ProjectileImpact { .. } => 6,
                         ReplicationEvent::Other { kind }
-                            if matches!(kind.code(), 5 | 6 | 9 | 21 | 32 | 38 | 39 | 40) =>
+                            if matches!(kind.code(), 5 | 6 | 9 | 21 | 38 | 39 | 40) =>
                         {
                             panic!("{}: event {kind:?} was not projected", manifest.display())
                         }
@@ -606,8 +608,7 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
         manifests.len()
     );
     assert!(populations > 0);
-    // A user's corpus need not contain every event kind (our captures have no
-    // type-32 teleports). Synthetic decoder tests cover those missing branches.
+    // A user's corpus need not contain every retained event kind.
     assert!(event_counts.iter().any(|n| *n > 0));
 }
 
@@ -631,11 +632,10 @@ fn captured_films_parse_into_typed_sections() {
                 ReplicationChange::Event { event } => Some(event),
                 _ => None,
             })
-            .fold([0usize; 3], |mut counts, event| {
+            .fold([0usize; 2], |mut counts, event| {
                 match event {
                     ReplicationEvent::DamageAftermath { .. } => counts[0] += 1,
                     ReplicationEvent::WeaponFire { .. } => counts[1] += 1,
-                    ReplicationEvent::Kill { .. } => counts[2] += 1,
                     _ => {}
                 }
                 counts
@@ -643,9 +643,9 @@ fn captured_films_parse_into_typed_sections() {
         assert_eq!(
             combat,
             if name == "bazaar_idle" {
-                [0, 7, 0]
+                [0, 7]
             } else {
-                [19, 30, 0]
+                [19, 30]
             },
             "{name}"
         );
@@ -689,8 +689,7 @@ fn captured_films_parse_into_typed_sections() {
                         ReplicationChange::Event {
                             event: ReplicationEvent::Other {
                                 kind: ReplicationEventKind::Damage
-                                    | ReplicationEventKind::WeaponFire
-                                    | ReplicationEventKind::Kill,
+                                    | ReplicationEventKind::WeaponFire,
                                 ..
                             }
                         }

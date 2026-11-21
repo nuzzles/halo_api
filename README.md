@@ -95,10 +95,13 @@ invalid appearance layouts fail film parsing with `ParseError::InvalidCustomizat
 Raw appearance bytes are not retained in the parsed film.
 
 `ReplicationChange::Bots` exposes recorded bot metadata. `ReplicationChange::Event` includes
-typed reload, throw, melee, pickup, zoom, teleport, impact, and detonation payloads. Event player
+typed reload, throw, melee, pickup, zoom, impact, and detonation payloads. Event player
 slots use `EventPlayerSlot`, and weapon asset tags use `WeaponTagId` (distinct from the
-family/variant `WeaponId`). Absent fields remain optional. Reference headers stay internal to
-the parser. Events without a supported payload retain only their kind in `Other`.
+family/variant `WeaponId`). Only damage attacker references and attacker-player slots remain
+optional in these payloads. Meaningful victim/attacker/shooter references are retained without
+resolving them to entity IDs; unexplained references stay internal. Projectile payloads retain
+only position. Unobserved replication kill/teleport payloads and other unsupported payloads
+retain only their event kind in `Other`; summary kill highlights are unaffected.
 Uninterpreted event fields, opaque player blocks, and duplicate raw metadata are not exposed.
 Slots are not resolved to roster XUIDs,
 and event positions retain their quantized codes.
