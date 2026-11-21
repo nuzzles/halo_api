@@ -17,10 +17,10 @@
         </section>
         <section class="setting" aria-labelledby="threading-heading">
           <h2 id="threading-heading">Threading</h2>
-          <select id="threading" class="choice" aria-label="Threading mode">
-            <option value="multi">Multi-Threaded</option>
-            <option value="single">Single-Threaded</option>
-          </select>
+          <div id="threading" class="threading-options" role="group" aria-label="Threading mode">
+            <button type="button" data-threading="multi" aria-label="Multi-threaded" aria-pressed="true">Multi</button>
+            <button type="button" data-threading="single" aria-label="Single-threaded" aria-pressed="false">Single</button>
+          </div>
         </section>
         <section class="setting" aria-labelledby="benchmark-heading">
           <h2 id="benchmark-heading">Select Benchmark</h2>
