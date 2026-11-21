@@ -72,6 +72,11 @@ These projects serve different parts of Halo Infinite Theater replay work:
 - [installation-08's infinite-theater-3d](https://github.com/llampwall/installation-08/tree/main/cmd/infinite-theater-3d)
   is a 3D Theater replay viewer.
 
+## Benchmarks
+
+See the [film parsing benchmarks](benchmarks/README.md) for the methodology and
+the [published results](https://nuzzles.github.io/halo_api/) for the comparison chart.
+
 ## MSRV
 
 This crate has a [Minimum Supported Rust Version (MSRV)][MSRV] of 1.96.
