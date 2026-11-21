@@ -7,8 +7,8 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use filmshell::{Chunk, Film as ShellFilm};
 use halo_api::clients::hi::models::{RawChunkKind, RawFilmChunk};
-use halo_api::theater::Film as HaloFilm;
 use halo_api::theater::film::{FilmParseOptions, Threading};
+use halo_api::theater::Film as HaloFilm;
 use serde::{Deserialize, Serialize};
 
 const FIXTURES: [(&str, &str); 7] = [
@@ -51,7 +51,6 @@ struct ResultRow {
     compressed_mib: f64,
     runs: usize,
     halo_api_ms: f64,
-    halo_api_samples_ms: Vec<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     libfilmshell_ms: Option<f64>,
     film_fingerprint: String,
@@ -189,10 +188,7 @@ fn fingerprint(film: &HaloFilm) -> Result<String, Box<dyn std::error::Error>> {
     Ok(format!("{:016x}", writer.0.finish()))
 }
 
-fn timed<T>(
-    entries: &[Input],
-    parse: impl FnOnce(&[Input]) -> Result<T, String>,
-) -> Result<f64, String> {
+fn timed<T>(entries: &[Input], parse: impl FnOnce(&[Input]) -> Result<T, String>) -> Result<f64, String> {
     let start = Instant::now();
     let film = parse(black_box(entries))?;
     black_box(&film);
@@ -207,7 +203,6 @@ fn benchmark(
     archive_path: &Path,
     requested_runs: Option<usize>,
     threading: Threading,
-    compare_shell: bool,
 ) -> Result<ResultRow, Box<dyn std::error::Error>> {
     let entries = load(archive_path)?;
     let bytes: usize = entries.iter().map(|entry| entry.data.len()).sum();
@@ -215,26 +210,25 @@ fn benchmark(
     let parsed = parse_halo(&entries, threading)?;
     let film_fingerprint = fingerprint(&parsed)?;
     drop(parsed);
-    if compare_shell {
+    if threading == Threading::Multi {
         parse_shell(&entries)?;
     }
 
     let mut halo_times = Vec::with_capacity(runs);
-    let mut shell_times = compare_shell.then(|| Vec::with_capacity(runs));
+    let mut shell_times = (threading == Threading::Multi).then(|| Vec::with_capacity(runs));
     for run in 0..runs {
         if let Some(shell_times) = &mut shell_times {
             if run % 2 == 0 {
-                halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
-                shell_times.push(timed(&entries, parse_shell)?);
-            } else {
-                shell_times.push(timed(&entries, parse_shell)?);
-                halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
+            halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
+            shell_times.push(timed(&entries, parse_shell)?);
+        } else {
+            shell_times.push(timed(&entries, parse_shell)?);
+            halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
             }
         } else {
             halo_times.push(timed(&entries, |entries| parse_halo(entries, threading))?);
         }
     }
-    let halo_api_samples_ms = halo_times.clone();
     halo_times.sort_by(f64::total_cmp);
     if let Some(shell_times) = &mut shell_times {
         shell_times.sort_by(f64::total_cmp);
@@ -246,7 +240,6 @@ fn benchmark(
         compressed_mib: bytes as f64 / 1_048_576.0,
         runs,
         halo_api_ms: median(&halo_times),
-        halo_api_samples_ms,
         libfilmshell_ms: shell_times.as_deref().map(median),
         film_fingerprint,
     };
@@ -268,19 +261,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let mut output = None;
     let mut threading = Threading::Multi;
-    let mut halo_only = false;
     let mut fixture_names = Vec::new();
     while let Some(arg) = args.next() {
         if arg == "--output" {
             output = Some(PathBuf::from(args.next().ok_or("--output needs a path")?));
-        } else if arg == "--halo-only" {
-            halo_only = true;
         } else if arg == "--threading" {
-            threading = match args
-                .next()
-                .ok_or("--threading needs single or multi")?
-                .as_str()
-            {
+            threading = match args.next().ok_or("--threading needs single or multi")?.as_str() {
                 "single" => Threading::Single,
                 "multi" => Threading::Multi,
                 _ => return Err("--threading must be single or multi".into()),
@@ -300,7 +286,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|value| value.parse::<usize>())
         .transpose()?
         .filter(|&runs| runs > 0);
-    let compare_shell = threading == Threading::Multi && !halo_only;
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures");
     let mut results = Vec::with_capacity(fixture_names.len());
     for fixture in fixture_names {
@@ -315,7 +300,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &root.join(format!("{fixture}.tar")),
             requested_runs,
             threading,
-            compare_shell,
         )?);
     }
     if let Some(output) = output {
@@ -326,7 +310,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             schema: 1,
             generated_at_unix_seconds: SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs(),
             halo_api_commit: String::from_utf8(commit.stdout)?.trim().to_owned(),
-            libfilmshell_commit: compare_shell.then_some(LIBFILMSHELL_REV),
+            libfilmshell_commit: (threading == Threading::Multi).then_some(LIBFILMSHELL_REV),
             os: std::env::consts::OS,
             arch: std::env::consts::ARCH,
             logical_cpus: std::thread::available_parallelism()?.get(),
