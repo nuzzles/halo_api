@@ -311,13 +311,20 @@ pub(crate) fn read_event_list(
             }
         };
         record.fields = std::mem::take(r.trace.as_mut().unwrap());
-        record.end_bit = record
-            .fields
-            .iter()
-            .filter(|field| !matches!(field.value, EventFieldValue::Unavailable))
-            .filter_map(|field| field.bit.checked_add(field.width))
-            .max()
-            .unwrap_or(record.start_bit);
+        record.end_bit = if record.layout_complete {
+            // A complete walk already has the final source-backed position.
+            r.cursor.position
+        } else {
+            // A nested partial reader can establish fields beyond the parent's
+            // cursor, so refusals still need the furthest successful read.
+            record
+                .fields
+                .iter()
+                .filter(|field| !matches!(field.value, EventFieldValue::Unavailable))
+                .filter_map(|field| field.bit.checked_add(field.width))
+                .max()
+                .unwrap_or(record.start_bit)
+        };
         out.records.push(record);
         if let Some(stop) = stop {
             out.stop = stop;

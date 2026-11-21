@@ -6,8 +6,83 @@ use crate::theater::film::{
 };
 use crate::theater::parser::v41::context::{V41DecodeConfig, movement::PrecisionDescriptor};
 use crate::theater::parser::v41::reference::references::EventReference;
-use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::EventRecord;
+use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::{
+    EventField, EventFieldValue, EventRecord,
+};
+#[cfg(test)]
 use crate::theater::parser::wire::bits::Cursor;
+
+trait ProjectionBits {
+    fn read(&mut self, width: usize) -> Option<u64>;
+    fn skip(&mut self, width: usize) -> Option<()>;
+}
+
+/// Reuse scalar evidence from the layout walk instead of extracting packet bits
+/// a second time. No extra payload or per-event allocation is retained.
+struct DecodedBits<'a> {
+    fields: &'a [EventField],
+    next: usize,
+    position: usize,
+    end: usize,
+}
+
+impl ProjectionBits for DecodedBits<'_> {
+    fn read(&mut self, width: usize) -> Option<u64> {
+        let end = self.position.checked_add(width)?;
+        if width > 64 || end > self.end {
+            return None;
+        }
+        let mut position = self.position;
+        let mut next = self.next;
+        let mut value = 0;
+        while position < end {
+            let field = loop {
+                let field = self.fields.get(next)?;
+                if field.bit.checked_add(field.width)? > position {
+                    break field;
+                }
+                next += 1;
+            };
+            if field.bit > position || field.width > 64 {
+                return None;
+            }
+            let EventFieldValue::Scalar(raw) = field.value else {
+                return None;
+            };
+            let field_end = field.bit + field.width;
+            let take = (end - position).min(field_end - position);
+            let part = (raw >> (field_end - position - take)) & (u64::MAX >> (64 - take));
+            value = if take == 64 {
+                part
+            } else {
+                (value << take) | part
+            };
+            position += take;
+        }
+        self.position = end;
+        self.next = next;
+        Some(value)
+    }
+
+    fn skip(&mut self, width: usize) -> Option<()> {
+        let end = self.position.checked_add(width)?;
+        if end > self.end {
+            return None;
+        }
+        self.position = end;
+        Some(())
+    }
+}
+
+#[cfg(test)]
+impl ProjectionBits for Cursor<'_> {
+    fn read(&mut self, width: usize) -> Option<u64> {
+        Cursor::read(self, width)
+    }
+    fn skip(&mut self, width: usize) -> Option<()> {
+        Cursor::skip(self, width)
+    }
+}
 
 /// Outer absence means the layout cannot be projected. A missing required
 /// value is an error, not permission to fall back to a kind-only event.
@@ -21,7 +96,17 @@ pub(super) fn project(
         return None;
     }
     let body = record.body_range()?;
-    let mut bits = Cursor::new(payload, body.start)?;
+    if record.end_bit > payload.len().saturating_mul(8) {
+        return None;
+    }
+    let mut bits = DecodedBits {
+        fields: &record.fields,
+        next: record
+            .fields
+            .partition_point(|field| field.bit < body.start),
+        position: body.start,
+        end: body.end,
+    };
     let event = match code {
         38 => {
             bits.skip(4)?;
@@ -163,7 +248,7 @@ pub(super) fn other(record: &EventRecord) -> Option<ReplicationEvent> {
     Some(ReplicationEvent::Other { kind })
 }
 
-fn skip_projectile_variant(bits: &mut Cursor<'_>) -> Option<()> {
+fn skip_projectile_variant(bits: &mut impl ProjectionBits) -> Option<()> {
     if bits.read(1)? == 0 {
         skip_tag(bits)?;
         bits.skip(32)?;
@@ -171,7 +256,7 @@ fn skip_projectile_variant(bits: &mut Cursor<'_>) -> Option<()> {
     Some(())
 }
 
-fn skip_tag(bits: &mut Cursor<'_>) -> Option<()> {
+fn skip_tag(bits: &mut impl ProjectionBits) -> Option<()> {
     if bits.read(1)? != 0 {
         bits.skip(32)?;
     }
@@ -179,7 +264,7 @@ fn skip_tag(bits: &mut Cursor<'_>) -> Option<()> {
 }
 
 fn point(
-    bits: &mut Cursor<'_>,
+    bits: &mut impl ProjectionBits,
     encoding: Option<(&PrecisionDescriptor, &LevelCalibration)>,
     precision: u8,
 ) -> Option<[f64; 3]> {
@@ -218,7 +303,7 @@ fn point(
     )
 }
 
-fn player(bits: &mut Cursor<'_>) -> Option<Option<EventPlayerSlot>> {
+fn player(bits: &mut impl ProjectionBits) -> Option<Option<EventPlayerSlot>> {
     if bits.read(1)? != 0 {
         Some(None)
     } else {
@@ -226,7 +311,7 @@ fn player(bits: &mut Cursor<'_>) -> Option<Option<EventPlayerSlot>> {
     }
 }
 
-fn optional_tag(bits: &mut Cursor<'_>) -> Option<Option<TagId>> {
+fn optional_tag(bits: &mut impl ProjectionBits) -> Option<Option<TagId>> {
     if bits.read(1)? == 0 {
         Some(None)
     } else {
@@ -256,6 +341,71 @@ mod tests {
             }
         }
         (bytes, bit_len)
+    }
+
+    #[test]
+    fn decoded_scalars_match_packet_reads_across_field_boundaries() {
+        let values = [
+            (1, 1),
+            (0x5a, 7),
+            (0x7abcd, 19),
+            (0xabc, 12),
+            (0x1e, 5),
+            (0xabcdef01, 32),
+            (u64::MAX - 17, 64),
+        ];
+        let (data, end) = pack(&values);
+        let fields: Vec<_> = values
+            .iter()
+            .scan(0, |bit, &(value, width)| {
+                let field = EventField {
+                    bit: *bit,
+                    width,
+                    stage: EventFieldStage::Body,
+                    value: EventFieldValue::Scalar(value),
+                };
+                *bit += width;
+                Some(field)
+            })
+            .collect();
+        for start in 0..=end {
+            for width in 0..=64.min(end - start) {
+                let mut source = Cursor::new(&data, start).unwrap();
+                let mut decoded = DecodedBits {
+                    fields: &fields,
+                    next: 0,
+                    position: start,
+                    end,
+                };
+                assert_eq!(
+                    decoded.read(width),
+                    source.read(width),
+                    "start={start}, width={width}"
+                );
+                assert_eq!(decoded.position, source.position);
+                let remaining = end - decoded.position;
+                decoded.skip(remaining).unwrap();
+                assert_eq!(decoded.read(1), None);
+                assert_eq!(decoded.position, end);
+            }
+        }
+        for value in [EventFieldValue::Opaque, EventFieldValue::Unavailable] {
+            let fields = [EventField {
+                bit: 0,
+                width: 8,
+                stage: EventFieldStage::Body,
+                value,
+            }];
+            let mut decoded = DecodedBits {
+                fields: &fields,
+                next: 0,
+                position: 0,
+                end: 8,
+            };
+            assert_eq!(decoded.read(1), None);
+            assert_eq!(decoded.position, 0);
+            decoded.skip(8).unwrap();
+        }
     }
 
     fn decode(code: u8, refs: &[(u64, usize)], body: &[(u64, usize)]) -> ReplicationEvent {
@@ -292,7 +442,23 @@ mod tests {
             code: Some(code),
             body_start_bit: Some(body_start_bit),
             references,
-            fields: Vec::new(),
+            fields: body
+                .iter()
+                .scan(body_start_bit, |bit, &(value, width)| {
+                    let field = EventField {
+                        bit: *bit,
+                        width,
+                        stage: EventFieldStage::Body,
+                        value: if width <= 64 {
+                            EventFieldValue::Scalar(value)
+                        } else {
+                            EventFieldValue::Opaque
+                        },
+                    };
+                    *bit += width;
+                    Some(field)
+                })
+                .collect(),
             layout_complete: true,
         };
         let event = if matches!(code, 32 | 85) {
@@ -301,6 +467,20 @@ mod tests {
         } else {
             project(&record, &payload, &V41DecodeConfig::default()).unwrap()?
         };
+        if !matches!(code, 32 | 85) {
+            // The packet remains available for bounds checking, but projection
+            // must use its decoded scalar evidence, not reread any payload bits.
+            assert_eq!(
+                project(
+                    &record,
+                    &vec![0; payload.len()],
+                    &V41DecodeConfig::default()
+                )
+                .transpose()
+                .unwrap(),
+                Some(event.clone()),
+            );
+        }
         if matches!(code, 0 | 36) {
             let mut missing_header = record.clone();
             missing_header.references = None;
@@ -1203,7 +1383,12 @@ mod tests {
             code: Some(21),
             body_start_bit: Some(11),
             references: None,
-            fields: vec![],
+            fields: vec![EventField {
+                bit: 11,
+                width: 2,
+                stage: EventFieldStage::Body,
+                value: EventFieldValue::Scalar(2),
+            }],
             layout_complete: true,
         };
         let config = V41DecodeConfig::default();

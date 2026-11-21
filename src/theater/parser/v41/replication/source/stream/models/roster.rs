@@ -1,20 +1,17 @@
 //! Count-driven session and bot metadata, without inferred player ownership.
-use crate::theater::parser::v41::packet::BitRange;
-use crate::theater::parser::wire::fields::RawBits;
+use crate::theater::parser::v41::packet::{BitRange, SourceRegion};
 
 /// Type 8 or 12 read. The enclosing packet retains the original timestamp/bytes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PlayerMetadataRead {
-    pub format_version: Option<u32>,
     pub build: Option<String>,
-    pub personalization_bytes: Option<usize>,
-    pub count: PlayerMetadataField,
     /// Includes the first partial entry; no successor search follows a stop.
     pub entries: Vec<PlayerMetadataEntry>,
+    /// Coalesced source coverage, without copies of uninterpreted values.
+    pub regions: Vec<SourceRegion>,
     pub end_bit: usize,
     pub stop: PlayerMetadataStop,
-    /// Exact remaining payload range. Type 8 does not validate its contents or
-    /// length. Type 12 requires fewer than eight bits, of any value.
+    /// Type 8 does not validate its tail. Type 12 requires fewer than eight bits.
     pub tail: BitRange,
 }
 
@@ -22,8 +19,27 @@ pub struct PlayerMetadataRead {
 pub struct PlayerMetadataEntry {
     pub start_bit: usize,
     pub end_bit: usize,
-    pub fields: Vec<PlayerMetadataField>,
+    pub values: Option<(PlayerMetadataIdentity, PlayerMetadataBody)>,
     pub stop: PlayerMetadataStop,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PlayerMetadataIdentity {
+    /// Byte-copy representation; reverse bytes of the MSB word for the XUID.
+    Session(u64),
+    Bot {
+        absolute_index: u32,
+        slot: u32,
+        id: u32,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlayerMetadataBody {
+    pub gamertag: [u16; 16],
+    pub gamertag_len: usize,
+    /// Payload-relative bits. Decoded only after the entire packet is admitted.
+    pub personalization: BitRange,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -41,58 +57,9 @@ pub enum PlayerMetadataStop {
     TrailingData,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PlayerMetadataField {
-    pub kind: PlayerMetadataFieldKind,
-    pub bit: usize,
-    pub width: usize,
-    /// Exact MSB-first bits. None denotes the first unavailable field.
-    pub raw: Option<RawBits>,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PlayerMetadataFieldKind {
     Count,
-    /// Type 8, format >=21: one means no following five-bit option.
-    OptionAbsent,
-    /// Role is not established; this is not a proven player slot.
-    Option,
-    /// Byte-copy representation: reverse bytes of the MSB word for the XUID.
-    Identity,
-    AbsoluteIndex,
-    Slot,
-    BotId,
-    MaskLengthMinusOne,
-    Mask,
     ByteCount,
-    ByteList,
     WordCount,
-    WordList,
-    Block104,
-    /// Original UTF-16BE units, including a consumed NUL, or all 16 units.
-    GamertagUnit(u8),
-    Block16,
-    Representation,
-    /// Byte-copy key at sub+0xcb8, retained even if it differs from Identity.
-    JoinKey,
-    /// Six raw words of widths 10,14,6,8,7,1. The six-bit native value is raw-1.
-    Short(u8),
-    Personalization,
-    /// Kept byte by byte; internal layout, including team, depends on build.
-    Block44Byte(u8),
-}
-
-impl PlayerMetadataFieldKind {
-    pub(crate) fn opaque(self) -> bool {
-        matches!(
-            self,
-            Self::Mask
-                | Self::ByteList
-                | Self::WordList
-                | Self::Block104
-                | Self::Block16
-                | Self::Personalization
-                | Self::Block44Byte(_)
-        )
-    }
 }

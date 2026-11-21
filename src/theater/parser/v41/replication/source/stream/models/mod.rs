@@ -1,7 +1,7 @@
 pub mod roster;
 pub use roster::{
-    PlayerMetadataEntry, PlayerMetadataField, PlayerMetadataFieldKind, PlayerMetadataRead,
-    PlayerMetadataStop,
+    PlayerMetadataBody, PlayerMetadataEntry, PlayerMetadataFieldKind, PlayerMetadataIdentity,
+    PlayerMetadataRead, PlayerMetadataStop,
 };
 
 pub mod records;
