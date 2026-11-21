@@ -11,6 +11,7 @@ pub use event_kind::ReplicationEventKind;
 mod event;
 pub use event::{
     EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant, ReplicationEvent,
+    ReplicationEventReference,
 };
 mod tag_reference;
 pub use tag_reference::{

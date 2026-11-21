@@ -1,11 +1,13 @@
-//! Project established event-body fields without correlating separate events.
+//! Project established event fields and reference roles without correlating events.
 use crate::theater::film::{
-    EventPlayerSlot, ReplicationEvent, TagId, WeaponTagId, WeaponVariantId,
+    EventPlayerSlot, ReplicationEvent, ReplicationEventReference, TagId, WeaponTagId,
+    WeaponVariantId,
 };
 use crate::theater::film::{
     EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant,
 };
 use crate::theater::parser::v41::context::{V41DecodeConfig, movement::PrecisionDescriptor};
+use crate::theater::parser::v41::reference::references::EventReference;
 use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::EventRecord;
 use crate::theater::parser::wire::bits::Cursor;
 
@@ -116,6 +118,7 @@ pub(super) fn project(
             }
         }
         0 => {
+            let references = record.references?;
             let effect = optional_tag(&mut bits)?;
             let attacker_player = player(&mut bits)?;
             let packed_direction = bits.read(19)? as u32;
@@ -124,6 +127,8 @@ pub(super) fn project(
             }
             bits.skip(5)?;
             ReplicationEvent::DamageAftermath {
+                victim: references.first.map(event_reference),
+                attacker: references.second.map(event_reference),
                 effect,
                 attacker_player,
                 packed_direction,
@@ -138,6 +143,7 @@ pub(super) fn project(
             let weapon = optional_tag(&mut bits)?.map(|tag| WeaponTagId(tag.raw()));
             let variant = WeaponVariantId(bits.read(32)? as u32);
             ReplicationEvent::WeaponFire {
+                shooter: record.references?.first.map(event_reference),
                 player,
                 weapon,
                 variant,
@@ -166,6 +172,14 @@ pub(super) fn project(
     // New action/projectile layouts must close exactly before any guard trailer.
     (bits.position <= body.end && (matches!(code, 0 | 36 | 85) || bits.position == body.end))
         .then_some(event)
+}
+
+fn event_reference(reference: EventReference) -> ReplicationEventReference {
+    ReplicationEventReference {
+        kind: reference.kind,
+        index: reference.index,
+        generation: reference.generation,
+    }
 }
 
 /// Preserve the occurrence without retaining an uninterpreted payload.
@@ -239,6 +253,7 @@ fn optional_tag(bits: &mut Cursor<'_>) -> Option<Option<TagId>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::theater::parser::v41::reference::references::read_triplet;
     use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::{
         EventFieldStage, EventListStop,
     };
@@ -264,22 +279,45 @@ mod tests {
         let fields: Vec<_> = prefix.iter().chain(refs).chain(body).copied().collect();
         let (payload, end_bit) = pack(&fields);
         let body_start_bit = 8 + refs.iter().map(|(_, width)| *width).sum::<usize>();
+        let references = if matches!(code, 0 | 36) {
+            let (bytes, length) = pack(refs);
+            let mut bits = Cursor::new(&bytes, 0).unwrap();
+            let kinds = if code == 0 { [1, 1, 7] } else { [1, 8, 7] };
+            let references = read_triplet(kinds, |width| bits.read(width)).unwrap();
+            assert_eq!(bits.position, length);
+            Some(references)
+        } else {
+            None
+        };
         let record = EventRecord {
             start_bit: 0,
             end_bit,
             code: Some(code),
             body_start_bit: Some(body_start_bit),
-            references: None,
+            references,
             fields: Vec::new(),
             layout_complete: true,
         };
         let event = project(&record, &payload, &V41DecodeConfig::default()).unwrap();
+        if matches!(code, 0 | 36) {
+            let mut missing_header = record.clone();
+            missing_header.references = None;
+            assert!(project(&missing_header, &payload, &V41DecodeConfig::default()).is_none());
+            // Projection uses the decoded envelope, not another read of its bits.
+            let mut overwritten_header = payload.clone();
+            for bit in 8..body_start_bit {
+                overwritten_header[bit / 8] ^= 1 << (7 - bit % 8);
+            }
+            assert_eq!(
+                project(&record, &overwritten_header, &V41DecodeConfig::default()),
+                Some(event.clone())
+            );
+        }
         let json = serde_json::to_value(&event).unwrap();
         for (kind, body) in json.as_object().unwrap() {
             let body = body.as_object().unwrap();
             assert!(!body.contains_key("handles"));
             assert!(!body.contains_key("third_reference"));
-            assert!(!body.contains_key("attacker"));
             for field in ["flag", "mode", "extra", "raw_scale", "kind", "selection"] {
                 assert!(!body.contains_key(field), "unexpected {field} in {kind}");
             }
@@ -289,9 +327,6 @@ mod tests {
                     data.keys()
                         .all(|key| matches!(key.as_str(), "variant" | "tag" | "position"))
                 );
-            }
-            if kind == "DamageAftermath" {
-                assert!(!body.contains_key("victim"));
             }
         }
         assert_eq!(
@@ -392,8 +427,9 @@ mod tests {
     #[test]
     fn combat_body_slots_and_weapon_tags_preserve_zero_and_absence() {
         assert_eq!(
-            decode(36, &[], &[(0, 10), (1, 1), (1, 1), (0, 1), (0, 32)]),
+            decode(36, &[(0, 3)], &[(0, 10), (1, 1), (1, 1), (0, 1), (0, 32)]),
             ReplicationEvent::WeaponFire {
+                shooter: None,
                 player: None,
                 weapon: None,
                 variant: WeaponVariantId(0),
@@ -402,10 +438,11 @@ mod tests {
         assert_eq!(
             decode(
                 36,
-                &[],
+                &[(0, 3)],
                 &[(0, 10), (0, 1), (0, 5), (1, 1), (1, 1), (0, 32), (0, 32)]
             ),
             ReplicationEvent::WeaponFire {
+                shooter: None,
                 player: Some(EventPlayerSlot(0)),
                 weapon: Some(WeaponTagId(0)),
                 variant: WeaponVariantId(0),
@@ -445,6 +482,12 @@ mod tests {
                 ]
             ),
             ReplicationEvent::DamageAftermath {
+                victim: Some(ReplicationEventReference {
+                    kind: 4,
+                    index: 5,
+                    generation: 2
+                }),
+                attacker: None,
                 effect: Some(TagId(0x1234_5678)),
                 attacker_player: Some(EventPlayerSlot(7)),
                 packed_direction: 123,
@@ -467,6 +510,7 @@ mod tests {
                 ]
             ),
             ReplicationEvent::WeaponFire {
+                shooter: None,
                 player: Some(EventPlayerSlot(3)),
                 weapon: Some(WeaponTagId(0x0000_8594)),
                 variant: WeaponVariantId(0xfeed_beef),
@@ -498,7 +542,7 @@ mod tests {
     }
 
     #[test]
-    fn damage_projection_omits_references_and_preserves_absent_body_fields() {
+    fn damage_projection_keeps_attacker_but_omits_unexplained_third_reference() {
         assert_eq!(
             decode(
                 0,
@@ -515,11 +559,90 @@ mod tests {
                 &[(0, 1), (1, 1), (0, 19), (0, 1), (2, 5)],
             ),
             ReplicationEvent::DamageAftermath {
+                victim: None,
+                attacker: Some(ReplicationEventReference {
+                    kind: 1,
+                    index: 123,
+                    generation: 1
+                }),
                 effect: None,
                 attacker_player: None,
                 packed_direction: 0,
             }
         );
+    }
+
+    #[test]
+    fn meaningful_references_preserve_presence_domains_and_generations() {
+        for mask in 0..8 {
+            for modes in 0..4 {
+                let mut refs = Vec::new();
+                let mut expected = [None; 3];
+                for (slot, reference) in expected.iter_mut().enumerate() {
+                    let present = mask & (1 << slot) != 0;
+                    refs.push((u64::from(present), 1));
+                    if present {
+                        let narrow = slot < 2 && modes & (1 << slot) != 0;
+                        if slot < 2 {
+                            refs.push((u64::from(narrow), 1));
+                        }
+                        // Zero is a valid present index, not a sentinel for absence.
+                        let index = if slot == 0 {
+                            0
+                        } else if narrow {
+                            511
+                        } else {
+                            8191
+                        };
+                        refs.extend([(index, if narrow { 9 } else { 13 }), (slot as u64 + 1, 2)]);
+                        *reference = Some(ReplicationEventReference {
+                            kind: if slot == 2 {
+                                7
+                            } else if narrow {
+                                4
+                            } else {
+                                1
+                            },
+                            index: index as u16,
+                            generation: slot as u8 + 1,
+                        });
+                    }
+                }
+                assert_eq!(
+                    decode(0, &refs, &[(0, 1), (1, 1), (0, 19), (0, 1), (0, 5)]),
+                    ReplicationEvent::DamageAftermath {
+                        victim: expected[0],
+                        attacker: expected[1],
+                        effect: None,
+                        attacker_player: None,
+                        packed_direction: 0,
+                    }
+                );
+            }
+        }
+        for narrow in [false, true] {
+            let refs = [
+                (1, 1),
+                (u64::from(narrow), 1),
+                (0, if narrow { 9 } else { 13 }),
+                (3, 2),
+                (0, 1),
+                (0, 1),
+            ];
+            assert_eq!(
+                decode(36, &refs, &[(0, 10), (1, 1), (1, 1), (0, 1), (0, 32)]),
+                ReplicationEvent::WeaponFire {
+                    shooter: Some(ReplicationEventReference {
+                        kind: if narrow { 4 } else { 1 },
+                        index: 0,
+                        generation: 3
+                    }),
+                    player: None,
+                    weapon: None,
+                    variant: WeaponVariantId(0),
+                }
+            );
+        }
     }
 
     #[test]

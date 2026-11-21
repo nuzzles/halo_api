@@ -25,8 +25,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
-- Event reference triplets are decoded once with presence-gated slots and kept inside the parser.
-  Public events no longer expose raw handles; unprojected events retain only their kind in `Other`.
+- Event reference triplets are decoded once with presence-gated slots. Public events retain
+  meaningful victim/attacker and shooter references as `ReplicationEventReference`, without
+  resolving them to entity or player IDs. Unexplained references stay internal;
+  unprojected events retain only their kind in `Other`.
   Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
 - Remove uninterpreted event numbers, flags, and action subcodes from public payloads.
   Projectile records retain asset identifiers and position. Player metadata retains identity,

@@ -1,6 +1,16 @@
 use super::ReplicationEventKind;
 use crate::theater::film::{EventPlayerSlot, TagId, WeaponTagId, WeaponVariantId};
 
+/// A recorded reference with a known role in its event. The index is relative
+/// to `kind`'s reference domain, not an `EntityId` or a player slot. Resolving it
+/// against runtime entities belongs to consumers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+pub struct ReplicationEventReference {
+    pub kind: u8,
+    pub index: u16,
+    pub generation: u8,
+}
+
 /// One event from the replication stream. Player numbers are the recorded
 /// five-bit event-body slots, not resolved player identities. Event references
 /// are not used to infer which individual shot produced a hit.
@@ -37,10 +47,14 @@ pub enum ReplicationEvent {
     ProjectileImpact {
         data: ProjectileImpact,
     },
-    /// `damage_aftermath`: a hit's effect tag, attacker slot, and direction.
-    /// The victim is not named by these body fields.
+    /// `damage_aftermath`: victim/attacker references and recorded hit fields.
     DamageAftermath {
+        /// First recorded reference: the victim, when present.
+        victim: Option<ReplicationEventReference>,
+        /// Second recorded reference: the attacker, when present.
+        attacker: Option<ReplicationEventReference>,
         effect: Option<TagId>,
+        /// Separately recorded body slot; not derived from `attacker`.
         attacker_player: Option<EventPlayerSlot>,
         /// Raw 19-bit packed direction, not an angle or vector.
         packed_direction: u32,
@@ -48,6 +62,8 @@ pub enum ReplicationEvent {
     /// `action_weapon_fire`: the shooter's body slot and the recorded weapon
     /// tag and variant. Neither a hit nor a kill is implied.
     WeaponFire {
+        /// First recorded reference: the shooter's unit, when present.
+        shooter: Option<ReplicationEventReference>,
         player: Option<EventPlayerSlot>,
         weapon: Option<WeaponTagId>,
         variant: WeaponVariantId,

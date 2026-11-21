@@ -547,6 +547,32 @@ fn captured_films_parse_into_typed_sections() {
             },
             "{name}"
         );
+        let mut references = [0usize; 3];
+        for observation in &film.replication_stream.observations {
+            match &observation.change {
+                ReplicationChange::Event {
+                    event:
+                        ReplicationEvent::DamageAftermath {
+                            victim, attacker, ..
+                        },
+                } => {
+                    references[0] += usize::from(victim.is_some());
+                    references[1] += usize::from(attacker.is_some());
+                }
+                ReplicationChange::Event {
+                    event: ReplicationEvent::WeaponFire { shooter, .. },
+                } => references[2] += usize::from(shooter.is_some()),
+                _ => {}
+            }
+        }
+        assert!(
+            references[2] > 0,
+            "{name}: lost recorded shooter references"
+        );
+        if name == "octagon_ar_kill" {
+            assert!(references[0] > 0, "lost recorded victim references");
+            assert!(references[1] > 0, "lost recorded attacker references");
+        }
         assert!(
             film.replication_stream
                 .observations

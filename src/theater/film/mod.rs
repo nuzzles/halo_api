@@ -150,8 +150,8 @@ pub use registry::{
 pub use replication::{
     BitValue, DamageAmount, DamageCause, DamageReference, FiringReference, ProjectileReference,
     ReplicationChange, ReplicationComponentChange, ReplicationControl, ReplicationEvent,
-    ReplicationEventKind, ReplicationField, ReplicationObservation, ReplicationStream,
-    ReplicationValue, TagKind, TagLink, TagReference,
+    ReplicationEventKind, ReplicationEventReference, ReplicationField, ReplicationObservation,
+    ReplicationStream, ReplicationValue, TagKind, TagLink, TagReference,
 };
 pub use summary::medals::Medal;
 pub use summary::{Summary, SummaryHighlight, SummaryHighlightPayload};
