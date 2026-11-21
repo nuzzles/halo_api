@@ -5,7 +5,7 @@ use crate::theater::film::replication::{
     ReplicationObservation, ReplicationStream, ReplicationValue,
 };
 use crate::theater::film::{
-    BitValue, ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId,
+    BitValue, ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId, ParseError,
 };
 use crate::theater::parser::v41::packet::PacketRead;
 use crate::theater::parser::wire::fields::RawBits;
@@ -31,7 +31,7 @@ pub(super) fn project_chunks(
         crate::theater::film::EntitySchemaKind,
     >,
     config: &crate::theater::parser::v41::context::V41DecodeConfig,
-) -> Vec<ReplicationObservation> {
+) -> Result<Vec<ReplicationObservation>, ParseError> {
     let capacity = chunks
         .iter()
         .flat_map(|chunk| &chunk.body.packets)
@@ -213,12 +213,12 @@ pub(super) fn project_chunks(
                     }
                 }
                 ReplicationStreamPacketBody::RosterPacketBody(read) => {
-                    if let Some(players) = super::stream::roster::roster(&read) {
+                    if let Some(players) = super::stream::roster::roster(&read)? {
                         emit(ReplicationChange::Roster { players });
                     }
                 }
                 ReplicationStreamPacketBody::BotsPacketBody(read) => {
-                    if let Some(players) = super::stream::roster::bots(&read) {
+                    if let Some(players) = super::stream::roster::bots(&read)? {
                         emit(ReplicationChange::Bots { players });
                     }
                 }
@@ -226,7 +226,7 @@ pub(super) fn project_chunks(
             }
         }
     }
-    observations
+    Ok(observations)
 }
 
 fn project_fields(

@@ -124,10 +124,9 @@ impl TryFrom<(&source::FilmRegistryRead, &[u8])> for crate::theater::film::Regis
             data,
             game_options.end_bit,
             &super::super::context::players::PlayerContext::recorded(body),
-        )
-        .ok_or(crate::theater::film::ParseError::IncompleteRegistryPlayers)?;
+        )?;
         Ok(Self {
-            settings: super::settings::project(body),
+            settings: super::settings::project(body)?,
             players,
             version,
             schemas,

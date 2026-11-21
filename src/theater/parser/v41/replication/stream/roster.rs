@@ -1,6 +1,8 @@
 //! Count-driven type 8/12 readers. Shared body: reference analysis 413971b
 //! player_table_record.go; wrappers: roster_type8.go and bot_metadata.go.
-use crate::theater::film::{BotPlayer, InitialPlayer, PlayerRecord, RosterPlayer, Xuid};
+use crate::theater::film::{
+    BotPlayer, InitialPlayer, ParseError, PlayerRecord, RosterPlayer, Xuid,
+};
 use crate::theater::parser::v41::context::players::PlayerContext;
 use crate::theater::parser::v41::packet::BitRange;
 use crate::theater::parser::v41::replication::source::{
@@ -152,80 +154,106 @@ fn scalar(fields: &[PlayerMetadataField], kind: K) -> Option<u64> {
     Some(value(fields, kind)?.low_u64())
 }
 
-fn player(fields: &[PlayerMetadataField], build: Option<&str>) -> Option<PlayerRecord> {
-    let bytes = |k| Some(value(fields, k)?.bytes.to_vec());
-    let gamertag_utf16 = fields
-        .iter()
-        .filter_map(|f| match f.kind {
-            K::GamertagUnit(_) => Some(f.raw.as_ref().map(|r| r.low_u64() as u16)),
-            _ => None,
-        })
-        .collect::<Option<Vec<_>>>()?;
-    let gamertag = String::from_utf16_lossy(gamertag_utf16.split(|v| *v == 0).next()?);
-    let shorts = (0..6)
-        .map(|i| scalar(fields, K::Short(i)).map(|v| v as u16))
-        .collect::<Option<Vec<_>>>()?
-        .try_into()
-        .ok()?;
-    let block44 = (0..44)
-        .map(|i| scalar(fields, K::Block44Byte(i)).map(|v| v as u8))
-        .collect::<Option<Vec<_>>>()?;
-    Some(PlayerRecord {
-        gamertag,
-        gamertag_utf16,
-        presence_mask: value(fields, K::Mask)?.clone().into(),
-        byte_list: bytes(K::ByteList)?,
-        word_list: bytes(K::WordList)?
-            .as_chunks::<4>()
-            .0
+fn player(
+    fields: &[PlayerMetadataField],
+    build: Option<&str>,
+) -> Result<Option<PlayerRecord>, ParseError> {
+    let raw = value(fields, K::Personalization).ok_or(ParseError::InvalidCustomization)?;
+    let customization = crate::theater::parser::v41::customization::decode(&raw.bytes, build)?;
+    Ok((|| {
+        let bytes = |k| Some(value(fields, k)?.bytes.to_vec());
+        let gamertag_utf16 = fields
             .iter()
-            .map(|b| u32::from_be_bytes(*b))
-            .collect(),
-        block104: bytes(K::Block104)?,
-        block16: bytes(K::Block16)?,
-        desired_representation: scalar(fields, K::Representation)? as u32,
-        join_key: bytes(K::JoinKey)?.try_into().ok()?,
-        short_fields: shorts,
-        customization: crate::theater::parser::v41::customization::decode(
-            bytes(K::Personalization)?,
-            build,
-        ),
-        block44,
-    })
+            .filter_map(|f| match f.kind {
+                K::GamertagUnit(_) => Some(f.raw.as_ref().map(|r| r.low_u64() as u16)),
+                _ => None,
+            })
+            .collect::<Option<Vec<_>>>()?;
+        let gamertag = String::from_utf16_lossy(gamertag_utf16.split(|v| *v == 0).next()?);
+        let shorts = (0..6)
+            .map(|i| scalar(fields, K::Short(i)).map(|v| v as u16))
+            .collect::<Option<Vec<_>>>()?
+            .try_into()
+            .ok()?;
+        let block44 = (0..44)
+            .map(|i| scalar(fields, K::Block44Byte(i)).map(|v| v as u8))
+            .collect::<Option<Vec<_>>>()?;
+        Some(PlayerRecord {
+            gamertag,
+            gamertag_utf16,
+            presence_mask: value(fields, K::Mask)?.clone().into(),
+            byte_list: bytes(K::ByteList)?,
+            word_list: bytes(K::WordList)?
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .map(|b| u32::from_be_bytes(*b))
+                .collect(),
+            block104: bytes(K::Block104)?,
+            block16: bytes(K::Block16)?,
+            desired_representation: scalar(fields, K::Representation)? as u32,
+            join_key: bytes(K::JoinKey)?.try_into().ok()?,
+            short_fields: shorts,
+            customization,
+            block44,
+        })
+    })())
 }
 
 /// Only complete packets become snapshots: a truncated roster must not remove players.
-pub(crate) fn roster(read: &PlayerMetadataRead) -> Option<Vec<RosterPlayer>> {
-    if read.stop != Stop::Complete {
-        return None;
+pub(crate) fn roster(read: &PlayerMetadataRead) -> Result<Option<Vec<RosterPlayer>>, ParseError> {
+    if read.stop == Stop::UnknownPersonalization {
+        return Err(ParseError::InvalidCustomization);
     }
-    read.entries
-        .iter()
-        .map(|e| {
-            Some(RosterPlayer {
-                xuid: Xuid(scalar(&e.fields, K::Identity)?.swap_bytes()),
-                option: scalar(&e.fields, K::Option).map(|v| v as u8),
-                player: player(&e.fields, read.build.as_deref())?,
-            })
-        })
-        .collect()
+    if read.stop != Stop::Complete {
+        return Ok(None);
+    }
+    let mut players = Vec::with_capacity(read.entries.len());
+    for e in &read.entries {
+        let Some(player) = player(&e.fields, read.build.as_deref())? else {
+            return Ok(None);
+        };
+        let Some(identity) = scalar(&e.fields, K::Identity) else {
+            return Ok(None);
+        };
+        players.push(RosterPlayer {
+            xuid: Xuid(identity.swap_bytes()),
+            option: scalar(&e.fields, K::Option).map(|v| v as u8),
+            player,
+        });
+    }
+    Ok(Some(players))
 }
 
-pub(crate) fn bots(read: &PlayerMetadataRead) -> Option<Vec<BotPlayer>> {
-    if read.stop != Stop::Complete {
-        return None;
+pub(crate) fn bots(read: &PlayerMetadataRead) -> Result<Option<Vec<BotPlayer>>, ParseError> {
+    if read.stop == Stop::UnknownPersonalization {
+        return Err(ParseError::InvalidCustomization);
     }
-    read.entries
-        .iter()
-        .map(|e| {
-            Some(BotPlayer {
-                absolute_index: scalar(&e.fields, K::AbsoluteIndex)? as u32,
-                slot: scalar(&e.fields, K::Slot)? as u32,
-                bot_id: scalar(&e.fields, K::BotId)? as u32,
-                player: player(&e.fields, read.build.as_deref())?,
-            })
-        })
-        .collect()
+    if read.stop != Stop::Complete {
+        return Ok(None);
+    }
+    let mut players = Vec::with_capacity(read.entries.len());
+    for e in &read.entries {
+        let Some(player) = player(&e.fields, read.build.as_deref())? else {
+            return Ok(None);
+        };
+        let Some(absolute_index) = scalar(&e.fields, K::AbsoluteIndex) else {
+            return Ok(None);
+        };
+        let Some(slot) = scalar(&e.fields, K::Slot) else {
+            return Ok(None);
+        };
+        let Some(bot_id) = scalar(&e.fields, K::BotId) else {
+            return Ok(None);
+        };
+        players.push(BotPlayer {
+            absolute_index: absolute_index as u32,
+            slot: slot as u32,
+            bot_id: bot_id as u32,
+            player,
+        });
+    }
+    Ok(Some(players))
 }
 
 /// The game-options reader establishes the boundary. No roster search or XUID heuristic.
@@ -233,19 +261,21 @@ pub(crate) fn initial(
     data: &[u8],
     start: usize,
     context: &PlayerContext,
-) -> Option<Vec<InitialPlayer>> {
+) -> Result<Vec<InitialPlayer>, ParseError> {
     context
         .format_version
-        .filter(|v| matches!(v, 20 | 21 | 24 | 25 | 27))?;
+        .filter(|v| matches!(v, 20 | 21 | 24 | 25 | 27))
+        .ok_or(ParseError::IncompleteRegistryPlayers)?;
     let mut r = Reader {
         data,
         bit: start,
         fields: Vec::new(),
     };
-    let take = |r: &mut Reader<'_>, width| {
-        let raw = RawBits::from_source(r.data, r.bit, width)?;
+    let take = |r: &mut Reader<'_>, width| -> Result<u64, ParseError> {
+        let raw = RawBits::from_source(r.data, r.bit, width)
+            .ok_or(ParseError::IncompleteRegistryPlayers)?;
         r.bit += width;
-        Some(raw.low_u64())
+        Ok(raw.low_u64())
     };
     let mut players = Vec::with_capacity(32);
     for slot in 0..32 {
@@ -258,8 +288,12 @@ pub(crate) fn initial(
         let header_value = take(&mut r, 2)? as u8;
         let session_token = take(&mut r, 48)?;
         let xuid = Xuid(take(&mut r, 64)?);
-        r.body(context).ok()?;
-        let player = player(&r.fields, context.build.as_deref())?;
+        r.body(context).map_err(|stop| match stop {
+            Stop::UnknownPersonalization => ParseError::InvalidCustomization,
+            _ => ParseError::IncompleteRegistryPlayers,
+        })?;
+        let player = player(&r.fields, context.build.as_deref())?
+            .ok_or(ParseError::IncompleteRegistryPlayers)?;
         r.fields.clear();
         let tail = take(&mut r, 32)? as u32;
         players.push(InitialPlayer {
@@ -273,7 +307,7 @@ pub(crate) fn initial(
             tail,
         });
     }
-    Some(players)
+    Ok(players)
 }
 
 #[cfg(test)]
@@ -327,6 +361,52 @@ mod tests {
         ]
     }
 
+    fn invalid_appearance_body() -> Vec<(u64, usize)> {
+        let mut fields = body();
+        fields.splice(18..19, [(0x22000000, 32), (0, 1852 * 8 - 32)]);
+        fields
+    }
+
+    #[test]
+    fn invalid_customization_fails_roster_bot_and_initial_projection() {
+        // A valid first record must not hide an invalid appearance in a later record.
+        for is_bot in [false, true] {
+            let mut fields = vec![(2, 32)];
+            for body in [body(), invalid_appearance_body()] {
+                if is_bot {
+                    fields.extend([(17, 32), (3, 32), (42, 32)]);
+                } else {
+                    fields.extend([(1, 1), (100, 64)]);
+                }
+                fields.extend(body);
+            }
+            let read = decode(&pack(&fields), is_bot, &context());
+            assert_eq!(read.stop, Stop::Complete);
+            if is_bot {
+                assert!(matches!(bots(&read), Err(ParseError::InvalidCustomization)));
+            } else {
+                assert!(matches!(
+                    roster(&read),
+                    Err(ParseError::InvalidCustomization)
+                ));
+            }
+        }
+        let mut fields = Vec::new();
+        for slot in 0..32 {
+            fields.extend([(5, 3), (12, 32), (2, 2), (123, 48), (slot + 100, 64)]);
+            fields.extend(if slot == 31 {
+                invalid_appearance_body()
+            } else {
+                body()
+            });
+            fields.push((99, 32));
+        }
+        assert!(matches!(
+            initial(&pack(&fields), 0, &context()),
+            Err(ParseError::InvalidCustomization)
+        ));
+    }
+
     #[test]
     fn complete_roster_preserves_identity_and_unknown_player_values() {
         let xuid = 2535472547643888u64;
@@ -344,7 +424,7 @@ mod tests {
             let mut context = context();
             context.format_version = Some(format);
             let read = decode(&data, false, &context);
-            let players = roster(&read).unwrap();
+            let players = roster(&read).unwrap().unwrap();
             assert_eq!(players.len(), 1);
             assert_eq!(players[0].xuid, Xuid(xuid));
             assert_eq!(players[0].option, option.map(|n| n as u8));
@@ -353,23 +433,44 @@ mod tests {
             assert_eq!(players[0].player.word_list, [0x12345678]);
             assert_eq!(players[0].player.join_key, [1, 2, 3, 4, 5, 6, 7, 8]);
             assert_eq!(players[0].player.short_fields, [1, 2, 3, 4, 5, 1]);
-            assert!(roster(&decode(&data[..data.len() - 1], false, &context)).is_none());
+            assert!(
+                roster(&decode(&data[..data.len() - 1], false, &context))
+                    .unwrap()
+                    .is_none()
+            );
             context.build = Some("future".into());
             context.personalization_bytes = None;
-            assert!(roster(&decode(&data, false, &context)).is_none());
+            assert!(matches!(
+                roster(&decode(&data, false, &context)),
+                Err(ParseError::InvalidCustomization)
+            ));
         }
     }
 
     #[test]
     fn empty_and_truncated_snapshots_are_distinct_and_bots_keep_their_ids() {
-        assert_eq!(roster(&decode(&[0; 4], false, &context())), Some(vec![]));
-        assert_eq!(bots(&decode(&[0; 4], true, &context())), Some(vec![]));
-        assert!(roster(&decode(&[0; 3], false, &context())).is_none());
-        assert!(roster(&decode(&[0, 0, 0, 1], false, &context())).is_none());
+        assert_eq!(
+            roster(&decode(&[0; 4], false, &context())).unwrap(),
+            Some(vec![])
+        );
+        assert_eq!(
+            bots(&decode(&[0; 4], true, &context())).unwrap(),
+            Some(vec![])
+        );
+        assert!(
+            roster(&decode(&[0; 3], false, &context()))
+                .unwrap()
+                .is_none()
+        );
+        assert!(
+            roster(&decode(&[0, 0, 0, 1], false, &context()))
+                .unwrap()
+                .is_none()
+        );
         let mut fields = vec![(1, 32), (17, 32), (3, 32), (42, 32)];
         fields.extend(body());
         let data = pack(&fields);
-        let players = bots(&decode(&data, true, &context())).unwrap();
+        let players = bots(&decode(&data, true, &context())).unwrap().unwrap();
         assert_eq!(
             (
                 players[0].absolute_index,
@@ -379,7 +480,11 @@ mod tests {
             (17, 3, 42)
         );
         assert_eq!(players[0].player.gamertag, "A");
-        assert!(bots(&decode(&data[..data.len() - 1], true, &context())).is_none());
+        assert!(
+            bots(&decode(&data[..data.len() - 1], true, &context()))
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]
@@ -396,7 +501,7 @@ mod tests {
         assert_eq!(players[31].xuid, Xuid(131));
         assert_eq!(players[31].flags, [true, false, true]);
         assert_eq!(players[31].tail, 99);
-        assert!(initial(&data[..data.len() - 1], 3, &context()).is_none());
+        assert!(initial(&data[..data.len() - 1], 3, &context()).is_err());
         assert!(
             initial(
                 &data,
@@ -406,7 +511,7 @@ mod tests {
                     ..context()
                 }
             )
-            .is_none()
+            .is_err()
         );
         assert!(
             initial(
@@ -417,7 +522,7 @@ mod tests {
                     ..context()
                 }
             )
-            .is_none()
+            .is_err()
         );
     }
 }

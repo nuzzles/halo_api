@@ -7,7 +7,6 @@ use crate::theater::film::{ComponentSlot, EntitySchemaId, MapAssetId, MapVersion
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Registry {
     /// Named recorded settings; absent values do not imply game defaults.
-    #[serde(default)]
     pub settings: crate::theater::film::MatchSettings,
     /// Complete initial table in source-slot order, including vacant slots.
     /// Film parsing fails if this table cannot be decoded.

@@ -2,12 +2,10 @@
 use super::{BitValue, Xuid};
 use serde::{Deserialize, Serialize};
 
-/// A build-specific appearance block. Unknown layouts retain their exact bytes.
+/// Decoded recorded appearance. Film parsing fails if the layout cannot be decoded.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FilmCustomization {
-    pub raw: Vec<u8>,
-    /// Present only for a recognized layout with valid bounded counts.
-    pub spartan: Option<SpartanCustomization>,
+    pub spartan: SpartanCustomization,
 }
 
 /// Hashed names from the recorded model configuration, not inventory paths or tag IDs.
@@ -20,7 +18,7 @@ pub struct ModelRegionPermutation {
 
 /// Named fields of the v41 HI_1_12_0/HI_1_13_0 appearance layout.
 /// These select game assets; they do not contain meshes, textures, or animation clips.
-/// Unnamed words and unused entries remain available in `FilmCustomization::raw`.
+/// Unmodeled bytes are not retained.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SpartanCustomization {
     pub regions: Vec<ModelRegionPermutation>,

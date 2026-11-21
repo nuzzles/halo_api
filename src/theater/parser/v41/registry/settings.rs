@@ -3,7 +3,8 @@
 //! independently projected through this parser's Compact Binary tree.
 use super::source::*;
 use crate::theater::film::{
-    MatchOption, MatchOptionValue, MatchSettings, StartingLoadout, StartingWeapon, TagId,
+    MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingLoadout, StartingWeapon,
+    TagId,
 };
 
 fn field(v: &BondValue, id: u16) -> Option<&BondValue> {
@@ -130,28 +131,97 @@ fn variant(root: &BondValue) -> Option<&BondValue> {
     selected
 }
 
-pub(super) fn project(body: &FilmRegistryRead) -> MatchSettings {
-    let mut out = MatchSettings::default();
-    let Some(header) = &body.bootstrap_header else {
-        return out;
-    };
-    out.build = super::super::context::players::PlayerContext::recorded(body).build;
-    let Some(identity) = &header.identification else {
-        return out;
-    };
-    out.start_time_unix_seconds = identity
-        .fields
-        .iter()
-        .find(|f| f.kind == BootstrapIdentificationFieldKind::StartTime)
-        .and_then(|f| f.raw.as_ref())
-        .and_then(|r| r.bytes.as_slice().try_into().ok())
-        .map(u32::from_le_bytes);
-    let Some(options) = &identity.game_options else {
-        return out;
-    };
-    if options.stop != GameOptionsStop::Complete {
-        return out;
+fn required<T>(value: Option<T>, field: &'static str) -> Result<T, ParseError> {
+    value.ok_or(ParseError::InvalidMatchSettings { field })
+}
+
+/// Absence is allowed, but malformed or ambiguous fields must not become absence.
+fn optional_path<'a>(
+    mut v: &'a BondValue,
+    path: &[u16],
+    name: &'static str,
+) -> Result<Option<&'a BondValue>, ParseError> {
+    for &id in path {
+        let next = match &v.body {
+            BondValueBody::Struct { fields, .. } => {
+                let start = fields
+                    .iter()
+                    .rposition(|f| f.wire_type == Some(1))
+                    .map_or(0, |i| i + 1);
+                let mut hits = fields[start..]
+                    .iter()
+                    .filter(|f| f.id == Some(id) && f.wire_type.is_some_and(|t| t > 1));
+                let Some(hit) = hits.next() else {
+                    return Ok(None);
+                };
+                if hits.next().is_some() {
+                    return Err(ParseError::InvalidMatchSettings { field: name });
+                }
+                Some(required(hit.value.as_ref(), name)?)
+            }
+            BondValueBody::Sequence { .. } => required(sequence(v), name)?.get(id as usize),
+            _ => return Err(ParseError::InvalidMatchSettings { field: name }),
+        };
+        let Some(next) = next else { return Ok(None) };
+        v = next;
     }
+    Ok(Some(v))
+}
+
+fn optional_number(
+    v: &BondValue,
+    path: &[u16],
+    name: &'static str,
+) -> Result<Option<i64>, ParseError> {
+    optional_path(v, path, name)?
+        .map(|v| required(integer(v), name))
+        .transpose()
+}
+
+fn optional_boolean(
+    v: &BondValue,
+    path: &[u16],
+    name: &'static str,
+) -> Result<Option<bool>, ParseError> {
+    optional_path(v, path, name)?
+        .map(|v| required(boolean(v, &[]), name))
+        .transpose()
+}
+
+fn optional_tag(
+    v: &BondValue,
+    path: &[u16],
+    name: &'static str,
+) -> Result<Option<TagId>, ParseError> {
+    optional_path(v, path, name)?
+        .map(|v| required(tag(v, &[]), name))
+        .transpose()
+}
+
+pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseError> {
+    let header = required(body.bootstrap_header.as_ref(), "bootstrap header")?;
+    let build = required(
+        super::super::context::players::PlayerContext::recorded(body).build,
+        "build",
+    )?;
+    let identity = required(header.identification.as_ref(), "identification")?;
+    let start_time_unix_seconds = required(
+        identity
+            .fields
+            .iter()
+            .find(|f| f.kind == BootstrapIdentificationFieldKind::StartTime)
+            .and_then(|f| f.raw.as_ref())
+            .and_then(|r| r.bytes.as_slice().try_into().ok())
+            .map(u32::from_le_bytes),
+        "start_time_unix_seconds",
+    )?;
+    let options = required(
+        identity
+            .game_options
+            .as_ref()
+            .filter(|o| o.stop == GameOptionsStop::Complete),
+        "game options",
+    )?;
     let mut variants = options.entries.iter().filter_map(|e| match e {
         GameOptionsEntry::Bond {
             kind: GameOptionsBondKind::Variant,
@@ -159,71 +229,77 @@ pub(super) fn project(body: &FilmRegistryRead) -> MatchSettings {
         } if read.stop == BondStop::Complete => Some(read),
         _ => None,
     });
-    let Some(read) = variants.next() else {
-        return out;
-    };
+    let read = required(variants.next(), "variant")?;
     if variants.next().is_some() {
-        return out;
+        return Err(ParseError::InvalidMatchSettings { field: "variant" });
     }
-    let Some(v) = variant(&read.root) else {
-        return out;
-    };
-    out.variant_decoded = true;
-    if let Some(block) = path(v, &[3, 0, 0, 0]).and_then(bytes) {
-        out.name = text(&block, number(v, &[3, 0, 1, 0, 0, 1, 0]));
-        out.description = text(&block, number(v, &[3, 0, 1, 0, 1, 1, 0]));
-    }
-    out.engine_type = number(v, &[0, 0]);
-    out.killcam_enabled = boolean(v, &[1, 0, 5, 0]);
-    out.play_of_game_enabled = boolean(v, &[1, 0, 5, 2]);
-    out.minimum_respawn_seconds = number(v, &[1, 2, 3]);
-    out.score_to_win = number(v, &[1, 7, 0]);
-    out.time_limit_seconds = number(v, &[1, 7, 3]);
-    out.overtime_seconds = number(v, &[1, 7, 9]);
-    out.last_chance_enabled = boolean(v, &[1, 7, 10]);
-    out.last_chance_seconds = number(v, &[1, 7, 11]);
-    out.starting_loadouts = path(v, &[1, 6, 1]).and_then(sequence).map(|loadouts| {
-        loadouts
-            .iter()
-            .map(|l| StartingLoadout {
-                weapons: path(l, &[1]).and_then(sequence).map(|weapons| {
-                    weapons
-                        .iter()
-                        .map(|w| StartingWeapon {
-                            tag: tag(w, &[0, 0]),
-                            random: boolean(w, &[2]),
-                        })
-                        .collect()
-                }),
-                equipment: tag(l, &[2, 0, 0]),
-            })
-            .collect()
-    });
-    out.options = path(v, &[3, 9, 0])
-        .and_then(sequence)
-        .map(|options| options.iter().map(option).collect());
-    out
+    let v = required(variant(&read.root), "variant")?;
+    let block = required(path(v, &[3, 0, 0, 0]).and_then(bytes), "variant strings")?;
+    let loadouts = required(path(v, &[1, 6, 1]).and_then(sequence), "starting_loadouts")?;
+    let options = required(path(v, &[3, 9, 0]).and_then(sequence), "options")?;
+    Ok(MatchSettings {
+        build,
+        start_time_unix_seconds,
+        name: required(text(&block, number(v, &[3, 0, 1, 0, 0, 1, 0])), "name")?,
+        description: required(
+            text(&block, number(v, &[3, 0, 1, 0, 1, 1, 0])),
+            "description",
+        )?,
+        engine_type: required(number(v, &[0, 0]), "engine_type")?,
+        killcam_enabled: optional_boolean(v, &[1, 0, 5, 0], "killcam_enabled")?,
+        play_of_game_enabled: required(boolean(v, &[1, 0, 5, 2]), "play_of_game_enabled")?,
+        minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
+        score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
+        time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
+        overtime_seconds: optional_number(v, &[1, 7, 9], "overtime_seconds")?,
+        last_chance_enabled: optional_boolean(v, &[1, 7, 10], "last_chance_enabled")?,
+        last_chance_seconds: optional_number(v, &[1, 7, 11], "last_chance_seconds")?,
+        starting_loadouts: loadouts.iter().map(loadout).collect::<Result<_, _>>()?,
+        options: options.iter().map(option).collect::<Result<_, _>>()?,
+    })
 }
 
-fn option(o: &BondValue) -> MatchOption {
-    let raw_value = path(o, &[1, 0]).and_then(bytes);
-    let value = raw_value.as_deref().and_then(|b| {
-        if b.len() != 8 {
-            return None;
+fn loadout(l: &BondValue) -> Result<StartingLoadout, ParseError> {
+    Ok(StartingLoadout {
+        weapons: required(path(l, &[1]).and_then(sequence), "loadout.weapons")?
+            .iter()
+            .map(weapon)
+            .collect::<Result<_, _>>()?,
+        equipment: optional_tag(l, &[2, 0, 0], "loadout.equipment")?,
+    })
+}
+
+fn weapon(w: &BondValue) -> Result<StartingWeapon, ParseError> {
+    let tag = optional_tag(w, &[0, 0], "weapon.tag")?;
+    let random = optional_boolean(w, &[2], "weapon.random")?;
+    Ok(match (tag, random == Some(true)) {
+        (Some(tag), false) => StartingWeapon::Real(tag),
+        (None, true) => StartingWeapon::Random,
+        (Some(tag), true) => StartingWeapon::RandomWithTag(tag),
+        (None, false) => StartingWeapon::Unspecified,
+    })
+}
+
+fn option(o: &BondValue) -> Result<MatchOption, ParseError> {
+    let raw_value = required(
+        path(o, &[1, 0]).and_then(bytes).filter(|b| b.len() == 8),
+        "option.raw_value",
+    )?;
+    let value = match raw_value[4] {
+        2 if raw_value[0] <= 1 => MatchOptionValue::Boolean(raw_value[0] != 0),
+        2 => {
+            return Err(ParseError::InvalidMatchSettings {
+                field: "option.boolean",
+            });
         }
-        match b[4] {
-            2 if b[0] <= 1 => Some(MatchOptionValue::Boolean(b[0] != 0)),
-            3 => Some(MatchOptionValue::NumberBits(u32::from_le_bytes(
-                b[..4].try_into().unwrap(),
-            ))),
-            _ => None,
-        }
-    });
-    MatchOption {
-        name_hash: tag(o, &[0, 0]).map(|t| t.0),
+        3 => MatchOptionValue::NumberBits(u32::from_le_bytes(raw_value[..4].try_into().unwrap())),
+        _ => MatchOptionValue::Unknown,
+    };
+    Ok(MatchOption {
+        name_hash: required(tag(o, &[0, 0]), "option.name_hash")?.0,
         raw_value,
         value,
-    }
+    })
 }
 
 #[cfg(test)]
@@ -231,6 +307,159 @@ mod tests {
     use super::*;
     use crate::theater::parser::v41::packet::BitRange;
     use crate::theater::parser::v41::registry::bootstrap::bond::read_bounded;
+
+    #[test]
+    fn missing_required_settings_fail_registry_projection() {
+        use std::io::Read;
+        let compressed = include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/fixtures/theater/bazaar_idle/chunk-000-type-1.bin"
+        ));
+        let mut data = Vec::new();
+        flate2::read::ZlibDecoder::new(compressed.as_slice())
+            .read_to_end(&mut data)
+            .unwrap();
+        for field in ["start_time_unix_seconds", "variant"] {
+            let mut body = super::super::parse_registry_chunk(&data).unwrap();
+            let identity = body
+                .bootstrap_header
+                .as_mut()
+                .unwrap()
+                .identification
+                .as_mut()
+                .unwrap();
+            if field == "start_time_unix_seconds" {
+                identity
+                    .fields
+                    .retain(|f| f.kind != BootstrapIdentificationFieldKind::StartTime);
+            } else {
+                identity.game_options.as_mut().unwrap().entries.retain(|e| {
+                    !matches!(
+                        e,
+                        GameOptionsEntry::Bond {
+                            kind: GameOptionsBondKind::Variant,
+                            ..
+                        }
+                    )
+                });
+            }
+            assert!(
+                matches!(crate::theater::film::Registry::try_from((&body, data.as_slice())), Err(ParseError::InvalidMatchSettings { field: failed }) if failed == field)
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "set HALO_FILM_CORPUS to a directory of local film.json fixtures"]
+    fn local_corpus_settings_audit() {
+        use std::{collections::BTreeMap, io::Read, path::Path};
+        fn visit(path: &Path, manifests: &mut Vec<std::path::PathBuf>) {
+            for entry in std::fs::read_dir(path).unwrap() {
+                let entry = entry.unwrap();
+                if entry.file_type().unwrap().is_dir() {
+                    visit(&entry.path(), manifests);
+                } else if entry.file_name() == "film.json" || entry.file_name() == "manifest.json" {
+                    manifests.push(entry.path());
+                }
+            }
+        }
+        fn count(
+            value: &serde_json::Value,
+            path: &str,
+            counts: &mut BTreeMap<String, (usize, usize)>,
+        ) {
+            let entry = counts.entry(path.to_owned()).or_default();
+            entry.0 += 1;
+            entry.1 += usize::from(value.is_null());
+            match value {
+                serde_json::Value::Object(fields) => {
+                    for (name, value) in fields {
+                        count(value, &format!("{path}.{name}"), counts);
+                    }
+                }
+                serde_json::Value::Array(values) => {
+                    for value in values {
+                        count(value, &format!("{path}[]"), counts);
+                    }
+                }
+                _ => {}
+            }
+        }
+        let root = std::env::var_os("HALO_FILM_CORPUS").expect("HALO_FILM_CORPUS");
+        let mut manifests = Vec::new();
+        visit(Path::new(&root), &mut manifests);
+        visit(
+            &Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/theater"),
+            &mut manifests,
+        );
+        manifests.sort();
+        assert!(!manifests.is_empty());
+        let mut counts = BTreeMap::new();
+        let mut profiles = BTreeMap::<String, usize>::new();
+        let mut weapons = BTreeMap::<String, usize>::new();
+        for manifest in &manifests {
+            let json: serde_json::Value =
+                serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
+            let chunk = json["chunks"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|c| c["chunk_type"] == 1 || c["kind"] == 1)
+                .unwrap();
+            let mut data = std::fs::read(
+                manifest
+                    .parent()
+                    .unwrap()
+                    .join(chunk["file"].as_str().unwrap()),
+            )
+            .unwrap();
+            if data
+                .get(..2)
+                .is_some_and(|h| h[0] & 15 == 8 && u16::from_be_bytes([h[0], h[1]]) % 31 == 0)
+            {
+                let mut inflated = Vec::new();
+                flate2::read::ZlibDecoder::new(data.as_slice())
+                    .read_to_end(&mut inflated)
+                    .unwrap();
+                data = inflated;
+            }
+            let parsed = super::super::V41RegistryChunkReader::read(
+                crate::theater::film::InflatedFilmChunk {
+                    kind: crate::theater::film::ChunkKind::Registry,
+                    index: 0,
+                    start_ms: 0,
+                    data,
+                },
+            )
+            .unwrap_or_else(|e| panic!("{}: {e}", manifest.display()));
+            *profiles
+                .entry(format!(
+                    "v{}/{}/{}",
+                    parsed.registry.version.film,
+                    parsed.registry.version.format,
+                    parsed.registry.settings.build
+                ))
+                .or_default() += 1;
+            assert_eq!(parsed.registry.players.len(), 32);
+            let settings = serde_json::to_value(&parsed.registry.settings).unwrap();
+            count(&settings, "settings", &mut counts);
+            if let Some(loadouts) = settings["starting_loadouts"].as_array() {
+                for l in loadouts {
+                    if let Some(entries) = l["weapons"].as_array() {
+                        for w in entries {
+                            *weapons.entry(w.to_string()).or_default() += 1;
+                        }
+                    }
+                }
+            }
+        }
+        eprintln!("{} registry films", manifests.len());
+        eprintln!("profiles: {profiles:?}");
+        for (path, (total, missing)) in counts {
+            eprintln!("{path}: {missing}/{total} absent");
+        }
+        eprintln!("starting weapons: {weapons:?}");
+    }
 
     fn read(data: &[u8]) -> BondValue {
         let read = read_bounded(
@@ -273,18 +502,75 @@ mod tests {
                 [1, 0, 192, 127, 3, 0, 0, 0],
                 Some(MatchOptionValue::NumberBits(0x7fc00001)),
             ),
-            ([0, 0, 0, 0, 99, 0, 0, 0], None),
+            ([0, 0, 0, 0, 99, 0, 0, 0], Some(MatchOptionValue::Unknown)),
         ] {
             // Two nested structs: name/hash and raw value as a packed byte array.
             let mut wire = vec![20, 10, 3, 3, 42, 0, 42, 12, 11, 3, 8];
             wire.extend(payload);
             wire.extend([0, 0]);
-            let option = option(&read(&wire));
-            assert_eq!(option.name_hash, Some(42));
-            assert_eq!(option.raw_value.as_deref(), Some(payload.as_slice()));
+            let decoded = option(&read(&wire));
+            let Some(expected) = expected else {
+                assert!(matches!(
+                    decoded,
+                    Err(ParseError::InvalidMatchSettings {
+                        field: "option.boolean"
+                    })
+                ));
+                continue;
+            };
+            let option = decoded.unwrap();
+            assert_eq!(option.name_hash, 42);
+            assert_eq!(option.raw_value, payload);
             assert_eq!(option.value, expected);
             assert!(serde_json::to_string(&option).is_ok());
         }
+    }
+
+    #[test]
+    fn loadouts_and_options_require_complete_fields_without_inventing_defaults() {
+        let empty = read(&[1, 0]);
+        assert!(matches!(
+            loadout(&empty),
+            Err(ParseError::InvalidMatchSettings {
+                field: "loadout.weapons"
+            })
+        ));
+        assert!(option(&empty).is_err());
+        assert_eq!(weapon(&empty).unwrap(), StartingWeapon::Unspecified);
+        // An explicitly empty weapon list is valid, unlike a missing list.
+        let empty_loadout = read(&[3, 43, 42, 0]);
+        assert!(loadout(&empty_loadout).unwrap().weapons.is_empty());
+        assert_eq!(loadout(&empty_loadout).unwrap().equipment, None);
+        assert_eq!(
+            weapon(&read(&[3, 66, 1, 0])).unwrap(),
+            StartingWeapon::Random
+        );
+        assert_eq!(
+            weapon(&read(&[3, 66, 0, 0])).unwrap(),
+            StartingWeapon::Unspecified
+        );
+        assert_eq!(
+            weapon(&read(&[6, 10, 3, 3, 42, 0, 0])).unwrap(),
+            StartingWeapon::Real(TagId(42))
+        );
+        assert_eq!(
+            weapon(&read(&[8, 10, 3, 3, 42, 0, 66, 1, 0])).unwrap(),
+            StartingWeapon::RandomWithTag(TagId(42))
+        );
+        // Malformed and duplicated tags are errors, not an unspecified weapon.
+        assert!(weapon(&read(&[3, 3, 42, 0])).is_err());
+        assert!(weapon(&read(&[5, 66, 1, 66, 0, 0])).is_err());
+        // Required option name and fixed-size payload cannot disappear silently.
+        let payload = [0, 0, 0, 0, 3, 0, 0, 0];
+        let mut wire = vec![15, 42, 12, 11, 3, 8];
+        wire.extend(payload);
+        wire.extend([0, 0]);
+        assert!(matches!(
+            option(&read(&wire)),
+            Err(ParseError::InvalidMatchSettings {
+                field: "option.name_hash"
+            })
+        ));
     }
 
     #[test]
