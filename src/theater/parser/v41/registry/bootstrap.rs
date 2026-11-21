@@ -5,7 +5,7 @@ use crate::theater::parser::v41::registry::source::{
     BootstrapHeaderStop, FilmRegistry,
 };
 use crate::theater::parser::wire::fields::RawBits;
-mod bond;
+pub(super) mod bond;
 mod game_options;
 mod identification;
 

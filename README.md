@@ -53,6 +53,79 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Offline Theater data
+
+`Film::parse` reads downloaded chunks without API calls. `film.registry.settings` exposes
+recording/variant metadata and a required `mode_options: ModeOptions` containing the mode rules,
+starting loadouts, and named script options. `film.registry.players` is a `Vec<InitialPlayer>`
+containing the complete initial 32-slot player table, including vacant slots. An unreadable table returns
+`ParseError::IncompleteRegistryPlayers`. Core settings and their lists are required; missing or
+malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
+such as score/time limits remain `None`, rather than acquiring game defaults.
+Round limit, rounds to win, rounds to draw, and machinima controls stay optional when omitted.
+Self-destruction and betrayal respawn penalties are required by the supported-capture
+contract; explicit zero penalties and disabled controls are preserved.
+`recording_start_time` is a `chrono::DateTime<Utc>` decoded from the recorder's timestamp
+(not necessarily the exact match start), serialized as RFC 3339 on native and WASM.
+`engine_type` is a `GameEngineType`; codes currently remain `Unknown(code)` without unverified
+names. Initial-table slots and bot metadata use `InitialPlayerSlot`, `BotAbsoluteIndex`,
+`BotSlot`, and `BotId`, distinct from event/control slots and entity IDs. These types retain
+numeric JSON serialization and expose their recorded values through `raw()`.
+Catalogue script defaults use `ModeScriptOptions`, separate from recorded `ModeOptions`.
+
+Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
+Starting equipment is `StartingEquipment::Real(EquipmentTagId)` or `StartingEquipment::None`
+when no tag is recorded. Unfamiliar equipment tags remain `Real`; malformed records fail parsing.
+`Unknown` preserves a recorded slot with no tag or enabled random selection; it does not
+resolve the runtime's default weapon. Match options have required typed names:
+`MatchOptionName::Known(KnownMatchOption)` from the catalogue or
+`MatchOptionName::Unknown { name_hash }`, preserving an unmatched hash. Known names serialize
+using their game script spelling (for example, `SlayerOptions_scorePerKill`). Values remain
+recorded booleans or exact float bits, with `MatchOptionValue::Unknown` for unfamiliar
+discriminators; catalogue defaults are never substituted.
+
+Player appearance is also recorded in timestamped roster packets. Initial player-table
+appearance blocks can be empty even when later roster blocks are populated:
+
+```rust
+use halo_api::theater::{Film, film::ReplicationChange};
+
+fn inspect_appearances(film: &Film) {
+    for observation in &film.replication_stream.observations {
+        if let ReplicationChange::Roster { players } = &observation.change {
+            for entry in players {
+                let spartan = &entry.player.customization.spartan;
+                println!("{} / {} at {}us: coating hash {:08x}",
+                    entry.player.gamertag, entry.xuid, observation.timestamp_us,
+                    spartan.coating_name);
+            }
+        }
+    }
+}
+```
+
+Appearance fields include region/permutation pairs, variant/style, theme/coating, attachments,
+objects, and action pose. They are recorded hashes—not endpoint inventory paths, named armor
+slots, meshes, textures, or animation clips. Typed appearance currently recognizes the
+1,852-byte HI_1_12_0/HI_1_13_0 layout. `customization.spartan` is required; unsupported or
+invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
+Raw appearance bytes are not retained in the parsed film.
+
+`ReplicationChange::Bots` exposes recorded bot metadata. `ReplicationChange::Event` includes
+typed reload, throw, melee, pickup, zoom, impact, and detonation payloads. Event player
+slots use `EventPlayerSlot`, and weapon asset tags use `WeaponTagId` (distinct from the
+family/variant `WeaponId`). Only damage attacker references and attacker-player slots remain
+optional in these payloads. Meaningful victim/attacker/shooter references are retained without
+resolving them to entity IDs; unexplained references stay internal. Projectile payloads retain
+only world-space `position: [f64; 3]` in native engine XYZ axes and units. Both default-box
+and map-region encodings decode to quantization-bin centers; map regions use the exact
+recorded build/level's catalogued bounds. Unobserved replication kill/teleport payloads and other unsupported payloads
+retain only their event kind in `Other`; summary kill highlights are unaffected.
+Uninterpreted event fields, opaque player blocks, and duplicate raw metadata are not exposed.
+Slots are not resolved to roster XUIDs. Position encoding details remain internal.
+To advance recorded observations to a time, use `FilmRuntime`; the parser does not construct
+resolved gameplay timelines or interpret projectile attachment geometry.
+
 ### Alternatives
 
 Other projects cover Halo API reverse engineering, film decoding, and replay:

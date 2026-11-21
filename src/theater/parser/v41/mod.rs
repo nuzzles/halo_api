@@ -7,3 +7,4 @@ pub(crate) mod registry;
 pub(crate) mod replication;
 pub(crate) mod summary;
 pub(crate) use chunks::V41ChunkReader;
+mod customization;

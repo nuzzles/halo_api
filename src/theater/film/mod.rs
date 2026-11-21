@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct Film {
     /// Setup: recorded version, component schemas, game options, and map identity.
     pub registry: Registry,
-    /// Timestamped entity, component, control, keyframe, and event observations.
+    /// Timestamped entity, component, control, keyframe, event, and roster observations.
     pub replication_stream: ReplicationStream,
     /// Guarded, typed highlights in recorded order.
     pub summary: Summary,
@@ -41,8 +41,8 @@ impl Film {
     /// Chunks are ordered by manifest index before dispatch. The registry must
     /// be first, and the summary must be last.
     /// Unknown chunk kinds, damaged compressed inputs, and registries without
-    /// readable map IDs or game options are rejected. Registry game modes other
-    /// than Multiplayer are rejected. Source packets are
+    /// readable map IDs, game options, or an initial player table are rejected.
+    /// Registry game modes other than Multiplayer are rejected. Source packets are
     /// consumed into typed observations and guarded highlights. Manifest indices
     /// must be contiguous from zero, and replay tick evidence must be complete.
     pub fn parse(chunks: impl IntoIterator<Item = RawFilmChunk>) -> Result<Self, ParseError> {
@@ -98,6 +98,14 @@ pub enum ParseError {
     MissingRegistryMap,
     #[error("registry game options could not be fully read")]
     IncompleteRegistryOptions,
+    #[error("registry initial player table could not be fully decoded")]
+    IncompleteRegistryPlayers,
+    #[error("recorded player customization has an unsupported or invalid layout")]
+    InvalidCustomization,
+    #[error("recorded match setting {field} is missing or invalid")]
+    InvalidMatchSettings { field: &'static str },
+    #[error("recorded event field {field} is required but absent")]
+    MissingRequiredEventField { field: &'static str },
     #[error("unsupported registry game mode {0}; supported: 2 (Multiplayer)")]
     UnsupportedGameMode(u8),
     #[error("unsupported film version {0}; supported: 41")]
@@ -122,6 +130,11 @@ pub enum FilmRegistryReadError {
 }
 
 pub mod catalog;
+pub mod players;
+pub use players::*;
+pub mod settings;
+pub use catalog::options::KnownMatchOption;
+pub use settings::*;
 mod ids;
 pub mod registry;
 pub mod replication;
@@ -129,8 +142,9 @@ pub mod summary;
 pub use crate::theater::parser::chunk::{ChunkKind, InflatedFilmChunk};
 pub use crate::theater::parser::compression::InflateError;
 pub use ids::{
-    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, KeyframeId, MapAssetId,
-    MapVersionId, TagId, WeaponId, WeaponVariantId, Xuid,
+    BotAbsoluteIndex, BotId, BotSlot, ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId,
+    EquipmentTagId, EventPlayerSlot, InitialPlayerSlot, KeyframeId, MapAssetId, MapVersionId,
+    TagId, WeaponId, WeaponTagId, WeaponVariantId, Xuid,
 };
 pub use registry::{
     EntitySchema, EntitySchemaKind, Registry, RegistryComponentDefinition, RegistryGameMode,
@@ -139,7 +153,7 @@ pub use registry::{
 pub use replication::{
     BitValue, DamageAmount, DamageCause, DamageReference, FiringReference, ProjectileReference,
     ReplicationChange, ReplicationComponentChange, ReplicationControl, ReplicationEvent,
-    ReplicationEventHandle, ReplicationEventKind, ReplicationField, ReplicationObservation,
+    ReplicationEventKind, ReplicationEventReference, ReplicationField, ReplicationObservation,
     ReplicationStream, ReplicationValue, TagKind, TagLink, TagReference,
 };
 pub use summary::medals::Medal;

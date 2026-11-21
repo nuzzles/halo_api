@@ -18,7 +18,7 @@ pub struct LevelCalibration {
     /// English name when the game's map info supplies one.
     pub display_name: Option<&'static str>,
     /// Halo service MatchInfo.LevelId, separate from a map variant's asset ID.
-    pub api_id: Option<Uuid>,
+    pub api_id: Uuid,
     pub index_bits: usize,
     pub play: LevelRegion,
     pub others: &'static [LevelRegion],
@@ -41,7 +41,7 @@ pub const BRANCH: &str = "HI_1_13_0";
 /// Find the catalogued level matching a Halo service MatchInfo.LevelId.
 /// This is a reference lookup and does not establish a film's writer build.
 pub fn by_api_id(id: Uuid) -> Option<&'static LevelCalibration> {
-    data::LEVELS.iter().find(|level| level.api_id == Some(id))
+    data::LEVELS.iter().find(|level| level.api_id == id)
 }
 
 /// Exact build and level-tag lookup. A neighboring build never supplies bounds.
@@ -69,4 +69,36 @@ pub(crate) fn resolve_recorded(
 
 pub fn all() -> &'static [LevelCalibration] {
     data::LEVELS
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn service_ids_resolve_every_catalogued_level_unambiguously() {
+        let mut ids = std::collections::HashSet::new();
+        for level in all() {
+            assert!(
+                !level.api_id.is_nil(),
+                "{} has a nil service ID",
+                level.module
+            );
+            assert!(
+                ids.insert(level.api_id),
+                "duplicate service ID for {}",
+                level.module
+            );
+            assert_eq!(
+                by_api_id(level.api_id).map(|entry| entry.tag),
+                Some(level.tag)
+            );
+            assert_eq!(
+                resolve(BUILD, level.tag).map(|entry| entry.api_id),
+                Some(level.api_id)
+            );
+        }
+        assert!(by_api_id(Uuid::nil()).is_none());
+        assert!(resolve("unknown-build", all()[0].tag).is_none());
+    }
 }

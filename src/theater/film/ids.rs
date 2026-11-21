@@ -109,7 +109,62 @@ impl ControlPlayerIndex {
     }
 }
 
-/// Exact Xbox user identity recorded in a summary highlight.
+/// Five-bit player slot recorded in an event body, not a roster position or XUID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct EventPlayerSlot(pub u8);
+
+impl EventPlayerSlot {
+    pub const fn raw(self) -> u8 {
+        self.0
+    }
+}
+
+/// One of the initial registry's player-table slots, not an event or control slot.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct InitialPlayerSlot(pub u8);
+
+impl InitialPlayerSlot {
+    pub const fn raw(self) -> u8 {
+        self.0
+    }
+}
+
+/// Absolute index recorded in a bot-metadata entry, not a live entity ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotAbsoluteIndex(pub u32);
+
+impl BotAbsoluteIndex {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Slot recorded in a bot-metadata entry; not assumed to share another slot domain.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotSlot(pub u32);
+
+impl BotSlot {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Bot identity recorded by bot metadata, distinct from an Xbox identity.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotId(pub u32);
+
+impl BotId {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Exact Xbox user identity recorded in a film.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Xuid(pub u64);
@@ -183,6 +238,40 @@ impl std::fmt::Display for TagId {
     }
 }
 
+/// A 32-bit weapon asset tag, distinct from the 64-bit family/variant `WeaponId`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct WeaponTagId(pub u32);
+
+impl WeaponTagId {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+impl From<WeaponTagId> for TagId {
+    fn from(value: WeaponTagId) -> Self {
+        Self(value.raw())
+    }
+}
+
+/// A 32-bit equipment asset tag, usable with the item catalogue through `TagId`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct EquipmentTagId(pub u32);
+
+impl EquipmentTagId {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+impl From<EquipmentTagId> for TagId {
+    fn from(value: EquipmentTagId) -> Self {
+        Self(value.raw())
+    }
+}
+
 /// A 32-bit weapon variant string hash, distinct from an asset tag or weapon ID.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -221,5 +310,92 @@ impl WeaponId {
 impl std::fmt::Display for WeaponId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "0x{:016x}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn player_identifiers_keep_their_numeric_representation() {
+        for raw in [0, 31, u8::MAX] {
+            let id = InitialPlayerSlot(raw);
+            assert_eq!(id.raw(), raw);
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(
+                serde_json::from_str::<InitialPlayerSlot>(&json).unwrap(),
+                id
+            );
+        }
+        assert!(serde_json::from_str::<InitialPlayerSlot>("256").is_err());
+        assert!(serde_json::from_str::<InitialPlayerSlot>("-1").is_err());
+
+        macro_rules! check_bot_id {
+            ($ty:ident) => {
+                for raw in [0, 31, u32::MAX] {
+                    let id = $ty(raw);
+                    assert_eq!(id.raw(), raw);
+                    let json = serde_json::to_string(&id).unwrap();
+                    assert_eq!(json, raw.to_string());
+                    assert_eq!(serde_json::from_str::<$ty>(&json).unwrap(), id);
+                }
+                assert!(serde_json::from_str::<$ty>("4294967296").is_err());
+                assert!(serde_json::from_str::<$ty>("-1").is_err());
+            };
+        }
+        check_bot_id!(BotAbsoluteIndex);
+        check_bot_id!(BotSlot);
+        check_bot_id!(BotId);
+    }
+
+    #[test]
+    fn weapon_tags_serialize_as_u32_and_convert_to_catalog_tags() {
+        for raw in [0, 0x0000_8594, u32::MAX] {
+            let id = WeaponTagId(raw);
+            assert_eq!(id.raw(), raw);
+            assert_eq!(TagId::from(id), TagId(raw));
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(serde_json::from_str::<WeaponTagId>(&json).unwrap(), id);
+        }
+        assert!(serde_json::from_str::<WeaponTagId>("4294967296").is_err());
+        assert!(serde_json::from_str::<WeaponTagId>("-1").is_err());
+    }
+
+    #[test]
+    fn equipment_tags_serialize_as_u32_and_convert_to_catalog_tags() {
+        for raw in [0, 42, u32::MAX] {
+            let id = EquipmentTagId(raw);
+            assert_eq!(id.raw(), raw);
+            assert_eq!(TagId::from(id), TagId(raw));
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(serde_json::from_str::<EquipmentTagId>(&json).unwrap(), id);
+        }
+        assert!(serde_json::from_str::<EquipmentTagId>("4294967296").is_err());
+        assert!(serde_json::from_str::<EquipmentTagId>("-1").is_err());
+    }
+
+    #[test]
+    fn event_player_slots_serialize_as_u8_and_preserve_optional_absence() {
+        for raw in [0, 7, 31, u8::MAX] {
+            let id = EventPlayerSlot(raw);
+            assert_eq!(id.raw(), raw);
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(serde_json::from_str::<EventPlayerSlot>(&json).unwrap(), id);
+        }
+        assert!(serde_json::from_str::<EventPlayerSlot>("256").is_err());
+        assert!(serde_json::from_str::<EventPlayerSlot>("-1").is_err());
+        assert_eq!(
+            serde_json::from_str::<Option<EventPlayerSlot>>("null").unwrap(),
+            None
+        );
+        assert_eq!(
+            serde_json::to_string(&Some(EventPlayerSlot(0))).unwrap(),
+            "0"
+        );
     }
 }

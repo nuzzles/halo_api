@@ -10,10 +10,75 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Added
+
+- Recorded round limit, rounds to win/draw, self-destruction/betrayal respawn penalties,
+  and machinima controls in match settings. Both penalties are required after the
+  31-film audit; omitted round settings and machinima controls stay optional.
+- Offline Theater player metadata: the initial 32-slot player table, timestamped roster and bot
+  snapshots, and recorded Spartan appearance hashes for recognized HI_1_12_0/HI_1_13_0 blocks.
+  Item names, asset paths, and current API customization are not substituted for recorded data.
+- Recorded match settings, including variant name/description, score/time/respawn limits,
+  starting loadouts, and typed option values.
+- Typed reload, throw, melee, pickup, zoom, projectile impact, and detonation events.
+  Positions decode to world-space XYZ; gameplay state and projectile attachment interpretation
+  remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
+
 ### Changed
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Distinguish catalogue `ModeScriptOptions` from recorded `ModeOptions`. Add domain-specific
+  initial-player and bot identifiers and `GameEngineType`, preserving numeric serialization.
+  Engine codes remain `Unknown(code)` until their names are verified.
+- Group mode rules, starting loadouts, and named script options under
+  `MatchSettings.mode_options: ModeOptions`; recording/variant metadata stays on `MatchSettings`.
+- Decode match-option hashes into `MatchOptionName::Known(KnownMatchOption)` using the
+  98-entry name catalogue, preserving unmatched hashes in `Unknown { name_hash }`.
+  Known names serialize with their original script spelling; recorded values are unchanged.
+- Rename the match settings to `sudden_death_enabled_in_overtime` and
+  `sudden_death_seconds`, replacing the internal "last chance" terminology.
+- Expose the film recorder timestamp as `recording_start_time: chrono::DateTime<Utc>`
+  instead of raw Unix seconds, with UTC RFC 3339 serialization on native and WASM.
+- Replace optional starting equipment tags with `StartingEquipment::Real(EquipmentTagId)`
+  or `StartingEquipment::None` (no recorded tag), without guessing defaults or item identities.
+- Decode projectile event positions to world-space `[f64; 3]` using verified default-box
+  or build-specific map-region bounds. Remove the public `EventPosition` wire encoding.
+- Inline projectile detonation/impact `position` fields on `ReplicationEvent`, removing
+  their single-field payload structs and the serialized `data` wrapper.
+- Require event fields populated in all 31 audited films: reload/throw player slots,
+  melee weapon/player, pickup item, damage victim/effect, and weapon-fire shooter/player/weapon.
+  Missing gated values now fail with
+  `ParseError::MissingRequiredEventField`, without silently falling back to `Other`.
+  The audit covers 26,084 damage events and 43,368 weapon fires. Damage attackers and
+  attacker-player slots are the only remaining optional event fields (1,495 and 1,494 absences).
+- Remove the unobserved typed replication `Kill` and `Teleport` payloads; their kinds remain
+  representable through `Other`. Summary kill highlights are unchanged. Remove throw item,
+  detonation variant/tag, and impact variant fields, all at least 80% absent in the corpus,
+  along with the unused `ProjectileVariant` type. Present discarded values are still consumed
+  without allocating or exposing them; projectile positions remain available.
+- Event reference triplets are decoded once with presence-gated slots. Public events retain
+  meaningful victim/attacker and shooter references as `ReplicationEventReference`, without
+  resolving them to entity or player IDs. Unexplained references stay internal;
+  unprojected events retain only their kind in `Other`.
+  Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
+- Remove uninterpreted event numbers, flags, and action subcodes from public payloads.
+  Projectile records retain position. Player metadata retains identity,
+  gamertag, and customization rather than opaque blocks, header words, and duplicate UTF-16 units.
+  Match options no longer retain raw payload copies. Required wire fields are still consumed
+  and validated; unused values are skipped during projection instead of stored.
+- `FilmCustomization::spartan` is required and the duplicate `raw` appearance bytes are removed.
+  Unsupported or invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
+- Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.
+  Missing or malformed required metadata returns `ParseError::InvalidMatchSettings`; the
+  redundant `variant_decoded` flag and implicit default settings are removed. Starting weapons
+  use `Real`, `Random`, and `Unknown` variants. Unrecognized option
+  discriminators use `MatchOptionValue::Unknown` without retaining opaque bytes.
+- `LevelCalibration::api_id` is required for all bundled levels. Genuine recorded absences
+  (including equipment, optional limits, and event presence-bit fields) remain optional.
+- `Registry::players` is a required `Vec<InitialPlayer>`. Film parsing returns
+  `ParseError::IncompleteRegistryPlayers` if the complete initial player table cannot be decoded,
+  instead of succeeding with missing player metadata.
 - `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded
   Theater decoding; `Film::parse` keeps the multi-threaded default. Film parsing benchmarks now
   measure both modes with 25 trials per fixture. Film chunk inflation now uses `zlib-rs`, which

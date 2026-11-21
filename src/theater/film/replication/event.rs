@@ -1,10 +1,11 @@
-use super::{BitValue, ReplicationEventKind};
-use crate::theater::film::{TagId, WeaponVariantId};
+use super::ReplicationEventKind;
+use crate::theater::film::{EventPlayerSlot, TagId, WeaponTagId, WeaponVariantId};
 
-/// One recorded event reference. `kind` selects the handle's index domain;
-/// `index` is kept in that domain rather than assumed to be a live entity ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct ReplicationEventHandle {
+/// A recorded reference with a known role in its event. The index is relative
+/// to `kind`'s reference domain, not an `EntityId` or a player slot. Resolving it
+/// against runtime entities belongs to consumers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+pub struct ReplicationEventReference {
     pub kind: u8,
     pub index: u16,
     pub generation: u8,
@@ -13,51 +14,59 @@ pub struct ReplicationEventHandle {
 /// One event from the replication stream. Player numbers are the recorded
 /// five-bit event-body slots, not resolved player identities. Event references
 /// are not used to infer which individual shot produced a hit.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+/// Required fields are enforced for supported captures even when the wire has
+/// a presence gate; an absent required value fails parsing instead of defaulting.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ReplicationEvent {
-    /// `damage_aftermath`: a hit's effect tag, attacker slot, direction, and
-    /// first five-bit damage scale. The victim is not named by these body fields.
+    WeaponReload {
+        player: EventPlayerSlot,
+    },
+    Throw {
+        player: EventPlayerSlot,
+    },
+    Melee {
+        weapon: WeaponTagId,
+        variant: WeaponVariantId,
+        player: EventPlayerSlot,
+    },
+    Pickup {
+        item: TagId,
+    },
+    Zoom {
+        level: u8,
+    },
+    ProjectileDetonation {
+        /// World-space [x, y, z] in engine axes and units, decoded at bin centers.
+        position: [f64; 3],
+    },
+    ProjectileImpact {
+        /// World-space [x, y, z] in engine axes and units, decoded at bin centers.
+        position: [f64; 3],
+    },
+    /// `damage_aftermath`: victim/attacker references and recorded hit fields.
     DamageAftermath {
-        /// First recorded reference, interpreted as the victim when present.
-        victim: Option<ReplicationEventHandle>,
-        /// Second recorded reference, interpreted as the attacker when present.
-        attacker: Option<ReplicationEventHandle>,
-        /// Optional third recorded reference (kind 7). Its gameplay meaning is
-        /// unknown, so this handle is preserved without assigning it a role.
-        third_reference: Option<ReplicationEventHandle>,
-        effect: Option<TagId>,
-        attacker_player: Option<u8>,
+        /// First recorded reference: the victim.
+        victim: ReplicationEventReference,
+        /// Second recorded reference: the attacker, when present.
+        attacker: Option<ReplicationEventReference>,
+        effect: TagId,
+        /// Separately recorded body slot; not derived from `attacker`.
+        attacker_player: Option<EventPlayerSlot>,
         /// Raw 19-bit packed direction, not an angle or vector.
         packed_direction: u32,
-        /// First raw five-bit scale word, not a complete damage amount.
-        raw_scale: u8,
     },
     /// `action_weapon_fire`: the shooter's body slot and the recorded weapon
     /// tag and variant. Neither a hit nor a kill is implied.
     WeaponFire {
-        /// First reference is the shooter's unit when present.
-        handles: [Option<ReplicationEventHandle>; 3],
-        player: Option<u8>,
-        weapon: Option<TagId>,
+        /// First recorded reference: the shooter's unit.
+        shooter: ReplicationEventReference,
+        player: EventPlayerSlot,
+        weapon: WeaponTagId,
         variant: WeaponVariantId,
     },
-    /// `PlayerKilledEvent`: recorded player slots and damage-share words. The
-    /// event itself does not identify a weapon or damage-effect tag.
-    Kill {
-        handles: [Option<ReplicationEventHandle>; 3],
-        victim: Option<u8>,
-        killer: Option<u8>,
-        killer_percent: u32,
-        /// Recorded one-bit flag, without imposing a gameplay interpretation.
-        flag: bool,
-        assistant: Option<u8>,
-        assistant_percent: u32,
-    },
-    /// A structurally complete event whose body is not projected yet. Bits
-    /// start after the presence flag and seven-bit kind code, and include
-    /// references and any guard trailer.
-    Raw {
+    /// A structurally complete event without a supported public payload.
+    /// Keeps the event occurrence and kind, not its uninterpreted bytes.
+    Other {
         kind: ReplicationEventKind,
-        payload: BitValue,
     },
 }

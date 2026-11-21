@@ -134,8 +134,11 @@ impl V41DecodeConfig {
         {
             config.profile.movement.world_object = world;
             config.event_quantized_vectors = true;
-            config.projectile_event_positions =
-                Some(ProjectilePositionEncoding { detonation, impact });
+            config.projectile_event_positions = Some(ProjectilePositionEncoding {
+                level,
+                detonation,
+                impact,
+            });
         }
         config.apply_recorded_corruption_checks(registry.bootstrap_header.as_ref());
         config
