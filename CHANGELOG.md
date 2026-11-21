@@ -24,6 +24,9 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- `Registry::players` is a required `Vec<InitialPlayer>`. Film parsing returns
+  `ParseError::IncompleteRegistryPlayers` if the complete initial player table cannot be decoded,
+  instead of succeeding with missing player metadata.
 - `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded
   Theater decoding; `Film::parse` keeps the multi-threaded default. Film parsing benchmarks now
   measure both modes with 25 trials per fixture. Film chunk inflation now uses `zlib-rs`, which

@@ -56,8 +56,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Offline Theater data
 
 `Film::parse` reads downloaded chunks without API calls. `film.registry.settings` exposes
-recorded match settings; `film.registry.players` contains the initial 32-slot player table
-when its layout is readable. Missing settings stay `None`, rather than acquiring game defaults.
+recorded match settings; `film.registry.players` is a `Vec<InitialPlayer>` containing the complete
+initial 32-slot player table, including vacant slots. An unreadable table returns
+`ParseError::IncompleteRegistryPlayers`. Missing settings stay `None`, rather than acquiring game defaults.
 
 Player appearance is also recorded in timestamped roster packets. Initial player-table
 appearance blocks can be empty even when later roster blocks are populated:

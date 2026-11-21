@@ -107,11 +107,7 @@ fn recorded_players_and_settings() {
                 0.6f32.to_bits()
             ))
         );
-        let initial = film
-            .registry
-            .players
-            .as_ref()
-            .expect("initial player table");
+        let initial = &film.registry.players;
         assert_eq!(initial.len(), 32);
         assert!(
             initial
@@ -206,6 +202,49 @@ fn runtime_replays_roster_snapshots_without_player_entity_inference() {
     assert!(runtime.current().bots.is_none());
 }
 
+#[test]
+fn initial_players_are_required_in_registry_json() {
+    use halo_api::theater::film::Registry;
+    let film = Film::parse(chunks("bazaar_idle")).unwrap();
+    let mut json = serde_json::to_value(&film.registry).unwrap();
+    assert_eq!(json["players"].as_array().unwrap().len(), 32);
+    assert_eq!(
+        serde_json::from_value::<Registry>(json.clone()).unwrap(),
+        film.registry
+    );
+    json["players"] = serde_json::Value::Null;
+    assert!(serde_json::from_value::<Registry>(json.clone()).is_err());
+    json.as_object_mut().unwrap().remove("players");
+    assert!(serde_json::from_value::<Registry>(json).is_err());
+}
+
+#[test]
+fn parse_rejects_an_unreadable_initial_player_layout() {
+    use std::io::{Read, Write};
+    let mut input = chunks("bazaar_idle");
+    let mut data = Vec::new();
+    flate2::read::ZlibDecoder::new(input[0].data.as_slice())
+        .read_to_end(&mut data)
+        .unwrap();
+    // Change only the fixture's recorded build, leaving its framing and options intact.
+    let build = b"HI_1_13_0\0";
+    let offsets: Vec<_> = data
+        .windows(build.len())
+        .enumerate()
+        .filter_map(|(i, bytes)| (bytes == build).then_some(i))
+        .collect();
+    assert_eq!(offsets.len(), 1);
+    let start = offsets[0];
+    data[start..start + build.len()].copy_from_slice(b"HI_9_99_9\0");
+    let mut writer = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+    writer.write_all(&data).unwrap();
+    input[0].data = writer.finish().unwrap();
+    assert!(matches!(
+        Film::parse(input),
+        Err(ParseError::IncompleteRegistryPlayers)
+    ));
+}
+
 /// Opt-in regression against a local corpus with film.json manifests. No downloads.
 #[test]
 #[ignore = "set HALO_FILM_CORPUS to a directory of local film.json fixtures"]
@@ -272,12 +311,7 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
         )
         .unwrap();
         assert_eq!(single, multi, "{}", manifest.display());
-        assert_eq!(
-            single.registry.players.as_ref().unwrap().len(),
-            32,
-            "{}",
-            manifest.display()
-        );
+        assert_eq!(single.registry.players.len(), 32, "{}", manifest.display());
         assert!(
             single.registry.settings.variant_decoded,
             "{}",
