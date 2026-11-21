@@ -441,7 +441,12 @@ impl ParsedReplicationStream {
                 &mut None,
             )?;
             update_tick_status(&mut tick_status, &chunk, chunk_index);
-            parsed::project_chunks_into(vec![chunk], &schema_kinds, projection_config, &mut observations)?;
+            parsed::project_chunks_into(
+                vec![chunk],
+                &schema_kinds,
+                projection_config,
+                &mut observations,
+            )?;
         }
         Ok(Self {
             observations,
