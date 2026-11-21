@@ -30,9 +30,10 @@ pub(super) fn project_chunks(
         EntitySchemaId,
         crate::theater::film::EntitySchemaKind,
     >,
+    config: &crate::theater::parser::v41::context::V41DecodeConfig,
 ) -> Vec<ReplicationObservation> {
     let mut observations = Vec::new();
-    project_chunks_into(chunks, schema_kinds, &mut observations);
+    project_chunks_into(chunks, schema_kinds, config, &mut observations);
     observations
 }
 
@@ -44,6 +45,7 @@ pub(super) fn project_chunks_into(
         EntitySchemaId,
         crate::theater::film::EntitySchemaKind,
     >,
+    config: &crate::theater::parser::v41::context::V41DecodeConfig,
     observations: &mut Vec<ReplicationObservation>,
 ) {
     let capacity = chunks
@@ -102,7 +104,7 @@ pub(super) fn project_chunks_into(
                         let Some(bit_len) = record.end_bit.checked_sub(start) else {
                             continue;
                         };
-                        let Some(event) = event::project(&record, payload).or_else(|| {
+                        let Some(event) = event::project(&record, payload, config).or_else(|| {
                             RawBits::from_source(payload, start, bit_len).map(|raw| {
                                 crate::theater::film::ReplicationEvent::Raw {
                                     kind: code.into(),
@@ -224,6 +226,16 @@ pub(super) fn project_chunks_into(
                                 })
                                 .collect(),
                         });
+                    }
+                }
+                ReplicationStreamPacketBody::RosterPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::roster(&read) {
+                        emit(ReplicationChange::Roster { players });
+                    }
+                }
+                ReplicationStreamPacketBody::BotsPacketBody(read) => {
+                    if let Some(players) = super::stream::roster::bots(&read) {
+                        emit(ReplicationChange::Bots { players });
                     }
                 }
                 _ => {}

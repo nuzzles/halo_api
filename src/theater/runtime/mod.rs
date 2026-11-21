@@ -74,6 +74,10 @@ impl<Id> EntityState<Id> {
 /// Live entity and separate keyframe observations through the requested time.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct WorldSnapshot {
+    /// Last complete recorded session roster; None until a roster packet is observed.
+    pub roster: Option<Vec<crate::theater::film::RosterPlayer>>,
+    /// Last complete recorded bot metadata, with no inferred entity ownership.
+    pub bots: Option<Vec<crate::theater::film::BotPlayer>>,
     /// Live entities keyed by their exact recorded IDs.
     pub entities: BTreeMap<EntityId, EntityState>,
     /// Keyframe baselines keyed by their exact recorded IDs. No link to a live
@@ -145,8 +149,7 @@ impl FilmRuntime {
 
     /// Clear playback state while retaining the film.
     pub fn rewind(&mut self) {
-        self.world.entities.clear();
-        self.world.keyframes.clear();
+        self.world = WorldSnapshot::default();
         self.cursor = 0;
         self.timestamp_us = None;
     }
@@ -189,6 +192,8 @@ fn field_observations(
 fn apply(world: &mut WorldSnapshot, observation: &ReplicationObservation) {
     let timestamp_us = observation.timestamp_us;
     match &observation.change {
+        ReplicationChange::Roster { players } => world.roster = Some(players.clone()),
+        ReplicationChange::Bots { players } => world.bots = Some(players.clone()),
         ReplicationChange::EntityCreated {
             id,
             schema,

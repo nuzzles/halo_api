@@ -6,6 +6,7 @@ pub(crate) use source::*;
 pub struct V41RegistryChunkReader;
 
 mod parsed;
+mod settings;
 pub(crate) use parsed::ParsedRegistry;
 
 impl V41RegistryChunkReader {
@@ -13,7 +14,20 @@ impl V41RegistryChunkReader {
         input: crate::theater::film::InflatedFilmChunk,
     ) -> Result<ParsedRegistry, crate::theater::film::ParseError> {
         let body = parse_registry_chunk(&input.data)?;
-        let registry = crate::theater::film::Registry::try_from(&body)?;
+        let mut registry = crate::theater::film::Registry::try_from(&body)?;
+        if let Some(options) = body
+            .bootstrap_header
+            .as_ref()
+            .and_then(|h| h.identification.as_ref())
+            .and_then(|i| i.game_options.as_ref())
+            .filter(|o| o.stop == GameOptionsStop::Complete)
+        {
+            registry.players = super::replication::stream::roster::initial(
+                &input.data,
+                options.end_bit,
+                &super::context::players::PlayerContext::recorded(&body),
+            );
+        }
         Ok(ParsedRegistry {
             index: input.index,
             start_ms: input.start_ms,
