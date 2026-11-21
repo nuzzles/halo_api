@@ -58,6 +58,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 Other projects cover Halo API reverse engineering, film decoding, and replay:
 
 - [OpenSpartan](https://github.com/openspartan) has many Halo API reverse-engineering examples.
+- [Grunt](https://github.com/PlayGrifball/grunt) is a C#/.NET client and HTTP gateway for the
+  Halo Infinite APIs.
 - [SPNKr](https://github.com/acurtis166/SPNKr) is a Python SDK for the Halo Infinite web API,
   including film highlights.
 - [libfilmshell](https://github.com/OpenSpartan/libfilmshell) is a Rust library for extracting data
