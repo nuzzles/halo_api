@@ -264,7 +264,7 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
             text(&block, number(v, &[3, 0, 1, 0, 1, 1, 0])),
             "description",
         )?,
-        engine_type: required(number(v, &[0, 0]), "engine_type")?,
+        engine_type: required(number(v, &[0, 0]), "engine_type")?.into(),
         mode_options: ModeOptions {
             minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
             score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,

@@ -13,8 +13,36 @@ pub struct MatchSettings {
     /// First language of the recorded variant string table.
     pub name: String,
     pub description: String,
-    pub engine_type: i64,
+    pub engine_type: GameEngineType,
     pub mode_options: ModeOptions,
+}
+
+/// Variant engine discriminator, distinct from the registry's broad game category.
+/// No code-to-name mapping has been verified yet; exact codes are retained.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(from = "i64", into = "i64")]
+pub enum GameEngineType {
+    Unknown(i64),
+}
+
+impl GameEngineType {
+    pub const fn raw(self) -> i64 {
+        match self {
+            Self::Unknown(code) => code,
+        }
+    }
+}
+
+impl From<i64> for GameEngineType {
+    fn from(code: i64) -> Self {
+        Self::Unknown(code)
+    }
+}
+
+impl From<GameEngineType> for i64 {
+    fn from(value: GameEngineType) -> Self {
+        value.raw()
+    }
 }
 
 /// Recorded mode rules, starting loadouts, and script options. No game defaults are applied.
@@ -114,4 +142,27 @@ pub enum MatchOptionValue {
     NumberBits(u32),
     /// The option was recorded, but its value type is not supported.
     Unknown,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn engine_codes_round_trip_without_inventing_classifications() {
+        for code in [i64::MIN, -1, 0, 1, 2, 99, i64::MAX] {
+            let engine = GameEngineType::from(code);
+            assert_eq!(engine, GameEngineType::Unknown(code));
+            assert_eq!(engine.raw(), code);
+            let json = serde_json::to_string(&engine).unwrap();
+            assert_eq!(json, code.to_string());
+            assert_eq!(
+                serde_json::from_str::<GameEngineType>(&json).unwrap(),
+                engine
+            );
+        }
+        for invalid in ["null", "\"Slayer\"", "1.5", "9223372036854775808"] {
+            assert!(serde_json::from_str::<GameEngineType>(invalid).is_err());
+        }
+    }
 }

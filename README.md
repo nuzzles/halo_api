@@ -67,6 +67,11 @@ Self-destruction and betrayal respawn penalties are required by the supported-ca
 contract; explicit zero penalties and disabled controls are preserved.
 `recording_start_time` is a `chrono::DateTime<Utc>` decoded from the recorder's timestamp
 (not necessarily the exact match start), serialized as RFC 3339 on native and WASM.
+`engine_type` is a `GameEngineType`; codes currently remain `Unknown(code)` without unverified
+names. Initial-table slots and bot metadata use `InitialPlayerSlot`, `BotAbsoluteIndex`,
+`BotSlot`, and `BotId`, distinct from event/control slots and entity IDs. These types retain
+numeric JSON serialization and expose their recorded values through `raw()`.
+Catalogue script defaults use `ModeScriptOptions`, separate from recorded `ModeOptions`.
 
 Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
 Starting equipment is `StartingEquipment::Real(EquipmentTagId)` or `StartingEquipment::None`

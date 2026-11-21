@@ -43,7 +43,7 @@ pub struct ModeOption {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[non_exhaustive]
-pub struct ModeOptions {
+pub struct ModeScriptOptions {
     pub prefix: &'static str,
     /// Lowercased Options script filename.
     pub script: &'static str,
@@ -72,7 +72,7 @@ impl Catalog {
     }
 
     /// Reference scripts only; this does not select a recorded mode or apply defaults.
-    pub fn mode_options(self) -> &'static [ModeOptions] {
+    pub fn mode_options(self) -> &'static [ModeScriptOptions] {
         MODES
     }
 }
@@ -114,6 +114,8 @@ mod tests {
 
     #[test]
     fn known_option_names_are_unique_sorted_and_hash_verified() {
+        let scripts: &[ModeScriptOptions] = Catalog.mode_options();
+        assert!(!scripts.is_empty());
         let options = known_match_options::ALL;
         assert_eq!(options.len(), 98);
         assert!(

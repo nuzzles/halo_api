@@ -120,7 +120,51 @@ impl EventPlayerSlot {
     }
 }
 
-/// Exact Xbox user identity recorded in a summary highlight.
+/// One of the initial registry's player-table slots, not an event or control slot.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct InitialPlayerSlot(pub u8);
+
+impl InitialPlayerSlot {
+    pub const fn raw(self) -> u8 {
+        self.0
+    }
+}
+
+/// Absolute index recorded in a bot-metadata entry, not a live entity ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotAbsoluteIndex(pub u32);
+
+impl BotAbsoluteIndex {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Slot recorded in a bot-metadata entry; not assumed to share another slot domain.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotSlot(pub u32);
+
+impl BotSlot {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Bot identity recorded by bot metadata, distinct from an Xbox identity.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BotId(pub u32);
+
+impl BotId {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+/// Exact Xbox user identity recorded in a film.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Xuid(pub u64);
@@ -272,6 +316,39 @@ impl std::fmt::Display for WeaponId {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn player_identifiers_keep_their_numeric_representation() {
+        for raw in [0, 31, u8::MAX] {
+            let id = InitialPlayerSlot(raw);
+            assert_eq!(id.raw(), raw);
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(
+                serde_json::from_str::<InitialPlayerSlot>(&json).unwrap(),
+                id
+            );
+        }
+        assert!(serde_json::from_str::<InitialPlayerSlot>("256").is_err());
+        assert!(serde_json::from_str::<InitialPlayerSlot>("-1").is_err());
+
+        macro_rules! check_bot_id {
+            ($ty:ident) => {
+                for raw in [0, 31, u32::MAX] {
+                    let id = $ty(raw);
+                    assert_eq!(id.raw(), raw);
+                    let json = serde_json::to_string(&id).unwrap();
+                    assert_eq!(json, raw.to_string());
+                    assert_eq!(serde_json::from_str::<$ty>(&json).unwrap(), id);
+                }
+                assert!(serde_json::from_str::<$ty>("4294967296").is_err());
+                assert!(serde_json::from_str::<$ty>("-1").is_err());
+            };
+        }
+        check_bot_id!(BotAbsoluteIndex);
+        check_bot_id!(BotSlot);
+        check_bot_id!(BotId);
+    }
 
     #[test]
     fn weapon_tags_serialize_as_u32_and_convert_to_catalog_tags() {

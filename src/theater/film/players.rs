@@ -1,5 +1,5 @@
 //! Player records and appearance identifiers recorded in a film. No API lookup is performed.
-use super::Xuid;
+use super::{BotAbsoluteIndex, BotId, BotSlot, InitialPlayerSlot, Xuid};
 use serde::{Deserialize, Serialize};
 
 /// Decoded recorded appearance. Film parsing fails if the layout cannot be decoded.
@@ -69,7 +69,7 @@ pub struct PlayerRecord {
 /// One of the 32 initial slots. Vacant slots are retained to preserve slot numbering.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InitialPlayer {
-    pub slot: u8,
+    pub slot: InitialPlayerSlot,
     pub xuid: Xuid,
     pub player: PlayerRecord,
 }
@@ -82,8 +82,8 @@ pub struct RosterPlayer {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BotPlayer {
-    pub absolute_index: u32,
-    pub slot: u32,
-    pub bot_id: u32,
+    pub absolute_index: BotAbsoluteIndex,
+    pub slot: BotSlot,
+    pub bot_id: BotId,
     pub player: PlayerRecord,
 }

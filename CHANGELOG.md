@@ -28,6 +28,9 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Distinguish catalogue `ModeScriptOptions` from recorded `ModeOptions`. Add domain-specific
+  initial-player and bot identifiers and `GameEngineType`, preserving numeric serialization.
+  Engine codes remain `Unknown(code)` until their names are verified.
 - Group mode rules, starting loadouts, and named script options under
   `MatchSettings.mode_options: ModeOptions`; recording/variant metadata stays on `MatchSettings`.
 - Decode match-option hashes into `MatchOptionName::Known(KnownMatchOption)` using the

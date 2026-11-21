@@ -1,10 +1,10 @@
 // Static mode-script option defaults.
 
-use super::{ModeOption, ModeOptions, OptionValue};
+use super::{ModeOption, ModeScriptOptions, OptionValue};
 
 /// Each mode's Options script and the default its scripts give each option.
-pub(crate) static MODES: &[ModeOptions] = &[
-    ModeOptions {
+pub(crate) static MODES: &[ModeScriptOptions] = &[
+    ModeScriptOptions {
         prefix: "AttritionOptions",
         script: "attritionoptions.lua",
         options: &[
@@ -130,7 +130,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "BastionOptions",
         script: "bastionoptions.lua",
         options: &[
@@ -256,7 +256,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "CTFOptions",
         script: "ctfoptions.lua",
         options: &[
@@ -368,7 +368,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "ExtractionOptions",
         script: "extractionoptions.lua",
         options: &[
@@ -510,7 +510,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "FirefightOptions",
         script: "firefightoptions.lua",
         options: &[
@@ -724,7 +724,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "GunGameOptions",
         script: "gungameoptions.lua",
         options: &[
@@ -775,7 +775,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "InfectionOptions",
         script: "infectionoptions.lua",
         options: &[
@@ -1397,7 +1397,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "MinigameOptions",
         script: "minigameoptions.lua",
         options: &[
@@ -1528,7 +1528,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "OddballOptions",
         script: "oddballoptions.lua",
         options: &[
@@ -1566,7 +1566,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "SlayerOptions",
         script: "slayeroptions.lua",
         options: &[
@@ -1671,7 +1671,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "StrongholdsOptions",
         script: "strongholdsoptions.lua",
         options: &[
@@ -1765,7 +1765,7 @@ pub(crate) static MODES: &[ModeOptions] = &[
             },
         ],
     },
-    ModeOptions {
+    ModeScriptOptions {
         prefix: "VIPOptions",
         script: "vipoptions.lua",
         options: &[

@@ -124,6 +124,10 @@ fn recorded_players_and_settings() {
         assert_eq!(settings.build, "HI_1_13_0");
         assert_eq!(settings.name, "Slayer");
         assert_eq!(
+            settings.engine_type,
+            halo_api::theater::film::GameEngineType::Unknown(2)
+        );
+        assert_eq!(
             settings.description,
             "Control Power Weapons to eliminate the enemy."
         );
@@ -162,7 +166,7 @@ fn recorded_players_and_settings() {
             initial
                 .iter()
                 .enumerate()
-                .all(|(i, p)| p.slot as usize == i)
+                .all(|(i, p)| p.slot.raw() as usize == i)
         );
         let occupied: Vec<_> = initial
             .iter()

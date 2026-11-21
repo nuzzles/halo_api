@@ -1,7 +1,8 @@
 //! Count-driven type 8/12 readers. Shared body: reference analysis 413971b
 //! player_table_record.go; wrappers: roster_type8.go and bot_metadata.go.
 use crate::theater::film::{
-    BotPlayer, InitialPlayer, ParseError, PlayerRecord, RosterPlayer, Xuid,
+    BotAbsoluteIndex, BotId, BotPlayer, BotSlot, InitialPlayer, InitialPlayerSlot, ParseError,
+    PlayerRecord, RosterPlayer, Xuid,
 };
 use crate::theater::parser::v41::context::players::PlayerContext;
 use crate::theater::parser::v41::packet::BitRange;
@@ -230,9 +231,9 @@ pub(crate) fn bots(read: &PlayerMetadataRead) -> Result<Option<Vec<BotPlayer>>, 
             return Ok(None);
         };
         players.push(BotPlayer {
-            absolute_index: absolute_index as u32,
-            slot: slot as u32,
-            bot_id: bot_id as u32,
+            absolute_index: BotAbsoluteIndex(absolute_index as u32),
+            slot: BotSlot(slot as u32),
+            bot_id: BotId(bot_id as u32),
             player,
         });
     }
@@ -284,7 +285,11 @@ pub(crate) fn initial(
             .ok_or(ParseError::IncompleteRegistryPlayers)?;
         r.fields.clear();
         skip(&mut r, 32)?;
-        players.push(InitialPlayer { slot, xuid, player });
+        players.push(InitialPlayer {
+            slot: InitialPlayerSlot(slot),
+            xuid,
+            player,
+        });
     }
     Ok(players)
 }
@@ -455,7 +460,7 @@ mod tests {
                 players[0].slot,
                 players[0].bot_id
             ),
-            (17, 3, 42)
+            (BotAbsoluteIndex(17), BotSlot(3), BotId(42))
         );
         assert_eq!(players[0].player.gamertag, "A");
         assert!(
@@ -496,7 +501,7 @@ mod tests {
         let players = initial(&data, 3, &context()).unwrap();
         assert_eq!(players.len(), 32);
         assert_eq!(players[31].xuid, Xuid(131));
-        assert_eq!(players[31].slot, 31);
+        assert_eq!(players[31].slot, InitialPlayerSlot(31));
         assert_eq!(players[31].player.gamertag, "A");
         assert_eq!(
             serde_json::to_value(&players[31])
