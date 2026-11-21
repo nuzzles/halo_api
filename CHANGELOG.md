@@ -14,7 +14,6 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
-
 - `Film::parse_with_options` accepts `FilmParseOptions` to select single- or multi-threaded
   Theater decoding; `Film::parse` keeps the multi-threaded default. Film parsing benchmarks now
   measure both modes with 25 trials per fixture. Film chunk inflation now uses `zlib-rs`, which
