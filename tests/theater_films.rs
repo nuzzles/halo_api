@@ -463,8 +463,8 @@ fn local_corpus_event_field_presence() {
         "WeaponFire/shooter",
         "WeaponFire/player",
         "WeaponFire/weapon",
-        "ProjectileDetonation/data/position",
-        "ProjectileImpact/data/position",
+        "ProjectileDetonation/position",
+        "ProjectileImpact/position",
     ];
     #[derive(Default)]
     struct Counts {
@@ -486,9 +486,11 @@ fn local_corpus_event_field_presence() {
                 "/Kill",
                 "/Teleport",
                 "/Throw/item",
-                "/ProjectileDetonation/data/variant",
-                "/ProjectileDetonation/data/tag",
-                "/ProjectileImpact/data/variant",
+                "/ProjectileDetonation/data",
+                "/ProjectileImpact/data",
+                "/ProjectileDetonation/variant",
+                "/ProjectileDetonation/tag",
+                "/ProjectileImpact/variant",
             ] {
                 assert!(
                     json.pointer(retired).is_none(),

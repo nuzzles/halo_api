@@ -1,9 +1,9 @@
 //! Project established event fields and reference roles without correlating events.
+use crate::theater::film::EventPosition;
 use crate::theater::film::{
     EventPlayerSlot, ParseError, ReplicationEvent, ReplicationEventReference, TagId, WeaponTagId,
     WeaponVariantId,
 };
-use crate::theater::film::{EventPosition, ProjectileDetonation, ProjectileImpact};
 use crate::theater::parser::v41::context::{V41DecodeConfig, movement::PrecisionDescriptor};
 use crate::theater::parser::v41::reference::references::EventReference;
 use crate::theater::parser::v41::replication::source::stream::models::kill_event_chain::EventRecord;
@@ -81,9 +81,7 @@ pub(super) fn project(
             }
             let direction_bits = if bits.read(1)? != 0 { 19 } else { 8 };
             bits.skip(direction_bits + 2)?;
-            Ok(ReplicationEvent::ProjectileDetonation {
-                data: ProjectileDetonation { position },
-            })
+            Ok(ReplicationEvent::ProjectileDetonation { position })
         }
         6 => {
             skip_projectile_variant(&mut bits)?;
@@ -97,9 +95,7 @@ pub(super) fn project(
                 18,
             )?;
             bits.skip(19 + 9 + 1)?;
-            Ok(ReplicationEvent::ProjectileImpact {
-                data: ProjectileImpact { position },
-            })
+            Ok(ReplicationEvent::ProjectileImpact { position })
         }
         0 => {
             let references = record.references?;
@@ -328,8 +324,8 @@ mod tests {
             "/WeaponFire/shooter",
             "/WeaponFire/player",
             "/WeaponFire/weapon",
-            "/ProjectileDetonation/data/position",
-            "/ProjectileImpact/data/position",
+            "/ProjectileDetonation/position",
+            "/ProjectileImpact/position",
         ] {
             if json.pointer(path).is_none() {
                 continue;
@@ -366,9 +362,8 @@ mod tests {
                 assert!(!body.contains_key("item"));
             }
             if matches!(kind.as_str(), "ProjectileDetonation" | "ProjectileImpact") {
-                let data = body["data"].as_object().unwrap();
                 assert_eq!(
-                    data.keys().map(String::as_str).collect::<Vec<_>>(),
+                    body.keys().map(String::as_str).collect::<Vec<_>>(),
                     ["position"]
                 );
             }
@@ -538,11 +533,9 @@ mod tests {
                 ],
             ),
             ReplicationEvent::ProjectileDetonation {
-                data: ProjectileDetonation {
-                    position: EventPosition::DefaultBox {
-                        codes: [0; 3],
-                        axis_bits: 21
-                    }
+                position: EventPosition::DefaultBox {
+                    codes: [0; 3],
+                    axis_bits: 21
                 }
             }
         );
@@ -561,11 +554,9 @@ mod tests {
                 ],
             ),
             ReplicationEvent::ProjectileImpact {
-                data: ProjectileImpact {
-                    position: EventPosition::DefaultBox {
-                        codes: [0; 3],
-                        axis_bits: 18
-                    }
+                position: EventPosition::DefaultBox {
+                    codes: [0; 3],
+                    axis_bits: 18
                 }
             }
         );
@@ -948,12 +939,10 @@ mod tests {
             assert_eq!(
                 decode(5, &refs, &body),
                 ReplicationEvent::ProjectileDetonation {
-                    data: ProjectileDetonation {
-                        position: EventPosition::DefaultBox {
-                            codes: [1, 2, 3],
-                            axis_bits: 21
-                        },
-                    }
+                    position: EventPosition::DefaultBox {
+                        codes: [1, 2, 3],
+                        axis_bits: 21
+                    },
                 }
             );
         }
@@ -975,12 +964,10 @@ mod tests {
                 ]
             ),
             ReplicationEvent::ProjectileImpact {
-                data: ProjectileImpact {
-                    position: EventPosition::DefaultBox {
-                        codes: [1, 2, 3],
-                        axis_bits: 18
-                    },
-                }
+                position: EventPosition::DefaultBox {
+                    codes: [1, 2, 3],
+                    axis_bits: 18
+                },
             }
         );
     }

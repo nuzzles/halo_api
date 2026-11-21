@@ -36,10 +36,10 @@ pub enum ReplicationEvent {
         level: u8,
     },
     ProjectileDetonation {
-        data: ProjectileDetonation,
+        position: EventPosition,
     },
     ProjectileImpact {
-        data: ProjectileImpact,
+        position: EventPosition,
     },
     /// `damage_aftermath`: victim/attacker references and recorded hit fields.
     DamageAftermath {
@@ -82,17 +82,4 @@ pub enum EventPosition {
         codes: [u32; 3],
         axis_bits: [u8; 3],
     },
-}
-
-/// Recorded detonation position. Sparse asset identifiers and uninterpreted
-/// fields are consumed by the parser but not retained in the finished film.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct ProjectileDetonation {
-    pub position: EventPosition,
-}
-
-/// Recorded impact position, without sparse asset identifiers or uninterpreted fields.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct ProjectileImpact {
-    pub position: EventPosition,
 }

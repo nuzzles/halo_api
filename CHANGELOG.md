@@ -25,6 +25,8 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Inline projectile detonation/impact `position` fields on `ReplicationEvent`, removing
+  their single-field payload structs and the serialized `data` wrapper.
 - Require event fields populated in all 31 audited films: reload/throw player slots,
   melee weapon/player, pickup item, damage victim/effect, and weapon-fire shooter/player/weapon.
   Missing gated values now fail with
