@@ -246,8 +246,6 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
             "description",
         )?,
         engine_type: required(number(v, &[0, 0]), "engine_type")?,
-        killcam_enabled: optional_boolean(v, &[1, 0, 5, 0], "killcam_enabled")?,
-        play_of_game_enabled: required(boolean(v, &[1, 0, 5, 2]), "play_of_game_enabled")?,
         minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
         score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
         time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
@@ -275,8 +273,12 @@ fn weapon(w: &BondValue) -> Result<StartingWeapon, ParseError> {
     Ok(match (tag, random == Some(true)) {
         (Some(tag), false) => StartingWeapon::Real(tag),
         (None, true) => StartingWeapon::Random,
-        (Some(tag), true) => StartingWeapon::RandomWithTag(tag),
-        (None, false) => StartingWeapon::Unspecified,
+        (Some(_), true) => {
+            return Err(ParseError::InvalidMatchSettings {
+                field: "weapon.tag/random conflict",
+            });
+        }
+        (None, false) => StartingWeapon::Unknown,
     })
 }
 
@@ -309,7 +311,7 @@ mod tests {
     use crate::theater::parser::v41::registry::bootstrap::bond::read_bounded;
 
     #[test]
-    fn missing_required_settings_fail_registry_projection() {
+    fn missing_required_settings_fail_projection() {
         use std::io::Read;
         let compressed = include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -344,7 +346,7 @@ mod tests {
                 });
             }
             assert!(
-                matches!(crate::theater::film::Registry::try_from((&body, data.as_slice())), Err(ParseError::InvalidMatchSettings { field: failed }) if failed == field)
+                matches!(project(&body), Err(ParseError::InvalidMatchSettings { field: failed }) if failed == field)
             );
         }
     }
@@ -536,7 +538,7 @@ mod tests {
             })
         ));
         assert!(option(&empty).is_err());
-        assert_eq!(weapon(&empty).unwrap(), StartingWeapon::Unspecified);
+        assert_eq!(weapon(&empty).unwrap(), StartingWeapon::Unknown);
         // An explicitly empty weapon list is valid, unlike a missing list.
         let empty_loadout = read(&[3, 43, 42, 0]);
         assert!(loadout(&empty_loadout).unwrap().weapons.is_empty());
@@ -547,17 +549,19 @@ mod tests {
         );
         assert_eq!(
             weapon(&read(&[3, 66, 0, 0])).unwrap(),
-            StartingWeapon::Unspecified
+            StartingWeapon::Unknown
         );
         assert_eq!(
             weapon(&read(&[6, 10, 3, 3, 42, 0, 0])).unwrap(),
             StartingWeapon::Real(TagId(42))
         );
-        assert_eq!(
-            weapon(&read(&[8, 10, 3, 3, 42, 0, 66, 1, 0])).unwrap(),
-            StartingWeapon::RandomWithTag(TagId(42))
-        );
-        // Malformed and duplicated tags are errors, not an unspecified weapon.
+        assert!(matches!(
+            weapon(&read(&[8, 10, 3, 3, 42, 0, 66, 1, 0])),
+            Err(ParseError::InvalidMatchSettings {
+                field: "weapon.tag/random conflict"
+            })
+        ));
+        // Malformed and duplicated tags are errors, not an unknown weapon.
         assert!(weapon(&read(&[3, 3, 42, 0])).is_err());
         assert!(weapon(&read(&[5, 66, 1, 66, 0, 0])).is_err());
         // Required option name and fixed-size payload cannot disappear silently.

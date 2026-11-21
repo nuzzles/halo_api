@@ -17,10 +17,20 @@ impl From<ParsedRegistry> for crate::theater::film::Registry {
     }
 }
 
-impl TryFrom<(&source::FilmRegistryRead, &[u8])> for crate::theater::film::Registry {
+impl
+    TryFrom<(
+        &source::FilmRegistryRead,
+        Vec<crate::theater::film::InitialPlayer>,
+    )> for crate::theater::film::Registry
+{
     type Error = crate::theater::film::ParseError;
 
-    fn try_from((body, data): (&source::FilmRegistryRead, &[u8])) -> Result<Self, Self::Error> {
+    fn try_from(
+        (body, players): (
+            &source::FilmRegistryRead,
+            Vec<crate::theater::film::InitialPlayer>,
+        ),
+    ) -> Result<Self, Self::Error> {
         use super::source::{
             BootstrapIdentificationFieldKind, GameOptionsEntry, GameOptionsFieldKind,
         };
@@ -116,15 +126,6 @@ impl TryFrom<(&source::FilmRegistryRead, &[u8])> for crate::theater::film::Regis
             recorder_simulation,
             level_tag,
         };
-        let game_options = identification
-            .and_then(|id| id.game_options.as_ref())
-            .filter(|read| read.stop == source::GameOptionsStop::Complete)
-            .ok_or(crate::theater::film::ParseError::IncompleteRegistryPlayers)?;
-        let players = super::super::replication::stream::roster::initial(
-            data,
-            game_options.end_bit,
-            &super::super::context::players::PlayerContext::recorded(body),
-        )?;
         Ok(Self {
             settings: super::settings::project(body)?,
             players,
