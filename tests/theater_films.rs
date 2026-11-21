@@ -321,7 +321,7 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
             "{field}"
         );
     }
-    for field in ["name_hash", "raw_value", "value"] {
+    for field in ["name_hash", "value"] {
         let mut missing = settings["options"][0].clone();
         missing.as_object_mut().unwrap().remove(field);
         assert!(
@@ -485,7 +485,7 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
                         ReplicationEvent::Teleport { .. } => 5,
                         ReplicationEvent::ProjectileDetonation { .. } => 6,
                         ReplicationEvent::ProjectileImpact { .. } => 7,
-                        ReplicationEvent::Raw { kind, .. }
+                        ReplicationEvent::Other { kind }
                             if matches!(kind.code(), 5 | 6 | 9 | 21 | 32 | 38 | 39 | 40) =>
                         {
                             panic!("{}: event {kind:?} was not projected", manifest.display())
@@ -555,7 +555,7 @@ fn captured_films_parse_into_typed_sections() {
                     !matches!(
                         &observation.change,
                         ReplicationChange::Event {
-                            event: ReplicationEvent::Raw {
+                            event: ReplicationEvent::Other {
                                 kind: ReplicationEventKind::Damage
                                     | ReplicationEventKind::WeaponFire
                                     | ReplicationEventKind::Kill,

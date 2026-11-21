@@ -11,7 +11,6 @@ pub use event_kind::ReplicationEventKind;
 mod event;
 pub use event::{
     EventPosition, ProjectileDetonation, ProjectileImpact, ProjectileVariant, ReplicationEvent,
-    ThrowSelection,
 };
 mod tag_reference;
 pub use tag_reference::{
@@ -81,7 +80,7 @@ pub enum ReplicationChange {
         components: Vec<ReplicationComponentChange>,
     },
     /// Record an event at this observation's timestamp. Known bodies expose
-    /// recorded fields; other bodies retain their exact bits.
+    /// established fields; other events retain only their kind.
     Event { event: ReplicationEvent },
 }
 

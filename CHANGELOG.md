@@ -16,7 +16,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   snapshots, and recorded Spartan appearance hashes for recognized HI_1_12_0/HI_1_13_0 blocks.
   Item names, asset paths, and current API customization are not substituted for recorded data.
 - Recorded match settings, including variant name/description, score/time/respawn limits,
-  starting loadouts, and typed option values with original bytes.
+  starting loadouts, and typed option values.
 - Typed reload, throw, melee, pickup, zoom, teleport, projectile impact, and detonation events.
   Positions retain quantized codes; gameplay state and projectile attachment interpretation
   remain outside the parser. `FilmRuntime` retains the latest complete roster/bot snapshots.
@@ -26,17 +26,20 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
 - Event reference triplets are decoded once with presence-gated slots and kept inside the parser.
-  Public events no longer expose raw handles; fallback payloads exclude headers and guard trailers.
+  Public events no longer expose raw handles; unprojected events retain only their kind in `Other`.
   Event player slots use `EventPlayerSlot`; event and starting weapon asset tags use `WeaponTagId`.
-- Match-option payloads use inline eight-byte arrays. Registry projection borrows packed Bond
-  bytes, and roster projection avoids temporary short-field, word-byte, and join-key allocations.
+- Remove uninterpreted event numbers, flags, and action subcodes from public payloads.
+  Projectile records retain asset identifiers and position. Player metadata retains identity,
+  gamertag, and customization rather than opaque blocks, header words, and duplicate UTF-16 units.
+  Match options no longer retain raw payload copies. Required wire fields are still consumed
+  and validated; unused values are skipped during projection instead of stored.
 - `FilmCustomization::spartan` is required and the duplicate `raw` appearance bytes are removed.
   Unsupported or invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
 - Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.
   Missing or malformed required metadata returns `ParseError::InvalidMatchSettings`; the
   redundant `variant_decoded` flag and implicit default settings are removed. Starting weapons
   use `Real`, `Random`, and `Unknown` variants. Unrecognized option
-  discriminators use `MatchOptionValue::Unknown` and retain their bytes.
+  discriminators use `MatchOptionValue::Unknown` without retaining opaque bytes.
 - `LevelCalibration::api_id` is required for all bundled levels. Genuine recorded absences
   (including equipment, optional limits, and event presence-bit fields) remain optional.
 - `Registry::players` is a required `Vec<InitialPlayer>`. Film parsing returns

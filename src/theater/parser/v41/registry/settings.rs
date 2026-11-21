@@ -306,7 +306,6 @@ fn option(o: &BondValue) -> Result<MatchOption, ParseError> {
     };
     Ok(MatchOption {
         name_hash: required(tag(o, &[0, 0]), "option.name_hash")?.0,
-        raw_value,
         value,
     })
 }
@@ -529,9 +528,14 @@ mod tests {
             };
             let option = decoded.unwrap();
             assert_eq!(option.name_hash, 42);
-            assert_eq!(option.raw_value, payload);
             assert_eq!(option.value, expected);
             assert!(serde_json::to_string(&option).is_ok());
+            assert!(
+                serde_json::to_value(&option)
+                    .unwrap()
+                    .get("raw_value")
+                    .is_none()
+            );
         }
     }
 

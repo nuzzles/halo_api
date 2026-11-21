@@ -1,5 +1,5 @@
 //! Player records and appearance identifiers recorded in a film. No API lookup is performed.
-use super::{BitValue, Xuid};
+use super::Xuid;
 use serde::{Deserialize, Serialize};
 
 /// Decoded recorded appearance. Film parsing fails if the layout cannot be decoded.
@@ -61,42 +61,22 @@ pub struct CustomizationObject {
 /// Shared body of an initial player, session-roster entry, or bot record.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerRecord {
+    /// Display name decoded from UTF-16; malformed units use the replacement character.
     pub gamertag: String,
-    /// Original units including the terminating NUL when recorded.
-    pub gamertag_utf16: Vec<u16>,
-    pub presence_mask: BitValue,
-    pub byte_list: Vec<u8>,
-    pub word_list: Vec<u32>,
-    pub block104: Vec<u8>,
-    pub block16: Vec<u8>,
-    pub desired_representation: u32,
-    /// Exact byte-copy key. Kept independent of any separately recorded XUID.
-    pub join_key: [u8; 8],
-    /// Six raw values with widths 10, 14, 6, 8, 7, and 1. No team assignment inferred.
-    pub short_fields: [u16; 6],
     pub customization: FilmCustomization,
-    /// Build-specific tail, including a second name and possible bot team data.
-    pub block44: Vec<u8>,
 }
 
 /// One of the 32 initial slots. Vacant slots are retained to preserve slot numbering.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InitialPlayer {
     pub slot: u8,
-    pub flags: [bool; 3],
-    pub header_word: u32,
-    pub header_value: u8,
-    pub session_token: u64,
     pub xuid: Xuid,
     pub player: PlayerRecord,
-    pub tail: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RosterPlayer {
     pub xuid: Xuid,
-    /// Optional five-bit value; its relationship to player/entity indices is not established.
-    pub option: Option<u8>,
     pub player: PlayerRecord,
 }
 

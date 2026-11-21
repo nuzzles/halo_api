@@ -62,9 +62,9 @@ initial 32-slot player table, including vacant slots. An unreadable table return
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
 such as score/time limits and equipment remain `None`, rather than acquiring game defaults.
 
-Starting weapons are `StartingWeapon::{Real(TagId), Random, Unknown}`.
+Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
 `Unknown` preserves a recorded slot with no tag or enabled random selection; it does not
-resolve the runtime's default weapon. Match options have required names, raw bytes, and typed
+resolve the runtime's default weapon. Match options have required names and typed
 values, with an explicit `MatchOptionValue::Unknown` for unfamiliar discriminators.
 
 Player appearance is also recorded in timestamped roster packets. Initial player-table
@@ -98,7 +98,9 @@ Raw appearance bytes are not retained in the parsed film.
 typed reload, throw, melee, pickup, zoom, teleport, impact, and detonation payloads. Event player
 slots use `EventPlayerSlot`, and weapon asset tags use `WeaponTagId` (distinct from the
 family/variant `WeaponId`). Absent fields remain optional. Reference headers stay internal to
-the parser; raw fallback events contain only body bits. Slots are not resolved to roster XUIDs,
+the parser. Events without a supported payload retain only their kind in `Other`.
+Uninterpreted event fields, opaque player blocks, and duplicate raw metadata are not exposed.
+Slots are not resolved to roster XUIDs,
 and event positions retain their quantized codes.
 To advance recorded observations to a time, use `FilmRuntime`; the parser does not construct
 resolved gameplay timelines or interpret projectile attachment geometry.

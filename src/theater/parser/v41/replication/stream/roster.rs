@@ -161,47 +161,27 @@ fn player(
     let raw = value(fields, K::Personalization).ok_or(ParseError::InvalidCustomization)?;
     let customization = crate::theater::parser::v41::customization::decode(&raw.bytes, build)?;
     Ok((|| {
-        let bytes = |k| Some(value(fields, k)?.bytes.to_vec());
-        let gamertag_utf16 = fields
-            .iter()
-            .filter_map(|f| match f.kind {
-                K::GamertagUnit(_) => Some(f.raw.as_ref().map(|r| r.low_u64() as u16)),
-                _ => None,
-            })
-            .collect::<Option<Vec<_>>>()?;
-        let gamertag = String::from_utf16_lossy(gamertag_utf16.split(|v| *v == 0).next()?);
-        let mut shorts = [0; 6];
-        for (i, short) in shorts.iter_mut().enumerate() {
-            *short = scalar(fields, K::Short(i as u8))? as u16;
-        }
-        let block44 = (0..44)
-            .map(|i| scalar(fields, K::Block44Byte(i)).map(|v| v as u8))
-            .collect::<Option<Vec<_>>>()?;
         Some(PlayerRecord {
-            gamertag,
-            gamertag_utf16,
-            presence_mask: value(fields, K::Mask)?.clone().into(),
-            byte_list: bytes(K::ByteList)?,
-            word_list: value(fields, K::WordList)?
-                .bytes
-                .as_chunks::<4>()
-                .0
-                .iter()
-                .map(|b| u32::from_be_bytes(*b))
-                .collect(),
-            block104: bytes(K::Block104)?,
-            block16: bytes(K::Block16)?,
-            desired_representation: scalar(fields, K::Representation)? as u32,
-            join_key: value(fields, K::JoinKey)?
-                .bytes
-                .as_slice()
-                .try_into()
-                .ok()?,
-            short_fields: shorts,
+            gamertag: gamertag(fields)?,
             customization,
-            block44,
         })
     })())
+}
+
+fn gamertag(fields: &[PlayerMetadataField]) -> Option<String> {
+    let mut units = [0; 16];
+    let mut len = 0;
+    for field in fields {
+        if let K::GamertagUnit(_) = field.kind {
+            let unit = field.raw.as_ref()?.low_u64() as u16;
+            if unit == 0 {
+                break;
+            }
+            *units.get_mut(len)? = unit;
+            len += 1;
+        }
+    }
+    Some(String::from_utf16_lossy(&units[..len]))
 }
 
 /// Only complete packets become snapshots: a truncated roster must not remove players.
@@ -222,7 +202,6 @@ pub(crate) fn roster(read: &PlayerMetadataRead) -> Result<Option<Vec<RosterPlaye
         };
         players.push(RosterPlayer {
             xuid: Xuid(identity.swap_bytes()),
-            option: scalar(&e.fields, K::Option).map(|v| v as u8),
             player,
         });
     }
@@ -276,21 +255,26 @@ pub(crate) fn initial(
         fields: Vec::new(),
     };
     let take = |r: &mut Reader<'_>, width| -> Result<u64, ParseError> {
-        let raw = RawBits::from_source(r.data, r.bit, width)
+        let mut cursor = crate::theater::parser::wire::bits::Cursor::new(r.data, r.bit)
             .ok_or(ParseError::IncompleteRegistryPlayers)?;
-        r.bit += width;
-        Ok(raw.low_u64())
+        let raw = cursor
+            .read(width)
+            .ok_or(ParseError::IncompleteRegistryPlayers)?;
+        r.bit = cursor.position;
+        Ok(raw)
+    };
+    let skip = |r: &mut Reader<'_>, width| -> Result<(), ParseError> {
+        let mut cursor = crate::theater::parser::wire::bits::Cursor::new(r.data, r.bit)
+            .ok_or(ParseError::IncompleteRegistryPlayers)?;
+        cursor
+            .skip(width)
+            .ok_or(ParseError::IncompleteRegistryPlayers)?;
+        r.bit = cursor.position;
+        Ok(())
     };
     let mut players = Vec::with_capacity(32);
     for slot in 0..32 {
-        let flags = [
-            take(&mut r, 1)? != 0,
-            take(&mut r, 1)? != 0,
-            take(&mut r, 1)? != 0,
-        ];
-        let header_word = take(&mut r, 32)? as u32;
-        let header_value = take(&mut r, 2)? as u8;
-        let session_token = take(&mut r, 48)?;
+        skip(&mut r, 3 + 32 + 2 + 48)?;
         let xuid = Xuid(take(&mut r, 64)?);
         r.body(context).map_err(|stop| match stop {
             Stop::UnknownPersonalization => ParseError::InvalidCustomization,
@@ -299,17 +283,8 @@ pub(crate) fn initial(
         let player = player(&r.fields, context.build.as_deref())?
             .ok_or(ParseError::IncompleteRegistryPlayers)?;
         r.fields.clear();
-        let tail = take(&mut r, 32)? as u32;
-        players.push(InitialPlayer {
-            slot,
-            flags,
-            header_word,
-            header_value,
-            session_token,
-            xuid,
-            player,
-            tail,
-        });
+        skip(&mut r, 32)?;
+        players.push(InitialPlayer { slot, xuid, player });
     }
     Ok(players)
 }
@@ -412,7 +387,7 @@ mod tests {
     }
 
     #[test]
-    fn complete_roster_preserves_identity_and_unknown_player_values() {
+    fn complete_roster_preserves_identity_without_opaque_player_values() {
         let xuid = 2535472547643888u64;
         for (format, option) in [(27, Some(7)), (27, None), (20, None)] {
             let mut fields = vec![(1, 32)];
@@ -431,12 +406,11 @@ mod tests {
             let players = roster(&read).unwrap().unwrap();
             assert_eq!(players.len(), 1);
             assert_eq!(players[0].xuid, Xuid(xuid));
-            assert_eq!(players[0].option, option.map(|n| n as u8));
-            assert_eq!(players[0].player.gamertag_utf16, [65, 0]);
-            assert_eq!(players[0].player.byte_list, [0xab]);
-            assert_eq!(players[0].player.word_list, [0x12345678]);
-            assert_eq!(players[0].player.join_key, [1, 2, 3, 4, 5, 6, 7, 8]);
-            assert_eq!(players[0].player.short_fields, [1, 2, 3, 4, 5, 1]);
+            assert_eq!(players[0].player.gamertag, "A");
+            let json = serde_json::to_value(&players[0]).unwrap();
+            assert_eq!(json.as_object().unwrap().len(), 2);
+            assert_eq!(json["player"].as_object().unwrap().len(), 2);
+            assert!(json["player"].get("customization").is_some());
             assert!(
                 roster(&decode(&data[..data.len() - 1], false, &context))
                     .unwrap()
@@ -492,6 +466,25 @@ mod tests {
     }
 
     #[test]
+    fn gamertags_decode_without_a_duplicate_utf16_buffer() {
+        for (units, expected) in [
+            (vec![0], String::new()),
+            (vec![65, 0], "A".into()),
+            (vec![0xd83d, 0xde00, 0], "😀".into()),
+            (vec![0xd800, 65, 0], "�A".into()),
+            (vec![65; 16], "A".repeat(16)),
+        ] {
+            let mut fields = vec![(1, 32), (1, 1), (100u64.swap_bytes(), 64)];
+            let mut body = body();
+            body.splice(7..9, units.into_iter().map(|unit| (unit, 16)));
+            fields.extend(body);
+            let read = decode(&pack(&fields), false, &context());
+            let players = roster(&read).unwrap().unwrap();
+            assert_eq!(players[0].player.gamertag, expected);
+        }
+    }
+
+    #[test]
     fn initial_table_requires_all_slots_and_a_supported_layout() {
         let mut fields = vec![(5, 3)]; // deliberately unaligned table
         for slot in 0..32 {
@@ -503,8 +496,16 @@ mod tests {
         let players = initial(&data, 3, &context()).unwrap();
         assert_eq!(players.len(), 32);
         assert_eq!(players[31].xuid, Xuid(131));
-        assert_eq!(players[31].flags, [true, false, true]);
-        assert_eq!(players[31].tail, 99);
+        assert_eq!(players[31].slot, 31);
+        assert_eq!(players[31].player.gamertag, "A");
+        assert_eq!(
+            serde_json::to_value(&players[31])
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .len(),
+            3
+        );
         assert!(initial(&data[..data.len() - 1], 3, &context()).is_err());
         assert!(
             initial(

@@ -40,8 +40,6 @@ pub enum StartingWeapon {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchOption {
     pub name_hash: u32,
-    /// Recorded bytes, including unknown types and nonfinite float bit patterns.
-    pub raw_value: [u8; 8],
     pub value: MatchOptionValue,
 }
 
@@ -50,6 +48,6 @@ pub enum MatchOptionValue {
     Boolean(bool),
     /// Exact IEEE-754 bits, avoiding lossy/nonfinite JSON floats.
     NumberBits(u32),
-    /// An unrecognized discriminator; the exact payload remains in `MatchOption::raw_value`.
+    /// The option was recorded, but its value type is not supported.
     Unknown,
 }
