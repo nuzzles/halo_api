@@ -52,10 +52,7 @@ impl TryFrom<&source::FilmRegistryRead> for crate::theater::film::Registry {
                     .components
                     .iter()
                     .map(|component| RegistryComponentDefinition {
-                        name: component
-                            .name()
-                            .expect("reader accepted registry name")
-                            .to_owned(),
+                        name: component.name.clone(),
                         precision_level: component.precision_level,
                     })
                     .collect(),

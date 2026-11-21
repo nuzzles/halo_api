@@ -154,7 +154,7 @@ impl FilmRuntime {
 
 fn component_state(change: &ReplicationComponentChange, timestamp_us: u64) -> ComponentState {
     ComponentState {
-        name: change.name.clone(),
+        name: change.name.to_string(),
         observations: vec![ComponentObservation {
             timestamp_us,
             fields: change.fields.clone(),
@@ -225,7 +225,7 @@ fn apply(world: &mut WorldSnapshot, observation: &ReplicationObservation) {
             state.updated_at_us = timestamp_us;
             for change in changes {
                 if let Some(component) = state.components.get_mut(&change.index) {
-                    component.name = change.name.clone();
+                    component.name = change.name.to_string();
                     component.observations.push(ComponentObservation {
                         timestamp_us,
                         fields: change.fields.clone(),

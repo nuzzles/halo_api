@@ -159,7 +159,7 @@ fn object_baselines(
             if !archetype
                 .components
                 .iter()
-                .any(|c| c.name() == Some("object-position-component"))
+                .any(|c| c.name == "object-position-component")
             {
                 return None;
             }

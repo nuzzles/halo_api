@@ -195,9 +195,10 @@ pub(crate) fn read_primary(
                         widths = axes.map(|w| w as u64);
                     }
                 }
+                const POSITION_NAMES: [&str; 3] = ["position[0]", "position[1]", "position[2]"];
                 for (i, raw) in widths.into_iter().enumerate() {
                     let width = r.reference_position_width(raw, "world axes")?;
-                    r.r_wide(&format!("position[{i}]"), width)?;
+                    r.r_wide(POSITION_NAMES[i], width)?;
                 }
                 r.r("finite", 2)?;
             }

@@ -33,10 +33,9 @@ impl DefaultState {
         let mut candidates = self
             .fields
             .iter()
-            .filter(|field| field.name == "player_index");
+            .filter(|field| field.name.as_ref() == "player_index");
         let field = candidates.next()?;
         if candidates.next().is_some()
-            || field.width != 6
             || field.raw.bit_len != 6
             || field.bit < self.source.start
             || field.bit.checked_add(6)? > self.source.end

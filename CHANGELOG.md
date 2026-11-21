@@ -10,6 +10,12 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## [Unreleased]
 
+### Changed
+
+- Theater film decoding now processes independent replication chunks in parallel while preserving
+  recorded observations and parser fallbacks. Reproducible benchmarks and a results site are in
+  `benchmarks/`.
+
 ## [0.6.1] - 2026-11-20
 
 This release has an [MSRV][] of 1.96.

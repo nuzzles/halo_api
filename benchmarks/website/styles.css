@@ -1,0 +1,58 @@
+:root {
+  color-scheme: dark;
+  --background: #242424;
+  --sidebar: #292929;
+  --line: #3b3b3b;
+  --text: #f3f3f3;
+  --muted: #aaa;
+  --halo: #398c94;
+  --shell: #8564bc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--text); background: var(--background); font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+.sidebar { padding: 34px 22px; border-right: 1px solid var(--line); background: var(--sidebar); }
+.setting { margin-bottom: 32px; }
+.setting h2 { margin: 0 0 12px; color: var(--muted); font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.choice { display: inline-block; max-width: 100%; padding: 8px 13px; border: 1px solid #4d6265; border-radius: 5px; background: #326f75; font-size: 15px; font-weight: 550; line-height: 1.35; }
+.content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
+.date-select { position: relative; display: inline-flex; flex: none; }
+.date-select::after { content: ""; position: absolute; right: 17px; top: 50%; width: 9px; height: 9px; border-right: 2px solid var(--text); border-bottom: 2px solid var(--text); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+.date-select select { appearance: none; min-width: 176px; padding: 11px 42px 11px 16px; border: 1px solid #626262; border-radius: 8px; background: #303030; color: var(--text); font: inherit; font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: .02em; cursor: pointer; }
+.date-select select:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
+.chart-header { padding-top: 30px; text-align: center; }
+h1, h2 { margin: 0; font-weight: 700; letter-spacing: -.025em; }
+h1 { font-size: 21px; }
+.chart-header h2 { font-size: clamp(22px, 2vw, 27px); }
+.legend { display: flex; justify-content: center; gap: 25px; margin-top: 14px; color: #d0d0d0; font-size: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.swatch { display: inline-block; width: 14px; height: 11px; }
+.swatch.halo, .bar.halo { background: var(--halo); }
+.swatch.shell, .bar.shell { background: var(--shell); }
+.chart { margin-top: 28px; }
+.chart-row { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: center; gap: 22px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.film-label { font-size: 16px; font-weight: 600; }
+.film-detail { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 400; }
+.bars { display: grid; gap: 7px; min-width: 0; }
+.bar-line { display: grid; grid-template-columns: minmax(0, 1fr) 88px; align-items: center; gap: 12px; min-width: 0; }
+.bar-rail { display: block; height: 19px; min-width: 0; background: repeating-linear-gradient(to right, transparent, transparent calc(25% - 1px), #303030 calc(25% - 1px), #303030 25%); }
+.bar { display: block; height: 100%; min-width: 2px; }
+.bar-value { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chart-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding-top: 17px; color: var(--muted); font-size: 12px; }
+.chart-footer p { margin: 0; }
+#updated { white-space: nowrap; }
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 20px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .setting { margin: 0; }
+  .content { padding: 27px 20px; }
+}
+@media (max-width: 560px) {
+  .page-header { flex-wrap: wrap; }
+  .date-select { margin-left: auto; }
+  .chart-row { grid-template-columns: 1fr; gap: 9px; }
+  .chart-footer { display: block; }
+  #updated { display: block; margin-top: 10px; white-space: normal; }
+  .bar-line { grid-template-columns: minmax(0, 1fr) 78px; gap: 8px; }
+}

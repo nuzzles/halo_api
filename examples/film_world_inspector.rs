@@ -547,7 +547,7 @@ fn show_fields(ui: &mut egui::Ui, fields: &[ReplicationField]) {
     }
     for (index, field) in fields.iter().enumerate() {
         ui.horizontal_wrapped(|ui| {
-            ui.strong(&field.name);
+            ui.strong(field.name.as_ref());
             match &field.value {
                 ReplicationValue::Empty => {
                     ui.monospace("empty");

@@ -14,12 +14,13 @@ use crate::theater::parser::v41::replication::components::widths::{
     ComponentWidthOverrides, read_component, signed_skip,
 };
 use crate::theater::parser::v41::replication::components::{m4b, vehicle};
-use crate::theater::parser::v41::replication::source::components::field::ComponentField;
+use crate::theater::parser::v41::replication::source::components::field::{
+    ComponentField, FieldBits,
+};
 use crate::theater::parser::v41::replication::source::stream::models::keyframes::{
     KeyframeComponentRead, KeyframeRecord, KeyframeStop,
 };
 use crate::theater::parser::wire::bits::reference::{reference_bits_at, reference_bits_tolerant};
-use crate::theater::parser::wire::fields::RawBits;
 
 pub(crate) fn decode_reference_keyframe_record_contextual(
     data: &[u8],
@@ -118,7 +119,7 @@ fn decode_keyframe_record_inner(
         width_error: None,
         context_error: None,
 
-        live_grammar: context.map(|c| c.grammar.clone()),
+        live_grammar: context.map(|c| &c.grammar),
         // The reference full-state walker creates a fresh reader without setting a slot.
         movement_slot: Some(0),
         diagnostics: Default::default(),
@@ -127,7 +128,7 @@ fn decode_keyframe_record_inner(
         } else {
             Cursor::new(data, usize::try_from(bit).ok()?)?
         },
-        fields: Vec::new(),
+        fields: Vec::with_capacity(32),
         position_encoding: encoding,
     };
     let (id, archetype) = if padded {
@@ -146,8 +147,7 @@ fn decode_keyframe_record_inner(
                 r.fields.push(ComponentField {
                     name: name.into(),
                     bit: usize::try_from(r.cursor.position).ok()?,
-                    width: usize::try_from(width).ok()?,
-                    raw: RawBits::from_source(
+                    raw: FieldBits::from_source(
                         data,
                         usize::try_from(r.cursor.position).ok()?,
                         usize::try_from(width).ok()?,
@@ -330,7 +330,7 @@ fn body(
     }
     let source_bits = r.cursor.source_bits();
     for (index, registry_component) in arch.components.iter().enumerate() {
-        let name = registry_component.name()?;
+        let name = registry_component.name.as_str();
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
         let status = match (ti, name, vehicle_gate) {
@@ -359,7 +359,7 @@ fn body(
         components.push(KeyframeComponentRead {
             status: status.into(),
             index,
-            name: name.to_owned(),
+            name: crate::theater::parser::v41::replication::components::reader::intern_name(name),
             start_bit,
             end_bit: r.cursor.position,
             fields,

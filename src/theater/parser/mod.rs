@@ -136,11 +136,31 @@ impl ChunkReader {
         }
 
         // Replication chunks are in the middle.
-        let replication_stream = chunks
-            .into_iter()
-            .map(RawFilmChunk::inflate)
-            .collect::<Result<Vec<_>, _>>()?;
-        let summary = summary_chunk.inflate()?;
+        // Large terminal summaries can inflate while the replication workers
+        // inflate the middle chunks. Tiny summaries cost less than a thread.
+        #[cfg(not(target_arch = "wasm32"))]
+        let (replication_stream, summary) = if summary_chunk.data.len() >= 64 * 1024
+            && std::thread::available_parallelism().is_ok_and(|workers| workers.get() > 1)
+        {
+            std::thread::scope(|scope| {
+                let summary = scope.spawn(|| summary_chunk.inflate());
+                let replication_stream = Self::inflate_replication_chunks(chunks);
+                let summary = summary
+                    .join()
+                    .expect("film summary inflation worker panicked");
+                Ok::<_, ParseError>((replication_stream?, summary?))
+            })?
+        } else {
+            (
+                Self::inflate_replication_chunks(chunks)?,
+                summary_chunk.inflate()?,
+            )
+        };
+        #[cfg(target_arch = "wasm32")]
+        let (replication_stream, summary) = (
+            Self::inflate_replication_chunks(chunks)?,
+            summary_chunk.inflate()?,
+        );
         let chunks = InflatedFilmChunks {
             registry: registry_chunk,
             replication_stream,
@@ -151,5 +171,43 @@ impl ChunkReader {
         match reader {
             Self::V41(reader) => reader.read(chunks, limits, context),
         }
+    }
+
+    fn inflate_replication_chunks(
+        chunks: Vec<RawFilmChunk>,
+    ) -> Result<Vec<InflatedFilmChunk>, ParseError> {
+        #[cfg(not(target_arch = "wasm32"))]
+        if chunks.len() >= 2 {
+            let workers =
+                std::thread::available_parallelism().map_or(1, |count| count.get().min(8));
+            if workers > 1 {
+                let chunk_count = chunks.len();
+                let group_size = chunks.len().div_ceil(workers);
+                let groups = chunk_count.div_ceil(group_size);
+                let mut chunks = chunks.into_iter();
+                return std::thread::scope(|scope| {
+                    let handles = (0..groups)
+                        .map(|_| {
+                            let group = chunks.by_ref().take(group_size).collect::<Vec<_>>();
+                            scope.spawn(move || {
+                                group
+                                    .into_iter()
+                                    .map(RawFilmChunk::inflate)
+                                    .collect::<Vec<_>>()
+                            })
+                        })
+                        .collect::<Vec<_>>();
+                    let mut inflated = Vec::with_capacity(chunk_count);
+                    for handle in handles {
+                        for result in handle.join().expect("film inflation worker panicked") {
+                            inflated.push(result?);
+                        }
+                    }
+                    Ok(inflated)
+                });
+            }
+            return chunks.into_iter().map(RawFilmChunk::inflate).collect();
+        }
+        chunks.into_iter().map(RawFilmChunk::inflate).collect()
     }
 }

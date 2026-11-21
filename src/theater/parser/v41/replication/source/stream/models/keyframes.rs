@@ -26,7 +26,7 @@ pub enum KeyframeStop {
 pub struct KeyframeComponentRead {
     pub status: ComponentReadStatus,
     pub index: usize,
-    pub name: String,
+    pub name: std::sync::Arc<str>,
     pub start_bit: i64,
     /// Includes the optional corruption check after the component.
     pub end_bit: i64,

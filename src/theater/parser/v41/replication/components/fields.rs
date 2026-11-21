@@ -11,15 +11,7 @@ pub(crate) fn take_component_fields(
     source_bits: usize,
 ) -> Vec<ComponentField> {
     let fields: Vec<_> = record_fields.drain(from..).collect();
-    let source_end = i64::try_from(source_bits).unwrap_or(i64::MAX);
-    let range = (start_bit < source_end)
-        .then(|| {
-            Some((
-                usize::try_from(start_bit).ok()?,
-                usize::try_from(end_bit.min(source_end)).ok()?,
-            ))
-        })
-        .flatten();
+    let range = source_range(start_bit, end_bit, source_bits);
     for field in &fields {
         if range.is_none_or(|(start, end)| field.bit < start || field.bit >= end) {
             record_fields.push(field.clone());
@@ -28,17 +20,28 @@ pub(crate) fn take_component_fields(
     fields
 }
 
+fn source_range(start_bit: i64, end_bit: i64, source_bits: usize) -> Option<(usize, usize)> {
+    let source_end = i64::try_from(source_bits).unwrap_or(i64::MAX);
+    (start_bit < source_end)
+        .then(|| {
+            Some((
+                usize::try_from(start_bit).ok()?,
+                usize::try_from(end_bit.min(source_end)).ok()?,
+            ))
+        })
+        .flatten()
+}
+
 #[cfg(test)]
 mod tests {
     use super::{ComponentField, take_component_fields};
-    use crate::theater::parser::wire::fields::RawBits;
+    use crate::theater::parser::v41::replication::source::components::field::FieldBits;
 
     fn field(bit: usize) -> ComponentField {
         ComponentField {
-            name: format!("field.{bit}"),
+            name: format!("field.{bit}").into(),
             bit,
-            width: 1,
-            raw: RawBits::from_low(1, 1),
+            raw: FieldBits::from_source(&[0x80], 0, 1).unwrap(),
         }
     }
 

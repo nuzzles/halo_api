@@ -21,7 +21,7 @@ xbox = ["dep:xbox"]
 [dependencies]
 xbox = { version = "0.3.1", default-features = false, optional = true }
 reqwest = { version = "0.13.4", features = ["json", "query"] }
-serde = { version = "1.0.229", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["float_roundtrip"] }
 thiserror = "2.0.19"
 tokio = { version = "1.53.1", features = ["sync", "time", "macros", "rt"] }
@@ -29,6 +29,8 @@ chrono = { version = "0.4.45", features = ["serde"] }
 async-trait = "0.1.92"
 tracing = "0.1.44"
 flate2 = "1.1"
+smallvec = { version = "1.15", features = ["serde"] }
+rustc-hash = "2.1"
 csv = "1.4"
 scraper = "0.24"
 uuid = "1.24"

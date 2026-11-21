@@ -1,6 +1,4 @@
 //! Signed reference traversal cursor. Slice addresses remain checked at access.
-use crate::theater::parser::v41::replication::stream::frame::header::decode_reference_record_header;
-use crate::theater::parser::wire::bits::reference::FilmBits;
 #[derive(Clone, Copy)]
 pub(crate) struct ComponentCursor<'a> {
     data: &'a [u8],
@@ -56,36 +54,12 @@ impl<'a> ComponentCursor<'a> {
         &self,
         start: i64,
         width: u64,
-    ) -> Option<crate::theater::parser::wire::fields::RawBits> {
-        crate::theater::parser::wire::fields::RawBits::from_source(
+    ) -> Option<crate::theater::parser::v41::replication::source::components::field::FieldBits>
+    {
+        crate::theater::parser::v41::replication::source::components::field::FieldBits::from_source(
             self.data,
             usize::try_from(start).ok()?,
             usize::try_from(width).ok()?,
         )
-    }
-    pub(crate) fn reference_header(
-        &mut self,
-        width: i64,
-        base: u32,
-    ) -> crate::theater::parser::v41::replication::source::RecordHeader {
-        let mut reader = FilmBits::new(self.data);
-        reader.set_position(self.position);
-        struct CopyBack<'r, 'd> {
-            reader: FilmBits<'d>,
-            cursor: &'r mut ComponentCursor<'d>,
-        }
-        impl Drop for CopyBack<'_, '_> {
-            fn drop(&mut self) {
-                self.cursor.position = self.reader.position();
-                if let Some(mirror) = self.cursor.mirror {
-                    mirror.set(self.cursor.position);
-                }
-            }
-        }
-        let mut guard = CopyBack {
-            reader,
-            cursor: self,
-        };
-        decode_reference_record_header(&mut guard.reader, width, base)
     }
 }

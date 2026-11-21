@@ -11,6 +11,189 @@ use crate::theater::parser::v41::reference::observations::{
     FilmComponentObservation, MovementComponent, UnitReference, UnitReferenceKind,
 };
 use crate::theater::parser::v41::replication::source::components::field::ComponentField;
+use std::cell::RefCell;
+use std::sync::{Arc, LazyLock};
+
+const FLAG_NAMES: [&str; 32] = [
+    "flags[0]",
+    "flags[1]",
+    "flags[2]",
+    "flags[3]",
+    "flags[4]",
+    "flags[5]",
+    "flags[6]",
+    "flags[7]",
+    "flags[8]",
+    "flags[9]",
+    "flags[10]",
+    "flags[11]",
+    "flags[12]",
+    "flags[13]",
+    "flags[14]",
+    "flags[15]",
+    "flags[16]",
+    "flags[17]",
+    "flags[18]",
+    "flags[19]",
+    "flags[20]",
+    "flags[21]",
+    "flags[22]",
+    "flags[23]",
+    "flags[24]",
+    "flags[25]",
+    "flags[26]",
+    "flags[27]",
+    "flags[28]",
+    "flags[29]",
+    "flags[30]",
+    "flags[31]",
+];
+
+static COMMON_FIELD_NAMES: LazyLock<[Arc<str>; 39]> = LazyLock::new(|| {
+    [
+        "baseline.gate",
+        "stationary",
+        "flag",
+        "direction",
+        "finite",
+        "position[0]",
+        "position[1]",
+        "position[2]",
+        "extra",
+        "tick",
+        "tick.gate",
+        "magnitude",
+        "delta",
+        "use_prediction",
+        "precision_high",
+        "default_region",
+        "region_index",
+        "full_precision",
+        "single",
+        "yaw",
+        "mask",
+        "value_b.selector",
+        "index_a",
+        "index_b",
+        "value_a",
+        "has_b",
+        "value_b",
+        "has_a",
+        "value_a.selector",
+        "counter",
+        "pitch",
+        "shield",
+        "block64",
+        "regeneration",
+        "value",
+        "tag",
+        "index",
+        "state",
+        "count",
+    ]
+    .map(Arc::from)
+});
+
+thread_local! {
+    static INTERNED_NAMES: RefCell<rustc_hash::FxHashMap<String, Arc<str>>> =
+        RefCell::new(rustc_hash::FxHashMap::default());
+}
+
+pub(crate) fn clear_interned_names() {
+    INTERNED_NAMES.with(|names| names.borrow_mut().clear());
+}
+
+pub(crate) fn intern_name(name: &str) -> Arc<str> {
+    let common = match name {
+        "baseline.gate" => Some(0),
+        "stationary" => Some(1),
+        "flag" => Some(2),
+        "direction" => Some(3),
+        "finite" => Some(4),
+        "position[0]" => Some(5),
+        "position[1]" => Some(6),
+        "position[2]" => Some(7),
+        "extra" => Some(8),
+        "tick" => Some(9),
+        "tick.gate" => Some(10),
+        "magnitude" => Some(11),
+        "delta" => Some(12),
+        "use_prediction" => Some(13),
+        "precision_high" => Some(14),
+        "default_region" => Some(15),
+        "region_index" => Some(16),
+        "full_precision" => Some(17),
+        "single" => Some(18),
+        "yaw" => Some(19),
+        "mask" => Some(20),
+        "value_b.selector" => Some(21),
+        "index_a" => Some(22),
+        "index_b" => Some(23),
+        "value_a" => Some(24),
+        "has_b" => Some(25),
+        "value_b" => Some(26),
+        "has_a" => Some(27),
+        "value_a.selector" => Some(28),
+        "counter" => Some(29),
+        "pitch" => Some(30),
+        "shield" => Some(31),
+        "block64" => Some(32),
+        "regeneration" => Some(33),
+        "value" => Some(34),
+        "tag" => Some(35),
+        "index" => Some(36),
+        "state" => Some(37),
+        "count" => Some(38),
+        _ => None,
+    };
+    if let Some(index) = common {
+        return COMMON_FIELD_NAMES[index].clone();
+    }
+    INTERNED_NAMES.with(|names| {
+        let mut names = names.borrow_mut();
+        if let Some(interned) = names.get(name) {
+            return interned.clone();
+        }
+        let interned: Arc<str> = Arc::from(name);
+        names.insert(name.to_owned(), interned.clone());
+        interned
+    })
+}
+
+fn gate_name<'a>(name: &str, buffer: &'a mut [u8; 128]) -> Option<&'a str> {
+    let end = name.len().checked_add(5)?;
+    if end > buffer.len() {
+        return None;
+    }
+    buffer[..name.len()].copy_from_slice(name.as_bytes());
+    buffer[name.len()..end].copy_from_slice(b".gate");
+    std::str::from_utf8(&buffer[..end]).ok()
+}
+
+fn indexed_name<'a>(prefix: &str, index: usize, buffer: &'a mut [u8; 128]) -> Option<&'a str> {
+    let mut digits = [0u8; 20];
+    let mut number = index;
+    let mut count = 0;
+    loop {
+        digits[count] = b'0' + (number % 10) as u8;
+        count += 1;
+        number /= 10;
+        if number == 0 {
+            break;
+        }
+    }
+    let end = prefix.len().checked_add(count + 2)?;
+    if end > buffer.len() {
+        return None;
+    }
+    buffer[..prefix.len()].copy_from_slice(prefix.as_bytes());
+    buffer[prefix.len()] = b'[';
+    for position in 0..count {
+        buffer[prefix.len() + 1 + position] = digits[count - 1 - position];
+    }
+    buffer[end - 1] = b']';
+    std::str::from_utf8(&buffer[..end]).ok()
+}
 #[derive(Clone, Copy)]
 pub(crate) struct ComponentWidths<'a> {
     pub movement: &'a MovementProfile,
@@ -26,7 +209,7 @@ pub(crate) struct ComponentReader<'a> {
     pub(crate) context_error: Option<&'static str>,
     pub(crate) width_error: Option<&'static str>,
 
-    pub(crate) live_grammar: Option<DecodeGrammar>,
+    pub(crate) live_grammar: Option<&'a DecodeGrammar>,
     pub(crate) movement_slot: Option<u32>,
     pub(crate) references: Vec<UnitReference>,
     pub(crate) diagnostics: FilmReadDiagnostics,
@@ -93,8 +276,17 @@ impl ComponentReader<'_> {
         }
         let count = self.r("mask.count", 3)?;
         let mut mask = 0;
+        const MASK_INDEX_NAMES: [&str; 7] = [
+            "mask.index[0]",
+            "mask.index[1]",
+            "mask.index[2]",
+            "mask.index[3]",
+            "mask.index[4]",
+            "mask.index[5]",
+            "mask.index[6]",
+        ];
         for i in 0..count {
-            mask |= 1 << self.r(&format!("mask.index[{i}]"), 6)?;
+            mask |= 1 << self.r(MASK_INDEX_NAMES[i as usize], 6)?;
         }
         Some(mask)
     }
@@ -126,9 +318,8 @@ impl ComponentReader<'_> {
         self.cursor.skip_signed(i64::try_from(width).ok()?);
         let raw = bits.low_u64();
         self.fields.push(ComponentField {
-            name: name.into(),
+            name: intern_name(name),
             bit: usize::try_from(bit).ok()?,
-            width: usize::try_from(width).ok()?,
             raw: bits,
         });
         Some(raw)
@@ -145,15 +336,32 @@ impl ComponentReader<'_> {
         width: usize,
         polarity: bool,
     ) -> Option<Option<u64>> {
-        if self.bit(&format!("{name}.gate"))? == polarity {
+        let mut buffer = [0u8; 128];
+        let present = if let Some(gate) = gate_name(name, &mut buffer) {
+            self.bit(gate)?
+        } else {
+            self.bit(&format!("{name}.gate"))?
+        };
+        if present == polarity {
             Some(Some(self.r(name, width)?))
         } else {
             Some(None)
         }
     }
     pub(crate) fn words(&mut self, name: &str, count: usize, width: usize) -> Option<()> {
+        if name == "flags" && count <= FLAG_NAMES.len() {
+            for flag in FLAG_NAMES.iter().take(count) {
+                self.r(flag, width)?;
+            }
+            return Some(());
+        }
+        let mut buffer = [0u8; 128];
         for i in 0..count {
-            self.r(&format!("{name}[{i}]"), width)?;
+            if let Some(indexed) = indexed_name(name, i, &mut buffer) {
+                self.r(indexed, width)?;
+            } else {
+                self.r(&format!("{name}[{i}]"), width)?;
+            }
         }
         Some(())
     }
@@ -228,7 +436,12 @@ impl ComponentReader<'_> {
         emit_absent: bool,
     ) -> Option<bool> {
         let start_bit = self.cursor.position;
-        let present = self.bit(&format!("{name}.gate"))?;
+        let mut buffer = [0u8; 128];
+        let present = if let Some(gate) = gate_name(name, &mut buffer) {
+            self.bit(gate)?
+        } else {
+            self.bit(&format!("{name}.gate"))?
+        };
         let value = if present { self.r(name, 32)? as u32 } else { 0 };
         if present || emit_absent {
             self.publish_reference(UnitReference {
@@ -276,5 +489,41 @@ impl ComponentReader<'_> {
             self.gate(&format!("axis[{i}].far"), 12, true)?;
         }
         Some(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{COMMON_FIELD_NAMES, gate_name, indexed_name, intern_name};
+    use std::sync::Arc;
+
+    #[test]
+    fn stack_gate_names_preserve_utf8_and_fall_back_when_long() {
+        let mut buffer = [0u8; 128];
+        assert_eq!(gate_name("λ.flag", &mut buffer), Some("λ.flag.gate"));
+        assert_eq!(
+            gate_name(&"x".repeat(123), &mut buffer).map(str::len),
+            Some(128)
+        );
+        assert_eq!(gate_name(&"x".repeat(124), &mut buffer), None);
+    }
+
+    #[test]
+    fn indexed_names_preserve_prefix_and_decimal_index() {
+        let mut buffer = [0u8; 128];
+        assert_eq!(indexed_name("λ.flags", 0, &mut buffer), Some("λ.flags[0]"));
+        let expected = format!("flags[{}]", usize::MAX);
+        assert_eq!(
+            indexed_name("flags", usize::MAX, &mut buffer),
+            Some(expected.as_str())
+        );
+        assert_eq!(indexed_name(&"x".repeat(128), 1, &mut buffer), None);
+    }
+
+    #[test]
+    fn common_name_slots_match_their_lookup_keys() {
+        for name in COMMON_FIELD_NAMES.iter() {
+            assert!(Arc::ptr_eq(&intern_name(name), name));
+        }
     }
 }

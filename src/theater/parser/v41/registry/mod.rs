@@ -100,12 +100,13 @@ pub(crate) fn parse_registry_chunk(data: &[u8]) -> Result<FilmRegistryRead, Film
             let start = 8 + index * REGISTRY_BLOCK_SIZE;
             let mut components = Vec::new();
             for (slot_index, slot) in block.as_chunks::<REGISTRY_SLOT_SIZE>().0.iter().enumerate() {
-                if registry_slot_name(slot).is_none() {
+                let Some(name) = registry_slot_name(slot) else {
                     break;
-                }
+                };
                 let slot_start = start + slot_index * REGISTRY_SLOT_SIZE;
                 components.push(RegistryComponent {
                     name_bytes: slot[..256].to_vec(),
+                    name,
                     precision_level: u32::from_le_bytes(slot[256..260].try_into().unwrap()),
                     source: ByteRange {
                         start: slot_start,

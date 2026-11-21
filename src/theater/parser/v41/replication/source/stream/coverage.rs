@@ -16,11 +16,11 @@ fn signed(start: i64, end: i64) -> SourceRegion {
         SourceRegionKind::Fields,
     )
 }
-fn fields(out: &mut Vec<SourceRegion>, fields: &[ComponentField]) {
-    out.extend(fields.iter().map(|field| {
+fn fields<'a>(out: &mut Vec<SourceRegion>, fields: impl IntoIterator<Item = &'a ComponentField>) {
+    out.extend(fields.into_iter().map(|field| {
         region(
             field.bit,
-            field.bit.saturating_add(field.width),
+            field.bit.saturating_add(field.raw.bit_len),
             SourceRegionKind::Fields,
         )
     }));
@@ -77,10 +77,10 @@ pub(super) fn regions(body: &ReplicationStreamPacketBody) -> Vec<SourceRegion> {
                 }
                 for record in &frame.records {
                     header(&mut out, &record.header);
-                    fields(&mut out, &record.fields);
+                    fields(&mut out, record.record_scope_fields());
                     defaults(&mut out, record.default_state.as_ref());
                     for component in &record.components {
-                        fields(&mut out, &component.fields);
+                        fields(&mut out, &record.fields[component.field_range.clone()]);
                     }
                 }
                 if let Some(

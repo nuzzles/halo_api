@@ -5,16 +5,15 @@ use crate::theater::parser::v41::reference::diagnostics::WidthPurpose;
 use crate::theater::parser::v41::registry::source::FilmRegistry;
 use crate::theater::parser::v41::replication::components::cursor::ComponentCursor as Cursor;
 use crate::theater::parser::v41::replication::components::defaults;
-use crate::theater::parser::v41::replication::components::fields::take_component_fields;
 use crate::theater::parser::v41::replication::components::m4b::required_runtime_field;
 use crate::theater::parser::v41::replication::components::reader::{
     ComponentReader, ComponentWidths,
 };
 use crate::theater::parser::v41::replication::components::widths::{read_component, signed_skip};
-use crate::theater::parser::v41::replication::source::RecordKind;
 use crate::theater::parser::v41::replication::source::stream::models::entity_records::{
     EntityComponentRead, EntityRecord, EntityViewStop,
 };
+use crate::theater::parser::v41::replication::source::{RecordHeader, RecordKind};
 
 /// Schema selected by the enclosing chronological traversal for this record.
 #[derive(Clone, Copy)]
@@ -31,17 +30,19 @@ pub(crate) struct RecordReadContext<'a> {
 
 pub(crate) fn decode_entity_record(
     data: &[u8],
-    bit: impl TryInto<i64>,
+    header: RecordHeader,
     registry: &FilmRegistry,
     encoding: &RecordLayout,
     binding: Option<RecordBinding>,
     simulation_complete: bool,
     slots: RecordReadContext<'_>,
 ) -> Option<EntityRecord> {
-    let bit = bit.try_into().ok()?;
     if !encoding.valid() {
         return None;
     }
+    // The frame reader already consumed the optional prefix and validated
+    // this header against the source before passing its body layout here.
+    debug_assert!(!encoding.extra_fields);
     let mut r = ComponentReader {
         category_references: encoding.category_references,
         snapshot: false,
@@ -54,15 +55,16 @@ pub(crate) fn decode_entity_record(
         width_error: None,
         context_error: None,
 
-        live_grammar: slots.context.as_ref().map(|c| c.grammar.clone()),
+        live_grammar: slots.context.map(|c| &c.grammar),
         movement_slot: slots.movement,
         diagnostics: Default::default(),
-        cursor: Cursor::signed(data, bit, None),
-        fields: vec![],
+        cursor: Cursor::signed(data, header.end_bit, None),
+        fields: Vec::with_capacity(32),
         position_encoding: encoding.position.as_ref(),
     };
     read_entity_record(
         &mut r,
+        header,
         data,
         registry,
         encoding,
@@ -72,37 +74,13 @@ pub(crate) fn decode_entity_record(
 }
 fn read_entity_record(
     r: &mut ComponentReader<'_>,
+    header: RecordHeader,
     data: &[u8],
     registry: &FilmRegistry,
     encoding: &RecordLayout,
     binding: Option<RecordBinding>,
     simulation_complete: bool,
 ) -> Option<EntityRecord> {
-    r.fields.clear();
-    if encoding.extra_fields {
-        // Reference skips this prefix without reading it. Retain source fields
-        // where addressable, but do not turn a negative skip into a read panic.
-        if r.cursor.position < 0 {
-            signed_skip(
-                r,
-                "record.prefix",
-                32,
-                false,
-                Some(WidthPurpose::RecordPrefix),
-                ("record.prefix", "record.prefix"),
-            )?;
-        } else {
-            r.r("record.prefix", 32)?;
-        }
-    }
-    let width = encoding
-        .reference_id_low_bits
-        .or_else(|| i64::try_from(encoding.ids.low_bits).ok())?;
-    if !r.cursor.fits_source(width) {
-        return None;
-    }
-    let header = r.cursor.reference_header(width, encoding.ids.base);
-    r.cursor.position = header.end_bit;
     let mut rec = EntityRecord {
         header,
         archetype: None,
@@ -135,17 +113,6 @@ fn read_entity_record(
         true
     });
     rec.fields = std::mem::take(&mut r.fields);
-    rec.fields.retain(|field| {
-        !rec.components.iter().any(|component| {
-            let Ok(start) = usize::try_from(component.start_bit) else {
-                return false;
-            };
-            let Ok(end) = usize::try_from(component.end_bit) else {
-                return false;
-            };
-            field.bit >= start && field.bit < end
-        })
-    });
     Some(rec)
 }
 
@@ -260,15 +227,11 @@ fn record_body(
     };
     // The reference registry loop ignores mask bits beyond its component list.
     let component_count = arch.components.len();
-    let source_bits = r.cursor.source_bits();
-    for index in 0..component_count {
-        if mask.unwrap_or(0) & (1 << (index & 63)) == 0 {
-            continue;
-        }
+    for index in ComponentMaskIndices::new(mask.unwrap_or(0), component_count) {
         let Some(registry_component) = arch.components.get(index) else {
             return Some(EntityViewStop::InvalidComponent { index });
         };
-        let name = registry_component.name()?;
+        let name = registry_component.name.as_str();
         let start_bit = r.cursor.position;
         let field_start = r.fields.len();
         let status = read_component(
@@ -279,20 +242,14 @@ fn record_body(
             Some(&encoding.component_widths),
             (simulation_complete, None),
         );
-        let fields = take_component_fields(
-            &mut r.fields,
-            field_start,
-            start_bit,
-            r.cursor.position,
-            source_bits,
-        );
+        let field_range = field_start..r.fields.len();
         rec.components.push(EntityComponentRead {
             index,
-            name: name.to_owned(),
+            name: crate::theater::parser::v41::replication::components::reader::intern_name(name),
             start_bit,
             end_bit: r.cursor.position,
             status: status.into(),
-            fields,
+            field_range,
         });
         if r.reference_configuration_unavailable() {
             rec.components.last_mut().unwrap().status =
@@ -337,18 +294,15 @@ fn record_body(
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::ContextUnavailable;
             return Some(EntityViewStop::MissingCorruptionCheckContext);
         };
-        let guard_start = r.fields.len();
         let check = if check {
             r.gate("component.corruption_check", 32, true)
         } else {
             Some(())
         };
         let end_bit = r.cursor.position;
-        let guard_fields =
-            take_component_fields(&mut r.fields, guard_start, start_bit, end_bit, source_bits);
         let component = rec.components.last_mut().unwrap();
         component.end_bit = end_bit;
-        component.fields.extend(guard_fields);
+        component.field_range.end = r.fields.len();
         if check.is_none() {
             component.status =
                 crate::theater::parser::v41::replication::source::ComponentReadStatus::Truncated;
@@ -369,6 +323,48 @@ fn record_body(
 /// These v41 creation forms have no initial-component section or gate.
 fn creation_has_component_gate(archetype: u32) -> bool {
     !matches!(archetype, 7 | 13 | 14 | 20 | 23 | 28 | 29 | 46 | 47 | 49)
+}
+
+/// The source mask is 64 bits; schemas longer than that reuse those bits.
+struct ComponentMaskIndices {
+    mask: u64,
+    remaining: u64,
+    base: usize,
+    count: usize,
+}
+
+impl ComponentMaskIndices {
+    fn new(mask: u64, count: usize) -> Self {
+        Self {
+            mask,
+            remaining: mask,
+            base: 0,
+            count,
+        }
+    }
+}
+
+impl Iterator for ComponentMaskIndices {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.base >= self.count {
+                return None;
+            }
+            if self.remaining == 0 {
+                self.base = self.base.saturating_add(64);
+                self.remaining = self.mask;
+                continue;
+            }
+            let index = self.base + self.remaining.trailing_zeros() as usize;
+            self.remaining &= self.remaining - 1;
+            if index >= self.count {
+                return None;
+            }
+            return Some(index);
+        }
+    }
 }
 
 fn read_reference_new_tail(r: &mut ComponentReader<'_>, width: i64) -> Option<()> {
@@ -407,4 +403,24 @@ fn read_new_raw_bits(r: &mut ComponentReader<'_>, name: &str, bits: usize) -> Op
         r.r(&format!("{name}.tail"), bits % 64)?;
     }
     Some(())
+}
+
+#[cfg(test)]
+mod mask_tests {
+    use super::ComponentMaskIndices;
+
+    #[test]
+    fn set_bits_match_the_recorded_wrapping_mask() {
+        for count in [0, 1, 6, 63, 64, 65, 70, 129] {
+            for mask in [0, 1, 0b100010, 1 << 63, u64::MAX] {
+                let expected = (0..count)
+                    .filter(|&index| mask & (1 << (index & 63)) != 0)
+                    .collect::<Vec<_>>();
+                assert_eq!(
+                    ComponentMaskIndices::new(mask, count).collect::<Vec<_>>(),
+                    expected
+                );
+            }
+        }
+    }
 }
