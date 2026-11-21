@@ -146,7 +146,10 @@ fn recorded_players_and_settings() {
         assert_eq!(weapons[0], StartingWeapon::Real(WeaponTagId(1220648237)));
         assert_eq!(weapons[1], StartingWeapon::Real(WeaponTagId(4094171407)));
         assert_eq!(weapons[2], StartingWeapon::Unknown);
-        assert_eq!(settings.starting_loadouts[0].equipment, None);
+        assert_eq!(
+            settings.starting_loadouts[0].equipment,
+            halo_api::theater::film::StartingEquipment::None
+        );
         assert_eq!(settings.options.len(), 10);
         assert_eq!(
             settings.options[0].value,
@@ -335,9 +338,14 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
             "{field}"
         );
     }
-    let mut loadout = settings["starting_loadouts"][0].clone();
-    loadout.as_object_mut().unwrap().remove("weapons");
-    assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
+    for field in ["weapons", "equipment"] {
+        let mut loadout = settings["starting_loadouts"][0].clone();
+        loadout.as_object_mut().unwrap().remove(field);
+        assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
+        let mut loadout = settings["starting_loadouts"][0].clone();
+        loadout[field] = serde_json::Value::Null;
+        assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
+    }
     let mut registry = serde_json::to_value(&film.registry).unwrap();
     registry.as_object_mut().unwrap().remove("settings");
     assert!(serde_json::from_value::<Registry>(registry).is_err());

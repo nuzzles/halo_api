@@ -60,9 +60,11 @@ recorded match settings; `film.registry.players` is a `Vec<InitialPlayer>` conta
 initial 32-slot player table, including vacant slots. An unreadable table returns
 `ParseError::IncompleteRegistryPlayers`. Core settings and their lists are required; missing or
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
-such as score/time limits and equipment remain `None`, rather than acquiring game defaults.
+such as score/time limits remain `None`, rather than acquiring game defaults.
 
 Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
+Starting equipment is `StartingEquipment::Real(EquipmentTagId)` or `StartingEquipment::None`
+when no tag is recorded. Unfamiliar equipment tags remain `Real`; malformed records fail parsing.
 `Unknown` preserves a recorded slot with no tag or enabled random selection; it does not
 resolve the runtime's default weapon. Match options have required names and typed
 values, with an explicit `MatchOptionValue::Unknown` for unfamiliar discriminators.

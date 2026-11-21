@@ -1,5 +1,5 @@
 //! Recorded match settings. Absent optional fields stay absent; no game defaults are applied.
-use super::{TagId, WeaponTagId};
+use super::{EquipmentTagId, WeaponTagId};
 use serde::{Deserialize, Serialize};
 
 /// Core metadata must decode successfully; genuinely omitted variant options stay optional.
@@ -25,8 +25,15 @@ pub struct MatchSettings {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StartingLoadout {
     pub weapons: Vec<StartingWeapon>,
-    /// No equipment tag was recorded when absent; no game default is inferred.
-    pub equipment: Option<TagId>,
+    pub equipment: StartingEquipment,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StartingEquipment {
+    /// A recorded equipment asset tag, even if it is not in the item catalogue.
+    Real(EquipmentTagId),
+    /// No equipment tag was recorded; no game default is inferred.
+    None,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

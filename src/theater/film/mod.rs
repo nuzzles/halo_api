@@ -141,8 +141,8 @@ pub mod summary;
 pub use crate::theater::parser::chunk::{ChunkKind, InflatedFilmChunk};
 pub use crate::theater::parser::compression::InflateError;
 pub use ids::{
-    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EventPlayerSlot, KeyframeId,
-    MapAssetId, MapVersionId, TagId, WeaponId, WeaponTagId, WeaponVariantId, Xuid,
+    ComponentSlot, ControlPlayerIndex, EntityId, EntitySchemaId, EquipmentTagId, EventPlayerSlot,
+    KeyframeId, MapAssetId, MapVersionId, TagId, WeaponId, WeaponTagId, WeaponVariantId, Xuid,
 };
 pub use registry::{
     EntitySchema, EntitySchemaKind, Registry, RegistryComponentDefinition, RegistryGameMode,

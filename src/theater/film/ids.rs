@@ -211,6 +211,23 @@ impl From<WeaponTagId> for TagId {
     }
 }
 
+/// A 32-bit equipment asset tag, usable with the item catalogue through `TagId`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct EquipmentTagId(pub u32);
+
+impl EquipmentTagId {
+    pub const fn raw(self) -> u32 {
+        self.0
+    }
+}
+
+impl From<EquipmentTagId> for TagId {
+    fn from(value: EquipmentTagId) -> Self {
+        Self(value.raw())
+    }
+}
+
 /// A 32-bit weapon variant string hash, distinct from an asset tag or weapon ID.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -268,6 +285,20 @@ mod tests {
         }
         assert!(serde_json::from_str::<WeaponTagId>("4294967296").is_err());
         assert!(serde_json::from_str::<WeaponTagId>("-1").is_err());
+    }
+
+    #[test]
+    fn equipment_tags_serialize_as_u32_and_convert_to_catalog_tags() {
+        for raw in [0, 42, u32::MAX] {
+            let id = EquipmentTagId(raw);
+            assert_eq!(id.raw(), raw);
+            assert_eq!(TagId::from(id), TagId(raw));
+            let json = serde_json::to_string(&id).unwrap();
+            assert_eq!(json, raw.to_string());
+            assert_eq!(serde_json::from_str::<EquipmentTagId>(&json).unwrap(), id);
+        }
+        assert!(serde_json::from_str::<EquipmentTagId>("4294967296").is_err());
+        assert!(serde_json::from_str::<EquipmentTagId>("-1").is_err());
     }
 
     #[test]

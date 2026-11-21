@@ -3,8 +3,8 @@
 //! independently projected through this parser's Compact Binary tree.
 use super::source::*;
 use crate::theater::film::{
-    MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingLoadout, StartingWeapon,
-    TagId, WeaponTagId,
+    EquipmentTagId, MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingEquipment,
+    StartingLoadout, StartingWeapon, TagId, WeaponTagId,
 };
 
 fn field(v: &BondValue, id: u16) -> Option<&BondValue> {
@@ -268,7 +268,10 @@ fn loadout(l: &BondValue) -> Result<StartingLoadout, ParseError> {
             .iter()
             .map(weapon)
             .collect::<Result<_, _>>()?,
-        equipment: optional_tag(l, &[2, 0, 0], "loadout.equipment")?,
+        equipment: optional_tag(l, &[2, 0, 0], "loadout.equipment")?
+            .map_or(StartingEquipment::None, |tag| {
+                StartingEquipment::Real(EquipmentTagId(tag.raw()))
+            }),
     })
 }
 
@@ -405,6 +408,7 @@ mod tests {
         let mut counts = BTreeMap::new();
         let mut profiles = BTreeMap::<String, usize>::new();
         let mut weapons = BTreeMap::<String, usize>::new();
+        let mut equipment = BTreeMap::<String, usize>::new();
         for manifest in &manifests {
             let json: serde_json::Value =
                 serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
@@ -453,6 +457,7 @@ mod tests {
             count(&settings, "settings", &mut counts);
             if let Some(loadouts) = settings["starting_loadouts"].as_array() {
                 for l in loadouts {
+                    *equipment.entry(l["equipment"].to_string()).or_default() += 1;
                     if let Some(entries) = l["weapons"].as_array() {
                         for w in entries {
                             *weapons.entry(w.to_string()).or_default() += 1;
@@ -467,6 +472,7 @@ mod tests {
             eprintln!("{path}: {missing}/{total} absent");
         }
         eprintln!("starting weapons: {weapons:?}");
+        eprintln!("starting equipment: {equipment:?}");
     }
 
     fn read(data: &[u8]) -> BondValue {
@@ -540,6 +546,53 @@ mod tests {
     }
 
     #[test]
+    fn starting_equipment_preserves_tags_and_rejects_malformed_records() {
+        for tag in [0, 42, 255] {
+            let loadout = loadout(&read(&[11, 43, 42, 74, 6, 10, 3, 3, tag, 0, 0, 0])).unwrap();
+            assert_eq!(
+                loadout.equipment,
+                StartingEquipment::Real(EquipmentTagId(u32::from(tag)))
+            );
+            let json = serde_json::to_value(&loadout.equipment).unwrap();
+            assert_eq!(json, serde_json::json!({"Real": tag}));
+            assert_eq!(
+                serde_json::from_value::<StartingEquipment>(json).unwrap(),
+                loadout.equipment
+            );
+        }
+        for wire in [&[3, 43, 42, 0][..], &[6, 43, 42, 74, 1, 0, 0][..]] {
+            assert_eq!(
+                loadout(&read(wire)).unwrap().equipment,
+                StartingEquipment::None
+            );
+        }
+        assert_eq!(
+            serde_json::to_value(StartingEquipment::None).unwrap(),
+            serde_json::json!("None")
+        );
+        assert_eq!(
+            serde_json::from_str::<StartingEquipment>("\"None\"").unwrap(),
+            StartingEquipment::None
+        );
+        for json in ["null", "\"Unknown\"", "42", "{\"Real\":null}"] {
+            assert!(serde_json::from_str::<StartingEquipment>(json).is_err());
+        }
+        for wire in [
+            &[5, 43, 42, 67, 42, 0][..],
+            &[
+                19, 43, 42, 74, 6, 10, 3, 3, 42, 0, 0, 74, 6, 10, 3, 3, 42, 0, 0, 0,
+            ][..],
+        ] {
+            assert!(matches!(
+                loadout(&read(wire)),
+                Err(ParseError::InvalidMatchSettings {
+                    field: "loadout.equipment"
+                })
+            ));
+        }
+    }
+
+    #[test]
     fn loadouts_and_options_require_complete_fields_without_inventing_defaults() {
         let empty = read(&[1, 0]);
         assert!(matches!(
@@ -553,7 +606,10 @@ mod tests {
         // An explicitly empty weapon list is valid, unlike a missing list.
         let empty_loadout = read(&[3, 43, 42, 0]);
         assert!(loadout(&empty_loadout).unwrap().weapons.is_empty());
-        assert_eq!(loadout(&empty_loadout).unwrap().equipment, None);
+        assert_eq!(
+            loadout(&empty_loadout).unwrap().equipment,
+            StartingEquipment::None
+        );
         assert_eq!(
             weapon(&read(&[3, 66, 1, 0])).unwrap(),
             StartingWeapon::Random
