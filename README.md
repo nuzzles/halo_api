@@ -53,6 +53,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Alternatives
+
+These projects serve different parts of Halo Infinite Theater replay work:
+
+- [libfilmshell](https://github.com/OpenSpartan/libfilmshell) is a Rust library for extracting data
+  from Theater films.
+- [halo-infinite-film-decoder](https://github.com/JGtm/halo-infinite-film-decoder) turns film chunks
+  into a 2D replay document with players, positions, kills, weapons, and objectives; it does not
+  download, store, or render films.
+- [installation-08's infinite-theater-3d](https://github.com/llampwall/installation-08/tree/main/cmd/infinite-theater-3d)
+  is a 3D Theater replay viewer.
+
 ## MSRV
 
 This crate has a [Minimum Supported Rust Version (MSRV)][MSRV] of 1.96.
