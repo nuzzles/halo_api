@@ -218,7 +218,7 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
             .and_then(|f| f.raw.as_ref())
             .and_then(|r| r.bytes.as_slice().try_into().ok())
             .map(u32::from_le_bytes),
-        "start_time_unix_seconds",
+        "recording_start_time",
     )?;
     let options = required(
         identity
@@ -244,7 +244,10 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
     let options = required(path(v, &[3, 9, 0]).and_then(sequence), "options")?;
     Ok(MatchSettings {
         build,
-        start_time_unix_seconds,
+        recording_start_time: required(
+            chrono::DateTime::from_timestamp(i64::from(start_time_unix_seconds), 0),
+            "recording_start_time",
+        )?,
         name: required(text(&block, number(v, &[3, 0, 1, 0, 0, 1, 0])), "name")?,
         description: required(
             text(&block, number(v, &[3, 0, 1, 0, 1, 1, 0])),
@@ -320,7 +323,7 @@ mod tests {
     use crate::theater::parser::v41::registry::bootstrap::bond::read_bounded;
 
     #[test]
-    fn missing_required_settings_fail_projection() {
+    fn required_settings_and_recording_datetime_decode_without_defaults() {
         use std::io::Read;
         let compressed = include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -330,7 +333,7 @@ mod tests {
         flate2::read::ZlibDecoder::new(compressed.as_slice())
             .read_to_end(&mut data)
             .unwrap();
-        for field in ["start_time_unix_seconds", "variant"] {
+        for field in ["recording_start_time", "variant"] {
             let mut body = super::super::parse_registry_chunk(&data).unwrap();
             let identity = body
                 .bootstrap_header
@@ -339,7 +342,7 @@ mod tests {
                 .identification
                 .as_mut()
                 .unwrap();
-            if field == "start_time_unix_seconds" {
+            if field == "recording_start_time" {
                 identity
                     .fields
                     .retain(|f| f.kind != BootstrapIdentificationFieldKind::StartTime);
@@ -356,6 +359,41 @@ mod tests {
             }
             assert!(
                 matches!(project(&body), Err(ParseError::InvalidMatchSettings { field: failed }) if failed == field)
+            );
+        }
+        for (seconds, expected) in [
+            (0_u32, "1970-01-01T00:00:00Z"),
+            (1_700_000_000, "2023-11-14T22:13:20Z"),
+            (u32::MAX, "2106-02-07T06:28:15Z"),
+        ] {
+            let mut body = super::super::parse_registry_chunk(&data).unwrap();
+            let raw = body
+                .bootstrap_header
+                .as_mut()
+                .unwrap()
+                .identification
+                .as_mut()
+                .unwrap()
+                .fields
+                .iter_mut()
+                .find(|field| field.kind == BootstrapIdentificationFieldKind::StartTime)
+                .unwrap()
+                .raw
+                .as_mut()
+                .unwrap();
+            raw.bytes.copy_from_slice(&seconds.to_le_bytes());
+            let settings = project(&body).unwrap();
+            assert_eq!(
+                settings.recording_start_time.timestamp(),
+                i64::from(seconds)
+            );
+            assert_eq!(settings.recording_start_time.timestamp_subsec_nanos(), 0);
+            let json = serde_json::to_value(&settings).unwrap();
+            assert_eq!(json["recording_start_time"], expected);
+            assert!(json.get("start_time_unix_seconds").is_none());
+            assert_eq!(
+                serde_json::from_value::<MatchSettings>(json).unwrap(),
+                settings
             );
         }
     }

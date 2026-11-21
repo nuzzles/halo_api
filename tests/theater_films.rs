@@ -301,9 +301,17 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     use halo_api::theater::film::{MatchOption, MatchSettings, Registry, StartingLoadout};
     let film = Film::parse(chunks("bazaar_idle")).unwrap();
     let settings = serde_json::to_value(&film.registry.settings).unwrap();
+    for invalid in [
+        serde_json::json!(1700000000),
+        serde_json::json!("not a timestamp"),
+    ] {
+        let mut settings = settings.clone();
+        settings["recording_start_time"] = invalid;
+        assert!(serde_json::from_value::<MatchSettings>(settings).is_err());
+    }
     for field in [
         "build",
-        "start_time_unix_seconds",
+        "recording_start_time",
         "name",
         "description",
         "engine_type",

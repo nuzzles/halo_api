@@ -1,12 +1,14 @@
 //! Recorded match settings. Absent optional fields stay absent; no game defaults are applied.
 use super::{EquipmentTagId, WeaponTagId};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// Core metadata must decode successfully; genuinely omitted variant options stay optional.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchSettings {
     pub build: String,
-    pub start_time_unix_seconds: u32,
+    /// Recorder's wall-clock start time in UTC, not necessarily the exact match start.
+    pub recording_start_time: DateTime<Utc>,
     /// First language of the recorded variant string table.
     pub name: String,
     pub description: String,

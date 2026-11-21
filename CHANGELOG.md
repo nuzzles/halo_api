@@ -25,6 +25,8 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- Expose the film recorder timestamp as `recording_start_time: chrono::DateTime<Utc>`
+  instead of raw Unix seconds, with UTC RFC 3339 serialization on native and WASM.
 - Replace optional starting equipment tags with `StartingEquipment::Real(EquipmentTagId)`
   or `StartingEquipment::None` (no recorded tag), without guessing defaults or item identities.
 - Decode projectile event positions to world-space `[f64; 3]` using verified default-box

@@ -61,6 +61,8 @@ initial 32-slot player table, including vacant slots. An unreadable table return
 `ParseError::IncompleteRegistryPlayers`. Core settings and their lists are required; missing or
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
 such as score/time limits remain `None`, rather than acquiring game defaults.
+`recording_start_time` is a `chrono::DateTime<Utc>` decoded from the recorder's timestamp
+(not necessarily the exact match start), serialized as RFC 3339 on native and WASM.
 
 Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
 Starting equipment is `StartingEquipment::Real(EquipmentTagId)` or `StartingEquipment::None`
