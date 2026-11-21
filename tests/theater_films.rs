@@ -300,6 +300,34 @@ fn parse_rejects_an_unreadable_initial_player_layout() {
 fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     use halo_api::theater::film::{MatchOption, MatchSettings, Registry, StartingLoadout};
     let film = Film::parse(chunks("bazaar_idle")).unwrap();
+    use halo_api::theater::film::{KnownMatchOption, MatchOptionName, MatchOptionValue};
+    let options = &film.registry.settings.options;
+    let score = options
+        .iter()
+        .find(|o| o.name == MatchOptionName::Known(KnownMatchOption::SlayerScorePerKill))
+        .unwrap();
+    assert_eq!(score.name.hash().raw(), 0x185f4770);
+    assert_eq!(score.value, MatchOptionValue::NumberBits(1.0_f32.to_bits()));
+    let unknown = options
+        .iter()
+        .find(|o| {
+            o.name
+                == MatchOptionName::Unknown {
+                    name_hash: 0x8d9d0ac5,
+                }
+        })
+        .unwrap();
+    assert_eq!(
+        unknown.value,
+        MatchOptionValue::NumberBits(0.6_f32.to_bits())
+    );
+    let json = serde_json::to_value(score).unwrap();
+    assert_eq!(
+        json["name"],
+        serde_json::json!({"Known": "SlayerOptions_scorePerKill"})
+    );
+    assert!(json.get("name_hash").is_none());
+    assert_eq!(serde_json::from_value::<MatchOption>(json).unwrap(), *score);
     let settings = serde_json::to_value(&film.registry.settings).unwrap();
     assert!(settings.get("last_chance_enabled").is_none());
     assert!(settings.get("last_chance_seconds").is_none());
@@ -343,7 +371,7 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
             "{field}"
         );
     }
-    for field in ["name_hash", "value"] {
+    for field in ["name", "value"] {
         let mut missing = settings["options"][0].clone();
         missing.as_object_mut().unwrap().remove(field);
         assert!(

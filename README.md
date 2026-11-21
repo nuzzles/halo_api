@@ -68,8 +68,12 @@ Starting weapons are `StartingWeapon::{Real(WeaponTagId), Random, Unknown}`.
 Starting equipment is `StartingEquipment::Real(EquipmentTagId)` or `StartingEquipment::None`
 when no tag is recorded. Unfamiliar equipment tags remain `Real`; malformed records fail parsing.
 `Unknown` preserves a recorded slot with no tag or enabled random selection; it does not
-resolve the runtime's default weapon. Match options have required names and typed
-values, with an explicit `MatchOptionValue::Unknown` for unfamiliar discriminators.
+resolve the runtime's default weapon. Match options have required typed names:
+`MatchOptionName::Known(KnownMatchOption)` from the catalogue or
+`MatchOptionName::Unknown { name_hash }`, preserving an unmatched hash. Known names serialize
+using their game script spelling (for example, `SlayerOptions_scorePerKill`). Values remain
+recorded booleans or exact float bits, with `MatchOptionValue::Unknown` for unfamiliar
+discriminators; catalogue defaults are never substituted.
 
 Player appearance is also recorded in timestamped roster packets. Initial player-table
 appearance blocks can be empty even when later roster blocks are populated:

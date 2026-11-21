@@ -133,6 +133,7 @@ pub mod catalog;
 pub mod players;
 pub use players::*;
 pub mod settings;
+pub use catalog::options::KnownMatchOption;
 pub use settings::*;
 mod ids;
 pub mod registry;

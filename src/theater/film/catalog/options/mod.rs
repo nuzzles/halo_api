@@ -3,7 +3,9 @@
 
 mod data;
 use super::Catalog;
-use data::{MODES, OPTION_NAMES};
+use data::MODES;
+pub mod known_match_options;
+pub use known_match_options::KnownMatchOption;
 
 /// A variant option's lowercased-name hash, distinct from asset or service IDs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -52,16 +54,21 @@ pub struct ModeOptions {
 impl Catalog {
     /// Original hash/name entries in hash order. Alias lists are separate.
     pub fn option_names(self) -> impl ExactSizeIterator<Item = (OptionHash, &'static str)> {
-        OPTION_NAMES
+        known_match_options::ALL
             .iter()
-            .map(|&(hash, name)| (OptionHash(hash), name))
+            .map(|option| (option.hash(), option.name()))
     }
 
     pub fn option_name(self, hash: OptionHash) -> Option<&'static str> {
-        OPTION_NAMES
-            .binary_search_by_key(&hash.raw(), |o| o.0)
+        self.match_option(hash).map(KnownMatchOption::name)
+    }
+
+    /// Classify a recorded option hash without applying script defaults.
+    pub fn match_option(self, hash: OptionHash) -> Option<KnownMatchOption> {
+        known_match_options::ALL
+            .binary_search_by_key(&hash.raw(), |option| option.hash().raw())
             .ok()
-            .map(|i| OPTION_NAMES[i].1)
+            .map(|i| known_match_options::ALL[i])
     }
 
     /// Reference scripts only; this does not select a recorded mode or apply defaults.
@@ -98,4 +105,73 @@ pub fn murmur3(data: &[u8]) -> u32 {
     h ^= h >> 13;
     h = h.wrapping_mul(0xc2b2_ae35);
     h ^ (h >> 16)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::theater::film::MatchOptionName;
+
+    #[test]
+    fn known_option_names_are_unique_sorted_and_hash_verified() {
+        let options = known_match_options::ALL;
+        assert_eq!(options.len(), 98);
+        assert!(
+            options
+                .windows(2)
+                .all(|pair| pair[0].hash().raw() < pair[1].hash().raw())
+        );
+        let mut names = std::collections::HashSet::new();
+        for &option in options {
+            assert!(names.insert(option.name()));
+            assert_eq!(OptionHash::from_name(option.name()), option.hash());
+            assert_eq!(Catalog.match_option(option.hash()), Some(option));
+            assert_eq!(Catalog.option_name(option.hash()), Some(option.name()));
+            let classified = MatchOptionName::from(option.hash());
+            assert_eq!(classified, MatchOptionName::Known(option));
+            assert_eq!(classified.hash(), option.hash());
+            assert_eq!(classified.as_str(), Some(option.name()));
+            let json = serde_json::to_value(classified).unwrap();
+            assert_eq!(json, serde_json::json!({"Known": option.name()}));
+            assert_eq!(
+                serde_json::from_value::<MatchOptionName>(json).unwrap(),
+                classified
+            );
+        }
+        assert_eq!(
+            Catalog.option_names().collect::<Vec<_>>(),
+            options
+                .iter()
+                .map(|o| (o.hash(), o.name()))
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn unknown_option_hashes_round_trip_without_defaulting() {
+        for name_hash in [0, 0x8d9d0ac5, u32::MAX] {
+            assert_eq!(Catalog.match_option(OptionHash(name_hash)), None);
+            let name = MatchOptionName::from(OptionHash(name_hash));
+            assert_eq!(name, MatchOptionName::Unknown { name_hash });
+            assert_eq!(name.hash().raw(), name_hash);
+            assert_eq!(name.as_str(), None);
+            let json = serde_json::to_value(name).unwrap();
+            assert_eq!(
+                json,
+                serde_json::json!({"Unknown": {"name_hash": name_hash}})
+            );
+            assert_eq!(
+                serde_json::from_value::<MatchOptionName>(json).unwrap(),
+                name
+            );
+        }
+        for invalid in [
+            serde_json::json!({"Known": "NotAnOption"}),
+            serde_json::json!({"Unknown": {}}),
+            serde_json::json!({"Unknown": {"name_hash": -1}}),
+            serde_json::json!({"Unknown": {"name_hash": 4294967296_u64}}),
+        ] {
+            assert!(serde_json::from_value::<MatchOptionName>(invalid).is_err());
+        }
+    }
 }

@@ -2,6 +2,7 @@
 //! Field paths: installation-08 d731fb7, film-decoder's `film_infos_de_match.go`,
 //! independently projected through this parser's Compact Binary tree.
 use super::source::*;
+use crate::theater::film::catalog::options::OptionHash;
 use crate::theater::film::{
     EquipmentTagId, MatchOption, MatchOptionValue, MatchSettings, ParseError, StartingEquipment,
     StartingLoadout, StartingWeapon, TagId, WeaponTagId,
@@ -315,7 +316,7 @@ fn option(o: &BondValue) -> Result<MatchOption, ParseError> {
         _ => MatchOptionValue::Unknown,
     };
     Ok(MatchOption {
-        name_hash: required(tag(o, &[0, 0]), "option.name_hash")?.0,
+        name: OptionHash(required(tag(o, &[0, 0]), "option.name_hash")?.raw()).into(),
         value,
     })
 }
@@ -451,6 +452,8 @@ mod tests {
         let mut profiles = BTreeMap::<String, usize>::new();
         let mut weapons = BTreeMap::<String, usize>::new();
         let mut equipment = BTreeMap::<String, usize>::new();
+        let mut known_option_names = 0;
+        let mut unknown_option_names = BTreeMap::<u32, usize>::new();
         for manifest in &manifests {
             let json: serde_json::Value =
                 serde_json::from_slice(&std::fs::read(manifest).unwrap()).unwrap();
@@ -495,6 +498,16 @@ mod tests {
                 ))
                 .or_default() += 1;
             assert_eq!(parsed.registry.players.len(), 32);
+            for option in &parsed.registry.settings.options {
+                use crate::theater::film::MatchOptionName;
+                match option.name {
+                    MatchOptionName::Known(_) => known_option_names += 1,
+                    MatchOptionName::Unknown { name_hash } => {
+                        *unknown_option_names.entry(name_hash).or_default() += 1;
+                    }
+                }
+                assert_eq!(MatchOptionName::from(option.name.hash()), option.name);
+            }
             let settings = serde_json::to_value(&parsed.registry.settings).unwrap();
             count(&settings, "settings", &mut counts);
             if let Some(loadouts) = settings["starting_loadouts"].as_array() {
@@ -515,6 +528,9 @@ mod tests {
         }
         eprintln!("starting weapons: {weapons:?}");
         eprintln!("starting equipment: {equipment:?}");
+        eprintln!(
+            "option names: {known_option_names} known, unknown hashes: {unknown_option_names:x?}"
+        );
     }
 
     fn read(data: &[u8]) -> BondValue {
@@ -575,7 +591,10 @@ mod tests {
                 continue;
             };
             let option = decoded.unwrap();
-            assert_eq!(option.name_hash, 42);
+            assert_eq!(
+                option.name,
+                crate::theater::film::MatchOptionName::Unknown { name_hash: 42 }
+            );
             assert_eq!(option.value, expected);
             assert!(serde_json::to_string(&option).is_ok());
             assert!(

@@ -1,5 +1,6 @@
 //! Recorded match settings. Absent optional fields stay absent; no game defaults are applied.
-use super::{EquipmentTagId, WeaponTagId};
+use super::catalog::{Catalog, options::OptionHash};
+use super::{EquipmentTagId, KnownMatchOption, WeaponTagId};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -48,10 +49,45 @@ pub enum StartingWeapon {
     Unknown,
 }
 
+/// A recorded option with a catalogue-classified name; no default value is inferred.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchOption {
-    pub name_hash: u32,
+    pub name: MatchOptionName,
     pub value: MatchOptionValue,
+}
+
+/// A catalogued option name or the exact unrecognized hash recorded in the film.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum MatchOptionName {
+    Known(KnownMatchOption),
+    Unknown { name_hash: u32 },
+}
+
+impl MatchOptionName {
+    pub const fn hash(self) -> OptionHash {
+        match self {
+            Self::Known(option) => option.hash(),
+            Self::Unknown { name_hash } => OptionHash(name_hash),
+        }
+    }
+
+    pub const fn as_str(self) -> Option<&'static str> {
+        match self {
+            Self::Known(option) => Some(option.name()),
+            Self::Unknown { .. } => None,
+        }
+    }
+}
+
+impl From<OptionHash> for MatchOptionName {
+    fn from(hash: OptionHash) -> Self {
+        Catalog.match_option(hash).map_or(
+            Self::Unknown {
+                name_hash: hash.raw(),
+            },
+            Self::Known,
+        )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
