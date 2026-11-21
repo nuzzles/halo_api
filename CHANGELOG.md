@@ -12,7 +12,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Added
 
-- Recorded round limit, rounds to win, self-destruction/betrayal respawn penalties,
+- Recorded round limit, rounds to win/draw, self-destruction/betrayal respawn penalties,
   and machinima controls in match settings. Both penalties are required after the
   31-film audit; omitted round settings and machinima controls stay optional.
 - Offline Theater player metadata: the initial 32-slot player table, timestamped roster and bot

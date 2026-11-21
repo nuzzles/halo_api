@@ -11,6 +11,9 @@ use crate::theater::film::{
 // Reference serializer fields in the already-decoded variant tree.
 const ROUND_LIMIT: &[u16] = &[1, 7, 17];
 const ROUNDS_TO_WIN: &[u16] = &[1, 7, 5];
+// Identified from user-confirmed settings: Oddball records 2; unlimited in
+// Slayer, KOTH, and Strongholds omits this field. No unlimited default is inferred.
+const ROUNDS_TO_DRAW: &[u16] = &[1, 7, 6];
 const SELF_DESTRUCTION_PENALTY: &[u16] = &[1, 2, 5];
 const BETRAYAL_PENALTY: &[u16] = &[1, 2, 6];
 const MACHINIMA_CONTROLS: &[u16] = &[1, 0, 5, 3];
@@ -267,6 +270,7 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
         time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
         round_limit: optional_number(v, ROUND_LIMIT, "round_limit")?,
         rounds_to_win: optional_number(v, ROUNDS_TO_WIN, "rounds_to_win")?,
+        rounds_to_draw: optional_number(v, ROUNDS_TO_DRAW, "rounds_to_draw")?,
         self_destruction_respawn_penalty_seconds: required(
             number(v, SELF_DESTRUCTION_PENALTY),
             "self_destruction_respawn_penalty_seconds",
@@ -526,6 +530,7 @@ mod tests {
                     parsed.registry.settings.name.clone(),
                     parsed.registry.settings.round_limit,
                     parsed.registry.settings.rounds_to_win,
+                    parsed.registry.settings.rounds_to_draw,
                 ))
                 .or_insert(0_usize) += 1;
             for option in &parsed.registry.settings.options {
@@ -558,7 +563,7 @@ mod tests {
         }
         eprintln!("starting weapons: {weapons:?}");
         eprintln!("starting equipment: {equipment:?}");
-        eprintln!("round settings (variant, limit, wins): {round_settings:?}");
+        eprintln!("round settings (variant, limit, wins, draws): {round_settings:?}");
         eprintln!(
             "option names: {known_option_names} known, unknown hashes: {unknown_option_names:x?}"
         );
@@ -604,6 +609,7 @@ mod tests {
         for (path, recorded_path, name) in [
             (ROUND_LIMIT, &[1, 7, 17][..], "round_limit"),
             (ROUNDS_TO_WIN, &[1, 7, 5][..], "rounds_to_win"),
+            (ROUNDS_TO_DRAW, &[1, 7, 6][..], "rounds_to_draw"),
         ] {
             assert_eq!(optional_number(&read(&[1, 0]), path, name).unwrap(), None);
             for value in [0, 7] {
@@ -621,6 +627,24 @@ mod tests {
                     matches!(optional_number(&tree, path, name), Err(ParseError::InvalidMatchSettings { field }) if field == name)
                 );
             }
+        }
+    }
+
+    #[test]
+    fn rounds_to_draw_reads_recorded_signed_byte_not_other_round_fields() {
+        for value in [0, 2, 3] {
+            let tree = nested_setting(&[1, 7, 6], 14, &[value], 1);
+            assert_eq!(
+                optional_number(&tree, ROUNDS_TO_DRAW, "rounds_to_draw").unwrap(),
+                Some(i64::from(value))
+            );
+        }
+        for other in [5, 17, 22] {
+            let tree = nested_setting(&[1, 7, other], 14, &[2], 1);
+            assert_eq!(
+                optional_number(&tree, ROUNDS_TO_DRAW, "rounds_to_draw").unwrap(),
+                None
+            );
         }
     }
 

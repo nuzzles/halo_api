@@ -332,6 +332,7 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     for (field, value) in [
         ("round_limit", serde_json::json!(3)),
         ("rounds_to_win", serde_json::json!(2)),
+        ("rounds_to_draw", serde_json::json!(2)),
         ("machinima_controls_enabled", serde_json::json!(false)),
     ] {
         assert!(settings.get(field).is_some());

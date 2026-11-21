@@ -20,6 +20,8 @@ pub struct MatchSettings {
     pub round_limit: Option<i64>,
     /// Recorded round-win threshold (`earlyVictoryRounds` in the serializer).
     pub rounds_to_win: Option<i64>,
+    /// Recorded round-draw threshold; omitted values remain `None`, not an inferred default.
+    pub rounds_to_draw: Option<i64>,
     pub minimum_respawn_seconds: i64,
     /// Additional respawn delay after self-destruction.
     pub self_destruction_respawn_penalty_seconds: i64,
