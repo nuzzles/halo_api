@@ -57,7 +57,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### API Wrappers
 
-- [Grunt API](https://gruntapi.com/) is an unofficial Halo Infinite API wrapper.
+- [Grunt API](https://github.com/PlayGrifball/grunt) is a C#/.NET client and HTTP gateway for the
+  Halo Infinite APIs.
 - [SPNKr](https://github.com/acurtis166/SPNKr) is a Python SDK for the Halo Infinite web API.
 
 #### Theater Libraries
