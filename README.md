@@ -55,6 +55,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Alternatives
 
+#### API Wrappers
+
+- [Grunt API](https://gruntapi.com/) is an unofficial Halo Infinite API wrapper.
+- [SPNKr](https://github.com/acurtis166/SPNKr) is a Python SDK for the Halo Infinite web API.
+
+#### Theater Libraries
+
 These projects serve different parts of Halo Infinite Theater replay work:
 
 - [libfilmshell](https://github.com/OpenSpartan/libfilmshell) is a Rust library for extracting data
