@@ -61,6 +61,9 @@ initial 32-slot player table, including vacant slots. An unreadable table return
 `ParseError::IncompleteRegistryPlayers`. Core settings and their lists are required; missing or
 malformed required fields return `ParseError::InvalidMatchSettings`. Genuinely omitted settings
 such as score/time limits remain `None`, rather than acquiring game defaults.
+Round limit, rounds to win, and machinima controls stay optional when omitted.
+Self-destruction and betrayal respawn penalties are required by the supported-capture
+contract; explicit zero penalties and disabled controls are preserved.
 `recording_start_time` is a `chrono::DateTime<Utc>` decoded from the recorder's timestamp
 (not necessarily the exact match start), serialized as RFC 3339 on native and WASM.
 

@@ -329,6 +329,27 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
     assert!(json.get("name_hash").is_none());
     assert_eq!(serde_json::from_value::<MatchOption>(json).unwrap(), *score);
     let settings = serde_json::to_value(&film.registry.settings).unwrap();
+    for (field, value) in [
+        ("round_limit", serde_json::json!(3)),
+        ("rounds_to_win", serde_json::json!(2)),
+        ("machinima_controls_enabled", serde_json::json!(false)),
+    ] {
+        assert!(settings.get(field).is_some());
+        let mut populated = settings.clone();
+        populated[field] = value;
+        let decoded: MatchSettings = serde_json::from_value(populated.clone()).unwrap();
+        assert_eq!(serde_json::to_value(decoded).unwrap(), populated);
+        for absent in [false, true] {
+            let mut missing = settings.clone();
+            if absent {
+                missing.as_object_mut().unwrap().remove(field);
+            } else {
+                missing[field] = serde_json::Value::Null;
+            }
+            let decoded: MatchSettings = serde_json::from_value(missing).unwrap();
+            assert!(serde_json::to_value(decoded).unwrap()[field].is_null());
+        }
+    }
     assert!(settings.get("last_chance_enabled").is_none());
     assert!(settings.get("last_chance_seconds").is_none());
     assert!(settings.get("sudden_death_enabled_in_overtime").is_some());
@@ -355,6 +376,8 @@ fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
         "description",
         "engine_type",
         "minimum_respawn_seconds",
+        "self_destruction_respawn_penalty_seconds",
+        "betrayal_respawn_penalty_seconds",
         "starting_loadouts",
         "options",
     ] {

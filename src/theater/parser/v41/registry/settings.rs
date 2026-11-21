@@ -8,6 +8,13 @@ use crate::theater::film::{
     StartingLoadout, StartingWeapon, TagId, WeaponTagId,
 };
 
+// Reference serializer fields in the already-decoded variant tree.
+const ROUND_LIMIT: &[u16] = &[1, 7, 17];
+const ROUNDS_TO_WIN: &[u16] = &[1, 7, 5];
+const SELF_DESTRUCTION_PENALTY: &[u16] = &[1, 2, 5];
+const BETRAYAL_PENALTY: &[u16] = &[1, 2, 6];
+const MACHINIMA_CONTROLS: &[u16] = &[1, 0, 5, 3];
+
 fn field(v: &BondValue, id: u16) -> Option<&BondValue> {
     let BondValueBody::Struct { fields, .. } = &v.body else {
         return None;
@@ -258,6 +265,21 @@ pub(super) fn project(body: &FilmRegistryRead) -> Result<MatchSettings, ParseErr
         minimum_respawn_seconds: required(number(v, &[1, 2, 3]), "minimum_respawn_seconds")?,
         score_to_win: optional_number(v, &[1, 7, 0], "score_to_win")?,
         time_limit_seconds: optional_number(v, &[1, 7, 3], "time_limit_seconds")?,
+        round_limit: optional_number(v, ROUND_LIMIT, "round_limit")?,
+        rounds_to_win: optional_number(v, ROUNDS_TO_WIN, "rounds_to_win")?,
+        self_destruction_respawn_penalty_seconds: required(
+            number(v, SELF_DESTRUCTION_PENALTY),
+            "self_destruction_respawn_penalty_seconds",
+        )?,
+        betrayal_respawn_penalty_seconds: required(
+            number(v, BETRAYAL_PENALTY),
+            "betrayal_respawn_penalty_seconds",
+        )?,
+        machinima_controls_enabled: optional_boolean(
+            v,
+            MACHINIMA_CONTROLS,
+            "machinima_controls_enabled",
+        )?,
         overtime_seconds: optional_number(v, &[1, 7, 9], "overtime_seconds")?,
         sudden_death_enabled_in_overtime: optional_boolean(
             v,
@@ -452,6 +474,7 @@ mod tests {
         let mut profiles = BTreeMap::<String, usize>::new();
         let mut weapons = BTreeMap::<String, usize>::new();
         let mut equipment = BTreeMap::<String, usize>::new();
+        let mut round_settings = BTreeMap::new();
         let mut known_option_names = 0;
         let mut unknown_option_names = BTreeMap::<u32, usize>::new();
         for manifest in &manifests {
@@ -498,6 +521,13 @@ mod tests {
                 ))
                 .or_default() += 1;
             assert_eq!(parsed.registry.players.len(), 32);
+            *round_settings
+                .entry((
+                    parsed.registry.settings.name.clone(),
+                    parsed.registry.settings.round_limit,
+                    parsed.registry.settings.rounds_to_win,
+                ))
+                .or_insert(0_usize) += 1;
             for option in &parsed.registry.settings.options {
                 use crate::theater::film::MatchOptionName;
                 match option.name {
@@ -528,6 +558,7 @@ mod tests {
         }
         eprintln!("starting weapons: {weapons:?}");
         eprintln!("starting equipment: {equipment:?}");
+        eprintln!("round settings (variant, limit, wins): {round_settings:?}");
         eprintln!(
             "option names: {known_option_names} known, unknown hashes: {unknown_option_names:x?}"
         );
@@ -543,6 +574,118 @@ mod tests {
         );
         assert_eq!(read.stop, BondStop::Complete);
         read.root
+    }
+
+    /// Build a tiny Compact Binary tree, including extended field IDs.
+    fn nested_setting(path: &[u16], wire_type: u8, payload: &[u8], copies: usize) -> BondValue {
+        let mut value = payload.to_vec();
+        for (depth, &id) in path.iter().rev().enumerate() {
+            let wire = if depth == 0 { wire_type } else { 10 };
+            let mut body = Vec::new();
+            for _ in 0..if depth == 0 { copies } else { 1 } {
+                if id < 6 {
+                    body.push((id as u8) << 5 | wire);
+                } else {
+                    assert!(id <= 255);
+                    body.extend([0xc0 | wire, id as u8]);
+                }
+                body.extend(&value);
+            }
+            body.push(0);
+            assert!(body.len() < 128);
+            value = vec![body.len() as u8];
+            value.extend(body);
+        }
+        read(&value)
+    }
+
+    #[test]
+    fn round_settings_preserve_absence_and_explicit_zero() {
+        for (path, recorded_path, name) in [
+            (ROUND_LIMIT, &[1, 7, 17][..], "round_limit"),
+            (ROUNDS_TO_WIN, &[1, 7, 5][..], "rounds_to_win"),
+        ] {
+            assert_eq!(optional_number(&read(&[1, 0]), path, name).unwrap(), None);
+            for value in [0, 7] {
+                let tree = nested_setting(recorded_path, 3, &[value], 1);
+                assert_eq!(
+                    optional_number(&tree, path, name).unwrap(),
+                    Some(i64::from(value))
+                );
+            }
+            for tree in [
+                nested_setting(recorded_path, 10, &[1, 0], 1),
+                nested_setting(recorded_path, 3, &[7], 2),
+            ] {
+                assert!(
+                    matches!(optional_number(&tree, path, name), Err(ParseError::InvalidMatchSettings { field }) if field == name)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn required_respawn_penalties_preserve_zero_and_reject_missing_or_invalid_fields() {
+        for (path, recorded_path, name) in [
+            (
+                SELF_DESTRUCTION_PENALTY,
+                &[1, 2, 5][..],
+                "self_destruction_respawn_penalty_seconds",
+            ),
+            (
+                BETRAYAL_PENALTY,
+                &[1, 2, 6][..],
+                "betrayal_respawn_penalty_seconds",
+            ),
+        ] {
+            for value in [0, 7] {
+                let tree = nested_setting(recorded_path, 3, &[value], 1);
+                assert_eq!(
+                    required(number(&tree, path), name).unwrap(),
+                    i64::from(value)
+                );
+            }
+            for tree in [
+                read(&[1, 0]),
+                nested_setting(recorded_path, 10, &[1, 0], 1),
+                nested_setting(recorded_path, 3, &[7], 2),
+            ] {
+                assert!(
+                    matches!(required(number(&tree, path), name), Err(ParseError::InvalidMatchSettings { field }) if field == name)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn machinima_controls_preserve_false_and_do_not_read_neighboring_playback_flags() {
+        let name = "machinima_controls_enabled";
+        assert_eq!(
+            optional_boolean(&read(&[1, 0]), MACHINIMA_CONTROLS, name).unwrap(),
+            None
+        );
+        for value in [0, 1] {
+            let tree = nested_setting(&[1, 0, 5, 3], 2, &[value], 1);
+            assert_eq!(
+                optional_boolean(&tree, MACHINIMA_CONTROLS, name).unwrap(),
+                Some(value != 0)
+            );
+        }
+        for neighbor in 0..3 {
+            let tree = nested_setting(&[1, 0, 5, neighbor], 2, &[1], 1);
+            assert_eq!(
+                optional_boolean(&tree, MACHINIMA_CONTROLS, name).unwrap(),
+                None
+            );
+        }
+        for tree in [
+            nested_setting(&[1, 0, 5, 3], 3, &[1], 1),
+            nested_setting(&[1, 0, 5, 3], 2, &[1], 2),
+        ] {
+            assert!(
+                matches!(optional_boolean(&tree, MACHINIMA_CONTROLS, name), Err(ParseError::InvalidMatchSettings { field }) if field == name)
+            );
+        }
     }
 
     #[test]

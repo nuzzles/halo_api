@@ -16,7 +16,16 @@ pub struct MatchSettings {
     pub engine_type: i64,
     pub score_to_win: Option<i64>,
     pub time_limit_seconds: Option<i64>,
+    /// Recorded round limit; absence does not infer the game's default.
+    pub round_limit: Option<i64>,
+    /// Recorded round-win threshold (`earlyVictoryRounds` in the serializer).
+    pub rounds_to_win: Option<i64>,
     pub minimum_respawn_seconds: i64,
+    /// Additional respawn delay after self-destruction.
+    pub self_destruction_respawn_penalty_seconds: i64,
+    /// Additional respawn delay after a betrayal.
+    pub betrayal_respawn_penalty_seconds: i64,
+    pub machinima_controls_enabled: Option<bool>,
     pub overtime_seconds: Option<i64>,
     /// Whether sudden death is enabled during overtime.
     pub sudden_death_enabled_in_overtime: Option<bool>,
