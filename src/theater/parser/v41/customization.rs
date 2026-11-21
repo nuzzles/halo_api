@@ -3,15 +3,18 @@
 //! investigation; no fitted geometry, asset lookup, or current-player data enters here.
 //! Layout reference: installation-08 d731fb7, film-decoder's
 //! `section3_slot_perso_research_test.go` (serializer field offsets).
+use crate::theater::film::ParseError;
 use crate::theater::film::players::*;
 
-pub(super) fn decode(raw: Vec<u8>, build: Option<&str>) -> FilmCustomization {
+pub(super) fn decode(raw: &[u8], build: Option<&str>) -> Result<FilmCustomization, ParseError> {
     let spartan = if matches!(build, Some("HI_1_12_0" | "HI_1_13_0")) && raw.len() == 1852 {
-        appearance(&raw)
+        appearance(raw)
     } else {
         None
     };
-    FilmCustomization { raw, spartan }
+    Ok(FilmCustomization {
+        spartan: spartan.ok_or(ParseError::InvalidCustomization)?,
+    })
 }
 
 fn appearance(raw: &[u8]) -> Option<SpartanCustomization> {
@@ -74,9 +77,7 @@ mod tests {
             .collect();
         raw[..4].copy_from_slice(&33u32.to_le_bytes());
         for build in ["HI_1_12_0", "HI_1_13_0"] {
-            let decoded = decode(raw.clone(), Some(build));
-            assert_eq!(decoded.raw, raw);
-            let value = decoded.spartan.unwrap();
+            let value = decode(&raw, Some(build)).unwrap().spartan;
             assert_eq!(value.regions.len(), 33);
             assert_eq!(value.regions[32].permutation, 0xab000000 + 67);
             assert_eq!(value.model_theme_name, 0xab000044);
@@ -100,19 +101,44 @@ mod tests {
             assert_eq!(value.action_pose, 0xab0001ce);
         }
         let old = vec![0x55; 1492];
-        let decoded = decode(old.clone(), Some("HI_1_11_0"));
-        assert!(decoded.spartan.is_none());
-        assert_eq!(decoded.raw, old);
+        assert!(matches!(
+            decode(&old, Some("HI_1_11_0")),
+            Err(ParseError::InvalidCustomization)
+        ));
     }
 
     #[test]
-    fn unknown_layout_and_invalid_count_preserve_bytes_without_inventing_fields() {
+    fn unknown_layout_and_invalid_count_fail_decoding() {
         let mut bytes = vec![0; 1852];
-        assert!(decode(bytes.clone(), Some("future")).spartan.is_none());
+        for build in [None, Some("future")] {
+            assert!(matches!(
+                decode(&bytes, build),
+                Err(ParseError::InvalidCustomization)
+            ));
+        }
         bytes[..4].copy_from_slice(&34u32.to_le_bytes());
-        let value = decode(bytes.clone(), Some("HI_1_13_0"));
-        assert_eq!(value.raw, bytes);
-        assert!(value.spartan.is_none());
-        assert!(decode(vec![0; 1851], Some("HI_1_13_0")).spartan.is_none());
+        assert!(matches!(
+            decode(&bytes, Some("HI_1_13_0")),
+            Err(ParseError::InvalidCustomization)
+        ));
+        assert!(matches!(
+            decode(&[0; 1851], Some("HI_1_13_0")),
+            Err(ParseError::InvalidCustomization)
+        ));
+    }
+
+    #[test]
+    fn serialized_customization_requires_spartan_and_has_no_raw_copy() {
+        let value = decode(&[0; 1852], Some("HI_1_13_0")).unwrap();
+        let mut json = serde_json::to_value(&value).unwrap();
+        assert!(json.get("raw").is_none());
+        assert_eq!(
+            serde_json::from_value::<FilmCustomization>(json.clone()).unwrap(),
+            value
+        );
+        json["spartan"] = serde_json::Value::Null;
+        assert!(serde_json::from_value::<FilmCustomization>(json.clone()).is_err());
+        json.as_object_mut().unwrap().remove("spartan");
+        assert!(serde_json::from_value::<FilmCustomization>(json).is_err());
     }
 }

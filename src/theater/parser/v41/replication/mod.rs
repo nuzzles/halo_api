@@ -234,7 +234,7 @@ impl ParsedReplicationStream {
                                     projection_handles
                                         .remove(0)
                                         .join()
-                                        .expect("film projection worker panicked"),
+                                        .expect("film projection worker panicked")?,
                                 );
                             }
                         }
@@ -310,7 +310,7 @@ impl ParsedReplicationStream {
                                     projection_handles
                                         .remove(0)
                                         .join()
-                                        .expect("film projection worker panicked"),
+                                        .expect("film projection worker panicked")?,
                                 );
                             }
                         }
@@ -330,7 +330,8 @@ impl ParsedReplicationStream {
                     projection_parts.extend(
                         projection_handles
                             .into_iter()
-                            .map(|handle| handle.join().expect("film projection worker panicked")),
+                            .map(|handle| handle.join().expect("film projection worker panicked"))
+                            .collect::<Result<Vec<_>, ParseError>>()?,
                     );
                     let mut observations =
                         Vec::with_capacity(projection_parts.iter().map(Vec::len).sum());
@@ -414,7 +415,7 @@ impl ParsedReplicationStream {
                     let mut parts = handles
                         .into_iter()
                         .map(|handle| handle.join().expect("film projection worker panicked"))
-                        .collect::<Vec<_>>();
+                        .collect::<Result<Vec<_>, ParseError>>()?;
                     let mut observations = Vec::with_capacity(parts.iter().map(Vec::len).sum());
                     for part in &mut parts {
                         observations.append(part);
@@ -440,7 +441,7 @@ impl ParsedReplicationStream {
                 &mut None,
             )?;
             update_tick_status(&mut tick_status, &chunk, chunk_index);
-            parsed::project_chunks_into(vec![chunk], &schema_kinds, projection_config, &mut observations);
+            parsed::project_chunks_into(vec![chunk], &schema_kinds, projection_config, &mut observations)?;
         }
         Ok(Self {
             observations,

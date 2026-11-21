@@ -100,6 +100,10 @@ pub enum ParseError {
     IncompleteRegistryOptions,
     #[error("registry initial player table could not be fully decoded")]
     IncompleteRegistryPlayers,
+    #[error("recorded player customization has an unsupported or invalid layout")]
+    InvalidCustomization,
+    #[error("recorded match setting {field} is missing or invalid")]
+    InvalidMatchSettings { field: &'static str },
     #[error("unsupported registry game mode {0}; supported: 2 (Multiplayer)")]
     UnsupportedGameMode(u8),
     #[error("unsupported film version {0}; supported: 41")]

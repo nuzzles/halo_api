@@ -14,8 +14,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Offline Theater player metadata: the initial 32-slot player table, timestamped roster and bot
   snapshots, and recorded Spartan appearance hashes for recognized HI_1_12_0/HI_1_13_0 blocks.
-  Original appearance bytes are retained; item names, asset paths, and current API customization
-  are not substituted for recorded data.
+  Item names, asset paths, and current API customization are not substituted for recorded data.
 - Recorded match settings, including variant name/description, score/time/respawn limits,
   starting loadouts, and typed option values with original bytes.
 - Typed reload, throw, melee, pickup, zoom, teleport, projectile impact, and detonation events.
@@ -26,6 +25,15 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
+- `FilmCustomization::spartan` is required and the duplicate `raw` appearance bytes are removed.
+  Unsupported or invalid appearance layouts fail film parsing with `ParseError::InvalidCustomization`.
+- Core `MatchSettings` fields, loadout/weapon lists, and `MatchOption` fields are required.
+  Missing or malformed required metadata returns `ParseError::InvalidMatchSettings`; the
+  redundant `variant_decoded` flag and implicit default settings are removed. Starting weapons
+  use an enum that retains unspecified slots and random-selection states. Unrecognized option
+  discriminators use `MatchOptionValue::Unknown` and retain their bytes.
+- `LevelCalibration::api_id` is required for all bundled levels. Genuine recorded absences
+  (including equipment, optional limits, and event presence-bit fields) remain optional.
 - `Registry::players` is a required `Vec<InitialPlayer>`. Film parsing returns
   `ParseError::IncompleteRegistryPlayers` if the complete initial player table cannot be decoded,
   instead of succeeding with missing player metadata.

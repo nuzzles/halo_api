@@ -121,16 +121,15 @@ fn recorded_players_and_settings() {
     for name in ["bazaar_idle", "octagon_ar_kill"] {
         let film = Film::parse(chunks(name)).unwrap();
         let settings = &film.registry.settings;
-        assert!(settings.variant_decoded);
-        assert_eq!(settings.build.as_deref(), Some("HI_1_13_0"));
-        assert_eq!(settings.name.as_deref(), Some("Slayer"));
+        assert_eq!(settings.build, "HI_1_13_0");
+        assert_eq!(settings.name, "Slayer");
         assert_eq!(
-            settings.description.as_deref(),
-            Some("Control Power Weapons to eliminate the enemy.")
+            settings.description,
+            "Control Power Weapons to eliminate the enemy."
         );
-        assert_eq!(settings.minimum_respawn_seconds, Some(8));
+        assert_eq!(settings.minimum_respawn_seconds, 8);
         assert_eq!(settings.killcam_enabled, None);
-        assert_eq!(settings.play_of_game_enabled, Some(true));
+        assert!(settings.play_of_game_enabled);
         assert_eq!(
             settings.time_limit_seconds,
             Some(if name == "bazaar_idle" { 720 } else { 60 })
@@ -143,20 +142,17 @@ fn recorded_players_and_settings() {
                 None
             }
         );
-        let weapons = settings.starting_loadouts.as_ref().unwrap()[0]
-            .weapons
-            .as_ref()
-            .unwrap();
+        let weapons = &settings.starting_loadouts[0].weapons;
         assert_eq!(weapons.len(), 3);
-        assert_eq!(weapons[0].tag, Some(TagId(1220648237)));
-        assert_eq!(weapons[1].tag, Some(TagId(4094171407)));
-        assert_eq!(weapons[2].tag, None);
-        assert_eq!(settings.options.as_ref().unwrap().len(), 10);
+        use halo_api::theater::film::StartingWeapon;
+        assert_eq!(weapons[0], StartingWeapon::Real(TagId(1220648237)));
+        assert_eq!(weapons[1], StartingWeapon::Real(TagId(4094171407)));
+        assert_eq!(weapons[2], StartingWeapon::Unspecified);
+        assert_eq!(settings.starting_loadouts[0].equipment, None);
+        assert_eq!(settings.options.len(), 10);
         assert_eq!(
-            settings.options.as_ref().unwrap()[0].value,
-            Some(halo_api::theater::film::MatchOptionValue::NumberBits(
-                0.6f32.to_bits()
-            ))
+            settings.options[0].value,
+            halo_api::theater::film::MatchOptionValue::NumberBits(0.6f32.to_bits())
         );
         let initial = &film.registry.players;
         assert_eq!(initial.len(), 32);
@@ -174,7 +170,11 @@ fn recorded_players_and_settings() {
         assert_eq!(occupied[0].player.gamertag, "Nuzzles");
         assert_eq!(occupied[0].xuid.0, 2535472547643888);
         for p in &occupied {
-            assert!(p.player.customization.raw.iter().all(|v| *v == 0));
+            let appearance = &p.player.customization.spartan;
+            assert!(appearance.regions.is_empty());
+            assert_eq!(appearance.variant_name, 0);
+            assert_eq!(appearance.coating_name, 0);
+            assert_eq!(appearance.action_pose, 0);
         }
         let mut snapshots = 0;
         for observation in &film.replication_stream.observations {
@@ -184,8 +184,7 @@ fn recorded_players_and_settings() {
                 for p in players {
                     let initial = occupied.iter().find(|i| i.xuid == p.xuid).unwrap();
                     assert_eq!(initial.player.gamertag, p.player.gamertag);
-                    assert_eq!(p.player.customization.raw.len(), 1852);
-                    let appearance = p.player.customization.spartan.as_ref().unwrap();
+                    let appearance = &p.player.customization.spartan;
                     assert_eq!(appearance.regions.len(), 22);
                     assert_eq!(appearance.attachments.len(), 24);
                     assert_eq!(appearance.objects.len(), 7);
@@ -292,8 +291,111 @@ fn parse_rejects_an_unreadable_initial_player_layout() {
     input[0].data = writer.finish().unwrap();
     assert!(matches!(
         Film::parse(input),
-        Err(ParseError::IncompleteRegistryPlayers)
+        Err(ParseError::InvalidCustomization)
     ));
+}
+
+#[test]
+fn serialized_settings_require_decoded_fields_but_allow_recorded_absence() {
+    use halo_api::theater::film::{MatchOption, MatchSettings, Registry, StartingLoadout};
+    let film = Film::parse(chunks("bazaar_idle")).unwrap();
+    let settings = serde_json::to_value(&film.registry.settings).unwrap();
+    for field in [
+        "build",
+        "start_time_unix_seconds",
+        "name",
+        "description",
+        "engine_type",
+        "play_of_game_enabled",
+        "minimum_respawn_seconds",
+        "starting_loadouts",
+        "options",
+    ] {
+        let mut missing = settings.clone();
+        missing.as_object_mut().unwrap().remove(field);
+        assert!(
+            serde_json::from_value::<MatchSettings>(missing).is_err(),
+            "{field}"
+        );
+        let mut null = settings.clone();
+        null[field] = serde_json::Value::Null;
+        assert!(
+            serde_json::from_value::<MatchSettings>(null).is_err(),
+            "{field}"
+        );
+    }
+    for field in ["name_hash", "raw_value", "value"] {
+        let mut missing = settings["options"][0].clone();
+        missing.as_object_mut().unwrap().remove(field);
+        assert!(
+            serde_json::from_value::<MatchOption>(missing).is_err(),
+            "{field}"
+        );
+        let mut null = settings["options"][0].clone();
+        null[field] = serde_json::Value::Null;
+        assert!(
+            serde_json::from_value::<MatchOption>(null).is_err(),
+            "{field}"
+        );
+    }
+    let mut loadout = settings["starting_loadouts"][0].clone();
+    loadout.as_object_mut().unwrap().remove("weapons");
+    assert!(serde_json::from_value::<StartingLoadout>(loadout).is_err());
+    let mut registry = serde_json::to_value(&film.registry).unwrap();
+    registry.as_object_mut().unwrap().remove("settings");
+    assert!(serde_json::from_value::<Registry>(registry).is_err());
+}
+
+#[test]
+fn invalid_roster_customization_fails_the_whole_film_in_both_threading_modes() {
+    use std::io::{Read, Write};
+    let mut input = chunks("bazaar_idle");
+    let chunk = &mut input[1];
+    let mut data = Vec::new();
+    flate2::read::ZlibDecoder::new(chunk.data.as_slice())
+        .read_to_end(&mut data)
+        .unwrap();
+    // Locate this fixture's recorded variant/style pair even when bit-unaligned.
+    // Its count lives 0x13c bytes earlier in the same appearance block.
+    let needle = [0x101f4ba9u32.to_le_bytes(), 0x79666886u32.to_le_bytes()].concat();
+    let bit = |bytes: &[u8], i: usize| (bytes[i / 8] >> (7 - i % 8)) & 1;
+    let anchor = (0x13c * 8..=data.len() * 8 - needle.len() * 8)
+        .find(|start| (0..needle.len() * 8).all(|i| bit(&data, start + i) == bit(&needle, i)))
+        .expect("fixture appearance variant/style");
+    let count_start = anchor - 0x13c * 8;
+    let original = 22u32.to_le_bytes();
+    assert!((0..32).all(|i| bit(&data, count_start + i) == bit(&original, i)));
+    let invalid = 34u32.to_le_bytes();
+    for i in 0..32 {
+        let offset = count_start + i;
+        let mask = 1 << (7 - offset % 8);
+        data[offset / 8] = (data[offset / 8] & !mask) | (bit(&invalid, i) << (7 - offset % 8));
+    }
+    let mut writer = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+    writer.write_all(&data).unwrap();
+    chunk.data = writer.finish().unwrap();
+    // Exercise sequential, parallel projection, and speculative chunk admission.
+    for replication_count in [1, 3, 8] {
+        let original = chunks("bazaar_idle");
+        let mut baseline = vec![original[0].clone()];
+        for index in 1..=replication_count {
+            let mut chunk = original[1].clone();
+            chunk.index = index;
+            baseline.push(chunk);
+        }
+        let mut summary = original.last().unwrap().clone();
+        summary.index = replication_count + 1;
+        baseline.push(summary);
+        for threading in [Threading::Single, Threading::Multi] {
+            Film::parse_with_options(baseline.clone(), FilmParseOptions { threading }).unwrap();
+            let mut corrupted = baseline.clone();
+            corrupted[1] = input[1].clone();
+            assert!(matches!(
+                Film::parse_with_options(corrupted, FilmParseOptions { threading }),
+                Err(ParseError::InvalidCustomization)
+            ));
+        }
+    }
 }
 
 /// Opt-in regression against a local corpus with film.json manifests. No downloads.
@@ -364,7 +466,7 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
         assert_eq!(single, multi, "{}", manifest.display());
         assert_eq!(single.registry.players.len(), 32, "{}", manifest.display());
         assert!(
-            single.registry.settings.variant_decoded,
+            !single.registry.settings.build.is_empty(),
             "{}",
             manifest.display()
         );
@@ -373,7 +475,7 @@ fn local_corpus_preserves_recorded_metadata_across_threading_modes() {
                 ReplicationChange::Roster { players } => {
                     populations += 1;
                     for p in players {
-                        assert!(p.player.customization.spartan.is_some());
+                        assert_eq!(p.player.customization.spartan.attachments.len(), 24);
                     }
                 }
                 ReplicationChange::Event { event } => {
