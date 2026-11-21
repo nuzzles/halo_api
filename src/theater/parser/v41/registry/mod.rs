@@ -14,20 +14,7 @@ impl V41RegistryChunkReader {
         input: crate::theater::film::InflatedFilmChunk,
     ) -> Result<ParsedRegistry, crate::theater::film::ParseError> {
         let body = parse_registry_chunk(&input.data)?;
-        let mut registry = crate::theater::film::Registry::try_from(&body)?;
-        if let Some(options) = body
-            .bootstrap_header
-            .as_ref()
-            .and_then(|h| h.identification.as_ref())
-            .and_then(|i| i.game_options.as_ref())
-            .filter(|o| o.stop == GameOptionsStop::Complete)
-        {
-            registry.players = super::replication::stream::roster::initial(
-                &input.data,
-                options.end_bit,
-                &super::context::players::PlayerContext::recorded(&body),
-            );
-        }
+        let registry = crate::theater::film::Registry::try_from((&body, input.data.as_slice()))?;
         Ok(ParsedRegistry {
             index: input.index,
             start_ms: input.start_ms,

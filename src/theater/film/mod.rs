@@ -41,8 +41,8 @@ impl Film {
     /// Chunks are ordered by manifest index before dispatch. The registry must
     /// be first, and the summary must be last.
     /// Unknown chunk kinds, damaged compressed inputs, and registries without
-    /// readable map IDs or game options are rejected. Registry game modes other
-    /// than Multiplayer are rejected. Source packets are
+    /// readable map IDs, game options, or an initial player table are rejected.
+    /// Registry game modes other than Multiplayer are rejected. Source packets are
     /// consumed into typed observations and guarded highlights. Manifest indices
     /// must be contiguous from zero, and replay tick evidence must be complete.
     pub fn parse(chunks: impl IntoIterator<Item = RawFilmChunk>) -> Result<Self, ParseError> {
@@ -98,6 +98,8 @@ pub enum ParseError {
     MissingRegistryMap,
     #[error("registry game options could not be fully read")]
     IncompleteRegistryOptions,
+    #[error("registry initial player table could not be fully decoded")]
+    IncompleteRegistryPlayers,
     #[error("unsupported registry game mode {0}; supported: 2 (Multiplayer)")]
     UnsupportedGameMode(u8),
     #[error("unsupported film version {0}; supported: 41")]
