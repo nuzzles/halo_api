@@ -19,6 +19,8 @@ body { margin: 0; color: var(--text); background: var(--background); font: 16px/
 .threading-options button { padding: 8px 4px; border: 1px solid #626262; border-radius: 5px; background: #303030; color: var(--text); font: inherit; font-size: 14px; font-weight: 550; cursor: pointer; }
 .threading-options button[aria-pressed="true"] { border-color: #4d6265; background: #326f75; }
 .threading-options button:focus-visible { outline: 2px solid var(--halo); outline-offset: 2px; }
+.benchmark-options { display: flex; flex-wrap: wrap; }
+.benchmark-options button { flex: 0 0 auto; padding: 8px 13px; font-size: 15px; line-height: 1.35; }
 .content { width: 100%; min-width: 0; padding: 38px clamp(26px, 4vw, 66px) 26px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
 .date-select { position: relative; display: inline-flex; flex: none; }

@@ -24,7 +24,11 @@
         </section>
         <section class="setting" aria-labelledby="benchmark-heading">
           <h2 id="benchmark-heading">Select Benchmark</h2>
-          <span class="choice">Film Parsing</span>
+          <div id="benchmark" class="threading-options benchmark-options" role="group" aria-label="Benchmark">
+            <button type="button" data-benchmark="full" aria-pressed="true">Full Film</button>
+            <button type="button" data-benchmark="replication" aria-pressed="false">Replication</button>
+            <button type="button" data-benchmark="summary" aria-pressed="false">Summary</button>
+          </div>
         </section>
         <section class="setting" aria-labelledby="metric-heading">
           <h2 id="metric-heading">Metric</h2>

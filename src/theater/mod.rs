@@ -19,6 +19,8 @@
 //! ```
 //! The recording has one registry, an ordered replication stream, and a
 //! required terminal summary/highlights chunk.
+//! Use [`Film::parse_replication`] or [`Film::parse_summary`] to decode only
+//! the selected section and registry. The other chunk type need not be supplied.
 //! Finished models are available under `film`; packet and structural read
 //! models remain private to parsing.
 //! Playback owns only typed state and an independent time cursor. The world
@@ -31,5 +33,5 @@ pub mod film;
 #[allow(dead_code)]
 pub(crate) mod parser;
 pub mod runtime;
-pub use film::Film;
+pub use film::{Film, FilmReplication, FilmSummary};
 pub use runtime::FilmRuntime;

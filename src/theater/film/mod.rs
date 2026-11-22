@@ -17,6 +17,32 @@ pub struct Film {
     pub summary: Summary,
 }
 
+/// Registry and replication observations, without summary highlights.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FilmReplication {
+    pub registry: Registry,
+    pub replication_stream: ReplicationStream,
+}
+
+impl AsRef<ReplicationStream> for Film {
+    fn as_ref(&self) -> &ReplicationStream {
+        &self.replication_stream
+    }
+}
+
+impl AsRef<ReplicationStream> for FilmReplication {
+    fn as_ref(&self) -> &ReplicationStream {
+        &self.replication_stream
+    }
+}
+
+/// Registry and guarded summary highlights, without replication observations.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FilmSummary {
+    pub registry: Registry,
+    pub summary: Summary,
+}
+
 /// Controls how film chunks are decoded. The default uses multiple threads on
 /// native targets when parallel work is available.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -35,6 +61,60 @@ pub enum Threading {
 }
 
 impl Film {
+    /// Decode only the registry and replication stream.
+    ///
+    /// Requires one registry at manifest index zero and at least one replication
+    /// chunk, with contiguous indices starting at one and complete replay tick
+    /// evidence. Summary chunks are ignored without inflation or validation.
+    /// Other validation is the same as [`Self::parse`].
+    pub fn parse_replication(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+    ) -> Result<FilmReplication, ParseError> {
+        Self::parse_replication_with_options(chunks, FilmParseOptions::default())
+    }
+
+    /// Decode registry and replication with an explicit threading choice.
+    /// See [`Self::parse_replication`] for input requirements and
+    /// [`Self::parse_with_options`] for threading behavior.
+    pub fn parse_replication_with_options(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+        options: FilmParseOptions,
+    ) -> Result<FilmReplication, ParseError> {
+        crate::theater::parser::ChunkReader::read_replication(
+            chunks,
+            ParseLimits::default(),
+            FilmParseContext::default(),
+            options.threading,
+        )
+    }
+
+    /// Decode only the registry and summary highlights.
+    ///
+    /// Requires one registry at manifest index zero and one summary at its
+    /// original positive manifest index. Replication chunks are ignored without
+    /// inflation or validation; gaps before the summary and absent replay ticks
+    /// are allowed. Registry validation is the same as [`Self::parse`].
+    /// Highlights remain guarded candidates and may be incomplete.
+    pub fn parse_summary(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+    ) -> Result<FilmSummary, ParseError> {
+        Self::parse_summary_with_options(chunks, FilmParseOptions::default())
+    }
+
+    /// Decode registry and summary with an explicit threading choice.
+    /// See [`Self::parse_summary`] for input requirements. Summary decoding
+    /// currently runs on the calling thread in either mode.
+    pub fn parse_summary_with_options(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+        options: FilmParseOptions,
+    ) -> Result<FilmSummary, ParseError> {
+        crate::theater::parser::ChunkReader::read_summary(
+            chunks,
+            ParseLimits::default(),
+            options.threading,
+        )
+    }
+
     /// Read the registry header, select a supported parser, and decode the chunks.
     ///
     /// Requires exactly one registry and at least one replication chunk.
