@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "benchmark": "full",
-  "generated_at_unix_seconds": 1795324665,
-  "halo_api_commit": "ace737d",
+  "generated_at_unix_seconds": 1795369942,
+  "halo_api_commit": "0ddfb5b",
   "halo_api_dirty": false,
   "os": "macos",
   "arch": "aarch64",
@@ -16,7 +16,7 @@
       "chunks": 7,
       "compressed_mib": 0.5712957382202148,
       "runs": 25,
-      "halo_api_ms": 26.088084000000002,
+      "halo_api_ms": 25.739125,
       "film_fingerprint": "c23b1645e280c67d"
     },
     {
@@ -25,7 +25,7 @@
       "chunks": 5,
       "compressed_mib": 0.5458307266235352,
       "runs": 25,
-      "halo_api_ms": 20.742209000000003,
+      "halo_api_ms": 20.095,
       "film_fingerprint": "d7079504c6adcc17"
     },
     {
@@ -34,7 +34,7 @@
       "chunks": 24,
       "compressed_mib": 1.9050264358520508,
       "runs": 25,
-      "halo_api_ms": 137.82150000000001,
+      "halo_api_ms": 138.983291,
       "film_fingerprint": "7a5371cf13729749"
     },
     {
@@ -43,7 +43,7 @@
       "chunks": 26,
       "compressed_mib": 5.556819915771484,
       "runs": 25,
-      "halo_api_ms": 386.535083,
+      "halo_api_ms": 392.256084,
       "film_fingerprint": "c90fc4b87b6e0839"
     },
     {
@@ -52,7 +52,7 @@
       "chunks": 63,
       "compressed_mib": 14.598649978637695,
       "runs": 25,
-      "halo_api_ms": 1210.477625,
+      "halo_api_ms": 1300.5378329999999,
       "film_fingerprint": "fd8bcb6aeef15a1b"
     },
     {
@@ -61,7 +61,7 @@
       "chunks": 41,
       "compressed_mib": 8.452743530273438,
       "runs": 25,
-      "halo_api_ms": 678.936334,
+      "halo_api_ms": 704.643416,
       "film_fingerprint": "9e9c559283c52c09"
     },
     {
@@ -70,7 +70,7 @@
       "chunks": 200,
       "compressed_mib": 58.58565807342529,
       "runs": 25,
-      "halo_api_ms": 4242.626916,
+      "halo_api_ms": 4395.913333,
       "film_fingerprint": "bc49835b0e8b0b3a"
     }
   ]

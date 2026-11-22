@@ -70,13 +70,11 @@ pub struct FilmReadDiagnostics {
     /// Reference Observation.IndexAbsolus; -1 denotes the build's default region.
     pub absolute_indices: BTreeMap<i32, u64>,
     /// Ordered reference MobilityActionHook flags, including failed/speculative reads.
-    /// Unlike movement-state capture, this historical hook is never suppressed.
     pub mobility_actions: Vec<[bool; 2]>,
     /// Number of component publications preceding each mobility publication.
     /// None with nonempty mobility_actions means ordering was not retained.
     pub mobility_offsets: Option<Vec<usize>>,
-    /// Ordered publications from named component hooks. Position, movement and
-    /// reference callbacks obey their independent reference capture policies.
+    /// Ordered publications from named component hooks.
     pub component_observations: Vec<FilmComponentObservation>,
 }
 
