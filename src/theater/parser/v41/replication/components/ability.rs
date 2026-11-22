@@ -5,12 +5,11 @@ use super::widths::signed_skip;
 use crate::theater::parser::v41::packet::BitRange;
 use crate::theater::parser::v41::reference::diagnostics::WidthPurpose;
 use crate::theater::parser::v41::reference::observations::{
-    AbilityNonPredictedState, FilmComponentObservation, MovementComponent, UnitReference,
+    AbilityNonPredictedState, FilmComponentObservation, UnitReference,
 };
 
 pub(crate) fn predicted(r: &mut ComponentReader<'_>) -> Option<bool> {
     let tag = r.r("tag", 2)?;
-    r.publish_movement(MovementComponent::ActiveAbility, vec![tag]);
     let mut sub = 0;
     let mut reference = 0;
     match tag {
@@ -155,10 +154,6 @@ pub(crate) fn mobility(r: &mut ComponentReader<'_>) -> Option<bool> {
     let active = r.bit("active")?;
     let flag = r.bit("flag")?;
     r.publish_mobility([active, flag]);
-    r.publish_movement(
-        MovementComponent::Mobility,
-        vec![u64::from(active), u64::from(flag)],
-    );
     if !active {
         return Some(true);
     }

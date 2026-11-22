@@ -8,7 +8,7 @@ use crate::theater::parser::v41::reference::diagnostics::{
     FilmReadDiagnostics, ReadOperation, ReadRefusal, WidthRefusal,
 };
 use crate::theater::parser::v41::reference::observations::{
-    FilmComponentObservation, MovementComponent, UnitReference, UnitReferenceKind,
+    FilmComponentObservation, UnitReference, UnitReferenceKind,
 };
 use crate::theater::parser::v41::replication::source::components::field::ComponentField;
 use std::cell::RefCell;
@@ -213,7 +213,6 @@ pub(crate) struct ComponentReader<'a> {
     pub(crate) width_error: Option<&'static str>,
 
     pub(crate) live_grammar: Option<&'a DecodeGrammar>,
-    pub(crate) movement_slot: Option<u32>,
     pub(crate) references: Vec<UnitReference>,
     pub(crate) diagnostics: FilmReadDiagnostics,
     pub(crate) cursor: Cursor<'a>,
@@ -261,16 +260,6 @@ impl ComponentReader<'_> {
     }
     pub(crate) fn record_absolute(&mut self, index: i32) {
         self.diagnostics.absolute(index);
-    }
-
-    pub(crate) fn publish_movement(&mut self, component: MovementComponent, values: Vec<u64>) {
-        if let Some(slot) = self.movement_slot {
-            self.publish_component(FilmComponentObservation::MovementState {
-                component,
-                slot,
-                values,
-            });
-        }
     }
 
     pub(crate) fn mask(&mut self) -> Option<u64> {

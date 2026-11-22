@@ -72,7 +72,6 @@ fn decode_view(
         context_error: None,
 
         live_grammar: None,
-        movement_slot: None,
         diagnostics: Default::default(),
         cursor,
         fields: Vec::new(),
