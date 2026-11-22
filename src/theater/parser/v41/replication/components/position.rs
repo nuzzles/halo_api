@@ -243,7 +243,6 @@ pub(crate) fn absolute_payload(
     encoding: &PositionEncoding,
 ) -> Option<()> {
     let mut raw_widths = encoding.default_axis_bits.map(|v| v as u64);
-    let mut region_index = -1;
     if !r.bit("default_region")? {
         let raw = r.reference_widths.map_or(encoding.index_bits as u64, |w| {
             w.movement.world_object.index_bits
@@ -251,7 +250,6 @@ pub(crate) fn absolute_payload(
         let width = r.reference_position_width(raw, "world index")?;
         let raw_index = r.r_wide("region_index", width)?;
         let index = raw_index as u32;
-        region_index = index as i32;
         let known_axes = r
             .reference_widths
             .and_then(|w| w.movement.world_object.regions.get(&index).copied());
@@ -271,7 +269,6 @@ pub(crate) fn absolute_payload(
         {
             // Do not split an aggregate width into invented axes. Runtime position
             // resolution requires position[0..2], so this cannot publish a pose.
-            r.record_absolute(region_index);
             r.r_wide("position.opaque_region_bits", bits)?;
             return Some(());
         }
@@ -291,7 +288,6 @@ pub(crate) fn absolute_payload(
             raw_widths = world.map(|v| v as u64);
         }
     }
-    r.record_absolute(region_index);
     const POSITION_NAMES: [&str; 3] = ["position[0]", "position[1]", "position[2]"];
     for (i, raw) in raw_widths.into_iter().enumerate() {
         let width = r.reference_position_width(raw, "world axes")?;
