@@ -67,8 +67,6 @@ pub struct FilmReadDiagnostics {
     pub rejected_unbound: u64,
     pub rejected_other_view: u64,
     pub anticipated_bindings: BTreeMap<u32, u64>,
-    /// Reference Observation.IndexAbsolus; -1 denotes the build's default region.
-    pub absolute_indices: BTreeMap<i32, u64>,
     /// Ordered reference MobilityActionHook flags, including failed/speculative reads.
     pub mobility_actions: Vec<[bool; 2]>,
     /// Number of component publications preceding each mobility publication.
@@ -87,9 +85,5 @@ impl FilmReadDiagnostics {
             offsets.push(self.component_observations.len());
         }
         self.mobility_actions.push(flags);
-    }
-
-    pub(crate) fn absolute(&mut self, index: i32) {
-        *self.absolute_indices.entry(index).or_default() += 1;
     }
 }

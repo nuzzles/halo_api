@@ -258,9 +258,6 @@ impl ComponentReader<'_> {
     pub(crate) fn publish_mobility(&mut self, flags: [bool; 2]) {
         self.diagnostics.publish_mobility(flags);
     }
-    pub(crate) fn record_absolute(&mut self, index: i32) {
-        self.diagnostics.absolute(index);
-    }
 
     pub(crate) fn mask(&mut self) -> Option<u64> {
         if self.bit("mask.dense")? {
