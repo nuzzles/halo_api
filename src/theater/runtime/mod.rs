@@ -4,13 +4,13 @@
 //! imply entity state changes. Highlights are the film's guarded candidates.
 
 use crate::theater::Film;
-use crate::theater::film::ReplicationComponentChange;
 pub use crate::theater::film::replication::ReplicationValue;
 use crate::theater::film::{ComponentSlot, EntityId, EntitySchemaId, EntitySchemaKind, KeyframeId};
 pub use crate::theater::film::{
     ReplicationChange, ReplicationControl, ReplicationField, ReplicationObservation,
     SummaryHighlight,
 };
+use crate::theater::film::{ReplicationComponentChange, ReplicationStream};
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -85,19 +85,20 @@ pub struct WorldSnapshot {
     pub keyframes: BTreeMap<KeyframeId, EntityState<KeyframeId>>,
 }
 
-/// An owned film and an independent playback cursor.
+/// A shared full film or replication-only film and an independent playback cursor.
+/// The original input type is retained, without cloning its decoded observations.
 #[derive(Debug)]
-pub struct FilmRuntime {
-    film: Arc<Film>,
+pub struct FilmRuntime<F = Film> {
+    film: Arc<F>,
     cursor: usize,
     timestamp_us: Option<u64>,
     world: WorldSnapshot,
 }
 
-impl FilmRuntime {
-    /// Prepare playback from the film's finished observations.
+impl<F: AsRef<ReplicationStream>> FilmRuntime<F> {
+    /// Prepare playback from an owned or `Arc`-shared [`Film`] or [`crate::theater::FilmReplication`].
     /// Observation timestamps are assumed to be nondecreasing in source order.
-    pub fn load(film: impl Into<Arc<Film>>) -> Self {
+    pub fn load(film: impl Into<Arc<F>>) -> Self {
         let film = film.into();
         Self {
             film,
@@ -108,7 +109,7 @@ impl FilmRuntime {
     }
 
     /// Parsed film used by this playback cursor.
-    pub fn film(&self) -> &Film {
+    pub fn film(&self) -> &F {
         self.film.as_ref()
     }
 
@@ -130,7 +131,7 @@ impl FilmRuntime {
         {
             self.rewind();
         }
-        let observations = &self.film.replication_stream.observations;
+        let observations = &self.film.as_ref().as_ref().observations;
         while self.cursor < observations.len()
             && observations[self.cursor].timestamp_us <= timestamp_us
         {

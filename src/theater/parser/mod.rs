@@ -12,7 +12,9 @@ pub(crate) use ticks::{ReplayTickSource, ReplayTickStatus};
 pub(crate) mod v41;
 
 use crate::clients::hi::models::{RawChunkKind, RawFilmChunk};
-use crate::theater::film::{ChunkKind, Film, InflatedFilmChunk, ParseError, Threading};
+use crate::theater::film::{
+    ChunkKind, Film, FilmReplication, FilmSummary, InflatedFilmChunk, ParseError, Threading,
+};
 
 /// Validated chunk roles after each downloaded buffer has been consumed by inflation.
 pub(crate) struct InflatedFilmChunks {
@@ -41,8 +43,8 @@ impl From<ParsedFilm> for Film {
 
 /// Version-selected reader used internally by [`Film::parse`].
 ///
-/// The enum makes the version dispatch explicit while preserving one public
-/// parsing entry point. Add future film versions as variants here.
+/// All full and partial parsing entry points share this version dispatch.
+/// Add future film versions as variants here.
 pub(crate) enum ChunkReader {
     V41(v41::V41ChunkReader),
 }
@@ -61,12 +63,106 @@ impl ChunkReader {
             }
         }
         let parsed = Self::read_ordered(chunks, limits, context, threading)?;
-        let tick_status = parsed.replication_stream.replay_tick_status();
-        match tick_status {
-            ReplayTickStatus::Found(_) => Ok(parsed.into()),
-            ReplayTickStatus::Absent => Err(ParseError::NoTicks),
-            ReplayTickStatus::Undetermined => Err(ParseError::TickEvidenceIncomplete),
+        Ok(parsed.into())
+    }
+
+    pub(crate) fn read_replication(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+        limits: ParseLimits,
+        context: FilmParseContext,
+        threading: Threading,
+    ) -> Result<FilmReplication, ParseError> {
+        let mut chunks = Self::sort_chunks(
+            chunks
+                .into_iter()
+                .filter(|chunk| chunk.kind != RawChunkKind::SUMMARY),
+        )?;
+        Self::validate_registry_first(&chunks)?;
+        Self::validate_replication_chunks(&chunks[1..])?;
+        for (expected, chunk) in chunks.iter().enumerate() {
+            if chunk.index as usize != expected {
+                return Err(ParseError::MissingIndex { index: expected });
+            }
         }
+        let registry = chunks.remove(0);
+        let (reader, registry) = Self::select_reader(registry)?;
+        let replication = Self::inflate_replication_chunks(chunks, threading)?;
+        match reader {
+            Self::V41(reader) => {
+                reader.read_replication(registry, replication, limits, context, threading)
+            }
+        }
+    }
+
+    pub(crate) fn read_summary(
+        chunks: impl IntoIterator<Item = RawFilmChunk>,
+        limits: ParseLimits,
+        _threading: Threading,
+    ) -> Result<FilmSummary, ParseError> {
+        let mut chunks = Self::sort_chunks(
+            chunks
+                .into_iter()
+                .filter(|chunk| chunk.kind != RawChunkKind::REPLICATION),
+        )?;
+        Self::validate_registry_first(&chunks)?;
+        if chunks[0].index != 0 {
+            return Err(ParseError::MissingIndex { index: 0 });
+        }
+        let registry = chunks.remove(0);
+        if chunks.is_empty() {
+            return Err(ParseError::MissingSummary);
+        }
+        for chunk in &chunks {
+            match ChunkKind::try_from(chunk.kind)? {
+                ChunkKind::Registry => return Err(ParseError::RegistryNotFirst),
+                ChunkKind::Summary => {}
+                ChunkKind::Replication => unreachable!("filtered above"),
+            }
+        }
+        if chunks.len() != 1 {
+            return Err(ParseError::SummaryNotLast);
+        }
+        let (reader, registry) = Self::select_reader(registry)?;
+        let summary = chunks.pop().expect("one summary").inflate()?;
+        match reader {
+            Self::V41(reader) => reader.read_summary(registry, summary, limits),
+        }
+    }
+
+    fn validate_registry_first(chunks: &[RawFilmChunk]) -> Result<(), ParseError> {
+        let registry = chunks.first().ok_or(ParseError::MissingRegistry)?;
+        if registry.kind != RawChunkKind::REGISTRY {
+            return Err(ParseError::RegistryNotFirst);
+        }
+        Ok(())
+    }
+
+    fn select_reader(registry: RawFilmChunk) -> Result<(Self, InflatedFilmChunk), ParseError> {
+        let registry = registry.inflate()?;
+        let header = registry
+            .data
+            .get(..8)
+            .ok_or(ParseError::TruncatedRegistryHeader)?;
+        let version = u32::from_le_bytes(header[..4].try_into().unwrap());
+        let reader = match version {
+            41 => Self::V41(v41::V41ChunkReader),
+            other => return Err(ParseError::UnsupportedVersion(other)),
+        };
+        Ok((reader, registry))
+    }
+
+    fn validate_replication_chunks(chunks: &[RawFilmChunk]) -> Result<(), ParseError> {
+        for chunk in chunks {
+            match ChunkKind::try_from(chunk.kind)? {
+                ChunkKind::Registry => return Err(ParseError::RegistryNotFirst),
+                ChunkKind::Summary => return Err(ParseError::SummaryNotLast),
+                ChunkKind::Replication => {}
+            }
+        }
+        if chunks.is_empty() {
+            return Err(ParseError::MissingReplication);
+        }
+        Ok(())
     }
 
     fn sort_chunks(
@@ -97,10 +193,7 @@ impl ChunkReader {
         threading: Threading,
     ) -> Result<ParsedFilm, ParseError> {
         // Registry chunk should always come first
-        let registry_chunk = chunks.first().ok_or(ParseError::MissingRegistry)?;
-        if registry_chunk.kind != RawChunkKind::REGISTRY {
-            return Err(ParseError::RegistryNotFirst);
-        }
+        Self::validate_registry_first(&chunks)?;
         let registry_chunk = chunks.remove(0);
 
         // Summary chunk should always come last.
@@ -111,31 +204,10 @@ impl ChunkReader {
         let summary_chunk = chunks.remove(chunks.len() - 1);
 
         // Get the version from the registry here, so we know what parser to use.
-        let registry_chunk = registry_chunk.inflate()?;
-        let header = registry_chunk
-            .data
-            .get(..8)
-            .ok_or(ParseError::TruncatedRegistryHeader)?;
-        let version = u32::from_le_bytes(header[..4].try_into().unwrap());
-
-        // Parse with the version-specific reader.
-        let reader = match version {
-            41 => Self::V41(v41::V41ChunkReader),
-            other => return Err(ParseError::UnsupportedVersion(other)),
-        };
+        let (reader, registry_chunk) = Self::select_reader(registry_chunk)?;
 
         // Validate remaining chunks are all Replication chunks.
-        for chunk in &chunks {
-            match ChunkKind::try_from(chunk.kind)? {
-                ChunkKind::Registry => return Err(ParseError::RegistryNotFirst),
-                ChunkKind::Summary => return Err(ParseError::SummaryNotLast),
-                ChunkKind::Replication => {}
-            }
-        }
-        // Ensure we have at least one replication chunk.
-        if chunks.is_empty() {
-            return Err(ParseError::MissingReplication);
-        }
+        Self::validate_replication_chunks(&chunks)?;
 
         // Replication chunks are in the middle.
         // Large terminal summaries can inflate while the replication workers

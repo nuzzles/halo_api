@@ -66,6 +66,275 @@ fn threading_modes_produce_identical_films() {
 }
 
 #[test]
+fn partial_parses_match_full_film_with_or_without_unselected_chunks() {
+    use halo_api::theater::{FilmReplication, FilmSummary};
+    for name in ["bazaar_idle", "octagon_ar_kill"] {
+        let input = chunks(name);
+        let full = Film::parse(input.clone()).unwrap();
+        let expected_replication = FilmReplication {
+            registry: full.registry.clone(),
+            replication_stream: full.replication_stream,
+        };
+        let expected_summary = FilmSummary {
+            registry: full.registry,
+            summary: full.summary,
+        };
+        assert_eq!(
+            Film::parse_replication(input.clone()).unwrap(),
+            expected_replication
+        );
+        assert_eq!(
+            Film::parse_summary(input.clone()).unwrap(),
+            expected_summary
+        );
+        for threading in [Threading::Single, Threading::Multi] {
+            for omitted in [false, true] {
+                let selected = |ignored| {
+                    input
+                        .iter()
+                        .rev()
+                        .filter(|chunk| !omitted || chunk.kind != ignored)
+                        .cloned()
+                        .collect::<Vec<_>>()
+                };
+                let replication = Film::parse_replication_with_options(
+                    selected(RawChunkKind::SUMMARY),
+                    FilmParseOptions { threading },
+                )
+                .unwrap();
+                let summary = Film::parse_summary_with_options(
+                    selected(RawChunkKind::REPLICATION),
+                    FilmParseOptions { threading },
+                )
+                .unwrap();
+                assert_eq!(replication, expected_replication, "{name}, {threading:?}");
+                assert_eq!(summary, expected_summary, "{name}, {threading:?}");
+                assert_eq!(
+                    serde_json::from_slice::<FilmReplication>(
+                        &serde_json::to_vec(&replication).unwrap()
+                    )
+                    .unwrap(),
+                    replication
+                );
+                assert_eq!(
+                    serde_json::from_slice::<FilmSummary>(&serde_json::to_vec(&summary).unwrap())
+                        .unwrap(),
+                    summary
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn partial_parses_never_inflate_or_validate_unselected_chunks() {
+    let original = chunks("octagon_ar_kill");
+    let expected_replication = Film::parse_replication(original.clone()).unwrap();
+    let expected_summary = Film::parse_summary(original.clone()).unwrap();
+    for threading in [Threading::Single, Threading::Multi] {
+        let corrupt = |ignored| {
+            original
+                .iter()
+                .cloned()
+                .map(|mut chunk| {
+                    if chunk.kind == ignored {
+                        chunk.data = vec![0xff];
+                        chunk.index = -1;
+                    }
+                    chunk
+                })
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            Film::parse_replication_with_options(
+                corrupt(RawChunkKind::SUMMARY),
+                FilmParseOptions { threading }
+            )
+            .unwrap(),
+            expected_replication
+        );
+        assert_eq!(
+            Film::parse_summary_with_options(
+                corrupt(RawChunkKind::REPLICATION),
+                FilmParseOptions { threading }
+            )
+            .unwrap(),
+            expected_summary
+        );
+    }
+}
+
+#[test]
+fn runtime_accepts_owned_and_shared_full_or_replication_films() {
+    use halo_api::theater::FilmRuntime;
+    use std::sync::Arc;
+    let chunks = chunks("octagon_ar_kill");
+    let full = Film::parse(chunks.clone()).unwrap();
+    let replication = Film::parse_replication(chunks).unwrap();
+    let mut owned_full = FilmRuntime::load(full.clone());
+    let mut owned_replication = FilmRuntime::load(replication.clone());
+    let full = Arc::new(full);
+    let replication = Arc::new(replication);
+    let mut shared_full = FilmRuntime::load(Arc::clone(&full));
+    let mut shared_replication = FilmRuntime::load(Arc::clone(&replication));
+    assert!(std::ptr::eq(shared_full.film(), full.as_ref()));
+    assert!(std::ptr::eq(
+        shared_replication.film(),
+        replication.as_ref()
+    ));
+    assert_eq!(shared_full.film().summary, full.summary);
+    let end = full
+        .replication_stream
+        .observations
+        .last()
+        .unwrap()
+        .timestamp_us;
+    for at in [0, end / 2, end, end / 3, end] {
+        let expected = owned_full.advance_to(at);
+        assert_eq!(owned_replication.advance_to(at), expected);
+        assert_eq!(shared_full.advance_to(at), expected);
+        assert_eq!(shared_replication.advance_to(at), expected);
+    }
+    assert_eq!(owned_full.seek(end / 2), shared_replication.seek(end / 2));
+    owned_full.rewind();
+    shared_replication.rewind();
+    assert_eq!(owned_full.current(), shared_replication.current());
+    assert_eq!(owned_full.timestamp_us(), shared_replication.timestamp_us());
+}
+
+#[test]
+fn partial_parses_validate_selected_inputs_and_registry() {
+    // Erase only the differing success types so both entry points see the same failures.
+    type ParsePartial = fn(Vec<RawFilmChunk>) -> Result<(), ParseError>;
+    let parsers: [ParsePartial; 2] = [
+        |chunks| Film::parse_replication(chunks).map(|_| ()),
+        |chunks| Film::parse_summary(chunks).map(|_| ()),
+    ];
+    for parse in parsers {
+        assert!(matches!(parse(vec![]), Err(ParseError::MissingRegistry)));
+        let original = chunks("bazaar_idle");
+        assert!(matches!(
+            parse(original[1..].to_vec()),
+            Err(ParseError::RegistryNotFirst)
+        ));
+        let mut duplicate = original.clone();
+        duplicate.push(original[0].clone());
+        assert!(matches!(
+            parse(duplicate),
+            Err(ParseError::DuplicateIndex { index: 0 })
+        ));
+        let mut duplicate = original.clone();
+        let mut registry = original[0].clone();
+        registry.index = original.len() as i32;
+        duplicate.push(registry);
+        assert!(matches!(
+            parse(duplicate),
+            Err(ParseError::RegistryNotFirst)
+        ));
+        let mut damaged = original.clone();
+        damaged[0].data = vec![0xff];
+        assert!(matches!(
+            parse(damaged),
+            Err(ParseError::Inflate { index: 0, .. })
+        ));
+        let mut unknown = original.clone();
+        unknown[1].kind = RawChunkKind(99);
+        assert!(matches!(
+            parse(unknown),
+            Err(ParseError::UnsupportedChunkKind(99))
+        ));
+        for (header, expected_version) in [
+            (vec![0; 4], None),
+            ([75u32.to_le_bytes(), [0; 4]].concat(), Some(75)),
+        ] {
+            let mut unsupported = original.clone();
+            let mut encoder =
+                flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+            std::io::Write::write_all(&mut encoder, &header).unwrap();
+            unsupported[0].data = encoder.finish().unwrap();
+            let error = parse(unsupported).unwrap_err();
+            match expected_version {
+                Some(version) => {
+                    assert!(matches!(error, ParseError::UnsupportedVersion(v) if v == version))
+                }
+                None => assert!(matches!(error, ParseError::TruncatedRegistryHeader)),
+            }
+        }
+    }
+}
+
+#[test]
+fn partial_parses_enforce_replication_continuity_but_allow_summary_gap() {
+    let original = chunks("bazaar_idle");
+    assert!(matches!(
+        Film::parse_replication(vec![original[0].clone()]),
+        Err(ParseError::MissingReplication)
+    ));
+    assert!(matches!(
+        Film::parse_summary(vec![original[0].clone()]),
+        Err(ParseError::MissingSummary)
+    ));
+    let mut gap = original.clone();
+    for chunk in &mut gap[1..] {
+        chunk.index += 1;
+    }
+    assert!(matches!(
+        Film::parse_replication(gap),
+        Err(ParseError::MissingIndex { index: 1 })
+    ));
+    let mut summary_only = vec![original[0].clone(), original.last().unwrap().clone()];
+    summary_only[1].index = 500;
+    assert_eq!(
+        Film::parse_summary(summary_only.clone()).unwrap(),
+        Film::parse_summary(original.clone()).unwrap()
+    );
+    summary_only.push(summary_only[1].clone());
+    assert!(matches!(
+        Film::parse_summary(summary_only.clone()),
+        Err(ParseError::DuplicateIndex { index: 500 })
+    ));
+    summary_only[2].index += 1;
+    assert!(matches!(
+        Film::parse_summary(summary_only),
+        Err(ParseError::SummaryNotLast)
+    ));
+
+    let mut no_ticks = original.clone();
+    let encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
+    let empty = encoder.finish().unwrap();
+    for chunk in &mut no_ticks {
+        if chunk.kind == RawChunkKind::REPLICATION {
+            chunk.data = empty.clone();
+        }
+    }
+    for threading in [Threading::Single, Threading::Multi] {
+        let options = FilmParseOptions { threading };
+        assert!(matches!(
+            Film::parse_with_options(no_ticks.clone(), options),
+            Err(ParseError::NoTicks)
+        ));
+        assert!(matches!(
+            Film::parse_replication_with_options(no_ticks.clone(), options),
+            Err(ParseError::NoTicks)
+        ));
+    }
+    assert!(Film::parse_summary(no_ticks).is_ok());
+
+    for kind in [RawChunkKind::REPLICATION, RawChunkKind::SUMMARY] {
+        let mut damaged = original.clone();
+        let chunk = damaged.iter_mut().find(|chunk| chunk.kind == kind).unwrap();
+        let expected = chunk.index as usize;
+        chunk.data = vec![0xff];
+        let result = if kind == RawChunkKind::REPLICATION {
+            Film::parse_replication(damaged).map(|_| ())
+        } else {
+            Film::parse_summary(damaged).map(|_| ())
+        };
+        assert!(matches!(result, Err(ParseError::Inflate { index, .. }) if index == expected));
+    }
+}
+
+#[test]
 fn replication_packet_boundaries_preserve_observations_across_chunks() {
     use std::io::Write;
     let original = chunks("bazaar_idle");
@@ -110,6 +379,11 @@ fn replication_packet_boundaries_preserve_observations_across_chunks() {
         chunk.index = index as i32;
     }
     for threading in [Threading::Single, Threading::Multi] {
+        let partial =
+            Film::parse_replication_with_options(split.clone(), FilmParseOptions { threading })
+                .unwrap();
+        assert_eq!(partial.registry, expected.registry);
+        assert_eq!(partial.replication_stream, expected.replication_stream);
         let actual =
             Film::parse_with_options(split.clone(), FilmParseOptions { threading }).unwrap();
         assert_eq!(actual, expected, "{threading:?}");
@@ -295,6 +569,14 @@ fn parse_rejects_an_unreadable_initial_player_layout() {
     let mut writer = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::fast());
     writer.write_all(&data).unwrap();
     input[0].data = writer.finish().unwrap();
+    assert!(matches!(
+        Film::parse_replication(input.clone()),
+        Err(ParseError::InvalidCustomization)
+    ));
+    assert!(matches!(
+        Film::parse_summary(input.clone()),
+        Err(ParseError::InvalidCustomization)
+    ));
     assert!(matches!(
         Film::parse(input),
         Err(ParseError::InvalidCustomization)

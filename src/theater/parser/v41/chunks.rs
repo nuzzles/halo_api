@@ -1,14 +1,53 @@
 //! Version-specific chunk dispatch in manifest-index order.
 use super::registry::V41RegistryChunkReader;
-use super::replication::ParsedReplicationStream;
+use super::replication::V41ReplicationStreamChunkReader;
 use super::summary::V41SummaryChunkReader;
-use crate::theater::film::{ParseError, Threading};
+use crate::theater::film::{
+    FilmReplication, FilmSummary, InflatedFilmChunk, ParseError, Threading,
+};
 use crate::theater::parser::{FilmParseContext, InflatedFilmChunks, ParseLimits, ParsedFilm};
 
 /// v41 backend selected from the first registry's recorded version.
 pub struct V41ChunkReader;
 
 impl V41ChunkReader {
+    pub(crate) fn read_replication(
+        self,
+        registry: InflatedFilmChunk,
+        chunks: Vec<InflatedFilmChunk>,
+        limits: ParseLimits,
+        context: FilmParseContext,
+        threading: Threading,
+    ) -> Result<FilmReplication, ParseError> {
+        let registry = V41RegistryChunkReader::read(registry)?;
+        let replication = V41ReplicationStreamChunkReader::read(
+            &registry,
+            chunks,
+            &context,
+            limits.max_packets_per_chunk,
+            limits.max_control_records,
+            threading,
+        )?;
+        Ok(FilmReplication {
+            registry: registry.into(),
+            replication_stream: replication.into(),
+        })
+    }
+
+    pub(crate) fn read_summary(
+        self,
+        registry: InflatedFilmChunk,
+        summary: InflatedFilmChunk,
+        limits: ParseLimits,
+    ) -> Result<FilmSummary, ParseError> {
+        let registry = V41RegistryChunkReader::read(registry)?;
+        let summary = V41SummaryChunkReader::read(summary, limits.max_packets_per_chunk)?;
+        Ok(FilmSummary {
+            registry: registry.into(),
+            summary: summary.into(),
+        })
+    }
+
     pub(crate) fn read(
         self,
         chunks: InflatedFilmChunks,
@@ -23,7 +62,7 @@ impl V41ChunkReader {
                 let summary = scope.spawn(|| {
                     V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)
                 });
-                let replication = ParsedReplicationStream::parse(
+                let replication = V41ReplicationStreamChunkReader::read(
                     &registry,
                     chunks.replication_stream,
                     &parse_context,
@@ -39,7 +78,7 @@ impl V41ChunkReader {
         } else {
             (
                 V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)?,
-                ParsedReplicationStream::parse(
+                V41ReplicationStreamChunkReader::read(
                     &registry,
                     chunks.replication_stream,
                     &parse_context,
@@ -52,7 +91,7 @@ impl V41ChunkReader {
         #[cfg(target_arch = "wasm32")]
         let (parsed_summary, parsed_replication) = (
             V41SummaryChunkReader::read(chunks.summary, limits.max_packets_per_chunk)?,
-            ParsedReplicationStream::parse(
+            V41ReplicationStreamChunkReader::read(
                 &registry,
                 chunks.replication_stream,
                 &parse_context,

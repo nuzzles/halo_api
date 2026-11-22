@@ -13,7 +13,7 @@ function renderBar(value, maximum, parser) {
   rail.className = 'bar-rail';
   const fill = document.createElement('span');
   fill.className = `bar ${parser}`;
-  fill.style.width = `${value / maximum * 100}%`;
+  fill.style.width = `${maximum > 0 ? value / maximum * 100 : 0}%`;
   rail.append(fill);
   const label = document.createElement('span');
   label.className = 'bar-value';
@@ -44,59 +44,93 @@ function render(results) {
   }
 }
 
-function loadReport(path) {
+function loadReport(path, benchmark, threading) {
   return fetch(path).then(response => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
   }).then(report => {
     if (report.schema !== 1 || !Array.isArray(report.results) || report.results.length === 0 ||
-        report.results.some(row => !Number.isFinite(row.halo_api_ms) ||
-          (row.libfilmshell_ms != null && !Number.isFinite(row.libfilmshell_ms)))) {
+        report.results.some(row => !Number.isFinite(row.halo_api_ms) || row.halo_api_ms < 0 ||
+          !Number.isFinite(row.compressed_mib) || row.compressed_mib < 0 ||
+          !Number.isInteger(row.chunks) || row.chunks < 1 ||
+          !Number.isInteger(row.runs) || row.runs < 1 ||
+          (row.libfilmshell_ms != null && (!Number.isFinite(row.libfilmshell_ms) || row.libfilmshell_ms < 0)))) {
       throw new Error('Unexpected benchmark data');
+    }
+    if ((report.benchmark ?? 'full') !== benchmark) throw new Error('Unexpected benchmark label');
+    if (report.threading !== (threading === 'multi' ? 'Multi-Threaded' : 'Single-Threaded')) {
+      throw new Error('Unexpected threading label');
+    }
+    const compareShell = benchmark === 'full' && threading === 'multi';
+    if (report.results.some(row => (row.libfilmshell_ms != null) !== compareShell)) {
+      throw new Error('Unexpected parser results');
     }
     return report;
   });
 }
 
-Promise.all([loadReport('results.json'), loadReport('results-single.json')])
-  .then(([multi, single]) => {
-    const reports = { multi, single };
-    if (multi.threading !== 'Multi-Threaded' || single.threading !== 'Single-Threaded') {
-      throw new Error('Unexpected threading labels');
+const benchmarks = {
+  full: { title: 'Film parsing time' },
+  replication: { title: 'Replication parsing time' },
+  summary: { title: 'Summary parsing time' },
+};
+const reports = new Map();
+let selectedThreading = 'multi';
+let selectedBenchmark = 'full';
+let requestId = 0;
+
+async function showReport() {
+  const request = ++requestId;
+  const benchmark = selectedBenchmark;
+  const threading = selectedThreading;
+  const path = `results${benchmark === 'full' ? '' : `-${benchmark}`}${threading === 'single' ? '-single' : ''}.json`;
+  document.querySelector('#page-title').textContent = benchmarks[benchmark].title;
+  document.querySelector('#shell-legend').hidden = benchmark !== 'full' || threading !== 'multi';
+  document.querySelector('#cpu-model').textContent = 'Loading…';
+  document.querySelector('#chart-title').textContent = 'Median parse time';
+  document.querySelector('#updated').textContent = '';
+  document.querySelector('#dataset-date').replaceChildren(new Option('Loading…', ''));
+  chart.textContent = 'Loading results…';
+  try {
+    if (!reports.has(path)) {
+      reports.set(path, loadReport(path, benchmark, threading).catch(error => {
+        reports.delete(path);
+        throw error;
+      }));
     }
-    if (multi.results.some(row => row.libfilmshell_ms == null) ||
-        single.results.some(row => row.libfilmshell_ms != null)) {
-      throw new Error('Unexpected parser results');
-    }
-    const threadingButtons = [...document.querySelectorAll('#threading button')];
-    let selectedThreading = 'multi';
-    function showReport() {
-      const report = reports[selectedThreading];
-      document.querySelector('#shell-legend').hidden = selectedThreading === 'single';
-      document.querySelector('#cpu-model').textContent = report.cpu_model || `${report.os}/${report.arch}`;
-      const trials = [...new Set(report.results.map(row => row.runs))].sort((a, b) => a - b);
-      const trialCount = new Intl.ListFormat(undefined, { type: 'disjunction' }).format(trials.map(String));
-      document.querySelector('#chart-title').textContent =
-        `Median parse time of ${trialCount} ${trials.length === 1 && trials[0] === 1 ? 'trial' : 'trials'}`;
-      const updated = document.querySelector('#updated');
-      const date = new Date(report.generated_at_unix_seconds * 1000);
-      const day = date.toISOString().slice(0, 10);
-      document.querySelector('#dataset-date').replaceChildren(new Option(day, day));
-      updated.dateTime = date.toISOString();
-      updated.textContent = `Updated ${date.toLocaleString(undefined, {
-        year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
-      })}`;
-      render(report.results);
-    }
-    for (const button of threadingButtons) {
-      button.addEventListener('click', () => {
-        selectedThreading = button.dataset.threading;
-        for (const option of threadingButtons) {
-          option.setAttribute('aria-pressed', String(option === button));
-        }
-        showReport();
-      });
-    }
-    showReport();
-  })
-  .catch(error => { chart.textContent = `Results could not be loaded: ${error.message}`; });
+    const report = await reports.get(path);
+    if (request !== requestId) return;
+    document.querySelector('#cpu-model').textContent = report.cpu_model || `${report.os}/${report.arch}`;
+    const trials = [...new Set(report.results.map(row => row.runs))].sort((a, b) => a - b);
+    const trialCount = new Intl.ListFormat(undefined, { type: 'disjunction' }).format(trials.map(String));
+    document.querySelector('#chart-title').textContent =
+      `Median parse time of ${trialCount} ${trials.length === 1 && trials[0] === 1 ? 'trial' : 'trials'}`;
+    const updated = document.querySelector('#updated');
+    const date = new Date(report.generated_at_unix_seconds * 1000);
+    const day = date.toISOString().slice(0, 10);
+    document.querySelector('#dataset-date').replaceChildren(new Option(day, day));
+    updated.dateTime = date.toISOString();
+    updated.textContent = `Updated ${date.toLocaleString(undefined, {
+      year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+    })}`;
+    render(report.results);
+  } catch (error) {
+    if (request !== requestId) return;
+    chart.textContent = `Results could not be loaded: ${error.message}`;
+    document.querySelector('#cpu-model').textContent = 'Unavailable';
+    document.querySelector('#dataset-date').replaceChildren(new Option('Unavailable', ''));
+  }
+}
+
+for (const group of ['threading', 'benchmark']) {
+  const buttons = [...document.querySelectorAll(`#${group} button`)];
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      if (group === 'threading') selectedThreading = button.dataset.threading;
+      else selectedBenchmark = button.dataset.benchmark;
+      for (const option of buttons) option.setAttribute('aria-pressed', String(option === button));
+      showReport();
+    });
+  }
+}
+showReport();
