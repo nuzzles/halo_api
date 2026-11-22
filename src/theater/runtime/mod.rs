@@ -96,28 +96,8 @@ pub struct FilmRuntime<F = Film> {
 }
 
 impl<F: AsRef<ReplicationStream>> FilmRuntime<F> {
-    /// Prepare playback from the film's finished observations.
+    /// Prepare playback from an owned or `Arc`-shared [`Film`] or [`crate::theater::FilmReplication`].
     /// Observation timestamps are assumed to be nondecreasing in source order.
-    /// Accepts an owned [`Film`] or [`crate::theater::FilmReplication`], or
-    /// an `Arc` of either. Full-film inputs retain access to their summary;
-    /// replication-only inputs do not need one.
-    ///
-    /// ```no_run
-    /// use halo_api::theater::{Film, FilmReplication, FilmRuntime};
-    /// # fn playback(full: Film, replication: FilmReplication) {
-    /// let full_runtime = FilmRuntime::load(full);
-    /// let _: &Film = full_runtime.film();
-    /// let mut runtime: FilmRuntime<FilmReplication> = FilmRuntime::load(replication);
-    /// runtime.advance_to(10_000_000);
-    /// # }
-    /// ```
-    /// Summary-only films cannot drive playback:
-    /// ```compile_fail
-    /// use halo_api::theater::{FilmRuntime, FilmSummary};
-    /// fn playback(summary: FilmSummary) {
-    ///     let _ = FilmRuntime::load(summary);
-    /// }
-    /// ```
     pub fn load(film: impl Into<Arc<F>>) -> Self {
         let film = film.into();
         Self {

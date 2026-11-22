@@ -307,10 +307,17 @@ fn partial_parses_enforce_replication_continuity_but_allow_summary_gap() {
             chunk.data = empty.clone();
         }
     }
-    assert!(matches!(
-        Film::parse_replication(no_ticks.clone()),
-        Err(ParseError::NoTicks)
-    ));
+    for threading in [Threading::Single, Threading::Multi] {
+        let options = FilmParseOptions { threading };
+        assert!(matches!(
+            Film::parse_with_options(no_ticks.clone(), options),
+            Err(ParseError::NoTicks)
+        ));
+        assert!(matches!(
+            Film::parse_replication_with_options(no_ticks.clone(), options),
+            Err(ParseError::NoTicks)
+        ));
+    }
     assert!(Film::parse_summary(no_ticks).is_ok());
 
     for kind in [RawChunkKind::REPLICATION, RawChunkKind::SUMMARY] {

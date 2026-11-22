@@ -49,15 +49,38 @@ impl ParsedReplicationStreamChunk {
     }
 }
 
-impl ParsedReplicationStream {
-    pub(crate) fn parse(
+impl V41ReplicationStreamChunkReader {
+    pub(crate) fn read(
         registry: &ParsedRegistry,
         inputs: impl IntoIterator<Item = InflatedFilmChunk>,
         parse_context: &FilmParseContext,
         max_packets: usize,
         max_control_records: usize,
         threading: Threading,
-    ) -> Result<Self, ParseError> {
+    ) -> Result<ParsedReplicationStream, ParseError> {
+        let replication = Self::read_stream(
+            registry,
+            inputs,
+            parse_context,
+            max_packets,
+            max_control_records,
+            threading,
+        )?;
+        match replication.tick_status {
+            ReplayTickStatus::Found(_) => Ok(replication),
+            ReplayTickStatus::Absent => Err(ParseError::NoTicks),
+            ReplayTickStatus::Undetermined => Err(ParseError::TickEvidenceIncomplete),
+        }
+    }
+
+    fn read_stream(
+        registry: &ParsedRegistry,
+        inputs: impl IntoIterator<Item = InflatedFilmChunk>,
+        parse_context: &FilmParseContext,
+        max_packets: usize,
+        max_control_records: usize,
+        threading: Threading,
+    ) -> Result<ParsedReplicationStream, ParseError> {
         #[cfg(target_arch = "wasm32")]
         let _ = threading;
         for &archetype in parse_context.delta_record_archetypes.values() {
@@ -126,7 +149,7 @@ impl ParsedReplicationStream {
                 let mut inputs = inputs.into_iter();
                 let first = inputs.next().expect("nonempty replication stream");
                 context.state.current_chunk = first.index;
-                let first = V41ReplicationStreamChunkReader::read(
+                let first = V41ReplicationStreamChunkReader::read_chunk(
                     first,
                     &mut context,
                     parse_context,
@@ -208,7 +231,7 @@ impl ParsedReplicationStream {
                             } = chunk;
                             drop(body);
                             context.state.current_chunk = index;
-                            V41ReplicationStreamChunkReader::read(
+                            V41ReplicationStreamChunkReader::read_chunk(
                                 InflatedFilmChunk {
                                     kind: ChunkKind::Replication,
                                     index,
@@ -286,7 +309,7 @@ impl ParsedReplicationStream {
                                 })
                             });
                             context.state.current_chunk = input.index;
-                            let read = V41ReplicationStreamChunkReader::read(
+                            let read = V41ReplicationStreamChunkReader::read_chunk(
                                 input,
                                 &mut context,
                                 parse_context,
@@ -338,7 +361,7 @@ impl ParsedReplicationStream {
                     for part in &mut projection_parts {
                         observations.append(part);
                     }
-                    Ok(Self {
+                    Ok(ParsedReplicationStream {
                         observations,
                         tick_status,
                     })
@@ -380,7 +403,7 @@ impl ParsedReplicationStream {
                                 })
                             });
                             context.state.current_chunk = current.index;
-                            let read = V41ReplicationStreamChunkReader::read(
+                            let read = V41ReplicationStreamChunkReader::read_chunk(
                                 current,
                                 &mut context,
                                 parse_context,
@@ -420,7 +443,7 @@ impl ParsedReplicationStream {
                     for part in &mut parts {
                         observations.append(part);
                     }
-                    Ok(Self {
+                    Ok(ParsedReplicationStream {
                         observations,
                         tick_status,
                     })
@@ -433,7 +456,7 @@ impl ParsedReplicationStream {
         let mut observations = Vec::new();
         for (chunk_index, input) in inputs.into_iter().enumerate() {
             context.state.current_chunk = input.index;
-            let chunk = V41ReplicationStreamChunkReader::read(
+            let chunk = V41ReplicationStreamChunkReader::read_chunk(
                 input,
                 &mut context,
                 parse_context,
@@ -448,15 +471,10 @@ impl ParsedReplicationStream {
                 &mut observations,
             )?;
         }
-        Ok(Self {
+        Ok(ParsedReplicationStream {
             observations,
             tick_status,
         })
-    }
-
-    /// Source-backed tick admission, evaluated before dropping packet bytes.
-    pub(crate) fn replay_tick_status(&self) -> ReplayTickStatus {
-        self.tick_status
     }
 }
 
@@ -547,7 +565,7 @@ fn speculative_chunk(
         state: &mut state,
         event_gate15,
     };
-    let chunk = V41ReplicationStreamChunkReader::read(
+    let chunk = V41ReplicationStreamChunkReader::read_chunk(
         input,
         &mut context,
         parse_context,
@@ -685,7 +703,7 @@ mod prefetch_tests {
 }
 
 impl V41ReplicationStreamChunkReader {
-    pub(crate) fn read(
+    fn read_chunk(
         input: InflatedFilmChunk,
         context: &mut DecodeContext<'_>,
         parse_context: &FilmParseContext,

@@ -63,18 +63,7 @@ impl ChunkReader {
             }
         }
         let parsed = Self::read_ordered(chunks, limits, context, threading)?;
-        Self::validate_ticks(&parsed.replication_stream)?;
         Ok(parsed.into())
-    }
-
-    fn validate_ticks(
-        replication: &v41::replication::ParsedReplicationStream,
-    ) -> Result<(), ParseError> {
-        match replication.replay_tick_status() {
-            ReplayTickStatus::Found(_) => Ok(()),
-            ReplayTickStatus::Absent => Err(ParseError::NoTicks),
-            ReplayTickStatus::Undetermined => Err(ParseError::TickEvidenceIncomplete),
-        }
     }
 
     pub(crate) fn read_replication(

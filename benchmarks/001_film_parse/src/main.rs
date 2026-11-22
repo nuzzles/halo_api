@@ -5,9 +5,9 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
-use filmshell::{Chunk, Film as ShellFilm};
+use filmshell::{Chunk, Film as LibfilmshellFilm};
 use halo_api::clients::hi::models::{RawChunkKind, RawFilmChunk};
-use halo_api::theater::Film as HaloFilm;
+use halo_api::theater::Film as HaloApiFilm;
 use halo_api::theater::film::{FilmParseOptions, Threading};
 use halo_api::theater::{FilmReplication, FilmSummary};
 use serde::{Deserialize, Serialize};
@@ -41,7 +41,7 @@ impl Benchmark {
         }
     }
 
-    fn compares_shell(self, threading: Threading) -> bool {
+    fn compares_libfilmshell(self, threading: Threading) -> bool {
         self == Self::Full && threading == Threading::Multi
     }
 }
@@ -172,7 +172,7 @@ fn load(archive_path: &Path) -> Result<Vec<Input>, Box<dyn std::error::Error>> {
     Ok(inputs)
 }
 
-fn halo_chunks(entries: &[Input]) -> Vec<RawFilmChunk> {
+fn halo_api_chunks(entries: &[Input]) -> Vec<RawFilmChunk> {
     entries
         .iter()
         .map(|entry| RawFilmChunk {
@@ -184,22 +184,28 @@ fn halo_chunks(entries: &[Input]) -> Vec<RawFilmChunk> {
         .collect()
 }
 
-fn parse_halo(entries: &[Input], threading: Threading) -> Result<HaloFilm, String> {
-    HaloFilm::parse_with_options(halo_chunks(entries), FilmParseOptions { threading })
+fn parse_halo_api(entries: &[Input], threading: Threading) -> Result<HaloApiFilm, String> {
+    HaloApiFilm::parse_with_options(halo_api_chunks(entries), FilmParseOptions { threading })
         .map_err(|error| error.to_string())
 }
 
 fn parse_replication(entries: &[Input], threading: Threading) -> Result<FilmReplication, String> {
-    HaloFilm::parse_replication_with_options(halo_chunks(entries), FilmParseOptions { threading })
-        .map_err(|error| error.to_string())
+    HaloApiFilm::parse_replication_with_options(
+        halo_api_chunks(entries),
+        FilmParseOptions { threading },
+    )
+    .map_err(|error| error.to_string())
 }
 
 fn parse_summary(entries: &[Input], threading: Threading) -> Result<FilmSummary, String> {
-    HaloFilm::parse_summary_with_options(halo_chunks(entries), FilmParseOptions { threading })
-        .map_err(|error| error.to_string())
+    HaloApiFilm::parse_summary_with_options(
+        halo_api_chunks(entries),
+        FilmParseOptions { threading },
+    )
+    .map_err(|error| error.to_string())
 }
 
-fn parse_shell(entries: &[Input]) -> Result<ShellFilm, String> {
+fn parse_libfilmshell(entries: &[Input]) -> Result<LibfilmshellFilm, String> {
     let chunks = entries
         .iter()
         .map(|entry| {
@@ -207,7 +213,7 @@ fn parse_shell(entries: &[Input]) -> Result<ShellFilm, String> {
         })
         .collect::<Result<Vec<_>, _>>()
         .map_err(|error| error.to_string())?;
-    ShellFilm::from_chunks(chunks).map_err(|error| error.to_string())
+    LibfilmshellFilm::from_chunks(chunks).map_err(|error| error.to_string())
 }
 
 fn fingerprint(film: &impl Serialize) -> Result<String, Box<dyn std::error::Error>> {
@@ -252,7 +258,7 @@ fn benchmark<T: Serialize>(
     let expected_fingerprint = if mode == Benchmark::Full {
         None
     } else {
-        let full = parse_halo(&entries, threading)?;
+        let full = parse_halo_api(&entries, threading)?;
         Some(match mode {
             Benchmark::Replication => fingerprint(&FilmReplication {
                 registry: full.registry,
@@ -274,30 +280,30 @@ fn benchmark<T: Serialize>(
     if expected_fingerprint.is_some_and(|expected| expected != film_fingerprint) {
         return Err(format!("{fixture}: partial output differs from full film").into());
     }
-    if mode.compares_shell(threading) {
-        parse_shell(&entries)?;
+    if mode.compares_libfilmshell(threading) {
+        parse_libfilmshell(&entries)?;
     }
 
-    let mut halo_times = Vec::with_capacity(runs);
-    let mut shell_times = mode
-        .compares_shell(threading)
+    let mut halo_api_times = Vec::with_capacity(runs);
+    let mut libfilmshell_times = mode
+        .compares_libfilmshell(threading)
         .then(|| Vec::with_capacity(runs));
     for run in 0..runs {
-        if let Some(shell_times) = &mut shell_times {
+        if let Some(libfilmshell_times) = &mut libfilmshell_times {
             if run % 2 == 0 {
-                halo_times.push(timed(&entries, |entries| parse(entries, threading))?);
-                shell_times.push(timed(&entries, parse_shell)?);
+                halo_api_times.push(timed(&entries, |entries| parse(entries, threading))?);
+                libfilmshell_times.push(timed(&entries, parse_libfilmshell)?);
             } else {
-                shell_times.push(timed(&entries, parse_shell)?);
-                halo_times.push(timed(&entries, |entries| parse(entries, threading))?);
+                libfilmshell_times.push(timed(&entries, parse_libfilmshell)?);
+                halo_api_times.push(timed(&entries, |entries| parse(entries, threading))?);
             }
         } else {
-            halo_times.push(timed(&entries, |entries| parse(entries, threading))?);
+            halo_api_times.push(timed(&entries, |entries| parse(entries, threading))?);
         }
     }
-    halo_times.sort_by(f64::total_cmp);
-    if let Some(shell_times) = &mut shell_times {
-        shell_times.sort_by(f64::total_cmp);
+    halo_api_times.sort_by(f64::total_cmp);
+    if let Some(libfilmshell_times) = &mut libfilmshell_times {
+        libfilmshell_times.sort_by(f64::total_cmp);
     }
     let result = ResultRow {
         fixture: fixture.to_owned(),
@@ -305,14 +311,14 @@ fn benchmark<T: Serialize>(
         chunks: entries.len(),
         compressed_mib: bytes as f64 / 1_048_576.0,
         runs,
-        halo_api_ms: median(&halo_times),
-        libfilmshell_ms: shell_times.as_deref().map(median),
+        halo_api_ms: median(&halo_api_times),
+        libfilmshell_ms: libfilmshell_times.as_deref().map(median),
         film_fingerprint,
     };
-    if let Some(shell_ms) = result.libfilmshell_ms {
+    if let Some(libfilmshell_ms) = result.libfilmshell_ms {
         println!(
             "{label}: halo_api {:.1} ms, libfilmshell {:.1} ms ({} runs, {} chunks)",
-            result.halo_api_ms, shell_ms, runs, result.chunks
+            result.halo_api_ms, libfilmshell_ms, runs, result.chunks
         );
     } else {
         println!(
@@ -385,7 +391,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 requested_runs,
                 threading,
                 mode,
-                parse_halo,
+                parse_halo_api,
             )?,
             Benchmark::Replication => benchmark(
                 &fixture,
@@ -433,7 +439,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .current_dir(Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
                 .status()?
                 .success(),
-            libfilmshell_commit: mode.compares_shell(threading).then_some(LIBFILMSHELL_REV),
+            libfilmshell_commit: mode
+                .compares_libfilmshell(threading)
+                .then_some(LIBFILMSHELL_REV),
             os: std::env::consts::OS,
             arch: std::env::consts::ARCH,
             logical_cpus: std::thread::available_parallelism()?.get(),
