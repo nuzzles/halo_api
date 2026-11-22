@@ -22,6 +22,15 @@ impl<'a> Bits<'a> {
             return Some(0);
         }
         let first = offset / 8;
+        let bit_offset = offset % 8;
+        // Most scalar reads are inside a packet: one checked word load avoids
+        // assembling their bytes individually. Short tails retain the bounded path.
+        if bit_offset + width <= 64
+            && let Some(bytes) = self.0.get(first..first + 8)
+        {
+            let word = u64::from_be_bytes(bytes.try_into().unwrap());
+            return Some((word << bit_offset) >> (64 - width));
+        }
         let count = ((offset % 8) + width).div_ceil(8);
         let shift = count * 8 - offset % 8 - width;
         let bytes = self.0.get(first..first + count)?;
@@ -159,6 +168,33 @@ impl Iterator for Windows<'_> {
 #[cfg(test)]
 mod tests {
     use super::Bits;
+
+    #[test]
+    fn word_reads_match_bitwise_reads_for_every_short_tail() {
+        let data = [
+            0x72, 0xa1, 0x05, 0xef, 0xc3, 0x49, 0x18, 0xb6, 0x2d, 0xf0, 0xff, 0x00,
+        ];
+        for len in 0..=data.len() {
+            let bits = Bits(&data[..len]);
+            for offset in 0..=len * 8 + 1 {
+                for width in 0..=65 {
+                    let expected = (width <= 64 && offset + width <= len * 8).then(|| {
+                        (0..width).fold(0u64, |value, bit| {
+                            let source = offset + bit;
+                            (value << 1) | u64::from((data[source / 8] >> (7 - source % 8)) & 1)
+                        })
+                    });
+                    assert_eq!(
+                        bits.read(offset, width),
+                        expected,
+                        "len {len}, offset {offset}, width {width}"
+                    );
+                }
+            }
+            assert_eq!(bits.read(usize::MAX, 1usize), None);
+            assert_eq!(bits.read(1usize, usize::MAX), None);
+        }
+    }
 
     #[test]
     fn short_reads_match_msb_first_bits_at_every_boundary() {

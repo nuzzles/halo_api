@@ -4,8 +4,6 @@ use crate::theater::parser::v41::packet::ByteRange;
 /// One recorded registry slot: fixed-width name followed by its precision level.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegistryComponent {
-    /// All 256 name bytes, including the terminator and string tail.
-    pub name_bytes: Vec<u8>,
     /// Validated name, decoded once when the registry slot is read.
     pub name: String,
     /// Recorded little-endian 32-bit encoding parameter immediately after the

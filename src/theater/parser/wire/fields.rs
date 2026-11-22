@@ -52,12 +52,17 @@ impl RawBits {
                 let shifted = (u64::from_be_bytes(window) << offset).to_be_bytes();
                 SmallVec::from_slice(&shifted[..byte_len])
             } else {
-                let mut bytes = SmallVec::with_capacity(byte_len);
-                for index in 0..byte_len {
-                    bytes.push(
-                        (data[first + index] << offset)
-                            | data.get(first + index + 1).copied().unwrap_or(0) >> (8 - offset),
-                    );
+                let mut bytes = SmallVec::from_elem(0, byte_len);
+                let paired = byte_len.min(data.len() - first - 1);
+                for ((output, &high), &low) in bytes[..paired]
+                    .iter_mut()
+                    .zip(&data[first..first + paired])
+                    .zip(&data[first + 1..first + paired + 1])
+                {
+                    *output = (high << offset) | (low >> (8 - offset));
+                }
+                if paired < byte_len {
+                    bytes[paired] = data[first + paired] << offset;
                 }
                 bytes
             };
@@ -89,6 +94,26 @@ impl RawBits {
 #[cfg(test)]
 mod tests {
     use super::RawBits;
+
+    #[test]
+    fn bulk_unaligned_fields_preserve_bytes_and_tail_padding() {
+        let data = (0..1025).map(|i| (i % 251) as u8).collect::<Vec<_>>();
+        for start in 0..8 {
+            for len in [
+                33usize, 63, 64, 65, 127, 128, 129, 255, 256, 257, 511, 1024, 4096, 8192,
+            ] {
+                let mut expected = vec![0; len.div_ceil(8)];
+                for bit in 0..len {
+                    expected[bit / 8] |=
+                        ((data[(start + bit) / 8] >> (7 - (start + bit) % 8)) & 1) << (7 - bit % 8);
+                }
+                for source in [&data[..], &data[..(start + len).div_ceil(8)]] {
+                    let raw = RawBits::from_source(source, start, len).unwrap();
+                    assert_eq!(raw.bytes.as_slice(), expected, "start {start}, len {len}");
+                }
+            }
+        }
+    }
 
     #[test]
     fn source_ranges_preserve_msb_order_and_padding() {
