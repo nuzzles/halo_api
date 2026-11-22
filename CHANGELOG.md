@@ -26,6 +26,9 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ### Changed
 
+- Theater parsing skips unused roster blocks, decodes appearance without a temporary heap copy,
+  and projects events from already-decoded scalars. Entity projection avoids discarded fields
+  and sequential projection no longer allocates a temporary chunk list. Public film data is unchanged.
 - Theater decoding uses per-thread common field names to reduce reference-count contention.
   Single-threaded decoding projects completed chunks immediately to reduce peak memory.
 - Distinguish catalogue `ModeScriptOptions` from recorded `ModeOptions`. Add domain-specific

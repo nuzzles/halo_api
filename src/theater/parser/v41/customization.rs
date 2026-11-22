@@ -5,6 +5,35 @@
 //! `section3_slot_perso_research_test.go` (serializer field offsets).
 use crate::theater::film::ParseError;
 use crate::theater::film::players::*;
+use crate::theater::parser::v41::packet::BitRange;
+
+/// Borrow aligned blocks, or realign into a bounded stack buffer. The packet
+/// already owns the source; no second heap allocation is needed for appearance.
+pub(super) fn decode_source(
+    data: &[u8],
+    source: BitRange,
+    build: Option<&str>,
+) -> Result<FilmCustomization, ParseError> {
+    if source.end.checked_sub(source.start) != Some(1852 * 8)
+        || source.end > data.len().saturating_mul(8)
+    {
+        return Err(ParseError::InvalidCustomization);
+    }
+    let first = source.start / 8;
+    let shift = source.start % 8;
+    let bytes = &data[first..first + 1852];
+    if shift == 0 {
+        return decode(bytes, build);
+    }
+    let mut aligned = [0; 1852];
+    for (out, pair) in aligned
+        .iter_mut()
+        .zip(data[first..=first + 1852].windows(2))
+    {
+        *out = pair[0] << shift | pair[1] >> (8 - shift);
+    }
+    decode(&aligned, build)
+}
 
 pub(super) fn decode(raw: &[u8], build: Option<&str>) -> Result<FilmCustomization, ParseError> {
     let spartan = if matches!(build, Some("HI_1_12_0" | "HI_1_13_0")) && raw.len() == 1852 {
@@ -70,6 +99,58 @@ fn appearance(raw: &[u8]) -> Option<SpartanCustomization> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn source_projection_matches_owned_bits_at_every_alignment() {
+        use crate::theater::parser::wire::fields::RawBits;
+        let mut raw: Vec<u8> = (0..1852).map(|i| (i * 37) as u8).collect();
+        raw[..4].copy_from_slice(&33u32.to_le_bytes());
+        let expected = decode(&raw, Some("HI_1_13_0")).unwrap();
+        for start in 0..8 {
+            let end = start + raw.len() * 8;
+            let mut data = vec![0; end.div_ceil(8)];
+            for bit in 0..raw.len() * 8 {
+                data[(start + bit) / 8] |=
+                    ((raw[bit / 8] >> (7 - bit % 8)) & 1) << (7 - (start + bit) % 8);
+            }
+            let source = BitRange { start, end };
+            assert_eq!(
+                decode_source(&data, source, Some("HI_1_13_0")).unwrap(),
+                expected
+            );
+            assert_eq!(
+                RawBits::from_source(&data, start, 1852 * 8)
+                    .unwrap()
+                    .bytes
+                    .as_slice(),
+                raw
+            );
+            assert!(decode_source(&data[..data.len() - 1], source, Some("HI_1_13_0")).is_err());
+            assert!(decode_source(&data, source, Some("future")).is_err());
+            assert!(
+                decode_source(
+                    &data,
+                    BitRange {
+                        start,
+                        end: end - 1
+                    },
+                    Some("HI_1_13_0")
+                )
+                .is_err()
+            );
+        }
+        assert!(
+            decode_source(
+                &raw,
+                BitRange {
+                    start: usize::MAX,
+                    end: 0
+                },
+                Some("HI_1_13_0")
+            )
+            .is_err()
+        );
+    }
     #[test]
     fn named_fields_are_little_endian_and_repeated_entries_keep_source_order() {
         let mut raw: Vec<u8> = (0..463u32)

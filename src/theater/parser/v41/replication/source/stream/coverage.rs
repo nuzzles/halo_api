@@ -1,4 +1,4 @@
-//! Coverage of established structural reads, derived from their owned fields.
+//! Coverage of established structural reads and explicitly retained source ranges.
 use super::super::{BitRange, ComponentField, SourceRegion, SourceRegionKind};
 use super::*;
 
@@ -145,20 +145,7 @@ pub(super) fn regions(body: &ReplicationStreamPacketBody) -> Vec<SourceRegion> {
         }
         ReplicationStreamPacketBody::RosterPacketBody(read)
         | ReplicationStreamPacketBody::BotsPacketBody(read) => {
-            for f in std::iter::once(&read.count).chain(read.entries.iter().flat_map(|e| &e.fields))
-            {
-                if f.raw.is_some() {
-                    out.push(region(
-                        f.bit,
-                        f.bit.saturating_add(f.width),
-                        if f.kind.opaque() {
-                            SourceRegionKind::Opaque
-                        } else {
-                            SourceRegionKind::Fields
-                        },
-                    ));
-                }
-            }
+            out.extend_from_slice(&read.regions);
             if matches!(body, ReplicationStreamPacketBody::BotsPacketBody(_))
                 && read.stop == PlayerMetadataStop::Complete
             {

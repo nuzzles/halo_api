@@ -40,7 +40,8 @@ pub(super) fn project_chunks(
 /// Append observations in source order so sequential decoding can release each
 /// chunk's bytes and intermediate records before decoding the next chunk.
 pub(super) fn project_chunks_into(
-    chunks: Vec<ParsedReplicationStreamChunk>,
+    chunks: impl AsRef<[ParsedReplicationStreamChunk]>
+    + IntoIterator<Item = ParsedReplicationStreamChunk>,
     schema_kinds: &std::collections::BTreeMap<
         EntitySchemaId,
         crate::theater::film::EntitySchemaKind,
@@ -49,6 +50,7 @@ pub(super) fn project_chunks_into(
     observations: &mut Vec<ReplicationObservation>,
 ) -> Result<(), ParseError> {
     let capacity = chunks
+        .as_ref()
         .iter()
         .flat_map(|chunk| &chunk.body.packets)
         .map(|packet| match &packet.body {
@@ -121,11 +123,14 @@ pub(super) fn project_chunks_into(
                             if !complete_components {
                                 continue;
                             }
-                            let (fields, components) =
-                                project_entity_fields(record.fields, record.components, payload);
                             match record.header.kind {
                                 RecordKind::New => {
                                     if let Some(archetype) = record.archetype {
+                                        let (fields, components) = project_entity_fields(
+                                            record.fields,
+                                            record.components,
+                                            payload,
+                                        );
                                         emit(ReplicationChange::EntityCreated {
                                             id: EntityId::from_raw(id),
                                             schema: EntitySchemaId(archetype),
@@ -144,11 +149,18 @@ pub(super) fn project_chunks_into(
                                         });
                                     }
                                 }
-                                RecordKind::Delta => emit(ReplicationChange::EntityUpdated {
-                                    id: EntityId::from_raw(id),
-                                    fields,
-                                    components,
-                                }),
+                                RecordKind::Delta => {
+                                    let (fields, components) = project_entity_fields(
+                                        record.fields,
+                                        record.components,
+                                        payload,
+                                    );
+                                    emit(ReplicationChange::EntityUpdated {
+                                        id: EntityId::from_raw(id),
+                                        fields,
+                                        components,
+                                    });
+                                }
                                 RecordKind::Delete => emit(ReplicationChange::EntityDeleted {
                                     id: EntityId::from_raw(id),
                                 }),
@@ -216,12 +228,12 @@ pub(super) fn project_chunks_into(
                     }
                 }
                 ReplicationStreamPacketBody::RosterPacketBody(read) => {
-                    if let Some(players) = super::stream::roster::roster(&read)? {
+                    if let Some(players) = super::stream::roster::roster(&read, payload)? {
                         emit(ReplicationChange::Roster { players });
                     }
                 }
                 ReplicationStreamPacketBody::BotsPacketBody(read) => {
-                    if let Some(players) = super::stream::roster::bots(&read)? {
+                    if let Some(players) = super::stream::roster::bots(&read, payload)? {
                         emit(ReplicationChange::Bots { players });
                     }
                 }
@@ -281,17 +293,16 @@ impl From<RawBits> for BitValue {
 }
 
 fn record_fields(fields: Vec<ComponentField>, payload: &[u8]) -> Vec<ReplicationField> {
-    project_fields(
-        fields.into_iter().filter(|field| {
-            !field.name.starts_with("record.")
-                && !field.name.starts_with("new.")
-                && !field.name.starts_with("delete.")
-                && !field.name.starts_with("mask.")
-                && field.name.as_ref() != "archetype"
-                && field.name.as_ref() != "baseline"
-        }),
-        payload,
-    )
+    project_fields(fields.into_iter().filter(is_record_payload_field), payload)
+}
+
+fn is_record_payload_field(field: &ComponentField) -> bool {
+    !field.name.starts_with("record.")
+        && !field.name.starts_with("new.")
+        && !field.name.starts_with("delete.")
+        && !field.name.starts_with("mask.")
+        && field.name.as_ref() != "archetype"
+        && field.name.as_ref() != "baseline"
 }
 
 fn project_entity_fields(
@@ -299,6 +310,9 @@ fn project_entity_fields(
     components: Vec<EntityComponentRead>,
     payload: &[u8],
 ) -> (Vec<ReplicationField>, Vec<ReplicationComponentChange>) {
+    if components.is_empty() {
+        return (record_fields(fields, payload), Vec::new());
+    }
     let spans = components
         .iter()
         .filter_map(|component| {
@@ -317,7 +331,8 @@ fn project_entity_fields(
         scope_fields.extend(
             source_fields
                 .by_ref()
-                .take(component.field_range.start - consumed),
+                .take(component.field_range.start - consumed)
+                .filter(is_record_payload_field),
         );
         let count = component.field_range.len();
         let current_span = (
@@ -331,6 +346,7 @@ fn project_entity_fields(
                     .zip(current_span.1)
                     .is_some_and(|(start, end)| field.bit >= start && field.bit < end);
                 if !within_current
+                    && is_record_payload_field(field)
                     && !spans
                         .iter()
                         .any(|&(start, end)| field.bit >= start && field.bit < end)
@@ -347,13 +363,13 @@ fn project_entity_fields(
         });
         consumed = component.field_range.end;
     }
-    scope_fields.extend(source_fields);
+    scope_fields.extend(source_fields.filter(is_record_payload_field));
     scope_fields.retain(|field| {
         !spans
             .iter()
             .any(|&(start, end)| field.bit >= start && field.bit < end)
     });
-    (record_fields(scope_fields, payload), projected_components)
+    (project_fields(scope_fields, payload), projected_components)
 }
 
 fn default_fields(state: Option<DefaultState>, payload: &[u8]) -> Vec<ReplicationField> {
@@ -365,9 +381,90 @@ fn default_fields(state: Option<DefaultState>, payload: &[u8]) -> Vec<Replicatio
 
 #[cfg(test)]
 mod tests {
-    use super::{ComponentField, EntityComponentRead, project_entity_fields};
+    use super::{
+        ComponentField, EntityComponentRead, project_entity_fields, project_fields, record_fields,
+    };
     use crate::theater::parser::v41::replication::source::ComponentReadStatus;
     use crate::theater::parser::v41::replication::source::components::field::FieldBits;
+
+    #[test]
+    fn early_scope_filtering_matches_source_ranges_including_overlapping_components() {
+        let payload = [0xff; 16];
+        let fields: Vec<_> = [
+            "record.header",
+            "header",
+            "archetype",
+            "mask.present",
+            "value",
+            "baseline",
+            "new.scope",
+            "other",
+            "delete.scope",
+            "tail",
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, name)| ComponentField {
+            name: name.into(),
+            bit: i * 8,
+            raw: FieldBits::from_source(&payload, i * 8, 1).unwrap(),
+        })
+        .collect();
+        for ranges in [
+            vec![],
+            vec![(2..8, 24, 56)],
+            vec![(2..5, 16, 40), (5..8, 32, 72)],
+            vec![(1..4, -1, 24), (4..8, 40, 56)],
+        ] {
+            let components: Vec<_> = ranges
+                .into_iter()
+                .enumerate()
+                .map(
+                    |(i, (field_range, start_bit, end_bit))| EntityComponentRead {
+                        index: i,
+                        name: "test".into(),
+                        start_bit,
+                        end_bit,
+                        status: ComponentReadStatus::Complete,
+                        field_range,
+                    },
+                )
+                .collect();
+            let expected_scope = record_fields(
+                fields
+                    .iter()
+                    .filter(|field| {
+                        !components.iter().any(|component| {
+                            let (Ok(start), Ok(end)) = (
+                                usize::try_from(component.start_bit),
+                                usize::try_from(component.end_bit),
+                            ) else {
+                                return false;
+                            };
+                            field.bit >= start && field.bit < end
+                        })
+                    })
+                    .cloned()
+                    .collect(),
+                &payload,
+            );
+            let expected_components: Vec<_> = components
+                .iter()
+                .map(|component| {
+                    project_fields(
+                        fields[component.field_range.clone()].iter().cloned(),
+                        &payload,
+                    )
+                })
+                .collect();
+            let (scope, projected) = project_entity_fields(fields.clone(), components, &payload);
+            assert_eq!(scope, expected_scope);
+            assert_eq!(
+                projected.into_iter().map(|c| c.fields).collect::<Vec<_>>(),
+                expected_components
+            );
+        }
+    }
 
     #[test]
     fn component_ranges_preserve_out_of_range_record_fields() {
