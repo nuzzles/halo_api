@@ -211,7 +211,6 @@ fn read_production_frame<const ALLOW_REPLACEMENT: bool>(
             context.reader.is_none_or(|c| c.grammar.simulation_complete),
             RecordReadContext {
                 context: context.reader,
-                movement: Some(capture_slot),
             },
         ) else {
             out.entity_end = Some(ProductionEntityEnd::Truncated);

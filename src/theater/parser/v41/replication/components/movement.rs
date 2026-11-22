@@ -1,10 +1,8 @@
 //! Slide and posture bodies from the reference movement-state deserializers.
 use super::position;
 use super::reader::ComponentReader;
-use crate::theater::parser::v41::reference::observations::MovementComponent;
 
 pub(crate) fn slide(r: &mut ComponentReader<'_>, level: u32) -> Option<bool> {
-    let field_start = r.fields.len();
     if r.bit("active")? {
         if !r.bit("normal.constant")? {
             r.r("normal.direction", 19)?;
@@ -16,29 +14,10 @@ pub(crate) fn slide(r: &mut ComponentReader<'_>, level: u32) -> Option<bool> {
         }
         r.r("tail", 8)?;
     }
-    let field = |name: &str| {
-        r.fields[field_start..]
-            .iter()
-            .find(|f| f.name.as_ref() == name)
-            .map_or(0, |f| f.raw.low_u64())
-    };
-    let values = [
-        "active",
-        "normal.constant",
-        "normal.direction",
-        "normal.magnitude",
-        "fraction_a",
-        "fraction_b",
-        "tail",
-    ]
-    .map(field)
-    .to_vec();
-    r.publish_movement(MovementComponent::Slide, values);
     Some(true)
 }
 
 pub(crate) fn posture(r: &mut ComponentReader<'_>) -> Option<bool> {
-    let field_start = r.fields.len();
     match r.r("tag", 2)? {
         0 => {
             if !r.bit("gate")? {
@@ -94,32 +73,6 @@ pub(crate) fn posture(r: &mut ComponentReader<'_>) -> Option<bool> {
         }
         _ => unreachable!(),
     }
-    let field = |name: &str| {
-        r.fields[field_start..]
-            .iter()
-            .find(|f| f.name.as_ref() == name)
-            .map_or(0, |f| f.raw.low_u64())
-    };
-    let tag = field("tag");
-    let gate = if tag == 1 {
-        u64::from(field("sub") != 0)
-    } else {
-        field("gate")
-    };
-    let word = if tag == 2 && gate != 0 {
-        field("reference.value")
-    } else {
-        field("word")
-    };
-    let values = vec![
-        tag,
-        gate,
-        field("sub"),
-        field("handle"),
-        field("direction"),
-        word,
-    ];
-    r.publish_movement(MovementComponent::Posture, values);
 
     Some(true)
 }

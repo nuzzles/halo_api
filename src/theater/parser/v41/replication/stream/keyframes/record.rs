@@ -120,8 +120,6 @@ fn decode_keyframe_record_inner(
         context_error: None,
 
         live_grammar: context.map(|c| &c.grammar),
-        // The reference full-state walker creates a fresh reader without setting a slot.
-        movement_slot: Some(0),
         diagnostics: Default::default(),
         cursor: if padded {
             Cursor::signed(data, bit, None)

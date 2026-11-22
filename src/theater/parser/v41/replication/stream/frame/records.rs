@@ -22,10 +22,9 @@ pub(crate) struct RecordBinding {
     pub archetype: u32,
 }
 
-/// Borrowed schema and inherited slots needed to read a single wire record.
+/// Borrowed schema context needed to read a single wire record.
 pub(crate) struct RecordReadContext<'a> {
     pub context: Option<&'a DecodeProfile>,
-    pub movement: Option<u32>,
 }
 
 pub(crate) fn decode_entity_record(
@@ -56,7 +55,6 @@ pub(crate) fn decode_entity_record(
         context_error: None,
 
         live_grammar: slots.context.map(|c| &c.grammar),
-        movement_slot: slots.movement,
         diagnostics: Default::default(),
         cursor: Cursor::signed(data, header.end_bit, None),
         fields: Vec::with_capacity(32),

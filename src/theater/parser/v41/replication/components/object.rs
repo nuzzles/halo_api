@@ -2,7 +2,7 @@
 use super::reader::ComponentReader;
 use super::{orientation, position, tlv};
 use crate::theater::parser::v41::reference::observations::{
-    FilmComponentObservation, MovementComponent, ObjectParentState,
+    FilmComponentObservation, ObjectParentState,
 };
 
 pub(crate) fn component(r: &mut ComponentReader<'_>, name: &str, archetype: u32) -> Option<bool> {
@@ -214,18 +214,15 @@ pub(crate) fn read_primary(
         "object-position-dynamic-precision-component" => return position::component(r),
         "object-translational-velocity-dynamic-precision-component" => {
             let full = r.bit("full_precision")?;
-            let mut values = vec![u64::from(full), 0, 0, 0];
             if full {
                 r.words("vector_bits", 3, 32)?;
             } else {
                 let absent = r.bit("stationary")?;
-                values[1] = u64::from(absent);
                 if !absent {
-                    values[2] = r.r("direction", 19)?;
-                    values[3] = r.r("magnitude", 10)?;
+                    r.r("direction", 19)?;
+                    r.r("magnitude", 10)?;
                 }
             }
-            r.publish_movement(MovementComponent::Velocity, values);
         }
         "object-translational-velocity-component" => r.direction(10)?,
         "object-angular-velocity-component" => r.direction(8)?,

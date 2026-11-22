@@ -23,7 +23,6 @@ pub(super) fn read(r: &mut Reader<'_>, data: &[u8], variant: u64) -> bool {
         width_error: None,
         context_error: None,
         live_grammar: None,
-        movement_slot: None,
         references: Vec::new(),
         diagnostics: Default::default(),
     };

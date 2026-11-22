@@ -1,7 +1,7 @@
 //! Unit component wire grammars.
 use super::control;
 use crate::theater::parser::v41::reference::observations::{
-    CamoState, FilmComponentObservation, MovementComponent, UnitEquipmentEntry, UnitEquipmentRead,
+    CamoState, FilmComponentObservation, UnitEquipmentEntry, UnitEquipmentRead,
 };
 
 use super::reader::ComponentReader;
@@ -15,14 +15,10 @@ pub(crate) fn read_primary(
     match name {
         "unit-control-component" => {
             let present = r.bit("control.present")?;
-            let mut values = vec![u64::from(present), 0, 0, 0];
             if present {
-                values[1] = r.r("control.index", 5)?;
-                let second = r.gated_value("control.second_index", 6, true)?;
-                values[2] = u64::from(second.is_some());
-                values[3] = second.unwrap_or(0);
+                r.r("control.index", 5)?;
+                r.gate("control.second_index", 6, true)?;
             }
-            r.publish_movement(MovementComponent::UnitControl, values);
             r.optional_word_reference("control.reference", true)?;
         }
         "unit-actor-control-component" => return control::actor_control(r, level),
@@ -82,9 +78,8 @@ pub(crate) fn read_primary(
             r.r("duration", 12)?;
         }
         "unit-crouch-component" => {
-            let flag = r.bit("flag")?;
-            let progress = r.r("progress", 10)?;
-            r.publish_movement(MovementComponent::Crouch, vec![u64::from(flag), progress]);
+            r.bit("flag")?;
+            r.r("progress", 10)?;
         }
         "unit-desired-aiming-vector-component" => {
             let single = r.bit("single")?;

@@ -118,7 +118,6 @@ pub(crate) fn parse_registry_chunk(data: &[u8]) -> Result<FilmRegistryRead, Film
                 };
                 let slot_start = start + slot_index * REGISTRY_SLOT_SIZE;
                 components.push(RegistryComponent {
-                    name_bytes: slot[..256].to_vec(),
                     name,
                     precision_level: u32::from_le_bytes(slot[256..260].try_into().unwrap()),
                     source: ByteRange {

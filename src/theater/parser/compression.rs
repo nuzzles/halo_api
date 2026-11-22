@@ -16,6 +16,9 @@ pub enum InflateError {
 /// Maximum inflated bytes per chunk, matching the pinned reference reader's ceiling.
 /// This limits output, not merely the initial allocation.
 const MAX_CHUNK_BYTES: usize = 256 << 20;
+// Keep enough output available for matches to use the current buffer instead
+// of repeatedly stopping and copying through the inflater's 32 KiB history.
+const INFLATE_WINDOW_BYTES: usize = 128 << 10;
 
 fn is_zlib_header(raw: &[u8]) -> bool {
     raw.get(..2).is_some_and(|h| {
@@ -50,7 +53,7 @@ fn inflate_body(raw: &[u8], header: usize, limit: usize) -> Result<Vec<u8>, Infl
         let remaining = limit - out.len();
         // One scratch byte beyond the limit distinguishes exact-limit StreamEnd
         // from real overflow, including when the checksum needs another call.
-        let scratch_len = 8192.min(remaining.saturating_add(1));
+        let scratch_len = INFLATE_WINDOW_BYTES.min(remaining.saturating_add(1));
         let output_start = out.len();
         out.resize(output_start + scratch_len, 0);
         let status = decoder.decompress(
@@ -118,7 +121,7 @@ impl RawFilmChunk {
 
 #[cfg(test)]
 mod tests {
-    use super::{InflateError, inflate_body, zlib_header};
+    use super::{INFLATE_WINDOW_BYTES, InflateError, inflate_body, zlib_header};
     use flate2::{Compression, write::ZlibEncoder};
     use std::io::Write;
 
@@ -126,6 +129,41 @@ mod tests {
         let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
         encoder.write_all(input).unwrap();
         encoder.finish().unwrap()
+    }
+
+    #[test]
+    fn output_windows_preserve_exact_limits_and_checksum_validation() {
+        for len in [
+            0,
+            1,
+            INFLATE_WINDOW_BYTES - 1,
+            INFLATE_WINDOW_BYTES,
+            INFLATE_WINDOW_BYTES + 1,
+            2 * INFLATE_WINDOW_BYTES,
+            2 * INFLATE_WINDOW_BYTES + 1,
+        ] {
+            let data = (0..len).map(|i| (i % 251) as u8).collect::<Vec<_>>();
+            let compressed = zlib(&data);
+            let header = zlib_header(&compressed).unwrap();
+            assert_eq!(inflate_body(&compressed, header, len).unwrap(), data);
+            assert_eq!(inflate_body(&compressed, header, len + 1).unwrap(), data);
+            if len > 0 {
+                assert_eq!(
+                    inflate_body(&compressed, header, len - 1),
+                    Err(InflateError::Limit)
+                );
+            }
+            let mut damaged = compressed.clone();
+            *damaged.last_mut().unwrap() ^= 1;
+            assert_eq!(
+                inflate_body(&damaged, header, len),
+                Err(InflateError::Stream)
+            );
+            assert_eq!(
+                inflate_body(&compressed[..compressed.len() - 1], header, len),
+                Err(InflateError::Stream)
+            );
+        }
     }
 
     #[test]

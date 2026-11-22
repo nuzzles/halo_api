@@ -1,16 +1,4 @@
 //! Reference data models.
-/// Reference movement-state callback identifiers; velocity uses the reference hook label.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MovementComponent {
-    Crouch,
-    Slide,
-    Posture,
-    UnitControl,
-    Velocity,
-    Mobility,
-    ActiveAbility,
-}
-
 /// Reference default-state callback fields; labels match the reference reader.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MppField {
@@ -173,11 +161,6 @@ pub struct AbilityNonPredictedState {
 pub enum FilmComponentObservation {
     UnitReference {
         reference: UnitReference,
-    },
-    MovementState {
-        component: MovementComponent,
-        slot: u32,
-        values: Vec<u64>,
     },
     Mpp {
         field: MppField,
