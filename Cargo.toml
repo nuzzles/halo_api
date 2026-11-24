@@ -41,7 +41,7 @@ wiremock = "0.6.5"
 rpassword = "7.5.4"
 xbox = { version = "0.3.1", features = ["legacy-password-login"] }
 roxmltree = "0.21.1"
-eframe = { version = "0.33.3", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+eframe = { version = "0.36.2", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
 [[example]]
 name = "appearance_gamertag"
 required-features = ["xbox"]
